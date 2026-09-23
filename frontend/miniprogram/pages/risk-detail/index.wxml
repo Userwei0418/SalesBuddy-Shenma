@@ -1,0 +1,26 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{risk}}" class="detail-page status-{{risk.status}} traffic-{{risk.signal.tone}}">
+  <view class="detail-hero">
+    <view class="hero-top"><view class="hero-state traffic-badge traffic-{{risk.signal.tone}}"><text></text>{{risk.signal.label}} · {{risk.statusLabel}}</view><view class="hero-level traffic-badge traffic-{{risk.signal.tone}}">{{risk.severity}}风险</view></view>
+    <view class="hero-customer">{{risk.customerName}}</view>
+    <view class="hero-title">{{risk.title}}</view>
+    <view class="hero-meta">{{risk.owner}} · {{risk.team}}</view>
+  </view>
+
+  <view class="detail-body">
+    <view class="section-card summary-card"><view class="section-eyebrow">RISK SUMMARY</view><view class="section-title">风险说明</view><view class="summary-text">{{risk.description}}</view><view class="summary-time">识别于 {{risk.openedLabel}}</view></view>
+
+    <view class="section-card evidence-card"><view class="section-title">判断依据</view><view wx:for="{{risk.evidence}}" wx:key="*this" class="evidence-row"><view>{{index + 1}}</view><text>{{item}}</text></view></view>
+
+    <view class="section-card action-card"><view class="action-icon">→</view><view><text>建议下一步</text><label>{{risk.nextAction}}</label></view></view>
+
+    <view wx:if="{{risk.status === 'resolved'}}" class="section-card resolved-card"><view class="resolved-icon">✓</view><view class="resolved-main"><text>{{risk.resolvedBy}} 已解除风险</text><label>{{risk.resolvedLabel}}</label><view>{{risk.resolutionNote}}</view></view></view>
+
+    <view wx:else class="section-card resolution-card"><view class="section-title">解除风险</view><view class="resolution-help">请填写已消除风险的事实依据，便于管理者和后续跟进人员追溯。</view><textarea value="{{resolutionNote}}" maxlength="500" placeholder="例如：客户已确认下一步方案和时间，原风险事项已闭环" bindinput="inputResolutionNote" /><view class="note-count">{{noteCount}} / 500</view></view>
+  </view>
+
+  <view wx:if="{{risk.status !== 'resolved' && canResolveRisk}}" class="bottom-bar"><button class="resolve-button {{noteCount < 5 || submitting ? 'disabled' : ''}}" bindtap="confirmResolve"><text>✓</text>{{submitting ? '正在同步' : '确认解除风险'}}</button><view>解除记录会保留处理人、时间和依据</view></view>
+</view>
+
+</block>

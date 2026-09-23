@@ -1,0 +1,87 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{task}}" class="detail-page status-{{task.status}} traffic-{{task.signal.tone}}">
+  <view class="detail-hero">
+    <view class="hero-top"><view class="hero-status traffic-badge traffic-{{task.signal.tone}}"><text></text>{{task.signal.label}} · {{task.statusLabel}}</view><view class="hero-priority">{{task.priority}}优先级</view></view>
+    <view class="hero-title">{{task.title}}</view>
+    <view class="hero-meta">{{task.customer}} · {{task.team}}</view>
+    <view class="hero-progress"><view style="width: {{task.status === 'completed' ? '100%' : task.status === 'pending_confirm' ? '16%' : task.status === 'cancelled' ? '100%' : '42%'}}"></view></view>
+    <view class="hero-stage">{{task.status === 'completed' ? '任务已完成，结果已同步' : task.status === 'pending_confirm' ? '等待接收方接受或拒绝' : task.status === 'pending_review' ? '完成说明已提交，等待发起人验收' : task.status === 'cancelled' ? (task.wasCancelled ? '任务已取消，原因和协调记录已保留' : '接收方已拒绝，等待发起人决定是否重新发起') : '任务执行中 · 等待完成反馈'}}</view>
+  </view>
+
+  <view class="detail-body">
+    <view wx:if="{{task.handover_required}}" class="fde-note">原接收人账号或岗位资格已变化，任务待交接；不自动完成或删除。</view>
+    <button wx:if="{{task.can_coordinate && task.status !== 'pending_review' && !coordinateOpen}}" class="coordination-entry" bindtap="openCoordination">
+      <view><text class="coordination-entry-title">协调任务</text><text class="coordination-entry-note">转交负责人或取消任务</text></view><text class="coordination-entry-arrow">›</text>
+    </button>
+    <view wx:if="{{coordinateOpen}}" class="section-card fde-coordinate">
+      <view class="section-title">任务协调</view>
+      <view class="coordinate-field-label">接手人员</view>
+      <picker class="coordinate-picker" range="{{coordinateMembers}}" range-key="name" value="{{coordinateIndex}}" bindchange="coordinateMember">
+        <view class="coordinate-select {{coordinateIndex>=0?'selected':''}}"><text>{{coordinateIndex>=0?coordinateMembers[coordinateIndex].name:'选择接手人员'}}</text><text class="coordinate-chevron">⌄</text></view>
+      </picker>
+      <view wx:if="{{coordinateLoading}}" class="coordinate-hint">正在读取可接手人员…</view><view wx:elif="{{!coordinateMembers.length}}" class="coordinate-hint">当前没有可接手人员，可联系运营或说明原因后取消。</view>
+      <view class="coordinate-field-label">协调原因<text>{{coordinateNote.length || 0}}/500</text></view>
+      <textarea class="task-textarea" value="{{coordinateNote}}" placeholder="请说明转交或取消原因" placeholder-class="task-input-placeholder" bindinput="coordinateNote" maxlength="500"/>
+      <text wx:if="{{coordinateError}}" class="coordinate-error">{{coordinateError}}</text>
+      <view class="fde-coordinate-actions"><button class="coordinate-back" disabled="{{submitting}}" bindtap="closeCoordination">返回</button><button class="coordinate-cancel" disabled="{{submitting}}" data-event="cancel" bindtap="coordinate">取消任务</button><button class="coordinate-submit" disabled="{{submitting || !coordinateMembers.length}}" data-event="reassign" bindtap="coordinate">确认转交</button></view>
+    </view>
+    <view class="section-card description-card">
+      <view class="section-title">任务要求</view>
+      <view class="description">{{task.description}}</view>
+    </view>
+
+    <view class="section-card info-card"><view class="info-row"><text>任务类别</text><view>{{task.associationLabel}}</view></view><view wx:if="{{task.opportunityLabel}}" class="info-row"><text>关联商机</text><view>{{task.opportunityLabel}}</view></view>
+      <view class="info-row"><text>负责人</text><view>{{task.owner}}</view></view>
+      <view class="info-row"><text>{{task.task_type === 'visit_follow_up' ? '记录人' : '下发人'}}</text><view>{{task.creator}}</view></view>
+      <view class="info-row"><text>任务来源</text><view>{{task.sourceLabel}}</view></view>
+      <view class="info-row"><text>截止时间</text><view class="deadline">{{task.dueLabel}}</view></view>
+      <view class="info-row"><text>创建时间</text><view>{{task.createdLabel}}</view></view>
+      <view class="info-row"><text>相关方</text><view>{{task.relatedText}}</view></view>
+    </view>
+
+    <view wx:if="{{task.status === 'completed'}}" class="section-card completed-card">
+      <view class="completed-icon">✓</view>
+      <view class="completed-main"><text>{{task.completedBy}} 已完成</text><label>{{task.completedLabel}}</label><view>{{task.completionNote}}</view></view>
+    </view>
+
+    <view wx:elif="{{task.status === 'cancelled'}}" class="section-card rejected-card">
+      <view class="rejected-icon">×</view>
+      <view class="rejected-copy">
+        <text class="rejected-title">{{task.wasCancelled ? '任务已取消' : '任务已被拒绝'}}</text>
+        <label class="rejected-kicker">{{task.wasCancelled ? '协调人说明' : '接收方说明'}}</label>
+        <view class="rejected-comment">{{task.wasCancelled ? task.cancellationNote : (task.rejectionComment || '暂未填写拒绝原因')}}</view>
+      </view>
+    </view>
+
+    <view wx:elif="{{task.canRespond}}" class="section-card response-card"><view class="section-title">接受或拒绝</view><view class="completion-help">确认后进入执行；岗位任务只需一人领取，拒绝仅表示本人不领取。拒绝时必须填写原因，系统会立即通知发起人。</view><textarea class="task-textarea" value="{{responseComment}}" maxlength="2000" placeholder="拒绝时必填：说明无法接受的原因或建议调整方式" placeholder-class="task-input-placeholder" bindinput="inputResponseComment" /></view>
+
+    <view wx:elif="{{task.status === 'pending_review'}}" class="section-card completion-card">
+      <view class="section-title">{{task.canReview ? '待你验收' : '等待发起人确认'}}</view>
+      <view class="completion-help">{{task.owner}} 提交的完成说明</view>
+      <view class="description review-evidence">{{task.completionNote}}</view>
+      <block wx:if="{{task.canReview}}">
+        <view class="completion-help">确认完成后任务闭环；驳回时请说明需要补充或改进的内容。</view>
+        <textarea class="task-textarea" value="{{reviewNote}}" maxlength="2000" placeholder="验收意见（驳回时必填）" placeholder-class="task-input-placeholder" bindinput="inputReviewNote" />
+      </block>
+    </view>
+    <view wx:elif="{{task.canComplete}}" class="section-card completion-card">
+      <view class="section-title">完成反馈</view><view wx:if="{{task.reviewRejected}}" class="review-rejected">驳回原因：{{task.reviewNote}}</view>
+      <view class="completion-help">{{task.selfAssigned ? '填写完成说明后可直接完成。' : '请填写完成说明，提交后由发起人验收，通过才算完成。'}}</view>
+      <textarea class="task-textarea" value="{{completionNote}}" maxlength="2000" placeholder="必填：说明交付结果、附件位置或后续安排" placeholder-class="task-input-placeholder" bindinput="inputCompletionNote" />
+    </view>
+
+    <view wx:else class="readonly-tip"><view>i</view><text>该任务由 {{task.owner}} 负责完成，你可以查看最新状态。</text></view>
+    <view wx:if="{{task.history.length}}" class="section-card review-history"><view class="section-title">提交与验收记录</view><view wx:for="{{task.history}}" wx:key="id" class="review-history-row"><view>{{item.label}} · {{item.actor_name}}</view><text class="completion-help">{{item.time}}</text><view class="description review-evidence">{{item.note}}</view></view></view>
+  </view>
+
+  <view wx:if="{{task.canRespond}}" class="bottom-bar response-actions"><view class="response-button-row"><button class="reject-button {{submitting ? 'disabled' : ''}}" bindtap="rejectTask">拒绝</button><button class="accept-button {{submitting ? 'disabled' : ''}}" bindtap="acceptTask">{{task.responseLabel}}</button></view><view>拒绝原因 将立即推送给 {{task.creator}}</view></view>
+  <view wx:elif="{{task.canRetry}}" class="bottom-bar retry-bar">
+    <button class="retry-button" bindtap="retryTask"><text class="retry-label">重新发起新任务</text><text class="retry-arrow">→</text></button>
+    <view class="bottom-note">原任务和拒绝说明会被保留，新任务可重新修改</view>
+  </view>
+  <view wx:elif="{{task.canReview}}" class="bottom-bar response-actions"><view class="response-button-row"><button class="reject-button" bindtap="reviewCompletion" data-event="reject_completion" disabled="{{submitting}}">驳回</button><button class="accept-button" bindtap="reviewCompletion" data-event="approve_completion" disabled="{{submitting}}">确认完成</button></view><view>验收结果将通知 {{task.owner}}</view></view>
+  <view wx:elif="{{task.canComplete}}" class="bottom-bar"><button class="complete-button {{submitting ? 'disabled' : ''}}" bindtap="markCompleted"><text>✓</text>{{submitting ? '正在同步' : (task.selfAssigned ? '确认完成' : '提交完成')}}</button><view>{{task.selfAssigned ? '填写说明后直接完成' : '提交后由 ' + task.creator + ' 验收'}}</view></view>
+</view>
+
+</block>

@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "作战地图",
+  "usingComponents": {
+    "advice-actions": "/components/advice-actions/index",
+    "detail-pagination": "../../components/detail-pagination/index",
+    "member-scope-filter": "/components/member-scope-filter/index"
+  }
+}

@@ -1,0 +1,73 @@
+page { background: #f4f5f8; }
+.login-page { min-height: 100vh; color: #26364a; background: #f4f5f8; }
+.product-hero { position: relative; overflow: hidden; padding: calc(env(safe-area-inset-top) + 160rpx) 46rpx 86rpx; color: #fff; background: linear-gradient(135deg, #172d44 0%, #203e5e 100%); }
+/* Use the supplied white RGBA logo directly; no device-dependent blending. */
+.brand-row { position: relative; z-index: 1; width: 550rpx; max-width: 100%; }
+.brand-logo { display: block; width: 100%; }
+.welcome-copy { position: relative; z-index: 1; margin-top: 58rpx; }
+.welcome-title { font-size: 46rpx; font-weight: 600; line-height: 1.65; letter-spacing: 1rpx; }
+.hero-watermark { position: absolute; right: -100rpx; bottom: -40rpx; width: 350rpx; height: 235rpx; opacity: .035; transform: rotate(-18deg); }
+.login-content { position: relative; z-index: 2; margin-top: -38rpx; padding: 0 30rpx calc(env(safe-area-inset-bottom) + 28rpx); }
+.login-panel { padding: 36rpx 38rpx 38rpx; border-radius: 36rpx; background: #fff; box-shadow: 0 24rpx 55rpx rgba(28,47,75,.07); }
+.panel-title { font-size: 38rpx; font-weight: 700; line-height: 1.35; }
+.role-caption { margin: 32rpx 0 16rpx; color: #8c97a5; font-size: 24rpx; }
+.role-selector { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14rpx 16rpx; }
+.role-tab { display: flex; justify-content: center; align-items: center; width: 100%; height: 66rpx; padding: 0 8rpx; border: 2rpx solid transparent; border-radius: 14rpx; background: #f3f4f6; color: #7f8b9b; font-size: 26rpx; font-weight: 500; }
+.role-tab:last-child { grid-column: span 2; }
+.role-tab.selected { color: #356daa; background: #eaf1fc; border-color: #c6d7f0; }
+.role-tab[disabled] { opacity: .7; }
+.form-area { margin-top: 36rpx; }
+.field-group + .field-group { margin-top: 24rpx; }
+.field-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12rpx; }
+.field-label { margin-bottom: 13rpx; color: #707f90; font-size: 24rpx; font-weight: 600; }
+.scope-note { color: #a0a9b5; font-size: 19rpx; text-align: right; }
+.input-shell { display: flex; align-items: center; height: 86rpx; padding: 0 24rpx; border: 2rpx solid #e5eaf0; border-radius: 16rpx; background: #f9fafc; }
+.input-shell input { flex: 1; min-width: 0; height: 82rpx; color: #26364a; font-size: 25rpx; }
+.input-placeholder { color: #adb6c1; }
+.login-page .switch-account[size="mini"] { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; height: 76rpx; margin: 0 -8rpx 0 12rpx; padding: 0 8rpx; border: 0; background: transparent; color: rgb(34, 94, 145); font-size: 23rpx; line-height: 1; }
+.switch-account::after { border: 0; }
+.password-toggle { flex: 0 0 62rpx; height: 78rpx; display: flex; align-items: center; justify-content: center; margin-right: -12rpx; background: transparent; }
+.eye { position: relative; width: 29rpx; height: 29rpx; border: 3rpx solid #93a1b1; border-radius: 65% 15%; transform: rotate(45deg); }
+.eye > view { position: absolute; top: 6rpx; left: 6rpx; width: 11rpx; height: 11rpx; border: 2rpx solid #93a1b1; border-radius: 50%; }
+.eye.visible { border-color: #397bd3; }
+.password-hint { margin-top: 12rpx; color: #8996a6; font-size: 21rpx; }
+.agreement { display: flex; align-items: center; gap: 13rpx; margin: 28rpx 0 30rpx; color: #929eac; font-size: 21rpx; line-height: 1.5; }
+.agreement > view:last-child > text { margin-left: 5rpx; color: #427aab; }
+.checkbox { flex: 0 0 28rpx; height: 28rpx; display: flex; align-items: center; justify-content: center; border: 2rpx solid #cbd5e0; border-radius: 7rpx; font-size: 20rpx; }
+.checkbox.checked { border-color: #387bd6; background: #387bd6; color: #fff; }
+.login-button { position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 88rpx; padding: 0 58rpx; border-radius: 16rpx; background: rgb(34, 94, 145); color: #fff; font-size: 29rpx; font-weight: 500; }
+.login-button[disabled] { background: rgb(34, 94, 145); color: #fff; opacity: .65; }
+.button-arrow { position: absolute; right: 26rpx; font-size: 43rpx; font-weight: 300; line-height: 1; }
+.security-note { margin-top: 29rpx; text-align: center; color: #a7b0bd; font-size: 19rpx; line-height: 1.6; }
+@media (max-width: 350px) {
+
+
+
+  .agreement { font-size: 20rpx; }
+}
+
+/* Override native mini-program button sizing within the fixed grid tracks. */
+.login-page .role-selector { width: 100%; min-width: 0; }
+.login-page .role-tab[size="mini"] { width: 100%; min-width: 0; max-width: 100%; margin: 0; padding: 0 8rpx; box-sizing: border-box; display: flex; line-height: normal; }
+.login-page .password-toggle[size="mini"] { width: 62rpx; min-width: 0; margin: 0 -12rpx 0 0; padding: 0; display: flex; }
+.login-page .login-button[size="mini"] { width: 100%; max-width: 100%; margin: 0; padding: 0 58rpx; display: flex; }
+
+/* Keep the reference layout readable on shorter phones; the page can scroll. */
+.login-panel { position: relative; }
+.role-selector { row-gap: 16rpx; column-gap: 18rpx; }
+.role-tab { height: 68rpx; }
+.input-shell { height: 88rpx; }
+.input-shell input { height: 84rpx; }
+.security-note { padding: 0 12rpx; }
+
+.remember-row { display: flex; align-items: center; gap: 13rpx; min-height: 64rpx; margin-top: 18rpx; color: #60758b; }
+.remember-label { font-size: 23rpx; }
+.remember-note { margin-left: auto; color: #929eac; font-size: 20rpx; }
+.remember-row + .agreement { margin-top: 12rpx; }
+
+.account-suggestions { margin-top: 10rpx; overflow: hidden; border: 2rpx solid #e5eaf0; border-radius: 16rpx; background: #f9fafc; }
+.suggestion-caption { padding: 14rpx 20rpx 4rpx; color: #929eac; font-size: 20rpx; }
+.login-page .account-suggestion[size="mini"] { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; width: 100%; height: 80rpx; margin: 0; padding: 0 20rpx; border-radius: 0; background: transparent; color: #26364a; line-height: normal; text-align: left; }
+.account-suggestion::after { border: 0; }
+.suggestion-account { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 23rpx; }
+.suggestion-action { flex-shrink: 0; color: rgb(34,94,145); font-size: 21rpx; }

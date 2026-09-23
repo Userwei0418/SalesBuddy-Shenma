@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "销售能力详情",
+  "navigationBarBackgroundColor": "#F6FAFE",
+  "navigationBarTextStyle": "black",
+  "usingComponents": {
+    "fde-dashboard": "../../components/fde-dashboard/index"
+  },
+  "homeButton": true
+}

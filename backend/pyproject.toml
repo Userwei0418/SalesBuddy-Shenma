@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sales-assistant-backend"
+version = "0.1.0"
+description = "销售智助 Sales SaaS API and Agent orchestrator"
+requires-python = ">=3.12"
+dependencies = [
+  "asyncpg>=0.30,<1",
+  "aiobotocore>=3.0,<4",
+  "cryptography>=46.0.7,<47",
+  "pypdf>=6,<7",
+  "defusedxml>=0.7,<1",
+  "fastapi>=0.116,<1",
+  "httpx>=0.28,<1",
+  "PyJWT>=2.10,<3",
+  "pydantic>=2.11,<3",
+  "python-multipart>=0.0.20,<1",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.1,<2",
+  "PyYAML>=6,<7",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+sales-worker = "sales_backend.worker:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sales_backend"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+asyncio_mode = "strict"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101", "S105", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S106"]

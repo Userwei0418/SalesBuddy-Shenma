@@ -1,0 +1,22 @@
+<view class="rank-card tone-{{tone}}">
+  <view class="rank-heading"><view class="rank-symbol">{{symbol}}</view><view class="rank-copy"><text>{{title}}</text><label>{{subtitle}}</label></view><view class="rank-details {{loading || error?'disabled':''}}" bindtap="open" role="button" aria-label="查看{{title}}完整榜单">查看详情 ›</view></view>
+  <view class="rank-period">{{period}}</view>
+  <view wx:if="{{loading}}" class="rank-empty">正在加载排名…</view>
+  <view wx:elif="{{error}}" class="rank-empty" bindtap="retry">{{error}} · 点击重试</view>
+  <block wx:else>
+    <view wx:for="{{summary}}" wx:key="id" class="rank-row"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><text>{{item.name}}</text><label>{{item.meta}}</label><view class="rank-track"><view style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
+    <view wx:if="{{!summary.length}}" class="rank-empty">{{rows.length ? emptySummary : '当前范围暂无排名数据'}}</view>
+  </block>
+</view>
+<view wx:if="{{open}}" class="sheet-layer tone-{{tone}}">
+  <view class="sheet-mask" catchtap="close" catchtouchmove="noop"></view>
+  <view class="sheet-panel">
+    <view class="sheet-handle-area" bindtap="close" bindtouchstart="touchStart" bindtouchend="touchEnd" role="button" aria-label="收起完整榜单"><view class="sheet-handle"></view></view>
+    <view class="sheet-heading"><text>{{title}}</text><label>{{subtitle}} · 共 {{rows.length}} 项</label><label>{{period}}</label></view>
+    <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="sheet-scroll" scroll-into-view="{{focusId}}"><view class="sheet-rows">
+      <view wx:for="{{detailRows}}" wx:key="id" id="{{item.anchorId}}" class="rank-row {{item.isSelected?'rank-self':''}}"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><text>{{item.name}}<text wx:if="{{item.isSelected}}" class="self-label">{{item.isSelf ? '本人' : '当前查看'}}</text></text><label>{{item.meta}}</label><view class="rank-track"><view style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
+      <view wx:if="{{!rows.length}}" class="rank-empty">当前范围暂无排名数据</view>
+    </view></scroll-view>
+    <view class="sheet-footer"><button bindtap="close">完成</button></view>
+  </view>
+</view>

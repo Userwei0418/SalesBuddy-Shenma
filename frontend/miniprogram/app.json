@@ -1,0 +1,79 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/login/index",
+    "pages/customers/index",
+    "pages/workbench/index",
+    "pages/bi/index",
+    "pages/profile/index",
+    "pages/member-growth/index",
+    "pages/visit-entry/index",
+    "pages/visit-confirm/index",
+    "pages/visit-detail/index",
+    "pages/customer-detail/index",
+    "pages/customer-create/index",
+    "pages/customer-edit/index",
+    "pages/opportunity-create/index",
+    "pages/opportunities/index",
+    "pages/management-task-create/index",
+    "pages/tasks/index",
+    "pages/task-detail/index",
+    "pages/risks/index",
+    "pages/risk-detail/index",
+    "pages/report-detail/index",
+    "pages/customer-assign-confirm/index",
+    "pages/customer-claim/index",
+    "pages/customer-assets/index",
+    "pages/fde-records/index",
+    "pages/demo-create/index"
+  ],
+  "window": {
+    "backgroundColor": "#F5F3F8",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F8F7FA",
+    "navigationBarTitleText": "商汤销售小浣熊",
+    "navigationBarTextStyle": "black"
+  },
+  "permission": {},
+  "tabBar": {
+    "color": "#7A8495",
+    "selectedColor": "#1677FF",
+    "backgroundColor": "#FBFAFC",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "总览",
+        "iconPath": "images/icons/tab-assistant.png",
+        "selectedIconPath": "images/icons/tab-assistant-active.png"
+      },
+      {
+        "pagePath": "pages/customers/index",
+        "text": "作战地图",
+        "iconPath": "images/icons/tab-customers.png",
+        "selectedIconPath": "images/icons/tab-customers-active.png"
+      },
+      {
+        "pagePath": "pages/workbench/index",
+        "text": "商机",
+        "iconPath": "images/icons/business.png",
+        "selectedIconPath": "images/icons/business-active.png"
+      },
+      {
+        "pagePath": "pages/bi/index",
+        "text": "看板",
+        "iconPath": "images/icons/tab-workbench.png",
+        "selectedIconPath": "images/icons/tab-workbench-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "images/icons/tab-profile.png",
+        "selectedIconPath": "images/icons/tab-profile-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

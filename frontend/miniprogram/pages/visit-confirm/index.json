@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "确认拜访记录",
+  "usingComponents": {
+    "opportunity-form": "/components/opportunity-form/index",
+    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index",
+    "advice-actions": "/components/advice-actions/index"
+  },
+  "homeButton": true
+}

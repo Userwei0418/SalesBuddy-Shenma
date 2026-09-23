@@ -1,0 +1,28 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+test('detail request routes distinguish customer panorama from personal opportunity and preserve bounded filters',async()=>{
+ const storage=new Map(),requests=[],filename=path.resolve(__dirname,'../miniprogram/utils/apiClient.js'),module={exports:{}};
+ let supportsLatestSort=true;
+ vm.runInNewContext(fs.readFileSync(filename,'utf8'),{module,Map,Set,Date,require:n=>require(path.resolve(path.dirname(filename),n)),wx:{getStorageSync:k=>storage.get(k),setStorageSync:(k,v)=>storage.set(k,v),removeStorageSync:k=>storage.delete(k),request:r=>{if(r.url.endsWith('/metadata/business-options')){r.success({statusCode:200,data:require('./helpers/business-options.json')});return;}requests.push(r);r.success({statusCode:200,data:{items:[],has_more:false,...(supportsLatestSort?{sort:'created_desc'}:{})}});}}});
+ const api=module.exports;api.saveAuth({access_token:'test-only',actor:{workspace_id:'w',user_id:'u'}});
+ await api.getCustomerOverview('c1');await api.getOpportunityDetailOverview('o1');await api.getCustomerOpportunityOverview('c1','o2');
+ await api.listCustomerOpportunities('c1',{page_size:20,offset:40,q:'same name & 部门'});await api.listCustomerContacts('c1',{page_size:20,offset:20});
+ await api.listVisits({customer_id:'c1',opportunity_id:'o2',page_size:20,offset:60});await api.listDetailTasks({customer_id:'c1',opportunity_id:'o2',page_size:20,offset:20});
+ await api.getOpportunityTimeline('o1',{page_size:20,offset:40});await api.getCustomerAssetQuarters({customer_id:'c1',opportunity_id:'o2',as_of:'2026-09-14'});
+ await api.listVisits({customer_id:'c1',page_size:20,cursor:'opaque_-position',sort:'created_desc'});
+ await api.getCustomerHeader('c1');await api.getOpportunityDetailHeader('o1');await api.getCustomerOpportunityHeader('c1','o2');
+ assert.equal(requests.length,13);const urls=requests.map(r=>new URL(r.url));
+ assert.equal(urls[0].pathname,'/api/v1/customers/c1/overview');assert.equal(urls[1].pathname,'/api/v1/opportunities/o1/overview');assert.equal(urls[2].pathname,'/api/v1/customers/c1/opportunities/o2/overview');
+ assert.equal(urls[10].pathname,'/api/v1/customers/c1/header');assert.equal(urls[11].pathname,'/api/v1/opportunities/o1/header');assert.equal(urls[12].pathname,'/api/v1/customers/c1/opportunities/o2/header');
+ assert.equal(urls[3].searchParams.get('q'),'same name & 部门');
+ for(const i of [3,4,5,6,7])assert.equal(urls[i].searchParams.get('page_size'),'20');
+ for(const i of [5,6,8])assert.equal(urls[i].searchParams.get('opportunity_id'),'o2');
+ assert.equal(urls[5].searchParams.get('offset'),'60');assert.equal(urls[8].pathname,'/api/v1/customer-assets/quarters');assert.equal(urls[8].searchParams.get('as_of'),'2026-09-14');assert.equal(urls[9].searchParams.get('cursor'),'opaque_-position');assert.equal(urls[9].searchParams.has('offset'),false);
+ assert.equal(urls[9].searchParams.get('sort'),'created_desc');
+ supportsLatestSort=false;
+ await assert.rejects(api.listVisits({customer_id:'c1',sort:'created_desc'}),/最新跟进列表正在更新/);
+ await assert.doesNotReject(api.listVisits({customer_id:'c1'}));
+});

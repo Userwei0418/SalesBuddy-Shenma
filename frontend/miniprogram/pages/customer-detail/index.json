@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "客户经营详情",
+  "navigationBarBackgroundColor": "#F7FAFE",
+  "backgroundColor": "#EEF5FC",
+  "usingComponents": {
+    "detail-pagination": "../../components/detail-pagination/index"
+  },
+  "homeButton": true
+}

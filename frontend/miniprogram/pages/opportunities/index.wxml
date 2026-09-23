@@ -1,0 +1,35 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-projects id="fdeContent" wx:if="{{isFde}}" initial-scope="{{fdeScope}}" member-id="{{fdeMemberId}}" customer-id="{{fdeCustomerId}}"/>
+<block wx:if="{{!isFde}}">
+<view class="page">
+  <view class="hero"><view class="eyebrow">OPPORTUNITY BOARD · {{scope}}</view><view class="title">全部商机</view><view class="subtitle">按商机阶段、关单日期与商机等级筛选</view><view class="hero-summary"><view><text>{{total}}</text><label>当前结果</label></view></view></view>
+  <view wx:if="{{canCreate}}" class="create-row"><view class="create-opportunity" hover-class="create-opportunity-active" bindtap="createOpportunity"><text>＋</text><label>新增商机</label></view></view>
+  <view class="filter-card compact-filter">
+    <view class="filter-line">
+      <text class="filter-title">筛选</text>
+      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="false">
+        <view class="filter-row">
+          <picker wx:if="{{role === 'manager'}}" class="filter-item filter-team" mode="selector" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam"><view class="filter-control"><label>团队</label><text>{{teamOptions[teamIndex].label}}</text><text class="chevron">⌄</text></view></picker>
+          <picker wx:if="{{role !== 'sales'}}" class="filter-item filter-owner" mode="selector" range="{{ownerOptions}}" range-key="label" value="{{ownerIndex}}" data-key="owner" bindchange="changeFilter"><view class="filter-control"><label>{{role === 'supervisor' ? '直属成员' : '人员'}}</label><text>{{ownerOptions[ownerIndex].label}}</text><text class="chevron">⌄</text></view></picker>
+          <view class="filter-item filter-stage {{selectedStages.length ? 'active' : ''}}" bindtap="toggleStageFilter"><view class="filter-control"><label>商机阶段</label><text>{{stageLabel}}</text><text class="chevron">⌄</text></view></view>
+          <picker class="filter-item filter-close" mode="selector" range="{{closeOptions}}" range-key="label" value="{{closeIndex}}" data-key="close" bindchange="changeFilter"><view class="filter-control"><label>关单日期</label><text>{{closeOptions[closeIndex].label}}</text><text class="chevron">⌄</text></view></picker>
+          <picker class="filter-item filter-grade" mode="selector" range="{{gradeOptions}}" range-key="label" value="{{gradeIndex}}" data-key="grade" bindchange="changeFilter"><view class="filter-control"><label>商机等级</label><text>{{gradeOptions[gradeIndex].label}}</text><text class="chevron">⌄</text></view></picker>
+        </view>
+      </scroll-view>
+      <text wx:if="{{filterActive}}" class="filter-reset" bindtap="resetFilters">重置</text>
+    </view>
+    <view wx:if="{{showStageFilter}}" class="stage-panel">
+      <view class="stage-option {{!selectedStages.length ? 'selected' : ''}}" data-value="all" bindtap="toggleStage"><text>{{!selectedStages.length ? '✓' : ''}}</text><label>全部阶段</label></view>
+      <view wx:for="{{stageOptions}}" wx:key="value" class="stage-option {{item.selected ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="toggleStage"><text>{{item.selected ? '✓' : ''}}</text><label>{{item.label}}</label></view>
+    </view>
+  </view>
+  <view wx:if="{{loading}}" class="empty">正在加载真实商机数据…</view>
+  <view wx:elif="{{loadError}}" class="empty" bindtap="loadPage">{{loadError}} · 点击重试</view>
+  <view wx:elif="{{filtered.length}}" class="list"><view class="opportunity-order-note">按预计关单季度分组 · 季度内按阶段进度降序</view><view wx:for="{{opportunityGroups}}" wx:for-item="group" wx:key="key" class="opportunity-quarter-group"><view class="opportunity-quarter-heading"><text>{{group.label}}</text><label>已显示 {{group.items.length}} 个商机</label></view><view wx:for="{{group.items}}" wx:key="id" class="card" data-customer-id="{{item.customer_id}}" data-opportunity-id="{{item.id}}" bindtap="openCustomer"><view class="card-top"><view><text>{{item.name}}</text><label>{{item.customer_name}}</label></view></view><view class="stage-progress-head traffic-text-{{item.signal.tone}}"><text>{{item.stageName}}</text><label>{{item.probabilityText}}</label></view><view class="progress"><text style="width:{{item.progressPercent}}%"></text></view><view style="margin-top:12rpx"><text class="traffic-badge traffic-{{item.signal.tone}}">{{item.signal.label}} · {{item.signal.detail}}</text></view><view class="meta"><view><text>累计确收</text><label>{{item.recognizedLabel}}</label></view><view><text>累计回款</text><label>{{item.collectionLabel}}</label></view><view><text>预计关单</text><label>{{item.closeLabel}}</label></view><view><text>产品线</text><label>{{item.productLineLabel}}</label></view></view><view class="owner">{{item.team}} · {{item.owner}}<text>查看此商机 ›</text></view></view></view></view>
+  <view wx:else class="empty">当前筛选条件下没有商机</view>
+  <view wx:if="{{loadingMore}}" class="empty">正在加载更多…</view><view wx:elif="{{moreError}}" class="empty" bindtap="loadMore">{{moreError}} · 点击重试</view><view wx:elif="{{hasMore}}" class="empty" bindtap="loadMore">已显示 {{filtered.length}} / {{total}} 个商机 · 加载更多</view>
+</view>
+
+</block>
+</block>

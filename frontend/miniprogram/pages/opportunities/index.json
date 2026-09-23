@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "商机看板",
+  "usingComponents": {
+    "fde-projects": "../../components/fde-projects/index"
+  },
+  "homeButton": true
+}

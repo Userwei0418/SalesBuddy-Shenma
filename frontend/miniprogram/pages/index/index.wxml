@@ -1,0 +1,142 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="assistant-page {{!homeChatBIEnabled && !managementTaskMode && !visitRecordingMode ? 'compact-composer' : ''}}">
+  <view class="overview-fixed">
+    <view class="workspace-head">
+      <view>
+        <view class="greeting">{{greeting}}，{{userName}}</view>
+        <view class="workspace-meta">{{roleName}} · 智能经营工作空间</view>
+      </view>
+      <view class="scope-pill"><text></text>{{scope}}</view>
+    </view>
+
+    <view class="brief-card">
+      <view class="brief-head">
+        <view><view class="brief-eyebrow">TODAY OVERVIEW</view><view class="brief-title">今日经营摘要</view></view>
+
+      </view>
+      <view class="brief-metrics">
+        <view wx:for="{{overviewMetrics}}" wx:key="key" class="brief-metric" data-key="{{item.key}}" bindtap="openOverviewTasks" hover-class="brief-metric-pressed"><text class="metric-num {{item.tone || ''}}">{{item.value}}</text><text class="metric-label">{{item.label}}</text></view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{isFdeLead && fdeTeamSummary}}" class="fde-team-summary" bindtap="openFdeTeamTasks">团队待办：{{fdeTeamSummary.overdue}} 逾期 · {{fdeTeamSummary.claim}} 待领取 · {{fdeTeamSummary.handover}} 待交接 ›</view>
+  <scroll-view class="chat-scroll" scroll-y enhanced show-scrollbar="false" scroll-into-view="{{chatScrollTarget}}">
+   <view class="chat-stream">
+    <view id="chat-newest" class="chat-tail"></view>
+    <view wx:for="{{messages}}" wx:key="id" id="chat-message-{{item.id}}" class="message-row {{item.from}}">
+      <view wx:if="{{item.from === 'agent'}}" class="agent-avatar"><text>✦</text></view>
+      <view class="message-stack">
+        <view wx:if="{{item.from === 'agent'}}" class="message-meta">{{item.time}}</view>
+        <view wx:if="{{item.kind === 'text'}}" class="bubble">{{item.text}}</view>
+        <view wx:if="{{item.kind === 'insight'}}" class="insight-bubble" bindtap="openWorkbench">
+          <view class="insight-top"><view class="insight-badge"><text></text>{{item.badge}}</view><view class="insight-type">经营洞察</view></view>
+          <view class="insight-title">{{item.title}}</view>
+          <view class="insight-copy">{{item.text}}</view>
+          <view class="insight-link">查看分析与建议 <text>→</text></view>
+        </view>
+        <view wx:if="{{item.kind === 'greeting'}}" class="greeting-card">
+          <view class="greeting-card-eyebrow">{{item.card.timeLabel}}</view>
+          <view class="greeting-card-title">{{item.card.title}}</view>
+          <view class="greeting-card-copy">{{item.card.text}}</view>
+          <view class="greeting-card-note">{{homeChatBIEnabled ? '从下方入口开始，或直接告诉我你要查什么。' : isFde ? '从下方记录客户拜访或创建任务。' : '从下方入口认领客户、记录拜访或创建任务。'}}</view>
+        </view>
+        <view wx:if="{{item.kind === 'data-card'}}" class="business-card tone-{{item.card.tone}}">
+          <view class="business-head">
+            <view><view class="business-eyebrow">{{item.card.eyebrow}}</view><view class="business-title">{{item.card.title}}</view></view>
+            <view wx:if="{{item.card.statusLabel}}" class="change-status"><text></text>{{item.card.statusLabel}}</view><view wx:else class="database-badge"><text></text>数据已同步</view>
+          </view>
+          <view class="business-subtitle">{{item.card.subtitle}}</view>
+          <view wx:if="{{item.card.metrics.length}}" class="business-metrics metrics-{{item.card.metrics.length}}">
+            <view wx:for="{{item.card.metrics}}" wx:for-item="metric" wx:key="label" class="{{metric.action ? 'metric-drill' : ''}}" data-action="{{metric.action}}" bindtap="handleMetricAction"><view><text>{{metric.value}}</text><label>{{metric.label}}</label></view><view wx:if="{{metric.action}}" class="metric-enter">查看 <text>›</text></view></view>
+          </view>
+          <view wx:if="{{item.card.sections && item.card.sections.length}}" class="business-sections">
+            <view wx:for="{{item.card.sections}}" wx:for-item="section" wx:key="key" class="business-section section-{{section.key}}">
+              <view class="business-section-head"><view><text>{{section.title}}</text><label>{{section.subtitle}}</label></view><view wx:if="{{section.report}}" class="report-section-count">{{section.rows.length}} 项</view><view wx:else><text>{{section.taskCount}} 待办</text><label>{{section.riskCount}} 风险</label></view></view>
+              <view wx:if="{{section.rows.length}}" class="business-rows section-rows">
+                <view wx:for="{{section.rows}}" wx:for-item="row" wx:key="title" class="business-row {{row.taskId || row.riskId || row.reportDetailId ? 'task-row' : ''}}" data-task-id="{{row.taskId}}" data-risk-id="{{row.riskId}}" data-report-detail-id="{{row.reportDetailId}}" bindtap="handleCardRow"><view><text>{{row.title}}</text><label>{{row.meta}}</label></view><view class="row-tag">{{row.tag}}</view><view wx:if="{{row.taskId || row.riskId || row.reportDetailId}}" class="row-arrow">›</view></view>
+              </view>
+              <view wx:else class="business-section-empty">{{section.emptyText || '当前没有未完成任务'}}</view>
+            </view>
+          </view>
+          <view wx:elif="{{item.card.rows.length}}" class="business-rows">
+            <view wx:for="{{item.card.rows}}" wx:key="title" class="business-row {{item.taskId || item.riskId || item.visitId ? 'task-row' : ''}}" data-task-id="{{item.taskId}}" data-risk-id="{{item.riskId}}" data-visit-id="{{item.visitId}}" data-customer-id="{{item.customerId}}" bindtap="handleCardRow"><view><text>{{item.title}}</text><label>{{item.meta}}</label></view><view wx:if="{{item.tag}}" class="row-tag">{{item.tag}}</view><view wx:if="{{item.taskId || item.riskId || item.visitId}}" class="row-arrow">›</view></view>
+          </view>
+          <view wx:elif="{{item.card.emptyText}}" class="business-empty">{{item.card.emptyText}}</view>
+          <view wx:if="{{item.card.footer}}" class="change-footer">{{item.card.footer}}</view><view wx:if="{{item.card.action}}" class="business-action" data-action="{{item.card.action.code}}" data-opportunity-id="{{item.card.action.opportunityId}}" data-customer-id="{{item.card.action.customerId}}" data-task-id="{{item.card.action.taskId}}" data-visit-id="{{item.card.action.visitId}}" data-risk-id="{{item.card.action.riskId}}" bindtap="handleCardAction"><text>{{item.card.action.label}}</text><view>→</view></view>
+        </view>
+        <view wx:if="{{item.from === 'user'}}" class="user-time">{{item.time}}</view>
+      </view>
+    </view>
+    <view wx:if="{{visitTranscriptVisible && role !== 'manager'}}" class="visit-transcript-wrap">
+      <view class="visit-transcript-meta"><text>{{isRecording ? '实时转写' : '拜访文字稿'}}</text><label>{{visitTranscriptStatus}}</label></view>
+      <view class="visit-transcript-bubble {{isRecording ? 'live' : ''}}">
+        <textarea value="{{visitTranscript}}" disabled="{{!visitTranscriptEditable}}" maxlength="10000" auto-height placeholder="{{isRecording ? '正在识别你说的内容…' : '可在此修改或补充拜访内容'}}" bindinput="inputVisitTranscript"></textarea>
+        <view wx:if="{{isRecording}}" class="live-cursor"><text></text> {{recordingTime}}</view>
+        <view wx:else class="transcript-actions"><button bindtap="redoVisitRecording">重新录音</button><button bindtap="submitVisitTranscript">提交结构化 <text>→</text></button></view>
+      </view>
+    </view>
+    <view wx:if="{{isThinking}}" class="message-row agent thinking-row">
+      <view class="agent-avatar"><text>✦</text></view>
+      <view class="message-stack"><view class="message-meta">{{todayLabel}}</view><view class="thinking-bubble"><view></view><view></view><view></view><text>正在读取最新业务数据</text></view></view>
+    </view>
+    <view wx:if="{{isProcessing}}" id="chatbi-processing" class="message-row agent thinking-row">
+      <view class="agent-avatar"><text>✦</text></view>
+      <view class="message-stack">
+        <view class="message-meta">{{todayLabel}}</view>
+        <view class="thinking-bubble"><view></view><view></view><view></view><text>{{visitRecordingMode ? '正在转写语音并整理拜访内容' : managementTaskMode && role !== 'sales' ? '正在提取客户建档与下发字段' : role === 'sales' ? '正在查询仅与你本人相关的业务数据' : '正在理解问题并查询权限范围内的业务数据'}}</text></view>
+      </view>
+    </view>
+    <view wx:if="{{showManagementResult && role !== 'sales'}}" class="message-row agent">
+      <view class="agent-avatar"><text>✦</text></view>
+      <view class="message-stack">
+        <view class="message-meta">{{todayLabel}}</view>
+        <view class="result-card management-result" bindtap="openManagementCustomerConfirm">
+          <view class="result-head"><view><view class="result-title">客户建档与下发草案</view><view class="result-sub">识别结果待人工核对</view></view><view class="confidence">待核对</view></view>
+          <view class="result-line"><text>客户名称</text><text>{{managementDraft.customerName}}</text></view>
+          <view class="result-line"><text>初始商机</text><text>{{managementDraft.opportunityName}}</text></view>
+          <view class="result-line"><text>下发对象</text><text>{{managementDraft.assignedTeam}} · {{managementDraft.assignedSales}}</text></view>
+          <view class="result-action">核对字段并建档下发 <text>→</text></view>
+        </view>
+      </view>
+    </view>
+    <view id="chat-latest" class="chat-tail"></view>
+   </view>
+  </scroll-view>
+
+  <view class="composer-wrap">
+    <view class="quick-action-bar {{quickActions.length === 3 ? 'three-quick-actions' : 'compact-quick-actions'}} {{isFde ? 'fde-quick-actions' : ''}}">
+      <view wx:for="{{quickActions}}" wx:key="action" hover-class="quick-action-pressed" class="quick-action-button action-{{item.kind}} {{item.kind === 'visit' && visitRecordingMode && isRecording ? 'recording' : ''}}" data-action="{{item.action}}" bindtap="tapQuickAction">
+        <view wx:if="{{item.kind === 'visit'}}" class="quick-action-icon icon-visit"><image class="visit-entry-microphone" src="/images/icons/microphone.svg" mode="aspectFit"/></view>
+        <text class="quick-action-label">{{item.kind === 'visit' && visitRecordingMode && isRecording ? '结束拜访录入' : item.label}}</text>
+      </view>
+    </view>
+    <view wx:if="{{homeChatBIEnabled || managementTaskMode || visitRecordingMode}}" class="voice-composer {{isRecording ? 'recording-active' : ''}} {{isStarting ? 'starting' : ''}} {{isStopping ? 'stopping' : ''}} {{isProcessing ? 'processing' : ''}}">
+      <view class="voice-state-icon">
+        <view wx:if="{{!managementTaskMode && !visitRecordingMode && !isStarting && !isStopping && !isProcessing && !isRecording}}" class="chatbi-mark">BI</view>
+        <view wx:else class="wave"><text></text><text></text><text></text><text></text><text></text></view>
+      </view>
+      <view wx:if="{{isStarting || isStopping || isProcessing || isRecording}}" class="voice-composer-copy" bindtap="tapRecordingState">
+        <view>{{isStarting ? '正在启动录音' : isStopping ? '正在结束录音' : isProcessing ? (visitRecordingMode ? '正在解析拜访内容' : managementTaskMode && role !== 'sales' ? '正在生成客户建档草案' : '正在分析经营数据') : (visitRecordingMode ? '正在录入客户拜访' : managementTaskMode && role !== 'sales' ? '正在录入客户建档任务' : role === 'sales' ? '正在聆听个人经营问题' : '正在聆听经营问题')}}</view>
+        <text>{{isStarting ? '正在获取麦克风权限' : isProcessing ? (visitRecordingMode ? '请稍候，正在生成可核对的拜访字段' : managementTaskMode && role !== 'sales' ? '请稍候，正在识别客户和下发对象' : role === 'sales' ? '正在查询仅与你本人相关的业务数据' : '正在查询你权限范围内的业务数据') : isRecording ? '再次点击即可停止录音' : visitRecordingMode ? '描述本次拜访，再次点击停止并整理' : '说出问题，再次点击停止并查询'}}</text>
+      </view>
+      <view wx:elif="{{managementTaskMode}}" class="voice-composer-copy"><view>录入客户建档与下发任务</view><text>点击语音按钮，描述客户信息、商机和负责销售</text></view>
+      <view wx:else class="composer-input-wrap">
+        <input class="composer-input" value="{{textInput}}" maxlength="500" confirm-type="send" cursor-spacing="24" placeholder="{{role === 'sales' ? '询问我的客户、待办、商机或风险' : '输入经营问题，或点击语音提问'}}" bindinput="inputText" bindconfirm="sendText" />
+        <text>{{role === 'sales' ? '文字或语音问数 · 仅查询本人数据' : '文字输入 · 语音问数 · 按权限查询'}}</text>
+      </view>
+      <view wx:if="{{textInput && !isStarting && !isStopping && !isProcessing && !isRecording}}" class="send-button" bindtap="sendText">↑</view>
+      <view wx:else class="voice-toggle {{!managementTaskMode ? 'chatbi-voice' : ''}}" bindtap="startRecord">
+        <text wx:if="{{isRecording || isStopping}}">{{recordingTime}}</text>
+        <text wx:elif="{{isStarting}}">启动中</text>
+        <text wx:elif="{{isProcessing}}">处理中</text>
+        <text wx:else>{{!managementTaskMode ? '语音问数' : '语音'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{managementTaskMode || visitRecordingMode}}" class="voice-privacy">{{visitRecordingMode ? '拜访语音仅生成草案，正式归档前仍需核对确认' : '语音仅生成草案，正式建档与下发前仍需核对确认'}}</view>
+  </view>
+
+</view>
+
+</block>

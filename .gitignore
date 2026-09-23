@@ -1,0 +1,29 @@
+# Runtime and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.dump
+*.backup
+*.sqlite*
+.private/
+**/runtime/volumes/
+**/runtime/tls/
+**/instance.json
+**/首次登录.txt
+# Dependencies and build outputs
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+project.private.config.json
+# Store immutable large distributions in private Releases
+*.zip
+*.tar.gz
+*.tgz
+.agent-build/

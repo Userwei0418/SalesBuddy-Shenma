@@ -1,0 +1,3 @@
+.actions{display:flex;flex-wrap:wrap;gap:16rpx;margin-top:22rpx;align-items:center}.adopt,.dismiss,.done{margin:0;padding:0 24rpx;font-size:24rpx;line-height:68rpx;border-radius:18rpx;font-weight:600}.adopt::after,.dismiss::after,.done::after{border:0}.adopt{background:#1976d2;color:#fff}.dismiss{background:#eef4fb;color:#55728e}.done{background:#e5f5ed;color:#217e59}.handled{font-size:23rpx;line-height:1.6;color:#607789}
+
+.adopt[disabled],.dismiss[disabled]{background:#e8edf3;color:#93a1af}.actions>.handled{width:100%}

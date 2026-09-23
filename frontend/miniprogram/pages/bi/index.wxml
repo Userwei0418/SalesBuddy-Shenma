@@ -1,0 +1,91 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-dashboard id="fdeContent" wx:if="{{isFde}}"/>
+<block wx:if="{{!isFde}}">
+<view class="bi-page">
+  <view class="page-head">
+    <view class="page-heading"><text>看板</text></view>
+    <view class="quarter-picker {{showQuarterFilter ? 'quarter-picker-open' : ''}}" hover-class="quarter-picker-pressed" bindtap="toggleQuarterFilter"><text class="quarter-picker-value">{{selectedQuarter.year || '—'}}</text><view class="quarter-picker-caret"></view></view>
+  </view>
+
+  <view wx:if="{{showQuarterFilter}}" class="dashboard-quarter-filter">
+    <view class="dashboard-quarter-head"><text>统计季度 · 可多选</text><picker range="{{quarterYears}}" value="{{quarterYearIndex}}" bindchange="changeQuarterYear"><view>{{quarterYears[quarterYearIndex]}}年 ▾</view></picker></view>
+    <view class="dashboard-quarter-options"><view wx:for="{{quarterChoices}}" wx:key="key" class="{{item.selected ? 'selected' : ''}}" data-key="{{item.key}}" bindtap="toggleQuarter">{{item.selected ? '✓ ' : ''}}Q{{item.quarter}}</view></view>
+    <view class="dashboard-quarter-footer"><text bindtap="resetQuarters">重置</text><label>恢复本年 Q1 至当前季度</label><view bindtap="closeQuarterFilter">完成</view></view>
+  </view>
+
+  <view class="metrics-section">
+    <view class="metrics-heading">
+      <text class="metrics-title">经营数据</text>
+      <view wx:if="{{role === 'supervisor' || role === 'manager'}}" class="metrics-controls">
+        <view class="metrics-scope-switch">
+          <button size="mini" class="metrics-scope-option {{viewMode === 'team' ? 'selected' : ''}}" data-mode="team" bindtap="changeView">团队</button>
+          <button size="mini" class="metrics-scope-option {{viewMode === 'personal' ? 'selected' : ''}}" data-mode="personal" bindtap="changeView">个人</button>
+        </view>
+        <view wx:if="{{viewMode === 'personal' || role === 'manager'}}" class="metrics-picker">
+          <dashboard-picker wx:if="{{viewMode === 'personal'}}" title="选择成员" subtitle="选择本人或授权范围内的成员" label="{{memberLabel}}" options="{{memberOptions}}" selected="{{memberSelected}}" loading="{{optionsLoading}}" error="{{optionsError}}" bind:change="selectMember" bind:retry="loadOptions"/>
+          <dashboard-picker wx:else title="选择团队" subtitle="单选一个团队；全部团队查看部门合计" selection-kind="team" label="{{teamLabel}}" options="{{teamOptions}}" selected="{{teamPickerSelected}}" loading="{{optionsLoading}}" error="{{optionsError}}" bind:change="selectTeams" bind:retry="loadOptions"/>
+        </view>
+      </view>
+    </view>
+    <view class="metrics-meta">
+      <text class="metrics-context">{{viewMode === 'personal' ? memberLabel : role === 'manager' ? teamLabel : '本团队'}} · {{selectedQuarter.label}}</text>
+      <view class="freshness"><text class="source-pill">{{dataModeLabel}}</text><text>更新至 {{sourceDate}}</text></view>
+    </view>
+  <view wx:if="{{loading}}" class="loading-card">正在加载经营数据…</view>
+  <view wx:elif="{{loadError}}" class="loading-card" bindtap="loadFacts">{{loadError}} · 点击重试</view>
+  <block wx:else>
+    <view class="countdown-card">
+      <view class="countdown-copy"><label>{{selectedQuarter.quarters.length > 1 ? '所选末季度倒计时' : '季度倒计时'}}</label><text>{{countdown.sentence}}</text></view>
+      <view class="countdown-numbers" wx:if="{{!countdown.closed}}"><view><text>{{countdown.days}}</text><label>天</label></view><text class="countdown-colon">:</text><view><text>{{countdown.hours}}</text><label>时</label></view><text class="countdown-colon">:</text><view><text>{{countdown.minutes}}</text><label>分</label></view></view>
+      <view class="countdown-foot">季度总商机 {{totalAcv}}<text>·</text>{{activeOpportunityCount === null ? '—' : activeOpportunityCount}} 个活跃商机</view>
+    </view>
+    <view class="kpi-grid">
+      <view wx:for="{{kpis}}" wx:key="label" class="kpi-card {{item.kind === 'value' ? 'value-card tone-' + item.tone : 'ring-card'}}">
+        <block wx:if="{{item.kind === 'ring'}}">
+          <view class="mini-ring" style="{{item.style}}"><view><text>{{item.value}}</text><label>完成率</label></view></view>
+          <view class="ring-copy"><text>{{item.label}}</text><label>{{item.actual}}</label><view>目标：{{item.target}}</view><text wx:if="{{item.estimated}}" class="planning-tag">规划口径</text></view>
+        </block>
+        <block wx:else>
+          <label>{{item.label}}</label><text class="{{item.compact ? 'compact-value' : ''}}">{{item.value}}</text><view>{{item.sub}}</view>
+        </block>
+      </view>
+    </view>
+
+    <block wx:if="{{!quarterEmpty}}">
+    <view class="chart-card">
+      <view class="section-head"><view><text>各阶段商机 ACV</text><label>按 90% / 70% / 50% / 30% / 10% 阶段降序展示</label></view><text class="section-total">{{totalAcv}}</text></view>
+      <view class="funnel-list">
+        <view wx:for="{{funnel}}" wx:key="probability" class="funnel-row">
+          <view class="funnel-bar tone-{{item.tone}}" style="width:{{item.width}}"><text>{{item.name}}·{{item.probability}}%</text><label>{{item.amount}}</label></view>
+          <text class="funnel-count">{{item.count}}个</text>
+        </view>
+      </view>
+    </view>
+
+    </block>
+    <view class="chart-card">
+      <view class="section-head"><view><text>近 7 天跟进节奏</text><label>已确认和已归档的拜访记录</label></view><text class="section-total">近7天 {{weeklyVisitCount}} 条</text></view>
+      <view class="visit-bars">
+        <view wx:for="{{visitDays}}" wx:key="key" class="visit-day {{item.isToday ? 'today' : ''}}"><view class="bar-space"><text class="visit-bar" style="height:{{item.height}}"></text></view><text>{{item.weekday}}</text><label>{{item.count}}条</label></view>
+      </view>
+    </view>
+
+    <block wx:if="{{!quarterEmpty}}">
+    <view class="chart-card">
+      <view class="section-head"><view><text>商机季度时间线</text><label>按预计成交月份分布</label></view><text wx:if="{{timeline.length > 3}}" class="timeline-scroll-hint">左右滑动查看 ›</text></view>
+      <scroll-view class="timeline-scroll" scroll-x enhanced show-scrollbar="{{false}}"><view class="timeline" style="width:{{timeline.length > 3 ? timeline.length * 210 + 'rpx' : '100%'}}">
+        <view class="timeline-line" style="left:{{50 / timeline.length}}%;right:{{50 / timeline.length}}%"></view>
+        <view wx:for="{{timeline}}" wx:key="month" class="timeline-item"><view class="timeline-dot {{item.status==='冲刺月'?'timeline-quarter-end':''}}">{{index + 1}}</view><view class="timeline-status">{{item.status}}</view><text>{{item.month}}</text><label>{{item.amount}}</label><text class="timeline-count">{{item.count}}个 · {{item.share}}%</text></view>
+      </view></scroll-view>
+    </view>
+
+    </block>
+  </block>
+  </view>
+  <view class="view-scope-note rankings-heading"><text>公共排名</text><label>{{rankingSubjectLabel}}</label></view>
+  <dashboard-ranking wx:for="{{rankingCards}}" wx:key="key" title="{{item.title}}" subtitle="{{item.subtitle}}" period="{{item.period}}" symbol="{{item.symbol}}" tone="{{item.tone}}" rows="{{item.rows}}" summary-ids="{{item.summaryIds}}" loading="{{rankingLoading}}" error="{{rankingMessage}}" empty-summary="{{item.emptySummary || '所选对象暂未纳入当前榜单'}}" bind:retry="reloadRankings"/>
+  <view class="data-note"><text>数据口径</text><label>经营数据按所选成员或团队汇总；确收、回款按发生季度统计，预测按已填季度计划乘阶段概率计算，包含10%阶段。实际为0与未登记分别展示。商机榜和区域榜按所选季度预计关单的在推商机ACV排名；跟进榜按近7天已确认记录排名。完整榜单只展示授权范围内的汇总数据。</label></view>
+</view>
+</block>
+</block>

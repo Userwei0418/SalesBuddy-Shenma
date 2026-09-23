@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "商机",
+  "usingComponents": {
+    "fde-projects": "../../components/fde-projects/index"
+  }
+}

@@ -1,0 +1,85 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="task-page">
+  <view class="task-hero">
+    <view class="hero-eyebrow">COLLABORATION TASK</view>
+    <view class="hero-title">创建任务</view>
+    <view class="hero-subtitle">向任意同事发起明确、可确认、可追踪的协作任务</view>
+    <view class="hero-scope"><text></text>{{roleName}} · {{scope}}</view>
+  </view>
+
+  <view class="task-body">
+    <view class="section-head"><view><text>任务类型</text><label>先确定任务范围，再填写任务内容</label></view></view>
+    <view class="task-type-options">
+      <button size="mini" class="task-type-option {{taskType==='daily'?'selected':''}}" data-type="daily" bindtap="changeTaskType" disabled="{{submitting || adviceSource || adviceLoading}}" aria-label="日常工作任务，不关联客户和商机{{taskType==='daily'?'，已选中':''}}"><view class="task-type-top"><text class="task-type-title">日常工作任务</text><view class="task-type-check">{{taskType==='daily'?'✓':''}}</view></view><text class="task-type-note">独立安排 · 直接下发</text></button>
+      <button size="mini" class="task-type-option {{taskType==='customer'?'selected':''}}" data-type="customer" bindtap="changeTaskType" disabled="{{submitting || adviceSource || adviceLoading}}" aria-label="客户任务，关联客户及商机{{taskType==='customer'?'，已选中':''}}"><view class="task-type-top"><text class="task-type-title">客户任务</text><view class="task-type-check">{{taskType==='customer'?'✓':''}}</view></view><text class="task-type-note">关联商机 · 同步待办</text></button>
+    </view>
+    <view wx:if="{{taskType==='customer'}}" class="task-link-card">
+      <view class="task-link-row" data-kind="customer" bindtap="openTaskSelector"><text class="task-link-label">客户</text><text class="task-link-value">{{customerName || (customerId ? '正在核对客户…' : '请选择客户')}}</text><text class="task-link-arrow">›</text></view>
+      <view class="task-link-row {{!customerId?'muted':''}}" data-kind="opportunity" bindtap="openTaskSelector"><text class="task-link-label">商机</text><text class="task-link-value">{{opportunityName || (opportunityId ? '正在核对商机…' : customerId ? '请选择该客户的商机' : '请先选择客户')}}</text><text class="task-link-arrow">›</text></view>
+      <text wx:if="{{linkError}}" class="task-link-error" bindtap="hydrateTaskLink">{{linkError}} · 点击重试</text><text wx:else class="task-link-note">任务关联后，可在总览、客户待办和商机待办中查看</text>
+    </view>
+
+    <view wx:if="{{adviceSource || adviceLoading || adviceError}}" class="advice-source">
+      <text class="advice-source-title">{{adviceLoading?'正在读取建议…':adviceError || ('来自AI建议：'+adviceSource.title)}}</text>
+      <text class="advice-source-note" wx:if="{{adviceSource && !adviceError}}">{{adviceSource.dailyVisit ? '本次跟进未关联商机，将创建日常待办，可修改任务内容。' : adviceSource.opportunityFixed ? '建议的客户和商机已固定，可修改任务内容。' : '请选择该客户下的商机，再确认任务内容。'}}确认下发后记录为已采纳。</text>
+    </view>
+    <view class="section-head"><view><text>任务描述</text><label>说明交付物、完成标准和业务背景</label></view><text>{{descriptionCount}} / 500</text></view>
+    <view class="description-card">
+      <textarea value="{{description}}" maxlength="500" placeholder="{{voiceExample}}" auto-height disabled="{{isStarting || isRecording || isStopping || isParsing}}" bindinput="inputDescription" />
+      <view class="task-voice {{isRecording ? 'recording' : ''}} {{isParsing ? 'parsing' : ''}} {{voiceFilled ? 'filled' : ''}}" bindtap="toggleTaskVoice">
+        <view class="task-voice-icon"><view class="task-wave"><text></text><text></text><text></text><text></text><text></text></view></view>
+        <view class="task-voice-copy">
+          <view>{{isStarting ? '正在启动录音' : isStopping ? '正在结束录音' : isParsing ? '正在识别任务内容' : isRecording ? '正在录入 ' + recordingTime : voiceFilled ? '重新语音录入任务描述' : '语音录入任务描述'}}</view>
+          <text>{{isRecording ? '再次点击即可结束并生成文字草案' : isParsing ? '识别完成后仍可手动修改' : '点击开始，说清任务要求、完成标准和时间'}}</text>
+        </view>
+        <view class="task-voice-action">{{isRecording ? '结束' : isParsing ? '识别中' : '开始'}}</view>
+      </view>
+      <view class="description-tip"><view>✦</view><text>建议写清交付物、完成标准和关键业务背景</text></view>
+    </view>
+
+    <view class="section-head"><view><text>任务负责人</text><label>可选择公司任意有效账号，一人接受并完成</label></view><text>{{members.length}} 人</text></view>
+    <!-- The picker cursor must be valid; a cursor is not a confirmed recipient. -->
+    <picker class="assignee-picker" mode="selector" range="{{members}}" range-key="pickerLabel" value="{{selectedAssigneeIndex < 0 ? 0 : selectedAssigneeIndex}}" disabled="{{!members.length}}" bindchange="changeAssignee">
+      <view class="assignee-select {{selectedMember ? 'selected' : ''}}">
+        <view class="assignee-avatar">{{selectedMember ? selectedMember.initial : '人'}}</view>
+        <view wx:if="{{selectedMember}}" class="assignee-copy"><view>{{selectedMember.name}}<text>{{selectedMember.roleLabel}}</text></view><label>{{selectedMember.team}} · 已开通账号</label></view>
+        <view wx:else class="assignee-copy placeholder"><view>{{recipientLoading ? '正在加载公司人员…' : members.length ? '请选择任务负责人' : '暂无可选负责人'}}</view><label>所有部门 · 公司有效账号</label></view>
+        <view class="assignee-chevron">⌄</view>
+      </view>
+    </picker>
+
+    <view wx:if="{{recipientError}}" class="task-link-error" bindtap="retryRecipients">{{recipientError}} · 点击重试</view>
+
+    <view class="section-head compact"><view><text>执行设置</text><label>接收方接受后开始执行，也可填写原因拒绝</label></view></view>
+    <view class="setting-card">
+      <view class="setting-block"><view class="setting-label">优先级</view><view class="choice-row"><view wx:for="{{priorities}}" wx:key="*this" class="choice {{selectedPriority === item ? 'selected' : ''}}" data-value="{{item}}" bindtap="selectPriority">{{item}}</view></view></view>
+      <view class="divider"></view>
+      <view class="setting-block">
+        <view class="setting-label setting-label-row"><text>截止时间</text><label>手动设定日期和时间</label></view>
+        <view class="custom-due selected">
+          <view class="custom-due-head"><view><text>设定截止时间</text><label>精确选择日期与时刻</label></view><text>必填</text></view>
+          <view class="custom-due-fields">
+            <picker mode="date" value="{{customDueDate}}" start="{{minDueDate}}" end="{{maxDueDate}}" bindchange="changeDueDate">
+              <view class="due-field"><view>日</view><view><label>日期</label><text>{{customDueDateLabel}}</text></view><text>›</text></view>
+            </picker>
+            <picker mode="time" value="{{customDueTime}}" bindchange="changeDueTime">
+              <view class="due-field"><view>时</view><view><label>时间</label><text>{{customDueTime}}</text></view><text>›</text></view>
+            </picker>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{selectedMember}}" class="delivery-preview">
+      <view class="preview-icon">✓</view>
+      <view><text>任务将发送给 {{selectedMember.name}}</text><label>{{selectedMember.team}} · {{selectedPriority}}优先级 · 截止{{selectedDue}}</label></view>
+    </view>
+  </view>
+
+
+  <view wx:if="{{selectorOpen}}" class="task-selector-layer"><view class="task-selector-sheet"><view class="task-selector-head"><text>{{selectorKind==='customer'?'选择客户':'选择商机'}}</text><button size="mini" bindtap="closeTaskSelector">关闭</button></view><input class="task-selector-search" value="{{selectorQuery}}" placeholder="{{selectorKind==='customer'?'搜索客户名称':'搜索当前客户的商机'}}" bindinput="searchTaskChoices" maxlength="100"/><scroll-view scroll-y class="task-selector-list" bindscrolltolower="moreTaskChoices"><view wx:for="{{selectorRows}}" wx:key="id" class="task-selector-row" data-id="{{item.id}}" bindtap="chooseTaskLink"><text>{{item.name}}</text><text class="task-link-arrow">选择 ›</text></view><view wx:if="{{selectorLoading}}" class="task-selector-state">正在加载…</view><view wx:elif="{{selectorError}}" class="task-selector-state task-link-error" bindtap="loadTaskChoices">{{selectorError}} · 重试</view><view wx:elif="{{!selectorRows.length}}" class="task-selector-state">{{selectorKind==='customer'?'暂无可关联商机的客户，请调整关键词或先完成商机登记':'暂无可关联的商机，请调整关键词'}}</view><view wx:elif="{{selectorMore}}" class="task-selector-state" bindtap="moreTaskChoices">加载更多</view></scroll-view></view></view>
+  <view class="bottom-bar"><button class="submit {{!selectedMember || descriptionCount < 5 || submitting || isStarting || isRecording || isStopping || isParsing ? 'disabled' : ''}}" bindtap="submitTask">{{submitting ? '正在发送' : '发送任务'}}<text>→</text></button><view>接收人确认后开始执行，也可说明原因拒绝</view></view>
+</view>
+
+</block>

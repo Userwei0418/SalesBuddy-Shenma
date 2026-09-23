@@ -1,0 +1,100 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{customer}}" class="detail-page">
+  <view wx:if="{{isFde}}" class="fde-note">客户全景资料 · 本人协助项目以商机名单为准</view><view class="customer-hero">
+    <view class="hero-top"><view class="sync-state"><text></text>数据已同步</view><view class="level-badge">{{customer.level}}级客户</view></view>
+    <view class="identity-row">
+      <view class="customer-mark">{{customer.initial}}</view>
+      <view class="identity-main"><view class="customer-name">{{customer.name}}</view><view class="customer-meta">{{customer.industry}} · {{customer.customerType}} · {{customer.team}}</view></view>
+    </view>
+    <view class="hero-tags"><view class="quadrant-tag">{{customer.quadrant}}</view><view class="risk-tag">{{customer.risk}}</view></view>
+    <view class="hero-footer"><text>负责人 {{customer.owner}}</text><text>{{customer.updatedAt}}</text></view>
+  </view>
+
+  <view class="detail-context-links"><view class="detail-context-link" bindtap="openAssets">经营实绩 ›</view><view class="detail-context-link" wx:if="{{canCreateTask}}" bindtap="createTask">创建任务</view></view>
+  <view class="score-card surface">
+    <view class="card-heading"><view><view class="card-eyebrow">CUSTOMER POSITION</view><view class="card-title">象限判断依据</view></view><view class="score-status">{{customer.quadrant}}</view></view>
+    <view class="quadrant-copy">{{customer.quadrantDefinition}}，建议{{customer.quadrantAction}}</view>
+    <view class="score-row"><view class="score-label"><text>客户潜力</text><label>{{customer.potentialText}}</label></view><view wx:if="{{customer.potential !== null}}" class="score-track"><view style="width: {{customer.potential}}%"></view></view></view>
+    <view class="evidence-list"><text wx:for="{{customer.potentialEvidence}}" wx:key="*this">{{item}}</text></view>
+    <view class="score-row relation"><view class="score-label"><text>关系深度</text><label>{{customer.relationshipText}}</label></view><view wx:if="{{customer.relationship !== null}}" class="score-track"><view style="width: {{customer.relationship}}%"></view></view></view>
+    <view class="evidence-list"><text wx:for="{{customer.relationshipEvidence}}" wx:key="*this">{{item}}</text></view>
+    <view class="rule-note">象限由事实数据自动计算；修改客户事实后，系统将重新评估。</view>
+  </view>
+
+  <scroll-view class="detail-tabs" scroll-x enhanced show-scrollbar="false">
+    <view class="tab-list"><view wx:for="{{tabs}}" wx:key="key" class="{{activeTab === item.key ? 'active' : ''}}" data-tab="{{item.key}}" bindtap="selectTab">{{item.label}}</view></view>
+  </scroll-view>
+
+  <view wx:if="{{!detailSummary.loaded}}" class="detail-summary-state"><text class="detail-summary-copy">{{detailSummary.loading ? '经营汇总加载中，其他资料可继续查看' : detailSummary.error ? '经营汇总暂不可用，已加载资料不受影响' : '经营汇总按需加载'}}</text><button class="detail-summary-button" wx:if="{{!detailSummary.loading}}" bindtap="retryCustomerSummary">{{detailSummary.error ? '重试汇总' : '查看汇总'}}</button></view>
+  <view wx:if="{{activeTab === 'overview'}}" class="tab-content">
+    <view class="metric-grid surface">
+      <view><text>{{customer.annualValue}}</text><label>在推商机 ACV</label></view>
+      <view><text>{{customer.opportunity.amount}}</text><label>当前商机 ACV</label></view>
+      <view><text class="{{customer.cooperationPending ? 'pending' : ''}}">{{customer.cooperationYears}}</text><label>合作时间</label></view>
+    </view>
+
+    <view class="ai-card">
+      <view class="ai-head"><view wx:if="{{!isFde}}" class="ai-mark">AI</view><view><view>{{isFde ? '已记录的下一步行动' : 'Agent 经营建议'}}</view><text wx:if="{{!isFde}}">基于最新客户事实生成</text></view></view>
+      <view class="ai-action-title">{{customer.nextAction}}</view>
+      <view class="ai-link" wx:if="{{canCreateTask}}" bindtap="createTask"><text>创建下一步任务</text><view>→</view></view>
+    </view>
+
+    <view class="section-heading"><text>当前商机</text><label>{{customer.opportunityCount}} 个商机</label></view>
+    <view wx:for="{{customer.opportunities}}" wx:key="id" class="opportunity-card surface opportunity-list-card">
+      <view class="opportunity-top"><view><view class="opportunity-name">{{item.name}}</view><view class="opportunity-stage">{{item.stage}}</view></view><view class="opportunity-amount">{{item.amount}}</view></view>
+      <view class="opportunity-progress"><view style="width: {{item.probability}}%"></view></view>
+      <view class="opportunity-meta"><text>{{item.stageText}}</text><text>预计签约 {{item.expectedDate}}</text></view>
+    </view>
+    <view wx:if="{{detailPages.opportunities.loaded && !detailPages.opportunities.error && !customer.opportunities.length}}" class="opportunity-card surface opportunity-empty">暂无商机</view>
+
+    <detail-pagination empty-text="" state="{{detailPages.opportunities}}" data-section="opportunities" bind:more="moreSection" bind:retry="retrySection" /><view class="section-heading"><text>关键联系人</text><label>{{customer.contactCount}} 人</label></view>
+    <view class="contact-list surface">
+      <view wx:for="{{customer.contacts}}" wx:key="id" class="contact-row">
+        <view class="contact-avatar">{{item.initial}}</view><view class="contact-main"><view>{{item.name}}<text>{{item.title}}</text></view><label>{{item.role}}</label></view><view class="strength strength-{{item.strengthTone}}">{{item.strength}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'overview'}}"><detail-pagination state="{{detailPages.contacts}}" data-section="contacts" bind:more="moreSection" bind:retry="retrySection" /></view>
+  <view wx:if="{{detailFocusError}}" class="detail-page-error">{{detailFocusError}}</view>
+  <view wx:if="{{activeTab === 'visits'}}" class="tab-content">
+    <view class="timeline surface">
+      <view wx:for="{{customer.visits}}" wx:key="id" class="timeline-item {{expandedVisitId === item.id ? 'expanded' : ''}}" data-id="{{item.id}}" bindtap="toggleVisit">
+        <view class="timeline-rail"><view></view><text></text></view>
+        <view class="timeline-main"><view class="timeline-date">{{item.date}} · {{item.mode}}<text>{{expandedVisitId === item.id ? '收起' : '展开'}}</text></view><view class="timeline-title">{{item.title}}</view><view class="timeline-meta"><text>{{item.conclusion}}</text><label>记录人 {{item.owner}}</label></view><view wx:if="{{expandedVisitId === item.id}}" class="timeline-expanded">
+<view wx:if="{{visitDetailState.loading}}">正在读取完整记录…</view><view wx:elif="{{visitDetailState.error}}" catchtap="retryVisitDetail">{{visitDetailState.error}} · 点击重试</view><block wx:elif="{{!item.isSummary && visitDetailState.ready}}"><view><text>客户名称</text><label>{{item.customerName}}</label></view><view><text>客户类型</text><label>{{item.customerType}}</label></view>
+<view><text>商机名称</text><label>{{item.opportunityName}}</label></view><view><text>伙伴名称</text><label>{{item.partnerName}}</label></view>
+<view><text>对接人</text><label>{{item.contactNames}}</label></view><view><text>拜访目标</text><label>{{item.visitGoal}}</label></view>
+<view><text>沟通内容</text><label>{{item.followUpRecord}}</label></view><view class="next"><text>下一步计划</text><label>{{item.nextAction}}</label></view>
+<view><text>拜访时间</text><label>{{item.date}}</label></view><view><text>创建时间</text><label>{{item.createdAt}}</label></view>
+<view><text>创建人</text><label>{{item.creator}}</label></view><view><text>{{item.originalRecorderName ? '原始跟进人' : '跟进人'}}</text><label>{{item.originalRecorderName || item.owner}}</label></view><view wx:if="{{item.managerName}}"><text>当前管理人</text><label>{{item.managerName}}</label></view>
+<view><text>协同人</text><label>{{item.collaborators}}</label></view><view><text>拜访方式</text><label>{{item.mode}}</label></view>
+<view><text>拜访时长</text><label>{{item.duration}}</label></view><view><text>达成结果</text><label>{{item.expectation}}</label></view>
+<view><text>是否首次拜访</text><label>{{item.firstVisitText}}</label></view><view><text>是否七天内</text><label>{{item.sevenDaysText}}</label></view>
+<view><text>地点</text><label>{{item.location}}</label></view>
+<block wx:if="{{item.isFirstVisit}}"><view><text>客户主营业务</text><label>{{item.customerMainBusiness}}</label></view><view><text>客户需求</text><label>{{item.customerNeeds}}</label></view><view><text>客户预算</text><label>{{item.customerBudget}}</label></view><view><text>联系人角色</text><label>{{item.contactRole}}</label></view></block>
+<button wx:if="{{canSupplementVisit && item.recorderId && item.recorderId === viewerUserId}}" class="supplement-button" data-id="{{item.id}}" catchtap="supplementVisit">补充信息 ›</button></block><view wx:else catchtap="retryVisitDetail">点击读取完整记录</view></view></view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === 'visits'}}"><detail-pagination state="{{detailPages.visits}}" data-section="visits" bind:more="moreSection" bind:retry="retrySection" /></view>
+  <view wx:if="{{activeTab === 'opportunity'}}" class="tab-content"><view wx:if="{{canEditOpportunity}}" class="opportunity-edit-entry" bindtap="createOpportunity"><text>＋ 新增商机</text></view>
+    <view wx:for="{{customer.opportunities}}" wx:key="id" wx:for-item="opportunity" class="opportunity-detail surface opportunity-list-card">
+      <view class="opportunity-card-heading"><view class="card-eyebrow">{{opportunity.status === 'won' ? '已赢单' : opportunity.status === 'lost' ? '已丢单' : '推进中'}}</view><view wx:if="{{canEditOpportunity}}" class="opportunity-card-edit" hover-class="opportunity-card-edit-active" role="button" aria-label="编辑商机" data-id="{{opportunity.id}}" catchtap="editOpportunity">编辑</view></view><view class="opportunity-detail-name">{{opportunity.name}}</view>
+      <view class="stage-pipeline"><view wx:for="{{opportunity.stageSteps}}" wx:key="label" class="{{item.status}}"><text></text><label>{{item.label}}</label></view></view>
+      <view class="detail-rows"><view><text>关联伙伴</text><label>{{opportunity.associatedPartnersText}}</label></view><view><text>转售伙伴</text><label>{{opportunity.resalePartnerText}}</label></view><view><text>签单方式</text><label>{{opportunity.signingMethodText}}</label></view><view><text>产品线</text><label>{{opportunity.product_line || '未填写'}}</label></view><view wx:if="{{opportunity.originalOwnerName}}"><text>原商机负责人</text><label>{{opportunity.originalOwnerName}}</label></view><view wx:if="{{opportunity.ownershipResolutionText}}"><text>当前归属状态</text><label>{{opportunity.ownershipResolutionText}}</label></view><view wx:for="{{opportunity.quarterDetails}}" wx:key="label" wx:for-item="q"><text>{{q.label}} 预测</text><label>含税确收 {{q.recognized}} · 回款 {{q.collection}}<text wx:if="{{q.collectionConfidenceText}}"> · 回款信心度 {{q.collectionConfidenceText}}</text></label></view></view><view class="detail-rows"><view><text>ACV（商机金额）</text><label>{{opportunity.amount}}</label></view><view><text>商机阶段</text><label>{{opportunity.stageText}}</label></view><view><text>预计签约</text><label>{{opportunity.expectedDate}}</label></view></view>
+      <view wx:if="{{opportunity.historicalPeriodRecords.length}}" class="historical-period-records">
+        <view class="card-eyebrow">历史季度原始记录</view>
+        <view class="historical-period-note">保留历史填报值，未计入季度实绩或预测</view>
+        <view class="detail-rows"><view wx:for="{{opportunity.historicalPeriodRecords}}" wx:key="key"><text>{{item.period}} {{item.kindText}}</text><label>{{item.amountText}} · {{item.taxBasisText}}<text wx:if="{{item.sourceFieldText}}"> · 来源：{{item.sourceFieldText}}</text></label></view></view>
+      </view>
+    </view>
+    <detail-pagination state="{{detailPages.opportunities}}" data-section="opportunities" bind:more="moreSection" bind:retry="retrySection" /><view class="risk-card"><view class="risk-icon">!</view><view><view>当前风险</view><text>{{customer.riskDetail}}</text></view></view>
+  </view>
+
+  <view wx:if="{{canRecordVisit}}" class="bottom-actions"><button class="record-button" bindtap="recordVisit"><view class="record-wave"><text></text><text></text><text></text></view><text>语音记录拜访</text></button></view>
+</view>
+
+</block>

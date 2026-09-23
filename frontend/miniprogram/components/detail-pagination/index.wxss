@@ -1,0 +1,1 @@
+.detail-page-state{padding:20rpx 12rpx;text-align:center;color:#8193ab;font-size:24rpx}.detail-page-state button{margin:8rpx;color:#2579c4;background:#edf6ff;border-radius:16rpx;border:1rpx solid #d8e7f6;font-size:24rpx}.detail-page-state button::after{border:0}.error{display:flex;flex-direction:column;align-items:center;gap:10rpx;color:#aa633a}

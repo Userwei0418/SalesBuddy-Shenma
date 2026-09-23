@@ -1,0 +1,90 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="page {{archived ? 'archived-page' : ''}}">
+  <view wx:if="{{archived}}" class="card success-card">
+    <view class="success-icon">✓</view><view class="title">拜访记录录入成功</view>
+    <view class="muted">{{customerName}}</view>
+    <view class="metrics"><view class="metric-cell"><text class="metric-number">{{archivedCount}}</text><label class="metric-label">字段已归档</label></view><view class="metric-cell"><text class="metric-number">{{score}}分</text><label class="metric-label">AI 评分</label></view><view class="metric-cell"><text class="metric-number">{{grade}}</text><label class="metric-label">质量等级</label></view></view>
+    <view class="success-next"><view class="section-title">下一步行动</view><view class="body-text">{{values.next_action}}</view></view>
+    <view wx:if="{{archiveWarning}}" class="notice error">{{archiveWarning}}</view>
+    <view class="success-actions">
+    <button class="v-button primary" bindtap="openVisit">查看本次跟进详情 <text>›</text></button>
+    <button wx:if="{{!isFde && (advice || adviceBusy || adviceError)}}" class="v-button secondary" bindtap="openAdvice">查看本次待办建议</button>
+    <button class="v-button primary {{busy ? 'is-disabled' : ''}}" bindtap="openCustomer">查看客户档案 <text>›</text></button>
+    </view>
+  </view>
+  <block wx:else>
+    <view class="hero"><view class="eyebrow">{{editing ? 'FOLLOW-UP RECORD' : 'VISIT REVIEW'}}</view><view class="title">{{editing ? '补充跟进信息' : flowStep === 'edit' ? '核对拜访记录' : flowStep === 'analyzing' ? 'AI 正在分析' : '查看质检结果'}}</view><view class="hero-sub">{{editing ? customerName : '核对内容 · AI 质检 · 确认保存'}}</view></view>
+    <view wx:if="{{errorText}}" class="notice error">{{errorText}}</view>
+    <view wx:if="{{!editing}}" class="flow-steps"><view class="flow-step {{flowStep==='edit'?'active':'done'}}"><text>1</text>核对内容</view><view class="step-line"></view><view class="flow-step {{flowStep!=='edit'?'active':''}}"><text>2</text>AI 质检</view><view class="step-line"></view><view class="flow-step"><text>3</text>确认保存</view></view>
+    <view wx:if="{{flowStep==='analyzing'}}" class="card analyzing-card"><view class="analysis-orbit"><view class="analysis-core">AI</view></view><view class="section-title">正在为这次拜访做质检</view><view class="analysis-caption">{{analysisPhrase}}</view><view class="muted">请稍候，完成后会展示评分与改进建议</view></view>
+    <view wx:if="{{!editing && flowStep==='result'}}" class="review-at-top">
+      <view class="card quality">
+        <view class="quality-top"><view><view class="section-title">AI 质量审核</view><view class="muted">评估本次拜访录入质量，并给出评分与改进建议</view></view><view wx:if="{{score !== null}}" class="score traffic-surface-{{scoreSignal.tone}}">{{score}}<text class="score-label">{{reviewStale ? '修改前评分' : '分 · ' + scoreSignal.label}}</text></view></view>
+        <view class="audit-rule">提交标准：质量评分须{{admissionRequirement}}</view>
+        <view wx:if="{{quality}}" class="feedback"><view wx:for="{{quality.suggestions}}" wx:key="*this" class="suggestion">• {{item}}</view></view>
+        <view wx:if="{{score !== null && !scorePassed && !reviewStale}}" class="notice error">AI 质量审核未通过，请按建议完善内容后重新审核。</view>
+
+      </view>
+      <view class="card next-audit">
+        <view class="audit-heading"><view><view class="section-title">下一步审核</view><view class="muted">硬性检查下一步计划是否可执行</view></view><view class="audit-status {{nextReviewPassed ? 'passed' : 'blocked'}}">{{nextReviewStatus}}</view></view>
+        <view class="audit-rule">必须同时包含具体日期，以及明确的行动计划或目标</view>
+        <view wx:if="{{quality && quality.next_action}}" class="feedback"><view wx:for="{{quality.next_action.suggestions}}" wx:key="*this" class="suggestion">• {{item}}</view></view>
+        <view wx:if="{{quality && !nextReviewPassed && !reviewStale}}" class="notice error">下一步审核未通过，即使质量评分通过也不能提交。</view>
+      </view>
+    </view>
+    <view hidden="{{!editing && flowStep!=='edit'}}" class="card structured-entry">
+      <view class="section-title">结构化录入</view>
+      <view class="optional-field"><view class="field-label">客户类型</view><picker mode="selector" range="{{customerTypeOptions}}" value="{{customerTypeIndex}}" bindchange="selectCustomerType" disabled="{{busy || editing}}"><view class="picker-row"><text>{{customerTypeLabel}}</text><text class="link">⌄</text></view></picker></view>
+      <view class="optional-field"><view class="field-label">客户名称</view>
+        <view wx:if="{{customerConfirmed}}" class="chosen"><view class="chosen-details"><view class="strong">{{customerName}}</view><view class="muted">已在上一页确认关联</view></view></view>
+        <block wx:else><input class="search" placeholder="搜索客户名称" value="{{customerQuery}}" bindinput="inputCustomer" disabled="{{busy}}" /><view class="muted match-hint">{{searching ? '正在搜索…' : '点击匹配结果，确认本次跟进的客户'}}</view><scroll-view scroll-y class="customer-results" wx:if="{{customers.length}}"><view wx:for="{{customers}}" wx:key="id" class="customer-row" data-id="{{item.id}}" bindtap="chooseCustomer"><text class="customer-name">{{item.name}}</text><text class="link">确认 ›</text></view></scroll-view><view wx:if="{{!searching && !customers.length}}" class="muted">没有找到匹配客户</view></block>
+      </view>
+      <fde-visit-opportunity wx:if="{{isFde && customerConfirmed && !editing}}" id="fdeVisitOpportunity" customer-id="{{customerId}}" selected-id="{{opportunityId}}" disabled="{{busy}}" bind:change="fdeOpportunityChanged"/>
+      <view wx:if="{{customerConfirmed && (!isFde || editing)}}" class="optional-field"><view class="field-label">商机名称 <text class="optional-tag">选填</text><text wx:if="{{opportunityAIRecognized}}" class="ai-recognized-tag">AI 已识别</text></view><view wx:if="{{opportunityAIHint}}" class="ai-opportunity-hint">{{opportunityAIHint}}</view><block wx:if="{{!editing}}"><view class="picker-row" bindtap="toggleOpportunityPicker"><text>{{opportunityOptions[opportunityIndex].name}}</text><text class="link">选择 ›</text></view>
+        <view wx:if="{{opportunityLoading && !opportunityPickerOpen}}" class="muted match-hint">正在读取商机…</view><view wx:if="{{opportunityError && !opportunityPickerOpen}}" class="opportunity-error">{{opportunityError}}<text class="link" bindtap="retryOpportunities"> 重新加载</text></view></block><view wx:else class="readonly-field">{{values.opportunity_name || '未关联商机'}}</view></view>
+      <view wx:if="{{!isFde && !editing && customerConfirmed && opportunityEditing}}" class="inline-opportunity"><opportunity-form visit-context="{{true}}" id="visitOpportunityForm" customer-id="{{customerId}}" existing="{{selectedOpportunity}}" saved-draft="{{opportunityDraft}}" disabled="{{busy}}" bind:change="changeOpportunityForm"/></view>
+      <view class="optional-field"><view class="field-label">伙伴名称 <text class="optional-tag">选填</text></view><input class="optional-input" value="{{values.partner_name}}" data-key="partner_name" bindinput="inputField" placeholder="未涉及伙伴可留空" maxlength="300" disabled="{{busy}}" /></view>
+      <view class="optional-field"><view class="field-label">跟进日期</view><picker mode="date" value="{{datePickerValue}}" bindchange="selectVisitDate" disabled="{{busy}}"><view class="picker-row"><text class="{{visitDate ? '' : 'muted'}}">{{visitDateLabel || '选择跟进日期'}}</text><text class="link">选择 ›</text></view></picker><view wx:if="{{visitDate}}" class="date-clear" bindtap="clearVisitDate">清除日期</view></view>
+      <view class="optional-field"><view class="field-label">对接人</view><input class="optional-input" value="{{values.contact_name}}" data-key="contact_name" bindinput="inputField" placeholder="填写本次沟通的客户对接人" maxlength="300" disabled="{{busy}}" /></view>
+      <view wx:for="{{core}}" wx:key="key" class="core-field"><view class="field-label">{{item.label}}</view><view wx:if="{{editing}}" class="body-text">{{item.value || '未记录'}}</view><textarea wx:else class="content-input" auto-height value="{{item.value}}" placeholder="{{item.placeholder}}" maxlength="15000" data-key="{{item.key}}" bindinput="inputField" disabled="{{busy}}" /></view>
+      <view wx:if="{{isFirstVisit}}" class="first-visit-section">
+        <view class="first-visit-heading"><view><view class="subsection-title">首次拜访补充</view><view class="muted">AI 已尝试识别，未识别到的内容请人工补充</view></view><text>4 项必填</text></view>
+        <view wx:for="{{firstVisitFields}}" wx:key="key" class="first-visit-field">
+          <view class="field-label">{{item.label}} <text class="required">*</text><text class="ai-tag">AI/系统</text></view>
+          <view wx:if="{{item.key === 'contact_role' && catalogError}}" class="error" bindtap="loadBusinessOptions">{{catalogError}} · 点击重试</view><picker wx:if="{{item.key === 'contact_role'}}" mode="selector" range="{{contactRoleOptions}}" value="{{contactRoleIndex}}" bindchange="selectContactRole" disabled="{{busy || !contactRoleOptions.length}}"><view class="picker-row"><text class="{{values.contact_role ? '' : 'muted'}}">{{values.contact_role || item.placeholder}}</text><text class="link">选择 ›</text></view></picker>
+          <textarea wx:elif="{{item.key === 'customer_main_business' || item.key === 'customer_needs'}}" class="first-visit-input multiline" auto-height value="{{item.value}}" placeholder="{{item.placeholder}}" maxlength="3000" data-key="{{item.key}}" bindinput="inputField" disabled="{{busy}}" />
+          <input wx:else class="first-visit-input" value="{{item.value}}" placeholder="{{item.placeholder}}" maxlength="300" data-key="{{item.key}}" bindinput="inputField" disabled="{{busy}}" />
+        </view>
+      </view>
+      <view class="optional-field"><view class="field-label">是否七天内</view><view class="readonly-field">{{sevenLabel}}</view><view class="muted seven-help">系统按跟进日期判断最近七天，含今天</view></view>
+      <view class="optional-field"><view class="field-label">创建时间</view><picker mode="date" value="{{createdDatePickerValue}}" bindchange="selectCreatedDate" disabled="{{busy}}"><view class="picker-row"><text class="{{createdDate ? '' : 'muted'}}">{{createdDateLabel || '选择填写日期'}}</text><text class="link">选择 ›</text></view></picker><view wx:if="{{createdDate}}" class="date-clear" bindtap="clearCreatedDate">清除日期</view></view>
+      <view class="optional-field"><view class="field-label">跟进人</view><view class="readonly-field">{{recorderName || '未记录'}}</view></view>
+      <view wx:if="{{!isFde}}" class="collaborator-row" bindtap="toggleColleagues"><view><view class="field-label">协同人 <text class="optional-tag">选填</text></view><view class="muted">{{collaboratorNames || '选择参与本次拜访的同事'}}</view></view><text class="link">{{showColleagues ? '⌃' : '⌄'}}</text></view>
+      <block wx:if="{{!isFde && showColleagues}}"><input class="search" placeholder="搜索同事姓名或账号" value="{{colleagueQuery}}" bindinput="inputColleagueQuery" /><checkbox-group bindchange="selectColleagues"><scroll-view class="colleagues" scroll-y><label wx:for="{{colleagues}}" wx:key="id" class="colleague"><checkbox value="{{item.id}}" checked="{{item.selected}}" disabled="{{busy}}" color="#1677ff"/><text>{{item.name}}</text></label><view wx:if="{{!colleagues.length}}" class="muted">没有匹配的同事</view></scroll-view></checkbox-group></block>
+    </view>
+    <view class="footer" wx:if="{{flowStep!=='analyzing'}}"><view wx:if="{{!editing && flowStep==='result' && blockReason}}" class="archive-hint">{{blockReason}}</view><view class="footer-actions"><button wx:if="{{editing}}" class="v-button primary" bindtap="saveSupplement" loading="{{busy}}" disabled="{{busy}}">保存补充信息</button><block wx:elif="{{flowStep==='edit'}}"><button class="v-button secondary draft" bindtap="saveDraft" disabled="{{busy}}">保存草稿</button><button class="v-button primary" bindtap="review" loading="{{busy}}" disabled="{{busy}}">{{pendingReviewId ? '继续查看质检' : '下一步 · AI 质检'}}</button></block><block wx:else><button class="v-button secondary" bindtap="backToEdit" disabled="{{busy}}">返回完善</button><button class="v-button primary" bindtap="archive" disabled="{{!canSubmit}}" loading="{{busy}}">下一步 · 确认保存</button></block></view></view>
+  </block>
+</view>
+
+</block>
+
+<view wx:if="{{opportunityPickerOpen && !isFde && !editing && !archived && !accessBlocked}}" class="opportunity-mask" catchtap="closeOpportunityPicker" catchtouchmove="stopOpportunityTap">
+  <view class="opportunity-sheet" catchtap="stopOpportunityTap">
+    <view class="opportunity-grip"></view>
+    <view class="opportunity-sheet-header"><text>选择关联商机</text><text class="opportunity-sheet-customer">{{customerName}}</text></view>
+    <input class="search opportunity-search" value="{{opportunityQuery}}" maxlength="100" placeholder="搜索该客户下的商机" bindinput="searchOpportunities" disabled="{{busy}}"/>
+    <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="opportunity-results">
+      <view wx:for="{{opportunityOptions}}" wx:key="id" class="opportunity-result {{item.id === opportunityPendingId ? 'opportunity-result-selected' : ''}} {{item.unverified ? 'opportunity-result-unverified' : ''}}" data-id="{{item.id}}" bindtap="chooseOpportunity">
+        <text class="opportunity-result-name">{{item.name}}</text><text class="opportunity-choice {{item.id === opportunityPendingId ? 'checked' : ''}}">{{item.unverified ? '待核对' : item.id === opportunityPendingId ? '✓' : ''}}</text>
+      </view>
+      <view wx:if="{{opportunityLoading}}" class="opportunity-sheet-hint">正在读取商机…</view>
+      <view wx:elif="{{!opportunityItems.length && !opportunityError}}" class="opportunity-sheet-hint">{{opportunityQuery ? '没有匹配的已有商机，请调整关键词' : '该客户暂无可关联的已有商机'}}</view>
+      <view wx:if="{{opportunityError}}" class="opportunity-error">{{opportunityError}}<text class="link" bindtap="retryOpportunities"> 重新加载</text></view>
+      <button wx:if="{{opportunityHasMore}}" class="opportunity-more" bindtap="moreOpportunities" disabled="{{busy || opportunityLoading}}">加载更多</button>
+    </scroll-view>
+    <view class="opportunity-sheet-actions"><button class="opportunity-cancel" bindtap="closeOpportunityPicker">取消</button><button class="opportunity-confirm" bindtap="confirmOpportunityPicker" disabled="{{busy || !opportunityPendingOption || opportunityPendingOption.unverified}}">确定</button></view>
+  </view>
+</view>
+
+<view wx:if="{{!isFde && archived && showAdvice}}" class="advice-mask" catchtap="closeAdvice"><view class="advice-sheet" catchtap="stopAdviceTap"><view class="sheet-grip-area" role="button" aria-label="收起待办建议" catchtap="closeAdvice" catchtouchstart="startAdviceDrag" catchtouchmove="stopAdviceTap" catchtouchend="endAdviceDrag" catchtouchcancel="cancelAdviceDrag"><view class="sheet-grip"></view></view><view class="sheet-header"><view><view class="section-title">本次拜访待办建议</view><view class="muted">拜访已保存，是否创建待办由你决定</view></view></view><scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="advice-scroll"><view wx:if="{{adviceBusy}}" class="sheet-status">正在根据本次拜访整理建议…</view><view wx:elif="{{adviceError}}" class="sheet-status">{{adviceError}}<button class="v-button secondary" bindtap="loadAdvice">重新获取建议</button></view><block wx:elif="{{advice}}"><view class="advice-summary">{{advice.summary}}</view><view wx:if="{{!advice.suggestions.length}}" class="sheet-status">本次没有需要补充的待办建议</view><view wx:for="{{advice.suggestions}}" wx:key="id" class="advice-item"><view class="field-label">{{index+1}}. {{item.title}}</view><view class="muted">{{item.evidence}}</view><view class="advice-action">{{item.action}}</view><advice-actions analysis-id="{{advice.id}}" suggestion="{{item}}" bind:changed="reloadAdvice"/></view></block></scroll-view><button class="v-button secondary sheet-later" bindtap="closeAdvice">完成，稍后再看</button></view></view>

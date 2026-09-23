@@ -1,0 +1,27 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{!eligible}}" class="demo-access">{{accessMessage}}</view>
+<view wx:if="{{eligible && viewing}}" class="demo-page demo-detail-page">
+  <view class="demo-head"><view><view class="demo-eyebrow">DEMO SCENARIO</view><view class="demo-title">{{sceneDetail.name}}</view><view class="demo-context">{{opportunity.name}}</view></view></view>
+  <scroll-view scroll-y class="demo-detail-scroll"><view class="demo-scene"><view class="demo-label">场景描述</view><text class="demo-detail-copy">{{sceneDetail.description}}</text><view class="demo-detail-meta">{{sceneDetail.creatorName}} · {{sceneDetail.createdLabel}}</view></view><view class="demo-note">已登记到当前商机，修改操作会保留记录</view></scroll-view>
+  <view wx:if="{{sceneDetail.can_edit}}" class="demo-footer demo-detail-actions"><button size="mini" class="demo-detail-delete" bindtap="deleteScene">删除</button><button size="mini" class="demo-submit" bindtap="startEditing">编辑场景</button></view>
+</view>
+<view wx:if="{{eligible && !viewing}}" class="demo-page">
+  <view class="demo-sheet">
+    <view class="demo-head"><view><view class="demo-eyebrow">DEMO SCENARIO</view><view class="demo-title">{{editing?'编辑 Demo 场景':'创建 Demo 场景'}}</view><view class="demo-context">{{opportunity.name}}</view></view></view>
+    <scroll-view scroll-y class="demo-scroll">
+      <view wx:for="{{demoScenes}}" wx:key="id" class="demo-scene">
+        <view class="demo-scene-head"><view class="demo-scene-heading"><text class="demo-scene-number">{{index+1}}</text><view><text class="demo-scene-title">Demo 场景</text><text class="demo-scene-caption">描述一个可演示的业务场景</text></view></view><button wx:if="{{demoScenes.length>1}}" size="mini" class="demo-remove" data-id="{{item.id}}" bindtap="removeDemoScene" aria-label="移除场景{{index+1}}"><view class="demo-remove-glyph" aria-hidden="true"></view></button></view>
+        <view class="demo-label">场景名称</view><view class="demo-input-shell"><input class="demo-input" type="text" value="{{item.name}}" maxlength="100" placeholder="例如：运输调度异常预警" placeholder-class="demo-input-placeholder" cursor-spacing="100" data-id="{{item.id}}" data-field="name" bindinput="editDemoScene"/></view>
+        <view class="demo-label">场景描述</view><textarea class="demo-description" value="{{item.description}}" maxlength="2000" placeholder="描述业务问题、演示内容和预期效果" data-id="{{item.id}}" data-field="description" bindinput="editDemoScene"/>
+        <button size="mini" class="demo-voice {{voiceId===item.id?'demo-voice-active':''}}" data-id="{{item.id}}" bindtap="toggleVoice" disabled="{{voiceState && (voiceId!==item.id || voiceState!=='recording')}}" aria-label="语音录入场景{{index+1}}描述"><view class="demo-mic" aria-hidden="true"><view class="demo-mic-capsule"></view><view class="demo-mic-cradle"></view></view><view class="demo-voice-copy"><text class="demo-voice-title">{{voiceId===item.id?(voiceState==='recording'?'录音中 · 点击结束':voiceState==='transcribing'?'正在转写…':'正在准备…'):'语音录入场景描述'}}</text><text class="demo-voice-caption">转写后追加到描述，可继续编辑</text></view><text class="demo-voice-action">{{voiceId===item.id && voiceState==='recording'?'结束':'开始'}}</text></button>
+      </view>
+      <button wx:if="{{!editing}}" size="mini" class="demo-add" bindtap="addDemoScene">＋ 添加 Demo 场景</button>
+      <view class="demo-note">每个登记场景计 1 个 Demo，自动关联当前商机。</view>
+      <view wx:if="{{demoError}}" class="demo-error">{{demoError}}</view>
+    </scroll-view>
+    <view class="demo-footer"><button size="mini" class="demo-submit" disabled="{{saving || voiceState}}" bindtap="submitDemoScenes">{{editing?'保存修改':'保存 '+demoScenes.length+' 个场景'}}</button><view class="demo-submit-note">保存后同步到当前商机，并计入登记数量</view></view>
+  </view>
+</view>
+
+</block>

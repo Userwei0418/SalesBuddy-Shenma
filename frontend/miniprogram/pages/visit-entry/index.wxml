@@ -1,0 +1,90 @@
+<view class="entry-navigation" style="padding-top:{{navTop}}px;">
+  <view class="entry-navigation-row" style="height:{{navHeight}}px;">
+    <button class="entry-back" bindtap="requestBack" aria-label="返回"><view></view></button>
+    <text>记录客户拜访</text>
+  </view>
+</view>
+<view style="height:{{navTop + navHeight}}px;"></view>
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="visit-entry-page" bindtap="dismissInputHelp">
+  <view class="entry-hero">
+    <view class="hero-eyebrow">VISIT NOTE · AGENT READY</view>
+    <view class="hero-title">记录客户拜访</view>
+    <view class="hero-copy">{{isFde ? "选择客户和本人参与的商机，录入后依次整理、质检并确认。" : "先记下拜访内容，AI 帮你整理沟通内容和下一步计划。"}}</view>
+    <view wx:if="{{customerName}}" class="customer-context"><text>本次关联客户</text><label>{{customerName}}</label></view>
+  </view>
+
+  <view class="customer-picker-card">
+    <view class="customer-picker-head"><view><text>选择客户 <label>必填</label></text><view>{{isFde ? "选择客户后，仅可录入本人参与的商机" : "可搜索公司全部客户"}}</view></view><text wx:if="{{customerConfirmed}}" bindtap="changeCustomer">更换</text></view>
+    <view wx:if="{{customerConfirmed}}" class="selected-customer"><view>{{customerInitial}}</view><text>{{customerName}}</text><label>已选择</label></view>
+    <block wx:else>
+      <view class="customer-search"><text></text><input value="{{customerQuery}}" placeholder="输入客户名称关键词" confirm-type="search" bindinput="inputCustomerQuery" bindconfirm="searchDepartmentCustomers" /></view>
+      <view class="customer-search-state">{{searching ? '正在匹配客户…' : '请选择匹配结果后再填写拜访内容'}}</view>
+      <scroll-view wx:if="{{customerResults.length}}" class="customer-results" scroll-y enhanced>
+        <view wx:for="{{customerResults}}" wx:key="id" class="customer-result" data-id="{{item.id}}" bindtap="chooseCustomer"><view>{{item.initial}}</view><text>{{item.name}}<label>{{item.team_name || item.team || '本部门'}}</label></text><label>选择</label></view>
+      </scroll-view>
+      <view wx:elif="{{customerSearchError}}" class="customer-empty customer-load-error"><text>{{customerSearchError}}</text><button class="customer-retry" bindtap="searchDepartmentCustomers">重新加载</button></view>
+      <view wx:elif="{{!searching}}" class="customer-empty">没有匹配到客户，请调整关键词</view>
+    </block>
+    <fde-visit-opportunity wx:if="{{isFde && customerConfirmed}}" id="fdeVisitOpportunity" customer-id="{{customerId}}" selected-id="{{opportunityId}}" disabled="{{isProcessing || isRecording}}" bind:change="fdeOpportunityChanged"/>
+  </view>
+
+  <view class="note-card">
+    <view class="note-head"><view><text>拜访原始记录</text><label>支持键盘输入与语音转写</label></view><view class="note-tools"><text class="note-count">{{transcript.length}} / 50000</text><button wx:if="{{transcript.length > 0}}" class="note-clear" hover-class="note-clear-pressed" bindtap="clearTranscript" disabled="{{isRecording || isStarting || isStopping}}">一键清空</button></view></view>
+    <textarea class="note-input" value="{{transcript}}" disabled="{{isRecording || isProcessing}}" maxlength="50000" auto-height="{{false}}" placeholder="可以说说：这次为什么拜访、客户反馈了什么、接下来准备何时做什么……" bindinput="inputTranscript"></textarea>
+    <view class="note-footer">
+      <checkbox-group wx:if="{{!isFde}}" class="first-visit-field" bindchange="toggleFirstVisit">
+        <label class="first-visit-option">
+          <checkbox value="first" checked="{{isFirstVisit}}" disabled="{{isProcessing}}" color="#1677e8" />
+          <view class="first-visit-copy"><text>首次拜访</text><label>AI 将识别必填信息，并在确认页提示补充</label></view>
+        </label>
+      </checkbox-group>
+      <view wx:if="{{draftSaveError}}" class="draft-state error">{{draftSaveError}}</view>
+      <view wx:elif="{{undoAvailable}}" class="draft-state undo">已清空本次内容<button bindtap="undoClear">撤销</button></view>
+      <view wx:elif="{{draftNotice}}" class="draft-state">{{draftNotice}}</view>
+      <view class="transcript-state {{errorText ? 'error' : ''}}"><text></text>{{statusText}}</view>
+    </view>
+  </view>
+
+  <view class="capture-card {{isRecording ? 'recording' : ''}}">
+    <view class="capture-head">
+      <view class="input-segment" aria-role="tablist">
+        <button class="input-tab {{entryMode === 'voice' ? 'selected' : ''}}" data-mode="voice" bindtap="switchInputMode" disabled="{{isRecording || isStarting || isStopping || isProcessing}}" aria-role="tab" aria-selected="{{entryMode === 'voice'}}">语音录入</button>
+        <button class="input-tab {{entryMode === 'file' ? 'selected' : ''}}" data-mode="file" bindtap="switchInputMode" disabled="{{isRecording || isStarting || isStopping || isProcessing}}" aria-role="tab" aria-selected="{{entryMode === 'file'}}">文件录入</button>
+      </view>
+      <button class="input-help {{inputHelpVisible ? 'open' : ''}}" catchtap="toggleInputHelp" aria-label="{{entryMode === 'voice' ? '查看语音录入说明' : '查看文件录入说明'}}">i</button>
+    </view>
+    <view class="capture-body">
+      <view wx:if="{{entryMode === 'voice'}}" class="voice-icon"><text></text><text></text><text></text><text></text><text></text></view>
+      <view wx:else class="file-icon"><view class="file-outline"><text></text><text></text><text></text></view></view>
+      <view class="capture-copy"><text>{{entryMode === 'voice' ? (isRecording ? '正在录音 ' + recordingTime : '说说这次拜访') : '导入已有材料'}}</text><label>{{entryMode === 'voice' ? '结束录音后自动转写' : '支持音频与文档文件'}}</label></view>
+      <button wx:if="{{entryMode === 'voice'}}" class="capture-primary" disabled="{{isProcessing || isStarting || isStopping}}" bindtap="toggleRecording">{{isStarting ? '启动中…' : isStopping ? '结束中…' : isRecording ? '结束录音' : '开始录音'}}</button>
+      <button wx:else class="capture-primary" disabled="{{isProcessing}}" bindtap="chooseMaterial">{{isProcessing ? '处理中…' : '选择文件'}}</button>
+    </view>
+    <view wx:if="{{fileName}}" class="selected-material">
+      <view class="material-line"><text class="material-name">{{fileName}}</text><text class="material-status {{importStatus === 'failed' || importStatus === 'save_failed' ? 'failed' : ''}}">{{localFileTemporary && !isProcessing && !importId ? '未保存，待处理' : importStatus === 'saving' ? '保存中' : importStatus === 'save_failed' ? '保存失败' : importStatus === 'uploading' ? uploadProgress + '%' : importStatus === 'succeeded' ? '已提取' : importStatus === 'failed' ? (importId ? '处理失败' : '上传失败') : '处理中'}}</text></view>
+      <view wx:if="{{importStatus === 'uploading'}}" class="upload-track"><view style="width:{{uploadProgress}}%"></view></view>
+      <view wx:if="{{!isProcessing}}" class="material-actions"><text wx:if="{{importStatus !== 'succeeded'}}" bindtap="retryImport">{{localFileTemporary && !importId ? '重试保存' : '重试 / 继续查看'}}</text><text wx:if="{{localFileTemporary && !importId}}" bindtap="uploadTemporaryFile">直接上传临时文件</text><text bindtap="removeFile">移除附件</text></view>
+    </view>
+    <view wx:if="{{inputHelpVisible}}" class="input-help-popover" catchtap="stopBubble">
+      <view class="help-heading"><text>{{entryMode === 'voice' ? '语音录入说明' : '文件录入说明'}}</text><button catchtap="dismissInputHelp" aria-label="关闭说明">×</button></view>
+      <block wx:if="{{entryMode === 'voice'}}">
+        <view class="help-row"><text>录音与转写</text><label>每次最长 10 分钟。点击开始录音，再次点击结束，随后自动转写为文字。</label></view>
+        <view class="help-foot">转写后可以修改文字，确认无误后再交给 AI 整理。</view>
+      </block>
+      <block wx:else>
+        <view class="help-row"><text>录音文件</text><label>MP3、WAV、M4A、AAC、OGG、FLAC、AMR、WEBM；最长 60 分钟，最大 100MB。</label></view>
+        <view class="help-row"><text>文档文件</text><label>文本 PDF、DOCX、PPTX、MD、TXT；最大 20MB。扫描件暂不支持。</label></view>
+        <view class="help-foot">文件中的文字会自动提取，录音会自动转写；核对后再交给 AI 整理。</view>
+      </block>
+    </view>
+  </view>
+  <view class="process-card">
+    <view><text>1</text><label>输入或语音转写</label></view><text>→</text><view><text>2</text><label>人工核对原文</label></view><text>→</text><view><text>3</text><label>AI 整理</label></view>
+  </view>
+  <view class="safe-tip">语音识别失败不影响手工录入；只有点击“提交结构化”后才会进入字段确认页。</view>
+  <button class="submit-button {{!canSubmit || isStarting || isStopping || isProcessing || isRecording ? 'disabled' : ''}}" disabled="{{!canSubmit || isStarting || isStopping || isProcessing || isRecording}}" bindtap="submitTranscript">{{!customerConfirmed ? '请先选择客户' : isFde && !fdeOpportunityVerified ? '请先选择本人参与的商机' : !transcript ? '请先录入拜访内容' : '提交结构化'}}</button>
+</view>
+
+</block>

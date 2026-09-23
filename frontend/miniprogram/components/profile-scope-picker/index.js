@@ -1,0 +1,7 @@
+Component({
+ properties:{modes:Array,members:Array,teams:Array,mode:String,memberId:String,teamId:String,label:String},
+ data:{open:false,search:'',filterTeam:'',visibleMembers:[],selecting:'person'},
+ observers:{'members,teams,memberId,teamId,mode':function(){this.close();this.filter();}},
+ pageLifetimes:{hide(){this.close();}},
+ methods:{noop(){},switchMode(e){const mode=e.currentTarget.dataset.mode;if(!(this.properties.modes||[]).some(row=>row.value===mode))return;this.triggerEvent('modechange',{mode});},show(){this.triggerEvent('visibilitychange',{open:true});this.setData({open:true,search:'',filterTeam:'',selecting:this.properties.mode==='team'?'team':'person'});this.filter();},close(){if(!this.data.open)return;this.setData({open:false});this.triggerEvent('visibilitychange',{open:false});},search(e){this.setData({search:e.detail.value});this.filter();},teamFilter(e){this.setData({filterTeam:e.currentTarget.dataset.id||''});this.filter();},filter(){const query=String(this.data.search||'').trim().toLowerCase(),team=this.data.filterTeam;this.setData({visibleMembers:(this.properties.members||[]).filter(row=>(!team||(row.team_ids||[]).includes(team))&&(!query||String(row.name||'').toLowerCase().includes(query)))});},select(e){const id=e.currentTarget.dataset.id,kind=this.data.selecting,rows=kind==='team'?this.properties.teams:this.properties.members;if(!(rows||[]).some(row=>row.id===id))return;this.close();this.triggerEvent('subjectchange',{kind,id});}}
+});

@@ -1,0 +1,11 @@
+{
+  "product": "Raccoon SalesBuddy Agent Platform",
+  "version": "20260923",
+  "base_version": "Dify 1.17.0 customized",
+  "architecture": "linux/amd64",
+  "installation": "online-fresh-instance",
+  "includes_production_data": false,
+  "includes_model_credentials": false,
+  "business_output_validation": "disabled as in current customized code",
+  "license": "LICENSE-Dify.txt"
+}

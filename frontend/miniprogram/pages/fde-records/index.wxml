@@ -1,0 +1,5 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-dashboard wx:if="{{context}}" records-only record-context="{{context}}" member-id="{{context.member_id}}" />
+
+</block>

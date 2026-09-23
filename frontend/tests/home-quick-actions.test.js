@@ -1,0 +1,50 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+
+test('首页按入口数量布局，三入口拜访居中，两入口使用紧凑布局', () => {
+  const js = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.js', 'utf8');
+  const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.wxml', 'utf8');
+  const wxss = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.wxss', 'utf8');
+  assert.match(wxml, /class="quick-action-bar [^"\n]*three-quick-actions[^"\n]*compact-quick-actions[^"\n]*"/);
+  assert.doesNotMatch(wxml, /class="prompt-scroll"[\s\S]*scroll-x/);
+  assert.match(wxml, /class="quick-action-button action-\{\{item.kind\}\}/);
+  assert.match(wxss, /\.composer-wrap\s*\{[\s\S]*position:\s*fixed/);
+  assert.match(wxss, /\.quick-action-button\.action-visit\{[^}]*border-radius:50%/);
+  assert.match(wxss, /\.quick-action-button\.action-visit\{[^}]*flex:0 0 112rpx/);
+  assert.match(wxss, /\.quick-action-button\.action-visit\{[\s\S]*linear-gradient/);
+  assert.match(wxss, /\.visit-entry-microphone\{[^}]*width:42rpx/);
+  assert.match(wxss, /\.action-visit \.quick-action-label\{display:none\}/);
+  assert.match(wxss, /\.three-quick-actions \.quick-action-button:first-child\{[^}]*margin-right:-56rpx[^}]*radial-gradient\(circle 62rpx at 100% 50%,transparent 60rpx/);
+  assert.match(wxss, /\.three-quick-actions \.quick-action-button:last-child\{[^}]*radial-gradient\(circle 62rpx at 0 50%,transparent 60rpx/);
+  assert.match(wxml, /class="visit-entry-microphone" src="\/images\/icons\/microphone\.svg"/);
+  assert.match(fs.readFileSync(__dirname + '/../miniprogram/images/icons/microphone.svg', 'utf8'), /stroke-linecap="round"/);
+  assert.doesNotMatch(wxml, /class="visit-entry-tag"/);
+  assert.doesNotMatch(wxml, /<text wx:else>＋<\/text>/);
+  assert.doesNotMatch(wxml, /class="quick-action-arrow"/);
+  const quickActions = js.slice(js.indexOf('quickActions: ['), js.indexOf('messages: shouldInitialize'));
+  assert.match(quickActions, /记录客户拜访/);
+  assert.match(quickActions, /客户认领/);
+  assert.match(quickActions, /创建任务/);
+  assert.doesNotMatch(quickActions, /下发新客户/);
+  assert.ok(quickActions.indexOf('客户认领') < quickActions.indexOf('记录客户拜访'));
+  assert.ok(quickActions.indexOf('记录客户拜访') < quickActions.indexOf('创建任务'));
+});
+
+test('首页固定经营摘要并在卡片区域独立滚动，客户认领进入独立页面', () => {
+  const js = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.js', 'utf8');
+  const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.wxml', 'utf8');
+  const wxss = fs.readFileSync(__dirname + '/../miniprogram/pages/index/index.wxss', 'utf8');
+  assert.match(wxml, /class="overview-fixed"[\s\S]*class="brief-card"[\s\S]*<scroll-view class="chat-scroll"/);
+  assert.match(wxss, /\.assistant-page\s*\{[\s\S]*display:\s*flex[\s\S]*overflow:\s*hidden/);
+  assert.match(wxss, /\.chat-scroll\{[^}]*flex:1[^}]*height:0/);
+  assert.match(wxss, /\.brief-card\s*\{[\s\S]*linear-gradient\(125deg,#153b61,#1b639d\)/);
+  assert.match(wxss, /\.metric-num\s*\{[\s\S]*color:\s*#fff/);
+  assert.match(js, /openCustomerClaim\(\)[\s\S]*navigateTo\(\{ url: "\/pages\/customer-claim\/index" \}\)/);
+  assert.doesNotMatch(wxml, /assignment-layer|CUSTOMER CLAIM/);
+  assert.match(js, /homeGreetingShownLogin/);
+  assert.doesNotMatch(js, /dismissLoginGreeting|loginGreetingTimer/);
+  assert.match(js, /sortHomeMessages\(messages, this\.homeOrder\)/);
+  assert.match(js, /time: formatTime\(notification\.created_at, ""\)/);
+  assert.doesNotMatch(wxml, /SALES ASSISTANT · \{\{item\.card\.timeLabel\}\}/);
+});

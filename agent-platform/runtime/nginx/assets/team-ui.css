@@ -1,0 +1,443 @@
+/* Apple website inspired interface. Existing team identity and semantic status colors retained. */
+html[data-theme='light'] {
+  --color-text-primary: #101c28;
+  --color-text-accent: #0080ff;
+  --color-text-accent-secondary: #0882fc;
+  --color-text-accent-light-mode-only: #0080ff;
+  --color-text-text-selected: rgb(0 113 227 / 0.14);
+  --color-state-accent-hover: #e9f4ff;
+  --color-state-accent-hover-alt: #d0e8ff;
+  --color-state-accent-active: rgb(0 113 227 / 0.08);
+  --color-state-accent-active-alt: rgb(0 113 227 / 0.14);
+  --color-state-accent-solid: #0080ff;
+  --color-components-icon-bg-blue-light-solid: #0b7cec;
+  --color-components-icon-bg-blue-solid: #0080ff;
+  --color-components-icon-bg-indigo-solid: #4496e7;
+  --color-components-icon-bg-violet-solid: #3994ee;
+  --color-components-icon-bg-blue-light-soft: #f0f8ff;
+  --color-components-icon-bg-blue-soft: #e9f4ff;
+  --color-components-icon-bg-indigo-soft: #eef7ff;
+  --color-components-icon-bg-violet-soft: #f3f9ff;
+  --color-components-chat-input-audio-bg: #e9f4ff;
+  --color-components-chat-input-audio-wave-default: rgb(0 113 227 / 0.2);
+  --color-components-chat-input-audio-wave-active: #0080ff;
+  --color-components-premium-badge-blue-bg-stop-0: #3098ff;
+  --color-components-premium-badge-blue-bg-stop-100: #0080ff;
+  --color-components-premium-badge-blue-stroke-stop-100: #0080ff;
+  --color-components-premium-badge-blue-text-stop-0: #f5faff;
+  --color-components-premium-badge-blue-text-stop-100: #d0e8ff;
+  --color-components-premium-badge-blue-glow: #0050a0;
+  --color-components-premium-badge-blue-glow-hover: #66b3ff;
+  --color-components-premium-badge-blue-bg-stop-0-hover: #0882fc;
+  --color-components-premium-badge-blue-bg-stop-100-hover: #006fde;
+  --color-components-premium-badge-blue-stroke-stop-100-hover: #0050a0;
+  --color-components-premium-badge-indigo-bg-stop-0: #80bdf9;
+  --color-components-premium-badge-indigo-bg-stop-100: #4496e7;
+  --color-components-premium-badge-indigo-stroke-stop-100: #61aaf3;
+  --color-components-premium-badge-indigo-text-stop-0: #f5faff;
+  --color-components-premium-badge-indigo-text-stop-100: #e0f0ff;
+  --color-components-premium-badge-indigo-glow: #2d5882;
+  --color-components-premium-badge-indigo-glow-hover: #a4d1fd;
+  --color-components-premium-badge-indigo-bg-stop-0-hover: #61aaf3;
+  --color-components-premium-badge-indigo-bg-stop-100-hover: #2d6aa6;
+  --color-components-premium-badge-indigo-stroke-stop-100-hover: #2d6aa6;
+  --color-components-premium-badge-grey-glow: #101c28;
+  --color-components-dropzone-bg-accent: rgb(0 113 227 / 0.14);
+  --color-components-dropzone-border-accent: #66b3ff;
+  --color-components-actionbar-bg-accent: #f5faff;
+  --color-components-actionbar-border-accent: #a0d0ff;
+  --color-components-input-text-filled: #101c28;
+  --color-components-input-text-filled-blue: #0080ff;
+  --color-components-input-border-active-prompt-1: #0b7cec;
+  --color-components-input-border-active-prompt-2: #0080ff;
+  --color-components-progress-brand-progress: #0080ff;
+  --color-components-progress-brand-border: #0080ff;
+  --color-components-progress-brand-bg: rgb(0 113 227 / 0.04);
+  --color-components-progress-bar-progress: rgb(0 113 227 / 0.14);
+  --color-components-progress-bar-progress-highlight: rgb(0 113 227 / 0.2);
+  --color-components-progress-bar-progress-solid: #0080ff;
+  --color-components-progress-bar-bg: rgb(0 113 227 / 0.04);
+  --color-components-button-primary-bg: #0080ff;
+  --color-components-button-primary-bg-hover: #006fde;
+  --color-components-button-primary-bg-disabled: rgb(0 113 227 / 0.14);
+  --color-components-button-secondary-accent-text: #0080ff;
+  --color-components-button-secondary-accent-text-disabled: #a0d0ff;
+  --color-components-button-indigo-bg: #4496e7;
+  --color-components-button-indigo-bg-hover: #3581cd;
+  --color-components-checkbox-bg: #0080ff;
+  --color-components-checkbox-bg-hover: #006fde;
+  --color-components-checkbox-bg-disabled-checked: #a0d0ff;
+  --color-components-radio-border-checked: #0080ff;
+  --color-components-radio-border-checked-hover: #006fde;
+  --color-components-radio-border-checked-disabled: #a0d0ff;
+  --color-components-toggle-bg: #0080ff;
+  --color-components-toggle-bg-hover: #006fde;
+  --color-components-toggle-bg-disabled: #d0e8ff;
+  --color-components-option-card-option-selected-border: #0080ff;
+  --color-components-slider-range: #0080ff;
+  --color-components-menu-item-bg-active: rgb(0 113 227 / 0.08);
+  --color-components-badge-status-light-normal-bg: #3698fa;
+  --color-components-badge-status-light-normal-border-inner: #0b7cec;
+  --color-components-tab-active: #0080ff;
+  --color-components-main-nav-text-active: #0080ff;
+  --color-components-main-nav-nav-button-text-active: #0080ff;
+  --color-components-main-nav-glass-shadow-reflection: rgb(0 113 227 / 0.04);
+  --color-components-main-nav-glass-surface-first: rgb(0 113 227 / 0.08);
+  --color-components-main-nav-glass-surface-middle-1: rgb(0 113 227 / 0.12);
+  --color-components-main-nav-glass-surface-middle-2: rgb(0 113 227 / 0.1);
+  --color-components-main-nav-glass-surface-end: rgb(0 113 227 / 0.08);
+  --color-components-main-nav-glass-edge-reflection-first: rgb(0 113 227 / 0);
+  --color-components-main-nav-glass-edge-reflection-middle: rgb(0 113 227 / 0.6);
+  --color-components-main-nav-glass-edge-reflection-end: rgb(0 113 227 / 0);
+  --color-divider-accent: #e5f2ff;
+  --color-third-party-aws: #14212e;
+  --color-third-party-aws-alt: #0f1a24;
+  --color-saas-dify-blue-static: #0080ff;
+  --color-saas-dify-blue-static-hover: #006fde;
+  --color-saas-dify-blue-accessible: #0080ff;
+  --color-saas-dify-blue-inverted: #0080ff;
+  --color-saas-dify-blue-inverted-dimmed: #0080ff;
+  --color-dify-logo-blue: #0080ff;
+  --color-brand-color-opacity-50: #f3f8fd;
+  --color-brand-color-opacity-100: #e2effb;
+  --color-brand-color-opacity-200: #bad8f5;
+  --color-brand-color-opacity-300: #89bcee;
+  --color-brand-color-opacity-400: #4f9ae5;
+  --color-brand-color-opacity-500: #0080ff;
+  --color-brand-color-opacity-600: #085eb4;
+  --color-brand-color-opacity-700: #074b8e;
+  --color-brand-color-opacity-800: #053769;
+  --color-brand-color-opacity-900: #032342;
+  --color-brand-color-opacity-1000: #021221;
+}
+html[data-theme='dark'] {
+  --color-text-accent: #66b3ff;
+  --color-text-accent-secondary: #3098ff;
+  --color-state-accent-solid: #3098ff;
+  --color-components-icon-bg-blue-light-solid: #0b7cec;
+  --color-components-icon-bg-blue-solid: #0882fc;
+  --color-components-icon-bg-indigo-solid: #4496e7;
+  --color-components-icon-bg-violet-solid: #3994ee;
+  --color-components-icon-bg-blue-soft: rgb(0 113 227 / 0.2);
+  --color-components-chat-input-audio-bg: rgb(0 113 227 / 0.2);
+  --color-components-chat-input-audio-wave-active: #66b3ff;
+  --color-components-premium-badge-blue-bg-stop-0: #3098ff;
+  --color-components-premium-badge-blue-bg-stop-100: #0882fc;
+  --color-components-premium-badge-blue-stroke-stop-100: #0882fc;
+  --color-components-premium-badge-blue-text-stop-0: #e9f4ff;
+  --color-components-premium-badge-blue-text-stop-100: #a0d0ff;
+  --color-components-premium-badge-blue-glow: #006fde;
+  --color-components-premium-badge-blue-glow-hover: #d0e8ff;
+  --color-components-premium-badge-blue-bg-stop-0-hover: #66b3ff;
+  --color-components-premium-badge-blue-bg-stop-100-hover: #006fde;
+  --color-components-premium-badge-blue-stroke-stop-100-hover: #0882fc;
+  --color-components-premium-badge-indigo-bg-stop-0: #61aaf3;
+  --color-components-premium-badge-indigo-bg-stop-100: #3581cd;
+  --color-components-premium-badge-indigo-stroke-stop-100: #4496e7;
+  --color-components-premium-badge-indigo-text-stop-0: #eef7ff;
+  --color-components-premium-badge-indigo-text-stop-100: #c7e3fe;
+  --color-components-premium-badge-indigo-glow: #3581cd;
+  --color-components-premium-badge-indigo-glow-hover: #e0f0ff;
+  --color-components-premium-badge-indigo-bg-stop-0-hover: #a4d1fd;
+  --color-components-premium-badge-indigo-bg-stop-100-hover: #3581cd;
+  --color-components-premium-badge-indigo-stroke-stop-100-hover: #4496e7;
+  --color-components-dropzone-bg-accent: rgb(0 113 227 / 0.2);
+  --color-components-dropzone-border-accent: #66b3ff;
+  --color-components-actionbar-border-accent: #3098ff;
+  --color-components-input-text-filled-blue: #66b3ff;
+  --color-components-input-border-active-prompt-1: #3698fa;
+  --color-components-input-border-active-prompt-2: #0882fc;
+  --color-components-progress-brand-progress: #3098ff;
+  --color-components-progress-brand-border: #3098ff;
+  --color-components-button-primary-bg: #0882fc;
+  --color-components-button-primary-bg-hover: #3098ff;
+  --color-components-button-indigo-bg: #4496e7;
+  --color-components-button-indigo-bg-hover: #61aaf3;
+  --color-components-checkbox-bg: #0882fc;
+  --color-components-checkbox-bg-hover: #3098ff;
+  --color-components-radio-border-checked: #0882fc;
+  --color-components-radio-border-checked-hover: #3098ff;
+  --color-components-toggle-bg: #0882fc;
+  --color-components-toggle-bg-hover: #3098ff;
+  --color-components-option-card-option-selected-border: #3098ff;
+  --color-components-slider-range: #0882fc;
+  --color-components-badge-status-light-normal-bg: #0b7cec;
+  --color-components-badge-status-light-normal-border-inner: #3698fa;
+  --color-components-tab-active: #3098ff;
+  --color-third-party-aws: #14212e;
+  --color-third-party-aws-alt: #192939;
+  --color-saas-dify-blue-static: #0080ff;
+  --color-saas-dify-blue-static-hover: #0882fc;
+  --color-saas-dify-blue-accessible: #0a85ff;
+  --color-brand-color-opacity-50: #021221;
+  --color-brand-color-opacity-100: #032342;
+  --color-brand-color-opacity-200: #053769;
+  --color-brand-color-opacity-300: #074b8e;
+  --color-brand-color-opacity-400: #085eb4;
+  --color-brand-color-opacity-500: #0080ff;
+  --color-brand-color-opacity-600: #4f9ae5;
+  --color-brand-color-opacity-700: #89bcee;
+  --color-brand-color-opacity-800: #bad8f5;
+  --color-brand-color-opacity-900: #e2effb;
+  --color-brand-color-opacity-1000: #f3f8fd;
+}
+aside a[aria-label='Dify'] {display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:148px;text-decoration:none;padding:5px 0;}
+aside a[aria-label='Dify'] > img {display:none;}
+aside a[aria-label='Dify']::before {content:'';display:block;width:146px;height:43px;background:#fff url('/sensetime-logo.png?v=1') center/132px auto no-repeat;border-radius:6px;}
+aside a[aria-label='Dify']::after {content:'Supreme FDE';color:var(--color-text-secondary);font-size:11px;letter-spacing:.6px;font-weight:600;line-height:18px;}
+aside a[href]:not([aria-label='Dify']) {border-radius:6px !important;transition:background .18s,color .18s;}
+aside a[aria-current='page'] {background:linear-gradient(90deg,#d9252a18,#ed6a1910) !important;box-shadow:inset 3px 0 #d9252a !important;color:var(--color-text-accent) !important;}
+button {font-weight:500;transition:background-color .16s,border-color .16s,box-shadow .16s;}
+button[class*='btn'],button[class*='rounded-lg'],button[class*='rounded-xl'] {border-radius:6px !important;}
+button[class*='primary']:not(:disabled):not([class*='tertiary']):not([class*='secondary']) {box-shadow:0 3px 8px #c6202518;}
+input:not([type='checkbox']):not([type='radio']),textarea,[role='combobox'] {border-radius:6px !important;}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible {outline-color:#dd383d !important;}
+[role='dialog'],[role='menu'],[data-base-ui-portal] [role='listbox'] {border-radius:10px !important;}
+main h1,main h2 {letter-spacing:-.5px;font-weight:650;}
+main a[class*='rounded-2xl'],main div[class*='rounded-2xl'][class*='border'] {border-radius:10px !important;}
+#fde-create-workspace {color:var(--color-text-accent) !important;border:1px dashed #d9252a45;margin-top:8px !important;}
+#fde-workspace-dialog {border-radius:10px !important;}
+::selection {background:#ed322b2b;}
+
+aside a[aria-label='Dify'] {height:68px !important;min-height:68px !important;overflow:visible !important;flex-shrink:0 !important;}
+aside a[aria-label='Dify']::before {min-height:43px;flex-shrink:0;}
+aside:has(a[aria-label='Dify']) > div:first-child {min-height:86px;}
+
+/* Sign-in page: same identity as the workspace, scoped to the sign-in route. */
+html.fde-signin .min-h-screen {
+ background:radial-gradient(ellipse at 15% 15%,#ef302014,transparent 50%),radial-gradient(ellipse at 85% 80%,#ffab1810,transparent 45%),#f5f3f1 !important;
+ padding:24px !important;
+}
+html.fde-signin[data-theme='dark'] .min-h-screen {
+ background:radial-gradient(ellipse at 15% 15%,#cf282318,transparent 50%),radial-gradient(ellipse at 85% 80%,#ef731810,transparent 45%),#191717 !important;
+}
+html.fde-signin .min-h-screen > .rounded-2xl {background:transparent !important;border:1px solid #8d726218 !important;border-radius:16px !important;}
+.fde-signin-header {position:relative;min-height:92px;padding:24px 32px !important;}
+.fde-signin-header img[data-fde-signin-logo] {width:152px !important;height:48px !important;object-fit:contain !important;filter:none !important;background:white;padding:5px 7px;border-radius:6px;}
+.fde-signin-header::after {content:'Supreme FDE';position:absolute;left:204px;top:38px;font-size:19px;font-weight:650;letter-spacing:-.45px;color:var(--color-text-primary);padding-left:20px;border-left:1px solid #8d726235;}
+html.fde-signin .md\:w-100 {width:480px !important;max-width:100%;background:var(--color-background-default);border:1px solid #8d726224;border-top:3px solid #da2b2b;border-radius:14px;padding:28px 36px 30px;box-shadow:0 18px 65px #3b15150b;margin:32px 0;}
+html.fde-signin h1 {font-size:27px;line-height:1.3;letter-spacing:-.6px;font-weight:650;}
+html.fde-signin .md\:w-100 > .mt-8 {margin-top:0;}
+html.fde-signin input:not([type='checkbox']) {min-height:44px;background:transparent !important;box-shadow:none;}
+html.fde-signin input:-webkit-autofill {-webkit-box-shadow:0 0 0 1000px var(--color-components-input-bg-normal) inset !important;-webkit-text-fill-color:var(--color-text-primary);caret-color:var(--color-text-primary);}
+html.fde-signin button[type='submit'] {min-height:44px;border-radius:7px !important;font-size:15px;letter-spacing:.5px;}
+html.fde-signin button[type='submit']:not(:disabled) {background:linear-gradient(110deg,#c9242a,#e1392a) !important;color:#fff !important;box-shadow:0 5px 16px #d9252a20;}
+@media(max-width:640px){
+ .fde-signin-header{padding:18px !important;min-height:104px;align-items:flex-start !important;}
+ .fde-signin-header img[data-fde-signin-logo]{width:125px !important;height:40px !important;}
+ .fde-signin-header::after{left:18px;top:64px;font-size:13px;border:0;padding:0;}
+ html.fde-signin .min-h-screen{padding:10px !important;}
+ html.fde-signin .md\:w-100{padding:24px 20px;}
+ html.fde-signin h1{font-size:23px;}
+}
+
+/* Account and nested account settings share this header. */
+html.fde-account a[aria-label='Dify'][href='/apps'] {display:flex;align-items:center;gap:12px;min-width:0;text-decoration:none;}
+html.fde-account a[aria-label='Dify'][href='/apps'] > img {display:none;}
+html.fde-account a[aria-label='Dify'][href='/apps']::before {content:'';display:block;width:108px;height:36px;flex-shrink:0;background:#fff url('/sensetime-logo.png?v=1') center/98px auto no-repeat;border-radius:5px;}
+html.fde-account a[aria-label='Dify'][href='/apps']::after {content:'Supreme FDE';font-size:15px;line-height:22px;font-weight:650;letter-spacing:-.4px;color:var(--color-text-primary);white-space:nowrap;}
+@media(max-width:640px){html.fde-account a[aria-label='Dify'][href='/apps']{gap:6px;}html.fde-account a[aria-label='Dify'][href='/apps']::before{width:76px;background-size:68px auto;}html.fde-account a[aria-label='Dify'][href='/apps']::after{font-size:10px;white-space:normal;max-width:64px;line-height:13px;}}
+
+/* First paint: never expose the source brand while deferred enhancements start. */
+html.fde-signin img[src='/logo/logo.svg']:not([data-fde-signin-logo]) {visibility:hidden !important;}
+html.fde-signin h1:not([data-fde-brand-ready]) {visibility:hidden;}
+/* Match the workspace picker width inside the sidebar's padded container. */
+#fde-create-workspace {margin:8px 0 8px !important;width:100%;box-sizing:border-box;min-height:38px;padding:8px 12px !important;text-align:left;border-radius:8px;}
+
+/* Unified Apple-inspired visual system. */
+html[data-theme='light'] {
+ --color-text-primary:#1d1d1f;--color-text-secondary:#424245;--color-text-tertiary:#6e6e73;
+ --color-text-placeholder:#86868b;--color-text-accent:#0066cc;--color-text-accent-secondary:#0071e3;
+ --color-background-body:#f5f5f7;--color-background-default:#fff;--color-background-default-subtle:#fff;
+ --color-background-default-burn:#f5f5f7;--color-background-section:#fafafa;--color-background-section-burn:#f5f5f7;
+ --color-background-sidenav-bg:rgba(250,250,252,.88);
+ --color-components-input-bg-normal:#f5f5f7;--color-components-input-bg-hover:#ededf0;
+ --color-components-input-bg-active:#fff;--color-components-input-border-active:#0071e3;
+ --color-components-button-primary-bg:#0071e3;--color-components-button-primary-bg-hover:#0077ed;
+ --color-components-button-primary-text:#fff;--color-components-button-primary-bg-disabled:#dceaf7;
+ --color-components-button-primary-text-disabled:#59738e;
+ --color-components-button-secondary-bg:#fff;--color-components-button-secondary-bg-hover:#f5f5f7;
+ --color-components-button-secondary-border:#d2d2d7;--color-components-button-secondary-text:#1d1d1f;
+ --color-state-accent-active:rgba(0,113,227,.08);--color-state-accent-hover:#eaf3fc;
+}
+html[data-theme='dark'] {
+ --color-text-primary:#f5f5f7;--color-text-secondary:#d2d2d7;--color-text-tertiary:#a1a1a6;
+ --color-text-accent:#2997ff;--color-text-accent-secondary:#2997ff;
+ --color-background-body:#000;--color-background-default:#1d1d1f;--color-background-default-subtle:#1d1d1f;
+ --color-background-default-burn:#000;--color-background-section:#161617;--color-background-section-burn:#232325;
+ --color-background-sidenav-bg:rgba(22,22,23,.9);
+ --color-components-input-bg-normal:#2c2c2e;--color-components-input-bg-hover:#363638;
+ --color-components-input-border-active:#2997ff;
+ --color-components-button-primary-bg:#0071e3;--color-components-button-primary-bg-hover:#0077ed;
+ --color-components-button-primary-bg-disabled:#173553;--color-components-button-primary-text-disabled:#839ab0;
+ --color-state-accent-active:rgba(41,151,255,.13);--color-state-accent-hover:#162c40;
+}
+html,body,button,input,textarea,select {font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue','PingFang SC','Microsoft YaHei',sans-serif;}
+body {-webkit-font-smoothing:antialiased;}
+aside {background:var(--color-background-sidenav-bg) !important;border-right:1px solid #86868b22 !important;}
+/* DetailSidebarFrame's collapsed hover panel uses z-40 outside the rail.
+   A backdrop-filter on its aside traps that panel beneath the main content.
+   Keep glass on the primary navigation, not the detail sidebar container. */
+aside:has(a[aria-label='Dify']) {backdrop-filter:blur(22px) saturate(150%);}
+aside a[aria-current='page'] {background:var(--color-state-accent-active) !important;color:var(--color-text-accent) !important;box-shadow:none !important;}
+aside a[href]:not([aria-label='Dify']) {border-radius:10px !important;min-height:38px;}
+aside a[aria-label='Dify']::after {letter-spacing:.15px;font-weight:600;font-size:12px;}
+button {letter-spacing:-.15px;transition:background-color .18s,box-shadow .18s,transform .18s;}
+button[class*='rounded-lg'],button[class*='rounded-xl'],button[class*='btn'] {border-radius:12px !important;}
+button[class*='bg-components-button-primary'],button[class*='bg-components-button-secondary'] {border-radius:999px !important;padding-inline:18px;}
+button[class*='primary']:not(:disabled):not([class*='tertiary']):not([class*='secondary']) {box-shadow:none;}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible {outline:3px solid #0071e366 !important;outline-offset:2px;}
+input:not([type='checkbox']):not([type='radio']),textarea,[role='combobox'] {border-radius:12px !important;}
+[role='dialog'],[role='menu'],[data-base-ui-portal] [role='listbox'] {border-radius:18px !important;}
+#main-content h1 {font-weight:650;letter-spacing:-1.1px;font-size:32px;line-height:1.22;}
+#main-content h2 {font-weight:600;letter-spacing:-.6px;}
+/* Cards only; leave workflow geometry and the canvas controls intact. */
+[aria-label='模板'] > div,[aria-label='工作室'] > div:has(> a),[aria-label='最近'] > a {border-radius:22px !important;}
+[aria-label='模板'] > div {border:1px solid #86868b12 !important;box-shadow:0 3px 16px #00000005;transition:box-shadow .2s,transform .2s;}
+[aria-label='模板'] > div:hover {box-shadow:0 10px 30px #0000000b;transform:translateY(-2px);}
+#fde-create-workspace {border:1px solid #86868b35 !important;background:var(--color-background-default);color:var(--color-text-accent) !important;border-radius:12px !important;min-height:40px;}
+#fde-create-workspace:hover {background:var(--color-state-accent-active) !important;}
+#fde-workspace-dialog {border-radius:24px !important;box-shadow:0 24px 80px #0003 !important;}
+#fde-workspace-dialog button[type='submit'] {background:#0071e3 !important;border-radius:999px !important;}
+html.fde-signin .min-h-screen {background:#f5f5f7 !important;}
+html.fde-signin[data-theme='dark'] .min-h-screen {background:#000 !important;}
+html.fde-signin .min-h-screen > .rounded-2xl {border:none !important;}
+html.fde-signin .md\:w-100 {border:1px solid #86868b18 !important;border-radius:28px !important;padding:40px !important;box-shadow:0 20px 65px #00000008 !important;}
+html.fde-signin h1 {font-size:30px;letter-spacing:-.8px;font-weight:650;}
+html.fde-signin button[type='submit'] {border-radius:999px !important;min-height:46px;letter-spacing:0;}
+html.fde-signin button[type='submit']:not(:disabled) {background:#0071e3 !important;box-shadow:none !important;}
+html.fde-signin button[type='submit']:not(:disabled):hover {background:#0077ed !important;}
+.fde-signin-header::after {letter-spacing:-.5px;font-weight:600;}
+::selection {background:#0071e32b;}
+@media(max-width:640px){html.fde-signin .md\:w-100{padding:26px !important;border-radius:22px !important;}#main-content h1{font-size:26px;}html.fde-signin h1{font-size:24px;}}
+@media(prefers-reduced-motion:reduce){button,[aria-label='模板']>div{transition:none !important;transform:none !important;}}
+/* Home cards use labelled sections, independent of the selected language. */
+section[aria-labelledby='home-templates-title'] {gap:18px !important;}
+section[aria-labelledby='home-templates-title'] > div {height:176px;border-radius:22px !important;border:1px solid #86868b12 !important;box-shadow:0 3px 16px #00000005;transition:box-shadow .2s,transform .2s;}
+section[aria-labelledby='home-templates-title'] > div:hover {box-shadow:0 10px 30px #0000000b;transform:translateY(-2px);}
+section[aria-labelledby='home-templates-title'] > div > button {border-radius:22px !important;}
+section[aria-labelledby='home-templates-title'] > div > div:first-of-type {padding:22px 22px 12px;}
+section[aria-labelledby='continue-work-title'] > div:last-child {gap:18px !important;}
+section[aria-labelledby='continue-work-title'] > div:last-child > * {border-radius:20px !important;}
+@media(prefers-reduced-motion:reduce){section[aria-labelledby='home-templates-title'] > div{transition:none !important;transform:none !important;}}
+
+/* Text-only Super FDE identity; applied by the render-blocking theme. */
+img[src*='sensetime-logo.png'],img[data-fde-signin-logo] {display:none !important;}
+aside a[aria-label='Dify']::before,html.fde-account a[aria-label='Dify'][href='/apps']::before {content:none !important;display:none !important;}
+aside a[aria-label='Dify'] {height:40px !important;min-height:40px !important;justify-content:center;gap:0;padding:0;}
+aside a[aria-label='Dify']::after {font-size:18px;line-height:24px;letter-spacing:-.55px;color:var(--color-text-primary);font-weight:650;}
+aside:has(a[aria-label='Dify']) > div:first-child {min-height:64px;}
+.fde-signin-header {justify-content:flex-end !important;}
+.fde-signin-header::after {left:32px;top:34px;padding-left:0;border:0;font-size:22px;}
+html.fde-account a[aria-label='Dify'][href='/apps']::after {font-size:18px;max-width:none;white-space:nowrap;}
+@media(max-width:640px){.fde-signin-header::after{left:18px;top:27px;font-size:17px;}html.fde-account a[aria-label='Dify'][href='/apps']::after{font-size:14px;line-height:20px;}}
+
+/* Raccoon SalesBuddy identity, supplied by the platform owner. */
+aside a[aria-label='Dify']::after,
+html.fde-account a[aria-label='Dify'][href='/apps']::after,
+.fde-signin-header::after {
+  content:'' !important;
+  display:block !important;
+  background:#fff url('/raccoon-salesbuddy.png?v=20260914') center / 112% auto no-repeat !important;
+  width:200px !important;
+  height:46px !important;
+  min-height:46px !important;
+  max-width:none !important;
+  border:0 !important;
+  border-radius:8px;
+  padding:0 !important;
+  flex-shrink:0;
+}
+aside a[aria-label='Dify'] {min-width:200px !important;height:48px !important;min-height:48px !important;}
+.fde-signin-header::after {width:300px !important;height:66px !important;left:32px;top:18px;}
+@media(max-width:640px){.fde-signin-header::after{width:210px !important;height:48px !important;left:18px;top:18px;}}
+aside a[aria-label='Dify'] {min-width:160px !important;}
+aside a[aria-label='Dify']::after {width:160px !important;height:40px !important;min-height:40px !important;}
+
+/* Raccoon palette: navy identity with cool neutral surfaces. */
+html[data-theme='light'] {
+ --color-text-primary:#1b2b45;--color-text-secondary:#42516a;--color-text-tertiary:#6e7b90;
+ --color-text-accent:#1b2b45;--color-text-accent-secondary:#344f74;
+ --color-background-body:#f3f5f8;--color-background-default:#fff;--color-background-default-subtle:#f9fafc;
+ --color-background-default-burn:#eef2f6;--color-background-section:#f8fafc;--color-background-section-burn:#edf1f6;
+ --color-background-sidenav-bg:rgba(246,248,251,.96);
+ --color-components-input-bg-normal:#eef2f6;--color-components-input-bg-hover:#e7ecf2;
+ --color-components-input-bg-active:#fff;--color-components-input-border-active:#526d93;
+ --color-components-button-primary-bg:#1b2b45;--color-components-button-primary-bg-hover:#2e4465;
+ --color-components-button-primary-text:#fff;--color-components-button-primary-bg-disabled:#e0e5ed;--color-components-button-primary-text-disabled:#78859a;
+ --color-components-button-secondary-bg:#fff;--color-components-button-secondary-bg-hover:#edf1f6;
+ --color-components-button-secondary-border:#d6deea;--color-components-button-secondary-text:#1b2b45;
+ --color-state-accent-solid:#344f74;--color-state-accent-active:#e5ebf3;--color-state-accent-hover:#edf1f7;
+ --color-divider-subtle:#e6ebf2;--color-divider-regular:#d6deea;
+}
+html[data-theme='dark'] {
+ --color-text-primary:#edf2fa;--color-text-secondary:#c3cede;--color-text-tertiary:#96a6bd;
+ --color-text-accent:#b4c9e8;--color-text-accent-secondary:#a5bfdf;
+ --color-background-body:#0e1623;--color-background-default:#192438;--color-background-default-subtle:#1d2a40;
+ --color-background-default-burn:#111c2c;--color-background-section:#152033;--color-background-section-burn:#1d2b41;
+ --color-background-sidenav-bg:rgba(17,27,43,.97);
+ --color-components-input-bg-normal:#243249;--color-components-input-bg-hover:#2e3e58;
+ --color-components-input-bg-active:#1d2a40;--color-components-input-border-active:#90accf;
+ --color-components-button-primary-bg:#aec4e2;--color-components-button-primary-bg-hover:#c6d7ed;
+ --color-components-button-primary-text:#142238;--color-components-button-primary-bg-disabled:#29374c;--color-components-button-primary-text-disabled:#8392a9;
+ --color-components-button-secondary-bg:#202e44;--color-components-button-secondary-bg-hover:#2c3c56;
+ --color-components-button-secondary-border:#3b4d68;--color-components-button-secondary-text:#dce6f5;
+ --color-state-accent-solid:#9db8dc;--color-state-accent-active:#2a3b55;--color-state-accent-hover:#22334c;
+ --color-divider-subtle:#2a3850;--color-divider-regular:#3a4a64;
+}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible {outline-color:#7896bb88 !important;}
+#fde-workspace-dialog button[type='submit'],html.fde-signin button[type='submit']:not(:disabled) {background:var(--color-components-button-primary-bg) !important;color:var(--color-components-button-primary-text) !important;}
+html.fde-signin button[type='submit']:not(:disabled):hover {background:var(--color-components-button-primary-bg-hover) !important;}
+html.fde-signin .min-h-screen,html.fde-signin[data-theme='dark'] .min-h-screen {background:var(--color-background-body) !important;}
+::selection {background:#7896bb55;}
+
+/* Give the brand its own row, with the existing search control below. */
+aside div:has(> a[aria-label='Dify']) {
+ flex-direction:column !important;align-items:stretch !important;
+ gap:8px !important;padding:18px 16px 12px !important;
+}
+aside a[aria-label='Dify'] {
+ width:100% !important;min-width:0 !important;height:64px !important;min-height:64px !important;
+ border-radius:12px;align-items:stretch !important;
+}
+aside a[aria-label='Dify']::after {
+ width:100% !important;height:64px !important;min-height:64px !important;
+ background-size:100% auto !important;border-radius:12px;
+}
+aside div:has(> a[aria-label='Dify']) > button {
+ align-self:flex-end;margin-right:0;
+}
+
+/* Transparent supplied artwork, 2026-09-15. Native theme selects color before paint. */
+html {
+ --raccoon-sidebar:url('/brand-assets/raccoon-salesbuddy-horizontal-navy-sidebar.svg');
+ --raccoon-horizontal:url('/brand-assets/raccoon-salesbuddy-horizontal-navy-transparent.svg');
+}
+html[data-theme='dark'] {
+ --raccoon-sidebar:url('/brand-assets/raccoon-salesbuddy-horizontal-white-sidebar.svg');
+ --raccoon-horizontal:url('/brand-assets/raccoon-salesbuddy-horizontal-white-transparent.svg');
+}
+@media(prefers-color-scheme:dark){html:not([data-theme='light']):not([data-theme='dark']) {
+ --raccoon-sidebar:url('/brand-assets/raccoon-salesbuddy-horizontal-white-sidebar.svg');
+ --raccoon-horizontal:url('/brand-assets/raccoon-salesbuddy-horizontal-white-transparent.svg');
+}}
+aside a[aria-label='Dify'],html.fde-account a[aria-label='Dify'][href='/apps'],.fde-signin-header {
+ background-color:transparent !important;box-shadow:none !important;
+}
+aside a[aria-label='Dify']::after,
+html.fde-account a[aria-label='Dify'][href='/apps']::after,
+.fde-signin-header::after {
+ background:transparent var(--raccoon-sidebar) center / contain no-repeat !important;
+ border-radius:0 !important;box-shadow:none !important;border:0 !important;
+}
+aside a[aria-label='Dify'] {height:52px !important;min-height:52px !important;}
+aside a[aria-label='Dify']::after {height:52px !important;min-height:52px !important;}
+html.fde-account a[aria-label='Dify'][href='/apps']::after {width:220px !important;height:46px !important;}
+.fde-signin-header::after {
+ background-image:var(--raccoon-horizontal) !important;
+ width:340px !important;height:110px !important;min-height:0 !important;top:0 !important;
+}
+@media(max-width:640px){
+ .fde-signin-header::after {width:230px !important;height:75px !important;top:0 !important;}
+ html.fde-account a[aria-label='Dify'][href='/apps']::after {width:175px !important;height:36px !important;min-height:36px !important;}
+}

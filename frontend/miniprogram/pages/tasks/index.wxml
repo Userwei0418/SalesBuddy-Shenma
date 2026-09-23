@@ -1,0 +1,48 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{completedYear}}" class="fde-note">已完成记录按 {{completedYear}} 年{{completedQuarters.length?'所选季度':'全年'}}筛选；未完成任务为当前状态。</view>
+<view wx:if="{{isFde && canViewTeam}}" class="fde-note"><text data-view="self" bindtap="changeTaskView">{{taskView==='self'?'✓ ':''}}本人任务</text>　<text data-view="team" bindtap="changeTaskView">{{taskView==='team'?'✓ ':''}}团队任务</text></view><view wx:if="{{loadError}}" class="access-empty" bindtap="loadTasks">{{loadError}} · 点击重试</view>
+<view class="tasks-page">
+  <view class="tasks-hero">
+    <view class="hero-eyebrow">TASK CENTER · {{scope}}</view>
+    <view class="hero-title">{{opportunityOnly ? '商机待办' : overviewTitle || '我的待办'}}</view>
+    <view class="hero-subtitle">{{opportunityOnly ? '待办项均绑定商机，可直接返回查看商机卡片' : overviewDescription || '每一项都可进入详情、追踪状态并反馈完成结果'}}</view>
+    <view wx:if="{{overviewFilter}}" class="hero-subtitle">{{loading ? '正在同步任务…' : loadError ? '任务数量暂未加载' : '共 ' + filteredTotal + ' 项任务'}}</view>
+    <view wx:else class="hero-stats"><view><text>{{loading || loadError ? '—' : pendingCount}}</text><label>未完成</label></view><view><text>{{loading || loadError ? '—' : completedCount}}</text><label>已完成</label></view><view><text>{{loading || loadError ? '—' : totalCount}}</text><label>全部任务</label></view></view>
+  </view>
+
+  <view wx:if="{{!overviewFilter}}" class="task-tabs">
+    <view wx:for="{{tabs}}" wx:key="key" class="task-tab {{activeTab === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}<text wx:if="{{item.key === 'pending'}}">{{pendingCount}}</text></view>
+  </view>
+
+  <view class="sort-toolbar">
+    <view class="sort-row">
+      <text class="sort-count">{{loading ? '加载中…' : loadError ? '加载未完成' : '共 ' + filteredTotal + ' 项'}}</text>
+      <picker mode="selector" range="{{sortOptions}}" range-key="label" value="{{sortIndex}}" bindchange="changeSort">
+        <view class="sort-select"><text>{{sortOptions[sortIndex].label}}</text><view class="sort-chevron"></view></view>
+      </picker>
+    </view>
+    <view class="sort-hint">{{sortOptions[sortIndex].hint}}</view>
+  </view>
+
+  <view wx:if="{{filteredTasks.length}}" class="task-list">
+    <view wx:for="{{filteredTasks}}" wx:key="id" class="task-card status-{{item.status}} traffic-{{item.signal.tone}}" data-id="{{item.id}}" bindtap="openTask">
+      <view class="task-stripe"></view>
+      <view class="task-main">
+        <view class="task-top"><view class="task-status traffic-badge traffic-{{item.signal.tone}}"><text></text>{{item.signal.label}} · {{item.statusLabel}}</view><view class="priority priority-{{item.priorityClass}}">{{item.priority}}</view></view>
+        <view class="task-title">{{item.title}}</view>
+        <view class="task-description">{{item.description}}</view>
+        <view wx:if="{{item.opportunityId}}" class="task-opportunity" data-customer-id="{{item.customerId}}" data-opportunity-id="{{item.opportunityId}}" catchtap="openOpportunity"><view><text>关联商机</text><label>{{item.opportunityName || '查看对应商机'}}</label></view><text>查看商机 ›</text></view>
+        <view class="task-meta"><view><text>负责人</text><label>{{item.owner}}</label></view><view><text>{{item.status === 'completed' ? '完成时间' : '截止时间'}}</text><label>{{item.status === 'completed' ? item.completedLabel : item.dueLabel}}</label></view></view>
+        <view class="task-source"><text>{{item.customer}}</text><label>{{item.sourceLabel}}</label><view>查看详情 ›</view></view>
+      </view>
+    </view>
+  </view>
+  <view wx:elif="{{!loadError}}" class="empty-state"><view>{{loading ? '…' : '✓'}}</view><text>{{loading ? '正在同步任务' : overviewEmptyTitle || (activeTab === 'pending' ? '当前没有未完成任务' : '暂无对应任务')}}</text><label>{{overviewFilter ? '任务更新后，返回页面即可查看最新结果' : '新的任务会自动同步到这里'}}</label></view>
+  <view wx:if="{{loadingMore}}" class="task-pagination">正在加载下一页…</view>
+  <view wx:elif="{{moreError}}" class="task-pagination"><text>{{moreError}}</text><button size="mini" bindtap="loadMore">重试下一页</button></view>
+  <view wx:elif="{{hasMore}}" class="task-pagination"><button size="mini" bindtap="loadMore">加载更多</button></view>
+  <view wx:elif="{{filteredTasks.length && !loading}}" class="task-pagination">已显示全部 {{filteredTotal}} 项</view>
+</view>
+
+</block>

@@ -1,0 +1,97 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<block>
+<view class="page-shell profile-page">
+  <view class="profile-content">
+  <view class="profile-card surface">
+    <view class="avatar">{{initial}}</view><view class="profile-main"><view class="name">{{userName}}</view><view class="meta">{{roleName}} · {{team}}</view></view><view class="status"><text></text> 已登录</view>
+  </view>
+  <view class="profile-insight-tabs surface">
+    <view wx:for="{{profileTabs}}" wx:key="key" class="{{activeProfileTab === item.key ? 'active' : ''}}" data-tab="{{item.key}}" bindtap="selectProfileTab">{{item.label}}</view>
+  </view>
+  <view wx:if="{{role !== 'sales' && !isFde}}" class="profile-subject-controls"><profile-scope-picker modes="{{profileScopeOptions}}" mode="{{profileScopeMode}}" members="{{scopeMembers}}" teams="{{scopeTeams}}" member-id="{{profileSelectedMemberId}}" team-id="{{profileTeamId}}" label="{{profileScopeLabel}}" bind:modechange="selectProfileScope" bind:subjectchange="changeProfileSubject" bind:visibilitychange="profilePickerVisibility"/></view>
+  <view wx:if="{{isFdeLead}}" class="profile-subject-controls"><profile-scope-picker modes="{{fdeScopeModes}}" mode="{{fdeProfileScope==='team'?'team':'person'}}" members="{{fdeScopeMembers}}" teams="{{fdeScopeTeams}}" team-id="{{fdeTeamId}}" member-id="{{fdeMemberId || ownUserId}}" label="{{fdeProfileScope==='team'?fdeTeamLabel:fdeMemberName || userName+'（本人）'}}" bind:modechange="changeFdeScopeMode" bind:subjectchange="changeFdeScopeSubject" bind:visibilitychange="profilePickerVisibility"/><view wx:if="{{fdeMembersError}}" class="subject-loading subject-error" bindtap="loadFdeMembers">{{fdeMembersError}}</view></view>
+
+  <view wx:if="{{!isFde && (directoryLoading || directoryError)}}" class="profile-directory-state surface">
+    <view wx:if="{{directoryLoading}}" class="profile-directory-loading">正在加载查看范围…</view>
+    <button wx:else class="profile-directory-retry" bindtap="loadProfileDirectory" hover-class="none">{{directoryError}} · 点击重试</button>
+  </view>
+  <view wx:if="{{organizationError && (!isFde || activeProfileTab==='efficiency')}}" class="growth-loading" bindtap="retryEfficiency">{{organizationError}} · 点击重试</view>
+  <view wx:if="{{!isFde && performanceError}}" class="growth-loading" bindtap="loadProfilePerformance">{{performanceError}} · 点击重试</view>
+  <view wx:elif="{{!isFde && performanceLoading}}" class="growth-loading">正在更新所选范围的经营数据</view>
+  <view wx:if="{{!isFde && !directoryLoading && !directoryError && activeProfileTab === 'maturity'}}" class="maturity-card surface">
+    <view class="insight-card-top">
+      <view><view class="capability-title">{{isFde ? '我的项目成效' : role === 'sales' ? maturityScopeLabel : profileScopeLabel + ' · 经营事实'}}</view></view>
+      <view class="overall-score module-total traffic-surface-{{maturityScoreInfo.signal.tone || 'gray'}}" data-kind="maturity" bindtap="showScoreRule"><view><text>{{maturityScore}}</text><label>分</label></view><label>{{maturityScoreInfo.signal.label || '待评估'}} · 总分 / 100 ⓘ</label></view>
+    </view>
+    <view wx:if="{{organizationLoading && !organizationReady}}" class="growth-loading"><view></view><text>{{isFde ? '正在汇总项目成效' : '正在汇总营销成熟度'}}</text></view>
+    <block wx:if="{{organizationReady}}">
+      <quarter-target id="salesQuarterTarget" scope="{{targetQueryScope}}" subject-id="{{targetQueryMemberId}}" team-id="{{profileTeamId}}" subject-label="{{profileScopeLabel}}" year="{{targetYear}}" quarter="{{targetQuarter}}" editable="{{canEditSalesTarget}}" context-key="{{targetContextKey}}" bind:saved="targetsSaved"/>
+      <view class="performance-board">
+        <view wx:for="{{performanceBoard}}" wx:key="kind" class="performance-metric">
+          <view class="performance-metric-head"><text>{{item.name}}</text><label>{{item.rateText}}</label></view>
+          <view class="performance-completed"><label>当季度已登记</label><text>{{item.completedText}}</text></view>
+          <view class="performance-target"><view><label>{{item.targetLabel}}</label><text>{{item.targetText}}</text></view></view>
+          <view class="performance-track"><view style="width:{{item.progress}}%"></view></view>
+        </view>
+      </view>
+      <view class="maturity-facts">
+        <view wx:for="{{maturityFacts}}" wx:key="key" class="maturity-fact {{index === 2 ? 'wide' : ''}}"><text>{{item.name}}</text><view>{{item.value}}</view><label>{{item.detail}}</label></view>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{activeProfileTab === 'efficiency' && (isFde || (!directoryLoading && !directoryError))}}" class="efficiency-card surface">
+    <view class="insight-card-top">
+      <view><view class="capability-title">{{isFde ? (fdeProfileScope==='team'?'团队协作效率':fdeMemberName?fdeMemberName+' · 协作效率':'我的协作效率') : role === 'sales' ? '我的营销效率' : profileScopeLabel + ' · 营销效率'}}</view></view>
+      <view class="overall-score module-total traffic-surface-{{efficiencyScoreInfo.signal.tone || 'gray'}}" data-kind="efficiency" bindtap="showScoreRule"><view><text>{{efficiencyScore}}</text><label>分</label></view><label>{{efficiencyScoreInfo.signal.label || '待评估'}} · 总分 / 100 ⓘ</label></view>
+    </view>
+    <view wx:if="{{organizationLoading && !organizationReady}}" class="growth-loading"><view></view><text>正在统计跟进效率</text></view>
+    <block wx:if="{{organizationReady}}">
+      <view class="metric-switch {{isFde ? 'fde-metric-switch' : ''}}"><view wx:for="{{efficiencyMetrics}}" wx:key="key" class="{{efficiencyMetric === item.key ? 'active' : ''}}" data-metric="{{item.key}}" bindtap="selectEfficiencyMetric">{{item.label}}</view></view>
+      <view class="period-switch"><view wx:for="{{efficiencyPeriods}}" wx:key="key" class="{{efficiencyPeriod === item.key ? 'active' : ''}}" data-period="{{item.key}}" bindtap="selectEfficiencyPeriod">{{item.label}}</view></view>
+      <view wx:if="{{!isFde && efficiencyMetric !== 'followup'}}" class="efficiency-ratio-card"><view class="ratio-title">{{efficiencyRatio.label}}</view><view class="ratio-value">{{efficiencyRatio.value}}</view><view class="ratio-track"><view style="width:{{efficiencyRatio.progress}}%"></view></view><view class="ratio-details"><text>{{efficiencyRatio.detail}}</text><text wx:if="{{efficiencyRatio.coverage}}" class="ratio-coverage">{{efficiencyRatio.coverage}}</text></view></view>
+      <block wx:else><view class="efficiency-summary"><view class="efficiency-summary-label"><text>{{efficiencyMetric==='opportunities'?'参与商机':efficiencyMetric==='demo'?'Demo 数量':'跟进次数'}}</text><label>{{efficiencyAggregateLabel}}</label></view><view class="efficiency-summary-value"><text>{{efficiencyTotal}}</text><label>{{efficiencyUnit}}</label></view></view>
+      <view wx:if="{{!isFde}}" class="followup-quality"><text>跟进记录平均分</text><text>{{efficiencySecondaryValue}}</text></view>
+      <view wx:if="{{isFde && efficiencyRanking.length}}" class="ranking-list"><view wx:for="{{efficiencyRanking}}" wx:key="user_id" class="ranking-item {{item.isSelected?'self':''}}"><view class="ranking-position rank-{{item.rank}}">{{item.rank}}</view><view class="ranking-person"><view><text>{{item.name}}</text><label>{{item.meta}}</label></view><view class="ranking-track"><view style="width:{{item.barWidth}}%"></view></view></view><view class="ranking-value"><text>{{item.value}}</text><label>{{efficiencyUnit}}</label></view></view></view></block>
+      <view class="efficiency-window">{{isFde?fdeEfficiencyNote:efficiencyWindowLabel}}</view>
+
+    </block>
+  </view>
+
+  <fde-profile charts-hidden="{{scopePickerOpen}}" wx:if="{{isFde && activeProfileTab!=='efficiency'}}" embedded identity-key="{{viewerIdentity}}" profile-scope="{{fdeProfileScope}}" selected-team-id="{{fdeTeamId}}" selected-member-id="{{fdeProfileScope==='self'?fdeMemberId:''}}" selected-member-name="{{fdeProfileScope==='self'?fdeMemberName:''}}" section="{{activeProfileTab}}" user-name="{{userName}}" role-name="{{roleName}}" team="{{team}}" account="{{account}}" initial="{{initial}}" />
+  <block wx:if="{{activeProfileTab === 'profile' && !isFde && !directoryLoading && !directoryError}}">
+    <view class="capability-card surface profile-capability-card">
+      <view class="capability-top">
+        <view><view class="capability-title">{{(role === 'sales' || isFde) ? '六维能力画像' : profileScopeLabel + ' · 六维能力画像'}}</view></view>
+        <view class="overall-score module-total traffic-surface-{{profileScoreInfo.signal.tone || 'gray'}}" data-kind="profile" bindtap="showScoreRule"><view><text>{{overallScore}}</text><label>分</label></view><label>{{profileScoreInfo.signal.label || '待评估'}} · 总分 / 100 ⓘ</label></view>
+      </view>
+      <view wx:if="{{!growthLoading && !growthReady}}" class="profile-empty">{{growthStatusText}}</view>
+      <view wx:if="{{growthLoading && !growthReady}}" class="growth-loading"><view></view><text>{{growthStatusText}}</text></view>
+      <block wx:if="{{growthReady}}">
+        <canvas wx:if="{{!scopePickerOpen}}" canvas-id="abilityRadar" class="radar-canvas"></canvas><view wx:else class="radar-canvas"/>
+        <view class="review-summary">{{reviewSummary}}</view>
+        <view class="review-meta"><text>{{growthStatusText}}</text><label>近30天 {{visitCount}} 次拜访 · {{reviewDate}}</label></view>
+        <view class="dimension-grid">
+          <view wx:for="{{dimensions}}" wx:key="code" class="dimension-item"><view><text>{{item.name}}</text><label class="traffic-text-{{item.signal.tone}}">{{item.score}} · {{item.signal.label}}</label></view><view class="score-track"><view class="traffic-fill-{{item.signal.tone}}" style="width:{{item.score === '--' ? 0 : item.score}}%"></view></view><text>{{item.coachingAction}}</text></view>
+        </view>
+        <view class="ai-advice-card"><view class="ai-advice-head"><view>AI</view><view><text>资深销售教练建议</text><label>围绕六项能力给出提升方法</label></view><view class="readonly">只读</view></view><view class="ai-advice-list"><view wx:for="{{aiAdvice}}" wx:key="*this"><text>{{index + 1}}</text><label>{{item}}</label></view></view></view>
+      </block>
+    </view>
+    <view wx:if="{{!profileNotApplicable && (role === 'sales' || profileScopeMode === 'person')}}" class="section-title capability-heading"><text>个人成长曲线</text><label>近30天</label></view>
+    <view wx:if="{{!profileNotApplicable && (role === 'sales' || profileScopeMode === 'person')}}" class="growth-card surface">
+      <scroll-view class="growth-tabs" scroll-x enhanced show-scrollbar="false"><view class="growth-tab-list"><view wx:for="{{growthOptions}}" wx:key="code" class="growth-tab {{selectedGrowthCode === item.code ? 'selected' : ''}}" data-code="{{item.code}}" bindtap="selectGrowthDimension">{{item.name}}</view></view></scroll-view>
+      <view class="growth-chart-head"><view>{{selectedGrowthName}}变化</view><text>{{history.length}} 个每日快照</text></view>
+      <block wx:if="{{growthReady}}"><canvas wx:if="{{!scopePickerOpen}}" canvas-id="growthLine" class="growth-canvas"></canvas><view wx:else class="growth-canvas"/></block>
+      <view wx:else class="growth-empty">完成首轮每日复盘后开始形成成长曲线</view>
+    </view>
+  </block>
+  </view>
+  <view class="profile-footer">
+    <button class="logout-button" bindtap="logout" disabled="{{logoutBusy}}" loading="{{logoutNavigating}}">{{logoutNavigating ? '正在退出…' : '退出登录 / 切换账号'}}</button>
+    <view class="version">销售智助 · MVP Preview 0.1</view>
+  </view>
+</view>
+
+</block>
+</block>

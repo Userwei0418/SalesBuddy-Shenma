@@ -1,0 +1,14 @@
+/* Scope controls belong to the metrics section, separate from public rankings. */
+.metrics-section{margin-top:30rpx}
+.metrics-heading{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.metrics-title{flex-shrink:0;color:#254766;font-size:30rpx;font-weight:700;line-height:1.4}
+.metrics-controls{display:flex;flex:0 0 auto;align-items:center;justify-content:flex-end;gap:12rpx;min-width:0}
+.metrics-scope-switch{display:flex;flex:0 0 160rpx;width:160rpx;box-sizing:border-box;gap:4rpx;padding:4rpx;border-radius:14rpx;background:#e3ebf4}
+.metrics-scope-option.metrics-scope-option{display:flex;flex:1 1 0;align-items:center;justify-content:center;box-sizing:border-box;width:74rpx;max-width:74rpx;min-width:0;min-height:0;height:48rpx;margin:0;padding:0;border:0;border-radius:10rpx;background:transparent;color:#72899d;font-size:22rpx;line-height:1;font-weight:500}
+.metrics-scope-option::after{border:0}
+.metrics-scope-option.metrics-scope-option.selected{background:#267fc3;color:#fff;font-weight:600;box-shadow:0 3rpx 8rpx rgba(36,101,155,.12)}
+.metrics-picker{flex:0 0 176rpx;width:176rpx;min-width:0}
+.metrics-meta{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:12rpx}
+.metrics-context{display:block;min-width:0;color:#7890a6;font-size:22rpx;line-height:1.5;word-break:break-all}
+.metrics-meta .freshness{flex-shrink:0}
+.public-rankings-heading{margin-top:38rpx;padding:8rpx 2rpx 0}

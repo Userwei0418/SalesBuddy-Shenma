@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "经营实绩",
+  "usingComponents": {
+    "advice-actions": "/components/advice-actions/index",
+    "fde-picker": "../../components/fde-picker/index",
+    "detail-pagination": "../../components/detail-pagination/index"
+  },
+  "homeButton": true
+}
