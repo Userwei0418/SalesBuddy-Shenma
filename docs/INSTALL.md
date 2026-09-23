@@ -49,6 +49,8 @@ python3_bin=/opt/shenma-sales/current/backend/.venv/bin/python
 
 ## 3. 配置销售 HTTPS
 
+本项目正式证书使用 Let's Encrypt；自动申请、续期定时器和重载配置见 [证书与自动续期](TLS.md)。下列路径也是自动续期后写入的位置。
+
 准备匹配 `salesbuddy.shenzhoukuntai.com` 的完整证书链和私钥，将下例 `/path/to/` 替换成实际安全交付路径：
 
 ```bash
