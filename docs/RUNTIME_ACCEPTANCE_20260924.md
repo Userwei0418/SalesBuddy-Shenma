@@ -1,5 +1,15 @@
 # 神码运行版本验收记录
 
+## 最新运行版本
+
+销售已部署 `7c7a376cc36873a7ba122c2663f075c2dfc85102`，对应 PR #13 完整 CI 通过的审核版本；合并后的 main 为 `4e7dd6ab590030b63948526cf6fbf1b4a330a08f`，两者源码树一致。升级包含能力复盘事实约束，不改变数据库或依赖；V125 保持不变。
+
+切换后公网版本接口、readiness 200、API/Worker、管理员登录/读取自身/退出、运行角色权限和密钥读取均已复验通过。旧 d287330 版本保留；升级前最近可用快照为 `/var/backups/shenma-sales/20260923T185704Z`，恢复演练记录见 OPERATIONS.md。服务器版本切换回执为 `/var/lib/shenma-provision/reviewed-release-activation.json`。
+
+仍仅开放原有四项管理员试点，不自动扩大未通过语义验收的能力。正式可信证书、客户 AppID 和完整业务端到端验收未完成。
+
+## 首次中台客户端部署记录
+
 - 销售运行版本：`d287330a1f04317c634147e5792362ebcd4234de`，PR #9 完整 CI 通过后切换。
 - API、Worker 正常，readiness 为 ok；公网版本接口核验一致，数据库仍为 V125。
 - 升级前备份：`/var/backups/shenma-sales/20260923T181733Z`；旧版本保留，可回退代码。
