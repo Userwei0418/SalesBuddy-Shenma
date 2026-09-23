@@ -28,7 +28,7 @@ def main():
     p.add_argument('--bundle', type=Path, required=True)
     p.add_argument('--images', type=Path, required=True)
     p.add_argument('--install-dir', type=Path, default=Path('/opt/raccoon-agent'))
-    p.add_argument('--public-url', default='https://ops-salesbuddy.shenzhoukuntai.com')
+    p.add_argument('--public-url', default='https://ops-salesbuddy.shenzhoukuntai.com:18899')
     p.add_argument('--resume', action='store_true')
     a = p.parse_args()
     if os.geteuid() != 0 or socket.gethostname() != 'opsbuddy':

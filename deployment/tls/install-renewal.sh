@@ -3,8 +3,8 @@
 set -euo pipefail
 test "$(id -u)" = 0
 case "$(hostname)" in
-  salesbuddy) domain=salesbuddy.shenzhoukuntai.com ;;
-  opsbuddy) domain=ops-salesbuddy.shenzhoukuntai.com ;;
+  salesbuddy) domain=salesbuddy.shenzhoukuntai.com; https_port=28899 ;;
+  opsbuddy) domain=ops-salesbuddy.shenzhoukuntai.com; https_port=18899 ;;
   *) echo 'Unexpected customer host' >&2; exit 1 ;;
 esac
 command -v certbot >/dev/null
@@ -28,7 +28,7 @@ server {
         default_type text/plain;
         try_files \$uri =404;
     }
-    location / { return 301 https://$domain\$request_uri; }
+    location / { return 301 https://$domain:$https_port\$request_uri; }
 }
 EOF
 ln -sfn "$site" /etc/nginx/sites-enabled/shenma-acme
