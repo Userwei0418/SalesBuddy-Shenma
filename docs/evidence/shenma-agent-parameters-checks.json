@@ -1,0 +1,62 @@
+[
+  {
+    "capability": "chatbi",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "battle_map_review",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "opportunity_draft",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "personal_risks",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "visit_entry",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "visit_quality",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "today_tasks",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "operating_report",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "customer_advice",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "opportunity_advice",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "visit_advice",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  },
+  {
+    "capability": "competency_review",
+    "parameters_verified": true,
+    "additional_required_inputs": false
+  }
+]
