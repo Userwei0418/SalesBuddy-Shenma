@@ -1,0 +1,185 @@
+{
+  "service_uid": 998,
+  "synthetic_only": true,
+  "business_writes": false,
+  "validation_scope": "domain contracts and explicit case assertions; semantic review is separate",
+  "results": [
+    {
+      "case": "report_empty_sales",
+      "capability": "operating_report",
+      "passed": true,
+      "answer": {
+        "title": "销售即时总结",
+        "period": "2026-09-24",
+        "scope": "合成验收范围",
+        "summary": "本次资料不足，未提供客户、商机、拜访、任务、风险、成员和团队事实。",
+        "safe_customers": [],
+        "attention_customers": [],
+        "action_plan": []
+      },
+      "validated": {
+        "safe_customers": [],
+        "attention_customers": [],
+        "action_plan": [],
+        "title": "一线销售个人即时总结",
+        "period": "当前实时状态",
+        "scope": "合成验收范围",
+        "summary": "本次资料不足，未提供客户、商机、拜访、任务、风险、成员和团队事实。"
+      },
+      "elapsed_ms": 1736
+    },
+    {
+      "case": "report_empty_supervisor",
+      "capability": "operating_report",
+      "passed": true,
+      "answer": {
+        "title": "总监即时经营总结",
+        "period": "2026-09-24",
+        "scope": "合成验收范围",
+        "summary": "本次输入未提供客户、商机、拜访、任务、风险、成员及团队等事实数据，无法进行安全与需处理客户的分类判断，亦无团队对比或行动依据。",
+        "personal_safe_customers": [],
+        "personal_attention_customers": [],
+        "team_safe_customers": [],
+        "team_attention_customers": [],
+        "action_plan": []
+      },
+      "validated": {
+        "personal_safe_customers": [],
+        "personal_attention_customers": [],
+        "team_safe_customers": [],
+        "team_attention_customers": [],
+        "action_plan": [],
+        "title": "销售主管个人与团队即时总结",
+        "period": "当前实时状态",
+        "scope": "合成验收范围",
+        "summary": "本次输入未提供客户、商机、拜访、任务、风险、成员及团队等事实数据，无法进行安全与需处理客户的分类判断，亦无团队对比或行动依据。"
+      },
+      "elapsed_ms": 1467
+    },
+    {
+      "case": "report_empty_manager",
+      "capability": "operating_report",
+      "passed": true,
+      "answer": {
+        "title": "销售总经理部门即时总结",
+        "period": "2026-09-24",
+        "scope": "合成验收范围",
+        "summary": "本次系统未提供客户、商机、拜访、任务、风险、成员和团队等事实数据，无法进行部门经营分析与判断。",
+        "safe_customers": [],
+        "attention_customers": [],
+        "team_comparison": [],
+        "action_plan": []
+      },
+      "validated": {
+        "safe_customers": [],
+        "attention_customers": [],
+        "team_comparison": [],
+        "action_plan": [],
+        "title": "销售总经理部门即时总结",
+        "period": "当前实时状态",
+        "scope": "合成验收范围",
+        "summary": "本次系统未提供客户、商机、拜访、任务、风险、成员和团队等事实数据，无法进行部门经营分析与判断。"
+      },
+      "elapsed_ms": 1433
+    },
+    {
+      "case": "report_empty_fde",
+      "capability": "operating_report",
+      "passed": true,
+      "answer": {
+        "title": "FDE经营总结",
+        "period": "2026-09-24",
+        "scope": "合成验收范围",
+        "summary": "本次资料不足，未提供客户、商机、拜访、任务、风险、成员和团队事实。",
+        "safe_customers": [],
+        "attention_customers": [],
+        "action_plan": []
+      },
+      "validated": {
+        "safe_customers": [],
+        "attention_customers": [],
+        "action_plan": [],
+        "title": "FDE个人协作即时总结",
+        "period": "当前实时状态",
+        "scope": "合成验收范围",
+        "summary": "本次资料不足，未提供客户、商机、拜访、任务、风险、成员和团队事实。"
+      },
+      "elapsed_ms": 1353
+    },
+    {
+      "case": "report_empty_fde_lead",
+      "capability": "operating_report",
+      "passed": true,
+      "answer": {
+        "title": "FDE Lead经营总结",
+        "period": "即时",
+        "scope": "合成验收范围",
+        "summary": "本次输入未提供客户、商机、拜访、任务、风险、成员及团队等事实数据，无法生成安全客户、需处理客户或团队对比内容。",
+        "safe_customers": [],
+        "attention_customers": [],
+        "team_comparison": [],
+        "action_plan": []
+      },
+      "validated": {
+        "safe_customers": [],
+        "attention_customers": [],
+        "team_comparison": [],
+        "action_plan": [],
+        "title": "FDE部门协作即时总结",
+        "period": "当前实时状态",
+        "scope": "合成验收范围",
+        "summary": "本次输入未提供客户、商机、拜访、任务、风险、成员及团队等事实数据，无法生成安全客户、需处理客户或团队对比内容。"
+      },
+      "elapsed_ms": 1410
+    },
+    {
+      "case": "map_visit",
+      "capability": "battle_map_review",
+      "passed": false,
+      "answer": {
+        "potential_score": 0,
+        "relationship_score": 20,
+        "summary": "本次评估基于单一拜访记录。商机层面因无关联商机数据，潜力无法量化；关系层面处于初步接触与演示安排阶段，意向明确但无采购承诺。",
+        "rationale": {
+          "potential": "输入中未包含任何关联的商机（opportunities）或联系人（contacts）资料。缺乏预算、金额、阶段概率及决策链信息，无法进行潜力维度的量化评分。",
+          "relationship": "依据拜访记录，客户已同意安排产品演示，显示初步合作意愿。但尚未给出采购承诺，且下一步动作仍为确认时间，处于早期接触阶段。"
+        },
+        "evidence": [
+          {
+            "source_type": "visit",
+            "source_id": "22222222-2222-4222-8222-222222222222",
+            "detail": "客户同意安排产品演示，尚未给出采购承诺；下一步计划于9月27日前确认演示时间。"
+          }
+        ]
+      },
+      "error_type": "AssertionError",
+      "elapsed_ms": 2194
+    },
+    {
+      "case": "map_empty",
+      "capability": "battle_map_review",
+      "passed": true,
+      "answer": {
+        "potential_score": 0,
+        "relationship_score": 0,
+        "summary": "本次输入未提供任何商机、拜访或联系人资料，缺乏评估潜力与关系所需的事实依据。",
+        "rationale": {
+          "potential": "无商机记录、金额、阶段或产品匹配信息，无法判断需求与成交概率。",
+          "relationship": "无拜访、沟通结果或联系人决策角色信息，无法评估互动意愿与关系进展。"
+        },
+        "evidence": []
+      },
+      "validated": {
+        "potential_score": 0.0,
+        "relationship_score": 0.0,
+        "summary": "本次输入未提供任何商机、拜访或联系人资料，缺乏评估潜力与关系所需的事实依据。",
+        "rationale": {
+          "potential": "无商机记录、金额、阶段或产品匹配信息，无法判断需求与成交概率。",
+          "relationship": "无拜访、沟通结果或联系人决策角色信息，无法评估互动意愿与关系进展。"
+        },
+        "evidence": []
+      },
+      "elapsed_ms": 1362
+    }
+  ]
+}

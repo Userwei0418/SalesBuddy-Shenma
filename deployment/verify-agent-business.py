@@ -9,7 +9,7 @@ import socket
 from pathlib import Path
 from time import monotonic
 
-from sales_backend.domain.agent import ActorContext
+from sales_backend.domain.agent import ActorContext, RoleCode
 from sales_backend.integrations.supreme_fde import FdeClient, FdeConfig
 from sales_backend.services.agent_platform.result_contracts import validate_run_result
 from sales_backend.services.agent_run.models import RunInput
@@ -97,7 +97,36 @@ def workbench_cases():
     ]
 
 
+def report_map_cases():
+    cutoff = "2026-09-24T08:00:00+08:00"
+    cases = []
+    for role in ("sales", "supervisor", "manager", "fde", "fde_lead"):
+        cases.append({"name": "report_empty_" + role, "capability": "operating_report", "role": role,
+                      "text": "仅根据本次空资料生成即时总结，不虚构客户或待办。",
+                      "facts": {"data_as_of": cutoff, "scope": {"scope_label": "合成验收范围"},
+                                "customers": [], "opportunities": [], "visits": [], "tasks": [], "risks": [],
+                                "members": [], "teams": []}})
+    for empty in (False, True):
+        cases.append({"name": "map_empty" if empty else "map_visit", "capability": "battle_map_review",
+                      "text": "仅根据本次客户资料评估潜力和关系，引用本次证据。",
+                      "facts": {"data_as_of": cutoff,
+                                "customer": {"id": "77777777-7777-4777-8777-777777777777", "name": "合成验收客户"},
+                                "opportunities": [], "contacts": [], "previous_score": None,
+                                "visits": [] if empty else [
+                                    {"id": "22222222-2222-4222-8222-222222222222",
+                                     "follow_up_record": "客户同意安排产品演示，尚未给出采购承诺。",
+                                     "next_action": "9月27日前与客户确认演示时间。"}]}})
+    return cases
+
+
 def check(case, answer):
+    if case["capability"] == "battle_map_review":
+        from sales_backend.contracts.battle_map import validate_battle_map_result
+        clean = validate_battle_map_result(answer, case["facts"])
+        assert bool(clean["evidence"]) is (case["name"] != "map_empty")
+        visible = clean["summary"] + json.dumps(clean["rationale"], ensure_ascii=False)
+        assert not any(token in visible for token in ("facts", "opportunities", "Opportunity", "evidence", "source_id"))
+        return clean
     if case["capability"] in {"opportunity_advice", "visit_advice"}:
         from sales_backend.domain.advice import validate_advice
         clean = validate_advice(answer, case["facts"])
@@ -117,9 +146,13 @@ def check(case, answer):
         return clean
     run = RunInput("synthetic-contract-run", "synthetic-contract-conversation", case["text"],
                    "visit_entry" if case["capability"] == "visit_quality" else case["capability"],
-                   None, ACTOR)
+                   None, ACTOR.model_copy(update={"role": RoleCode(case.get("role", "sales"))}))
     clean = validate_run_result(run, answer, case["facts"])
-    if case["capability"] == "chatbi":
+    if case["capability"] == "operating_report":
+        from sales_backend.services.agent_run.contract import INSTANT_SUMMARY_CONTRACT
+        assert all(clean[key] == [] for key in INSTANT_SUMMARY_CONTRACT[run.actor.role][1])
+        assert clean["scope"] == "合成验收范围"
+    elif case["capability"] == "chatbi":
         assert clean["scope"] == "合成验收范围"
         assert clean["data_as_of"] == case["facts"]["data_as_of"]
         if case["name"] == "chatbi_counts":
@@ -164,7 +197,7 @@ def check(case, answer):
 async def run(bindings, output, suite, case_names=None):
     results = []
     cases = {"core": lambda: list(CASES), "coaching": coaching_cases,
-             "workbench": workbench_cases}[suite]()
+             "workbench": workbench_cases, "report_map": report_map_cases}[suite]()
     if case_names:
         if set(case_names) - {case["name"] for case in cases}:
             raise ValueError("Unknown case for selected suite")
@@ -173,7 +206,7 @@ async def run(bindings, output, suite, case_names=None):
         binding = bindings[case["capability"]]
         config = FdeConfig("https://ops-salesbuddy.shenzhoukuntai.com:18899/v1", binding["api_key"],
                            "agent_final", timeout_seconds=30, ca_bundle_path="/etc/shenma-sales/agent-ca.pem")
-        query = {"mode": case["capability"], "role": "sales", "user_text": case["text"],
+        query = {"mode": case["capability"], "role": case.get("role", "sales"), "user_text": case["text"],
                  "current_time": case["facts"]["data_as_of"], "facts": case["facts"]}
         if "backend_prompt" in case:
             query["backend_prompt"] = case["backend_prompt"]
@@ -210,7 +243,7 @@ async def run(bindings, output, suite, case_names=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("core", "coaching", "workbench"), default="core")
+    parser.add_argument("--suite", choices=("core", "coaching", "workbench", "report_map"), default="core")
     parser.add_argument("--case", action="append", dest="case_names")
     args = parser.parse_args()
     if os.geteuid() != 0 or socket.gethostname() != "salesbuddy":
