@@ -12,6 +12,7 @@ import codecs
 import json
 import math
 import re
+import ssl
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field, replace
 from time import monotonic
@@ -75,6 +76,8 @@ class FdeConfig:
     # stream fixture, never silently guess on a mixed stream.
     text_protocol: TextProtocol
     timeout_seconds: float = 12.0
+    # Optional private instance trust, scoped to this client. Never disables TLS checks.
+    ca_bundle_path: str = ""
 
     def __post_init__(self):
         try:
@@ -312,12 +315,14 @@ class FdeClient:
 
     def __init__(self, config: FdeConfig, *, transport: httpx.AsyncBaseTransport | None = None):
         self._config = config
+        verify = ssl.create_default_context(cafile=config.ca_bundle_path) if config.ca_bundle_path else True
         self._client = httpx.AsyncClient(
             base_url=config.base_url.rstrip("/") + "/",
             headers={"Authorization": f"Bearer {config.api_key}"},
             timeout=config.timeout_seconds,
             follow_redirects=False,
             trust_env=False,
+            verify=verify,
             transport=transport,
         )
 

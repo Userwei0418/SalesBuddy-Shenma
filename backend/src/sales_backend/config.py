@@ -41,6 +41,7 @@ class Settings:
     agent_fde_pilot_json: str = "{}"
     agent_fde_pilot_path: str = ""
     agent_fde_base_url: str = ""
+    agent_fde_ca_bundle: str = ""
     agent_fde_chatbi_id: str = ""
     agent_fde_chatbi_api_key: str = field(default="", repr=False)
     agent_fde_battle_map_id: str = ""
@@ -135,6 +136,7 @@ def get_settings() -> Settings:
         agent_fde_pilot_json=os.getenv("AGENT_FDE_PILOT_JSON", "{}"),
         agent_fde_pilot_path=os.getenv("AGENT_FDE_PILOT_PATH", ""),
         agent_fde_base_url=os.getenv("AGENT_FDE_BASE_URL", ""),
+        agent_fde_ca_bundle=os.getenv("AGENT_FDE_CA_BUNDLE", ""),
         agent_fde_chatbi_id=os.getenv("AGENT_FDE_CHATBI_ID", ""),
         agent_fde_chatbi_api_key=os.getenv("AGENT_FDE_CHATBI_API_KEY", ""),
         agent_fde_battle_map_id=os.getenv("AGENT_FDE_BATTLE_MAP_ID", ""),
