@@ -17,3 +17,5 @@
 中台完整安装包存放在本私有仓库 Release 中，Web 编译产物不入 Git。下载后以包内 SHA256SUMS 校验；对源码的后续修改需要生成新的发行包和校验清单，不能冒用原版哈希。
 
 见 [首次安装指引](docs/INSTALL.md)、[计划与状态](docs/PLAN.md)、[隔离边界](AGENTS.md)、[来源清单](docs/SOURCE_MANIFEST.json)。
+
+模型接入与后续替换见 [模型配置](docs/MODELS.md)。

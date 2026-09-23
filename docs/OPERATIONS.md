@@ -34,13 +34,13 @@ sudo docker compose -f compose.json ps
 sudo python3 /opt/raccoon-agent/healthcheck.py --wait 30
 ```
 
-中台首次初始化口令只保存在服务器 `/opt/raccoon-agent/首次登录.txt`。模型供应商和销售 Agent 需使用客户独立账号、发布 ID 与 Key；原环境的 publication.json 不随源码迁移。
+中台首次初始化口令只保存在服务器 `/opt/raccoon-agent/首次登录.txt`。本次已创建管理员 `admin@example.com`，随机密码记录在 `/var/lib/shenma-provision/agent-admin.json`（root 0600）；正式交接后由管理员改密。模型供应商和销售 Agent 需使用客户独立账号、发布 ID 与 Key；原环境的 publication.json 不随源码迁移。
 
 ## 备份与升级
 
 销售快照脚本 `deployment/backup-sales.sh` 会在维护窗口短暂停止 API/Worker，备份数据库、文件、密钥与版本，再恢复原先运行的服务。快照只保留在 root 可访问的 `/var/backups/shenma-sales/`；含实际数据和秘密，不能放进源码仓库或普通交付包。首次上线前演练备份及恢复，后续频率和保留周期由客户运维确定。
 
-恢复时先校验 SHA256SUMS，在另建的恢复数据库和目录中验证 `pg_restore`、文件和密钥配套，再安排服务切换。不得直接覆盖运行库，也不能仅回退代码而忽略已执行的数据库迁移。中台备份须同时包含它自己的数据库、文件/向量存储和 `.env`、TLS 密钥，并记录镜像与源码版本。
+恢复时先校验 SHA256SUMS，在另建的恢复数据库和目录中验证 `pg_restore`、文件和密钥配套，再安排服务切换。不得直接覆盖运行库，也不能仅回退代码而忽略已执行的数据库迁移。中台可运行 `sudo python3 deployment/backup-agent.py`：会暂停中台服务，备份两套数据库、实例配置、文件/向量卷和 TLS/登录凭据，验证临时数据库恢复并恢复原服务。请在维护窗口执行。快照在 `/var/backups/shenma-agent/`，含秘密，只能由客户运维保管；物理卷归档可读性与逻辑数据库恢复分别登记。
 
 后续定开从本仓库 main 新建 `codex/` 分支，经检查后合并。商汤的新功能按明确提交评估后移植；不自动同步其环境配置、数据或发布绑定。
 
