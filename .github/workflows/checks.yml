@@ -2,7 +2,7 @@ name: Customer source checks
 on:
   pull_request:
   push:
-    branches: [main, 'codex/**']
+    branches: [main]
 permissions:
   contents: read
 jobs:
