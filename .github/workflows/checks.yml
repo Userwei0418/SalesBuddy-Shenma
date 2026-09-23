@@ -23,6 +23,13 @@ jobs:
       PGUSER: postgres
       PGPASSWORD: isolated-ci-only
     steps:
+      - name: Require the private customer repository
+        env:
+          ACTUAL_REPOSITORY: ${{ github.repository }}
+          REPOSITORY_IS_PRIVATE: ${{ github.event.repository.private }}
+        run: |
+          test "$ACTUAL_REPOSITORY" = 'Userwei0418/SalesBuddy-Shenma'
+          test "$REPOSITORY_IS_PRIVATE" = 'true'
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:

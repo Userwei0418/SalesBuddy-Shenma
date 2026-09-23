@@ -54,6 +54,8 @@ sudo python3 /opt/raccoon-agent/healthcheck.py --wait 30
 
 从干净、已提交并通过检查的代码生成完整源码包：
 
+打包前需安装并登录 GitHub CLI（`gh`），脚本会实时核对神码仓库为 PRIVATE；无法核验或仓库公开时停止打包。CI 同时检查运行仓库名称与私有标记。源码 remote 隔离不等于仓库可见性隔离，两项分别核验。
+
 ```bash
 python3 scripts/package_source.py --output-dir ../output/shenma-delivery
 ```

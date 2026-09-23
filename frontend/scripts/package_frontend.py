@@ -52,6 +52,7 @@ def build(args: argparse.Namespace) -> dict:
     repo = Path(git(Path(__file__).resolve().parent, "rev-parse", "--show-toplevel").decode().strip())
     if git(repo, "status", "--porcelain", "--untracked-files=all").strip():
         raise ValueError("工作目录有未提交文件；请提交、通过检查并合并后从最终 HEAD 打包。")
+    subprocess.run(["python3", str(repo / "scripts/check_isolation.py"), "--verify-remote"], check=True, cwd=repo)
     head = git(repo, "rev-parse", "HEAD").decode().strip()
     if not re.fullmatch(r"[0-9a-f]{40}", args.backend_revision):
         raise ValueError("--backend-revision 必须是已核验的完整 40 位 Git SHA。")

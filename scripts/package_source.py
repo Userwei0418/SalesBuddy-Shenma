@@ -34,7 +34,7 @@ def main() -> None:
     if remote not in ('https://github.com/Userwei0418/SalesBuddy-Shenma',
                       'git@github.com:Userwei0418/SalesBuddy-Shenma'):
         parser.error('This packager only accepts the isolated Shenma repository')
-    subprocess.run(['python3', str(ROOT / 'scripts/check_isolation.py')], check=True, cwd=ROOT)
+    subprocess.run(['python3', str(ROOT / 'scripts/check_isolation.py'), '--verify-remote'], check=True, cwd=ROOT)
     revision = git('rev-parse', 'HEAD').decode().strip()
     timestamp = int(git('show', '-s', '--format=%ct', 'HEAD'))
     name = 'SalesBuddy-Shenma-source-' + revision[:12]
