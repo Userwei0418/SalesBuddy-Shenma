@@ -2,10 +2,12 @@
 
 | 服务器 | 内容 | 监听 | 入口 / 数据 |
 |---|---|---|---|
-| salesbuddy，172.22.9.234，SSH 32222 | 销售 API、管理端、Worker、PostgreSQL | HTTPS 443；API 仅 127.0.0.1:8080；数据库仅本机 5432 | salesbuddy.shenzhoukuntai.com；销售库及上传文件 |
-| opsbuddy，172.22.9.233，SSH 12222 | Agent 中台及自有数据库、Redis、向量库、沙箱 | HTTPS 443；存储服务仅容器网络 | ops-salesbuddy.shenzhoukuntai.com；中台账号、Agent、知识库及运行记录 |
+| salesbuddy，172.22.9.234，SSH 32222 | 销售 API、管理端、Worker、PostgreSQL | HTTPS 443、28899；API 仅 127.0.0.1:8080；数据库仅本机 5432 | salesbuddy.shenzhoukuntai.com；销售库及上传文件 |
+| opsbuddy，172.22.9.233，SSH 12222 | Agent 中台及自有数据库、Redis、向量库、沙箱 | HTTPS 443、18899；存储服务仅容器网络 | ops-salesbuddy.shenzhoukuntai.com；中台账号、Agent、知识库及运行记录 |
 
 表中为本项目安装目标。公网 443 的域名分流由客户网关配置，两个域名解析到同一公网 IP 不能代替转发配置。正式公网入口以现场验收为准。
+
+已通过短时 TCP 监听和外部连接核验现有 NAT：公网 `223.76.131.120:28899` 到销售机 `172.22.9.234:28899`，公网 `:18899` 到中台机 `172.22.9.233:18899`。客户网关若通过公网预留端口回源，应将销售域名接 28899、中台域名接 18899；若内网直连，则分别接两台机器的 443。不要沿用职责互换前的反向对应表。
 
 ## 销售主机
 

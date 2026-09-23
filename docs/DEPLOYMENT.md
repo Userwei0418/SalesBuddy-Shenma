@@ -7,15 +7,43 @@
 - 独立私有 GitHub 已创建，源码来源见 SOURCE_MANIFEST.json。
 - 中台原始包已保存到私有 Release `agent-platform-20260923`，服务器端校验通过。
 - 中台机失效 file:/cdrom 软件源已备份为 `.shenma-before` 并停用；正常软件源保留。
-- 两台机器本来就在执行 unattended-upgrades。安装遇到 dpkg 锁时等待，不删除锁文件、不强杀系统升级。
+- 两台机器原有 unattended-upgrades 已结束。安装期间等待 dpkg 锁释放，未删除锁文件或强杀系统升级。
 - 两台服务器 Docker Hub 连接失败。改由本地从官方 Docker Hub 按固定摘要下载 linux/amd64 镜像，经哈希验证后传入，不改用未知镜像源。TLS 校验保持开启；本地下载使用 IPv4 转发以避免 IPv6 CDN 连接重置。
 - 销售结构需要 PostgreSQL 15+ 的 NULLS NOT DISTINCT；目标安装 PostgreSQL 16，与源项目 CI 基线一致。不能使用 Ubuntu 22.04 默认 PostgreSQL 14。
+- 中台机器的 Docker CE 官方仓库 TLS 连接失败，已停用本次新增的 CE 源，改从 Ubuntu 已签名软件源安装 Docker 29.1.3、Compose 2.40.3 和 Buildx 0.30.1。Docker 服务已启用。
+
+## 销售系统实际状态
+
+部署源码：`7ca20056d01c45edbac8ac40d2fa2a837a3e624a`，对应通过 CI 的 PR #1 内容；维护主线已合并为 `aa8444e`。运行目录为 `/opt/shenma-sales/current`，指向 `/opt/shenma-sales/releases/7ca20056d01c45edbac8ac40d2fa2a837a3e624a`。
+
+| 项目 | 已验证结果 |
+|---|---|
+| Python / 数据库 | Python 3.12.14 / PostgreSQL 16.15，结构 V125 |
+| 进程 | `shenma-api`、`shenma-worker`、Nginx 均运行；API 监听 `127.0.0.1:8080` |
+| 运行角色 | `shenma_runtime`，NOSUPERUSER、NOBYPASSRLS；禁止读取密码/登录节流表及执行改权函数 |
+| 初始管理员 | `CUSTOMERADMIN` 实际登录、获取自身信息、退出通过；仍要求首次改密 |
+| 数据边界 | 客户、商机、拜访 0 条；仅初始化客户公司、管理团队、管理员及验证产生的认证记录 |
+| 本机 HTTPS | 域名匹配验证通过，当前为 30 天临时自签证书 |
+| 公网域名 | 两个域名均解析至 `223.76.131.120`；公网 443 超时，未验收通过 |
+| 就绪检查 | 数据库和认证通过；模型未配置，因此 `health/ready` 返回 503 / degraded |
+
+运行配置 `/etc/shenma-sales/runtime.env` 和初始化凭据 `/var/lib/shenma-provision/initial-admin.json` 为 root 0600；私有 keyring 仅运行服务可读。凭据不写入本说明。
+
+`deployment/verify-live-sales.py` 已在客户机执行通过，验证真实运行账号、私有 keyring、初始管理员登录/退出及版本。该脚本仅适用于管理员尚未首次改密的初始化验收；改密后不要使用旧凭据重跑。服务证据保存在客户机 `/tmp/shenma-live-sales-check.json`，不含密码或会话 Token。
+
+销售入口已在 Nginx 配置 `salesbuddy.shenzhoukuntai.com:443`。客户网关还需按域名将公网 443 分流到销售机 `172.22.9.234:443` 和中台机 `172.22.9.233:443`，并配置可信证书；临时证书仅用于本机检查。
+
+已实测预留端口 NAT：公网 28899 进入 salesbuddy 的 28899，公网 18899 进入 opsbuddy 的 18899。销售 Nginx 增加 HTTPS 28899 监听，中台离线安装器增加 HTTPS 18899 映射，保留两台机器的内网 443。若网关通过公网回源，目标应为销售域名 → 28899、中台域名 → 18899，与最早的对应表相反。
+
+销售预留端口已完成外部 HTTPS 实测：使用本次生成的公共证书作受信 CA、保留销售域名 SNI，将连接指向公网 28899，`/api/v1/health/version` 返回 200 和部署版本 `7ca20056...`。未关闭 TLS 校验。此结果说明预留端口及销售服务可用；不代表默认公网 443 或浏览器可信证书已经完成。
+
+2026-09-23 已完成首次备份恢复演练。快照位于客户机 `/var/backups/shenma-sales/20260923T091815Z`，已校验全部归档哈希，并把数据库恢复到临时独立库：V125、1 公司、1 用户、客户/商机/拜访各 0 条。配置和 keyring 与快照一致，上传目录归档可读取；API/Worker 已恢复运行。临时恢复库及解包目录已删除，脱敏结果保留在快照的 `restore-check.json`。快照包含秘密，留在客户机，不进入代码仓库或源码交付包。
 
 ## 首次数据库权限
 
 `deployment/runtime-grants.sql` 来源于同版本原系统的只读 ACL 元数据（schema、表、序列、函数权限），没有读取密码、连接环境或业务行。只移植权限形状，映射至神码独立角色 `shenma_runtime`；不复制原数据库角色、所有者或 BYPASSRLS 属性。
 
-先迁移 V125，再创建 NOSUPERUSER NOBYPASSRLS 的运行账号、应用显式授权并执行迁移器权限核对。`verify-runtime-access.sql` 检查运行账号不是 owner、不具备超级权限、不能读取密码表及改变权限。最终还需真实受限身份登录及业务链路验证。
+已迁移 V125，创建 NOSUPERUSER NOBYPASSRLS 的运行账号、应用显式授权并执行迁移器权限核对。`verify-runtime-access.sql` 和真实登录检查均通过；模型业务链路和小程序真机链路仍待外部配置。
 
 ## 中台发行资产
 

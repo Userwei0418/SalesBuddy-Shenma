@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import socket
 import subprocess
+from urllib.parse import urlsplit
 
 
 def run(*args, cwd=None):
@@ -71,6 +72,12 @@ def main():
         elif 'image' in service and 'build' not in service:
             if service['image'] not in mapping.values():
                 p.error('Unexpected image in compose; refusing registry fallback')
+    # Verified customer NAT: public 18899 reaches opsbuddy:18899.
+    # Keep internal 443 for the canonical URL and expose only HTTPS on this extra port.
+    ports = compose['services']['nginx'].setdefault('ports', [])
+    reserved_https_port = '${BIND_ADDRESS:-0.0.0.0}:18899:443'
+    if (urlsplit(a.public_url).port or 443) != 18899 and reserved_https_port not in ports:
+        ports.append(reserved_https_port)
     compose_file.write_text(json.dumps(compose, indent=2) + '\n')
     for name in ('api', 'web'):
         dockerfile = runtime / 'build' / name / 'Dockerfile'
@@ -80,7 +87,8 @@ def main():
         if not text.startswith('FROM shenma-base/'):
             p.error('Unexpected base image in ' + str(dockerfile))
         dockerfile.write_text(text)
-    receipt = {'original_base_images': json.loads((a.bundle / 'BASE-IMAGES.json').read_text()),
+    receipt = {'installer_script_sha256': digest(Path(__file__).resolve()),
+               'original_base_images': json.loads((a.bundle / 'BASE-IMAGES.json').read_text()),
                'verified_local_archives': entries,
                'modified_files': {str(f.relative_to(a.install_dir)): digest(f) for f in
                                   (compose_file, runtime / 'build/api/Dockerfile', runtime / 'build/web/Dockerfile')}}

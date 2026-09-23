@@ -31,4 +31,4 @@ ln -s "$ROOT" /opt/shenma-sales/current
 cp deployment/shenma-api.service deployment/shenma-worker.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now shenma-api shenma-worker
-curl --fail --silent http://127.0.0.1:8080/api/v1/health/version
+curl --fail --silent --show-error --retry 15 --retry-connrefused --retry-delay 1 --max-time 3 http://127.0.0.1:8080/api/v1/health/version
