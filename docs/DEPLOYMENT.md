@@ -27,3 +27,11 @@
 - 客户可用模型配置/额度：等待接入方式确认；不自行使用商汤 Key。
 - 公网 443 分流和可信证书：等待客户 IT 配合方式。临时本机证书验收不计为正式域名验收。
 - 中台完整 Web 开发源码：待补；不阻止先运行已有发行包。
+
+## 中台离线安装方式
+
+`deployment/install-agent-offline.py` 校验原包 SHA256SUMS、全部镜像压缩包哈希以及 BASE-IMAGES 精确覆盖，再导入 Docker。原官方摘要与本地标签对应关系写入 `offline-provenance.json`。仅在目标实例中把 Compose 镜像和 Dockerfile FROM 改为已验证的本地标签，禁用启动时拉取；原始包保留不变。
+
+销售依赖就绪后，以 root 在销售 release 目录运行 `bash deployment/install-sales.sh`。它只接受 salesbuddy 主机，创建新库、受限运行角色、客户公司及强制首次改密管理员，再启动 API/Worker。初始账号凭据只保存在服务器 `/var/lib/shenma-provision/initial-admin.json`（root 0600）。脚本发现已有数据库时停止，不会删除或重建；部分失败需检查已完成阶段后继续。
+
+AppID、可信证书和模型 Key 不进入仓库。当前源码包不含任何数据库业务数据；数据库结构和系统规则通过迁移创建。
