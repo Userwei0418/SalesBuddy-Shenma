@@ -55,7 +55,7 @@
 
 两机部署钩子 SHA256 均为 `074a9295a2cb03562fc50678f24ba484ebba5bfd05888f499a8d21e9c055273b`。销售 API、Worker、HTTPS 在配置后保持 active，版本接口仍返回上述 7ca20056 / V125。
 
-正式证书尚未签发。公网两个域名的 80/443 仍超时，需客户网关提供验证与 HTTPS 转发；签发及实际续期演练见 [TLS.md](TLS.md)。
+正式证书尚未签发。随后两台实际运行 `certbot certonly --dry-run`，测试 CA 对两个域名均返回 `Timeout during connect`，确认无法从公网 80 下载验证文件。日志在各服务器 `/var/log/shenma-acme-staging-check.log`。公网两个域名的 80/443 仍超时，需客户网关提供验证与 HTTPS 转发；签发及实际续期演练见 [TLS.md](TLS.md)。
 
 ## 待外部输入
 

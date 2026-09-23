@@ -4,7 +4,7 @@
 
 ## 已落地与剩余条件
 
-2026-09-23 实机已安装 Certbot 1.21.0，两个 `certbot.timer` 均为 enabled/active；本机 HTTP 验证路径已返回正确内容。正式证书尚未签发，真实续期演练尚未执行：两个域名的公网 80、443 仍超时。仅启用定时器不代表证书已签发或续期已验收。
+2026-09-23 实机已安装 Certbot 1.21.0，两个 `certbot.timer` 均为 enabled/active；本机及内网 HTTP 验证路径已返回正确内容。已分别运行 Certbot `certonly --dry-run`：Let's Encrypt 测试 CA 对两个域名均返回 `Timeout during connect`，无法连接公网 80 下载验证文件。正式证书尚未签发，真实续期演练尚未通过；外部检测公网 443 也仍超时。仅启用定时器不代表证书已签发或续期已验收。
 
 客户网关需配置：
 
