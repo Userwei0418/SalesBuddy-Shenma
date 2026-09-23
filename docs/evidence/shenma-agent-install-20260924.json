@@ -1,0 +1,150 @@
+{
+  "verified_at": "2026-09-23T17:45:05Z",
+  "hostname": "opsbuddy",
+  "lan_ip": "172.22.9.233",
+  "instance": {
+    "public_url": "https://ops-salesbuddy.shenzhoukuntai.com:18899",
+    "bind_address": "0.0.0.0",
+    "project": "raccoon_a040fe4cce",
+    "version": "20260923"
+  },
+  "installer": {
+    "state": "local_https_passed",
+    "updated_at": "2026-09-23T12:42:16Z",
+    "exit_code": 0
+  },
+  "services": [
+    {
+      "Service": "agent_backend",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "5050/tcp"
+    },
+    {
+      "Service": "agent_ssrf_proxy",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "3128/tcp"
+    },
+    {
+      "Service": "api",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": "5001/tcp"
+    },
+    {
+      "Service": "api_websocket",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "5001/tcp"
+    },
+    {
+      "Service": "db_postgres",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": "5432/tcp"
+    },
+    {
+      "Service": "init_permissions",
+      "State": "exited",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": ""
+    },
+    {
+      "Service": "local_sandbox",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": "5004/tcp"
+    },
+    {
+      "Service": "nginx",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "80/tcp, 0.0.0.0:18899->443/tcp"
+    },
+    {
+      "Service": "plugin_daemon",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": ""
+    },
+    {
+      "Service": "redis",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": "6379/tcp"
+    },
+    {
+      "Service": "sandbox",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": ""
+    },
+    {
+      "Service": "senseaudio_speech",
+      "State": "running",
+      "Health": "healthy",
+      "ExitCode": 0,
+      "Ports": "5001/tcp"
+    },
+    {
+      "Service": "ssrf_proxy",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "3128/tcp"
+    },
+    {
+      "Service": "weaviate",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": ""
+    },
+    {
+      "Service": "web",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "3000/tcp"
+    },
+    {
+      "Service": "worker",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "5001/tcp"
+    },
+    {
+      "Service": "worker_beat",
+      "State": "running",
+      "Health": "",
+      "ExitCode": 0,
+      "Ports": "5001/tcp"
+    }
+  ],
+  "administrator": {
+    "origin": "https://ops-salesbuddy.shenzhoukuntai.com:18899",
+    "setup": "finished",
+    "admin_email": "admin@example.com",
+    "login_profile_logout": "passed",
+    "workspace_count": 1,
+    "app_count": 0,
+    "credential_receipt": "/var/lib/shenma-provision/agent-admin.json",
+    "verified_at": "2026-09-23T17:44:10Z"
+  },
+  "compose_sha256": "f42d1d224d2d161a070d8c9df411c2fe529db1de64ce5c1ee6dcd08d1527dc2e",
+  "tls": "temporary_self_signed",
+  "model_inference": "pending_customer_configuration"
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "/console/api/setup",
+    "status": 200,
+    "bytes": 52,
+    "content_type": "application/json",
+    "setup": "finished"
+  },
+  {
+    "path": "/signin",
+    "status": 200,
+    "bytes": 466483,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "path": "/brand-bootstrap.js",
+    "status": 200,
+    "bytes": 299,
+    "content_type": "application/javascript"
+  },
+  {
+    "path": "/favicon.ico",
+    "status": 200,
+    "bytes": 50125,
+    "content_type": "image/x-icon"
+  }
+]
