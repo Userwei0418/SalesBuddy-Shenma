@@ -43,5 +43,7 @@ jobs:
         run: PYTHONPATH=backend:backend/src python -m pytest database/tests -q
       - name: Frontend suite
         run: node --test frontend/tests/*.test.js
+      - name: Check keyring permissions with a service UID
+        run: sudo "$(command -v python)" backend/tests/system/verify_credential_permissions.py
       - name: Fresh PostgreSQL integration suite
         run: python backend/tests/system/run_integration_postgres.py
