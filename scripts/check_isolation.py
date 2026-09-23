@@ -14,6 +14,7 @@ if (root/'.git').exists():
  print('Repository remotes isolated')
 if args.verify_remote:
  metadata=json.loads(subprocess.check_output(['gh','api','repos/Userwei0418/SalesBuddy-Shenma'],cwd=root,text=True))
- assert metadata.get('full_name')=='Userwei0418/SalesBuddy-Shenma' and metadata.get('private') is True, 'Customer GitHub repository must be PRIVATE before packaging'
+ if metadata.get('full_name')!='Userwei0418/SalesBuddy-Shenma' or metadata.get('private') is not True:
+  raise SystemExit('Customer GitHub repository must be PRIVATE before packaging')
  print('Live customer GitHub visibility verified: PRIVATE')
 print('Frontend target isolated; AppID:', 'pending' if cfg['appid'].startswith('REPLACE_') else 'customer configured')
