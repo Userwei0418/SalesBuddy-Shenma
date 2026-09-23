@@ -1,0 +1,55 @@
+name: Customer source checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  sales-and-database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: isolated-ci-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      UV_PROJECT_ENVIRONMENT: /tmp/shenma-ci-venv
+      PGHOST: 127.0.0.1
+      PGUSER: postgres
+      PGPASSWORD: isolated-ci-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated dependencies
+        id: dependencies
+        run: |
+          python -m pip install uv
+          cd backend
+          uv sync --frozen --all-extras
+          echo "$UV_PROJECT_ENVIRONMENT/bin" >> "$GITHUB_PATH"
+      - name: Verify customer isolation
+        run: python scripts/check_isolation.py
+      - name: Backend unit suite
+        run: cd backend && python -m pytest tests -q
+      - name: Migration checks
+        run: PYTHONPATH=backend:backend/src python -m pytest database/tests -q
+      - name: Frontend suite
+        run: node --test frontend/tests/*.test.js
+      - name: Check keyring permissions with a service UID
+        run: sudo "$(command -v python)" backend/tests/system/verify_credential_permissions.py
+      - name: Fresh PostgreSQL integration suite
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: python backend/tests/system/run_integration_postgres.py
+      - name: Customer bootstrap and runtime grants
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: python deployment/check-provisioning-ci.py
