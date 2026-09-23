@@ -11,7 +11,7 @@
 
 ## 1. 准备文件与依赖
 
-下载本私有仓库的完整源码包及 `.sha256`，在同一目录校验外层哈希，解压后再执行包内 `sha256sum -c SHA256SUMS`。根目录 `REVISION` 是源码版本；`DELIVERY.json` 标记 AppID 和中台 Web 源码状态。
+下载本公开仓库的完整源码包及 `.sha256`，在同一目录校验外层哈希，解压后再执行包内 `sha256sum -c SHA256SUMS`。根目录 `REVISION` 是源码版本；`DELIVERY.json` 标记 AppID 和中台 Web 源码状态。
 
 销售机需要 PostgreSQL **16**、Nginx、ffmpeg、curl、CA 证书及 uv。按 [PostgreSQL 官方 Ubuntu 指南](https://www.postgresql.org/download/linux/ubuntu/)启用 PGDG 仓库后，安装命令为：
 

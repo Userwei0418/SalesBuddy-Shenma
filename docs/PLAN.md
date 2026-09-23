@@ -2,7 +2,7 @@
 
 ## 目标
 
-建立独立本地目录与私有 GitHub，部署销售系统和中台，完成客户环境下的业务链路。商汤代码、远程仓库、数据库、小程序与发布流程不受影响。
+建立独立本地目录与公开 GitHub，部署销售系统和中台，完成客户环境下的业务链路。商汤代码、远程仓库、数据库、小程序与发布流程不受影响。
 
 ## 步骤与验收
 
@@ -18,14 +18,14 @@
 
 | 交付项 | 当前结果 | 验收记录 |
 |---|---|---|
-| 独立维护 | 独立目录与私有 GitHub 已建立，未添加商汤或公司 GitLab 推送目标 | AGENTS.md、SOURCE_MANIFEST.json |
+| 独立维护 | 独立目录与公开 GitHub 已建立，未添加商汤或公司 GitLab 推送目标 | AGENTS.md、SOURCE_MANIFEST.json |
 | 销售服务 | 运行 7c7a376，API、管理后台、Worker、PostgreSQL 16.15 / V125；登录、权限与就绪检查通过 | RUNTIME_ACCEPTANCE_20260924.md |
 | Agent 中台 | 独立实例安装完成，16 个运行服务正常，初始化任务正常退出，独立管理员登录通过 | DEPLOYMENT.md |
 | 域名入口 | 销售 28899、中台 18899 可达；目前仍是自签证书 | TLS.md |
 | 模型连接 | SenseAudio 文字、ASR 与 TTS 客户机调用通过；接口、模型、Key 可配置 | MODELS.md |
 | Agent 接入 | 12 个 Agent 已发布；原有四项仅配置为管理员限时连通试点，其余通过项及失败项分别登记 | CORE_AGENT_ACCEPTANCE.md、COACHING_ACCEPTANCE.md、WORKBENCH_ACCEPTANCE.md、REPORT_MAP_ACCEPTANCE.md |
 | 备份恢复 | 销售及中台均有客户机快照与独立临时库恢复记录，密钥映射已纳入备份 | OPERATIONS.md |
-| 源码包 | 完整源码包和小程序包已在私有 Release shenma-source-20260924-reviewed 提供，不含业务数据或运行秘密 | 私有 Release 说明、包内 DELIVERY.json |
+| 源码包 | 完整源码包和小程序包已在公开 Release shenma-source-20260924-reviewed 提供，不含业务数据或运行秘密 | 公开 Release 说明、包内 DELIVERY.json |
 
 初始化时未导入商汤客户、商机或拜访数据。之后的联调会产生认证、模型调用、Agent 会话和测试任务记录，不能把当前运行库称为完全空库。
 

@@ -8,8 +8,8 @@
 
 ## 2026-09-23 首次实施
 
-- 独立私有 GitHub 已创建，源码来源见 SOURCE_MANIFEST.json。
-- 中台原始包已保存到私有 Release `agent-platform-20260923`，服务器端校验通过。
+- 独立公开 GitHub 已创建，源码来源见 SOURCE_MANIFEST.json。
+- 中台原始包已保存到公开 Release `agent-platform-20260923`，服务器端校验通过。
 - 中台机失效 file:/cdrom 软件源已备份为 `.shenma-before` 并停用；正常软件源保留。
 - 两台机器原有 unattended-upgrades 已结束。安装期间等待 dpkg 锁释放，未删除锁文件或强杀系统升级。
 - 两台服务器 Docker Hub 连接失败。改由本地从官方 Docker Hub 按固定摘要下载 linux/amd64 镜像，经哈希验证后传入，不改用未知镜像源。TLS 校验保持开启；本地下载使用 IPv4 转发以避免 IPv6 CDN 连接重置。
