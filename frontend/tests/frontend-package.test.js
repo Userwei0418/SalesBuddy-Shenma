@@ -7,6 +7,8 @@ const crypto = require('node:crypto');
 const {execFileSync, spawnSync} = require('node:child_process');
 
 const sourceScript = path.resolve(__dirname, '../scripts/package_frontend.py');
+const isolationScript = path.resolve(__dirname, '../../scripts/check_isolation.py');
+const customerApi = 'https://salesbuddy.shenzhoukuntai.com:28899/api/v1';
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'salegent-handoff-test-'));
@@ -23,11 +25,13 @@ function fixture(t) {
   git('config', 'user.name', 'Packaging test');
   git('config', 'user.email', 'packaging@example.invalid');
   git('config', 'commit.gpgsign', 'false');
+  git('remote', 'add', 'origin', 'https://github.com/Userwei0418/SalesBuddy-Shenma.git');
   write('frontend/scripts/package_frontend.py', fs.readFileSync(sourceScript));
+  write('scripts/check_isolation.py', fs.readFileSync(isolationScript));
   write('frontend/README.md', '# 前端\n\n[当前状态](../docs/CURRENT_STATUS.md)\n');
   write('frontend/VERSION.json', JSON.stringify({artifact_kind:'source_tree', source_package_date:'2026-09-12'}));
-  write('frontend/project.config.json', JSON.stringify({miniprogramRoot:'miniprogram/'}));
-  write('frontend/miniprogram/config.js', 'module.exports={API_BASE_URL:"https://example.invalid/api/v1"};');
+  write('frontend/project.config.json', JSON.stringify({miniprogramRoot:'miniprogram/', appid:'REPLACE_WITH_SHENMA_APPID'}));
+  write('frontend/miniprogram/config.js', `module.exports={API_BASE_URL:${JSON.stringify(customerApi)}};`);
   write('frontend/miniprogram/app.json', JSON.stringify({pages:['pages/index/index']}));
   for (const name of ['app.js','app.wxss','utils/apiClient.js','pages/index/index.js','pages/index/index.wxss','pages/index/index.wxml']) {
     write('frontend/miniprogram/' + name, '');
@@ -44,10 +48,20 @@ function fixture(t) {
   }
   const commit = () => {git('add', '.');git('commit', '-qm', 'fixture');return git('rev-parse', 'HEAD');};
   const deployed = commit();
+  // Exercise the real guard without network or CI account credentials.
+  const bin = path.join(root, 'bin');
+  fs.mkdirSync(bin);
+  const metadata = path.join(root, 'github-fixture.json');
+  const setVisibility = isPrivate => fs.writeFileSync(metadata, JSON.stringify({
+    full_name:'Userwei0418/SalesBuddy-Shenma', private:isPrivate,
+  }));
+  setVisibility(true);
+  fs.writeFileSync(path.join(bin, 'gh'), '#!/usr/bin/env node\nprocess.stdout.write(require("node:fs").readFileSync(process.env.GH_FIXTURE_JSON, "utf8"));\n', {mode:0o755});
   const run = (...extra) => spawnSync('python3', [path.join(repo,'frontend/scripts/package_frontend.py'),
     '--output-dir', path.join(root,'delivery'), '--release-name','fixture-release',
-    '--backend-revision',deployed,'--database-version','V073',...extra], {encoding:'utf8'});
-  return {root, repo, write, git, commit, deployed, run};
+    '--backend-revision',deployed,'--database-version','V073',...extra], {encoding:'utf8',
+      env:{...process.env, PATH:bin+path.delimiter+process.env.PATH, GH_FIXTURE_JSON:metadata}});
+  return {root, repo, write, git, commit, deployed, run, setVisibility};
 }
 
 function inspectZip(filename) {
@@ -78,7 +92,7 @@ test('交付来自最终提交，包含可导入项目及版本；本地缓存�
   const inspected = inspectZip(output.zip);
   assert.equal(inspected.version.frontend_revision, head);
   assert.equal(inspected.version.backend_revision, f.deployed);
-  assert.equal(inspected.version.api_base_url, 'https://example.invalid/api/v1');
+  assert.equal(inspected.version.api_base_url, customerApi);
   assert.equal(inspected.version.artifact_kind, 'frontend_handoff');
   assert.equal(inspected.version.contains_private_account_guide, false);
   for (const name of ['frontend/project.config.json','frontend/miniprogram/pages/index/index.wxml','docs/CURRENT_STATUS.md','docs/DEMO.md','docs/evidence/final/check.json','接口说明/openapi.yaml']) {
@@ -129,4 +143,17 @@ test('拒绝仓库内交付、仓库内账号说明、越界文档和不完整�
   ]) assert.notEqual(f.run(...args).status,0);
   f.git('rm','frontend/miniprogram/pages/index/index.wxml');f.commit();
   const result=f.run();assert.notEqual(result.status,0);assert.match(result.stderr,/缺少/);
+});
+
+test('公开仓库不能打包，私有状态核验后保留纯 JSON 输出', t => {
+  const f = fixture(t);
+  f.setVisibility(false);
+  const rejected = f.run();
+  assert.notEqual(rejected.status, 0);
+  assert.match(rejected.stderr, /must be PRIVATE/);
+  assert.equal(fs.existsSync(path.join(f.root, 'delivery')), false);
+  f.setVisibility(true);
+  const accepted = f.run();
+  assert.equal(accepted.status, 0, accepted.stderr);
+  assert.equal(JSON.parse(accepted.stdout).backend_revision, f.deployed);
 });
