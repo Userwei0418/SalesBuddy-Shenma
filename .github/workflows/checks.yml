@@ -50,3 +50,6 @@ jobs:
       - name: Fresh PostgreSQL integration suite
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: python backend/tests/system/run_integration_postgres.py
+      - name: Customer bootstrap and runtime grants
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: python deployment/check-provisioning-ci.py
