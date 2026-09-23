@@ -1,0 +1,16 @@
+{
+  "capability": "customer_advice",
+  "agent_id": "01a0cf6f-2cf2-71b2-8f36-719f08920280",
+  "app_id": "76755d62-1e25-441c-9fe1-43bd1f83c5f2",
+  "snapshot_id": "01a0cf6f-5da4-702f-81f1-6ce14b7ed9d6",
+  "published": true,
+  "synthetic_data_only": true,
+  "http_status": 200,
+  "stream_completed": true,
+  "schema_valid": true,
+  "semantic_accepted": false,
+  "review_note": "Input had a description but output claimed description was empty. Business acceptance pending.",
+  "sales_business_binding_enabled": false,
+  "business_data_written": false,
+  "tls": "pinned instance certificate"
+}
