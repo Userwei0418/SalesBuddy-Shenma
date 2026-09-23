@@ -95,7 +95,14 @@ def main():
         with tarfile.open(archive, 'x:gz') as tar:
             for name in include:
                 tar.add(base / name, arcname='instance/' + name)
-            tar.add(provision / 'agent-admin.json', arcname='provision/agent-admin.json')
+            # Include the connection handover created after first installation.
+            # The encrypted provider credentials and encryption keys are already
+            # covered by database dumps and runtime files respectively.
+            for name in ('agent-admin.json', 'agent-runtime-bindings.json',
+                         'agent-catalog-publications.json'):
+                path = provision / name
+                if path.is_file():
+                    tar.add(path, arcname='provision/' + name)
         checked = 0
         with tarfile.open(archive) as tar:
             for member in tar:

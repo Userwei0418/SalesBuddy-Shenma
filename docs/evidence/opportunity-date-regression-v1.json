@@ -1,0 +1,40 @@
+{
+  "service_uid": 998,
+  "synthetic_only": true,
+  "business_writes": false,
+  "validation_scope": "domain contracts and explicit case assertions; semantic review is separate",
+  "results": [
+    {
+      "case": "opportunity_advice",
+      "capability": "opportunity_advice",
+      "passed": true,
+      "answer": {
+        "summary": "商机“合成试点商机”金额8万元，状态open。本次拜访记录显示客户同意安排试点，但试点范围、验收标准和负责人均未确认，关键要素缺失导致无法推进后续确收与回款计划。",
+        "suggestions": [
+          {
+            "title": "明确试点执行三要素",
+            "evidence": "本次提供的拜访记录指出客户同意安排试点，但试点范围、验收标准和负责人尚未确认，当前缺乏可执行的落地依据。",
+            "action": "9月27日前与客户确认试点范围、验收标准和负责人，并更新商机记录。",
+            "evidence_refs": [
+              "subject"
+            ]
+          }
+        ]
+      },
+      "validated": {
+        "summary": "商机“合成试点商机”金额8万元，状态open。本次拜访记录显示客户同意安排试点，但试点范围、验收标准和负责人均未确认，关键要素缺失导致无法推进后续确收与回款计划。",
+        "suggestions": [
+          {
+            "title": "明确试点执行三要素",
+            "evidence": "本次提供的拜访记录指出客户同意安排试点，但试点范围、验收标准和负责人尚未确认，当前缺乏可执行的落地依据。",
+            "action": "9月27日前与客户确认试点范围、验收标准和负责人，并更新商机记录。",
+            "evidence_refs": [
+              "subject"
+            ]
+          }
+        ]
+      },
+      "elapsed_ms": 2104
+    }
+  ]
+}

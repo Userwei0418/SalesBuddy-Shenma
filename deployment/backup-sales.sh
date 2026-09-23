@@ -17,8 +17,14 @@ systemctl stop shenma-api shenma-worker
 sudo -u postgres pg_dump -Fc shenma_sales > "$DEST/database.dump"
 tar -czf "$DEST/uploads.tar.gz" -C /var/lib/sales-backend .
 tar -czf "$DEST/runtime-secrets.tar.gz" -C /etc shenma-sales
+PROVISION_FILES=()
+for name in initial-admin.json agent-runtime-bindings.json activated-sales-release.json; do
+ [[ ! -f "/var/lib/shenma-provision/$name" ]] || PROVISION_FILES+=("$name")
+done
+[[ ${#PROVISION_FILES[@]} -gt 0 ]] || { echo 'Missing provisioning handover files'; exit 1; }
+tar -czf "$DEST/provision-secrets.tar.gz" -C /var/lib/shenma-provision "${PROVISION_FILES[@]}"
 readlink -f /opt/shenma-sales/current > "$DEST/release-path.txt"
 cp /opt/shenma-sales/current/REVISION "$DEST/REVISION"
 pg_restore --list "$DEST/database.dump" >/dev/null
-(cd "$DEST" && sha256sum database.dump uploads.tar.gz runtime-secrets.tar.gz REVISION > SHA256SUMS)
+(cd "$DEST" && sha256sum database.dump uploads.tar.gz runtime-secrets.tar.gz provision-secrets.tar.gz release-path.txt REVISION > SHA256SUMS)
 echo "Backup verified: $DEST (contains private data; never commit or attach to a public artifact)"
