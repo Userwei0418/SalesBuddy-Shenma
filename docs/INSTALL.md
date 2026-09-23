@@ -5,7 +5,7 @@
 | 主机 | 部署内容 | HTTPS 监听 | 公网预留端口 |
 |---|---|---|---|
 | salesbuddy，172.22.9.234，SSH 32222 | API、管理端、Worker、销售 PostgreSQL、上传文件 | 443、28899 | 28899 |
-| opsbuddy，172.22.9.233，SSH 12222 | Agent 中台及其数据库、缓存、向量库和沙箱 | 443、18899 | 18899 |
+| opsbuddy，172.22.9.233，SSH 12222 | Agent 中台及其数据库、缓存、向量库和沙箱 | 主机 18899 → 容器 443 | 18899 |
 
 两机均为 Ubuntu 22.04 amd64。以下安装命令使用 root；实际磁盘空间、已运行服务和目标主机必须先核对。源码包不含业务数据；初次安装只创建结构、系统规则和最小管理账号。
 
@@ -77,7 +77,7 @@ systemctl reload nginx
 python3 deployment/install-agent-offline.py \
   --bundle /opt/shenma-installer-source/Raccoon-Agent-Installer-20260923 \
   --images /home/opsbuddy/shenma-images \
-  --public-url https://ops-salesbuddy.shenzhoukuntai.com
+  --public-url https://ops-salesbuddy.shenzhoukuntai.com:18899
 python3 /opt/raccoon-agent/healthcheck.py --wait 300
 ```
 
@@ -89,8 +89,8 @@ python3 /opt/raccoon-agent/healthcheck.py --wait 300
 
 ## 5. 网关、小程序与验收
 
-公网两个域名均需提供可信的标准 HTTPS 443 入口。若网关通过预留公网端口回源，销售域名接 `223.76.131.120:28899`，中台域名接 `223.76.131.120:18899`；若内网回源，分别接两台机器的 443。TLS 回源使用匹配的域名/SNI 与可信证书。
+用户已确认使用带端口地址：销售 `https://salesbuddy.shenzhoukuntai.com:28899`，中台 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。保留现有 NAT 映射，不要求新增公网 80/443。证书通过 DNS-01 自动验证，配置要求见 TLS.md。
 
-客户 AppID 填入 `frontend/project.config.json`；前端 API 固定指向销售域名 `/api/v1`。在客户小程序后台配置实际所用的合法请求/上传/下载域名，再使用客户工程做真机登录、录音上传与业务操作验收。正式微信审核发布另行安排。
+客户 AppID 填入 `frontend/project.config.json`；前端 API 固定指向销售域名的 `:28899/api/v1`。在客户小程序后台配置实际所用的合法请求/上传/下载域名，须包含 `:28899` 并与请求一致，再使用客户工程做真机登录、录音上传与业务操作验收。正式微信审核发布另行安排。
 
 上线验收需覆盖：两机进程及版本、真实登录权限、持久化/备份恢复、可信公网 HTTPS、客户模型真实调用、中台与销售业务输出、小程序真机主链。模型未配置时 `health/ready` 返回 degraded，属于尚未完成接入。当前已验证项见 [部署记录](DEPLOYMENT.md)，备份和后续定开见 [运行维护](OPERATIONS.md)。

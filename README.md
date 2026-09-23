@@ -12,7 +12,7 @@
 | scripts | 隔离与交付检查 |
 | docs | 计划、状态和来源证据 |
 
-销售域名 `salesbuddy.shenzhoukuntai.com`；中台域名 `ops-salesbuddy.shenzhoukuntai.com`。公网入口、证书和实际业务能力按验收记录判断。
+已确认销售入口 `https://salesbuddy.shenzhoukuntai.com:28899`；中台入口 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。证书采用 DNS-01 自动验证，待对方运维完成 DNS 验证与证书配置；证书和实际业务能力按验收记录判断。
 
 中台完整安装包存放在本私有仓库 Release 中，Web 编译产物不入 Git。下载后以包内 SHA256SUMS 校验；对源码的后续修改需要生成新的发行包和校验清单，不能冒用原版哈希。
 

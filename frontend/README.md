@@ -1,6 +1,6 @@
 # 神码小程序开发与交付
 
-在微信开发者工具中导入本目录。API 指向 `https://salesbuddy.shenzhoukuntai.com/api/v1`；客户 AppID 尚待提供，不得替换为商汤 AppID。正式域名和证书验收后，再完成真机登录、录音与上传测试。
+在微信开发者工具中导入本目录。API 指向 `https://salesbuddy.shenzhoukuntai.com:28899/api/v1`；客户 AppID 尚待提供，不得替换为商汤 AppID。微信后台的请求、上传、下载合法域名须按实际使用配置相同的 `https://salesbuddy.shenzhoukuntai.com:28899`，不能省略端口。正式域名和证书验收后，再完成真机登录、录音与上传测试。
 
 日常修改在本独立仓库进行。测试：在仓库根运行 `node --test frontend/tests/*.test.js`。交付从干净、已提交的代码生成，并记录已核验的后端版本与数据库迁移版本。执行示例：
 
