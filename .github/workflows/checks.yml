@@ -18,6 +18,7 @@ jobs:
           --health-cmd "pg_isready -U postgres"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      UV_PROJECT_ENVIRONMENT: /tmp/shenma-ci-venv
       PGHOST: 127.0.0.1
       PGUSER: postgres
       PGPASSWORD: isolated-ci-only
@@ -30,11 +31,12 @@ jobs:
         with:
           node-version: '22'
       - name: Install isolated dependencies
+        id: dependencies
         run: |
           python -m pip install uv
           cd backend
           uv sync --frozen --all-extras
-          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+          echo "$UV_PROJECT_ENVIRONMENT/bin" >> "$GITHUB_PATH"
       - name: Verify customer isolation
         run: python scripts/check_isolation.py
       - name: Backend unit suite
@@ -46,4 +48,5 @@ jobs:
       - name: Check keyring permissions with a service UID
         run: sudo "$(command -v python)" backend/tests/system/verify_credential_permissions.py
       - name: Fresh PostgreSQL integration suite
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: python backend/tests/system/run_integration_postgres.py
