@@ -65,12 +65,16 @@ def main() -> None:
                 parser.error('Private key found in ' + item.name)
             files[item.name] = (content, item.mode & 0o777)
     project = json.loads(files['frontend/project.config.json'][0])
+    migrations = [int(match.group(1)) for path in files
+                  if (match := re.fullmatch(r'database/(?:migrations/)?V(\d+)__[^/]+\.sql', path))]
+    if not migrations:
+        parser.error('Database migration ledger source is missing')
     files['REVISION'] = ((revision + '\n').encode(), 0o644)
     metadata = {
         'artifact_kind': 'customer_source', 'customer': 'shenzhoukuntai',
         'source_revision': revision,
         'source_commit_time': datetime.fromtimestamp(timestamp, timezone.utc).isoformat(),
-        'database_head': 'V125', 'contains_business_data': False,
+        'database_head': f'V{max(migrations):03d}', 'contains_business_data': False,
         'contains_runtime_credentials': False,
         'customer_appid': 'pending' if project['appid'].startswith('REPLACE_') else project['appid'],
         'deployment_status': 'See docs/DEPLOYMENT.md; source packaging is not runtime acceptance.',
@@ -82,8 +86,10 @@ def main() -> None:
                         for path, (content, _) in sorted(files.items()))
     files['SHA256SUMS'] = (checksums.encode(), 0o644)
     output.mkdir(parents=True, exist_ok=True)
+    created = False
     try:
         with target.open('xb') as raw:
+            created = True
             target.chmod(0o600)
             with gzip.GzipFile(filename='', mode='wb', fileobj=raw, mtime=timestamp) as compressed:
                 with tarfile.open(fileobj=compressed, mode='w', format=tarfile.PAX_FORMAT) as dest:
@@ -99,10 +105,12 @@ def main() -> None:
                 assert verified.extractfile(member).read() == files[path][0]
         digest = hashlib.sha256(target.read_bytes()).hexdigest()
         checksum_file = target.with_suffix(target.suffix + '.sha256')
-        checksum_file.write_text(digest + '  ' + target.name + '\n')
+        with checksum_file.open('x') as checksum:
+            checksum.write(digest + '  ' + target.name + '\n')
         checksum_file.chmod(0o600)
     except BaseException:
-        target.unlink(missing_ok=True)
+        if created:
+            target.unlink(missing_ok=True)
         raise
     print(json.dumps({'artifact': str(target), 'revision': revision, 'sha256': digest,
                       'files': len(files), 'bytes': target.stat().st_size,
