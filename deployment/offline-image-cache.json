@@ -1,0 +1,14 @@
+{
+  "dify-web": {
+    "source": "langgenius/dify-web@sha256:6a81fcdd82b51f6fe3436cdc25d1a358cd301a2c3457554bf96de7f5f32a6b5a",
+    "local_tag": "shenma-base/dify-web:6a81fcdd82b51f6f",
+    "image_id": "sha256:ec2ff932c6b8a47a0d35882cac31d4c3217e7581144a6e7606279357bed07ad4",
+    "archive_prefix": "langgenius_dify-web-6a81fcdd82b5"
+  },
+  "postgres": {
+    "source": "postgres@sha256:fe0737ba566a2c5b2a28f34433c0a423261900ec17b9bf7ad115e1aae7e57f1b",
+    "local_tag": "shenma-base/postgres:fe0737ba566a2c5b",
+    "image_id": "sha256:aad6289ca337b3ce76896f2e7e61480490152886c7828120371fb28e6b779e1d",
+    "archive_prefix": "postgres-fe0737ba566a"
+  }
+}

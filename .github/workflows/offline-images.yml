@@ -1,0 +1,80 @@
+name: Cache pinned customer deployment images
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [postgres, dify-web]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read and validate pinned source
+        id: spec
+        env:
+          IMAGE_KEY: ${{ matrix.image }}
+        run: |
+          python3 - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          row=json.loads(Path('deployment/offline-image-cache.json').read_text())[os.environ['IMAGE_KEY']]
+          bases=set(json.loads(Path('agent-platform/BASE-IMAGES.json').read_text()).values())
+          assert row['source'] in bases
+          assert re.fullmatch(r'[a-z0-9/-]+@sha256:[0-9a-f]{64}',row['source'])
+          assert re.fullmatch(r'shenma-base/[a-z0-9-]+:[0-9a-f]{16}',row['local_tag'])
+          assert re.fullmatch(r'sha256:[0-9a-f]{64}',row['image_id'])
+          assert re.fullmatch(r'[a-z0-9_-]+',row['archive_prefix'])
+          row['archive']=f"{row['archive_prefix']}-gha-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}.tar.gz"
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              for key,value in row.items():f.write(f'{key}={value}\n')
+          PY
+      - name: Pull exact official image and check original image identity
+        env:
+          SOURCE: ${{ steps.spec.outputs.source }}
+          LOCAL_TAG: ${{ steps.spec.outputs.local_tag }}
+          EXPECTED_ID: ${{ steps.spec.outputs.image_id }}
+        run: |
+          docker pull --platform linux/amd64 "$SOURCE"
+          docker image inspect "$SOURCE" > image-inspection.json
+          python3 - <<'PY'
+          import json,os
+          item=json.load(open('image-inspection.json'))[0]
+          assert item['Id']==os.environ['EXPECTED_ID']
+          assert item['Architecture']=='amd64' and item['Os']=='linux'
+          print('Pinned official image configuration and platform verified')
+          PY
+          docker tag "$SOURCE" "$LOCAL_TAG"
+      - name: Build archive and checksum receipt
+        env:
+          IMAGE_KEY: ${{ matrix.image }}
+          ARCHIVE: ${{ steps.spec.outputs.archive }}
+          LOCAL_TAG: ${{ steps.spec.outputs.local_tag }}
+        run: |
+          set -o pipefail
+          docker save "$LOCAL_TAG" | gzip -n -6 > "$ARCHIVE"
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          row=json.loads(Path('deployment/offline-image-cache.json').read_text())[os.environ['IMAGE_KEY']]
+          archive=Path(os.environ['ARCHIVE']);h=hashlib.sha256()
+          with archive.open('rb') as f:
+              for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
+          receipt=dict(row,compressed_file=archive.name,compressed_sha256=h.hexdigest(),
+                       compressed_bytes=archive.stat().st_size,build_commit=os.environ['GITHUB_SHA'],
+                       build_run_id=os.environ['GITHUB_RUN_ID'])
+          Path(str(archive)+'.receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps(receipt,indent=2))
+          PY
+      - name: Store cache in the private installer release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.spec.outputs.archive }}
+        run: |
+          test "$(gh api "repos/$GITHUB_REPOSITORY" --jq .private)" = true
+          gh release upload agent-platform-20260923 "$ARCHIVE" "$ARCHIVE.receipt.json" --repo "$GITHUB_REPOSITORY"
