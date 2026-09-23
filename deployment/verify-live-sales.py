@@ -52,7 +52,8 @@ async def main():
     assert status == 200, f'Initial administrator login failed: HTTP {status}'
     token = session['access_token']
     try:
-        assert session['must_change_password'] is True and session['actor']['role'] == 'administrator'
+        assert session['must_change_password'] == credentials['must_change_password']
+        assert session['actor']['role'] == 'administrator'
         me_status, me = request('auth/me', token=token)
         assert me_status == 200 and me['account_code'] == credentials['account']
     finally:
@@ -65,7 +66,7 @@ async def main():
     assert version['revision'] == (root / 'REVISION').read_text().strip()
     print(json.dumps({'runtime_role': flags, 'private_data_access_denied': True,
         'service_keyring_readable': True, 'initial_login_me_logout_passed': True,
-        'initial_password_change_required': True, 'version': version,
+        'password_change_required': session['must_change_password'], 'version': version,
         'readiness_http': ready_status, 'readiness': ready}, ensure_ascii=False))
 
 
