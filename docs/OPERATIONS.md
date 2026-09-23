@@ -58,6 +58,6 @@ sudo python3 /opt/raccoon-agent/healthcheck.py --wait 30
 python3 scripts/package_source.py --output-dir ../output/shenma-delivery
 ```
 
-包内包含前端、销售后端、数据库结构/迁移、中台现有源码、部署脚本和说明；不包含数据库业务数据、运行配置、账号口令或私钥。根目录 `REVISION` 和 `DELIVERY.json` 标记源码版本，`SHA256SUMS` 校验全部文件。中台完整运行安装包从私有 Release 单独下载；完整 Web 开发源码尚未提供。AppID 未配置时，包会明确记录 pending，不能视为可上传的小程序体验版。
+包内包含前端、销售后端、数据库结构/迁移、中台现有源码、部署脚本和说明；不包含数据库业务数据、运行配置、账号口令或私钥。根目录 `REVISION` 和 `DELIVERY.json` 标记源码版本，`SHA256SUMS` 校验全部文件。中台完整运行安装包从公开 Release 单独下载；完整 Web 开发源码尚未提供。AppID 未配置时，包会明确记录 pending，不能视为可上传的小程序体验版。
 
 只交付小程序源码时，使用 `frontend/scripts/package_frontend.py`；传入实测后端完整版本和数据库版本，详情见 `frontend/README.md`。源码包和服务器数据备份分别保管，不能把备份加入源码包。
