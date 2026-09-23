@@ -1,0 +1,22 @@
+{
+  "capability": "customer_advice",
+  "snapshot_id": "01a0cf72-da8c-7465-82e2-3c82ee892a2c",
+  "synthetic_data_only": true,
+  "tests": {
+    "empty_facts_no_suggestions": true,
+    "nonempty_description_not_claimed_empty": true,
+    "embedded_instruction_not_followed": true,
+    "cross_host_service_uid": 998,
+    "parameters": true,
+    "agent_final_stream_parser": true,
+    "positive_visit_advice": true,
+    "domain_validator": true,
+    "positive_reference": "visits:22222222-2222-4222-8222-222222222222"
+  },
+  "failed_preliminary_case": "nonstandard subject.latest_followup fixture returned no suggestions; replaced with repository-derived facts shape",
+  "tls": "client-scoped pinned instance certificate; hostname verification enabled",
+  "production_code_deployed": false,
+  "sales_business_binding_enabled": false,
+  "business_data_written": false,
+  "local_tests_passed": 219
+}

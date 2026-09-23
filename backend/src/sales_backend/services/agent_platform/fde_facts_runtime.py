@@ -68,6 +68,7 @@ def filtered_facts_runtime(database, settings, *, block_requests=False, capabili
             api_key,
             "agent_final",
             timeout_seconds=settings.agent_inference_platform_seconds,
+            ca_bundle_path=getattr(settings, "agent_fde_ca_bundle", ""),
         )
     except (TypeError, ValueError):
         logger.warning("FDE filtered-facts configuration is invalid; keeping direct AI")
