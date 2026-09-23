@@ -1,0 +1,172 @@
+{
+  "service_uid": 998,
+  "synthetic_only": true,
+  "business_writes": false,
+  "validation_scope": "domain contracts and explicit case assertions; semantic review is separate",
+  "results": [
+    {
+      "case": "chatbi_counts",
+      "capability": "chatbi",
+      "passed": true,
+      "answer": {
+        "title": "任务完成情况",
+        "summary": "当前未完成任务有3个，已完成任务有7个。",
+        "metrics": [
+          {
+            "label": "未完成任务数",
+            "value": 3
+          },
+          {
+            "label": "已完成任务数",
+            "value": 7
+          }
+        ],
+        "rows": [],
+        "scope": "合成验收范围",
+        "data_as_of": "2026-09-24T08:00:00+08:00"
+      },
+      "validated": {
+        "title": "任务完成情况",
+        "summary": "当前未完成任务有3个，已完成任务有7个。",
+        "metrics": [
+          {
+            "label": "未完成任务数",
+            "value": "3"
+          },
+          {
+            "label": "已完成任务数",
+            "value": "7"
+          }
+        ],
+        "rows": [],
+        "scope": "合成验收范围",
+        "data_as_of": "2026-09-24T08:00:00+08:00"
+      },
+      "elapsed_ms": 1930
+    },
+    {
+      "case": "chatbi_missing",
+      "capability": "chatbi",
+      "passed": true,
+      "answer": {
+        "title": "本月回款金额",
+        "summary": "当前资料未提供本月回款金额。",
+        "metrics": [],
+        "rows": [],
+        "scope": "合成验收范围",
+        "data_as_of": "2026-09-24T08:00:00+08:00"
+      },
+      "validated": {
+        "title": "本月回款金额",
+        "summary": "当前资料未提供本月回款金额。",
+        "metrics": [],
+        "rows": [],
+        "scope": "合成验收范围",
+        "data_as_of": "2026-09-24T08:00:00+08:00"
+      },
+      "elapsed_ms": 1292
+    },
+    {
+      "case": "risks_budget",
+      "capability": "personal_risks",
+      "passed": true,
+      "answer": {
+        "title": "客户经营风险识别报告",
+        "summary": "基于最近一次拜访记录，发现预算审批停滞风险。需跟进财务审批进度以确认采购可行性。",
+        "risks": [
+          {
+            "source_visit_id": "22222222-2222-4222-8222-222222222222",
+            "risk_type": "budget_risk",
+            "title": "预算未获批导致采购停滞",
+            "description": "客户明确表示项目预算尚未获得批准，采购动作依赖于后续财务审批结果，当前存在资金到位的不确定性。",
+            "severity": "high",
+            "due_at": null,
+            "evidence_detail": "follow_up_record: '客户明确表示本项目预算未获批准，需财务审批后才能采购。'",
+            "suggested_action": "跟进财务审批流程状态，确认预计批复时间及所需补充材料。"
+          }
+        ]
+      },
+      "validated": {
+        "title": "客户经营风险识别报告",
+        "summary": "基于最近一次拜访记录，发现预算审批停滞风险。需跟进财务审批进度以确认采购可行性。",
+        "risks": [
+          {
+            "source_visit_id": "22222222-2222-4222-8222-222222222222",
+            "risk_type": "budget_risk",
+            "title": "预算未获批导致采购停滞",
+            "description": "客户明确表示项目预算尚未获得批准，采购动作依赖于后续财务审批结果，当前存在资金到位的不确定性。",
+            "severity": "high",
+            "due_at": null,
+            "evidence_detail": "follow_up_record: '客户明确表示本项目预算未获批准，需财务审批后才能采购。'",
+            "suggested_action": "跟进财务审批流程状态，确认预计批复时间及所需补充材料。"
+          }
+        ]
+      },
+      "elapsed_ms": 2010
+    },
+    {
+      "case": "risks_empty",
+      "capability": "personal_risks",
+      "passed": true,
+      "answer": {
+        "title": "客户经营风险识别",
+        "summary": "当前无历史拜访与跟进记录，无法识别具体风险点。请补充至少一次有效拜访或跟进事实以支持分析。",
+        "risks": []
+      },
+      "validated": {
+        "title": "客户经营风险识别",
+        "summary": "当前无历史拜访与跟进记录，无法识别具体风险点。请补充至少一次有效拜访或跟进事实以支持分析。",
+        "risks": []
+      },
+      "elapsed_ms": 1187
+    },
+    {
+      "case": "tasks_original_deadline",
+      "capability": "today_tasks",
+      "passed": true,
+      "answer": {
+        "title": "今日待办",
+        "summary": "1项跟进：1个已过期测试方案提交。",
+        "ordered_items": [
+          {
+            "source_type": "visit_follow_up",
+            "source_id": "22222222-2222-4222-8222-222222222222",
+            "due_at": "2026-09-22T17:00:00+08:00",
+            "priority": "urgent",
+            "reason": "测试方案提交期限已过，需立即处理。"
+          }
+        ]
+      },
+      "validated": {
+        "title": "今日待办",
+        "summary": "1项跟进：1个已过期测试方案提交。",
+        "ordered_items": [
+          {
+            "source_type": "visit_follow_up",
+            "source_id": "22222222-2222-4222-8222-222222222222",
+            "priority": "urgent",
+            "due_at": "2026-09-22T17:00:00+08:00",
+            "reason": "测试方案提交期限已过，需立即处理。"
+          }
+        ]
+      },
+      "elapsed_ms": 1614
+    },
+    {
+      "case": "tasks_empty",
+      "capability": "today_tasks",
+      "passed": true,
+      "answer": {
+        "title": "今日待办",
+        "summary": "当前无本人跟进任务或候选拜访。",
+        "ordered_items": []
+      },
+      "validated": {
+        "title": "今日待办",
+        "summary": "当前无本人跟进任务或候选拜访。",
+        "ordered_items": []
+      },
+      "elapsed_ms": 1088
+    }
+  ]
+}

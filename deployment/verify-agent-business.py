@@ -68,6 +68,35 @@ def coaching_cases():
     return cases
 
 
+def workbench_cases():
+    from sales_backend.domain.follow_up_schedule import deadline_context
+
+    cutoff = "2026-09-24T08:00:00+08:00"
+    visit_id = "22222222-2222-4222-8222-222222222222"
+    candidate = {"source_type": "visit_follow_up", "source_id": visit_id,
+                 "interaction_at": "2026-09-20T02:00:00+00:00", "visit_date": "2026-09-20",
+                 "recorder_name": "销售甲", "next_action": "销售甲于2026年9月22日提交测试方案。"}
+    candidate["deadline"] = deadline_context(candidate)
+    return [
+        {"name": "chatbi_counts", "capability": "chatbi", "text": "有多少未完成任务和已完成任务？",
+         "facts": {"data_as_of": cutoff, "scope": {"scope_label": "合成验收范围"},
+                   "summary": {"customers": 2, "open_opportunities": 1, "open_tasks": 3,
+                               "completed_tasks": 7, "open_risks": 0, "open_pipeline_amount_cny": 80000}}},
+        {"name": "chatbi_missing", "capability": "chatbi", "text": "本月回款是多少？",
+         "facts": {"data_as_of": cutoff, "summary": {}, "scope": {"scope_label": "合成验收范围"}}},
+        {"name": "risks_budget", "capability": "personal_risks", "text": "识别资料中的风险。",
+         "facts": {"data_as_of": cutoff, "visits": [
+             {"source_visit_id": visit_id, "follow_up_record": "客户明确表示本项目预算未获批准，需财务审批后才能采购。",
+              "next_action": "9月27日前销售确认财务审批流程。"}]}},
+        {"name": "risks_empty", "capability": "personal_risks", "text": "识别资料中的风险。",
+         "facts": {"data_as_of": cutoff, "visits": []}},
+        {"name": "tasks_original_deadline", "capability": "today_tasks", "text": "排列本人待办，不改变来源日期。",
+         "facts": {"data_as_of": cutoff, "active_tasks": [], "follow_up_candidates": [candidate]}},
+        {"name": "tasks_empty", "capability": "today_tasks", "text": "排列本人待办。",
+         "facts": {"data_as_of": cutoff, "active_tasks": [], "follow_up_candidates": []}},
+    ]
+
+
 def check(case, answer):
     if case["capability"] in {"opportunity_advice", "visit_advice"}:
         from sales_backend.domain.advice import validate_advice
@@ -90,7 +119,29 @@ def check(case, answer):
                    "visit_entry" if case["capability"] == "visit_quality" else case["capability"],
                    None, ACTOR)
     clean = validate_run_result(run, answer, case["facts"])
-    if case["name"] == "opportunity_create":
+    if case["capability"] == "chatbi":
+        assert clean["scope"] == "合成验收范围"
+        assert clean["data_as_of"] == case["facts"]["data_as_of"]
+        if case["name"] == "chatbi_counts":
+            values = {item["value"] for item in clean["metrics"]}
+            assert any("3" in value for value in values) and any("7" in value for value in values)
+        else:
+            assert not clean["metrics"], "Missing collection data must not become a numeric metric"
+            text = json.dumps(clean, ensure_ascii=False)
+            assert not any(token in text for token in ("facts", "collected_amount", "payment_received"))
+    elif case["capability"] == "personal_risks":
+        if case["name"] == "risks_empty":
+            assert clean["risks"] == []
+        else:
+            assert any(item["risk_type"] == "budget_risk" for item in clean["risks"])
+            assert all(item.get("due_at") is None for item in clean["risks"]), "Fixture gives no clock time"
+    elif case["capability"] == "today_tasks":
+        if case["name"] == "tasks_empty":
+            assert clean["ordered_items"] == []
+        else:
+            assert len(clean["ordered_items"]) == 1
+            assert clean["ordered_items"][0]["due_at"] == case["facts"]["follow_up_candidates"][0]["deadline"]["due_at"]
+    elif case["name"] == "opportunity_create":
         assert clean["action"] == "create"
         assert clean["amount"] == 80000 and clean["probability"] == 50
         assert clean["expected_close_date"] == "2026-12-20"
@@ -112,7 +163,8 @@ def check(case, answer):
 
 async def run(bindings, output, suite, case_names=None):
     results = []
-    cases = list(CASES) if suite == "core" else coaching_cases()
+    cases = {"core": lambda: list(CASES), "coaching": coaching_cases,
+             "workbench": workbench_cases}[suite]()
     if case_names:
         if set(case_names) - {case["name"] for case in cases}:
             raise ValueError("Unknown case for selected suite")
@@ -158,7 +210,7 @@ async def run(bindings, output, suite, case_names=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--suite", choices=("core", "coaching"), default="core")
+    parser.add_argument("--suite", choices=("core", "coaching", "workbench"), default="core")
     parser.add_argument("--case", action="append", dest="case_names")
     args = parser.parse_args()
     if os.geteuid() != 0 or socket.gethostname() != "salesbuddy":
