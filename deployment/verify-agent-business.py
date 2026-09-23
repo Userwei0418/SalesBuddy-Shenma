@@ -73,6 +73,10 @@ def check(case, answer):
         from sales_backend.domain.advice import validate_advice
         clean = validate_advice(answer, case["facts"])
         assert bool(clean["suggestions"]) is not case["empty"]
+        if case["capability"] == "opportunity_advice":
+            # The fixture supplies a data cutoff but no visit date.
+            text = json.dumps(clean, ensure_ascii=False)
+            assert not any(date in text for date in ("9月24日", "2026-09-24", "9/24", "09/24"))
         return clean
     if case["capability"] == "competency_review":
         from sales_backend.domain.competency_review import validate_competency_result
