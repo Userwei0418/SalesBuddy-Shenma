@@ -35,7 +35,53 @@ CASES = [
 ]
 
 
+def coaching_cases():
+    from sales_backend.domain.advice import messages
+    from sales_backend.services.competency_reviews import CompetencyReviewHandler
+
+    visit = {"id": "22222222-2222-4222-8222-222222222222",
+             "follow_up_record": "客户同意安排试点，但试点范围、验收标准和负责人尚未确认。",
+             "next_action": "9月27日前与客户确认试点范围、验收标准和负责人。"}
+    cases = []
+    for kind, empty in [("opportunity", False), ("visit", False), ("visit", True)]:
+        subject = ({"id": "33333333-3333-4333-8333-333333333333", "name": "合成试点商机",
+                    "status": "open", "amount": 80000} if kind == "opportunity" else
+                   {**visit, **({"follow_up_record": "", "next_action": ""} if empty else {})})
+        facts = {"subject": subject, "records": {"visits": [visit]} if kind == "opportunity" else {},
+                 "actor_context": {"role": "sales"}, "data_as_of": "2026-09-24T08:00:00+08:00"}
+        cases.append({"name": kind + ("_empty" if empty else "_advice"), "capability": kind + "_advice",
+                      "text": "仅根据所给资料给出建议。", "facts": facts, "empty": empty,
+                      "backend_prompt": messages(kind, "overview", facts)[0].content})
+    framework = {"dimensions": [{"code": f"dimension_{i}", "name": name, "weight": 1}
+                                for i, name in enumerate(["需求洞察", "决策链经营", "方案沟通", "商机推进",
+                                                          "客户关系", "跟进执行"])]}
+    for empty in [False, True]:
+        facts = {"framework": framework, "visits": [] if empty else [
+            {"visit_id": visit["id"], "follow_up_record": visit["follow_up_record"],
+             "next_action": visit["next_action"]}], "visit_count": 0 if empty else 1,
+                 "review_date": "2026-09-24", "window_days": 30,
+                 "data_as_of": "2026-09-24T08:00:00+08:00"}
+        cases.append({"name": "competency_empty" if empty else "competency_review",
+                      "capability": "competency_review", "text": "按给定六维框架进行证据化复盘。",
+                      "facts": facts, "empty": empty,
+                      "backend_prompt": CompetencyReviewHandler._messages(framework, facts)[0].content})
+    return cases
+
+
 def check(case, answer):
+    if case["capability"] in {"opportunity_advice", "visit_advice"}:
+        from sales_backend.domain.advice import validate_advice
+        clean = validate_advice(answer, case["facts"])
+        assert bool(clean["suggestions"]) is not case["empty"]
+        return clean
+    if case["capability"] == "competency_review":
+        from sales_backend.domain.competency_review import validate_competency_result
+        clean = validate_competency_result(answer, case["facts"]["framework"], case["facts"])
+        if case["empty"]:
+            assert all(not dimension["evidence"] for dimension in clean["dimensions"])
+        else:
+            assert any(dimension["evidence"] for dimension in clean["dimensions"])
+        return clean
     run = RunInput("synthetic-contract-run", "synthetic-contract-conversation", case["text"],
                    "visit_entry" if case["capability"] == "visit_quality" else case["capability"],
                    None, ACTOR)
@@ -60,15 +106,21 @@ def check(case, answer):
     return clean
 
 
-async def run(bindings, output):
+async def run(bindings, output, suite, case_names=None):
     results = []
-    cases = list(CASES)
+    cases = list(CASES) if suite == "core" else coaching_cases()
+    if case_names:
+        if set(case_names) - {case["name"] for case in cases}:
+            raise ValueError("Unknown case for selected suite")
+        cases = [case for case in cases if case["name"] in case_names]
     for case in cases:
         binding = bindings[case["capability"]]
         config = FdeConfig("https://ops-salesbuddy.shenzhoukuntai.com:18899/v1", binding["api_key"],
                            "agent_final", timeout_seconds=30, ca_bundle_path="/etc/shenma-sales/agent-ca.pem")
         query = {"mode": case["capability"], "role": "sales", "user_text": case["text"],
                  "current_time": case["facts"]["data_as_of"], "facts": case["facts"]}
+        if "backend_prompt" in case:
+            query["backend_prompt"] = case["backend_prompt"]
         result = {"case": case["name"], "capability": case["capability"], "passed": False}
         started = monotonic()
         try:
@@ -94,6 +146,7 @@ async def run(bindings, output):
         print(json.dumps({k: v for k, v in result.items() if k not in {"answer", "validated"}},
                          ensure_ascii=False), flush=True)
     json.dump({"service_uid": os.getuid(), "synthetic_only": True, "business_writes": False,
+               "validation_scope": "domain contracts and explicit case assertions; semantic review is separate",
                "results": results}, output, ensure_ascii=False, indent=2)
     return all(item["passed"] for item in results)
 
@@ -101,6 +154,8 @@ async def run(bindings, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--suite", choices=("core", "coaching"), default="core")
+    parser.add_argument("--case", action="append", dest="case_names")
     args = parser.parse_args()
     if os.geteuid() != 0 or socket.gethostname() != "salesbuddy":
         raise SystemExit("Run as root on customer salesbuddy only")
@@ -111,7 +166,7 @@ def main():
     os.setgid(service.pw_gid)
     os.setuid(service.pw_uid)
     with os.fdopen(fd, "w") as output:
-        passed = asyncio.run(run(bindings, output))
+        passed = asyncio.run(run(bindings, output, args.suite, args.case_names))
     raise SystemExit(0 if passed else 1)
 
 
