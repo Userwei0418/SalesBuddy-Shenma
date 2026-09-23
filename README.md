@@ -20,4 +20,4 @@
 
 模型接入与后续替换见 [模型配置](docs/MODELS.md)。
 
-2026-09-24：销售运行 d287330 / V125，中台已发布 12 个销售 Agent，4 项核心能力限管理员试点；尚待可信证书、客户 AppID 和其余业务验收。详见 [部署记录](docs/DEPLOYMENT.md)、[核心能力验收](docs/CORE_AGENT_ACCEPTANCE.md)、[辅导建议验收](docs/COACHING_ACCEPTANCE.md)。
+2026-09-24：销售运行 7c7a376 / V125，中台已发布 12 个销售 Agent，4 项核心能力限管理员试点；尚待可信证书、客户 AppID 和其余业务验收。详见 [部署记录](docs/DEPLOYMENT.md)、[核心能力验收](docs/CORE_AGENT_ACCEPTANCE.md)、[辅导建议验收](docs/COACHING_ACCEPTANCE.md)。
