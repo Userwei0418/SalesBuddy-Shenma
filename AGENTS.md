@@ -6,7 +6,7 @@
 - 每次实施核对 cwd、origin、分支、HEAD 和工作区；部署核对目标主机名、内网 IP 和 SSH 端口。
 - 销售主机：salesbuddy@223.76.131.120:32222，内网 172.22.9.234；销售 API、管理端、Worker、PostgreSQL、文件同机。
 - 中台主机：opsbuddy@223.76.131.120:12222，内网 172.22.9.233；中台及自己的数据库/缓存。
-- 已确认公网地址：销售 https://salesbuddy.shenzhoukuntai.com:28899；中台 https://ops-salesbuddy.shenzhoukuntai.com:18899。证书采用 DNS-01，待客户 DNS 自动验证权限；公网 80/443 不是当前方案的前置要求。禁止从本项目调用原环境进行验收写入。
+- 已确认公网地址：销售 https://salesbuddy.shenzhoukuntai.com:28899；中台 https://ops-salesbuddy.shenzhoukuntai.com:18899。证书采用 DNS-01，由对方运维配置 DNS 验证与自动续期；公网 80/443 不是当前方案的前置要求。禁止从本项目调用原环境进行验收写入。
 - 不复制商汤用户、业务数据、凭据、飞书表/群绑定、中台账号及运行 Key。默认新公司、新数据库；Agent 提示词模板须逐项发布并验证。
 - 客户 AppID 待提供；不得使用商汤 AppID 上传。本任务授权不包含微信正式审核发布。
 - API/Worker 运行角色 NOSUPERUSER、NOBYPASSRLS，维护角色仅用于迁移；不得靠放宽权限跳过问题。

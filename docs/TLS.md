@@ -7,18 +7,15 @@
 - 两台已安装 Certbot 1.21.0，`certbot.timer` 为 enabled/active，每天检查两次；证书成功续期后由部署钩子校验并重载 HTTPS。
 - 销售 28899 已通过临时公共证书验证并返回正确 API 版本；正式可信证书尚未签发。中台仍在安装。
 - 曾运行 HTTP-01 测试，Let's Encrypt 测试 CA 对两个域名均返回公网 80 连接超时。现已改选 DNS-01，这一结果不再作为当前方案的阻断条件。
-- 权威 DNS 查询为 `dns13.hichina.com`、`dns14.hichina.com`，对应阿里云/万网解析。目前没有客户 DNS API 授权，DNS 验证客户端尚未配置，真实续期演练尚未通过。
+- 权威 DNS 查询为 `dns13.hichina.com`、`dns14.hichina.com`，对应阿里云/万网解析。DNS 验证及首次签发待对方运维配置，真实续期演练尚未通过。
 
-## 客户只需配合 DNS 授权
+## 对方运维负责证书与 DNS 自动验证
 
-由域名管理员提供专用 RAM 用户的云解析 API 授权，或将以下验证名称委派到可自动管理的独立验证区域：
+用户已明确不采用向我们交付 DNS 管理权限的方式。由对方域名/服务器运维申请两个域名的正式证书，在各客户服务器配置 DNS 验证和无人值守续期，凭据由对方保管；我们负责服务部署、提供已安装的续期重载钩子并联合验收。
 
-- `_acme-challenge.salesbuddy.shenzhoukuntai.com`
-- `_acme-challenge.ops-salesbuddy.shenzhoukuntai.com`
+验证名称为 `_acme-challenge.salesbuddy.shenzhoukuntai.com` 与 `_acme-challenge.ops-salesbuddy.shenzhoukuntai.com`。请对方复用 Certbot 时，分别以本机完整域名作为 `--cert-name`，将其自行管理的 DNS 验证参数写入对应续期配置。无需向我们提供 DNS 账号、API 授权链接或主账号权限。
 
-我们负责创建/清理验证 TXT、签发证书、配置续期和验收。阿里云权限细分到域名粒度；若要隔离至特定验证名称，需要独立子域或委派，不能声称普通域中的两条 TXT 已得到记录级 RAM 隔离。无需主账号或其他云资源权限。凭据只在客户服务器私有配置中保存，不进入仓库、镜像或交付包。
-
-授权参考：[阿里云云解析自定义权限](https://help.aliyun.com/zh/dns/alibaba-cloud-dns-custom-permission-policy-reference-dns)。仅手工添加一次 TXT 不能满足无人值守续期；获得实际授权方式后再配置对应客户端，不写入虚构的 API 凭据。
+对方可直接复用已有 `certbot.timer` 和部署钩子。若使用其他客户端，应配置等效的自动更新服务证书及 Nginx 重载，不能只完成首次签发。验收需包含真实续期演练。
 
 ## 首次签发与验收
 
