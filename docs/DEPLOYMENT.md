@@ -14,7 +14,7 @@
 
 ## 销售系统实际状态
 
-部署源码：`7ca20056d01c45edbac8ac40d2fa2a837a3e624a`，对应通过 CI 的 PR #1 内容；维护主线已合并为 `aa8444e`。运行目录为 `/opt/shenma-sales/current`，指向 `/opt/shenma-sales/releases/7ca20056d01c45edbac8ac40d2fa2a837a3e624a`。
+部署源码：`7ca20056d01c45edbac8ac40d2fa2a837a3e624a`，对应通过 CI 的 PR #1 内容（当时合并提交 `aa8444e`）；后续部署脚本和文档独立在仓库 main 维护。运行目录为 `/opt/shenma-sales/current`，指向 `/opt/shenma-sales/releases/7ca20056d01c45edbac8ac40d2fa2a837a3e624a`。
 
 | 项目 | 已验证结果 |
 |---|---|
@@ -49,11 +49,19 @@
 
 `agent-platform/runtime/build/web/web-code.tgz` 为 127MB 编译产物，位于原始 Release 安装包，不入 Git。原始 installer 的 SHA256SUMS 对原始文件有效；客户修改须使用新的构建清单，不能直接替换文件后沿用原清单。
 
+## Let's Encrypt 与自动续期
+
+2026-09-23 两机均安装 Certbot 1.21.0，`certbot.timer` 已 enabled/active，每日两次自动检查。宿主机 Nginx 的 HTTP 验证路径通过本机及两机内网互访；部署钩子的替换、失败恢复、无关证书隔离 3 项检查在本地和两台机器通过。手动触发 `certbot.service` 正常退出；因尚无正式证书，此次属于空配置执行，不是真实续期验收。
+
+两机部署钩子 SHA256 均为 `074a9295a2cb03562fc50678f24ba484ebba5bfd05888f499a8d21e9c055273b`。销售 API、Worker、HTTPS 在配置后保持 active，版本接口仍返回上述 7ca20056 / V125。
+
+正式证书尚未签发。随后两台实际运行 `certbot certonly --dry-run`，测试 CA 对两个域名均返回 `Timeout during connect`，确认无法从公网 80 下载验证文件。日志在各服务器 `/var/log/shenma-acme-staging-check.log`。公网两个域名的 80/443 仍超时，需客户网关提供验证与 HTTPS 转发；签发及实际续期演练见 [TLS.md](TLS.md)。
+
 ## 待外部输入
 
 - 客户小程序 AppID：用户稍后提供。
 - 客户可用模型配置/额度：等待接入方式确认；不自行使用商汤 Key。
-- 公网 443 分流和可信证书：等待客户 IT 配合方式。临时本机证书验收不计为正式域名验收。
+- 公网 80 验证入口与 443 分流：等待客户网关配置；Let's Encrypt 证书由本项目申请和续期。临时本机证书验收不计为正式域名验收。
 - 中台完整 Web 开发源码：待补；不阻止先运行已有发行包。
 
 ## 中台离线安装方式
