@@ -1,0 +1,10 @@
+{
+  "synthetic_only": true,
+  "service_uid": 998,
+  "model": "senseaudio-asr-lite-1.5-260319",
+  "audio_sha256": "359ae2e8e24c67c252fac5b810e483da982cf23ebcc1e1a59bc942e4c10517b0",
+  "input_duration_seconds": 7.8934375,
+  "transcript": "这是神码部署验收的合成录音，客户同意安排产品演示，下一步确认演示时间。",
+  "passed": true,
+  "elapsed_ms": 2856
+}

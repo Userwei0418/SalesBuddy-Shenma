@@ -1,0 +1,16 @@
+{
+  "synthetic_only": true,
+  "service_uid": 998,
+  "model": "senseaudio-tts-1.5-260319",
+  "voice_id": "male_0028_a",
+  "voice_source": "provider system_voice list",
+  "input_text": "这是部署验收的合成语音，下一步确认演示时间。",
+  "format": "mp3",
+  "sample_rate": 32000,
+  "bytes": 82697,
+  "audio_sha256": "fd95c1e5b13b251432f3034130575048552fa1201b5dc786f0d489dd43004161",
+  "synthesis_elapsed_ms": 1706,
+  "roundtrip_transcript": "这是部署验收的合成语音，下一步确认演示时间。",
+  "passed": true,
+  "playback_listening_verified": false
+}

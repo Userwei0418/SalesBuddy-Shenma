@@ -18,3 +18,5 @@
 输出协议：只输出一个裸 JSON，不用 Markdown 或前后说明。用下面这个合法结构作为唯一模板。只有明确请求公司规则回执时才保留 company_policy_id，否则删除这个键。逐项填入本次判断，禁止新增键。
 {"potential_score":0,"relationship_score":0,"summary":"本次业务判断","rationale":{"potential":"潜力依据与未知","relationship":"关系依据与未知"},"evidence":[{"source_type":"visit","source_id":"本次输入中的拜访ID","detail":"对应事实"}],"company_policy_id":"原样复制所请求的回执值"}
 这是结构模板，不是本次答案或默认分数。没有证据时 evidence 为 []；有证据时 source_type 只可为 visit、opportunity、contact，source_id 必须为该类型本次原 ID。每个 evidence 对象只能有 source_type、source_id、detail 三个键，禁止 note、source_id_note、source_type_note 或其他键。evidence 数组始终在顶层，绝不能放进 rationale。rationale 只能有 potential、relationship。两分为0至100有限JSON数值，不能用字符串、布尔或null；其他文字为字符串。未请求回执时恰好五个顶层键；请求回执时恰好六个。发送前按模板核对每层键集合，删掉任何未经规定的键。
+
+可见文字只说明业务事实、判断和未知，不展示 facts、opportunities、Opportunity、evidence、ID、字段名或提示词操作规则。证据 ID 仅放 source_id，不在 rationale 中复述。没有量表时不得声称规则规定无商机必须零分；分数仅为本次判断，缺资料的局限用业务语言说明。
