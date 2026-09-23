@@ -1,0 +1,232 @@
+{
+  "service_uid": 998,
+  "synthetic_only": true,
+  "business_writes": false,
+  "results": [
+    {
+      "case": "opportunity_create",
+      "capability": "opportunity_draft",
+      "passed": true,
+      "answer": {
+        "action": "create",
+        "opportunity_id": "",
+        "name": "传感器试点",
+        "probability": 50,
+        "status": "open",
+        "expected_close_date": "2026-12-20",
+        "amount": 80000,
+        "partner_name": "",
+        "product_line": "",
+        "rationale": "原文明示为合成验收客户新增独立项目，名称为传感器试点。金额明确为80000元，概率50%对应方案沟通阶段，预计关单日明确为2026年12月20日。当前无已有商机列表，确认为新建。",
+        "title": "新建商机候选",
+        "summary": "新建传感器试点项目，ACV 80000元，方案沟通阶段，预计2026-12-20关单。",
+        "missing_fields": []
+      },
+      "validated": {
+        "action": "create",
+        "opportunity_id": "",
+        "name": "传感器试点",
+        "probability": 50,
+        "status": "open",
+        "expected_close_date": "2026-12-20",
+        "amount": 80000.0,
+        "partner_name": "",
+        "product_line": "",
+        "rationale": "原文明示为合成验收客户新增独立项目，名称为传感器试点。金额明确为80000元，概率50%对应方案沟通阶段，预计关单日明确为2026年12月20日。当前无已有商机列表，确认为新建。",
+        "title": "新建商机候选",
+        "summary": "新建传感器试点项目，ACV 80000元，方案沟通阶段，预计2026-12-20关单。",
+        "missing_fields": [],
+        "prompt_version": "opportunity-candidate-v2-20260910"
+      },
+      "elapsed_ms": 2314
+    },
+    {
+      "case": "opportunity_none",
+      "capability": "opportunity_draft",
+      "passed": true,
+      "answer": {
+        "action": "none",
+        "opportunity_id": "",
+        "name": "",
+        "probability": null,
+        "status": null,
+        "expected_close_date": null,
+        "amount": null,
+        "partner_name": "",
+        "product_line": "",
+        "rationale": "原文仅表示维护日常客户关系，无新增项目或更新意图。",
+        "title": "本次不关联商机",
+        "summary": "未识别到具体商机创建或更新目标。",
+        "missing_fields": []
+      },
+      "validated": {
+        "action": "none",
+        "opportunity_id": "",
+        "name": "",
+        "probability": null,
+        "status": null,
+        "expected_close_date": null,
+        "amount": null,
+        "partner_name": "",
+        "product_line": "",
+        "rationale": "原文仅表示维护日常客户关系，无新增项目或更新意图。",
+        "title": "本次不关联商机",
+        "summary": "未识别到具体商机创建或更新目标。",
+        "missing_fields": [],
+        "prompt_version": "opportunity-candidate-v2-20260910"
+      },
+      "elapsed_ms": 1540
+    },
+    {
+      "case": "visit_repeat",
+      "capability": "visit_entry",
+      "passed": true,
+      "answer": {
+        "fields": {
+          "follow_up_record": "2026年9月24日与王经理沟通。客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点。",
+          "next_action": "2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+          "customer_name": "合成验收客户",
+          "customer_type": "",
+          "opportunity_name": "",
+          "partner_name": "",
+          "interaction_at": "2026-09-24",
+          "created_date": "2026-09-24",
+          "contact_name": "王经理",
+          "contact_title": "",
+          "interaction_mode": "",
+          "visit_location": "",
+          "visit_goal": "",
+          "is_first_visit": false,
+          "customer_main_business": "",
+          "customer_needs": "",
+          "customer_budget": "",
+          "contact_role": ""
+        },
+        "summary": "2026-09-24记录：客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点；计划2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。"
+      },
+      "validated": {
+        "fields": {
+          "customer_name": "合成验收客户",
+          "customer_type": "客户",
+          "opportunity_name": "",
+          "follow_up_record": "2026年9月24日与王经理沟通。客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点。",
+          "next_action": "2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+          "interaction_at": "2026-09-24",
+          "created_date": "2026-09-24",
+          "contact_name": "王经理",
+          "partner_name": "",
+          "contact_title": "",
+          "interaction_mode": "",
+          "visit_location": "",
+          "visit_goal": "",
+          "customer_main_business": "",
+          "customer_needs": "",
+          "customer_budget": "",
+          "contact_role": "",
+          "is_first_visit": false
+        },
+        "summary": "2026-09-24记录：客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点；计划2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+        "visit_stage": "structure",
+        "prompt_version": "visit-split-v1"
+      },
+      "elapsed_ms": 2615
+    },
+    {
+      "case": "visit_quality",
+      "capability": "visit_quality",
+      "passed": true,
+      "answer": {
+        "fields": {
+          "customer_name": "合成验收客户",
+          "customer_type": "客户",
+          "opportunity_name": "",
+          "follow_up_record": "2026年9月24日与王经理沟通。客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点。",
+          "next_action": "2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+          "interaction_at": "2026-09-24",
+          "created_date": "2026-09-24",
+          "contact_name": "王经理",
+          "partner_name": "",
+          "contact_title": "",
+          "interaction_mode": "",
+          "visit_location": "",
+          "visit_goal": "",
+          "customer_main_business": "",
+          "customer_needs": "",
+          "customer_budget": "",
+          "contact_role": "",
+          "is_first_visit": false
+        },
+        "summary": "2026-09-24记录：客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点；计划2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+        "quality_review": {
+          "follow_up_score": 85,
+          "suggestions": [
+            "补充明确的业务影响或价值收益，例如说明当前退款规则缺失导致的业务痛点（如客诉率、处理时长等），以及补齐资料后试点预期解决的具体问题。",
+            "细化下一步行动计划，明确“销售提供试点方案”的具体交付物内容（如方案文档、功能清单）及双方对接人，确保行动可执行。",
+            "补充拜访目标（visit_goal）和沟通方式（interaction_mode），以便更完整地记录本次互动的背景与形式。"
+          ],
+          "next_action": {
+            "passed": true,
+            "time_found": true,
+            "goal_or_plan_found": true,
+            "suggestions": []
+          }
+        }
+      },
+      "validated": {
+        "fields": {
+          "customer_name": "合成验收客户",
+          "customer_type": "客户",
+          "opportunity_name": "",
+          "follow_up_record": "2026年9月24日与王经理沟通。客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点。",
+          "next_action": "2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+          "interaction_at": "2026-09-24",
+          "created_date": "2026-09-24",
+          "contact_name": "王经理",
+          "partner_name": "",
+          "contact_title": "",
+          "interaction_mode": "",
+          "visit_location": "",
+          "visit_goal": "",
+          "customer_main_business": "",
+          "customer_needs": "",
+          "customer_budget": "",
+          "contact_role": "",
+          "is_first_visit": false
+        },
+        "summary": "2026-09-24记录：客户测试5条问题，4条准确，1条缺少最新退款规则；同意补齐资料后小范围试点；计划2026年9月27日前销售提供试点方案，王经理提供20条脱敏样本。",
+        "quality_review": {
+          "follow_up_score": 85,
+          "suggestions": [
+            "补充明确的业务影响或价值收益，例如说明当前退款规则缺失导致的业务痛点（如客诉率、处理时长等），以及补齐资料后试点预期解决的具体问题。",
+            "细化下一步行动计划，明确“销售提供试点方案”的具体交付物内容（如方案文档、功能清单）及双方对接人，确保行动可执行。",
+            "补充拜访目标（visit_goal）和沟通方式（interaction_mode），以便更完整地记录本次互动的背景与形式。"
+          ],
+          "next_action": {
+            "passed": true,
+            "time_found": true,
+            "goal_or_plan_found": true,
+            "suggestions": []
+          },
+          "grade": "良好",
+          "admission_policy": {
+            "schema_version": 1,
+            "score_threshold": 60,
+            "inclusive": false,
+            "good_score": 80,
+            "excellent_score": 90,
+            "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+            "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+            "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。",
+            "suggestion_count": 4
+          }
+        },
+        "company_policy": {
+          "definition": {}
+        },
+        "visit_stage": "quality",
+        "prompt_version": "visit-split-v1"
+      },
+      "elapsed_ms": 3203
+    }
+  ]
+}
