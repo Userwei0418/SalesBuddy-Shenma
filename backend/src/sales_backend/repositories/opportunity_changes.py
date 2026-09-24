@@ -63,7 +63,7 @@ async def review_is_pending(connection, event_id):
         "SELECT EXISTS(SELECT 1 FROM crm.business_change b JOIN workflow.notification n "
         "ON n.payload->>'event_id'=b.id::text WHERE b.id=$1::uuid "
         "AND b.actor_user_ref_id=common.current_user_ref_id() AND b.opportunity_id IS NOT NULL "
-        "AND security.has_opportunity_access(b.opportunity_id) "
+        "AND security.authorization_opportunity('opportunity.update',b.opportunity_id) "
         "AND n.payload->'change_review'->>'status'='pending')", event_id,
     )
 

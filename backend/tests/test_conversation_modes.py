@@ -18,9 +18,9 @@ def test_sales_cannot_open_management_task_agent() -> None:
     raise AssertionError("sales must not use management_task agent mode")
 
 
-def test_conversation_api_uses_role_policy_not_hardcoded_sales_chatbi_ban() -> None:
+def test_conversation_api_uses_configured_action_not_hardcoded_role_ban() -> None:
     source = getsource(assistant.create_conversation)
-    assert "assert_mode_allowed" in source
+    assert "require_agent_access" in source
     assert "AgentMode.CHATBI" not in source
 
 

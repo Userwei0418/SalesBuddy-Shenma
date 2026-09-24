@@ -5,10 +5,13 @@ from sales_backend.repositories.fde_dashboard import fde_dashboard
 from sales_backend.repositories.tasks import TaskRepository
 
 
-async def fde_analysis_facts(connection, actor, *, personal=False):
-    scope = "self" if personal or actor.role.value == "fde" else "team"
-    board = await fde_dashboard(connection, actor, scope=scope)
-    _, _, _, projects = await scoped_opportunity_ids(connection, actor, scope=scope)
+async def fde_analysis_facts(connection, actor, *, personal=False, permission="agent.operating_report"):
+    from sales_backend.repositories.authorization import AuthorizationRepository
+
+    grants = (await AuthorizationRepository().effective(connection)).for_permission(permission)
+    scope = "self" if personal or not any(g.scope in {"teams", "workspace"} for g in grants) else "team"
+    board = await fde_dashboard(connection, actor, scope=scope, permission=permission)
+    _, _, _, projects = await scoped_opportunity_ids(connection, actor, scope=scope, permission=permission, fde_cohort=True)
     ids = [p["id"] for p in projects]
     opportunities = await connection.fetch(
         "SELECT o.id::text,o.name,o.customer_id::text,c.name AS customer_name,o.status,o.probability,o.amount,"
@@ -23,7 +26,7 @@ async def fde_analysis_facts(connection, actor, *, personal=False):
         "AND status IN ('new','pending','in_progress','escalated') ORDER BY opened_at DESC LIMIT 100",
         ids,
     )
-    tasks = await TaskRepository().list(connection, status=None, customer_id=None, limit=100, fde_view=scope)
+    tasks = await TaskRepository().list(connection, status=None, customer_id=None, limit=100, fde_view="self" if personal else None)
     return {
         "scope": {
             "role": actor.role.value,

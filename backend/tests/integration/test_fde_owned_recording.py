@@ -93,8 +93,14 @@ async def technical_review(connection, owner, opportunity):
     return submitted.model_dump(mode="json")
 
 
-async def test_direct_assignment_is_required_even_when_customer_panorama_or_team_is_readable(connection):
+@pytest.mark.parametrize("channel,partner_name", [("direct", "直销"), ("unknown", None), ("unknown", "历史伙伴")])
+async def test_direct_assignment_is_required_even_when_customer_panorama_or_team_is_readable(connection, channel, partner_name):
     sales, opportunity, people, _ = await fde_fixture(connection)
+    await set_request_context(connection, sales)
+    await connection.execute(
+        "UPDATE crm.opportunity SET sales_channel=$2,partner_name=$3 WHERE id=$1::uuid",
+        opportunity["id"], channel, partner_name,
+    )
     other = await other_project(connection, sales, opportunity)
     first = await actor(connection, people["first"]["code"])
     assert (await capability_snapshot(connection, first))["capabilities"]["visit.create"]
@@ -118,6 +124,10 @@ async def test_direct_assignment_is_required_even_when_customer_panorama_or_team
         )
         assert choices.status_code == 200, choices.text
         assert [row["id"] for row in choices.json()["items"]] == [opportunity["id"]]
+        selected = choices.json()["items"][0]
+        assert selected["sales_channel"] == channel
+        assert selected["partner_name"] == partner_name
+        assert selected["partner_id"] is None
         assert (await client.get("/api/v1/fde/visit-opportunities", params={"opportunity_id": other["id"]})).json()[
             "total"
         ] == 0

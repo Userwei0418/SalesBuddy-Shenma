@@ -5,7 +5,7 @@
 日常修改在本独立仓库进行。测试：在仓库根运行 `node --test frontend/tests/*.test.js`。交付从干净、已提交的代码生成，并记录已核验的后端版本与数据库迁移版本。执行示例：
 
 ```bash
-python3 frontend/scripts/package_frontend.py --output-dir ../output --backend-revision <已部署的完整提交SHA> --database-version V125
+python3 frontend/scripts/package_frontend.py --output-dir ../output --backend-revision <已部署的完整提交SHA> --database-version V151
 ```
 
 代码包包含程序与接口契约，不包含数据库业务数据、账号口令或运行密钥。

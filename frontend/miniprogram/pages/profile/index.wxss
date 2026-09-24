@@ -36,3 +36,5 @@
 .profile-directory-state{margin-top:18rpx;padding:22rpx 24rpx}.profile-directory-loading{font-size:23rpx;line-height:1.7;color:#7891a7}.profile-directory-retry{width:100%;margin:0;padding:0;min-height:48rpx;line-height:1.7;text-align:left;font-size:23rpx;font-weight:500;color:#b36f57;background:transparent;border:0}.profile-directory-retry::after{border:0}
 
 .profile-page .performance-metric-head>label{max-width:none;flex-shrink:0;white-space:nowrap}
+
+.permission-perspectives{display:flex;gap:16rpx;padding:16rpx 32rpx}.permission-perspectives button{flex:1;background:#eef4fa;color:#50657d}.permission-perspectives .selected{background:#207ccc;color:#fff}

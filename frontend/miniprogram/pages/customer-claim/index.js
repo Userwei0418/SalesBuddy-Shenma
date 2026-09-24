@@ -23,6 +23,8 @@ function customerItem(raw) {
 Page({
   data: {
     loading: true, loadingMore: false, submitting: false, query: "",
+    industry: "", claimStatus: "", industryIndex: 0, statusIndex: 0, hasFilters: false,
+    industryOptions: [], statusOptions: [], optionsLoading: false, optionsError: "",
     customers: [], total: null, hasMore: false, nextOffset: null,
     loadError: "", loadMoreError: "", refreshRequired: false, selectedCustomerId: "", resultMessage: "",
   },
@@ -42,6 +44,7 @@ Page({
       if (getApp().guardPage && !getApp().guardPage(this, 'customer-claim')) return;
       if (!getApp().ensureLogin()) return;
       this.refreshOnReturn = false;
+      this.optionsLoaded = false;
       this.setData({ submitting: false, resultMessage: "" });
       return this.loadCustomers(identityChanged ? "" : this.data.query);
     }
@@ -75,25 +78,31 @@ Page({
     const identity = identityKey();
     if (this.directoryIdentity !== identity) {
       this.directoryEpoch = (this.directoryEpoch || 0) + 1;
-      this.setData({ submitting: false, resultMessage: "" });
+      this.optionsLoaded = false;
+      this.setData({ submitting: false, resultMessage: "", industry: "", claimStatus: "",
+        industryIndex: 0, statusIndex: 0, industryOptions: [], statusOptions: [], optionsError: "" });
     }
     this.directoryEpoch = this.directoryEpoch || 1;
     this.directoryIdentity = identity;
-    const request = { id: (this.customerRequestId || 0) + 1, identity, epoch: this.directoryEpoch };
+    const request = { id: (this.customerRequestId || 0) + 1, identity, epoch: this.directoryEpoch,
+      industry: this.data.industry, claimStatus: this.data.claimStatus };
     this.customerRequestId = request.id;
-    this.setData({ query, loading: true, loadingMore: false, customers: [], total: null,
+    this.setData({ query, hasFilters: !!(query || this.data.industry || this.data.claimStatus), loading: true, loadingMore: false, customers: [], total: null,
       hasMore: false, nextOffset: null, selectedCustomerId: "", loadError: "", loadMoreError: "", refreshRequired: false });
     return request;
   },
 
   loadCustomers(query = this.data.query) {
-    return this.fetchCustomers(this.beginCustomers(query), query, 0, false);
+    const request = this.beginCustomers(query);
+    const options = !this.optionsLoaded ? this.loadFilterOptions(request) : Promise.resolve();
+    return Promise.all([this.fetchCustomers(request, query, 0, false), options]);
   },
 
   loadMore() {
     if (this.directoryIdentity !== identityKey()) return this.loadCustomers("");
     if (this.data.loading || this.data.loadingMore || !this.data.hasMore) return Promise.resolve();
-    const request = { id: ++this.customerRequestId, identity: this.directoryIdentity, epoch: this.directoryEpoch };
+    const request = { id: ++this.customerRequestId, identity: this.directoryIdentity, epoch: this.directoryEpoch,
+      industry: this.data.industry, claimStatus: this.data.claimStatus };
     this.setData({ loadingMore: true, loadMoreError: "" });
     return this.fetchCustomers(request, this.data.query, this.data.nextOffset, true);
   },
@@ -102,7 +111,10 @@ Page({
   retryMore() { return this.data.refreshRequired ? this.refreshCustomers() : this.loadMore(); },
 
   fetchCustomers(request, query, offset, append) {
-    return apiClient.listCustomerClaimPool({ q: query, pageSize: PAGE_SIZE, offset }).then(page => {
+    const filters = {};
+    if (request.industry) filters.industry = request.industry;
+    if (request.claimStatus) filters.claimStatus = request.claimStatus;
+    return apiClient.listCustomerClaimPool({ q: query, pageSize: PAGE_SIZE, offset, ...filters }).then(page => {
       if (!this.currentRequest(request)) return;
       const valid = page && Array.isArray(page.items) && page.items.length <= PAGE_SIZE
         && Number.isInteger(page.total) && page.total >= 0 && typeof page.has_more === 'boolean'
@@ -140,7 +152,56 @@ Page({
     }, 250);
   },
 
-  refreshCustomers() { return this.loadCustomers(this.data.query); },
+  refreshCustomers() { this.optionsLoaded = false; return this.loadCustomers(this.data.query); },
+
+  loadFilterOptions(context = { identity: this.directoryIdentity, epoch: this.directoryEpoch }) {
+    const requestId = this.optionsRequestId = (this.optionsRequestId || 0) + 1;
+    const current = () => this.currentIdentity(context) && requestId === this.optionsRequestId;
+    this.setData({ optionsLoading: true, optionsError: "" });
+    return apiClient.listCustomerClaimOptions().then(options => {
+      if (!current()) return;
+      const valid = list => Array.isArray(list) && list.length && list[0].value === ""
+        && list.every(item => item && typeof item.value === 'string' && typeof item.label === 'string' && item.label)
+        && new Set(list.map(item => item.value)).size === list.length;
+      if (!options || !valid(options.industries) || !valid(options.claim_statuses)) {
+        throw new Error("筛选选项数据不完整，请重试");
+      }
+      const industryIndex = options.industries.findIndex(item => item.value === this.data.industry);
+      const statusIndex = options.claim_statuses.findIndex(item => item.value === this.data.claimStatus);
+      this.optionsLoaded = true;
+      this.setData({ industryOptions: options.industries, statusOptions: options.claim_statuses,
+        industryIndex: Math.max(0, industryIndex), statusIndex: Math.max(0, statusIndex),
+        optionsLoading: false, optionsError: "" });
+      // A removed industry must not leave a hidden filter behind after refresh.
+      if (industryIndex < 0 || statusIndex < 0) {
+        this.setData({ industry: industryIndex < 0 ? "" : this.data.industry,
+          claimStatus: statusIndex < 0 ? "" : this.data.claimStatus });
+        return this.loadCustomers(this.data.query);
+      }
+    }).catch(error => {
+      if (!current()) return;
+      this.optionsLoaded = false;
+      this.setData({ optionsLoading: false, optionsError: error.message || "筛选选项加载失败，请重试" });
+    });
+  },
+
+  retryFilterOptions() { return this.loadFilterOptions(); },
+
+  changeIndustry(e) { return this.changeFilter('industry', 'industryIndex', 'industryOptions', e); },
+  changeClaimStatus(e) { return this.changeFilter('claimStatus', 'statusIndex', 'statusOptions', e); },
+  changeFilter(field, indexField, optionsField, e) {
+    if (this.directoryIdentity !== identityKey() || this.data.optionsLoading || this.data.submitting) return;
+    const index = Number(e.detail.value), option = this.data[optionsField][index];
+    if (!Number.isInteger(index) || !option || option.value === this.data[field]) return;
+    this.setData({ [field]: option.value, [indexField]: index, resultMessage: "" });
+    return this.loadCustomers(this.data.query);
+  },
+
+  clearFilters() {
+    if (this.data.submitting) return;
+    this.setData({ industry: "", claimStatus: "", industryIndex: 0, statusIndex: 0, resultMessage: "" });
+    return this.loadCustomers("");
+  },
 
   selectCustomer(e) {
     if (this.data.submitting || this.directoryIdentity !== identityKey()) return;

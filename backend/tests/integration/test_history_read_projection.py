@@ -2,6 +2,7 @@
 from datetime import date
 
 import pytest
+from tests.integration.feishu_fixtures import seed_execute
 
 from sales_backend.repositories.customer_map import CustomerMapRepository
 from sales_backend.repositories.detail_history import DetailHistoryRepository
@@ -22,8 +23,8 @@ async def test_one_visit_is_visible_through_both_opportunities_without_duplicate
     person = await actor(connection, "XS001")
     record = await formal_visit(connection, person, first["customer_id"], "2026-09-21")
     await actor(connection, "OPS001")
-    await connection.execute(
-        """INSERT INTO activity.visit_opportunity(workspace_id,visit_id,opportunity_id)
+    await seed_execute(
+        connection, """INSERT INTO activity.visit_opportunity(workspace_id,visit_id,opportunity_id)
         SELECT workspace_id,$1::uuid,id FROM crm.opportunity WHERE id=ANY($2::uuid[])""",
         record["id"], [first["id"], second["id"]],
     )

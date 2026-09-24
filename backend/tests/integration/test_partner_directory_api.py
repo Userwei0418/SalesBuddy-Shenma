@@ -10,6 +10,9 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_partner_directory_opportunity_roundtrip_and_retirement(connection):
+    from tests.integration.provision import authorize_opportunity_operations
+    from tests.integration.test_operations_claims_sql import actor
+    await authorize_opportunity_operations(connection, await actor(connection, "OPS001"))
     async with await client_for(connection) as client:
         await sign_in(client)
         key = str(uuid4())

@@ -19,6 +19,10 @@ from sales_backend.repositories.task_links import TaskLinkRepository
 from sales_backend.repositories.task_mutations import TaskMutationRepository
 from sales_backend.repositories.task_targets import TaskTargetRepository
 from sales_backend.repositories.tasks import TaskRepository
+from sales_backend.services.authorization import require_permission
+from sales_backend.domain.route_permissions import TASK_EVENTS
+from sales_backend.domain.authorization import ObjectScope
+from sales_backend.repositories.authorization import AuthorizationRepository
 
 
 async def validate_task_links(connection, actor, customer_id=None, opportunity_id=None, association_kind=None):
@@ -58,8 +62,11 @@ class TaskService:
         source_suggestion_id=None,
         association_kind=None,
     ):
-        if actor.role.value not in {"sales", "supervisor", "manager", "fde", "fde_lead", "operations", "administrator"}:
-            raise TaskForbidden("当前账号不能创建任务")
+        permission = "task.create_" + task_association_kind(customer_id, opportunity_id, association_kind)
+        effective = await AuthorizationRepository().effective(connection)
+        own_scope = ObjectScope(actor.workspace_id, actor.user_id,
+            actor.team_ids[0] if actor.team_ids else None, frozenset({actor.user_id}))
+        effective.require(permission, own_scope)
         if due_at.tzinfo is None:
             due_at = due_at.replace(tzinfo=UTC)
         if due_at <= datetime.now(UTC):
@@ -71,6 +78,8 @@ class TaskService:
             connection, actor, account=assignee_account_code, position=target_position,
             opportunity_id=opportunity_id, customer_id=customer_id,
         )
+        if any(target["user_id"] != actor.user_id for target in targets):
+            effective.require("task.assign", own_scope)
         creator_name = await connection.fetchval(
             "SELECT display_name FROM platform.user_ref WHERE id=$1::uuid", actor.user_id
         )
@@ -233,6 +242,7 @@ class TaskService:
         expected_version: int | None = None,
         assignee_account_code: str | None = None,
     ) -> dict[str, Any]:
+        await require_permission(connection, TASK_EVENTS.get(event_type, ""), task_id=task_id)
         if event_type in {"cancel", "reassign"}:
             from sales_backend.services.task_coordination import coordinate_task
             return await coordinate_task(connection, actor=actor, task_id=task_id, event_type=event_type,
@@ -336,9 +346,9 @@ class TaskService:
     async def _require_current_owner_eligibility(connection, actor, task_id):
         if not await connection.fetchval(
             "SELECT EXISTS(SELECT 1 FROM workflow.task_assignee a WHERE a.task_id=$1::uuid "
-            "AND a.assignee_user_ref_id=$2::uuid AND a.responsibility='owner' AND a.assignee_role=$3 "
+            "AND a.assignee_user_ref_id=$2::uuid AND a.responsibility='owner' "
             "AND security.task_recipient_eligible("
             "a.task_id,a.assignee_user_ref_id,a.assignee_role,a.assignee_team_id))",
-            task_id, actor.user_id, actor.role.value,
+            task_id, actor.user_id,
         ):
             raise TaskForbidden("当前账号或岗位资格已变化，任务待交接，请联系发起人或负责人")

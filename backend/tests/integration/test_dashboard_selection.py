@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 import pytest
+from tests.integration.feishu_fixtures import seed_execute
 
 from sales_backend.repositories.dashboard import DashboardRepository
 from sales_backend.repositories.dashboard_scope import dashboard_members
@@ -25,7 +26,7 @@ async def two_teams(connection):
         'UPDATE platform.team_membership SET team_id=$1 WHERE user_ref_id=$2::uuid', north, other.user_id)
     await connection.execute(
         'UPDATE platform.role_binding SET team_id=$1 WHERE user_ref_id=$2::uuid', north, other.user_id)
-    await connection.execute('UPDATE crm.opportunity SET owner_team_id=$1 WHERE id=$2::uuid', north, second['id'])
+    await seed_execute(connection, 'UPDATE crm.opportunity SET owner_team_id=$1 WHERE id=$2::uuid', north, second['id'])
     await connection.execute('UPDATE crm.customer SET owner_team_id=$1 WHERE id=$2::uuid', north, second['customer_id'])
     return first, second, other.user_id
 

@@ -46,7 +46,7 @@ class WorkbenchRepository:
               ORDER BY CASE r.severity_code WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
                        r.opened_at DESC LIMIT 1
             ) risk ON true
-            WHERE c.deleted_at IS NULL
+            WHERE c.deleted_at IS NULL AND security.authorization_customer('overview.read',c.id)
             ORDER BY latest.interaction_at DESC NULLS LAST, c.name
             """
         )
@@ -101,9 +101,9 @@ class WorkbenchRepository:
               count(*) FILTER (WHERE status = 'open' AND standard_probability >= 30) AS qualified_open_count
             FROM standardized
             """,
-            actor.role.value,
+            "overview.read",
             actor.user_id,
-            list(actor.team_ids),
+            actor.workspace_id,
             False,
             quarter_start,
             quarter_start.date(),
@@ -127,7 +127,7 @@ class WorkbenchRepository:
               ) primary_team ON true
               LEFT JOIN platform.team team ON team.id = primary_team.team_id
               LEFT JOIN crm.customer c ON c.id = t.customer_id
-             WHERE t.deleted_at IS NULL
+             WHERE t.deleted_at IS NULL AND security.authorization_task('overview.read',t.id)
                AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review')
              ORDER BY t.due_at, t.created_at DESC
             """
@@ -148,7 +148,10 @@ class WorkbenchRepository:
                 ORDER BY tm.valid_from DESC, tm.id LIMIT 1
               ) primary_team ON true
               LEFT JOIN platform.team team ON team.id = primary_team.team_id
-             WHERE r.deleted_at IS NULL
+             WHERE r.deleted_at IS NULL AND (
+               security.authorization_subject('overview.read','person',r.owner_user_ref_id,NULL)
+               OR (r.owner_user_ref_id IS NULL AND
+                 security.authorization_customer('overview.read',r.customer_id)))
                AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
              ORDER BY CASE r.severity_code
                WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
@@ -161,14 +164,14 @@ class WorkbenchRepository:
                    p.name AS product_name, cp.relationship_status
               FROM crm.customer_product cp
               JOIN crm.product p ON p.id = cp.product_id
-             WHERE cp.deleted_at IS NULL
+             WHERE cp.deleted_at IS NULL AND security.authorization_customer('overview.read',cp.customer_id)
              ORDER BY cp.updated_at DESC
             """
         )
         facts = DashboardRepository()
-        opportunities = await facts.opportunities(connection, actor)
-        quarter_forecasts = await facts.forecasts(connection, actor)
-        recent_visits = await facts.recent_visits(connection, actor)
+        opportunities = await facts.opportunities(connection, actor, permission="overview.read")
+        quarter_forecasts = await facts.forecasts(connection, actor, permission="overview.read")
+        recent_visits = await facts.recent_visits(connection, actor, permission="overview.read")
         metrics = dict(metrics)
         metrics.update(
             opportunities=len(opportunities),

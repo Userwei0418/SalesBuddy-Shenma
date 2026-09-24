@@ -1,6 +1,7 @@
 """Persisted quality reaches every paginated visit without broadening visibility."""
 
 import pytest
+from tests.integration.feishu_fixtures import seed_fetchval
 
 from tests.integration.test_operations_api import client_for
 from tests.integration.test_profile_scores import business_login
@@ -44,8 +45,8 @@ async def test_customer_and_opportunity_pages_preserve_quality_evidence_and_perm
     ]
     expected = {}
     for n, (score, review, summary) in enumerate(cases):
-        visit_id = await connection.fetchval(
-            """INSERT INTO activity.visit(workspace_id,customer_id,opportunity_id,recorder_user_ref_id,
+        visit_id = await seed_fetchval(
+            connection, """INSERT INTO activity.visit(workspace_id,customer_id,opportunity_id,recorder_user_ref_id,
               recorder_team_id,created_by_user_ref_id,form_version_id,status,interaction_at,created_at,
               follow_up_record,next_action,follow_up_score,quality_review)
             VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5::uuid,$4::uuid,

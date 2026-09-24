@@ -34,7 +34,7 @@
     <view class="note-head"><view><text>拜访原始记录</text><label>支持键盘输入与语音转写</label></view><view class="note-tools"><text class="note-count">{{transcript.length}} / 50000</text><button wx:if="{{transcript.length > 0}}" class="note-clear" hover-class="note-clear-pressed" bindtap="clearTranscript" disabled="{{isRecording || isStarting || isStopping}}">一键清空</button></view></view>
     <textarea class="note-input" value="{{transcript}}" disabled="{{isRecording || isProcessing}}" maxlength="50000" auto-height="{{false}}" placeholder="可以说说：这次为什么拜访、客户反馈了什么、接下来准备何时做什么……" bindinput="inputTranscript"></textarea>
     <view class="note-footer">
-      <checkbox-group wx:if="{{!isFde}}" class="first-visit-field" bindchange="toggleFirstVisit">
+      <checkbox-group wx:if="{{canFirstVisit}}" class="first-visit-field" bindchange="toggleFirstVisit">
         <label class="first-visit-option">
           <checkbox value="first" checked="{{isFirstVisit}}" disabled="{{isProcessing}}" color="#1677e8" />
           <view class="first-visit-copy"><text>首次拜访</text><label>AI 将识别必填信息，并在确认页提示补充</label></view>
@@ -61,6 +61,15 @@
       <view class="capture-copy"><text>{{entryMode === 'voice' ? (isRecording ? '正在录音 ' + recordingTime : '说说这次拜访') : '导入已有材料'}}</text><label>{{entryMode === 'voice' ? '结束录音后自动转写' : '支持音频与文档文件'}}</label></view>
       <button wx:if="{{entryMode === 'voice'}}" class="capture-primary" disabled="{{isProcessing || isStarting || isStopping}}" bindtap="toggleRecording">{{isStarting ? '启动中…' : isStopping ? '结束中…' : isRecording ? '结束录音' : '开始录音'}}</button>
       <button wx:else class="capture-primary" disabled="{{isProcessing}}" bindtap="chooseMaterial">{{isProcessing ? '处理中…' : '选择文件'}}</button>
+    </view>
+    <view wx:if="{{entryMode === 'voice'}}" class="recording-guide">
+      <button class="recording-guide-toggle" catchtap="toggleRecordingGuide" aria-expanded="{{recordingGuideVisible}}"><text>录音时可以说些什么</text><text class="recording-guide-action">{{recordingGuideVisible ? '收起 ⌃' : '展开 ⌄'}}</text></button>
+      <view wx:if="{{recordingGuideVisible}}" class="recording-guide-content">
+        <view class="recording-guide-section"><text class="recording-guide-title">每次跟进</text><text class="recording-guide-line">背景：客户名称、实际沟通日期、对接人姓名。</text><text class="recording-guide-line">结果：讨论了什么、客户如何反馈、已达成什么结果。</text><text class="recording-guide-line">下一步：具体哪天、由谁负责、做什么或达成什么目标。</text></view>
+        <view wx:if="{{canFirstVisit || isFirstVisit}}" class="recording-guide-section"><text class="recording-guide-title">首次拜访时</text><text class="recording-guide-line">再说明客户主营业务、客户需求、客户预算和联系人角色。未说清的内容可在确认页补充。</text></view>
+        <view wx:if="{{canCreateOpportunity}}" class="recording-guide-section"><text class="recording-guide-title">本次产生新商机时</text><text class="recording-guide-line">说清项目名称、当前阶段或赢单概率、ACV 金额及单位、预计关单日期，以及直销还是合作伙伴；涉及伙伴时说明名称。</text><text class="recording-guide-line">已有季度回款和确收计划可一起说明，确认页会按所选阶段提示需要补齐的内容。</text><text class="recording-guide-line">如果跟进的是已有商机，说清商机名称，稍后在确认页核对关联。</text></view>
+        <view class="recording-guide-note">只记录已知事实，不确定的信息先留空，核实后补充。转写后请核对文字，并在确认页补齐信息；质检以实际记录内容为准。</view>
+      </view>
     </view>
     <view wx:if="{{fileName}}" class="selected-material">
       <view class="material-line"><text class="material-name">{{fileName}}</text><text class="material-status {{importStatus === 'failed' || importStatus === 'save_failed' ? 'failed' : ''}}">{{localFileTemporary && !isProcessing && !importId ? '未保存，待处理' : importStatus === 'saving' ? '保存中' : importStatus === 'save_failed' ? '保存失败' : importStatus === 'uploading' ? uploadProgress + '%' : importStatus === 'succeeded' ? '已提取' : importStatus === 'failed' ? (importId ? '处理失败' : '上传失败') : '处理中'}}</text></view>

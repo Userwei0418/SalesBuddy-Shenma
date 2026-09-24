@@ -175,8 +175,8 @@ class AgentRunHandler:
                 opportunity_id=business.get("opportunity_id"),
                 permission_version=identity.get("permission_version"),
             )
-            if actor.role.value in {"fde", "fde_lead"} and not identity.get("permission_version"):
-                raise PermissionError("FDE analysis snapshot is missing its permission version")
+            if not identity.get("permission_version"):
+                raise PermissionError("Analysis snapshot is missing its permission version")
             await connection.execute(
                 """
                 UPDATE agent.run SET status = 'running', started_at = COALESCE(started_at, clock_timestamp()),

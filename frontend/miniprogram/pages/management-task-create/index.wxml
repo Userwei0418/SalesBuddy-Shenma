@@ -26,7 +26,7 @@
     </view>
     <view class="section-head"><view><text>任务描述</text><label>说明交付物、完成标准和业务背景</label></view><text>{{descriptionCount}} / 500</text></view>
     <view class="description-card">
-      <textarea value="{{description}}" maxlength="500" placeholder="{{voiceExample}}" auto-height disabled="{{isStarting || isRecording || isStopping || isParsing}}" bindinput="inputDescription" />
+      <textarea value="{{description}}" maxlength="500" placeholder="{{voiceExample}}" auto-height disabled="{{submitting || submissionPending || isStarting || isRecording || isStopping || isParsing}}" bindinput="inputDescription" />
       <view class="task-voice {{isRecording ? 'recording' : ''}} {{isParsing ? 'parsing' : ''}} {{voiceFilled ? 'filled' : ''}}" bindtap="toggleTaskVoice">
         <view class="task-voice-icon"><view class="task-wave"><text></text><text></text><text></text><text></text><text></text></view></view>
         <view class="task-voice-copy">
@@ -38,16 +38,11 @@
       <view class="description-tip"><view>✦</view><text>建议写清交付物、完成标准和关键业务背景</text></view>
     </view>
 
-    <view class="section-head"><view><text>任务负责人</text><label>可选择公司任意有效账号，一人接受并完成</label></view><text>{{members.length}} 人</text></view>
-    <!-- The picker cursor must be valid; a cursor is not a confirmed recipient. -->
-    <picker class="assignee-picker" mode="selector" range="{{members}}" range-key="pickerLabel" value="{{selectedAssigneeIndex < 0 ? 0 : selectedAssigneeIndex}}" disabled="{{!members.length}}" bindchange="changeAssignee">
-      <view class="assignee-select {{selectedMember ? 'selected' : ''}}">
-        <view class="assignee-avatar">{{selectedMember ? selectedMember.initial : '人'}}</view>
-        <view wx:if="{{selectedMember}}" class="assignee-copy"><view>{{selectedMember.name}}<text>{{selectedMember.roleLabel}}</text></view><label>{{selectedMember.team}} · 已开通账号</label></view>
-        <view wx:else class="assignee-copy placeholder"><view>{{recipientLoading ? '正在加载公司人员…' : members.length ? '请选择任务负责人' : '暂无可选负责人'}}</view><label>所有部门 · 公司有效账号</label></view>
-        <view class="assignee-chevron">⌄</view>
-      </view>
-    </picker>
+    <view class="section-head"><view><text>任务负责人</text><label>可多选，每人各一条待办，独立接受和完成</label></view><text>已选 {{selectedMembers.length}} 人</text></view>
+    <view class="assignee-select {{selectedMembers.length ? 'selected' : ''}}" bindtap="openRecipients">
+      <view class="assignee-avatar">人</view><view class="assignee-copy"><view>{{recipientLoading ? '正在加载公司人员…' : '搜索并选择负责人'}}</view><label>{{selectedMembers.length ? selectedNames : '按姓名、账号或部门搜索'}}</label></view><view class="assignee-chevron">⌄</view>
+    </view>
+    <view class="selected-recipients"><view wx:for="{{selectedMembers}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleRecipient">{{item.name}} · {{item.account}} ×</view></view>
 
     <view wx:if="{{recipientError}}" class="task-link-error" bindtap="retryRecipients">{{recipientError}} · 点击重试</view>
 
@@ -71,15 +66,24 @@
       </view>
     </view>
 
-    <view wx:if="{{selectedMember}}" class="delivery-preview">
+    <view wx:if="{{selectedMembers.length}}" class="delivery-preview">
       <view class="preview-icon">✓</view>
-      <view><text>任务将发送给 {{selectedMember.name}}</text><label>{{selectedMember.team}} · {{selectedPriority}}优先级 · 截止{{selectedDue}}</label></view>
+      <view><text>分别发送给 {{selectedNames}}</text><label>{{selectedPriority}}优先级 · 截止{{selectedDue}}</label></view>
     </view>
   </view>
 
 
   <view wx:if="{{selectorOpen}}" class="task-selector-layer"><view class="task-selector-sheet"><view class="task-selector-head"><text>{{selectorKind==='customer'?'选择客户':'选择商机'}}</text><button size="mini" bindtap="closeTaskSelector">关闭</button></view><input class="task-selector-search" value="{{selectorQuery}}" placeholder="{{selectorKind==='customer'?'搜索客户名称':'搜索当前客户的商机'}}" bindinput="searchTaskChoices" maxlength="100"/><scroll-view scroll-y class="task-selector-list" bindscrolltolower="moreTaskChoices"><view wx:for="{{selectorRows}}" wx:key="id" class="task-selector-row" data-id="{{item.id}}" bindtap="chooseTaskLink"><text>{{item.name}}</text><text class="task-link-arrow">选择 ›</text></view><view wx:if="{{selectorLoading}}" class="task-selector-state">正在加载…</view><view wx:elif="{{selectorError}}" class="task-selector-state task-link-error" bindtap="loadTaskChoices">{{selectorError}} · 重试</view><view wx:elif="{{!selectorRows.length}}" class="task-selector-state">{{selectorKind==='customer'?'暂无可关联商机的客户，请调整关键词或先完成商机登记':'暂无可关联的商机，请调整关键词'}}</view><view wx:elif="{{selectorMore}}" class="task-selector-state" bindtap="moreTaskChoices">加载更多</view></scroll-view></view></view>
-  <view class="bottom-bar"><button class="submit {{!selectedMember || descriptionCount < 5 || submitting || isStarting || isRecording || isStopping || isParsing ? 'disabled' : ''}}" bindtap="submitTask">{{submitting ? '正在发送' : '发送任务'}}<text>→</text></button><view>接收人确认后开始执行，也可说明原因拒绝</view></view>
+  <view wx:if="{{recipientOpen}}" class="task-selector-layer"><view class="task-selector-sheet">
+    <view class="task-selector-head"><text>选择负责人 · 已选 {{selectedMembers.length}} 人</text><button size="mini" bindtap="closeRecipients">完成</button></view>
+    <input class="task-selector-search" value="{{recipientQuery}}" placeholder="搜索姓名、账号或部门" bindinput="searchRecipients" maxlength="100" />
+    <scroll-view scroll-y class="task-selector-list"><view wx:for="{{recipientRows}}" wx:key="id" class="member-card {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="toggleRecipient">
+      <view class="member-copy"><text>{{item.name}} · {{item.account}}</text><label>{{item.team || item.team_name || '未填写部门'}} · {{item.roleLabel}}</label></view><view class="member-check">{{item.selected ? '✓' : ''}}</view>
+    </view><view wx:if="{{!recipientRows.length}}" class="task-selector-state">{{recipientError || '没有匹配的负责人，请调整关键词'}}</view></scroll-view>
+    <view class="task-link-note">每人生成独立待办；修改搜索条件会保留已选人员。</view>
+  </view></view>
+  <view wx:if="{{submissionPending && !submitting}}" class="submission-notice">发送结果尚未确认。请点击重试，系统会核对原提交，不会重复派发。</view>
+  <view class="bottom-bar"><button class="submit {{!selectedMembers.length || descriptionCount < 5 || submitting || isStarting || isRecording || isStopping || isParsing ? 'disabled' : ''}}" bindtap="submitTask">{{submitting ? '正在发送' : submissionPending ? '重试确认发送结果' : '发送任务'}}<text>→</text></button><view>接收人确认后开始执行，也可说明原因拒绝</view></view>
 </view>
 
 </block>

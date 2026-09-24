@@ -13,11 +13,12 @@ from sales_backend.integrations.supreme_fde import FdeError, FdeResult, RunIds
 from sales_backend.services import connectivity as module
 from sales_backend.services.connectivity import ConnectivityService, present
 from sales_backend.services.model_api import ModelApiError
-from tests.test_model_api import ACTOR, FakeDB
+from tests.test_model_api import ACTOR
+from tests.authorization_fixtures import configured_database
 
 
 def service():
-    s = ConnectivityService(FakeDB(), get_settings())
+    s = ConnectivityService(configured_database(ACTOR, {"ai.config_test": "workspace"}), get_settings())
     s.repo = SimpleNamespace(
         lock=AsyncMock(), get=AsyncMock(return_value=None), count_recent=AsyncMock(return_value=0), append=AsyncMock(),
         enqueue=AsyncMock(),

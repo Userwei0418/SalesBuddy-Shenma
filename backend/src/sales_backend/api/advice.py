@@ -2,12 +2,12 @@ from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity, get_settings
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.config import Settings
-from sales_backend.contracts.models import TaskCreate
+from sales_backend.contracts.models import TaskBatchCreate, TaskCreate
 from sales_backend.db import Database
 from sales_backend.domain.advice import AdviceError, AdviceRequest
 from sales_backend.domain.concurrency import VersionConflict
@@ -24,6 +24,15 @@ class SuggestionDecision(BaseModel):
     version_no: int = Field(ge=1)
     note: str = Field(default="", max_length=1000)
     task: TaskCreate | None = None
+    tasks: list[TaskCreate] | None = Field(default=None, min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def one_task_form(self):
+        if self.tasks is not None:
+            if self.task is not None or self.decision != "adopted":
+                raise ValueError("多人采纳只传 tasks，不同时传 task；无需待办时不得传任务")
+            TaskBatchCreate(tasks=self.tasks)
+        return self
 
 
 @router.post("", description="请求经营建议。销售未关联商机的拜访可生成日常待办建议；已关联商机的拜访生成客户待办建议。")
@@ -92,6 +101,7 @@ async def decide_suggestion(
                     body.version_no,
                     body.task,
                     runtime,
+                    tasks=body.tasks,
                 ),
             )
     except AdviceError as exc:

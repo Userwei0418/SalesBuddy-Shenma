@@ -1,7 +1,6 @@
 """Portrait metrics are database facts; an Agent supplies read-only coaching."""
 
 from sales_backend.domain.agent import AgentMode
-from sales_backend.domain.capabilities import FDE_ROLES
 from sales_backend.domain.fde_coaching import model_facts
 from sales_backend.domain.fde_profile import CONTRACT_VERSION, DIMENSIONS, TZ, factual_summary
 from sales_backend.repositories import fde_profile
@@ -9,11 +8,6 @@ from sales_backend.repositories.assistant import AssistantRepository
 from sales_backend.repositories.capabilities import CapabilityRepository
 from sales_backend.repositories.collaboration import scope_members
 from sales_backend.services.agent_access import require_agent_access
-
-
-def require_fde(actor):
-    if actor.role.value not in FDE_ROLES:
-        raise PermissionError("此画像仅供FDE查看本人协作情况")
 
 
 def presentation(facts, run=None):
@@ -50,18 +44,22 @@ def presentation(facts, run=None):
 
 
 async def get_profile(connection, actor, days, *, scope="self", member_id=None, team_id=None):
-    require_fde(actor)
+    from sales_backend.services.authorization import require_permission
+
+    await require_permission(connection, "profile.fde_read")
     # A leader's selected member is authorized through the same scope resolver
     # used by map/projects. Selection never changes the request's actor identity.
     effective_scope = "team" if member_id and str(member_id) != actor.user_id else scope
-    _, ids, members = await scope_members(connection, actor, effective_scope, member_id, team_id=team_id)
+    _, ids, members = await scope_members(connection, actor, effective_scope, member_id, team_id=team_id,
+                                            permission="profile.fde_read", fde_cohort=True)
     own = len(ids) == 1 and ids[0] == actor.user_id and scope != "team"
     facts = await fde_profile.profile_facts(
         connection, actor, days, **({} if own else {"member_ids": ids, "team_id": team_id}))
     result = presentation(facts, await fde_profile.matching_run(connection, actor, facts) if own else None)
     selected_id = ids[0] if len(ids) == 1 and (scope != "team" or member_id) else None
     selected_name = next((p["name"] for p in members if p["id"] == selected_id), None)
-    result.update(scope=scope, member_id=selected_id, member_name=selected_name, can_review=own, history=[])
+    can_review = own and bool(await connection.fetchval("SELECT security.authorization_has('profile.fde_review')"))
+    result.update(scope=scope, member_id=selected_id, member_name=selected_name, can_review=can_review, history=[])
     if selected_id and (own or any(p["id"] == selected_id for p in members)):
         history = await fde_profile.profile_history(connection, selected_id, days)
         result["history"] = [
@@ -87,7 +85,11 @@ async def get_profile(connection, actor, days, *, scope="self", member_id=None, 
 
 
 async def request_review(connection, actor, days):
-    require_fde(actor)
+    from sales_backend.services.authorization import require_permission
+
+    await require_permission(connection, "profile.fde_review")
+    if not await connection.fetchval("SELECT security.fde_user_is_active($1::uuid)",actor.user_id):
+        raise PermissionError("本人 FDE 成长评估需要有效 FDE 任职")
     await require_agent_access(connection, actor, "operating_report")
     await fde_profile.lock_profile(connection, actor, days)
     facts = await fde_profile.profile_facts(connection, actor, days)
@@ -115,7 +117,11 @@ async def request_review(connection, actor, days):
 
 
 async def current_run_facts(connection, run):
-    require_fde(run.actor)
+    from sales_backend.services.authorization import require_permission
+
+    await require_permission(connection, "profile.fde_review")
+    if not await connection.fetchval("SELECT security.fde_user_is_active($1::uuid)", run.actor.user_id):
+        raise PermissionError("FDE 任职已失效")
     if run.mode != "operating_report" or run.surface != "fde_profile" or not run.facts_fingerprint:
         raise PermissionError("FDE画像运行来源不合法")
     facts = await fde_profile.profile_facts(connection, run.actor, run.profile_days)

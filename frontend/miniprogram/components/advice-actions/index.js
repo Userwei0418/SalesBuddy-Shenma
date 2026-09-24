@@ -28,6 +28,6 @@ Component({
         }
       });
     },
-    openTask(){const s=this.data.suggestion;if(s&&s.task_id)wx.navigateTo({url:`/pages/task-detail/index?id=${encodeURIComponent(s.task_id)}`});}
+    openTask(e){const s=this.data.suggestion;const id=e&&e.currentTarget.dataset.id || s&&s.task_id;if(!s || !id || !(s.task_id===id || (s.tasks||[]).some(task=>task.id===id)))return;wx.navigateTo({url:`/pages/task-detail/index?id=${encodeURIComponent(id)}`});}
   }
 });

@@ -16,6 +16,8 @@ from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.repositories.connectivity import ConnectivityRepository
 from sales_backend.repositories.model_api import ModelApiRepository
 from sales_backend.repositories.identity import IdentityRepository
+from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.services.authorization import require_permission
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.security.runtime_credentials import decrypt_credential
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
@@ -50,6 +52,7 @@ class ConnectivityService:
             raise ModelApiError("不支持的测试对象", 422)
         label = PURPOSES[target]["label"] if kind == "direct" else labels[target]
         async with self.database.transaction(actor) as conn:
+            await require_permission(conn, "ai.config_test")
             await self.repo.lock(conn, actor)
             prior = await self.repo.get(conn, actor, request_id)
             if prior:
@@ -92,9 +95,10 @@ class ConnectivityService:
             if result["status"] not in {"running", "unknown"}:
                 return result
             current = await IdentityRepository().find_actor_by_id(
-                conn, workspace_id=actor.workspace_id, user_id=actor.user_id, role="administrator"
-            ) if actor.role.value == "administrator" else None
-            if not current or row["stale"] or result.get("dispatch_started"):
+                conn, workspace_id=actor.workspace_id, user_id=actor.user_id, role=actor.role.value
+            )
+            allowed = (await AuthorizationRepository().effective(conn)).allows("ai.config_test")
+            if not current or not allowed or row["stale"] or result.get("dispatch_started"):
                 result.update(status="unavailable", message="测试已过期、权限已变更或执行回执不完整，请重新测试")
                 await self.repo.append(conn, actor, result, finished=True)
                 await record_job_effect(conn, actor.workspace_id)
@@ -122,6 +126,7 @@ class ConnectivityService:
     async def direct(self, actor, purpose, result):
         service = ModelApiService(self.database, self.settings)
         async with self.database.transaction(actor, readonly=True) as conn:
+            await require_permission(conn, "ai.config_test")
             row = await ModelApiRepository().current(conn, actor, purpose)
             config = row["config_snapshot"] if row else {"mode": "inherit"}
             version = row["version_no"] if row else 0
@@ -170,6 +175,7 @@ class ConnectivityService:
 
     async def agent(self, actor, capability, result):
         async with self.database.transaction(actor, readonly=True) as conn:
+            await require_permission(conn, "ai.config_test")
             policy = await CompanyRulesRepository().active(conn, "agent_execution." + capability)
         settings = apply_execution_policy(self.settings, policy)
         binding = binding_for(settings.agent_platform_bindings_json, actor.workspace_id, capability)

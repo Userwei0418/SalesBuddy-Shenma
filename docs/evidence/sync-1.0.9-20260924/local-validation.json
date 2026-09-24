@@ -1,0 +1,31 @@
+{
+  "source": "be421b12b9dce38aa940e8b546dde1796c3bdef5",
+  "backend_unit": {
+    "passed": 1842,
+    "skipped": 729,
+    "note": "Integration tests run separately"
+  },
+  "frontend": {
+    "passed": 831
+  },
+  "postgres_integration": {
+    "passed": 711,
+    "skipped": 20
+  },
+  "database_unit": {
+    "passed": 5,
+    "skipped": 12
+  },
+  "customer_upgrade": {
+    "upgrade": "V125->V151",
+    "applied": 26,
+    "companies": 2,
+    "accounts_verified": 26,
+    "existing_rows_unchanged": true,
+    "repeat_migration_unchanged": true,
+    "runtime_acl_and_isolation": true
+  },
+  "customer_fresh_install": true,
+  "tls_deployment_checks": true,
+  "runtime_deployed": false
+}

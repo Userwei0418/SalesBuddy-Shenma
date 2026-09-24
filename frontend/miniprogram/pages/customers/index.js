@@ -143,9 +143,18 @@ Page({
   onShow() {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'customers')) return;
     if (!getApp().ensureLogin()) return;
+    this._mapPageVisible = true;
+    this.syncTabBar();
     this.loadData();
   },
-  onHide() { this._plotTapSerial=(this._plotTapSerial||0)+1;this.mapLoadSerial=(this.mapLoadSerial||0)+1;this.assetSerial=(this.assetSerial||0)+1;if(wx.hideNavigationBarLoading)wx.hideNavigationBarLoading();if(this._detailReader)this._detailReader.close();if(this._battleReader)this._battleReader.close();this._adviceGeneration=(this._adviceGeneration||0)+1;this.setData({selectedCustomer:null,selectedBattleCustomer:null,plotCandidates:[]});if(wx.hideLoading)wx.hideLoading();if(wx.showTabBar)wx.showTabBar({animation:false}); },
+  syncTabBar() {
+    if (this._mapPageVisible === false) return;
+    // Derive visibility from current overlays; a failed transition may leave none open.
+    const hasOverlay = this.data.selectedCustomer || this.data.selectedBattleCustomer || this.data.plotCandidates.length;
+    if (hasOverlay) { if (wx.hideTabBar) wx.hideTabBar({ animation: false }); }
+    else if (wx.showTabBar) wx.showTabBar({ animation: false });
+  },
+  onHide() { this._mapPageVisible=false;this._plotTapSerial=(this._plotTapSerial||0)+1;this.mapLoadSerial=(this.mapLoadSerial||0)+1;this.assetSerial=(this.assetSerial||0)+1;if(wx.hideNavigationBarLoading)wx.hideNavigationBarLoading();if(this._detailReader)this._detailReader.close();if(this._battleReader)this._battleReader.close();this._adviceGeneration=(this._adviceGeneration||0)+1;this.setData({selectedCustomer:null,selectedBattleCustomer:null,plotCandidates:[]});if(wx.hideLoading)wx.hideLoading();if(wx.showTabBar)wx.showTabBar({animation:false}); },
   onUnload() {
     this.onHide();
     this.mapLoadSerial = (this.mapLoadSerial || 0) + 1;
@@ -162,7 +171,7 @@ Page({
   fdeMapParams(){
     const session=(getApp().globalData||{}).session||{};
     if(!access.isFde(session.role))return {};
-    const team=session.role==='fde_lead'&&access.can(session,'team.view');
+    const team=access.canViewTeam(session,'battle_map.read');
     return {scope:team?'team':'self',member_ids:team?this.data.fdeMapMemberIds:[]};
   },
   changeFdeMapMember(e){if(this.data.directoryLoading||this.data.directoryError)return;this.setData({fdeMapMemberIds:e.detail.ids});return this.loadData();},
@@ -437,13 +446,13 @@ Page({
         const candidates = points.filter(p => ids.includes(String(p.id)));
         if (candidates.length > 1) {
           this.setData({plotCandidates:candidates});
-          wx.hideTabBar({animation:false});
+          this.syncTabBar();
         } else if (candidates.length === 1) this.showBattleCustomer(candidates[0].id);
       }).exec();
   },
   closePlotCandidates() {
     this.setData({plotCandidates:[]});
-    wx.showTabBar({animation:false});
+    this.syncTabBar();
   },
   choosePlotCustomer(e) {
     const id = e.currentTarget.dataset.id;
@@ -458,6 +467,7 @@ Page({
     if(!this._battleReader)this._battleReader=new DetailReadSession(undefined,()=>access.identity(getApp().globalData.session));
     const reader=this._battleReader,token=reader.reset(customerId);
     this.setData({selectedBattleCustomer:null});
+    this.syncTabBar();
     wx.showLoading({ title: "加载客户数据" });
     try {
       const raw=await apiClient.getCustomerOverview(customerId);
@@ -467,15 +477,15 @@ Page({
       const toneMap={"客户资产":"asset","主攻区":"attack","见单打单":"order","客户资源":"resource"};
       const planRow=summary?[{label:"经营计划",value:summary.agentPlanSegmentLabel,note:summary.agentPlanReason,emphasis:true}]:[];
       this.setData({selectedBattleCustomer:{...customer,mapDetailRows:[...planRow,...(customer.mapDetailRows||[])],quadrantTone:toneMap[customer.quadrant]||"asset",hasRisk:customer.risk!=="暂无重大风险"}});
-      wx.hideTabBar({animation:false});
+      this.syncTabBar();
     } catch(error) {if(reader.current(token))wx.showToast({title:error.message||"客户数据加载失败",icon:"none"});}
-    finally {if(reader.current(token))wx.hideLoading();}
+    finally {if(reader.current(token)){wx.hideLoading();this.syncTabBar();}}
   },
   closeBattleCustomer() {
     if(this._battleReader)this._battleReader.close();
     wx.hideLoading();
     this.setData({ selectedBattleCustomer: null });
-    wx.showTabBar({ animation: false });
+    this.syncTabBar();
   },
   viewFullCustomer() {
     const customer = this.data.selectedBattleCustomer;
@@ -492,6 +502,7 @@ Page({
     this._detailRaw=null;this._focusedOpportunity=null;this._focusedId=opportunityId;
     this._adviceGeneration=(this._adviceGeneration||0)+1;this._adviceCustomer=null;
     this.setData({selectedCustomer:null,detailPages:{},detailTab:targetTab,detailFocusError:'',detailScrollTarget:''});
+    this.syncTabBar();
     wx.showLoading({title:"加载客户"});
     try {
       const raw=await apiClient.getCustomerHeader(customerId);
@@ -500,7 +511,7 @@ Page({
       this._detailLoaders=customerLoaders(apiClient,customerId,{visitSort:'created_desc'});
       const detailAdvice=Object.fromEntries(Object.entries(ADVICE_TABS).map(([key,title])=>[key,{title,status:'idle',summary:'',rows:[]} ]));
       this.setData({detailAdvice});this.renderCustomerDetail();
-      wx.hideLoading();wx.hideTabBar({animation:false});this.loadCustomerAdvice();this.loadDetailSections();
+      wx.hideLoading();this.syncTabBar();this.loadCustomerAdvice();this.loadDetailSections();
       if(opportunityId){
         const target=await apiClient.getCustomerOpportunityHeader(customerId,opportunityId);
         if(!reader.current(token))return;
@@ -512,7 +523,7 @@ Page({
         if(card&&targetTab==='opportunity')this.setData({detailScrollTarget:card.anchorId});
       }
     } catch(error) {if(reader.current(token)){if(this._detailRaw)this.setData({detailFocusError:error.message});else wx.showToast({title:error.message||"客户详情加载失败",icon:"none"});}}
-    finally {if(reader.current(token))wx.hideLoading();}
+    finally {if(reader.current(token)){wx.hideLoading();this.syncTabBar();}}
   },
   renderCustomerDetail(){
     const reader=this._detailReader;if(!reader||!reader.current()||!this._detailRaw)return;
@@ -539,20 +550,20 @@ Page({
     this._adviceGeneration=(this._adviceGeneration||0)+1;
     this._adviceCustomer=null;
     this.setData({ selectedCustomer: null, detailScrollTarget: "" });
-    wx.showTabBar({ animation: false });
+    this.syncTabBar();
   },
   selectDetailTab(e) {
     this.setData({ detailTab: e.currentTarget.dataset.tab },()=>{this.loadCustomerAdvice();this.loadDetailSections();});
   },
   async loadCustomerAdvice(event) {
-    if (this.data.isFde || access.isFde((getApp().globalData.session || {}).role)) return;
+    const session=getApp().globalData.session||{};
+    if(session.permissions?!(access.can(session,'advice.request')&&access.can(session,'advice.customer')):access.isFde(session.role))return;
     const tab=this.data.detailTab,raw=this._adviceCustomer;
     if(!raw||!ADVICE_TABS[tab])return;
     const previous=this.data.detailAdvice[tab];
     const refresh=Boolean(event&&event.currentTarget);
     if(previous&&(previous.status==='loading'||(!refresh&&previous.status==='ready')))return;
     const generation=this._adviceGeneration;
-    const session=getApp().globalData.session||{};
     const identity=access.identity(session);
     const update=values=>this.setData({detailAdvice:{...this.data.detailAdvice,[tab]:{title:ADVICE_TABS[tab],...values}}});
     update({status:'loading',summary:'',rows:[]});

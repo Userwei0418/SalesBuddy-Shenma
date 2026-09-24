@@ -63,7 +63,7 @@ async def test_department_ranks_and_active_counts_match_selected_facts(connectio
     }
     assert acv[codes["北区"]]["rank"] == 1 and acv[codes["南区"]]["rank"] == 2
     assert {row["code"]: row["value"] for row in full["followup"]["rows"]} == {
-        codes["北区"]: 4, codes["南区"]: 1, codes["客户成功组"]: 0,
+        codes["北区"]: 4, codes["南区"]: pytest.approx(1 / 3), codes["客户成功组"]: None,
     }
     assert {row["code"]: row["value"] for row in full["active_opportunities"]["groups"]} == {
         codes["北区"]: 2, codes["南区"]: 1, codes["客户成功组"]: 0,
@@ -132,8 +132,9 @@ async def test_manager_member_roles_enable_fde_selection_without_expanding_super
     assert fde["id"] not in {row["id"] for row in await dashboard_members(connection, supervisor)}
     with pytest.raises(PermissionError, match="不在可查看范围"):
         await resolve_selection(connection, supervisor, personal=True, member_id=fde["id"])
-    with pytest.raises(PermissionError):
-        await department_ranking_groups(
-            connection, supervisor, "followup", date(2026, 9, 1), date(2026, 9, 19),
-            months=None, team_ids=supervisor.team_ids,
-        )
+    # Ranking capability is configurable; the default supervisor can read aggregates.
+    groups = await department_ranking_groups(
+        connection, supervisor, "followup", date(2026, 9, 1), date(2026, 9, 19),
+        months=None, team_ids=supervisor.team_ids,
+    )
+    assert all(row["code"] in {"team:" + t for t in supervisor.team_ids} for row in groups)

@@ -185,6 +185,8 @@ async def test_invalid_job_cannot_mutate_an_aggregate_in_another_workspace(conne
 
 @pytest.mark.parametrize("kind", ["agent.run", "sales_competency.review", "business.advice"])
 async def test_invalid_identity_closes_other_pending_projections(connection, manager_actor, kind):
+    from sales_backend.repositories.capabilities import CapabilityRepository
+    identity = await CapabilityRepository().analysis_identity(connection, manager_actor)
     identifier = str(uuid4())
     if kind == "agent.run":
         conversation = await AssistantRepository().create_conversation(
@@ -193,7 +195,7 @@ async def test_invalid_identity_closes_other_pending_projections(connection, man
         await connection.execute(
             "INSERT INTO agent.run(id,workspace_id,conversation_id,identity_context,status) "
             "VALUES($1::uuid,$2::uuid,$3::uuid,$4::jsonb,'running')",
-            identifier, manager_actor.workspace_id, conversation["id"], manager_actor.model_dump(mode="json"),
+            identifier, manager_actor.workspace_id, conversation["id"], identity,
         )
         table = "agent.run"
     elif kind == "sales_competency.review":
@@ -213,8 +215,9 @@ async def test_invalid_identity_closes_other_pending_projections(connection, man
             subject_kind,subject_id,customer_id,section,cache_key,facts_fingerprint,configuration_fingerprint,
             identity_snapshot,facts_snapshot,configuration_snapshot,status)
             VALUES($1::uuid,$2::uuid,$3::uuid,'manager','customer',$4::uuid,$4::uuid,'overview',$5,$5,$5,
-            '{}'::jsonb,'{}'::jsonb,'{}'::jsonb,'running')""",
+            $6::jsonb,'{}'::jsonb,'{}'::jsonb,'running')""",
             identifier, manager_actor.workspace_id, manager_actor.user_id, project["customer_id"], uuid4().hex * 2,
+            await CapabilityRepository().analysis_identity(connection, manager_actor),
         )
         table = "insight.business_advice"
     queue_id = await enqueue(connection, manager_actor, kind, aggregate_id=identifier)

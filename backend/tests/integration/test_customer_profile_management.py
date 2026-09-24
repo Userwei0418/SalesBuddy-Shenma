@@ -126,7 +126,7 @@ async def test_profile_company_selection_blocks_cross_company_read_write(connect
         client.headers["X-Company-ID"] = wid
         assert (await client.get(path + "/overview")).status_code == 404
         denied = await client.patch(path, json={"version_no": before["version_no"], "main_business": "跨公司写入"})
-        assert denied.status_code == 404, denied.text
+        assert denied.status_code == 403, denied.text
         client.headers.pop("X-Company-ID")
         assert (await client.get(path + "/overview")).json() == before
 

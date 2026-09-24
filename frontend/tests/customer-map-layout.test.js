@@ -57,8 +57,8 @@ test('管理角色复用地图筛选条并按角色增加范围筛选', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.wxml', 'utf8');
   const filterCss = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/filter-bar.wxss', 'utf8');
   assert.doesNotMatch(wxml, /class="asset-scope-panel"/);
-  assert.match(wxml, /wx:if="\{\{role === 'manager'\}\}" class="operating-picker filter-team/);
-  assert.match(wxml, /wx:if="\{\{!isFde && role !== 'sales'\}\}" class="operating-picker filter-member/);
+  assert.match(wxml, /wx:if="\{\{canViewTeam\}\}" class="operating-picker filter-team/);
+  assert.match(wxml, /wx:if="\{\{!isFde && canViewTeam\}\}" class="operating-picker filter-member/);
   assert.match(wxml, /role === 'supervisor' \? '团队成员' : '人员'/);
   assert.match(wxml, /bindchange="changeTeam"/);
   assert.match(wxml, /bindchange="changeMember"/);

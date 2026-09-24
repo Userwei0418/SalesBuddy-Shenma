@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import asyncpg
 import pytest
+from tests.integration.feishu_fixtures import seed_fetchval
 
 from sales_backend.config import get_settings
 from sales_backend.contracts.visit_flow import canonical_fields, validate_stage_result
@@ -133,8 +134,8 @@ async def test_sales_identities_claim_approve_record_and_supplement(connection, 
         "UPDATE crm.customer SET owner_team_id=$2::uuid WHERE id=$1::uuid", customer["id"], outside_team
     )
     other_owner = await connection.fetchval("SELECT id FROM platform.user_ref WHERE account_code='XS002'")
-    other_opportunity = await connection.fetchval(
-        "INSERT INTO crm.opportunity(workspace_id,customer_id,name,owner_user_ref_id,"
+    other_opportunity = await seed_fetchval(
+        connection, "INSERT INTO crm.opportunity(workspace_id,customer_id,name,owner_user_ref_id,"
         "owner_team_id,created_by_user_ref_id) "
         "VALUES($1::uuid,$2::uuid,'他人的独立商机',$3,$4::uuid,$3) RETURNING id",
         administrator.workspace_id,
@@ -222,7 +223,7 @@ async def test_claim_approval_rechecks_active_business_identity(connection, code
         "UPDATE platform.role_binding SET valid_to=clock_timestamp() WHERE user_ref_id=$1::uuid", subject.user_id
     )
     await actor(connection, "OPS001")
-    with pytest.raises(asyncpg.RaiseError, match="有效销售业务身份"):
+    with pytest.raises(asyncpg.RaiseError, match="认领权限已失效"):
         async with connection.transaction():
             await connection.fetchval(
                 "SELECT security.review_customer_claim($1::uuid,'approved','岗位已撤销')", request["request_id"]

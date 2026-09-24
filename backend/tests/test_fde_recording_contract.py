@@ -29,73 +29,48 @@ def person(role=RoleCode.FDE):
     )
 
 
-@pytest.mark.parametrize("role", [RoleCode.FDE, RoleCode.FDE_LEAD])
-@pytest.mark.parametrize("missing", ["customer", "opportunity"])
-async def test_recording_requires_nonempty_customer_and_personally_assigned_opportunity(role, missing):
+@pytest.mark.parametrize("role", [RoleCode.FDE, RoleCode.FDE_LEAD, RoleCode.SALES])
+@pytest.mark.parametrize("allowed", [False, True])
+async def test_recording_uses_current_action_scope_instead_of_primary_role(role, allowed):
+    actor = person(role)
     connection = AsyncMock()
-    ids = {"customer": str(uuid4()), "opportunity": str(uuid4()), missing: None}
-    with pytest.raises(PermissionError, match="本人参与"):
-        await visit_access.require_visit_recording_scope(connection, person(role), ids["customer"], ids["opportunity"])
-    connection.fetchrow.assert_not_awaited()
-
-
-@pytest.mark.parametrize("role", [RoleCode.FDE, RoleCode.FDE_LEAD])
-async def test_customer_panorama_or_team_scope_never_substitutes_for_direct_recording_assignment(role):
-    connection = AsyncMock()
-    connection.fetchrow.return_value = None
-    connection.fetchval.return_value = True  # Broader customer READ may still be permitted.
+    connection.fetchval.return_value = allowed
     customer_id, opportunity_id = str(uuid4()), str(uuid4())
-    with pytest.raises(PermissionError, match="名单"):
-        await visit_access.require_visit_recording_scope(connection, person(role), customer_id, opportunity_id)
-    connection.fetchval.assert_not_awaited()
-    connection.fetchrow.return_value = {"id": opportunity_id, "customer_id": customer_id}
-    await visit_access.require_visit_recording_scope(connection, person(role), customer_id, opportunity_id)
-
-
-async def test_sales_retains_optional_post_extraction_association():
-    connection = AsyncMock()
-    await visit_access.require_visit_recording_scope(connection, person(RoleCode.SALES), str(uuid4()), None)
+    if allowed:
+        await visit_access.require_visit_recording_scope(connection, actor, customer_id, opportunity_id)
+    else:
+        with pytest.raises(PermissionError, match="授权范围"):
+            await visit_access.require_visit_recording_scope(connection, actor, customer_id, opportunity_id)
+    sql, *args = connection.fetchval.await_args.args
+    assert "security.authorization_visit_target" in sql
+    assert args == ["visit.create", customer_id, opportunity_id, actor.user_id, actor.team_ids[0]]
     connection.fetchrow.assert_not_awaited()
 
 
-@pytest.mark.parametrize(
-    "changed", ["created_by_user_ref_id", "recorder_user_ref_id", "confirmed_by_user_ref_id", "status"]
-)
-async def test_supplement_requires_self_creation_recording_and_confirmation(monkeypatch, changed):
-    actor = person()
-    row = {
-        "customer_id": str(uuid4()),
-        "opportunity_id": str(uuid4()),
-        "status": "archived",
-        "created_by_user_ref_id": actor.user_id,
-        "recorder_user_ref_id": actor.user_id,
-        "confirmed_by_user_ref_id": actor.user_id,
-    }
-    row[changed] = "draft" if changed == "status" else str(uuid4())
-    monkeypatch.setattr(visit_access, "recording_visit", AsyncMock(return_value=row))
-    scope = AsyncMock()
-    monkeypatch.setattr(visit_access, "require_visit_recording_scope", scope)
-    with pytest.raises(PermissionError, match="本人创建"):
-        await visit_access.require_visit_supplement_scope(AsyncMock(), actor, str(uuid4()))
-    scope.assert_not_awaited()
+@pytest.mark.parametrize("allowed", [False, True])
+async def test_optional_post_extraction_association_obeys_the_same_configured_scope(allowed):
+    actor, connection = person(RoleCode.SALES), AsyncMock()
+    connection.fetchval.return_value = allowed
+    if allowed:
+        await visit_access.require_visit_recording_scope(connection, actor, None, None)
+    else:
+        with pytest.raises(PermissionError):
+            await visit_access.require_visit_recording_scope(connection, actor, None, None)
+    assert connection.fetchval.await_args.args[1:4] == ("visit.create", None, None)
 
 
-async def test_supplement_rechecks_current_assignment_even_for_own_archived_record(monkeypatch):
-    actor = person()
-    row = {
-        "customer_id": str(uuid4()),
-        "opportunity_id": str(uuid4()),
-        "status": "archived",
-        "created_by_user_ref_id": actor.user_id,
-        "recorder_user_ref_id": actor.user_id,
-        "confirmed_by_user_ref_id": actor.user_id,
-    }
-    monkeypatch.setattr(visit_access, "recording_visit", AsyncMock(return_value=row))
-    scope = AsyncMock(side_effect=PermissionError("已移出商机"))
-    monkeypatch.setattr(visit_access, "require_visit_recording_scope", scope)
-    with pytest.raises(PermissionError, match="已移出"):
-        await visit_access.require_visit_supplement_scope(AsyncMock(), actor, str(uuid4()))
-    assert scope.await_args.args[2:] == (row["customer_id"], row["opportunity_id"])
+@pytest.mark.parametrize("allowed", [False, True])
+async def test_supplement_always_rechecks_its_independent_action_and_record(allowed):
+    actor, connection, visit_id = person(), AsyncMock(), str(uuid4())
+    connection.fetchval.return_value = allowed
+    if allowed:
+        await visit_access.require_visit_supplement_scope(connection, actor, visit_id)
+    else:
+        with pytest.raises(PermissionError, match="授权"):
+            await visit_access.require_visit_supplement_scope(connection, actor, visit_id)
+    sql, *args = connection.fetchval.await_args.args
+    assert "security.authorization_visit" in sql
+    assert args == ["visit.supplement", visit_id]
 
 
 def reviewed():

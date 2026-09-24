@@ -7,7 +7,7 @@ POSITIONS = {"self": "自己", "supervisor": "主管", "manager": "总经理", "
 
 
 class TaskTargetRepository:
-    async def recipients(self, connection, actor, *, q="", limit=None, offset=0, target_role=None):
+    async def recipients(self, connection, actor, *, q="", limit=None, offset=0, target_role=None, business_only=False):
         """Workspace recipient directory; selecting a colleague grants no CRM access."""
         rows = await connection.fetch(
             """WITH people AS (
@@ -26,6 +26,7 @@ class TaskTargetRepository:
               WHERE u.workspace_id=$1::uuid AND u.status='active' AND u.deleted_at IS NULL
                 AND NULLIF(btrim(u.account_code),'') IS NOT NULL
                 AND rb.role_code IN ('sales','supervisor','manager','operations','administrator','fde','fde_lead')
+                AND (NOT $8::boolean OR rb.role_code IN ('sales','supervisor','manager','fde','fde_lead'))
                 AND ($4::text IS NULL OR rb.role_code=$4)
                 AND (rb.role_code NOT IN ('fde','fde_lead') OR security.fde_user_is_active(u.id,rb.role_code,t.id))
                 AND ($5::text='' OR u.display_name ILIKE '%'||$5||'%' OR u.account_code ILIKE '%'||$5||'%')
@@ -34,7 +35,7 @@ class TaskTargetRepository:
                   WHEN 'supervisor' THEN 4 WHEN 'fde_lead' THEN 5 WHEN 'fde' THEN 6 ELSE 7 END,
                 tm.is_primary DESC NULLS LAST,tm.valid_from DESC,tm.id,rb.id
             ) SELECT * FROM people ORDER BY name,id LIMIT $6 OFFSET $7""",
-            actor.workspace_id, actor.user_id, actor.role.value, target_role, q, limit, offset,
+            actor.workspace_id, actor.user_id, actor.role.value, target_role, q, limit, offset, business_only,
         )
         return [dict(row) for row in rows]
 
@@ -92,7 +93,7 @@ class TaskTargetRepository:
               JOIN workflow.task t ON t.id=c.task_id
               JOIN platform.user_ref u ON u.id=c.user_ref_id AND u.workspace_id=c.workspace_id
             WHERE c.task_id=$1::uuid AND c.user_ref_id=$2::uuid AND c.workspace_id=$3::uuid
-              AND c.role_code=$4 AND u.status='active' AND u.deleted_at IS NULL
+              AND u.status='active' AND u.deleted_at IS NULL
               AND EXISTS(SELECT 1 FROM platform.role_binding rb WHERE rb.user_ref_id=u.id
                 AND rb.workspace_id=u.workspace_id AND rb.role_code=c.role_code
                 AND clock_timestamp()>=rb.valid_from AND clock_timestamp()<rb.valid_to)
@@ -105,5 +106,4 @@ class TaskTargetRepository:
             task_id,
             actor.user_id,
             actor.workspace_id,
-            actor.role.value,
         )

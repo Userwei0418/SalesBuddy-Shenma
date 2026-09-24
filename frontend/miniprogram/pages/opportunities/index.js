@@ -18,7 +18,7 @@ function dateText(value) {
 Page({
   data: {
     fdeScope: '', fdeMemberId: '', fdeCustomerId: '',
-    role: "sales", scope: "", loading: false, canCreate:false, opportunities: [], filtered: [], opportunityGroups: [], totalAmount: "—", total:0, hasMore:false, nextOffset:null, loadingMore:false, loadError:"", moreError:"", filterActive: false,
+    role: "sales", canViewTeam:false, scope: "", loading: false, canCreate:false, opportunities: [], filtered: [], opportunityGroups: [], totalAmount: "—", total:0, hasMore:false, nextOffset:null, loadingMore:false, loadError:"", moreError:"", filterActive: false,
     teamOptions: [{ value: "all", label: "全部团队" }], teamIndex: 0,
     ownerOptions: [{ value: "all", label: "全部负责人" }], ownerIndex: 0,
     stageOptions: STAGES.map((item) => ({ value: item.code, label: item.text, selected: false })), selectedStages: [], stageLabel: "全部阶段", showStageFilter: false,
@@ -35,7 +35,7 @@ Page({
   },
   onShow() {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'opportunities')) return;
-    if (['fde', 'fde_lead'].includes(getApp().globalData.role)) {
+    if (access.fdeProjectView(getApp().globalData.session)) {
       this.setData({
         isFde: true
       });
@@ -63,8 +63,8 @@ Page({
       pageSize: 20,
       includeClosed: true,
       order: 'quarter_stage',
-      teamId: this.data.role === 'manager' ? (this.data.teamOptions[this.data.teamIndex] || {}).value || this.teamFilter : null,
-      owner: this.data.role === 'sales' || owner === 'all' ? null : owner,
+      teamId: this.data.canViewTeam ? (this.data.teamOptions[this.data.teamIndex] || {}).value || this.teamFilter : null,
+      owner: !this.data.canViewTeam || owner === 'all' ? null : owner,
       stages: this.data.selectedStages,
       closePeriod: this.data.closeOptions[this.data.closeIndex].value,
       grade: this.data.gradeOptions[this.data.gradeIndex].value
@@ -74,6 +74,7 @@ Page({
     const app = getApp(),
       session = app.globalData.session || {},
       role = app.globalData.role;
+    this.setData({canViewTeam:session.permissions?access.canViewTeam(session,'opportunity.read'):['supervisor','manager'].includes(role)});
     const identity = access.identity(session),
       serial = this.loadSerial = (this.loadSerial || 0) + 1;
     if (this.identity !== undefined && this.identity !== identity) {
@@ -103,7 +104,7 @@ Page({
     this.identity = identity;
     this.setData({
       role,
-      canCreate: access.can(session,'opportunity.edit'),
+      canCreate: access.can(session,'opportunity.create'),
       scope: session.scope || '当前权限范围',
       loading: true,
       loadError: '',
@@ -118,8 +119,8 @@ Page({
     });
     const params = this.pageParams();
     if (!this.loadedOnce) {
-      if (this.teamFilter && this.teamFilter !== 'all' && role === 'manager') params[this.routeTeamId ? 'teamId' : 'team'] = this.teamFilter;
-      if (this.memberFilter && this.memberFilter !== 'all' && role !== 'sales') params.owner = this.memberFilter;
+      if (this.teamFilter && this.teamFilter !== 'all' && this.data.canViewTeam) params[this.routeTeamId ? 'teamId' : 'team'] = this.teamFilter;
+      if (this.memberFilter && this.memberFilter !== 'all' && this.data.canViewTeam) params.owner = this.memberFilter;
     }
     this.pageRequest = params;
     const current = () => !this.closed && serial === this.loadSerial && identity === access.identity(getApp().globalData.session);
@@ -181,7 +182,7 @@ Page({
       value,
       label: value
     }))];
-    if (this.data.role === 'manager' && !Array.isArray(response.team_options)) throw Error('团队目录暂不可用，请稍后重试');
+    if (this.data.canViewTeam && !Array.isArray(response.team_options)) throw Error('团队目录暂不可用，请稍后重试');
     const teamOptions = [{value:'all',label:'全部团队'},...(response.team_options||[]).map(team=>({value:team.id,label:team.name}))],
       ownerOptions = options((response.facets || {}).owners, this.data.role === 'sales' ? '全部负责人' : '全部成员');
     const opportunityGroups = groupOpportunitiesByQuarter(opportunities);
@@ -243,7 +244,7 @@ Page({
     this.setData({ teamIndex: 0, ownerOptions, ownerIndex: 0, selectedStages: [], stageLabel: "全部阶段", showStageFilter: false, stageOptions: this.data.stageOptions.map((item) => ({ ...item, selected: false })), closeIndex: 0, gradeIndex: 0 }, () => this.applyFilters());
   },
   applyFilters() {
-    this.setData({filterActive:(this.data.role==='manager'&&this.data.teamIndex>0)||(this.data.role!=='sales'&&this.data.ownerIndex>0)||this.data.selectedStages.length>0||this.data.closeIndex>0||this.data.gradeIndex>0});
+    this.setData({filterActive:(this.data.canViewTeam&&this.data.teamIndex>0)||(this.data.canViewTeam&&this.data.ownerIndex>0)||this.data.selectedStages.length>0||this.data.closeIndex>0||this.data.gradeIndex>0});
     return this.loadPage();
   },
   createOpportunity() { wx.navigateTo({url:"/pages/opportunity-create/index"}); },

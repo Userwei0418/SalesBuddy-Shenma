@@ -57,30 +57,28 @@ async def test_agent_incomplete_source_remains_candidate_without_writes():
 def advice_context(source_opportunity=None, kind="visit"):
     service = AdviceService.__new__(AdviceService)
     customer, suggestion = str(uuid4()), str(uuid4())
-    row = {"customer_id": customer, "opportunity_id": source_opportunity, "subject_kind": kind,
+    row = {"customer_id": customer, "opportunity_id": source_opportunity, "subject_kind": kind, "subject_id": str(uuid4()),
            "status": "succeeded", "cache_key": "same"}
     service.repo = SimpleNamespace(get=AsyncMock(return_value=row))
     service.assert_actor = AsyncMock()
     service.key_for = AsyncMock(return_value="same")
-    connection = SimpleNamespace(fetchrow=AsyncMock(return_value={"version_no": 1, "decision": "pending", "advice_id": str(uuid4())}),
+    connection = SimpleNamespace(fetchval=AsyncMock(return_value=True), fetchrow=AsyncMock(return_value={"version_no": 1, "decision": "pending", "advice_id": str(uuid4())}),
                                  execute=AsyncMock())
     return service, connection, customer, suggestion
 
 
 @pytest.mark.asyncio
-async def test_advice_without_opportunity_accepts_human_selection_and_keeps_source(monkeypatch):
+async def test_visit_advice_without_opportunity_creates_daily_task_and_keeps_source(monkeypatch):
     service, connection, customer, suggestion = advice_context()
-    selected = str(uuid4())
     task = TaskCreate(description="联系客户确认验收标准", assignee_account_code="OTHER_TEAM",
-                      due_at=datetime.now(UTC)+timedelta(days=1), customer_id=customer, opportunity_id=selected,
-                      association_kind="customer")
+                      due_at=datetime.now(UTC)+timedelta(days=1), association_kind="daily")
     create = AsyncMock(return_value={"id": str(uuid4())})
     monkeypatch.setattr(TaskService, "create", create)
     await service.decide(connection, actor("fde"), suggestion, "adopted", "", 1, task, None)
-    assert create.call_args.kwargs["opportunity_id"] == selected
-    assert create.call_args.kwargs["customer_id"] == customer
+    assert create.call_args.kwargs["opportunity_id"] is None
+    assert create.call_args.kwargs["customer_id"] is None
     assert create.call_args.kwargs["source_suggestion_id"] == suggestion
-    assert create.call_args.kwargs["association_kind"] == "customer"
+    assert create.call_args.kwargs["association_kind"] == "daily"
 
 
 @pytest.mark.asyncio
@@ -97,8 +95,9 @@ async def test_fixed_source_and_missing_selection_cannot_be_reclassified_as_dail
 
 
 @pytest.mark.asyncio
-async def test_fde_cannot_decide_customer_level_advice():
+async def test_account_denied_decision_cannot_process_customer_advice():
     service, connection, _, suggestion = advice_context(kind="customer")
-    with pytest.raises(AdviceError):
+    connection.fetchval.return_value=False
+    with pytest.raises(PermissionError):
         await service.decide(connection, actor("fde"), suggestion, "no_task", "", 1, None, None)
     connection.execute.assert_not_called()

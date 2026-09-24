@@ -1,8 +1,9 @@
 const api = require('../../utils/apiClient');
 const opp = require('../../utils/opportunity');
+const access = require('../../utils/access');
 Component({
   properties: { customerId: String, existing: { type: Object, value: null }, visitContext: Boolean, disabled: Boolean, savedDraft: { type: Object, value: null } },
-  data: { partnerModes:['直销','合作伙伴'], partnerIndex:0, partners: [], partnerQuery: '', partnersLoading: false, partnersError: '', partnerTotal: 0, showPartnerSearch: false, form: opp.formFor(null), stages: opp.STAGES, error: '', checking: false, showMore: false,
+  data: { ownerTeams:[],ownerTeamIndex:0,ownerTeamLabel:'请选择所属团队',ownerTeamsLoading:false,ownerTeamsError:'',requiresOwnerTeam:false, partnerModes:['直销','合作伙伴'], partnerIndex:0, partners: [], partnerQuery: '', partnersLoading: false, partnersError: '', partnerTotal: 0, showPartnerSearch: false, form: opp.formFor(null), stages: opp.STAGES, error: '', checking: false, showMore: false,
     stageText: '请选择阶段', predictedCollection: '—', predictedRecognized: '—', forecastRate: '—', showForecast: false, forecastRequired: false, forecastError: '', quarterOptions: [], quarterIndex: 0, quarterLabel: '', recognized: '', collection: '', dateHint: '' },
   observers: { 'customerId, existing, visitContext': function() { this.reset(); } },
   lifetimes: { attached() { this.reset(); }, detached() { this.closed=true; clearTimeout(this.nameTimer); clearTimeout(this.partnerTimer); this.partnerSeq = (this.partnerSeq || 0) + 1; this.seq = (this.seq || 0) + 1; } },
@@ -36,7 +37,27 @@ Component({
       form.quarters.forEach(q => { if (!opts.some(o => o.year === q.year && o.quarter === q.quarter)) opts.push({ year: q.year, quarter: q.quarter, label: `${q.year} Q${q.quarter}` }); });
       opts.sort((a,b) => a.year - b.year || a.quarter - b.quarter);
       this.setData({ stages:opp.STAGES, form, partnerIndex:form.partner_mode === 'partner' ? 1 : 0, forecastRequired: opp.forecastRequired(form.stageIndex), showForecast: opp.forecastRequired(form.stageIndex), forecastError: '', error: '', checking: false, quarterOptions: opts, quarterIndex: opts.findIndex(o => o.year === now.year && o.quarter === now.quarter), stageText: (opp.STAGES[form.stageIndex] || {}).text || '请选择阶段' });
-      this.loadQuarter(); this.emit();
+      this.loadQuarter(); this.emit(); this.loadOwnerTeams();
+    },
+    async loadOwnerTeams() {
+      const session=typeof getApp==='function'?getApp().globalData.session:null;
+      const serial=this.ownerTeamSerial=(this.ownerTeamSerial||0)+1,identity=access.identity(session),source=this.sourceKey;
+      const required=!!(session&&session.permissions&&!this.properties.existing&&access.can(session,'opportunity.create'));
+      this.setData({requiresOwnerTeam:required,ownerTeams:[],ownerTeamsLoading:required,ownerTeamsError:''});
+      if(!required)return;
+      const current=()=>!this.closed&&serial===this.ownerTeamSerial&&source===this.sourceKey&&identity===access.identity(getApp().globalData.session);
+      try {
+        const result=await api.getOpportunityCreateOptions();if(!current())return;
+        if(!Array.isArray(result.teams)||!result.teams.length)throw Error('当前没有可创建商机的团队，请联系管理员');
+        const saved=this.data.form.owner_team_id,id=saved?(result.teams.some(t=>t.id===saved)?saved:''):result.default_team_id||'';
+        const index=result.teams.findIndex(t=>t.id===id);
+        this.setData({ownerTeams:result.teams,ownerTeamIndex:Math.max(0,index),ownerTeamLabel:index>=0?result.teams[index].name:'请选择所属团队',ownerTeamsLoading:false,'form.owner_team_id':id});this.emit();
+      } catch(error){if(current())this.setData({ownerTeamsLoading:false,ownerTeamsError:error.message||'团队选项加载失败，请重试'});}
+    },
+    changeOwnerTeam(e) {
+      if(this.properties.disabled)return;
+      const index=Number(e.detail.value),team=this.data.ownerTeams[index];if(!team)return;
+      this.setData({ownerTeamIndex:index,ownerTeamLabel:team.name,'form.owner_team_id':team.id});this.emit();
     },
     fdeChanged(e) {
       if (this.properties.disabled) return;
@@ -114,6 +135,7 @@ Component({
     // 30%及以上至少一组完整季度回款/确收；0 与未填不同；直销/伙伴的保存契约见 utils/opportunity.js。
     // 此组件同时供独立商机和拜访录入使用；后端所有写入口应复用相同校验与关单/重开确认规则。
     async prepare() {
+      if(this.data.requiresOwnerTeam&&(this.data.ownerTeamsLoading||this.data.ownerTeamsError||!this.data.form.owner_team_id))throw Error(this.data.ownerTeamsError||'请选择商机所属团队');
       let p;
       try {
         p = opp.payload(this.data.form, this.properties.existing);

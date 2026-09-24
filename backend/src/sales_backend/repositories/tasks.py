@@ -30,6 +30,13 @@ class TaskRepository:
                security.has_opportunity_read_access(t.opportunity_id) AS can_open_opportunity,
                t.target_position,t.source_suggestion_id::text,
                security.fde_can_coordinate_task(t.id) AS can_coordinate,
+               jsonb_build_object(
+                 'task.accept',security.authorization_task('task.accept',t.id),
+                 'task.decline',security.authorization_task('task.decline',t.id),
+                 'task.complete',security.authorization_task('task.complete',t.id),
+                 'task.review',security.authorization_task('task.review',t.id),
+                 'task.cancel',security.authorization_task('task.cancel',t.id),
+                 'task.coordinate',security.authorization_task('task.coordinate',t.id)) AS action_permissions,
                """ + TASK_HANDOVER_REQUIRED_SQL + """ AS handover_required,
                COALESCE((SELECT jsonb_agg(jsonb_build_object(
                  'user_id',tc.user_ref_id::text,'name',cu.display_name,'decision',tc.decision,
@@ -39,7 +46,7 @@ class TaskRepository:
                CASE WHEN t.status='pending_review' THEN t.creator_user_ref_id=common.current_user_ref_id()
                  ELSE EXISTS(SELECT 1 FROM workflow.v_task_action_recipient ar
                  WHERE ar.task_id=t.id AND ar.assignee_user_ref_id=common.current_user_ref_id()
-                   AND ar.assignee_role=common.current_role_code()) END AS requires_action,
+                   ) END AS requires_action,
                (SELECT e.event_type FROM workflow.task_event e WHERE e.task_id=t.id
                  ORDER BY e.occurred_at DESC,e.id DESC LIMIT 1) AS last_event_type,
                (SELECT e.note FROM workflow.task_event e WHERE e.task_id=t.id
@@ -88,7 +95,7 @@ class TaskRepository:
                 OR EXISTS(SELECT 1 FROM workflow.task_candidate s WHERE s.task_id=t.id
                   AND s.user_ref_id=common.current_user_ref_id()))""")
         elif fde_view == "team":
-            predicates.append("security.fde_can_coordinate_task(t.id)")
+            predicates.append("security.authorization_task('task.read',t.id)")
         elif fde_view is not None:
             raise ValueError("Unknown task view")
         if inbox:

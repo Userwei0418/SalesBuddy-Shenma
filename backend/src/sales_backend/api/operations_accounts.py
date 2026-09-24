@@ -19,6 +19,7 @@ from sales_backend.contracts.operations import (
 from sales_backend.db import Database
 from sales_backend.repositories.identity import ROLE_NAMES
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
+from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.services.operations import management_write
 from sales_backend.services.operations_accounts import OperationsAccountService
 
@@ -64,13 +65,14 @@ async def organization(
 ):
     async with database.transaction(identity.actor, readonly=True) as connection:
         result = await repository.organization(connection)
+        permissions = await AuthorizationRepository().effective(connection)
     return {
         **result,
         "roles": [
             {
                 "code": code,
                 "name": name,
-                "assignable": identity.actor.role.value == "administrator"
+                "assignable": permissions.allows("authorization.accounts_manage")
                 or code not in {"operations", "administrator"},
             }
             for code, name in ROLE_NAMES.items()

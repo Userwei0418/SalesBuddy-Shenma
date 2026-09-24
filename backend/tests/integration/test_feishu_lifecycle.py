@@ -77,7 +77,7 @@ async def test_all_ten_sources_project_actual_schema_and_capture_lifecycle(conne
     # Update and tombstone exercise actual DB capture and source projection, not a constructed dict.
     for kind, table in [('partner', 'crm.partner'), ('demo_scene', 'crm.opportunity_demo_scenes'),
                         ('contact', 'crm.contact'), ('customer', 'crm.customer')]:
-        await connection.execute(f"UPDATE {table} SET name='renamed' WHERE id=$1", ids[kind])  # noqa: S608
+        await seed_execute(connection, f"UPDATE {table} SET name='renamed' WHERE id=$1", ids[kind])  # noqa: S608
         raw = await connection.fetchval('SELECT ops.feishu_source($1,$2,$3)', cid, kind, ids[kind])
         assert project(kind, raw, {'name'})['name'] == 'renamed'
         event = await connection.fetchrow(
@@ -123,7 +123,7 @@ async def test_soft_deleted_parent_immediately_queues_dependent_refresh(connecti
     ws, cid = await setup(connection)
     ids = await records(connection, ws, cid)
     await connection.execute("UPDATE ops.feishu_event SET status='succeeded' WHERE connection_id=$1", cid)
-    await connection.execute("UPDATE crm.customer SET deleted_at=clock_timestamp() WHERE id=$1", ids['customer'])
+    await seed_execute(connection, "UPDATE crm.customer SET deleted_at=clock_timestamp() WHERE id=$1", ids['customer'])
     assert await connection.fetchval(
         "SELECT count(*) FROM ops.feishu_event WHERE connection_id=$1 AND object_kind='refresh' "
         "AND status='pending' AND historical", cid) == 1
@@ -150,9 +150,9 @@ async def test_opportunity_parent_changes_immediately_refresh_related_objects(co
         # rejects direct soft deletion. Source/trigger assertions remain restricted.
         await seed_execute(connection, 'UPDATE crm.opportunity SET deleted_at=clock_timestamp() WHERE id=$1', oid)
     elif change == 'hard_delete':
-        await connection.execute('DELETE FROM crm.opportunity WHERE id=$1', oid)
+        await seed_execute(connection, 'DELETE FROM crm.opportunity WHERE id=$1', oid)
     else:
-        await connection.execute('UPDATE crm.opportunity SET customer_id=$1 WHERE id=$2', customers[1], oid)
+        await seed_execute(connection, 'UPDATE crm.opportunity SET customer_id=$1 WHERE id=$2', customers[1], oid)
     assert await connection.fetchval(
         "SELECT count(*) FROM ops.feishu_event WHERE connection_id=$1 AND object_kind='refresh' "
         "AND status='pending' AND historical", cid) == 1

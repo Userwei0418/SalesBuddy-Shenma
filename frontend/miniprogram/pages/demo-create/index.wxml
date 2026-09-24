@@ -4,7 +4,7 @@
 <view wx:if="{{eligible && viewing}}" class="demo-page demo-detail-page">
   <view class="demo-head"><view><view class="demo-eyebrow">DEMO SCENARIO</view><view class="demo-title">{{sceneDetail.name}}</view><view class="demo-context">{{opportunity.name}}</view></view></view>
   <scroll-view scroll-y class="demo-detail-scroll"><view class="demo-scene"><view class="demo-label">场景描述</view><text class="demo-detail-copy">{{sceneDetail.description}}</text><view class="demo-detail-meta">{{sceneDetail.creatorName}} · {{sceneDetail.createdLabel}}</view></view><view class="demo-note">已登记到当前商机，修改操作会保留记录</view></scroll-view>
-  <view wx:if="{{sceneDetail.can_edit}}" class="demo-footer demo-detail-actions"><button size="mini" class="demo-detail-delete" bindtap="deleteScene">删除</button><button size="mini" class="demo-submit" bindtap="startEditing">编辑场景</button></view>
+  <view wx:if="{{sceneDetail.can_edit || sceneDetail.can_delete}}" class="demo-footer demo-detail-actions"><button wx:if="{{sceneDetail.can_delete}}" size="mini" class="demo-detail-delete" bindtap="deleteScene">删除</button><button wx:if="{{sceneDetail.can_edit}}" size="mini" class="demo-submit" bindtap="startEditing">编辑场景</button></view>
 </view>
 <view wx:if="{{eligible && !viewing}}" class="demo-page">
   <view class="demo-sheet">

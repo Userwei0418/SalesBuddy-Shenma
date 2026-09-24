@@ -28,7 +28,7 @@ const assets = path.resolve(__dirname, '../../backend/src/sales_backend/web/asse
 const agentId = '01a09021-b848-7e7f-9567-e20859d29bf8';
 const boundAgent = {
   capability: 'battle_map_review', capability_label: '客户作战地图评估',
-  agent_name: '销售智助-客户作战地图评估', agent_id: agentId,
+  agent_name: 'Raccoon SalesBuddy-客户作战地图评估', agent_id: agentId,
   expected_snapshot_id: 'published-fixture', bound: true,
   configuration_url: `https://123.207.235.181/agents/${agentId}/configure`,
 };

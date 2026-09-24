@@ -94,6 +94,9 @@ class OperationsOpportunityRepository:
         }
 
     async def attach_quote(self, connection, actor, opportunity_id, data):
+        from sales_backend.repositories.authorization_checks import require_permission
+
+        await require_permission(connection, "opportunity.quote_create", opportunity_id=opportunity_id)
         if not await connection.fetchval(
             "SELECT EXISTS(SELECT 1 FROM crm.opportunity WHERE id=$1::uuid AND deleted_at IS NULL)", opportunity_id
         ):

@@ -71,7 +71,7 @@ test('看板单选同步事实和排名，全部选项只在UI中存在且适应
   require:name=>name.endsWith('/apiClient')?{getDashboardOptions:async()=>({members:[],team_groups:groups})}:require(path.resolve(path.dirname(filename),name)),
   getApp:()=>({globalData:{role:'manager',session:{role:'manager',userId:'self',workspaceId:'w'}}}),
  });
- page.data=JSON.parse(JSON.stringify(page.data));Object.assign(page.data,{role:'manager',viewMode:'team'});
+ page.data=JSON.parse(JSON.stringify(page.data));Object.assign(page.data,{role:'manager',viewMode:'team',canViewTeam:true});
  page.setData=values=>Object.assign(page.data,values);page.loadFacts=async()=>{reads++;};page.loadRankingData=async()=>{reads++;};
  await page.loadOptions(false);assert.deepEqual(Array.from(page.data.teamPickerSelected),['all']);
  assert.deepEqual(Array.from(page.factsQuery().team_groups),['team:empty']);
@@ -84,4 +84,26 @@ test('看板单选同步事实和排名，全部选项只在UI中存在且适应
  await page.selectTeams({detail:{ids:['team:empty']}});await page.loadOptions();assert.equal(page.data.selectedTeamChoice,'team:empty');
  groups=groups.filter(row=>row.code!=='team:empty');await page.loadOptions();assert.equal(page.data.selectedTeamChoice,'all');
  assert.deepEqual(Array.from(page.factsQuery().team_groups),['team:new']);
+});
+
+test('团队人均榜可从摘要和完整榜打开成员，返回保持原名次与团队选择',()=>{
+ const members=[{user_id:'a',name:'甲',followup_count:2,current_member:true},{user_id:'z',name:'零次',followup_count:0,current_member:true}];
+ const rows=[{id:'team:a',name:'团队甲',rank:2,members,memberSummary:'2 ÷ 2 = 1 次/人'},{id:'team:b',name:'团队乙',rank:1,members:[]}];
+ const {instance:c,def}=component('dashboard-ranking',{rows,summaryIds:['team:a']});
+ def.observers['rows, summaryIds'].call(c);
+ c.showMembers({currentTarget:{dataset:{id:'team:a'}}});
+ assert.equal(c.data.open,true);assert.equal(c.data.memberTeam.members[1].followup_count,0);
+ assert.equal(c.data.memberTeam.rank,2);c.backToTeams();assert.equal(c.data.open,true);assert.equal(c.data.memberTeam,null);
+ assert.equal(c.data.focusId,'rank-item-0');c.showMembers({currentTarget:{dataset:{id:'team:b'}}});
+ assert.equal(c.data.memberTeam.members.length,0);c.close();assert.equal(c.data.memberTeam,null);
+});
+
+test('成员明细随换团队、刷新、接口失败或离开页面关闭；普通金额榜不误打开',()=>{
+ const rows=[{id:'team:a',members:[]}];const {instance:c,def}=component('dashboard-ranking',{rows,summaryIds:[]});
+ const tap=()=>c.showMembers({currentTarget:{dataset:{id:'team:a'}}});
+ tap();def.pageLifetimes.hide.call(c);assert.equal(c.data.open,false);assert.equal(c.data.memberTeam,null);
+ tap();def.observers['rows, summaryIds'].call(c);assert.equal(c.data.memberTeam,null);
+ tap();c.properties.loading=true;def.observers['loading, error'].call(c);assert.equal(c.data.open,false);tap();assert.equal(c.data.open,false);
+ c.properties.loading=false;c.properties.error='接口失败';tap();assert.equal(c.data.open,false);
+ c.properties.error='';c.properties.rows=[{id:'team:a',value:100}];tap();assert.equal(c.data.open,false);
 });

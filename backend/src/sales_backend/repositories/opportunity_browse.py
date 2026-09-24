@@ -8,7 +8,7 @@ facets parse a minimal provenance projection; business bodies stay page-scoped.
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from sales_backend.repositories.collaboration import FDE_ROLES, scope_members
+from sales_backend.repositories.collaboration import scope_members
 from sales_backend.repositories.opportunity_business_date import business_created_on, creation_date_projection
 from sales_backend.repositories.team_directory import require_team, selectable_teams
 
@@ -45,9 +45,9 @@ async def browse_opportunities(
     close_period=None,
     order="close_date",
 ):
-    team_options = await selectable_teams(connection, actor) if actor is not None else []
+    team_options = await selectable_teams(connection, actor, permission='opportunity.read') if actor is not None else []
     if team_id is not None:
-        selected = await require_team(connection, actor, team_id)
+        selected = await require_team(connection, actor, team_id, permission='opportunity.read')
         if team and team != selected['name']:
             raise ValueError('团队ID与名称不一致，请刷新团队目录')
     args = []
@@ -61,26 +61,14 @@ async def browse_opportunities(
     opportunity_source = "crm.opportunity o"
     if not include_closed:
         base.append("o.status='open'")
-    role = actor.role.value if actor is not None else None
-    if role == "sales":
-        base.append(f"o.owner_user_ref_id={bind(actor.user_id, 'uuid')}")
-    elif role == "supervisor":
-        base.append(f"o.owner_team_id=ANY({bind(list(actor.team_ids), 'uuid[]')})")
-    elif role in FDE_ROLES:
-        _, people, _ = await scope_members(connection, actor, scope, member_id, member_ids)
-        # A customer detail is the authorized customer panorama. A personal/team
-        # project list is precisely the effective participation set.
-        if not customer_id or member_id or member_ids:
-            # Materialize the small participation set first; otherwise opportunity
-            # RLS may be evaluated for every company project before the EXISTS.
-            # Both participant and opportunity RLS still apply to the SQL join.
-            scope_cte = f"""fde_projects AS MATERIALIZED (
-                SELECT DISTINCT p.opportunity_id FROM crm.opportunity_participant p
-                WHERE p.user_ref_id=ANY({bind(people, "uuid[]")})
-                AND p.participant_role='fde' AND clock_timestamp()>=p.valid_from
-                AND clock_timestamp()<p.valid_to AND security.fde_user_is_active(p.user_ref_id)
-              ), """
-            opportunity_source = "fde_projects fp JOIN crm.opportunity o ON o.id=fp.opportunity_id"
+    if actor:
+        base.append("security.authorization_opportunity_direct('opportunity.read',o.id)" if not customer_id
+                    else "security.authorization_opportunity('opportunity.read',o.id)")
+        if scope or member_id or member_ids:
+            _, people, _ = await scope_members(connection, actor, scope, member_id, member_ids, permission='opportunity.read')
+            base.append(f"(o.owner_user_ref_id=ANY({bind(people, 'uuid[]')}) OR EXISTS(SELECT 1 FROM crm.opportunity_participant p "
+                        f"WHERE p.opportunity_id=o.id AND p.user_ref_id=ANY({bind(people, 'uuid[]')}) "
+                        "AND clock_timestamp()>=p.valid_from AND clock_timestamp()<p.valid_to))")
     if customer_id:
         base.append(f"o.customer_id={bind(customer_id, 'uuid')}")
 
@@ -212,7 +200,10 @@ async def browse_opportunities(
           COALESCE(c.name,security.customer_reference(o.customer_id)->>'name') AS customer_name,
           o.owner_user_ref_id::text AS owner_id,o.owner_team_id::text AS team_id,
           owner.display_name AS owner_name,team.name AS team_name,
-          security.can_manage_fde_members(o.id) AS can_manage_fde_members
+          security.can_manage_fde_members(o.id) AS can_manage_fde_members,
+          security.authorization_opportunity('opportunity.update',o.id) AS can_edit,
+          security.authorization_opportunity('opportunity.close',o.id) AS can_close,
+          security.authorization_opportunity('opportunity.reopen',o.id) AS can_reopen
         FROM unnest($1::uuid[]) WITH ORDINALITY page(id,ordinal)
         JOIN crm.opportunity o ON o.id=page.id
         LEFT JOIN crm.customer c ON c.id=o.customer_id AND c.deleted_at IS NULL

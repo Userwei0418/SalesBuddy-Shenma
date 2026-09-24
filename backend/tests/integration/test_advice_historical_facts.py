@@ -27,18 +27,20 @@ async def test_history_preserves_units_tax_source_and_invalidates_cached_analysi
     manager = await actor(connection, "OPS001")
     ws = manager.workspace_id
     batch = await connection.fetchval(
-        "INSERT INTO ops.crm_import_batch(workspace_id,source_system,source_base_id,manifest_sha256,source_snapshot_at) "
-        "VALUES($1::uuid,'synthetic','advice-history',repeat('a',64),clock_timestamp()) RETURNING id", ws)
+        "INSERT INTO ops.crm_import_batch(workspace_id,source_system,source_base_id,manifest_sha256,source_snapshot_at,status) "
+        "VALUES($1::uuid,'synthetic','advice-history',repeat('a',64),clock_timestamp(),'approved') RETURNING id", ws)
+    await connection.execute("SELECT set_config('app.feishu_historical_import','on',true)")
     for kind, amount, unit in [("recognized", 54, "wan_cny"), ("collection", 1200, "cny")]:
+        snapshot = uuid4()
         source = await connection.fetchval(
             "INSERT INTO ops.crm_import_record(workspace_id,batch_id,source_table_id,source_record_id,object_kind,"
-            "source_sha256,raw_fields,status) VALUES($1::uuid,$2,'synthetic',$3,'period_actual_snapshot',"
-            "repeat('b',64),'{}','approved') RETURNING id", ws, batch, str(uuid4()))
+            "source_sha256,raw_fields,status,target_id) VALUES($1::uuid,$2,'synthetic',$3,'period_actual_snapshot',"
+            "repeat('b',64),'{}','approved',$4) RETURNING id", ws, batch, str(uuid4()), snapshot)
         await connection.execute(
             "INSERT INTO crm.opportunity_period_actual_snapshot(workspace_id,opportunity_id,year,quarter,kind,"
-            "source_field,raw_amount,source_unit,tax_basis,source_record_id,import_batch_id) "
-            "VALUES($1::uuid,$2::uuid,2026,2,$3,$4,$5,$6,'unknown',$7,$8)",
-            ws, op["id"], kind, "Q2 raw " + kind, amount, unit, source, batch)
+            "source_field,raw_amount,source_unit,tax_basis,source_record_id,import_batch_id,id) "
+            "VALUES($1::uuid,$2::uuid,2026,2,$3,$4,$5,$6,'unknown',$7,$8,$9)",
+            ws, op["id"], kind, "Q2 raw " + kind, amount, unit, source, batch, snapshot)
     await actor(connection, "XS001")
     after = await repo.load(connection, who, "opportunity", op["id"])
     rows = after["facts"]["records"]["historical_actuals"]

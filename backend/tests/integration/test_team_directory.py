@@ -72,7 +72,9 @@ async def test_sales_and_supervisor_never_receive_or_select_unrelated_empty_team
     assert ids == set(person.team_ids) and team['id'] not in ids
     with pytest.raises(PermissionError):
         await require_team(connection, person, team['id'])
-    assert await selectable_teams(connection, person, 'dashboard') == []
+    dashboard_ids = {row['id'] for row in await selectable_teams(connection, person, 'dashboard')}
+    # A supervisor's configured team scope now provides an explicit team selector.
+    assert dashboard_ids == (set(person.team_ids) if account == 'ZJ001' else set())
 
 
 async def test_member_directory_retains_all_effective_team_ids(connection):

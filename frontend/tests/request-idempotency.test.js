@@ -94,3 +94,16 @@ test('a read begun during a write cannot be shared by a post-commit refresh',asy
  const retry=api.request({path:'/tasks'});assert.equal(requests.length,5);
  requests[4].success({statusCode:200,data:{items:[]}});await retry;
 });
+
+
+test('多人派发超时重试保留幂等标识和完整批次，重新加载也不丢失',async()=>{
+ const storage=new Map(),requests=[];let fail=true;
+ global.wx={getStorageSync:k=>storage.get(k),setStorageSync:(k,v)=>storage.set(k,v),removeStorageSync:k=>storage.delete(k),request:o=>{requests.push(o);if(fail)o.fail({errMsg:'timeout'});else o.success({statusCode:201,data:{items:[{id:'a'},{id:'b'}]}});}};
+ const load=()=>{delete require.cache[require.resolve('../miniprogram/utils/apiClient')];return require('../miniprogram/utils/apiClient');};
+ let api=load();api.saveAuth({access_token:'test-only',actor:{workspace_id:'w',user_id:'a'}});
+ const inputs=['A001','B001'].map(assigneeAccount=>({assigneeAccount,description:'核对试点资料',dueAt:'2030-01-01T00:00:00Z',associationKind:'daily',priority:'高'}));
+ await assert.rejects(api.createTasks(inputs),/timeout/);const key=requests[0].header['Idempotency-Key'];assert.ok(key);
+ assert.ok(requests[0].url.endsWith('/tasks/batch'));assert.equal(requests[0].data.tasks.length,2);
+ api=load();fail=false;assert.equal((await api.createTasks(inputs)).items.length,2);
+ assert.equal(requests[1].header['Idempotency-Key'],key);assert.deepEqual(requests[1].data,requests[0].data);
+});

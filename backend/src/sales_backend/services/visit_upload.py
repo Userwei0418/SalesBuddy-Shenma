@@ -144,11 +144,14 @@ class VisitUploadService:
 
     async def upload(self, actor, *, source: UploadSource, filename: str) -> dict:
         async with self.database.transaction(actor, readonly=True) as connection:
-            await require_capability(connection, actor, "visit.create")
+            await require_capability(connection, actor, "visit.upload")
         filename = Path(filename).name[:200]
         suffix = Path(filename).suffix.lower()
         if suffix not in DOCUMENT_EXTENSIONS | AUDIO_EXTENSIONS:
             raise UploadRejected(422, "支持录音、PDF、DOCX、PPTX、MD、TXT")
+        if suffix in AUDIO_EXTENSIONS:
+            async with self.database.transaction(actor, readonly=True) as connection:
+                await require_capability(connection, actor, "visit.transcribe")
         limit = MAX_DOCUMENT if suffix in DOCUMENT_EXTENSIONS else MAX_UPLOAD
         upload = self.storage.begin(str(self._id_factory()), suffix)
         try:
@@ -161,7 +164,7 @@ class VisitUploadService:
             await upload.ready()
             location = await self.registry.prepare(actor, upload) if self.registry else None
             async with self.database.transaction(actor) as connection:
-                await require_capability(connection, actor, "visit.create")
+                await require_capability(connection, actor, "visit.upload")
                 upload.phase = UploadPhase.REGISTERING
                 await create_import(connection, actor, upload.import_id, filename, upload.path, upload.size)
                 if self.registry:

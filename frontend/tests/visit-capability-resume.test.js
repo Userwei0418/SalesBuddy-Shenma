@@ -15,7 +15,7 @@ function setup(route, role = 'supervisor') {
   const recorder = {onStart:fn=>recorderBindings.push(['start',fn]),onStop:fn=>recorderBindings.push(['stop',fn]),onError:fn=>recorderBindings.push(['error',fn])};
   const api = {
     getCurrentActor:()=>actorResponse, getAuth:()=>null,
-    listCustomerClaimPool:async options=>{calls.push({kind:'claims',options});return {items:[{id:'customer-1',name:'可认领客户',can_claim:true}],total:1,has_more:false,next_offset:null};},
+    listCustomerClaimOptions: async () => ({ industries: [{value: '', label: '全部行业'}], claim_statuses: [{value: '', label: '全部认领状态'}] }), listCustomerClaimPool:async options=>{calls.push({kind:'claims',options});return {items:[{id:'customer-1',name:'可认领客户',can_claim:true}],total:1,has_more:false,next_offset:null};},
     getCustomerReference:async id=>{calls.push({kind:'customer',id});return {id,name:'授权客户'};},
     listCustomers:async options=>{calls.push({kind:'customers',options});return {items:[]};},
     request:async options=>{calls.push(options);return options.path==='/directory/colleagues'?{items:[]}:{id:'visit-1',customer_id:'customer-1',customer_name:'授权客户',recorder_name:'本人',version_no:2};},

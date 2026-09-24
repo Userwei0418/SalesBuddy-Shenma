@@ -5,11 +5,8 @@ from sales_backend.repositories.team_directory import selectable_teams
 SALES_ROLES = ('sales', 'supervisor', 'manager')
 
 
-async def scope_options(connection, actor):
-    role = actor.role.value
-    if role not in SALES_ROLES:
-        raise PermissionError('当前身份不适用销售经营画像')
-    teams = await selectable_teams(connection, actor, 'profile')
+async def scope_options(connection, actor, *, permission='profile.sales_read'):
+    teams = await selectable_teams(connection, actor, 'profile', permission=permission)
     members = [dict(row) for row in await connection.fetch(
         """SELECT u.id::text,u.id::text AS user_id,u.account_code,u.display_name,
           active_role.role_code AS role,
@@ -26,16 +23,15 @@ async def scope_options(connection, actor):
           ORDER BY CASE b.role_code WHEN 'manager' THEN 0 WHEN 'supervisor' THEN 1 ELSE 2 END LIMIT 1
         ) active_role ON true
         WHERE u.workspace_id=$1::uuid AND u.status='active' AND u.deleted_at IS NULL
-          AND (u.id=$2::uuid OR $3='manager' OR ($3='supervisor' AND EXISTS(
-            SELECT 1 FROM platform.team_membership tm WHERE tm.workspace_id=u.workspace_id
-              AND tm.user_ref_id=u.id AND security.supervises_team(tm.team_id)
-              AND clock_timestamp()>=tm.valid_from AND clock_timestamp()<tm.valid_to)))
-        ORDER BY u.display_name,u.id""", actor.workspace_id, actor.user_id, role)]
+          AND security.authorization_subject($2,'person',u.id,NULL)
+        ORDER BY u.display_name,u.id""", actor.workspace_id, permission)]
+    department = await connection.fetchval("SELECT security.authorization_subject($1,'department',NULL,NULL)", permission)
+    own = any(member['id'] == actor.user_id for member in members)
     return {
         'data_source': 'database', 'teams': teams, 'members': members,
-        'allowed_scopes': ['self', 'person'] + (['team'] if role != 'sales' else [])
-            + (['department'] if role == 'manager' else []),
-        'defaults': {'scope': 'department' if role == 'manager' else 'team' if teams else 'self',
+        'allowed_scopes': (['self'] if own else []) + (['person'] if members else [])
+            + (['team'] if teams else []) + (['department'] if department else []),
+        'defaults': {'scope': 'department' if department else 'team' if teams else 'self',
                      'member_id': actor.user_id, 'team_id': teams[0]['id'] if teams else None},
     }
 
@@ -72,9 +68,11 @@ async def resolve_scope(connection, actor, *, scope, member_id=None, team_id=Non
             raise ValueError('团队视角不能同时指定个人')
     elif member_id or team_id or account_code or team:
         raise ValueError('部门视角不能同时指定团队或个人')
-    editable = selected_member is not None and selected_member['id'] == str(actor.user_id)
+    editable = bool(await connection.fetchval("SELECT security.authorization_subject('target.submit',$1,$2::uuid,$3::uuid)",
+        'person' if selected_member else scope, selected_member['id'] if selected_member else None,
+        selected_team['id'] if selected_team else None))
     if write and not editable:
-        raise PermissionError('仅可设置本人目标，团队和部门目标请由运营维护')
+        raise PermissionError('所选目标不在当前设置权限的范围内')
     return {
         'scope': 'person' if selected_member else scope,
         'user_id': selected_member['id'] if selected_member else None,

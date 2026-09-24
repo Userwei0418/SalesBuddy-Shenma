@@ -11,8 +11,11 @@ from sales_backend.repositories.rankings import department_ranking_groups, ranki
 
 
 async def dashboard_rankings(connection, actor, *, year, quarters, personal, member_id=None, team_groups=()):
+    # Preserve the sales peer-comparison default. This chooses a presentation;
+    # the selected subject and every aggregate still use configured grants.
+    personal = personal or (actor.role.value == "sales" and not team_groups and not member_id)
     selection = await resolve_selection(
-        connection, actor, personal=personal, member_id=member_id, team_groups=team_groups
+        connection, actor, personal=personal, member_id=member_id, team_groups=team_groups, permission="dashboard.read"
     )
     quarters = sorted(set(quarters))
     months = [month for quarter in quarters for month in range(quarter * 3 - 2, quarter * 3 + 1)]
@@ -30,11 +33,12 @@ async def dashboard_rankings(connection, actor, *, year, quarters, personal, mem
     )
     # Explicit legacy region parameters retain their original response/cohort.
     # New manager selectors use actual departments, including a zero-value roster.
-    dynamic = actor.role.value == "manager" and not selection.personal and (
+    dynamic = not selection.personal and (actor.role.value == "manager" or
+        any(code.startswith("team:") for code in selection.team_groups)) and (
         not selection.team_groups or any(code.startswith("team:") for code in selection.team_groups)
     )
     if dynamic:
-        departments = await dashboard_team_groups(connection, actor)
+        departments = await dashboard_team_groups(connection, actor, permission="dashboard.ranking")
         team_ids = [row["team_id"] for row in departments]
         for metric, payload, start, end, period_months in (
             ("opportunity_acv", acv, date(year, 1, 1), date(year, 12, 31), months),
@@ -54,10 +58,25 @@ async def dashboard_rankings(connection, actor, *, year, quarters, personal, mem
                  if selection.team_ids is None or row["team_id"] in selection.team_ids]
     elif selection.personal:
         codes = acv["subject_region_codes"]
-    elif actor.role.value == "manager":
+    elif await connection.fetchval("SELECT security.authorization_subject('dashboard.read','department',NULL,NULL)"):
         codes = list(selection.team_groups) or [group["code"] for group in GROUPS]
     else:
         codes = await supervised_region_codes(connection, actor)
+    if not selection.personal:
+        # Old saved region selections still receive the same per-capita calculation.
+        if not dynamic:
+            for metric, payload, start, end, period_months in (
+                ("opportunity_acv", acv, date(year, 1, 1), date(year, 12, 31), months),
+                ("followup", followup, as_of - timedelta(days=6), as_of, None),
+            ):
+                groups = await department_ranking_groups(
+                    connection, actor, metric, start, end, months=period_months, team_ids=None, legacy=True,
+                )
+                payload["groups"] = groups
+                payload["rows"] = groups
+        followup["calculation"] = "team_followup_per_capita_v1"
+        followup["denominator"] = "current_active_sales_appointments_including_zero"
+        acv["calculation"] = "team_acv_amount_v2"
     return {
         "contract_version": 2,
         "data_source": "database",
@@ -80,6 +99,7 @@ async def dashboard_rankings(connection, actor, *, year, quarters, personal, mem
         "definitions": {
             "opportunity_acv": "预计关单日在所选季度的在推商机 ACV，不含 Won / Lost",
             "active_opportunities": "所选季度有已确认跟进的商机去重，含仍有跟进的 Won，排除 Lost",
-            "followup": "近7天（含今天）已确认或归档的跟进记录",
+            "followup": ("近7天（含今天）已确认或归档跟进；团队按总次数/当前有效销售业务成员数排名，"
+                         "含零次成员，不含纯运营；个人按次数排名"),
         },
     }

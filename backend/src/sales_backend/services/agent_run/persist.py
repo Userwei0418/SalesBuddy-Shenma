@@ -49,8 +49,8 @@ class AgentRunStore:
             await require_agent_access(connection, run.actor, run.mode, run.customer_id,
                                        opportunity_id=run.opportunity_id,
                                        permission_version=run.permission_version)
-            if run.actor.role.value in {"fde", "fde_lead"} and not run.permission_version:
-                raise PermissionError("FDE analysis snapshot is missing its permission version")
+            if not run.permission_version:
+                raise PermissionError("Analysis snapshot is missing its permission version")
             if run.surface == "fde_profile":
                 from sales_backend.services.fde_profile import current_run_facts
 

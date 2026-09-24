@@ -7,7 +7,7 @@ import asyncpg
 
 from sales_backend.domain.agent import ActorContext
 from sales_backend.domain.concurrency import require_version
-from sales_backend.repositories.customer_members import CustomerMemberRepository
+from sales_backend.repositories.authorization_checks import require_permission
 from sales_backend.repositories.customer_risk import enqueue_customer_risk_review
 from sales_backend.repositories.jobs import enqueue_battle_map_review
 from sales_backend.repositories.visit_normalize import CONTACT_ROLE_CODES
@@ -24,10 +24,7 @@ class CustomerMutationRepository:
         expected_version: int | None = None,
         management_profile: bool = False,
     ) -> dict[str, Any]:
-        if management_profile and actor.role.value not in {"operations", "administrator"}:
-            raise PermissionError("客户档案管理需要运营或管理员身份")
-        if actor.role.value in {"fde", "fde_lead"}:
-            raise PermissionError("FDE 可阅读客户全貌，客户资料由销售或运营维护")
+        await require_permission(connection, 'customer.update', customer_id=customer_id)
         if not data:
             raise ValueError("请至少修改一项客户信息")
         customer = await connection.fetchrow(
@@ -43,11 +40,6 @@ class CustomerMutationRepository:
         if not customer:
             raise LookupError("客户不存在或不在当前权限范围内")
         require_version(customer["version_no"], expected_version)
-        if actor.role.value == "sales" and not await CustomerMemberRepository().contains(
-            connection, customer_id, actor.user_id
-        ):
-            raise PermissionError("只能修改本人负责的客户")
-
         mapping = {
             "name": "name",
             "industry": "industry_code",
@@ -196,13 +188,12 @@ class CustomerMutationRepository:
         *,
         data: dict[str, Any],
     ) -> dict[str, Any]:
-        if actor.role.value not in {"operations", "administrator"}:
-            raise PermissionError("客户须由运营核实公司建档结果后创建")
+        await require_permission(connection, 'customer.create')
         if not str(data.get("company_reference") or "").strip():
             raise ValueError("请填写已核实的公司客户编号或审批单号")
         from sales_backend.repositories.team_directory import selectable_teams
 
-        teams = await selectable_teams(connection, actor, 'assignment')
+        teams = await selectable_teams(connection, actor, 'assignment', permission='customer.create')
         target_id = data.get('target_team_id')
         matches = [team for team in teams if team['id'] == str(target_id)] if target_id else [
             team for team in teams if team['name'] == data['target_team']]

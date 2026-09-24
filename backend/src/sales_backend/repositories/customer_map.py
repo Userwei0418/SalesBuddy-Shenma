@@ -73,9 +73,8 @@ class CustomerMapRepository:
                 SELECT c.* FROM crm.customer c WHERE c.id=active.customer_id AND c.deleted_at IS NULL LIMIT 1
               ) c ON true
               WHERE true
-                AND (common.current_role_code()<>'sales'
-                     OR security.profile_customer_owner(c.id)=common.current_user_ref_id())
-                AND ($1::uuid[] IS NULL OR c.id IN (SELECT customer_id FROM scoped_opportunities))
+                AND security.authorization_portfolio_customer('battle_map.read',c.id)
+                AND ($1::uuid[] IS NULL OR security.profile_customer_owner(c.id)=ANY($1::uuid[]) OR c.id IN (SELECT customer_id FROM scoped_opportunities))
             )
             SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.level_code,
               c.lifecycle_status,c.data_kind,c.owner_user_ref_id::text,c.owner_team_id::text,

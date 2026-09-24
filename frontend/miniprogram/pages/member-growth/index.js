@@ -16,10 +16,10 @@ Page({
     if (!getApp().ensureLogin()) return;
     if(session && ['fde','fde_lead'].includes(session.role)) {
       const memberId=this.data.fdeMemberId;
-      if(session.role==='fde'&&memberId!==session.userId){this.setData({accessBlocked:true,accessMessage:'当前身份仅能查看本人协作记录'});return;}
+      if(memberId!==session.userId && (session.permissions ? !require('../../utils/access').hasScope(session,'profile.fde_read',['teams','workspace']) : session.role==='fde')){this.setData({accessBlocked:true,accessMessage:'当前身份仅能查看本人协作记录'});return;}
       this.setData({isFde:true,fdeMemberId:memberId});wx.setNavigationBarTitle({title:'成员协作看板'});return;
     }
-    if (!session || !["supervisor", "manager"].includes(session.role)) {
+    if (!session || (session.permissions ? !require("../../utils/access").can(session,"profile.sales_read") : !["supervisor", "manager"].includes(session.role))) {
       wx.showToast({ title: "当前账号没有查看团队画像的权限", icon: "none" });
       setTimeout(() => wx.navigateBack(), 600);
       return;

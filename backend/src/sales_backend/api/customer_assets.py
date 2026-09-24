@@ -8,12 +8,12 @@ from sales_backend.api.dependencies import RequestIdentity, get_database, get_id
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.contracts.models import ActualCreate, ActualVoid
 from sales_backend.db import Database
-from sales_backend.repositories.collaboration import FDE_ROLES, scope_members, scoped_opportunity_ids
+from sales_backend.repositories.collaboration import scope_members, scoped_opportunity_ids
 from sales_backend.repositories.customer_assets import CustomerAssetRepository, can_manage, today
 from sales_backend.repositories.customer_map import CustomerMapRepository, activity_since
 from sales_backend.repositories.customers import CustomerRepository
+from sales_backend.repositories.profile_scope import scope_options
 from sales_backend.repositories.profile_customers import subject_customers
-from sales_backend.repositories.profile_scope import resolve_scope, scope_options
 from sales_backend.services.idempotency import execute_mutation
 
 router = APIRouter(prefix="/api/v1/customer-assets", tags=["Customer assets"])
@@ -33,39 +33,27 @@ async def map_customers(
     async with database.transaction(identity.actor, readonly=True) as connection:
         # No arbitrary cap; both map and list represent the complete active authorized set.
         fde_user_ids = None
-        if identity.actor.role.value in FDE_ROLES:
+        if scope or member_id or member_ids or team_id:
             try:
                 _, fde_user_ids, _ = await scope_members(
-                    connection, identity.actor, scope, member_id, member_ids, team_id)
+                    connection, identity.actor, scope, member_id, member_ids, team_id, permission='battle_map.read')
             except PermissionError as exc:
                 raise HTTPException(403, str(exc)) from exc
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from exc
         items = await CustomerMapRepository().read(connection, fde_user_ids=fde_user_ids, as_of=as_of)
-        if identity.actor.role.value in {'sales', 'supervisor', 'manager'}:
-            try:
-                actor = identity.actor
-                if member_ids:
-                    raise ValueError('销售个人视角请选择一名具体成员')
-                if scope is None and actor.role.value == 'supervisor' and not member_id and not team_id:
-                    directory = await scope_options(connection, actor)
-                    selected = {'scope': 'team', 'member_ids': [m['id'] for m in directory['members']],
-                                'team_ids': [t['id'] for t in directory['teams']]}
-                else:
-                    chosen_scope = scope or ('person' if member_id else 'team' if team_id else
-                        'department' if actor.role.value == 'manager' else 'self')
-                    selected = await resolve_scope(connection, actor, scope=chosen_scope,
-                                                   member_id=member_id, team_id=team_id)
-                assessments = {row['id']: row for row in await subject_customers(
-                    connection, member_ids=selected['member_ids'], scope=selected['scope'],
-                    team_ids=selected['team_ids'], customer_ids=[item['id'] for item in items])}
-                items = [{**item, **{key: assessments[item['id']][key] for key in
-                          ('potential_score', 'relationship_score', 'quadrant_code', 'quadrant_policy')}}
-                         for item in items if item['id'] in assessments]
-            except PermissionError as exc:
-                raise HTTPException(403, str(exc)) from exc
-            except ValueError as exc:
-                raise HTTPException(422, str(exc)) from exc
+        directory = await scope_options(connection, identity.actor, permission='battle_map.read')
+        people = [member['id'] for member in directory['members']
+                  if fde_user_ids is None or member['id'] in fde_user_ids]
+        if people:
+            selected_scope = 'person' if len(people)==1 and not team_id else 'team' if team_id else 'department'
+            assessments = {row['id']: row for row in await subject_customers(
+                connection,member_ids=people,scope=selected_scope,
+                team_ids=[str(team_id)] if team_id else [team['id'] for team in directory['teams']],
+                customer_ids=[item['id'] for item in items])}
+            items = [{**item, **{key: assessments[item['id']][key] for key in
+                ('potential_score','relationship_score','quadrant_code','quadrant_policy')}}
+                if item['id'] in assessments else item for item in items]
     return dict(items=items, activity_since=activity_since(as_of), as_of=as_of, data_source="database")
 
 
@@ -93,9 +81,9 @@ async def read_assets(
         if customer_id and not await CustomerRepository().exists(connection, customer_id):
             raise HTTPException(404, "客户不存在或不在当前权限范围内")
         customer_ids = None
-        if identity.actor.role.value in FDE_ROLES:
+        if scope or member_id or member_ids:
             try:
-                _, _, _, scoped = await scoped_opportunity_ids(connection, identity.actor, scope, member_id, member_ids)
+                _, _, _, scoped = await scoped_opportunity_ids(connection, identity.actor, scope, member_id, member_ids, permission='actual.read')
             except PermissionError as exc:
                 raise HTTPException(403, str(exc)) from exc
             customer_ids = list({r["customer_id"] for r in scoped})
@@ -112,7 +100,8 @@ async def read_assets(
             offset=offset,
             limit=page_size,
         )
-    return {**result, "can_manage": can_manage(identity.actor)}
+        editable = await can_manage(connection, customer_id, opportunity_id)
+    return {**result, "can_manage": editable}
 
 
 @router.post("", status_code=201)

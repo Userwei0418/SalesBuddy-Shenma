@@ -1115,3 +1115,15 @@ dialog::backdrop {background:#101e35a6;backdrop-filter:blur(3px);}
 .feishu-sync-card[open] summary{margin-bottom:20px}
 .feishu-sync-card .actions{flex-wrap:wrap;gap:10px}
 .feishu-sync-card small{line-height:1.7}
+
+/* Permission configuration keeps each action beside its own data scope. */
+.permission-group {border:1px solid var(--line, #e1e8f0);border-radius:10px;margin:12px 0;padding:12px;}
+.permission-group > summary {font-weight:600;cursor:pointer;padding:5px 0;}
+.permission-row {display:grid;grid-template-columns:minmax(200px, 1fr) minmax(200px, 1fr);gap:16px;padding:12px 4px;border-top:1px solid #edf1f7;align-items:start;}
+.permission-row[hidden],.permission-group[hidden] {display:none;}
+.permission-row label {display:flex;gap:10px;align-items:center;}
+.permission-row input[type=checkbox] {width:18px;height:18px;flex:0 0 auto;}
+.permission-row select {max-width:100%;width:100%;}
+.permission-row label select {width:112px;flex:0 0 auto;}
+.permission-row [data-team-controls],.permission-row [data-role-teams] {margin-top:8px;}
+@media (max-width:650px) {.permission-row {grid-template-columns:1fr;gap:8px;}}

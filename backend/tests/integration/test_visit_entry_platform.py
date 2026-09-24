@@ -43,7 +43,8 @@ async def existing_actor(connection, account, role):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("account,role", [("XS001", "sales"), ("FDE001", "fde")])
-@pytest.mark.parametrize("case", ["archive_replay", "low_score", "next_rejected", "changed_content", "structure_only"])
+@pytest.mark.parametrize("case", ["archive_replay", "low_score", "next_rejected", "changed_content", "structure_only",
+                                 "cross_day", "legacy_cross_day"])
 async def test_split_visit_requires_own_unchanged_passing_quality(connection, account, role, case):
     # Every branch must execute in a fresh CI database. Do not depend on a
     # previously imported customer, existing FDE account or live model run.
@@ -80,10 +81,16 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
     )
     run = await handler._load_and_start(first["run_id"], actor)
     facts = await handler.facts_loader.load(run)
+    if case in {"cross_day", "legacy_cross_day"}:
+        facts["server_fields"]["created_date"] = "2026-09-14"
+        fields["next_action"] = "下周由本人提交补充方案"
     fields["created_date"] = facts["server_fields"]["created_date"]
     result = validate_stage_result({"fields": fields, "summary": summary}, facts)
     assert "quality_review" not in result
     await store.persist_result(run, result, facts)
+    if case in {"cross_day", "legacy_cross_day"}:
+        # Editing the visible date must not move the trusted relative-time anchor.
+        fields["created_date"] = "2099-01-01"
     review_id = first["run_id"]
     if case != "structure_only":
         second = await prepare_visit_run(
@@ -98,9 +105,15 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
             ),
             "quality",
         )
+        if case == "legacy_cross_day":
+            await connection.execute("UPDATE agent.run SET business_context=business_context #- '{visit_request,date_anchor}' WHERE id=$1::uuid",
+                                     second["run_id"])
         run = await handler._load_and_start(second["run_id"], actor)
         facts = await handler.facts_loader.load(run)
         assert facts["fields"] == fields  # Date strings cannot be normalized as timestamps.
+        if case in {"cross_day", "legacy_cross_day"}:
+            assert facts["server_fields"]["created_date"] == "2026-09-14"
+            assert facts["data_as_of"][:10] != "2099-01-01"
         result = validate_stage_result(
             {
                 "fields": fields,
@@ -124,7 +137,7 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
     if case == "changed_content":
         submitted["contact_name"] = "改了联系人"
     task_count = await connection.fetchval("SELECT count(*) FROM workflow.task")
-    if case != "archive_replay":
+    if case not in {"archive_replay", "cross_day", "legacy_cross_day"}:
         with pytest.raises(ValueError):
             async with connection.transaction():
                 await archive_visit(connection, actor, customer_id=customer_id, fields=submitted)

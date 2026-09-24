@@ -65,7 +65,9 @@ async def main():
         await connection.execute("INSERT INTO config.feishu_connection(id,workspace_id,revision,enabled,validated_revision,settings,updated_by) VALUES($1,$2,1,true,1,$3::jsonb,$4)", sync, ws, settings, operator)
         old_snapshot = await connection.fetchval("SELECT to_jsonb(v)::text FROM activity.visit v WHERE id=$1", old_visit)
         event_count = await connection.fetchval("SELECT count(*) FROM ops.feishu_event")
-        await migrate(connection)
+        # Freeze the pre-RBAC historical migration contract. The current permission
+        # and approved-ledger import path is covered by verify_crm_history_apply_postgres.
+        await migrate_through(connection, 125)
         after = json.loads(await connection.fetchval("SELECT to_jsonb(v)::text FROM activity.visit v WHERE id=$1", old_visit))
         before = json.loads(old_snapshot)
         assert all(after[key] == value for key, value in before.items())
@@ -244,6 +246,7 @@ async def main():
         checks.append("complete_relations_and_quarter_source_project_without_jobs_or_historical_notifications")
         assert await connection.fetchval("SELECT count(*) FROM activity.visit WHERE interaction_at >= '2026-03-22 00:00:00+08' AND interaction_at < '2026-09-23 00:00:00+08' AND id=ANY($1::uuid[])", [old_visit, historical_visit, multi]) == 2
         checks.append("historical_activity_uses_original_calendar_date_not_archive_or_import_time")
+        await migrate(connection)  # Current authorization adapters also upgrade the historical fixtures.
         assert all(step["status"] == "unchanged" for step in await migrate(connection))
         checks.append("repeat_deployment_remains_noop_after_real_business_fixture")
         print(json.dumps({"passed": len(checks), "checks": checks}, ensure_ascii=False))

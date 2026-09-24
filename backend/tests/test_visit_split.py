@@ -8,6 +8,7 @@ from sales_backend.contracts.visit_flow import archival_snapshot, canonical_fiel
 from sales_backend.domain.agent import RoleCode
 from sales_backend.domain.company_rules import VisitAdmissionPolicy
 from sales_backend.services.visit_review_gate import consume_review
+from tests.authorization_fixtures import visit_authorization_query
 
 FIELDS = canonical_fields(
     {
@@ -81,12 +82,15 @@ def gate(monkeypatch):
     request = {**archival_snapshot(fields), "stage": "quality"}
     row = {
         "id": "artifact",
+        "identity_context": {"permission_version": "rbac-test:1"},
         "status": "pending_confirm",
         "payload": validate_stage_result(RESULT, FACTS),
         "business_context": {"customer_id": "customer", "visit_request": request},
     }
     db = SimpleNamespace(fetchrow=AsyncMock(return_value=row), execute=AsyncMock())
-    actor = SimpleNamespace(workspace_id="workspace", user_id="user", role=RoleCode.SALES)
+    actor = SimpleNamespace(workspace_id="workspace", user_id="user", role=RoleCode.SALES, team_ids=(),
+                            model_dump=lambda **kwargs: {"workspace_id": "workspace", "user_id": "user"})
+    db.fetchval = AsyncMock(side_effect=visit_authorization_query(actor))
     monkeypatch.setattr(
         "sales_backend.repositories.company_rules.CompanyRulesRepository.active", AsyncMock(return_value=POLICY)
     )
@@ -154,3 +158,21 @@ async def test_quality_facts_keep_human_date_strings(monkeypatch):
     facts = await loader.load(SimpleNamespace(mode="visit_entry"))
     assert facts["fields"] == FIELDS
     assert facts["fields"]["interaction_at"] == "2026-09-15"
+
+
+@pytest.mark.parametrize("anchor,current,expected,expired", [
+    ("2026-09-20", "2026-09-29T12:00:00+08:00", ("2026-09-21", "2026-09-27"), True),
+    ("2026-09-23", "2026-09-29T12:00:00+08:00", ("2026-09-28", "2026-10-04"), False),
+    ("2026-09-23", "2026-10-04T23:59:59+08:00", ("2026-09-28", "2026-10-04"), False),
+    ("2026-12-31", "2027-01-01T00:00:00+08:00", ("2027-01-04", "2027-01-10"), False),
+    ("2028-02-29", "2028-02-29T16:00:00+00:00", ("2028-03-06", "2028-03-12"), False),
+])
+def test_relative_time_calendar_is_anchored_and_handles_week_year_and_leap_boundaries(anchor, current, expected, expired):
+    from sales_backend.services.visit_flow import relative_time_context
+
+    result = relative_time_context(anchor, current)
+    assert (result["next_week_start"], result["next_week_end"]) == expected
+    assert result["anchor_date"] == anchor
+    assert result["next_week_expired"] is expired
+    if anchor == "2028-02-29":
+        assert result["current_date"] == "2028-03-01"

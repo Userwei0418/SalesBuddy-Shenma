@@ -33,6 +33,13 @@ class AgentFactsLoader:
 
     async def _load(self, run: RunInput, *, today_tasks_scope=None) -> dict[str, Any]:
         async with self.database.transaction(run.actor, readonly=True) as connection:
+            from sales_backend.services.agent_access import require_agent_access
+            from sales_backend.domain.route_permissions import AGENT_PERMISSIONS
+
+            await require_agent_access(connection,run.actor,run.mode,run.customer_id,
+                opportunity_id=run.opportunity_id,permission_version=run.permission_version)
+            await connection.execute("SELECT set_config('app.authorized_feature',$1,true)",
+                'profile.fde_read' if run.surface=='fde_profile' else AGENT_PERMISSIONS[run.mode])
             if run.surface == "fde_profile":
                 from sales_backend.services.fde_profile import current_run_facts
 
@@ -40,17 +47,6 @@ class AgentFactsLoader:
             if run.mode == "visit_entry":
                 if not run.customer_id:
                     raise ValueError("录入拜访必须先选择客户")
-                if run.actor.role in {RoleCode.FDE, RoleCode.FDE_LEAD}:
-                    from sales_backend.services.agent_access import require_agent_access
-
-                    await require_agent_access(
-                        connection,
-                        run.actor,
-                        run.mode,
-                        run.customer_id,
-                        opportunity_id=run.opportunity_id,
-                        permission_version=run.permission_version,
-                    )
                 # Only bound customer reference fields and this actor's default
                 # recording values supplement the original input. No customer
                 # contacts, previous visit content or aggregates enter extraction.
@@ -65,7 +61,21 @@ class AgentFactsLoader:
                     "is_first_visit": request.get("is_first_visit", False),
                 }
                 if stage == "quality":
+                    from sales_backend.services.visit_flow import (
+                        relative_time_context, structure_date_anchor, structure_source,
+                    )
+
+                    anchor = request.get("date_anchor")
+                    if not anchor:
+                        # Compatibility for quality jobs queued before this
+                        # release. Re-read their owned, durable source run.
+                        source = await structure_source(connection, run.actor, request["source_run_id"])
+                        if not source or source["business_context"].get("customer_id") != run.customer_id:
+                            raise ValueError("结构化原始记录不存在，请重新整理")
+                        anchor = structure_date_anchor(source)
+                    server["created_date"] = anchor
                     facts.update(
+                        relative_time_context=relative_time_context(anchor, facts["data_as_of"]),
                         fields=request["fields"],
                         summary=request["summary"],
                         company_policy=await CompanyRulesRepository().active(connection, "visit_admission"),
@@ -90,7 +100,8 @@ class AgentFactsLoader:
             if run.actor.role in {RoleCode.FDE, RoleCode.FDE_LEAD} and run.mode in {"chatbi", "operating_report"}:
                 from sales_backend.repositories.fde_analysis import fde_analysis_facts
 
-                return await fde_analysis_facts(connection, run.actor, personal="范围仅本人" in run.text)
+                return await fde_analysis_facts(connection, run.actor, personal="范围仅本人" in run.text,
+                                                permission=AGENT_PERMISSIONS[run.mode])
             if run.mode == "operating_report":
                 return await self._load_operating_report_facts(connection, run)
             if run.mode == "opportunity_draft":
@@ -139,24 +150,12 @@ class AgentFactsLoader:
                 LEFT JOIN crm.opportunity o ON o.owner_user_ref_id = u.id AND o.deleted_at IS NULL
                 LEFT JOIN insight.risk r ON r.owner_user_ref_id = u.id AND r.deleted_at IS NULL
                 WHERE u.workspace_id = $1::uuid AND u.deleted_at IS NULL
-                  AND (
-                    $2 = 'manager'
-                    OR ($2 = 'sales' AND u.id = $3::uuid)
-                    OR ($2 = 'supervisor' AND EXISTS (
-                      SELECT 1 FROM platform.team_membership visible_tm
-                      WHERE visible_tm.user_ref_id = u.id
-                        AND visible_tm.team_id = ANY($4::uuid[])
-                        AND clock_timestamp() >= visible_tm.valid_from
-                        AND clock_timestamp() < visible_tm.valid_to
-                    ))
-                  )
+                  AND security.authorization_subject($2,'person',u.id,NULL)
                 GROUP BY u.id, u.display_name
                 ORDER BY u.display_name
                 """,
                 run.actor.workspace_id,
-                run.actor.role.value,
-                run.actor.user_id,
-                list(run.actor.team_ids),
+                AGENT_PERMISSIONS[run.mode],
             )
         return {
             "scope": {
@@ -352,7 +351,11 @@ class AgentFactsLoader:
         }
 
     async def _load_operating_report_facts(self, connection: Any, run: RunInput) -> dict[str, Any]:
-        personal_scope = run.actor.role is RoleCode.SALES or "范围仅本人" in run.text
+        from sales_backend.repositories.authorization import AuthorizationRepository
+
+        grants = (await AuthorizationRepository().effective(connection)).for_permission("agent.operating_report")
+        scopes = {grant.scope for grant in grants}
+        personal_scope = scopes <= {"self"} or "范围仅本人" in run.text
         visits = await connection.fetch(
             """
             SELECT v.id::text, v.interaction_at, v.expectation_code,
@@ -450,15 +453,8 @@ class AgentFactsLoader:
             personal_scope,
             run.actor.user_id,
         )
-        scope_label = (
-            "个人"
-            if personal_scope
-            else {
-                "sales": "个人",
-                "supervisor": "直属团队",
-                "manager": "销售部门",
-            }[run.actor.role.value]
-        )
+        scope_label = ("个人" if personal_scope else "全公司授权范围" if "workspace" in scopes
+                       else "指定团队" if "teams" in scopes else "参与项目")
         return {
             "scope": {
                 "role": run.actor.role.value,

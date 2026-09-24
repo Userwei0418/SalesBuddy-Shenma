@@ -22,16 +22,21 @@ async def subject_ranking(connection, metric, start, end, *, months, member_id):
     )
 
 
-async def department_ranking_groups(connection, actor, metric, start, end, *, months, team_ids):
-    """Manager department totals use the same event ownership and caller RLS as facts.
+async def department_ranking_groups(connection, actor, metric, start, end, *, months, team_ids, legacy=False):
+    """Public ranks use a scoped aggregate projection; active facts retain caller RLS.
 
-    Legacy/peer aggregates still use the established security functions. This query
-    adds no SECURITY DEFINER boundary and never reads an unrestricted connection.
+    The public projection returns only statistics, including current-member counts
+    and followup totals per person. It grants no access to customer/visit bodies.
     """
-    if actor.role.value != "manager":
-        raise PermissionError("仅总经理团队视角可筛选团队")
+    if not await connection.fetchval("SELECT security.authorization_has('dashboard.ranking')"):
+        raise PermissionError("当前账号未获查看排名授权")
     if metric not in {"followup", "opportunity_acv", "active_opportunities"}:
         raise ValueError("Unknown department ranking metric")
+    if metric != "active_opportunities":
+        return await connection.fetchval(
+            "SELECT security.dashboard_team_ranking($1,$2,$3,$4::integer[],$5::uuid[],$6)",
+            metric, start, end, months, list(team_ids) if team_ids is not None else None, legacy,
+        )
     rows = await connection.fetch(
         """WITH members AS (
           SELECT u.id,primary_team.team_id FROM platform.user_ref u
@@ -75,7 +80,7 @@ async def department_ranking_groups(connection, actor, metric, start, end, *, mo
           WHERE t.workspace_id=$1::uuid AND t.id=ANY($6::uuid[])
             AND t.status='active' AND t.deleted_at IS NULL
             AND clock_timestamp()>=t.valid_from AND clock_timestamp()<t.valid_to
-            AND common.current_role_code()='manager' AND security.has_active_role('manager')
+            AND security.authorization_subject('dashboard.ranking','team',NULL,t.id)
           GROUP BY t.id,t.name
         ) SELECT *,rank() OVER(ORDER BY value DESC) AS rank FROM totals ORDER BY rank,code""",
         actor.workspace_id, metric, start, end, months, list(team_ids),
@@ -110,10 +115,10 @@ async def opportunity_distribution(connection, actor, *, year, months, personal,
           SELECT *,rank() OVER(ORDER BY value DESC) AS rank FROM totals WHERE code<>'unassigned'
           UNION ALL SELECT *,NULL::bigint AS rank FROM totals WHERE code='unassigned'
         ) SELECT * FROM ranked ORDER BY rank NULLS LAST,code""",
-        actor.role.value,
+        "dashboard.read",
         actor.user_id,
-        list(actor.team_ids),
-        personal or actor.role.value == "sales",
+        actor.workspace_id,
+        personal,
         year,
         months,
         dimension,

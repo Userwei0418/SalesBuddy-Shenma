@@ -14,6 +14,7 @@ from sales_backend.repositories.operations_accounts import OperationsAccountRepo
 from sales_backend.services.auth import AuthService
 from sales_backend.services.capabilities import capability_snapshot, require_capability
 from sales_backend.services.tasks import TaskService
+from tests.authorization_fixtures import permission_snapshot
 
 
 def fde(role=RoleCode.FDE):
@@ -85,11 +86,11 @@ def test_policy_precedence_is_user_then_role_then_global():
 async def test_live_policy_changes_capabilities_without_reissuing_token():
     actor = fde()
     connection = AsyncMock()
-    connection.fetchrow.return_value = {"visit_entry_enabled": False, "permission_version": "one"}
+    connection.fetchval.return_value = permission_snapshot(actor, {}, version="one")
     disabled = await capability_snapshot(connection, actor)
     with pytest.raises(PermissionError, match="未开启"):
         await require_capability(connection, actor, "visit.create")
-    connection.fetchrow.return_value = {"visit_entry_enabled": True, "permission_version": "two"}
+    connection.fetchval.return_value = permission_snapshot(actor, {"visit.create": "assigned"}, version="two")
     enabled = await capability_snapshot(connection, actor)
     assert enabled["capabilities"]["visit.create"]
     assert enabled["permission_version"] != disabled["permission_version"]
@@ -151,7 +152,16 @@ async def test_fde_agent_modes_block_sales_materialization_and_changed_snapshots
 
     connection = AsyncMock()
     actor = fde()
-    connection.fetchrow.return_value = {"visit_entry_enabled": False, "permission_version": "current"}
+    enabled = {code: "assigned" for code in ("agent.chatbi", "agent.customer_chatbi", "agent.operating_report")}
+    async def fetchval(sql, *args):
+        if "authorization_snapshot" in sql:
+            return permission_snapshot(actor, enabled, version="current")
+        if "authorization_customer" in sql:
+            return args[0] in enabled
+        if "authorization_visit_target" in sql:
+            return "visit.create" in enabled
+        raise AssertionError(sql)
+    connection.fetchval.side_effect = fetchval
     for mode in ["today_tasks", "personal_risks", "opportunity_draft", "customer_create", "management_task"]:
         with pytest.raises(PermissionError):
             await require_agent_access(connection, actor, mode)
@@ -159,9 +169,9 @@ async def test_fde_agent_modes_block_sales_materialization_and_changed_snapshots
         await require_agent_access(connection, actor, mode, str(uuid4()) if mode == "customer_chatbi" else None, permission_version="current")
     with pytest.raises(PermissionError, match="权限已变化"):
         await require_agent_access(connection, actor, "chatbi", permission_version="old")
-    with pytest.raises(PermissionError, match="未开启"):
+    with pytest.raises(PermissionError):
         await require_agent_access(connection, actor, "visit_entry", str(uuid4()), opportunity_id=str(uuid4()), permission_version="current")
-    connection.fetchrow.return_value["visit_entry_enabled"] = True
+    enabled.update({"visit.create": "assigned", "visit.structure": "assigned"})
     await require_agent_access(connection, actor, "visit_entry", str(uuid4()), opportunity_id=str(uuid4()), permission_version="current")
 
 
@@ -175,15 +185,15 @@ def test_advice_cache_key_includes_fde_permission_version():
 
 
 @pytest.mark.asyncio
-async def test_analysis_snapshot_uses_database_version_separately_from_ui_version():
+async def test_analysis_and_ui_use_the_same_current_authorization_version():
     from sales_backend.repositories.capabilities import CapabilityRepository
 
     connection = AsyncMock()
-    connection.fetchrow.return_value = {"visit_entry_enabled": False, "permission_version": "db-raw"}
     actor = fde()
+    connection.fetchval.return_value = permission_snapshot(actor, {}, version="db-raw")
     snapshot = await CapabilityRepository().analysis_identity(connection, actor)
     assert snapshot["permission_version"] == "db-raw"
-    assert (await capability_snapshot(connection, actor))["permission_version"] != "db-raw"
+    assert (await capability_snapshot(connection, actor))["permission_version"] == "db-raw"
 
 
 def test_fde_activity_and_task_handover_have_business_names():
@@ -209,12 +219,14 @@ async def test_audio_visit_permission_is_live_while_fde_manual_task_audio_remain
 
     actor = fde()
     connection = AsyncMock()
-    connection.fetchrow.return_value = {"visit_entry_enabled": False, "permission_version": "one"}
+    enabled = {"visit.transcribe": "self", "task.create_daily": "self"}
+    connection.fetchval.return_value = permission_snapshot(actor, enabled)
     with pytest.raises(HTTPException) as error:
         await require_audio_purpose(connection, actor, "visit_entry")
     assert error.value.status_code == 403
     await require_audio_purpose(connection, actor, "management_task")
-    connection.fetchrow.return_value["visit_entry_enabled"] = True
+    enabled["visit.structure"] = "assigned"
+    connection.fetchval.return_value = permission_snapshot(actor, enabled)
     await require_audio_purpose(connection, actor, "visit_entry")
     with pytest.raises(HTTPException):
         await require_audio_purpose(connection, actor, "customer_create")
@@ -237,6 +249,11 @@ async def test_file_processing_rechecks_policy_before_persisting_text(tmp_path, 
         return {"filename": "record.md", "file_path": str(source), "file_size": source.stat().st_size, "status": "queued"}
 
     connection.fetchrow.side_effect = fetchrow
+    person = fde()
+    async def snapshot(sql, *args):
+        assert "authorization_snapshot" in sql
+        return permission_snapshot(person, {"visit.upload": "self"} if enabled else {})
+    connection.fetchval.side_effect = snapshot
 
     class Database:
         @asynccontextmanager
@@ -252,7 +269,7 @@ async def test_file_processing_rechecks_policy_before_persisting_text(tmp_path, 
     monkeypatch.setenv("VISIT_IMPORT_ROOT", str(tmp_path))
     monkeypatch.setattr(visit_import, "document_text", extract)
     with pytest.raises(PermissionError, match="未开启"):
-        await visit_import.VisitImportHandler(Database()).handle(str(uuid4()), fde())
+        await visit_import.VisitImportHandler(Database()).handle(str(uuid4()), person)
     assert not any("status='succeeded'" in call.args[0] for call in connection.execute.call_args_list)
 
 
@@ -273,7 +290,7 @@ def test_fde_report_has_native_prompt_and_output_contract(role):
 
 
 @pytest.mark.parametrize("role", [RoleCode.FDE, RoleCode.FDE_LEAD])
-def test_sales_profile_routes_reject_fde_before_database_queries(role):
+def test_sales_profile_routes_reject_ungranted_actions_before_business_queries(role, monkeypatch):
     from types import SimpleNamespace
 
     from fastapi import FastAPI
@@ -282,18 +299,35 @@ def test_sales_profile_routes_reject_fde_before_database_queries(role):
     from sales_backend.api.dependencies import get_database, get_identity
     from sales_backend.api.profile import router
 
-    app = FastAPI()
+    from contextlib import asynccontextmanager
+    from fastapi import Depends
+    from fastapi.responses import JSONResponse
+    from sales_backend.api.permission_gate import enforce_route_permission
+    person = fde(role)
+    identity = SimpleNamespace(actor=person, auth_method="password", client_channel="wechat-mini-program")
+    connection = AsyncMock()
+    connection.fetchval.return_value = permission_snapshot(person, {"access.mini_program": "workspace"})
+    @asynccontextmanager
+    async def transaction(*args, **kwargs):
+        yield connection
+    database = SimpleNamespace(transaction=transaction)
+    monkeypatch.setattr("sales_backend.api.permission_gate.get_identity", AsyncMock(return_value=identity))
+    app = FastAPI(dependencies=[Depends(enforce_route_permission)])
+    app.state.database = database
+    app.state.settings = object()
+    @app.exception_handler(PermissionError)
+    async def denied(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=403)
     app.include_router(router)
-    app.dependency_overrides[get_identity] = lambda: SimpleNamespace(actor=fde(role))
-    # A missing DB cannot turn a denied role into a SQL 500.
-    app.dependency_overrides[get_database] = lambda: None
+    app.dependency_overrides[get_identity] = lambda: identity
+    app.dependency_overrides[get_database] = lambda: database
     with TestClient(app) as client:
         for path in ["evaluation", "performance", "sales-growth", "sales-growth/scoped", "team-members/XS001/sales-growth"]:
             response = client.get("/api/v1/profile/" + path)
             assert response.status_code == 403, path
-            assert response.json()["detail"] == "SALES_PROFILE_UNAVAILABLE"
         assert client.post("/api/v1/profile/sales-growth/review").status_code == 403
         assert client.post("/api/v1/profile/sales-targets", json={}).status_code == 403
+    assert not connection.fetch.called and not connection.fetchrow.called
 
 
 @pytest.mark.parametrize("role", [RoleCode.SALES, RoleCode.FDE, RoleCode.FDE_LEAD])

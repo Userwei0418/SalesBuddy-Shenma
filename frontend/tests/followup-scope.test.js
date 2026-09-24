@@ -35,7 +35,7 @@ function pageWith(role = 'supervisor', overrides = {}) {
       dashboardCalls.push(personal);
       return personal ? data('self', state.visits.filter(item => item.recorder_id === 'a'), state.opportunities.filter(item => item.owner_id === 'a')) : data('workspace', state.visits, state.opportunities);
     },
-    getDashboardRankings:async q=>({data_source:'database',contract_version:2,scope:q.personal?'peer':'company_teams',selection:{personal:q.personal,member_id:q.member_id||'a',team_groups:q.team_groups||[]},opportunity_acv:{rows:[],groups:[]},followup:{rows:[],groups:[]},region:{rows:[],groups:[]},active_opportunities:{rows:[],groups:[]}}),
+    getDashboardRankings:async q=>({data_source:'database',contract_version:2,scope:q.personal?'peer':'company_teams',selection:{personal:q.personal,member_id:q.member_id||'a',team_groups:q.team_groups||[]},opportunity_acv:{rows:[],groups:[]},followup:{calculation:q.personal?'personal':'team_followup_per_capita_v1',rows:[],groups:[]},region:{rows:[],groups:[]},active_opportunities:{rows:[],groups:[]}}),
     getDashboardOptions:async()=>({members:state.members,team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
     getDirectoryMembers: async () => { directoryCalls += 1; return { items: state.members }; },
     ...overrides,
@@ -45,7 +45,7 @@ function pageWith(role = 'supervisor', overrides = {}) {
     Page: value => { page = value; },
     require: name => name.endsWith('apiClient') ? api : require(path.resolve(path.dirname(filename), name)),
     Date, Set, Map,
-    getApp: () => ({ globalData: { role, session: { role, workspaceId: 'test-workspace', userId: 'a', userName: '销售甲', teamIds: ['north-id'] } }, ensureLogin: () => true }),
+    getApp: () => ({ globalData: { role, session: { role, capabilities:{'team.view':['supervisor','manager'].includes(role)}, workspaceId: 'test-workspace', userId: 'a', userName: '销售甲', teamIds: ['north-id'] } }, ensureLogin: () => true }),
     wx: { showNavigationBarLoading() {}, hideNavigationBarLoading() {}, showToast() {} },
   });
   page.data = JSON.parse(JSON.stringify(page.data));

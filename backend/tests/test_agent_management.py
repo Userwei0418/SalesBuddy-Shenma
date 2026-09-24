@@ -49,7 +49,7 @@ def test_registered_agent_for_another_capability_keeps_identity_but_cannot_link(
     related = metadata["related_agents"][0]
     assert related["bound"] is True
     assert related["agent_id"] == opportunity_agent
-    assert related["agent_name"] == "销售智助-商机新建更新判断-BETA"
+    assert related["agent_name"] == "Raccoon SalesBuddy-商机新建更新判断-BETA"
     assert related["expected_snapshot_id"] == "expected-only"
     assert related["configuration_url"] is None
     assert "配置快捷入口已关闭" in metadata["validation_note"]

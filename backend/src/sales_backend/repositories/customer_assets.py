@@ -3,8 +3,9 @@
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-from sales_backend.domain.agent import RoleCode
 from sales_backend.repositories.historical_customer_assets import read_historical_assets
+from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.repositories.authorization_checks import require_permission
 
 
 def today():
@@ -16,8 +17,12 @@ def period_start(period, as_of=None):
     return date(day.year, 1, 1) if period == "year" else None
 
 
-def can_manage(actor):
-    return actor.role in {RoleCode.MANAGER, RoleCode.SUPERVISOR}
+async def can_manage(connection, customer_id=None, opportunity_id=None):
+    if not (await AuthorizationRepository().effective(connection)).allows('actual.create'):
+        return False
+    if customer_id and not await connection.fetchval("SELECT security.authorization_customer('actual.create',$1::uuid)",str(customer_id)):
+        return False
+    return not opportunity_id or bool(await connection.fetchval("SELECT security.authorization_opportunity('actual.create',$1::uuid)",str(opportunity_id)))
 
 
 class CustomerAssetRepository:
@@ -41,7 +46,8 @@ class CustomerAssetRepository:
         as_of = today()
         args = [period_start(period, as_of), as_of, kind, customer_id, opportunity_id, team_id, owner_id, customer_ids]
         cte = """WITH facts AS (
-          SELECT a.*,COALESCE(c.name,reference.value->>'name') AS customer_name,
+          SELECT a.*,security.authorization_customer('actual.void',a.customer_id) AND
+            (a.opportunity_id IS NULL OR security.authorization_opportunity('actual.void',a.opportunity_id)) AS can_void,COALESCE(c.name,reference.value->>'name') AS customer_name,
             c.data_kind,u.display_name AS owner_name,
             o.name AS opportunity_name,t.name AS team_name,conf.display_name AS confirmed_by
           FROM crm.customer_actual a LEFT JOIN crm.customer c ON c.id=a.customer_id
@@ -74,7 +80,7 @@ class CustomerAssetRepository:
         )
         if customer_id:
             query = """SELECT id::text,customer_id::text,customer_name,opportunity_id::text,opportunity_name,
-              kind,amount,occurred_on,source_ref,note,created_at,confirmed_by,data_kind
+              kind,amount,occurred_on,source_ref,note,created_at,confirmed_by,data_kind,can_void
               FROM facts ORDER BY occurred_on DESC,created_at DESC,id LIMIT $9 OFFSET $10"""
             total = summary["entry_count"]
         else:
@@ -136,8 +142,7 @@ class CustomerAssetRepository:
         )
 
     async def create(self, connection, actor, data):
-        if not can_manage(actor):
-            raise PermissionError("仅管理人员可确认经营实绩")
+        await require_permission(connection, 'actual.create', customer_id=data['customer_id'])
         customer = await connection.fetchval(
             "SELECT id FROM crm.customer WHERE id=$1 AND deleted_at IS NULL", data["customer_id"]
         )
@@ -149,6 +154,8 @@ class CustomerAssetRepository:
             customer,
         ):
             raise ValueError("商机不属于当前客户，请重新选择")
+        if data.get('opportunity_id'):
+            await require_permission(connection, 'actual.create', opportunity_id=data['opportunity_id'])
         # Same request may be retried after a lost response, but never reused for changed content.
         await connection.execute("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", str(data["request_id"]))
         old = await connection.fetchrow(
@@ -182,13 +189,15 @@ class CustomerAssetRepository:
         return dict(id=record["id"], replayed=False, voided=False)
 
     async def void(self, connection, actor, record_id, reason):
-        if not can_manage(actor):
-            raise PermissionError("仅管理人员可作废经营实绩")
+        await require_permission(connection, 'actual.void')
         row = await connection.fetchrow(
-            "SELECT id,voided_at FROM crm.customer_actual WHERE id=$1 FOR UPDATE", record_id
+            "SELECT id,voided_at,customer_id,opportunity_id FROM crm.customer_actual WHERE id=$1 FOR UPDATE", record_id
         )
         if not row:
             raise LookupError("记录不存在或不在当前权限范围内")
+        await require_permission(connection, 'actual.void', customer_id=row['customer_id'])
+        if row['opportunity_id']:
+            await require_permission(connection, 'actual.void', opportunity_id=row['opportunity_id'])
         if not row["voided_at"]:
             await connection.execute(
                 """UPDATE crm.customer_actual SET voided_at=clock_timestamp(),

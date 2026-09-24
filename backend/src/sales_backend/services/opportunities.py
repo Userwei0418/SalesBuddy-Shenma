@@ -15,7 +15,6 @@ from sales_backend.domain.opportunities import (
     stage_for_probability,
     validate_forecast_completeness,
 )
-from sales_backend.domain.policy import AgentModeForbidden, assert_opportunity_create_allowed
 from sales_backend.repositories.business_changes import record_change
 from sales_backend.repositories.collaboration import effective_ids, members_by_opportunity, validated_fde, write_members
 from sales_backend.repositories.customer_risk import enqueue_customer_risk_review
@@ -31,15 +30,15 @@ from sales_backend.repositories.opportunity_mutations import (
     write_opportunity,
 )
 from sales_backend.repositories.partners import resolve_opportunity_partner
-from sales_backend.services.capabilities import require_capability
+from sales_backend.services.authorization import opportunity_creation_owner, require_permission
 
 
 async def save_opportunity(connection, actor, *, customer_id, data, visit_context=None):
-    await require_capability(connection, actor, "opportunity.edit")
+    updating = data.get("action") == "update"
+    await require_permission(connection, "opportunity.update" if updating else "opportunity.create")
     customer = await customer_for_opportunity(connection, customer_id)
     if not customer:
         raise LookupError("客户不存在或不在当前权限范围内")
-    updating = data.get("action") == "update"
     oid = data.get("opportunity_id") if updating else str(uuid4())
     before = None
     old_forecasts = []
@@ -49,21 +48,17 @@ async def save_opportunity(connection, actor, *, customer_id, data, visit_contex
         row = await lock_opportunity(connection, oid, customer_id)
         if not row:
             raise LookupError("商机不存在或不属于此客户")
-        if actor.role.value == "sales" and str(row["owner_user_ref_id"]) != actor.user_id:
-            raise PermissionError("只能修改本人的商机")
+        await require_permission(connection, "opportunity.update", opportunity_id=oid)
         before = dict(row)
         require_version(before["version_no"], data.get("version_no"))
         old_forecasts = await forecasts(connection, oid)
-    else:
-        try:
-            assert_opportunity_create_allowed(actor)
-        except AgentModeForbidden as exc:
-            raise PermissionError("当前角色不能创建商机") from exc
     owner = None
-    if actor.role.value in {"operations", "administrator"} and not updating:
+    if "owner_user_ref_id" in data and not updating:
         if not data.get("owner_user_ref_id"):
             raise ValueError("请选择商机负责人")
         owner = await validate_opportunity_owner(connection, data["owner_user_ref_id"])
+    if not updating:
+        owner = await opportunity_creation_owner(connection, actor, data, delegated_owner=owner)
     if (
         updating
         and data.get("owner_user_ref_id")
@@ -71,6 +66,16 @@ async def save_opportunity(connection, actor, *, customer_id, data, visit_contex
     ):
         raise ValueError("此处保留商机负责人，人员交接需单独处理")
     after = prepare_change(before, data)
+    if after["status"] != (before["status"] if before else "open"):
+        permission = "opportunity.reopen" if after["status"] == "open" else "opportunity.close"
+        if updating:
+            await require_permission(connection, permission, opportunity_id=oid)
+        else:
+            from sales_backend.domain.authorization import ObjectScope
+            from sales_backend.repositories.authorization import AuthorizationRepository
+
+            (await AuthorizationRepository().effective(connection)).require(permission, ObjectScope(
+                actor.workspace_id, owner["user_id"], owner["team_id"], frozenset({owner["user_id"]})))
     after.update(await resolve_opportunity_partner(connection, before, data))
     if not await opportunity_name_available(connection, customer_id, after["name"], oid if updating else None):
         raise FileExistsError(NAME_CONFLICT_MESSAGE)
@@ -80,6 +85,7 @@ async def save_opportunity(connection, actor, *, customer_id, data, visit_contex
     changes = differences(before, after, old_forecasts, new_forecasts)
     fde_ids = None
     if data.get("fde_member_ids") is not None:
+        await require_permission(connection, "opportunity.fde_members", opportunity_id=oid if updating else None)
         fde_people = await validated_fde(connection, data["fde_member_ids"])
         fde_ids = {r["id"] for r in fde_people}
         old_fde = await effective_ids(connection, oid) if updating else set()

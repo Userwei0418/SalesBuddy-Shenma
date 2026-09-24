@@ -1,20 +1,17 @@
 # ruff: noqa: S608 -- Only the fixed scope expression is interpolated; all values are bound.
 """Minimal, paged task link choices with the same scope as task creation."""
 
-# Receiving a task never satisfies this predicate. FDE creation requires direct
-# participation, while sales and management retain their existing business scope.
-_SCOPE = """CASE WHEN $2::text IN ('fde','fde_lead') THEN
-    EXISTS(SELECT 1 FROM unnest($3::uuid[]) team WHERE
-      security.fde_user_direct_opportunity_scope($1::uuid,$2,team,o.id))
-    ELSE security.has_opportunity_access(o.id) END"""
+# This action keeps its own scopes. Merely receiving a task grants no access
+# to its linked opportunity, and an FDE's broader panorama read is not a write grant.
+_SCOPE = "security.authorization_opportunity('task.create_customer',o.id)"
 
 
 class TaskLinkRepository:
     async def allowed(self, connection, actor, opportunity_id):
         return await connection.fetchval(
-            f"SELECT EXISTS(SELECT 1 FROM crm.opportunity o WHERE o.id=$4::uuid "
+            f"SELECT EXISTS(SELECT 1 FROM crm.opportunity o WHERE o.id=$1::uuid "
             f"AND o.deleted_at IS NULL AND ({_SCOPE}))",
-            actor.user_id, actor.role.value, list(actor.team_ids), opportunity_id,
+            opportunity_id,
         )
 
     async def customers(self, connection, actor, *, query="", limit=20, offset=0):
@@ -27,9 +24,9 @@ class TaskLinkRepository:
                 security.customer_reference(customer_id)->>'name' AS name
               FROM customer_ids
             ) SELECT id,name FROM choices WHERE name IS NOT NULL
-              AND ($4::text='' OR name ILIKE '%' || $4 || '%')
-              ORDER BY name,id LIMIT $5 OFFSET $6""",
-            actor.user_id, actor.role.value, list(actor.team_ids), query, limit + 1, offset,
+              AND ($1::text='' OR name ILIKE '%' || $1 || '%')
+              ORDER BY name,id LIMIT $2 OFFSET $3""",
+            query, limit + 1, offset,
         )
         return self._page(rows, limit, offset)
 
@@ -37,11 +34,11 @@ class TaskLinkRepository:
                             query="", limit=20, offset=0):
         rows = await connection.fetch(
             f"""SELECT o.id::text,o.name,o.customer_id::text FROM crm.opportunity o
-              WHERE o.deleted_at IS NULL AND ({_SCOPE}) AND o.customer_id=$4::uuid
-                AND ($5::text='' OR o.name ILIKE '%' || $5 || '%')
-                AND ($8::uuid IS NULL OR o.id=$8::uuid)
-              ORDER BY o.name,o.id LIMIT $6 OFFSET $7""",
-            actor.user_id, actor.role.value, list(actor.team_ids), customer_id,
+              WHERE o.deleted_at IS NULL AND ({_SCOPE}) AND o.customer_id=$1::uuid
+                AND ($2::text='' OR o.name ILIKE '%' || $2 || '%')
+                AND ($5::uuid IS NULL OR o.id=$5::uuid)
+              ORDER BY o.name,o.id LIMIT $3 OFFSET $4""",
+            customer_id,
             query, limit + 1, offset, opportunity_id,
         )
         return self._page(rows, limit, offset)

@@ -112,10 +112,10 @@ test('FDE加入/移出是协作通知，不生成待接受任务卡片',()=>{
  }
 });
 
-test('待交接任务不能接受或完成，保留对象级协调入口',async()=>{
+test('待交接任务不能接受或完成，没有功能授权时隐藏对象协调入口',async()=>{
  const task={id:'11111111-1111-1111-1111-111111111111',status:'pending_execution',handover_required:true,can_coordinate:true,assignees:[{user_id:'u1',responsibility:'owner',name:'甲'}]};
  const page=make('pages/task-detail/index.js',{app:appFor(fde),api:{getTask:async()=>task}});page.data.taskId=task.id;page.loadTask();await new Promise(r=>setImmediate(r));
- assert.equal(page.data.task.canRespond,false);assert.equal(page.data.task.canComplete,false);assert.equal(page.data.task.can_coordinate,true);
+ assert.equal(page.data.task.canRespond,false);assert.equal(page.data.task.canComplete,false);assert.equal(page.data.task.can_coordinate,false);
 });
 
 test('协作记录失去完整资料权限后只展示摘要，不打开旧深链',()=>{

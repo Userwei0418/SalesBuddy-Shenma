@@ -9,8 +9,9 @@
   <view class="profile-insight-tabs surface">
     <view wx:for="{{profileTabs}}" wx:key="key" class="{{activeProfileTab === item.key ? 'active' : ''}}" data-tab="{{item.key}}" bindtap="selectProfileTab">{{item.label}}</view>
   </view>
-  <view wx:if="{{role !== 'sales' && !isFde}}" class="profile-subject-controls"><profile-scope-picker modes="{{profileScopeOptions}}" mode="{{profileScopeMode}}" members="{{scopeMembers}}" teams="{{scopeTeams}}" member-id="{{profileSelectedMemberId}}" team-id="{{profileTeamId}}" label="{{profileScopeLabel}}" bind:modechange="selectProfileScope" bind:subjectchange="changeProfileSubject" bind:visibilitychange="profilePickerVisibility"/></view>
-  <view wx:if="{{isFdeLead}}" class="profile-subject-controls"><profile-scope-picker modes="{{fdeScopeModes}}" mode="{{fdeProfileScope==='team'?'team':'person'}}" members="{{fdeScopeMembers}}" teams="{{fdeScopeTeams}}" team-id="{{fdeTeamId}}" member-id="{{fdeMemberId || ownUserId}}" label="{{fdeProfileScope==='team'?fdeTeamLabel:fdeMemberName || userName+'（本人）'}}" bind:modechange="changeFdeScopeMode" bind:subjectchange="changeFdeScopeSubject" bind:visibilitychange="profilePickerVisibility"/><view wx:if="{{fdeMembersError}}" class="subject-loading subject-error" bindtap="loadFdeMembers">{{fdeMembersError}}</view></view>
+  <view wx:if="{{presentationOptions.length > 1}}" class="permission-perspectives"><button wx:for="{{presentationOptions}}" wx:key="value" size="mini" class="{{presentation===item.value?'selected':''}}" data-kind="{{item.value}}" bindtap="changePresentation">{{item.label}}</button></view>
+  <view wx:if="{{profileScopeOptions.length && !isFde}}" class="profile-subject-controls"><profile-scope-picker modes="{{profileScopeOptions}}" mode="{{profileScopeMode}}" members="{{scopeMembers}}" teams="{{scopeTeams}}" member-id="{{profileSelectedMemberId}}" team-id="{{profileTeamId}}" label="{{profileScopeLabel}}" bind:modechange="selectProfileScope" bind:subjectchange="changeProfileSubject" bind:visibilitychange="profilePickerVisibility"/></view>
+  <view wx:if="{{canViewFdeTeam && isFde}}" class="profile-subject-controls"><profile-scope-picker modes="{{fdeScopeModes}}" mode="{{fdeProfileScope==='team'?'team':'person'}}" members="{{fdeScopeMembers}}" teams="{{fdeScopeTeams}}" team-id="{{fdeTeamId}}" member-id="{{fdeMemberId || ownUserId}}" label="{{fdeProfileScope==='team'?fdeTeamLabel:fdeMemberName || userName+'（本人）'}}" bind:modechange="changeFdeScopeMode" bind:subjectchange="changeFdeScopeSubject" bind:visibilitychange="profilePickerVisibility"/><view wx:if="{{fdeMembersError}}" class="subject-loading subject-error" bindtap="loadFdeMembers">{{fdeMembersError}}</view></view>
 
   <view wx:if="{{!isFde && (directoryLoading || directoryError)}}" class="profile-directory-state surface">
     <view wx:if="{{directoryLoading}}" class="profile-directory-loading">正在加载查看范围…</view>
@@ -26,7 +27,7 @@
     </view>
     <view wx:if="{{organizationLoading && !organizationReady}}" class="growth-loading"><view></view><text>{{isFde ? '正在汇总项目成效' : '正在汇总营销成熟度'}}</text></view>
     <block wx:if="{{organizationReady}}">
-      <quarter-target id="salesQuarterTarget" scope="{{targetQueryScope}}" subject-id="{{targetQueryMemberId}}" team-id="{{profileTeamId}}" subject-label="{{profileScopeLabel}}" year="{{targetYear}}" quarter="{{targetQuarter}}" editable="{{canEditSalesTarget}}" context-key="{{targetContextKey}}" bind:saved="targetsSaved"/>
+      <quarter-target wx:if="{{canReadTargets}}" id="salesQuarterTarget" scope="{{targetQueryScope}}" subject-id="{{targetQueryMemberId}}" team-id="{{profileTeamId}}" subject-label="{{profileScopeLabel}}" year="{{targetYear}}" quarter="{{targetQuarter}}" editable="{{canEditSalesTarget}}" context-key="{{targetContextKey}}" bind:saved="targetsSaved"/>
       <view class="performance-board">
         <view wx:for="{{performanceBoard}}" wx:key="kind" class="performance-metric">
           <view class="performance-metric-head"><text>{{item.name}}</text><label>{{item.rateText}}</label></view>
@@ -89,7 +90,7 @@
   </view>
   <view class="profile-footer">
     <button class="logout-button" bindtap="logout" disabled="{{logoutBusy}}" loading="{{logoutNavigating}}">{{logoutNavigating ? '正在退出…' : '退出登录 / 切换账号'}}</button>
-    <view class="version">销售智助 · MVP Preview 0.1</view>
+    <view class="version">Raccoon SalesBuddy · MVP Preview 0.1</view>
   </view>
 </view>
 

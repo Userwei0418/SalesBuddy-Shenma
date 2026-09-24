@@ -61,7 +61,8 @@ async def test_advice_repository_serializes_correct_date_and_stable_fingerprint(
     connection = SimpleNamespace(
         fetchrow=AsyncMock(return_value={"id": "visit-1", "customer_id": "customer-1",
                                        "interaction_at": datetime(2026, 9, 6, 16, tzinfo=UTC)}),
-        fetchval=AsyncMock(return_value={"name": "客户"}),
+        fetchval=AsyncMock(side_effect=lambda sql,*args: True if "security.authorization_" in sql else {"name": "客户"}),
+        execute=AsyncMock(),
     )
     actor = SimpleNamespace(role=SimpleNamespace(value="sales"), user_id="sales-1")
     first = await AdviceFactsRepository().load(connection, actor, "visit", "visit-1")

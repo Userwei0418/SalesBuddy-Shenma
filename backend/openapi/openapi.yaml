@@ -1,6 +1,35 @@
 # 本文件由 scripts/export_openapi.py 生成，请勿手工编辑。
 components:
   schemas:
+    AccountAuthorizationSave:
+      additionalProperties: false
+      properties:
+        overrides:
+          items:
+            $ref: '#/components/schemas/AccountPermissionOverride'
+          maxItems: 300
+          title: Overrides
+          type: array
+        reason:
+          maxLength: 500
+          minLength: 1
+          title: Reason
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/AccountRoleAssignment'
+          maxItems: 100
+          title: Roles
+          type: array
+        version_no:
+          minimum: 0.0
+          title: Version No
+          type: integer
+      required:
+      - version_no
+      - reason
+      title: AccountAuthorizationSave
+      type: object
     AccountCreate:
       properties:
         account_code:
@@ -105,6 +134,67 @@ components:
       - version_no
       - reason
       title: AccountLoginUnlock
+      type: object
+    AccountPermissionOverride:
+      additionalProperties: false
+      properties:
+        effect:
+          enum:
+          - allow
+          - deny
+          title: Effect
+          type: string
+        permission:
+          title: Permission
+          type: string
+        scope:
+          default: inherit
+          enum:
+          - inherit
+          - self
+          - assigned
+          - teams
+          - workspace
+          title: Scope
+          type: string
+        team_ids:
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Team Ids
+          type: array
+      required:
+      - permission
+      - effect
+      title: AccountPermissionOverride
+      type: object
+    AccountRoleAssignment:
+      additionalProperties: false
+      properties:
+        role_id:
+          format: uuid
+          title: Role Id
+          type: string
+        scope:
+          enum:
+          - self
+          - assigned
+          - teams
+          - workspace
+          title: Scope
+          type: string
+        team_ids:
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Team Ids
+          type: array
+      required:
+      - role_id
+      - scope
+      title: AccountRoleAssignment
       type: object
     AccountUpdate:
       properties:
@@ -219,10 +309,21 @@ components:
         display_name:
           title: Display Name
           type: string
+        permission_grants:
+          items:
+            additionalProperties: true
+            type: object
+          title: Permission Grants
+          type: array
         permission_version:
           default: ''
           title: Permission Version
           type: string
+        permissions:
+          additionalProperties:
+            type: boolean
+          title: Permissions
+          type: object
         role:
           title: Role
           type: string
@@ -1244,6 +1345,23 @@ components:
       - claim_status
       title: CustomerDirectoryItem
       type: object
+    CustomerDirectoryOptions:
+      properties:
+        claim_statuses:
+          items:
+            $ref: '#/components/schemas/DirectoryFilterOption'
+          title: Claim Statuses
+          type: array
+        industries:
+          items:
+            $ref: '#/components/schemas/DirectoryFilterOption'
+          title: Industries
+          type: array
+      required:
+      - industries
+      - claim_statuses
+      title: CustomerDirectoryOptions
+      type: object
     CustomerDirectoryPage:
       properties:
         has_more:
@@ -1934,6 +2052,19 @@ components:
       - name
       - short_name
       title: DimensionDefinition
+      type: object
+    DirectoryFilterOption:
+      properties:
+        label:
+          title: Label
+          type: string
+        value:
+          title: Value
+          type: string
+      required:
+      - value
+      - label
+      title: DirectoryFilterOption
       type: object
     Draft:
       properties:
@@ -2692,6 +2823,13 @@ components:
             type: string
           - type: 'null'
           title: Opportunity Id
+        owner_team_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 新增商机所属团队；须在创建权限的数据范围内
+          title: Owner Team Id
         partner_id:
           anyOf:
           - format: uuid
@@ -2953,6 +3091,13 @@ components:
             type: string
           - type: 'null'
           title: Opportunity Id
+        owner_team_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 新增商机所属团队；须在创建权限的数据范围内
+          title: Owner Team Id
         owner_user_ref_id:
           anyOf:
           - format: uuid
@@ -3623,6 +3768,48 @@ components:
       - resolution_note
       title: RiskResolve
       type: object
+    RoleSave:
+      additionalProperties: false
+      properties:
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+        name:
+          maxLength: 80
+          minLength: 1
+          title: Name
+          type: string
+        permissions:
+          items:
+            $ref: '#/components/schemas/ScopedPermission'
+          maxItems: 300
+          title: Permissions
+          type: array
+        reason:
+          maxLength: 500
+          minLength: 1
+          title: Reason
+          type: string
+        status:
+          default: active
+          enum:
+          - active
+          - inactive
+          title: Status
+          type: string
+        version_no:
+          anyOf:
+          - minimum: 1.0
+            type: integer
+          - type: 'null'
+          title: Version No
+      required:
+      - name
+      - reason
+      title: RoleSave
+      type: object
     RunAccepted:
       properties:
         run_id:
@@ -3707,6 +3894,33 @@ components:
       - expected_revision
       - config
       title: SaveFeishuConfig
+      type: object
+    ScopedPermission:
+      additionalProperties: false
+      properties:
+        permission:
+          title: Permission
+          type: string
+        scope:
+          default: inherit
+          enum:
+          - inherit
+          - self
+          - assigned
+          - teams
+          - workspace
+          title: Scope
+          type: string
+        team_ids:
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Team Ids
+          type: array
+      required:
+      - permission
+      title: ScopedPermission
       type: object
     SessionResponse:
       properties:
@@ -3794,6 +4008,15 @@ components:
           anyOf:
           - $ref: '#/components/schemas/TaskCreate'
           - type: 'null'
+        tasks:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/TaskCreate'
+            maxItems: 100
+            minItems: 1
+            type: array
+          - type: 'null'
+          title: Tasks
         version_no:
           minimum: 1.0
           title: Version No
@@ -4097,6 +4320,20 @@ components:
       - amount
       - reason
       title: TargetSave
+      type: object
+    TaskBatchCreate:
+      description: One human-confirmed assignment, one independently owned task per colleague.
+      properties:
+        tasks:
+          items:
+            $ref: '#/components/schemas/TaskCreate'
+          maxItems: 100
+          minItems: 1
+          title: Tasks
+          type: array
+      required:
+      - tasks
+      title: TaskBatchCreate
       type: object
     TaskCardState:
       properties:
@@ -4789,7 +5026,7 @@ components:
       scheme: bearer
       type: http
 info:
-  title: 销售智助 Sales SaaS API
+  title: Raccoon SalesBuddy Sales SaaS API
   version: 0.1.0
 openapi: 3.1.0
 paths:
@@ -5426,6 +5663,20 @@ paths:
       summary: Password Login
       tags:
       - Auth
+  /api/v1/auth/permissions:
+    get:
+      operationId: own_permissions_api_v1_auth_permissions_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Own Permissions
+      tags:
+      - Authorization
   /api/v1/auth/refresh:
     post:
       operationId: refresh_session_api_v1_auth_refresh_post
@@ -8560,6 +8811,246 @@ paths:
       summary: Update Password Policy
       tags:
       - Accounts and organization
+  /api/v1/console/permissions/accounts/{user_id}:
+    get:
+      operationId: account_api_v1_console_permissions_accounts__user_id__get
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          format: uuid
+          title: User Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Account
+      tags:
+      - Authorization
+    put:
+      operationId: update_account_api_v1_console_permissions_accounts__user_id__put
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          format: uuid
+          title: User Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountAuthorizationSave'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Update Account
+      tags:
+      - Authorization
+  /api/v1/console/permissions/audit:
+    get:
+      operationId: audit_api_v1_console_permissions_audit_get
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 200
+          minimum: 1
+          title: Limit
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Audit
+      tags:
+      - Authorization
+  /api/v1/console/permissions/catalog:
+    get:
+      operationId: catalog_api_v1_console_permissions_catalog_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Catalog
+      tags:
+      - Authorization
+  /api/v1/console/permissions/me:
+    get:
+      operationId: console_permissions_api_v1_console_permissions_me_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Console Permissions
+      tags:
+      - Authorization
+  /api/v1/console/permissions/options:
+    get:
+      operationId: options_api_v1_console_permissions_options_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Options
+      tags:
+      - Authorization
+  /api/v1/console/permissions/roles:
+    get:
+      operationId: roles_api_v1_console_permissions_roles_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Roles
+      tags:
+      - Authorization
+    post:
+      operationId: create_role_api_v1_console_permissions_roles_post
+      parameters:
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleSave'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Create Role
+      tags:
+      - Authorization
+  /api/v1/console/permissions/roles/{role_id}:
+    put:
+      operationId: update_role_api_v1_console_permissions_roles__role_id__put
+      parameters:
+      - in: path
+        name: role_id
+        required: true
+        schema:
+          format: uuid
+          title: Role Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleSave'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Update Role
+      tags:
+      - Authorization
   /api/v1/console/summary:
     get:
       operationId: summary_api_v1_console_summary_get
@@ -9812,6 +10303,29 @@ paths:
           minimum: 0
           title: Offset
           type: integer
+      - in: query
+        name: industry
+        required: false
+        schema:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          title: Industry
+      - in: query
+        name: claim_status
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - unclaimed
+            - claimed
+            - mine
+            - pending
+            - legacy_review
+            type: string
+          - type: 'null'
+          title: Claim Status
       responses:
         '200':
           content:
@@ -9828,6 +10342,21 @@ paths:
       security:
       - HTTPBearer: []
       summary: Customer Claim Pool
+      tags:
+      - Customers
+  /api/v1/customers/claim-pool/options:
+    get:
+      operationId: customer_claim_pool_options_api_v1_customers_claim_pool_options_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerDirectoryOptions'
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Customer Claim Pool Options
       tags:
       - Customers
   /api/v1/customers/{customer_id}:
@@ -9958,7 +10487,7 @@ paths:
       - Customers
   /api/v1/customers/{customer_id}/claims:
     post:
-      description: 一线销售、销售主管、销售总经理可为本人申请未认领客户；运营审批通过后生效。FDE 不可认领。
+      description: 依据当前账号的客户认领权限及数据范围申请；审批通过后生效。
       operationId: claim_existing_customer_api_v1_customers__customer_id__claims_post
       parameters:
       - in: path
@@ -10425,6 +10954,9 @@ paths:
       - Business
   /api/v1/dashboard/rankings:
     get:
+      description: 公共排名排除团队类型 fde，组织筛选与活跃商机事实不受影响。团队跟进 calculation=team_followup_per_capita_v1，value 为未舍入人均次数（排序依据），average
+        保留两位，record_count 为总次数，member_count 为当前有效销售业务成员数（含零次）。members 只含授权范围内姓名、账号及个人次数汇总；current_member=false
+        的原团队贡献者不计入分母。分母为零时 value/average/rank 为 null，不参与排名。ACV仍按金额，record_count仅为辅助商机数；个人跟进仍按次数。
       operationId: dashboard_ranking_view_api_v1_dashboard_rankings_get
       parameters:
       - in: query
@@ -11261,6 +11793,7 @@ paths:
       - FDE collaboration
   /api/v1/fde/visit-opportunities:
     get:
+      description: 仅返回本人可录入跟进的商机；包含 sales_channel、partner_id、partner_name，供跟进复用商机伙伴，空伙伴保持未知。
       operationId: visit_opportunities_api_v1_fde_visit_opportunities_get
       parameters:
       - in: query
@@ -11691,6 +12224,23 @@ paths:
       security:
       - HTTPBearer: []
       summary: Opportunities
+      tags:
+      - Business
+  /api/v1/opportunities/create-options:
+    get:
+      operationId: opportunity_create_options_api_v1_opportunities_create_options_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Opportunity Create Options Api V1 Opportunities Create Options Get
+                type: object
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Opportunity Create Options
       tags:
       - Business
   /api/v1/opportunities/overview:
@@ -12903,6 +13453,48 @@ paths:
       security:
       - HTTPBearer: []
       summary: Create Task
+      tags:
+      - Tasks
+  /api/v1/tasks/batch:
+    post:
+      description: 为每位指定负责人创建独立待办。整批在同一事务提交；任一校验失败则全部回滚。支持 Idempotency-Key 重放。
+      operationId: create_task_batch_api_v1_tasks_batch_post
+      parameters:
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskBatchCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Task Batch Api V1 Tasks Batch Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Create Task Batch
       tags:
       - Tasks
   /api/v1/tasks/customers:

@@ -42,7 +42,13 @@ async def main(version=108):
                     target.symlink_to(path)
 
         async def migrate_v108(connection):
-            return await original_migrate(connection, root=root)
+            result = await original_migrate(connection, root=root)
+            # This harness intentionally runs old schemas only. Modern request
+            # setup can call its refresh hook; historical authorization remains
+            # entirely enforced by the actual V108/V117 policies under test.
+            await connection.execute("CREATE OR REPLACE FUNCTION security.authorization_refresh() RETURNS void "
+                                     "LANGUAGE sql AS 'SELECT NULL::void'")
+            return result
 
         async def verify(config, name, role):
             user = quote(config["user"], safe="")

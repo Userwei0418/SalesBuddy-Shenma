@@ -151,7 +151,7 @@ async def fde_activity(
     selected = reporting_period(
         now, year=year, quarters=quarters, period="all" if all_history else period, date_from=date_from, date_to=date_to
     )
-    scope, ids, _ = await scope_members(connection, actor, scope, member_id, member_ids, team_id)
+    scope, ids, _ = await scope_members(connection, actor, scope, member_id, member_ids, team_id, permission="profile.fde_activity")
     arguments = history_arguments(
         actor,
         scope=scope,
@@ -183,12 +183,14 @@ async def fde_dashboard(
     period=None,
     date_from=None,
     date_to=None,
+    permission="profile.fde_read",
 ):
     now = datetime.now(TZ)
     requested_quarters = sorted(set(quarters or []))
     selected = reporting_period(now, year=year, quarters=quarters, period=period, date_from=date_from, date_to=date_to)
     year, quarters = year or now.year, list(selected.quarters) or [1, 2, 3, 4]
-    scope, ids, members, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids, team_id)
+    scope, ids, members, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids, team_id,
+                                                                permission=permission, fde_cohort=True)
     opp_ids = [r["id"] for r in scoped]
     opportunities = (
         [
@@ -287,13 +289,14 @@ async def fde_dashboard(
         selected.end_at,
         list(selected.quarters) or None,
     )
+    can_rank = await connection.fetchval("SELECT security.authorization_has('dashboard.ranking')")
     company = await connection.fetchval(
         "SELECT security.fde_dashboard_rankings($1,$2,$3::int[],$4::uuid)",
         selected.start,
         selected.end,
         list(selected.quarters) or None,
         str(member_id) if member_id else actor.user_id if scope == "self" else None,
-    )
+    ) if can_rank else {"rows": [], "groups": [], "selection": {}}
     if team_id:
         company = {**company, "selection": {**company.get("selection", {}), "team_ids": [str(team_id)]}}
     rhythm, rhythm_weeks = rhythm_axes(history["rhythm"], selected, now)

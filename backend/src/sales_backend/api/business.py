@@ -32,6 +32,13 @@ from sales_backend.services.visit_archive import archive_visit
 router = APIRouter(prefix="/api/v1", tags=["Business"])
 
 
+@router.get('/opportunities/create-options')
+async def opportunity_create_options(identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database)) -> dict:
+    from sales_backend.repositories.authorization_checks import opportunity_creation_options
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await opportunity_creation_options(connection, identity.actor)
+
+
 @router.get("/metadata/business-options")
 async def business_options(identity: RequestIdentity = Depends(get_identity)) -> dict:
     """Current server-owned form/filter choices. Requires a valid actor session."""
@@ -102,7 +109,13 @@ async def workbench(
         return await WorkbenchRepository().load(connection, identity.actor)
 
 
-@router.get("/dashboard/rankings")
+@router.get("/dashboard/rankings", description=(
+    "公共排名排除团队类型 fde，组织筛选与活跃商机事实不受影响。团队跟进 calculation=team_followup_per_capita_v1，"
+    "value 为未舍入人均次数（排序依据），average 保留两位，record_count 为总次数，"
+    "member_count 为当前有效销售业务成员数（含零次）。"
+    "members 只含授权范围内姓名、账号及个人次数汇总；current_member=false 的原团队贡献者不计入分母。"
+    "分母为零时 value/average/rank 为 null，不参与排名。ACV仍按金额，record_count仅为辅助商机数；个人跟进仍按次数。"
+))
 async def dashboard_ranking_view(
     year: int = Query(ge=2000, le=2100),
     quarters: list[int] = Query(min_length=1, max_length=4),
@@ -114,8 +127,6 @@ async def dashboard_ranking_view(
 ) -> dict:
     if any(quarter < 1 or quarter > 4 for quarter in quarters):
         raise HTTPException(422, "季度只能是1至4")
-    if identity.actor.role.value not in {"sales", "supervisor", "manager"}:
-        raise HTTPException(403, "当前角色不提供销售排名")
     async with database.transaction(identity.actor, readonly=True) as connection:
         try:
             return await dashboard_rankings(connection, identity.actor, year=year, quarters=quarters, personal=personal,
@@ -129,11 +140,8 @@ async def dashboard_options(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
-    if identity.actor.role.value not in {"sales", "supervisor", "manager"}:
-        raise HTTPException(403, "当前身份不提供销售看板筛选")
     async with database.transaction(identity.actor, readonly=True) as connection:
-        groups = (await dashboard_team_groups(connection, identity.actor)
-                  if identity.actor.role.value == "manager" else [])
+        groups = await dashboard_team_groups(connection, identity.actor)
         return {"members": await dashboard_members(connection, identity.actor),
                 "team_groups": groups}
 

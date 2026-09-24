@@ -13,6 +13,7 @@ from sales_backend.domain.agent import ActorContext
 from sales_backend.job_context import JobLeaseLost, current_job_lease
 from sales_backend.request_metadata import request_metadata
 from sales_backend.performance import record_pool_wait, record_query
+from sales_backend.permission_context import current_feature
 
 
 async def _initialize_connection(connection: asyncpg.Connection) -> None:
@@ -113,7 +114,9 @@ async def set_request_context(connection: asyncpg.Connection, actor: ActorContex
           set_config('app.request_id', $5, true),
           set_config('app.client_ip', $6, true),
           set_config('app.user_agent', $7, true),
-          set_config('app.job_id', $8, true)
+          set_config('app.job_id', $8, true),
+          set_config('app.authorization_context', '', true),
+          set_config('app.authorized_feature', $9, true)
         """,
         actor.workspace_id,
         actor.user_id,
@@ -123,7 +126,12 @@ async def set_request_context(connection: asyncpg.Connection, actor: ActorContex
         metadata.client_ip,
         metadata.user_agent,
         current_job_lease.get().job_id if current_job_lease.get() else "",
+        current_feature.get(),
     )
+
+    # Resolve from current database assignments once per transaction. Row policies
+    # consume only this server-established context, never frontend capability flags.
+    await connection.execute("SELECT security.authorization_refresh()")
 
 
 def json_value(value: Any) -> Any:

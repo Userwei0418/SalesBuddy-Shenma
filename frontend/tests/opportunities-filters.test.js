@@ -29,8 +29,8 @@ test('商机筛选以销售基础项为准，管理角色按权限追加范围�
   const wxss = fs.readFileSync(__dirname + '/../miniprogram/pages/opportunities/index.wxss', 'utf8');
   assert.doesNotMatch(wxml, /customerOptions|probabilityOptions|>金额</);
   for (const label of ['商机阶段', '关单日期', '商机等级']) assert.match(wxml, new RegExp(`>${label}<`));
-  assert.match(wxml, /role === 'manager'.*filter-team/);
-  assert.match(wxml, /role !== 'sales'.*filter-owner/);
+  assert.match(wxml, /canViewTeam.*filter-team/);
+  assert.match(wxml, /canViewTeam.*filter-owner/);
   assert.match(wxml, /role === 'supervisor' \? '直属成员' : '人员'/);
   assert.match(wxml, /class="stage-panel"/);
   assert.match(wxml, /class="filter-scroll" scroll-x/);

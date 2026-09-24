@@ -17,7 +17,9 @@ from sales_backend.repositories import opportunity_browse, opportunity_overview
 
 def client_context(role):
     actor = ActorContext(workspace_id=str(uuid4()), user_id=str(uuid4()), role=role, data_scope="self")
+    from tests.authorization_fixtures import permission_snapshot
     connection = SimpleNamespace(
+        fetchval=AsyncMock(return_value=permission_snapshot(actor, {"opportunity.read": "workspace", "battle_map.read": "workspace"})),
         fetchrow=AsyncMock(return_value={
             "ids": [], "summary": {"total": 0}, "facets": {"years": []}, "creation_date_facts": [],
         }),
@@ -66,7 +68,7 @@ async def test_selected_members_reach_shared_sql_scope_even_with_customer_filter
     assert response.status_code == 200, response.text
     assert [str(value) for value in resolver.call_args.args[4]] == members
     sql, *args = connection.fetchrow.call_args.args
-    assert "SELECT DISTINCT p.opportunity_id" in sql and "fde_projects fp JOIN crm.opportunity" in sql
+    assert "security.authorization_opportunity" in sql and "o.owner_user_ref_id=ANY" in sql
     assert members in args
 
 
@@ -97,7 +99,7 @@ async def test_map_and_overview_forward_selected_members_to_their_sql_scopes(mon
         response = await client.get("/api/v1/customer-assets/map", params=params)
         assert response.status_code == 200, response.text
         assert [str(value) for value in map_scope.call_args.args[4]] == members
-        assert connection.fetch.call_args.args[1] == members
+        assert any(members in call.args[1:] for call in connection.fetch.call_args_list)
         response = await client.get("/api/v1/opportunities/overview", params=params)
         assert response.status_code == 200, response.text
         assert [str(value) for value in overview_scope.call_args.args[4]] == members

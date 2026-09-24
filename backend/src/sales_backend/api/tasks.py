@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
 from sales_backend.api.idempotency import MutationKey
-from sales_backend.api.models import TaskCreate, TaskEventCreate
+from sales_backend.api.models import TaskBatchCreate, TaskCreate, TaskEventCreate
 from sales_backend.contracts.task_links import TaskLinkPage
 from sales_backend.contracts.types import UUIDString
 from sales_backend.db import Database
@@ -107,8 +107,6 @@ async def list_tasks(
         raise HTTPException(422, "请选择有效的完成年份和季度")
     fde_view = None
     if identity.actor.role.value in {"fde", "fde_lead"} and not customer_id and not opportunity_id:
-        if view == "team" and identity.actor.role.value != "fde_lead":
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "只有FDE主管可查看部门待办")
         fde_view = view
     async with database.transaction(identity.actor, readonly=True) as connection:
         if tab is not None:
@@ -192,6 +190,35 @@ async def create_task(
         raise HTTPException(status.HTTP_403_FORBIDDEN, str(exc)) from exc
     except TaskConflict as exc:
         raise HTTPException(status.HTTP_409_CONFLICT, str(exc)) from exc
+
+
+@router.post("/batch", status_code=status.HTTP_201_CREATED,
+             description="为每位指定负责人创建独立待办。整批在同一事务提交；任一校验失败则全部回滚。支持 Idempotency-Key 重放。")
+async def create_task_batch(
+    body: TaskBatchCreate,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+    idempotency_key: MutationKey = None,
+) -> dict:
+    async def create(connection):
+        items = []
+        for task in body.tasks:
+            values = task.model_dump()
+            if values["opportunity_id"]:
+                values["opportunity_id"] = str(values["opportunity_id"])
+            items.append(await TaskService().create(connection, actor=identity.actor, **values))
+        return {"items": items}
+
+    try:
+        async with database.transaction(identity.actor) as connection:
+            return await execute_mutation(connection, identity.actor, idempotency_key,
+                "tasks.create_batch", body.model_dump(), lambda: create(connection))
+    except TaskNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except TaskForbidden as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except TaskConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
 
 
 @router.get("/{task_id}")

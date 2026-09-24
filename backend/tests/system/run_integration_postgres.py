@@ -47,6 +47,14 @@ async def main(serve=None):
             await conn.execute(f'GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA {schema} TO "{role}"')
         await conn.execute(f'REVOKE INSERT,UPDATE,DELETE ON crm.customer_sales_member FROM "{role}"')
         await conn.execute(f'REVOKE ALL ON platform.password_credential,security.login_throttle FROM "{role}"')
+        # Exercise deployed runtime grants, not the overly broad bootstrap ACL.
+        await conn.fetchval("SELECT security.reconcile_runtime_grants()")
+        for private in ("security.authorization_grants_for(uuid,uuid)",
+                        "security.authorization_user_allows(text,uuid,uuid,uuid,uuid[],boolean)",
+                        "security.reconcile_runtime_grants()"):
+            if await conn.fetchval("SELECT to_regprocedure('security.authorization_grants_for(uuid,uuid)') IS NOT NULL"):
+                assert not await conn.fetchval("SELECT has_function_privilege($1,$2,'EXECUTE')", role, private)
+
         workspace = uuid.uuid4()
         team = uuid.uuid4()
         await conn.execute(

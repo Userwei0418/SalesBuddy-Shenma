@@ -3,13 +3,12 @@ import asyncio
 from sales_backend.auth.passwords import encode_password
 from sales_backend.domain.concurrency import require_version
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
+from sales_backend.services.authorization import require_permission
 
 
-def require_assignable_roles(actor, roles):
-    if actor.role.value not in {"operations", "administrator"}:
-        raise PermissionError("需要账号管理权限")
-    if actor.role.value != "administrator" and set(roles) & {"operations", "administrator"}:
-        raise PermissionError("运营及系统管理员账号由系统管理员管理")
+async def require_assignable_roles(connection, roles):
+    if set(roles) & {"operations", "administrator"}:
+        await require_permission(connection, "authorization.accounts_manage")
 
 
 class OperationsAccountService:
@@ -38,7 +37,8 @@ class OperationsAccountService:
             await self.repository.validate_team(connection, membership["team_id"])
 
     async def create(self, connection, actor, data, password):
-        require_assignable_roles(actor, data["roles"])
+        await require_permission(connection, "account.create")
+        await require_assignable_roles(connection, data["roles"])
         if not data["display_name"].strip():
             raise ValueError("请填写姓名")
         await self.repository.lock_workspace(connection, actor.workspace_id)
@@ -50,14 +50,15 @@ class OperationsAccountService:
         return {**result, "must_change_password": policy["require_initial_change"]}
 
     async def update(self, connection, actor, uid, data):
-        require_assignable_roles(actor, data["roles"])
+        await require_permission(connection, "account.update")
+        await require_assignable_roles(connection, data["roles"])
         if not data["display_name"].strip():
             raise ValueError("请填写姓名")
         await self.repository.lock_workspace(connection, actor.workspace_id)
         current = await self.repository.member(connection, uid)
         if current.get("platform_managed"):
             raise PermissionError("平台管理身份由公司授权维护，不能在成员列表修改")
-        require_assignable_roles(actor, current["roles"])
+        await require_assignable_roles(connection, current["roles"])
         require_version(current["version_no"], data["version_no"])
         if (
             "administrator" in current["roles"]
@@ -82,14 +83,17 @@ class OperationsAccountService:
                     ],
                 }
         await self.validate_organization(connection, data)
-        return await self.repository.update(connection, actor, uid, data)
+        result = await self.repository.update(connection, actor, uid, data)
+        await connection.execute("SELECT security.check_permission_administrator()")
+        return result
 
     async def reset_password(self, connection, actor, uid, version, password):
+        await require_permission(connection, "account.reset_password")
         await self.repository.lock_workspace(connection, actor.workspace_id)
         current = await self.repository.member(connection, uid)
         if current.get("platform_managed"):
             raise PermissionError("平台管理身份由公司授权维护，不能在成员列表修改")
-        require_assignable_roles(actor, current["roles"])
+        await require_assignable_roles(connection, current["roles"])
         require_version(current["version_no"], version)
         encoded = await asyncio.to_thread(encode_password, password)
         await self.repository.set_password(connection, uid, encoded)
@@ -106,6 +110,7 @@ class OperationsAccountService:
         """Maintenance rename only: keep roles, memberships and password untouched."""
         from pydantic import TypeAdapter
         from sales_backend.contracts.operations import AccountCode, AccountContact
+        await require_permission(connection, "account.update")
         account_code = TypeAdapter(AccountCode).validate_python(account_code)
         # Reuse the complete email field contract, including normalization.
         email = AccountContact(email=email).email
@@ -113,11 +118,12 @@ class OperationsAccountService:
         current = await self.repository.member(connection, uid)
         if current.get("platform_managed"):
             raise PermissionError("平台管理身份不能批量更名")
-        require_assignable_roles(actor, current["roles"])
+        await require_assignable_roles(connection, current["roles"])
         require_version(current["version_no"], version)
         return await self.repository.rename_account(connection, actor, uid, account_code, email)
 
     async def unlock_login(self, connection, actor, uid, version, reason):
+        await require_permission(connection, "account.unlock")
         reason = reason.strip()
         if not reason or len(reason) > 500:
             raise ValueError("请填写解除原因（1–500 字）")
@@ -125,7 +131,7 @@ class OperationsAccountService:
         current = await self.repository.member(connection, uid)
         if current.get("platform_managed"):
             raise PermissionError("平台管理身份由公司授权维护，不能在成员列表修改")
-        require_assignable_roles(actor, current["roles"])
+        await require_assignable_roles(connection, current["roles"])
         require_version(current["version_no"], version)
         await self.repository.unlock_login(connection, uid, reason)
         version = await self.repository.bump_version(connection, uid)

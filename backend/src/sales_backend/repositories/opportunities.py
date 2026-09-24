@@ -6,7 +6,7 @@ import asyncpg
 
 from sales_backend.domain.agent import ActorContext
 from sales_backend.repositories.attribute_overlay import overlay_opportunity_attributes
-from sales_backend.repositories.collaboration import FDE_ROLES, members_by_opportunity, scoped_opportunity_ids
+from sales_backend.repositories.collaboration import members_by_opportunity, scoped_opportunity_ids
 
 NAME_CONFLICT_MESSAGE = "该客户已有同名商机，请选择已有商机，或在名称中补充部门、项目期次以区分"
 
@@ -43,8 +43,8 @@ class OpportunityRepository:
         member_ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         scoped_ids = None
-        if actor and actor.role.value in FDE_ROLES and not customer_id and not opportunity_id:
-            _, _, _, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids)
+        if actor and (scope or member_id or member_ids) and not customer_id and not opportunity_id:
+            _, _, _, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids, permission='opportunity.read')
             scoped_ids = [r["id"] for r in scoped]
         rows = await connection.fetch(
             """
@@ -57,34 +57,32 @@ class OpportunityRepository:
                    COALESCE(c.name,security.customer_reference(o.customer_id)->>'name') AS customer_name,
                    o.owner_user_ref_id::text AS owner_id,o.owner_team_id::text AS team_id,
                    owner.display_name AS owner_name, team.name AS team_name,
-                   security.can_manage_fde_members(o.id) AS can_manage_fde_members
+                   security.can_manage_fde_members(o.id) AS can_manage_fde_members,
+          security.authorization_opportunity('opportunity.update',o.id) AS can_edit,
+          security.authorization_opportunity('opportunity.close',o.id) AS can_close,
+          security.authorization_opportunity('opportunity.reopen',o.id) AS can_reopen
               FROM crm.opportunity o
               LEFT JOIN crm.customer c ON c.id = o.customer_id AND c.deleted_at IS NULL
               LEFT JOIN platform.user_ref owner ON owner.id = o.owner_user_ref_id
               LEFT JOIN platform.team team ON team.id = o.owner_team_id
-             WHERE o.deleted_at IS NULL AND ($11::boolean OR o.status = 'open')
-               AND ($5::text IS NULL OR $5::text IN ('manager','operations','administrator')
-                    OR ($5::text = 'sales' AND o.owner_user_ref_id = $6::uuid)
-                    OR ($5::text = 'supervisor' AND o.owner_team_id = ANY($7::uuid[]))
-                    OR ($5::text IN('fde','fde_lead') AND security.has_opportunity_read_access(o.id)))
-               AND ($14::uuid[] IS NULL OR o.id=ANY($14::uuid[]))
+             WHERE o.deleted_at IS NULL AND ($9::boolean OR o.status = 'open')
+               AND ($5::boolean OR security.authorization_opportunity_direct('opportunity.read',o.id))
+               AND ($12::uuid[] IS NULL OR o.id=ANY($12::uuid[]))
                AND ($1::text IS NULL OR o.customer_id = $1::uuid)
                AND ($2::text IS NULL OR owner.display_name = $2)
                AND ($3::integer IS NULL OR o.probability = $3)
                AND ($4::text IS NULL OR o.stage_code = $4)
-               AND ($8::date IS NULL OR o.expected_close_date >= $8::date)
-               AND ($9::date IS NULL OR o.expected_close_date <= $9::date)
-               AND ($13::uuid IS NULL OR o.id=$13::uuid)
+               AND ($6::date IS NULL OR o.expected_close_date >= $6::date)
+               AND ($7::date IS NULL OR o.expected_close_date <= $7::date)
+               AND ($11::uuid IS NULL OR o.id=$11::uuid)
              ORDER BY o.expected_close_date NULLS LAST, o.amount DESC, o.updated_at DESC,o.id
-             LIMIT $10 OFFSET $12
+             LIMIT $8 OFFSET $10
             """,
             customer_id,
             owner_name,
             probability,
             stage_code,
-            actor.role.value if actor else None,
-            actor.user_id if actor else None,
-            list(actor.team_ids) if actor else [],
+            bool(customer_id or opportunity_id),
             close_from,
             close_to,
             limit,

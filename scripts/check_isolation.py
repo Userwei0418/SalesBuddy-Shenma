@@ -2,7 +2,8 @@ from pathlib import Path
 import json,subprocess
 root=Path(__file__).resolve().parents[1]
 cfg=json.loads((root/'frontend/project.config.json').read_text())
-assert cfg['appid']!='wx08463b79dbeb2ba7','Source AppID forbidden'
+assert cfg['appid']=='wx2824bdeb58528fd8','Customer AppID must match the confirmed project'
+assert cfg.get('setting', {}).get('urlCheck') is True, 'Domain validation must remain enabled'
 assert 'https://salesbuddy.shenzhoukuntai.com:28899/api/v1' in (root/'frontend/miniprogram/config.js').read_text()
 assert 'www.ericepc.com' not in (root/'frontend/miniprogram/config.js').read_text()
 if (root/'.git').exists():

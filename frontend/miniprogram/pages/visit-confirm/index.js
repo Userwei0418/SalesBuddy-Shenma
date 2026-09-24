@@ -24,6 +24,7 @@ Page({
     flowVersion: 1, flowStep: "edit", sourceRunId: "", summary: "", reviewPayload: null, pendingReviewId: "",
     analysisPhrase: "正在分析这份拜访记录…", advice: null, adviceBusy: false, adviceError: "", showAdvice: false,
     values: {},
+    linkedPartnerName: '',
     core: [],
     optional: [],
     customerId: "",
@@ -83,6 +84,7 @@ Page({
     this.confirmOptions = options;
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'visit-confirm', options)) return;
     if (!getApp().ensureLogin()) return;
+    this.setData({isFde:require('../../utils/access').assignedVisitOnly(getApp().globalData.session)});
     this.confirmInitialized = true;
     this.closed = false;
     this.userKey = draftScope(getApp().globalData.session);
@@ -131,7 +133,7 @@ Page({
     const result = source.result || {};
     const restored = flow.restoreReview(source, draft);
     if(restored.flowStep==='analyzing')restored.flowStep='edit';
-    this.aiOpportunitySuggestion = draft ? null : opportunityAI.normalizeOpportunitySuggestion(source.opportunitySuggestion || result);
+    this.aiOpportunitySuggestion = draft ? draft.pendingOpportunitySuggestion || null : opportunityAI.normalizeOpportunitySuggestion(source.opportunitySuggestion || result);
     const isFirstVisit = typeof restored.isFirstVisit === "boolean"
       ? restored.isFirstVisit
       : typeof source.isFirstVisit === "boolean"
@@ -139,6 +141,7 @@ Page({
         : firstVisit.enabled(restored.values);
     const boundCustomerId = source.customerHintId || restored.customerId || "";
     const boundCustomerName = source.customerHint || restored.customerName || "";
+    const values = firstVisit.normalizeValues(restored.values, isFirstVisit);
     this.setData({
         sourceImportId: source.sourceImportId || "",
         sourceRunId: source.runId || (draft || {}).sourceRunId || "", summary: result.summary || "",
@@ -149,10 +152,12 @@ Page({
         customerConfirmed: Boolean(boundCustomerId && boundCustomerName),
         customerType: visitTargetType(restored.customerType || (result.fields && result.fields.customer_type)),
         isFirstVisit,
-        values: firstVisit.normalizeValues(restored.values, isFirstVisit),
+        values: draft ? values : dates.withDefaultDates(values),
     });
     if(this.data.isFde)this.setData({reviewedOpportunityId:draft ? draft.reviewedOpportunityId || "" : source.opportunityId || "",opportunityId:restored.opportunityId || source.opportunityId || "",fdeOpportunityVerified:false,opportunityEditing:false,opportunityDraft:null,opportunityAIRecognized:false,opportunityAIHint:""});
     this.refresh();
+    // Persist the actual defaults once so reopening after midnight keeps this visit's dates.
+    if (!draft) this.persist();
     if (!this.data.customerConfirmed) this.searchCustomers();
     else this.loadOpportunities();
   },
@@ -240,7 +245,7 @@ Page({
       (this.data.opportunityId && this.data.opportunityId !== "__new__" && !this.data.selectedOpportunity));
     const blockReason = opportunityUnverified ? "请先核对关联商机，或明确选择不关联商机" : this.data.isFde && !this.data.editing && (!this.data.opportunityId || !this.data.fdeOpportunityVerified)
       ? "请选择并确认本人参与的商机" : flow.archiveBlockReason({ ...this.data, reviewStale });
-    this.setData({ reviewStale, blockReason, canSubmit: !blockReason });
+    this.setData({ reviewStale, blockReason, canSubmit: !blockReason, linkedPartnerName: snapshot.partnerName(this.data) });
   },
   persist() {
     if (this.data.editing || this.data.archived) return;
@@ -258,6 +263,7 @@ Page({
       opportunityDrafts: d.opportunityDrafts,
       opportunityAIRecognized: d.opportunityAIRecognized,
       opportunityAIHint: d.opportunityAIHint,
+      pendingOpportunitySuggestion: this.aiOpportunitySuggestion || null,
       collaboratorIds: d.collaboratorIds,
       flowVersion:1, flowStep:d.flowStep==='analyzing'?'edit':d.flowStep,
       sourceRunId:d.sourceRunId, summary:d.summary, reviewPayload:d.reviewPayload, pendingReviewId:d.pendingReviewId,
@@ -278,6 +284,7 @@ Page({
   inputField(e) {
     const key = e.currentTarget.dataset.key;
     if (this.data.busy || this.data.archived) return;
+    if (key === 'partner_name' && !this.data.editing && this.data.opportunityId) return;
     this.setData({
       [`values.${key}`]: e.detail.value,
       errorText: "",
@@ -525,6 +532,7 @@ Page({
     if(e.detail.customerId!==undefined && (e.detail.customerId!==this.data.customerId || e.detail.opportunityId!==this.data.opportunityId))return;
     const opportunityDraft = e.detail.form;
     this.setData({ opportunityDraft });
+    this.refreshGate();
     this.persist();
   },
   toggleColleagues() {

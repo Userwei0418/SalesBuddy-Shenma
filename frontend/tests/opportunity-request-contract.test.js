@@ -33,7 +33,7 @@ function opportunityPage(role, api, view = 'opportunities') {
     require: name => name.endsWith('apiClient') ? api : require(path.resolve(path.dirname(filename), name)),
     Date, Set, Map, setTimeout, clearTimeout, wx: {},
   });
-  return {...definition, data: {...JSON.parse(JSON.stringify(definition.data)), role}};
+  return {...definition, data: {...JSON.parse(JSON.stringify(definition.data)), role, canViewTeam:true}};
 }
 
 for (const role of ['supervisor', 'manager']) {

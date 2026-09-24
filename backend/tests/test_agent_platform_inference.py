@@ -147,15 +147,16 @@ async def test_customer_risk_surface_rejects_other_capabilities_before_dispatch(
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("role", [RoleCode.FDE, RoleCode.FDE_LEAD, RoleCode.ADMINISTRATOR])
-async def test_customer_risk_surface_cannot_use_a_triggering_fde_or_management_actor(role):
+async def test_customer_risk_surface_checks_configured_permission_before_dispatch(role):
     inference, calls, _ = service()
+    inference.assert_actor_current.side_effect=PermissionError("risk.auto_review revoked")
     with pytest.raises(PermissionError):
         await inference.evaluate(
             actor=ACTOR.model_copy(update={"role": role}), mode="personal_risks", surface="customer_risk",
             facts={"visits": []}, messages=[ChatMessage(role="system", content="客户风险评估")],
             user_text="评估", validate=lambda value: value,
         )
-    inference.assert_actor_current.assert_not_awaited()
+    assert inference.assert_actor_current.await_args.args[1] == "risk.auto_review"
     assert not calls
 
 

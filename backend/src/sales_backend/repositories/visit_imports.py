@@ -34,14 +34,15 @@ async def create_import(connection, actor, import_id, filename, path, size):
 async def import_detail(connection, actor, import_id):
     row = await connection.fetchrow(
         "SELECT id::text,filename,status,extracted_text,error_message FROM activity.visit_import "
-        "WHERE id=$1::uuid AND (created_by_user_ref_id=$2::uuid OR security.is_fde_actor())",
+        "WHERE id=$1::uuid AND security.authorization_import('visit.read',id)",
         str(import_id),
-        actor.user_id,
     )
     return dict(row) if row else None
 
 
 async def retry_import(connection, actor, import_id):
+    if not await connection.fetchval("SELECT security.authorization_import('visit.retry_import',$1::uuid)", str(import_id)):
+        raise PermissionError("当前账号未获重试此材料的授权")
     row = await connection.fetchrow(
         "SELECT status FROM activity.visit_import WHERE id=$1::uuid AND created_by_user_ref_id=$2::uuid FOR UPDATE",
         str(import_id),
@@ -61,7 +62,7 @@ async def original_location(connection, actor, import_id):
     # RLS also permits explicitly authorized historical visit readers.
     row = await connection.fetchrow(
         "SELECT id,filename,file_size,file_path,storage_profile,storage_driver,storage_key,content_sha256 "
-        "FROM activity.visit_import WHERE id=$1::uuid",
+        "FROM activity.visit_import WHERE id=$1::uuid AND security.authorization_import('visit.download_original',id)",
         str(import_id),
     )
     return dict(row) if row else None

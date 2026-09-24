@@ -16,14 +16,14 @@ from sales_backend.api.models import (
     OpportunityCreate,
     PageResponse,
 )
-from sales_backend.contracts.customer_directory import CustomerDirectoryPage
+from sales_backend.contracts.customer_directory import (
+    ClaimDirectoryStatus, CustomerDirectoryOptions, CustomerDirectoryPage,
+)
 from sales_backend.contracts.types import UUIDString
 from sales_backend.db import Database
+from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.domain.concurrency import VersionConflict
-from sales_backend.domain.policy import (
-    AgentModeForbidden,
-    assert_opportunity_create_allowed,
-)
+from sales_backend.services.authorization import require_permission
 from sales_backend.repositories.customer_members import CustomerMemberRepository
 from sales_backend.repositories.customer_mutations import CustomerMutationRepository
 from sales_backend.repositories.customers import CustomerRepository
@@ -40,17 +40,24 @@ async def customer_claim_pool(
     q: str | None = Query(default=None, max_length=100),
     page_size: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0, le=2_147_483_647),
+    industry: str | None = Query(default=None, max_length=100),
+    claim_status: ClaimDirectoryStatus | None = Query(default=None),
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
-    # Match the existing company-directory API boundary. FDE customer selection
-    # remains limited to its authorized opportunities, never the company pool.
-    if identity.actor.role.value in {"fde", "fde_lead"}:
-        raise HTTPException(403, "当前身份不可访问客户认领目录")
     async with database.transaction(identity.actor, readonly=True) as connection:
         return await CustomerMemberRepository().claim_pool_page(
-            connection, query=q, limit=page_size, offset=offset
+            connection, query=q, limit=page_size, offset=offset, industry=industry or None, claim_status=claim_status
         )
+
+
+@router.get("/claim-pool/options", response_model=CustomerDirectoryOptions)
+async def customer_claim_pool_options(
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await CustomerMemberRepository().claim_pool_options(connection)
 
 
 @router.get("/{customer_id}/reference")
@@ -79,7 +86,7 @@ async def list_customers(
     database: Database = Depends(get_database),
 ) -> PageResponse:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        if scope in {"department", "company"} and identity.actor.role.value not in {"fde", "fde_lead"}:
+        if scope in {"department", "company"} and (await AuthorizationRepository().effective(connection)).allows("customer.claim_directory"):
             items = await CustomerMemberRepository().claim_pool(connection, query=q, limit=page_size)
             return PageResponse(items=items)
         items = await CustomerRepository().list(
@@ -90,7 +97,7 @@ async def list_customers(
 
 @router.post(
     "/{customer_id}/claims", status_code=201,
-    description="一线销售、销售主管、销售总经理可为本人申请未认领客户；运营审批通过后生效。FDE 不可认领。",
+    description="依据当前账号的客户认领权限及数据范围申请；审批通过后生效。",
 )
 async def claim_existing_customer(
     customer_id: UUID,
@@ -227,13 +234,10 @@ async def create_customer_opportunity(
     database: Database = Depends(get_database),
     idempotency_key: MutationKey = None,
 ) -> dict:
-    if body.action == "create":
-        try:
-            assert_opportunity_create_allowed(identity.actor)
-        except AgentModeForbidden as exc:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "OPPORTUNITY_CREATE_FORBIDDEN") from exc
     try:
         async with database.transaction(identity.actor) as connection:
+            await require_permission(connection, "opportunity.update" if body.action == "update" else "opportunity.create",
+                                     opportunity_id=body.opportunity_id if body.action == "update" else None)
             return await execute_mutation(
                 connection,
                 identity.actor,

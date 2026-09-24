@@ -1,3 +1,3 @@
-"""销售智助后端。"""
+"""Raccoon SalesBuddy后端。"""
 
 __version__ = "0.1.0"

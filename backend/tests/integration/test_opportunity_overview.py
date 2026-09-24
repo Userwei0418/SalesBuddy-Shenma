@@ -3,6 +3,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 import pytest
+from tests.integration.feishu_fixtures import seed_fetchval
 
 from sales_backend.repositories.customer_assets import CustomerAssetRepository
 from sales_backend.repositories.opportunities import OpportunityRepository
@@ -79,8 +80,8 @@ async def test_history_creation_dates_are_business_facts_not_import_timestamps(c
     ids = []
     for extra, status, timestamp in specs:
         meta = {"import_type": "crm_history", **extra} if extra is not None else {}
-        ids.append(await connection.fetchval(
-            """INSERT INTO crm.opportunity(workspace_id,customer_id,name,owner_user_ref_id,owner_team_id,
+        ids.append(await seed_fetchval(
+            connection, """INSERT INTO crm.opportunity(workspace_id,customer_id,name,owner_user_ref_id,owner_team_id,
               created_by_user_ref_id,stage_code,status,amount,probability,expected_close_date,source_code,
               created_at,import_meta)
             SELECT workspace_id,customer_id,$2,owner_user_ref_id,owner_team_id,

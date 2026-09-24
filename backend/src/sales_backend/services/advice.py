@@ -119,13 +119,9 @@ class AdviceService:
         config = configuration(runtime, actor, request.subject_kind, request.section)
         async with self.database.transaction(actor) as connection:
             await self.assert_actor(connection, actor)
-            if actor.role.value in {"fde", "fde_lead"} and request.subject_kind == "visit" and request.section == "tasks":
-                opportunity_id = await connection.fetchval(
-                    "SELECT opportunity_id FROM activity.visit WHERE id=$1::uuid AND deleted_at IS NULL",
-                    request.subject_id,
-                )
-                if not opportunity_id:
-                    raise AdviceError("本次拜访未关联商机，无需生成待办建议", 422)
+            from sales_backend.services.authorization import require_permission
+
+            await require_permission(connection, 'advice.request', **{request.subject_kind + '_id': request.subject_id})
             await connection.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
                 cache_key(actor, request.subject_kind, request.subject_id, request.section, "serialize", {}),
@@ -225,7 +221,7 @@ class AdviceService:
             current = await self.key_for(connection, actor, row, runtime)
         return present(row, stale=current != row["cache_key"])
 
-    async def decide(self, connection, actor, suggestion_id, decision, note, expected_version, task, runtime):
+    async def decide(self, connection, actor, suggestion_id, decision, note, expected_version, task, runtime, *, tasks=None):
         suggestion = await connection.fetchrow(
             "SELECT * FROM insight.business_suggestion WHERE id=$1::uuid FOR UPDATE",
             suggestion_id,
@@ -236,45 +232,54 @@ class AdviceService:
         if suggestion["decision"] != "pending":
             raise AdviceError("这条建议已处理，请刷新查看")
         row = await self.repo.get(connection, str(suggestion["advice_id"]))
-        if actor.role.value in {"fde", "fde_lead"} and row["subject_kind"] not in {"opportunity", "visit"}:
-            raise AdviceError("FDE仅可处置本人可见的商机或拜访协作建议", 403)
+        from sales_backend.services.authorization import require_permission
+
+        await require_permission(connection, 'advice.decide', **{row['subject_kind'] + '_id': str(row['subject_id'])})
         await self.assert_actor(connection, actor)
         if row["status"] != "succeeded" or await self.key_for(connection, actor, row, runtime) != row["cache_key"]:
             raise AdviceError("相关资料或规则已变化，请先更新建议")
-        task_result = None
+        if tasks is not None:
+            from sales_backend.contracts.models import TaskBatchCreate
+            if task is not None or decision != "adopted":
+                raise AdviceError("建议处理方式不正确", 422)
+            tasks = TaskBatchCreate(tasks=tasks).tasks
+        selected_tasks = tasks if tasks is not None else ([task] if task else [])
+        task_results = []
         if decision == "adopted":
-            if not task:
+            if not selected_tasks:
                 raise AdviceError("请确认任务内容、接收人和截止时间", 422)
-            if (task.customer_id and str(task.customer_id) != str(row["customer_id"])) or (
-                row["opportunity_id"] and task.opportunity_id and str(task.opportunity_id) != str(row["opportunity_id"])
-            ):
-                raise AdviceError("任务关联对象必须与建议一致", 422)
-            daily_visit = (
-                actor.role.value not in {"fde", "fde_lead"}
-                and row["subject_kind"] == "visit" and not row["opportunity_id"]
-            )
-            if daily_visit and (task.association_kind != "daily" or task.customer_id or task.opportunity_id):
-                raise AdviceError("未关联商机的拜访建议应创建日常待办，不关联客户或商机", 422)
-            if not daily_visit and task.association_kind == "daily":
-                raise AdviceError("经营建议必须创建客户任务，请选择该客户下的商机", 422)
-            selected_opportunity = row["opportunity_id"] or task.opportunity_id
-            if not daily_visit and not selected_opportunity:
-                raise AdviceError("请补充该客户下的商机，再确认创建客户任务", 422)
-            task_result = await TaskService().create(
-                connection,
-                actor=actor,
-                description=task.description,
-                due_at=task.due_at,
-                priority_code=task.priority_code,
-                assignee_account_code=task.assignee_account_code,
-                target_position=task.target_position,
-                customer_id=None if daily_visit else str(row["customer_id"]),
-                opportunity_id=None if daily_visit else str(selected_opportunity),
-                source_suggestion_id=suggestion_id,
-                association_kind="daily" if daily_visit else "customer",
-            )
-        elif decision != "no_task" or task:
+            for task in selected_tasks:
+                if (task.customer_id and str(task.customer_id) != str(row["customer_id"])) or (
+                    row["opportunity_id"] and task.opportunity_id and str(task.opportunity_id) != str(row["opportunity_id"])
+                ):
+                    raise AdviceError("任务关联对象必须与建议一致", 422)
+                daily_visit = (
+                    row["subject_kind"] == "visit" and not row["opportunity_id"]
+                )
+                if daily_visit and (task.association_kind != "daily" or task.customer_id or task.opportunity_id):
+                    raise AdviceError("未关联商机的拜访建议应创建日常待办，不关联客户或商机", 422)
+                if not daily_visit and task.association_kind == "daily":
+                    raise AdviceError("经营建议必须创建客户任务，请选择该客户下的商机", 422)
+                selected_opportunity = row["opportunity_id"] or task.opportunity_id
+                if not daily_visit and not selected_opportunity:
+                    raise AdviceError("请补充该客户下的商机，再确认创建客户任务", 422)
+                task_result = await TaskService().create(
+                    connection,
+                    actor=actor,
+                    description=task.description,
+                    due_at=task.due_at,
+                    priority_code=task.priority_code,
+                    assignee_account_code=task.assignee_account_code,
+                    target_position=task.target_position,
+                    customer_id=None if daily_visit else str(row["customer_id"]),
+                    opportunity_id=None if daily_visit else str(selected_opportunity),
+                    source_suggestion_id=suggestion_id,
+                    association_kind="daily" if daily_visit else "customer",
+                )
+                task_results.append(task_result)
+        elif decision != "no_task" or selected_tasks:
             raise AdviceError("建议处理方式不正确", 422)
+        task_result = task_results[0] if task_results else None
         await connection.execute(
             """UPDATE insight.business_suggestion SET decision=$2,decision_note=$3,decided_by_user_ref_id=$4::uuid,
             decided_at=clock_timestamp(),task_id=$5::uuid WHERE id=$1::uuid""",
@@ -284,7 +289,7 @@ class AdviceService:
             actor.user_id,
             task_result["id"] if task_result else None,
         )
-        return {"suggestion_id": suggestion_id, "decision": decision, "task": task_result}
+        return {"suggestion_id": suggestion_id, "decision": decision, "task": task_result, "tasks": task_results}
 
 
 class AdviceHandler:

@@ -1,8 +1,9 @@
 {
   "artifact_kind": "source_tree",
   "customer": "shenzhoukuntai",
-  "source_version": "1.0.8",
-  "source_commit": "3e5b904645fdcafda46e177eedae7f9e2dd1d957",
-  "database_version": "V125",
-  "customer_appid": "wx2824bdeb58528fd8"
+  "source_version": "1.0.9",
+  "source_commit": "be421b12b9dce38aa940e8b546dde1796c3bdef5",
+  "database_version": "V151",
+  "customer_appid": "wx2824bdeb58528fd8",
+  "customer_version": "1.0.9-shenma.1"
 }

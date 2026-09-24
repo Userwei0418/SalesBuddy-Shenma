@@ -24,7 +24,7 @@ function setup({canEdit=true,role='fde',headerCustomer='customer',sceneOpportuni
     Page:p=>page=p,getApp:()=>({ensureLogin:()=>true,globalData:{session}}),
     wx:{setNavigationBarTitle(){},showToast(){},navigateBack(){},showModal:o=>calls.modals.push(o)},
     require:name=>name.endsWith('apiClient')?api:name.endsWith('access')
-      ? {identity:s=>s.workspaceId+':'+s.userId,can:()=>false}
+      ? {identity:s=>s.workspaceId+':'+s.userId,can:(_session,code)=>code==='demo_scene.create'?createAllowed:code==='demo_scene.update'?canEdit:false}
       : {beijingTime:value=>'北京时间 '+value},
   });
   page.data=JSON.parse(JSON.stringify(page.data));

@@ -9,19 +9,15 @@ def test_profile_evaluation_route_is_registered() -> None:
     assert operation["tags"] == ["Profile"]
 
 
-def test_evaluation_member_rows_are_role_scoped() -> None:
+def test_evaluation_member_rows_use_action_scopes() -> None:
     import inspect
 
     source = inspect.getsource(ProfileRepository.evaluation_summary)
-    assert "$2 = 'supervisor' AND tm.team_id = ANY($3::uuid[])" in source
-    assert 'if actor.role.value == "manager"' in source
-    assert 'if actor.role.value in {"supervisor", "manager"}' in source
+    assert "profile.sales_read" in source and "authorization_subject" in source
 
 
-def test_task_assignee_directory_is_role_scoped() -> None:
+def test_task_assignee_directory_uses_business_recipient_projection() -> None:
     import inspect
 
     source = inspect.getsource(DirectoryRepository.task_assignees)
-    assert "$2 = 'supervisor' AND rb.role_code = 'sales'" in source
-    assert "$2 = 'sales' AND rb.role_code = 'sales'" in source
-    assert "manager" in source
+    assert "TaskTargetRepository().recipients" in source and "business_only=True" in source

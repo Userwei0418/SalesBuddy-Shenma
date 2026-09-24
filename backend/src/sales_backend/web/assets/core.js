@@ -1,5 +1,6 @@
 export const state = {
   token: null,
+  permissions: null,
   actor: null,
   org: null,
   company: null,
@@ -114,6 +115,7 @@ function assertSession(generation) {
   if (generation !== sessionGeneration) throw Object.assign(Error("登录状态已变更，请在当前账号下重试"), {code: "SESSION_CHANGED"});
 }
 export function clearSession() {
+  state.permissions = null;
   sessionGeneration += 1;
   refreshFlight = null;
   state.token = null;

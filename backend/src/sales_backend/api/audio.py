@@ -23,13 +23,14 @@ PURPOSES = {"chatbi", "visit_entry", "customer_create", "management_task", "demo
 
 
 async def require_audio_purpose(connection, actor, purpose):
-    capability = {"demo_scene": "visit.create", "visit_entry": "visit.create", "management_task": "task.create",
-                  "customer_create": "customer.create", "chatbi": "customer.read"}[purpose]
-    if purpose == "visit_entry" or actor.role.value in {"fde", "fde_lead"}:
-        try:
-            await require_capability(connection, actor, capability)
-        except PermissionError as exc:
-            raise HTTPException(403, str(exc)) from exc
+    capability = {"demo_scene": "demo_scene.create", "visit_entry": "visit.structure",
+                  "management_task": "task.create_daily", "customer_create": "customer.create",
+                  "chatbi": "agent.chatbi"}[purpose]
+    try:
+        await require_capability(connection, actor, "visit.transcribe")
+        await require_capability(connection, actor, capability)
+    except PermissionError as exc:
+        raise HTTPException(403, str(exc)) from exc
 
 
 @router.post("/transcriptions", response_model=AudioTranscriptionResponse)

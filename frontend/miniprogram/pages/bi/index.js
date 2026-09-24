@@ -1,3 +1,4 @@
+const access = require('../../utils/access');
 const { defaultQuarterKeys, selectedQuarters, matchesSelectedQuarter } = require('../../utils/dashboardQuarters');
 const { beijingDateParts } = require('../../utils/opportunityQuarter');
 const apiClient = require("../../utils/apiClient");
@@ -144,27 +145,32 @@ Page({
     funnel:[],visitDays:[],weeklyVisitCount:0,timeline:[],sourceDate:'--',dataModeLabel:'实时数据',
     rankingLoading:false,rankingMessage:'',rankingCards:[],ownIds:[],ownRegionCodes:[],cohortLabel:'',
   },
-  identityKey(){const app=getApp(),session=app.globalData.session || {};return [session.workspaceId,session.userId,app.globalData.role].join(':');},
+  identityKey(){return access.identity(getApp().globalData.session);},
   onUnload(){this._loadId=(this._loadId||0)+1;this._rankingLoadId=(this._rankingLoadId||0)+1;this._optionsLoadId=(this._optionsLoadId||0)+1;},
   onShow(){
     const app=getApp();
     if(app.guardPage&&!app.guardPage(this,'bi'))return;
-    if(['fde','fde_lead'].includes(app.globalData.role)){this.onUnload();this.setData({isFde:true});return;}
+    const options=access.presentationOptions(app.globalData.session,'bi');
+    const selected=options.find(row=>row.value===this.data.presentation)||options.find(row=>row.value===(access.isFde(app.globalData.role)?'fde':'sales'))||options[0];
+    this.setData({presentationOptions:options,presentation:selected&&selected.value});
+    if(selected&&selected.value==='fde'){this.onUnload();this.setData({isFde:true});return;}
     if(!app.ensureLogin())return;
     this.setData({isFde:false});return this.loadData();
   },
+  changePresentation(e){const choice=e.currentTarget.dataset.kind;if(!this.data.presentationOptions.some(row=>row.value===choice))return;this.setData({presentation:choice});return this.onShow();},
   loadData(){
     const app=getApp(),role=app.globalData.role,context=this.identityKey();
+    this.setData({canViewTeam:access.canViewTeam(app.globalData.session,'dashboard.read')});
     if(context!==this._context){
       this.onUnload();this._context=context;
-      this.setData({role,viewMode:role==='manager'?'team':'personal',selectedMemberId:'',selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
+      this.setData({role,viewMode:access.canViewTeam(app.globalData.session,'dashboard.read')&&role==='manager'?'team':'personal',selectedMemberId:'',selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
         memberOptions:[],teamOptions:[],memberLabel:app.globalData.session.userName||'本人',teamLabel:'部门合计',
         selectedQuarterKeys:defaultQuarterKeys(),quarterFilterDirty:false,showQuarterFilter:false,rankingCards:[]});
     }
     this._nativeRankings=null;this._nativeRankingKey=null;this._rankingPending=null;this._rankingPendingKey=null;
     this._rankingLoadId=(this._rankingLoadId||0)+1;
     this.setData({quarterOptions:buildQuarterOptions([],this.data.quarterOptions)});this.syncQuarterFilter();
-    if(!['supervisor','manager'].includes(role))return Promise.all([this.loadFacts(),this.loadRankingData()]);
+    if(!this.data.canViewTeam)return Promise.all([this.loadFacts(),this.loadRankingData()]);
     const options=this.loadOptions(false),optionsSerial=this._optionsLoadId;
     return options.then(()=>{
       if(optionsSerial!==this._optionsLoadId||context!==this.identityKey())return;
@@ -172,7 +178,7 @@ Page({
     });
   },
   factsQuery(){return {personal:this.data.viewMode==='personal',member_id:this.data.viewMode==='personal'?this.data.selectedMemberId:'',
-    team_groups:this.data.viewMode==='team'&&this.data.role==='manager'?this.data.selectedTeamGroups.slice().sort():[]};},
+    team_groups:this.data.viewMode==='team'&&this.data.canViewTeam?this.data.selectedTeamGroups.slice().sort():[]};},
   loadFacts(){
     const query=this.factsQuery(),key=JSON.stringify(query),context=this.identityKey(),serial=this._loadId=(this._loadId||0)+1;
     this._raw=null;this.setData({loading:true,loadError:'',kpis:[],totalAcv:'—',sourceDate:'--',funnel:[],visitDays:[],timeline:[]});
@@ -204,7 +210,7 @@ Page({
     }).finally(()=>{if(serial===this._loadId)wx.hideNavigationBarLoading();});
   },
   loadOptions(reload=true){
-    if(!['supervisor','manager'].includes(this.data.role))return Promise.resolve();
+    if(!this.data.canViewTeam)return Promise.resolve();
     const serial=this._optionsLoadId=(this._optionsLoadId||0)+1,context=this.identityKey();
     this.setData({optionsLoading:true,optionsError:''});
     return apiClient.getDashboardOptions().then(response=>{
@@ -218,7 +224,7 @@ Page({
       const selectedTeamChoice=teams.some(row=>row.id===this.data.selectedTeamChoice)?this.data.selectedTeamChoice:'all';
       const nextTeams=selectedTeamChoice==='all'?teams.map(row=>row.id):[selectedTeamChoice];
       this.setData({optionsLoading:false,memberOptions,teamOptions,selectedTeamChoice,selectedTeamGroups:nextTeams});this.updateSelectionLabels();
-      if(reload&&this.data.role==='manager'&&this.data.viewMode==='team'&&JSON.stringify(nextTeams)!==JSON.stringify(previousTeams)){
+      if(reload&&this.data.canViewTeam&&this.data.viewMode==='team'&&JSON.stringify(nextTeams)!==JSON.stringify(previousTeams)){
         return Promise.all([this.loadFacts(),this.loadRankingData()]);
       }
     }).catch(error=>{if(serial===this._optionsLoadId&&context===this.identityKey())this.setData({optionsLoading:false,optionsError:error.message||'可选范围加载失败'});});
@@ -235,19 +241,21 @@ Page({
   },
   selectTeams(event){
     const ids=event.detail.ids;
-    if(this.data.role!=='manager'||!Array.isArray(ids)||ids.length!==1||!this.data.teamOptions.some(row=>row.id===ids[0]))return;
+    if(!this.data.canViewTeam||!Array.isArray(ids)||ids.length!==1||!this.data.teamOptions.some(row=>row.id===ids[0]))return;
     const selectedTeamChoice=ids[0];
     const selectedTeamGroups=selectedTeamChoice==='all'?this.data.teamOptions.filter(row=>row.id!=='all').map(row=>row.id):[selectedTeamChoice];
     this.setData({selectedTeamChoice,selectedTeamGroups:selectedTeamGroups.sort()});this.updateSelectionLabels();return Promise.all([this.loadFacts(),this.loadRankingData()]);
   },
   changeView(event){
     const mode=event.currentTarget.dataset.mode;
-    if(!['personal','team'].includes(mode)||mode===this.data.viewMode||this.data.role==='sales')return;
+    if(!['personal','team'].includes(mode)||mode===this.data.viewMode||!this.data.canViewTeam)return;
     this.setData({viewMode:mode});this.updateSelectionLabels();return Promise.all([this.loadFacts(),this.loadRankingData()]);
   },
   rankingQuery(){const quarter=selectedQuarters(this.data.quarterOptions,this.data.selectedQuarterKeys);return quarter?{year:quarter.year,quarters:quarter.quarters,...this.factsQuery()}:null;},
   reloadRankings(){return this.loadRankingData(true);},
   loadRankingData(force=false){
+    const session=getApp().globalData.session;
+    if(session.permissions&&!access.can(session,'dashboard.ranking')){this._nativeRankings=null;this._rankingLoadId=(this._rankingLoadId||0)+1;this.setData({rankingLoading:false,rankingMessage:'',rankingCards:[],activeOpportunityCount:null});return Promise.resolve();}
     const query=this.rankingQuery();if(!query)return Promise.resolve();
     const selectedMember=this.data.memberOptions.find(row=>row.id===(query.member_id||''));
     if(query.personal&&selectedMember&&['fde','fde_lead'].includes(selectedMember.role)){
@@ -266,6 +274,7 @@ Page({
       if(!payload||payload.contract_version!==2||payload.data_source!=='database'||payload.scope!==(query.personal?'peer':'company_teams')||!selected||selected.personal!==query.personal)throw Error('排名范围与当前选择不一致');
       if(query.personal&&selected.member_id!==target)throw Error('排名成员与当前选择不一致');
       if(!query.personal&&query.team_groups.length&&JSON.stringify(selected.team_groups.slice().sort())!==JSON.stringify(query.team_groups))throw Error('排名团队与当前选择不一致');
+      if(!query.personal&&(!payload.followup||payload.followup.calculation!=='team_followup_per_capita_v1'))throw Error('当前后端尚未提供人均跟进排名，请在配套版本上线后重试');
       rankingDisplay(payload.opportunity_acv);rankingDisplay(payload.followup);rankingDisplay(payload.region);
       this._nativeRankings=payload;this._nativeRankingKey=key;
       this.setData({rankingLoading:false,rankingMessage:''});this.rebuildRankingCards();
@@ -284,12 +293,15 @@ Page({
     const summaryIds=personal?[target]:regions;
     const rows=(key,moneyValue)=>payload?rankingDisplay(payload[key],false,moneyValue).rows.map(row=>({
       ...row,id:row.key,isSelf:row.user_id===selfId,isSelected:(key==='region'?regions:summaryIds).includes(row.key),
-      meta:key==='followup'?`跟进 ${row.customerCount} 家客户${personal&&row.team?' · '+row.team:''}`:`${row.count} 个在推商机${personal&&row.team?' · '+row.team:''}`,
-      displayValue:moneyValue?row.amount:row.value+' 次',
+      meta:key==='followup'?(personal?`跟进 ${row.customerCount} 家客户${row.team?' · '+row.team:''}`:`共 ${row.count} 次 · ${row.member_count} 名有效成员 · ${row.customerCount} 家客户`):`${row.count} 个在推商机${personal&&row.team?' · '+row.team:''}`,
+      displayValue:moneyValue?row.amount:personal?row.value+' 次':row.member_count?Number(row.average).toFixed(2).replace(/\.?0+$/,'')+' 次/人':'—',
+      rank:row.rank==null?'—':row.rank,
+      members:key==='followup'&&!personal?row.members:undefined,
+      memberSummary:key==='followup'&&!personal?(row.member_count?`总次数 ${row.count} ÷ 有效成员 ${row.member_count} 人 = ${Number(row.average).toFixed(2)} 次/人`:'暂无有效业务成员，不参与人均排名'):'',
     })):[];
     const cards=[
-      {key:'acv',title:personal?'商机 ACV 排名':'团队商机 ACV 排名',symbol:'商',tone:'blue',subtitle:cohort,period:this.data.selectedQuarter.label+' · 在推商机',rows:rows('opportunity_acv',true),summaryIds},
-      {key:'followup',title:personal?'跟进排名':'团队跟进排名',symbol:'跟',tone:'mint',subtitle:cohort,period:'近7天（含今天）· 已确认跟进',rows:rows('followup',false),summaryIds},
+      {key:'acv',title:personal?'商机 ACV 排名':'团队商机 ACV 排名',symbol:'商',tone:'blue',subtitle:cohort,period:this.data.selectedQuarter.label+' · 在推商机',rows:rows('opportunity_acv',true),summaryIds,emptySummary:'所选团队不参与销售团队排名，点击查看完整榜单'},
+      {key:'followup',title:personal?'跟进排名':'团队人均跟进排名',symbol:'跟',tone:'mint',subtitle:cohort,period:'近7天（含今天）· 已确认跟进',rows:rows('followup',false),summaryIds,emptySummary:'所选团队不参与销售团队排名，点击查看完整榜单'},
     ];
     // Personal region comparison uses the server's region labels, separate from team selection.
     if(personal)cards.push({key:'region',title:'区域排名',symbol:'区',tone:'amber',subtitle:((payload&&payload.region&&payload.region.rows)||[]).map(row=>row.name||row.label||row.team).filter(Boolean).join(' / ')||'所属区域',period:this.data.selectedQuarter.label+' · 在推商机 ACV',rows:rows('region',true),summaryIds:regions,emptySummary:'所选成员暂无所属区域，点击查看完整榜单'});
@@ -302,7 +314,7 @@ Page({
     if(!active||!Array.isArray(active.rows)){this.setData({activeOpportunityCount:null});return;}
     let rows;
     if(this.data.viewMode==='personal'){const id=this.data.selectedMemberId||getApp().globalData.session.userId;rows=active.rows.filter(row=>row.user_id===id);}
-    else if(this.data.role==='manager'&&this.data.selectedTeamGroups.length)rows=(active.groups||[]).filter(row=>this.data.selectedTeamGroups.includes(row.code));
+    else if(this.data.canViewTeam&&this.data.selectedTeamGroups.length)rows=(active.groups||[]).filter(row=>this.data.selectedTeamGroups.includes(row.code));
     else rows=active.rows;
     this.setData({activeOpportunityCount:rows.reduce((sum,row)=>sum+Number(row.value),0)});
   },

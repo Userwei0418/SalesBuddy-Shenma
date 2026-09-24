@@ -3,6 +3,7 @@
 import asyncio
 
 import pytest
+from tests.integration.feishu_fixtures import seed_execute
 
 from sales_backend.repositories.task_browse import TaskBrowseRepository
 from sales_backend.repositories.tasks import TaskRepository
@@ -20,8 +21,8 @@ async def test_task_pages_filter_before_paging_with_full_counts_and_light_bodies
         await connection.execute("SET LOCAL statement_timeout='10s'")
         project = await opportunity(connection, "XS001", 100)
         person = await actor(connection, "XS001")
-        await connection.execute(
-            """WITH inserted AS (
+        await seed_execute(
+            connection, """WITH inserted AS (
               INSERT INTO workflow.task(workspace_id,customer_id,opportunity_id,creator_user_ref_id,
                 creator_team_id,title,description,status,created_at,due_at,completed_at)
               SELECT $1::uuid,$2::uuid,$3::uuid,$4::uuid,$5::uuid,'分页任务'||n,repeat('任务说明',500),

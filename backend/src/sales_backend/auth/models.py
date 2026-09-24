@@ -40,6 +40,8 @@ class ActorResponse(BaseModel):
     team_ids: list[str]
     team_names: list[str]
     capabilities: dict[str, bool] = Field(default_factory=dict)
+    permissions: dict[str, bool] = Field(default_factory=dict)
+    permission_grants: list[dict] = Field(default_factory=list)
     permission_version: str = ""
 
 

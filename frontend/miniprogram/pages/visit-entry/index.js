@@ -19,6 +19,7 @@ Page({
     localFilePath: "", localFileTemporary: false, fileSaveErrorCode: "",
     entryMode: "voice",
     inputHelpVisible: false,
+    recordingGuideVisible: false,
     transcript: "",
     hasTranscription: false,
     customerId: "",
@@ -70,7 +71,7 @@ Page({
       hasTranscription: restored && (typeof draft.hasTranscription === "boolean"
         ? draft.hasTranscription : Boolean(draft.appliedImportId || draft.importStatus === "succeeded")),
       entryMode: draft.entryMode === "file" ? "file" : "voice",
-      isFde: access.isFde((getApp().globalData.session || {}).role),
+      isFde: access.assignedVisitOnly(getApp().globalData.session),
       customerId, customerName: restored ? draft.customerName || "" : "",
       customerInitial: "", customerQuery: restored ? draft.customerQuery || "" : "",
       customerConfirmed: false, canSubmit: false,
@@ -346,7 +347,7 @@ Page({
     const query = String(this.data.customerQuery || "").trim();
     const request = this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
     const identity = access.identity(getApp().globalData.session);
-    const isFde = access.isFde((getApp().globalData.session || {}).role);
+    const isFde = access.assignedVisitOnly(getApp().globalData.session);
     this.setData({ isFde, searching: true, customerSearchError: "", customerResults: [] });
     try {
       // /customers uses mine/department/company, unlike FDE statistics' self/team.
@@ -469,6 +470,9 @@ Page({
   },
   toggleInputHelp() {
     this.setData({ inputHelpVisible: !this.data.inputHelpVisible });
+  },
+  toggleRecordingGuide() {
+    this.setData({ recordingGuideVisible: !this.data.recordingGuideVisible, inputHelpVisible: false });
   },
   dismissInputHelp() {
     if (this.data.inputHelpVisible) this.setData({ inputHelpVisible: false });
@@ -668,7 +672,7 @@ Page({
       errorText: "",
       statusText: "AI 正在整理沟通内容和下一步计划…",
     });
-    const isFirstVisit = !this.data.isFde && this.data.isFirstVisit;
+    const isFirstVisit = (!getApp().globalData.session.permissions || this.data.canFirstVisit) && this.data.isFirstVisit;
     const opportunityPrompt = [
       "请从以下拜访记录识别商机信息，只提取原文明确出现的内容，不要猜测。",
       "请识别：已有商机名称或新商机名称、商机阶段或赢单概率、ACV、预计关单日期、合作伙伴、产品线；未明确的字段留空。",
@@ -679,7 +683,7 @@ Page({
     return Promise.all([
       this.structureVisit({text,is_first_visit:isFirstVisit,customer_id:this.data.customerId,
         opportunity_id:this.data.isFde ? this.data.opportunityId : null,source_import_id:this.data.importId || null}, token),
-      this.data.isFde ? Promise.resolve(null) : api.runAgent("opportunity_draft", opportunityPrompt, this.data.customerId || null).catch(() => null),
+      this.data.isFde || (getApp().can && !getApp().can('agent.opportunity_draft')) ? Promise.resolve(null) : api.runAgent("opportunity_draft", opportunityPrompt, this.data.customerId || null).catch(() => null),
     ]).then(([run, opportunityRun]) => {
         if (!this.operationCurrent(token)) return;
         wx.setStorageSync(

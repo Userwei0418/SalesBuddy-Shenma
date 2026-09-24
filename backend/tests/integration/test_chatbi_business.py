@@ -57,13 +57,14 @@ async def test_customer_totals_include_rows_beyond_detail_limit(connection, sale
     for index in range(27):
         await connection.execute(
             """INSERT INTO crm.opportunity(workspace_id,customer_id,name,amount,status,
-                       owner_user_ref_id,created_by_user_ref_id)
-                 VALUES($1::uuid,$2::uuid,$3,100.01,$4,$5::uuid,$5::uuid)""",
+                       owner_user_ref_id,created_by_user_ref_id,owner_team_id)
+                 VALUES($1::uuid,$2::uuid,$3,100.01,$4,$5::uuid,$5::uuid,$6::uuid)""",
             sales_actor.workspace_id,
             customer["id"],
             f"合成商机{index}",
             "open" if index < 25 else "lost",
             sales_actor.user_id,
+            sales_actor.team_ids[0],
         )
     task_opportunity = await connection.fetchval("SELECT id::text FROM crm.opportunity WHERE customer_id=$1::uuid LIMIT 1", customer["id"])
     for index in range(32):
@@ -103,7 +104,10 @@ async def test_route_metadata_persists_without_changing_public_result(connection
         client_message_id=str(uuid4()),
         input_source="text",
     )
-    run = RunInput(run_id, conversation["id"], "合成问数", "chatbi", None, sales_actor)
+    from sales_backend.repositories.capabilities import CapabilityRepository
+    snapshot = await CapabilityRepository().analysis_identity(connection, sales_actor)
+    run = RunInput(run_id, conversation["id"], "合成问数", "chatbi", None, sales_actor,
+                   permission_version=snapshot["permission_version"])
     trace = {"provider": "senseaudio", "fallback_reason": "ControlledPlatformBlock", "model_ref": "synthetic"}
     result = {"summary": "合成结果", "metrics": [], "rows": []}
     await AgentRunStore(Database(), get_settings()).persist_result(

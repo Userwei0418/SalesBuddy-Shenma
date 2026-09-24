@@ -82,7 +82,7 @@ async def enqueue_customer_risk_review(connection, actor, *, customer_id, trigge
     if not owner:
         return None  # An unclaimed customer has no accountable business owner yet.
     execution = None
-    for role in ("sales", "supervisor", "manager"):
+    for role in ("sales", "supervisor", "manager", "fde", "fde_lead", "operations", "administrator"):
         execution = await IdentityRepository().find_actor_by_id(
             connection, workspace_id=actor.workspace_id, user_id=owner, role=role,
         )

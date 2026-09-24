@@ -207,10 +207,17 @@ async def test_visit_facts_do_not_query_or_disclose_business_aggregates():
             return {"display_name": "当前记录人", "created_date": "2026-09-13"}
 
         async def fetchval(sql, *args):
+            if "authorization_" in sql:
+                from tests.authorization_fixtures import visit_authorization_query
+                return await visit_authorization_query(ACTOR, customer_id="selected")(sql, *args)
             assert sql == "SELECT security.customer_reference($1::uuid)"
             return {"name": "已选客户", "customer_type_code": "prospect"}
 
-        yield SimpleNamespace(fetchrow=fetchrow, fetchval=fetchval)  # Reference only; no CRM aggregates.
+        async def execute(sql, *args):
+            assert "SELECT set_config('app.authorized_feature'" in sql
+            assert args == ("visit.structure",)
+
+        yield SimpleNamespace(fetchrow=fetchrow, fetchval=fetchval, execute=execute)  # No CRM aggregates.
 
     run = RunInput("run", "conversation", SOURCE_TEXT, "visit_entry", "selected", ACTOR)
     facts = await AgentFactsLoader(SimpleNamespace(transaction=transaction)).load(run)

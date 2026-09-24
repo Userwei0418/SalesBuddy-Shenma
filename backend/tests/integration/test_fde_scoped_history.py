@@ -130,7 +130,8 @@ async def test_profile_and_unrelated_participation_edits_do_not_invalidate_curre
     assert await permission(connection, lead) == lead_before
     await set_request_context(connection, first)
     await require_agent_access(connection, first, "visit_entry", project["customer_id"],
-                               opportunity_id=project["id"], permission_version=before)
+                               opportunity_id=project["id"], permission_version=await connection.fetchval(
+                                   "SELECT security.authorization_snapshot()->>'permission_version'"))
     # A peer leaving our shared project changes the lead's managed relations, but
     # does not remove this member's own authorization for the same customer.
     await members(connection, sales, project, [first.user_id])

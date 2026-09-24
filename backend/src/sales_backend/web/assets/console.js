@@ -28,6 +28,7 @@ import {partners} from './partners.js';
 import {taskInbox} from './tasks.js';
 import {targets, targetRequests} from './targets.js';
 import {loadCompanies, chooseCompany, companyLabel} from './companies.js';
+import {permissionsPage} from "./permissions.js";
 import {feishuSync} from "./feishu-sync.js";
 export const nav = [
   ["customers", "客户管理", "◈"],
@@ -38,6 +39,7 @@ export const nav = [
   ["targets", "目标管理", "◷"],
   ["target_requests", "目标修改审批", "✓"],
   ["accounts", "账号与组织", "♧"],
+  ["permissions", "权限管理", "♧"],
   ["ai", "AI 调用管理", "✧"],
   ["modelApis", "模型接口配置", "⚙"],
   ["agentRuns", "智能体运行审计", "◎"],
@@ -57,6 +59,7 @@ const pages = {
   targets,
   target_requests: targetRequests,
   accounts,
+  permissions: permissionsPage,
   ai: aiUsage,
   modelApis,
   agentRuns,
@@ -67,13 +70,14 @@ const pages = {
   activities: businessActivities,
   system: systemLogs,
 };
-const groups=[['业务运营',['customers','claims','opportunities','partners','tasks']],['组织与目标',['accounts','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
+const pagePermissions={customers:'customer.read',claims:'customer.claim_review',opportunities:'opportunity.read',partners:'partner.read',tasks:'task.read',targets:'target.read',target_requests:'target.approve',accounts:'organization.read',permissions:'authorization.read',ai:'ai.usage_read',modelApis:'ai.config_read',agentRuns:'ai.run_read',agentExecution:'ai.execution_read',companyRules:'rule.read',feishuSync:'feishu.read',activities:'audit.business_read',audit:'audit.read',system:'audit.events_read'};
+const groups=[['业务运营',['customers','claims','opportunities','partners','tasks']],['组织与目标',['accounts','permissions','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
 const iconPaths={customers:'M3 5h18v14H3z M3 10h18 M8 5v14',claims:'M8 5h12v16H4V5h4 M8 3h8v4H8z M8 12l2 2 5-5',opportunities:'M4 20V9h4v11 M10 20V4h4v16 M16 20v-8h4v8',accounts:'M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M17 4a4 4 0 0 1 0 8 M23 21v-2a4 4 0 0 0-4-4',agentRuns:'M12 3a9 9 0 1 0 9 9 M12 7v5l4 2 M17 3h4v4',companyRules:'M4 7h16 M4 17h16 M9 4v6 M15 14v6',tasks:'M5 3h14v18H5z M8 8h8 M8 12h8 M8 16h5'};
 const navIcon=id=>`<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[id]||'M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z'}"/></svg>`;
 let renderId = 0;
 const pageMemory=new Map();
 function navigate(page, {history=true}={}) {
-  if(!pages[page]) return;
+  if(!pages[page] || !state.permissions?.[pagePermissions[page]]) return;
   pageMemory.set(state.page,{filters:{...state.filters},offset:state.offset});
   state.page=page;
   const saved=pageMemory.get(page);
@@ -92,6 +96,7 @@ state.refresh = async ({reason = "refresh"} = {}) => {
   if (!root) return;
   root.classList.add("loading");
   root.setAttribute('aria-busy','true');
+  $(".crumb").textContent = "运营管理 / " + nav.find((n) => n[0] === page)[1];
   const status=$('#page-status');if(status)status.textContent='正在更新…';
   try {
     const view = await pages[page]({reason, isCurrent: () => id === renderId && state.page === page});
@@ -99,8 +104,6 @@ state.refresh = async ({reason = "refresh"} = {}) => {
     root.innerHTML = view.html;
     await view.bind?.(root);
     if(id===renderId && status) status.textContent="已更新 · "+new Date().toLocaleTimeString("zh-CN",{hour12:false});
-    $(".crumb").textContent =
-      "运营管理 / " + nav.find((n) => n[0] === state.page)[1];
   } catch (e) {
     if(id===renderId&&status)status.textContent='加载未完成，请重试';
     if (id === renderId)
@@ -117,10 +120,10 @@ function login(message = "") {
   $("#dialog").close();
   $("#app").innerHTML =
     `<main class="login"><section class="login-art">
-      <div class="brand"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="商汤销售小浣熊 Raccoon SalesBuddy"></div>
-      <div class="login-story"><div class="eyebrow">RACCOON SALESBUDDY</div><h1>记录每一次沟通，<br>让 AI 助力销售增长。</h1><div class="story-divider"></div><p>从客户沟通到商机跟进，<br>用 AI 整理拜访要点，让销售行动更有依据。</p></div>
+      <div class="brand"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="Raccoon SalesBuddy"></div>
+      <div class="login-story"><div class="eyebrow">Raccoon SalesBuddy</div><h1>记录每一次沟通，<br>让 AI 助力销售增长。</h1><div class="story-divider"></div><p>从客户沟通到商机跟进，<br>用 AI 整理拜访要点，让销售行动更有依据。</p></div>
       <div class="login-process" aria-label="工作流程"><span><small>01</small>沟通记录</span><i aria-hidden="true">→</i><span><small>02</small>AI 整理</span><i aria-hidden="true">→</i><span><small>03</small>商机跟进</span></div>
-      <footer><span>商汤销售小浣熊</span><span>Raccoon SalesBuddy</span></footer><img class="login-watermark" src="/admin/assets/brand-mark-white.svg" alt="" aria-hidden="true">
+      <footer><span>Raccoon SalesBuddy</span><span>运营管理工作台</span></footer><img class="login-watermark" src="/admin/assets/brand-mark-white.svg" alt="" aria-hidden="true">
     </section><section class="login-form"><form id="login-form"><div class="form-accent" aria-hidden="true"></div><h2>登录管理工作台</h2><p class="muted">使用由管理员开通的账号登录</p>
       <label class="field"><b>账号</b><input name="account" type="text" autocomplete="username" placeholder="请输入账号名或手机号" required></label>
       <label class="field password-field"><b>密码</b><span class="password-input"><input name="password" id="login-password" type="password" autocomplete="current-password" placeholder="请输入密码" required><button type="button" class="password-toggle" id="toggle-password" aria-label="显示密码" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
@@ -178,14 +181,19 @@ function passwordScreen(required = true) {
 async function shell() {
   const me = await api("/auth/me");
   state.actor = me.actor || state.actor;
-  if (!["operations", "administrator"].includes(state.actor?.role)) {
+  state.permissions = (await api("/permissions/me")).permissions;
+  if (!state.permissions["access.console"]) {
     await logoutAccount();
-    return login("此页面仅向运营和系统管理员开放，请使用相应账号。");
+    return login("当前账号未获运营后台访问权限，请联系管理员。");
   }
   await loadCompanies();
-  state.org = await api("/organization");
-  const initial=window.location.hash.slice(1);if(pages[initial])state.page=initial;
-  $('#app').innerHTML=`<a class="skip-link" href="#content">跳到主要内容</a><div class="shell"><aside id="sidebar"><a class="brand" href="#customers" aria-label="商汤销售小浣熊运营管理"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="商汤销售小浣熊 Raccoon SalesBuddy"></a><div class="workspace-label">运营管理工作台</div><label class="nav-search"><input id="nav-search" type="search" aria-label="查找功能" placeholder="查找功能…"><kbd>/</kbd></label><nav class="nav" aria-label="管理功能">${groups.map(([group,items])=>`<section class="nav-group"><h2>${group}</h2>${items.map(id=>{const item=nav.find(n=>n[0]===id);return `<button type="button" data-nav="${id}" title="${item[1]}" aria-current="${state.page===id?'page':'false'}" class="${state.page===id?'active':''}"><span class="nav-icon">${navIcon(id)}</span><span class="nav-text">${item[1]}</span></button>`;}).join('')}</section>`).join('')}<p id="nav-empty" hidden>没有匹配的功能</p></nav><div class="side-bottom"><span class="connection-dot"></span>业务数据实时读取<button type="button" id="collapse-nav" aria-label="收起导航" title="收起导航">«</button></div></aside><button class="nav-scrim" aria-label="关闭导航" hidden></button><div class="main"><header class="topbar"><button class="mobile-menu" aria-label="展开导航" aria-expanded="false" aria-controls="sidebar">☰</button>${companyLabel()}<div class="user"><span class="avatar">${esc((state.actor.display_name||'管')[0])}</span><span>${esc(state.actor.display_name||state.actor.account_code||'管理账号')}<small>${esc(roles[state.actor.role])}</small></span><button class="link" id="change-password">修改密码</button><button class="link" id="logout">退出</button></div></header><div class="page-tools"><span class="crumb">运营管理</span><span id="page-status" role="status">正在读取数据…</span><button id="refresh-page" class="link" type="button">↻ 刷新当前页</button></div><main class="content" id="content" tabindex="-1"></main><footer class="main-footer">Raccoon SalesBuddy · 运营管理</footer></div></div>`;
+  state.org = state.permissions["organization.read"] ? await api("/organization") : null;
+  const availableGroups=groups.map(([name,items])=>[name,items.filter(id=>state.permissions[pagePermissions[id]])]).filter(([,items])=>items.length);
+  const initial=window.location.hash.slice(1);
+  if(pages[initial] && state.permissions[pagePermissions[initial]])state.page=initial;
+  else if(!state.permissions[pagePermissions[state.page]])state.page=availableGroups[0]?.[1][0];
+  if(!state.page){$('#app').innerHTML='<div class="boot">已登录，尚未分配可访问的管理功能。请联系管理员。</div>';return;}
+  $('#app').innerHTML=`<a class="skip-link" href="#content">跳到主要内容</a><div class="shell"><aside id="sidebar"><a class="brand" href="#customers" aria-label="Raccoon SalesBuddy运营管理"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="Raccoon SalesBuddy"></a><div class="workspace-label">运营管理工作台</div><label class="nav-search"><input id="nav-search" type="search" aria-label="查找功能" placeholder="查找功能…"><kbd>/</kbd></label><nav class="nav" aria-label="管理功能">${availableGroups.map(([group,items])=>`<section class="nav-group"><h2>${group}</h2>${items.map(id=>{const item=nav.find(n=>n[0]===id);return `<button type="button" data-nav="${id}" title="${item[1]}" aria-current="${state.page===id?'page':'false'}" class="${state.page===id?'active':''}"><span class="nav-icon">${navIcon(id)}</span><span class="nav-text">${item[1]}</span></button>`;}).join('')}</section>`).join('')}<p id="nav-empty" hidden>没有匹配的功能</p></nav><div class="side-bottom"><span class="connection-dot"></span>业务数据实时读取<button type="button" id="collapse-nav" aria-label="收起导航" title="收起导航">«</button></div></aside><button class="nav-scrim" aria-label="关闭导航" hidden></button><div class="main"><header class="topbar"><button class="mobile-menu" aria-label="展开导航" aria-expanded="false" aria-controls="sidebar">☰</button>${companyLabel()}<div class="user"><span class="avatar">${esc((state.actor.display_name||'管')[0])}</span><span>${esc(state.actor.display_name||state.actor.account_code||'管理账号')}<small>${esc(roles[state.actor.role])}</small></span><button class="link" id="change-password">修改密码</button><button class="link" id="logout">退出</button></div></header><div class="page-tools"><span class="crumb">运营管理</span><span id="page-status" role="status">正在读取数据…</span><button id="refresh-page" class="link" type="button">↻ 刷新当前页</button></div><main class="content" id="content" tabindex="-1"></main><footer class="main-footer">Raccoon SalesBuddy · 运营管理</footer></div></div>`;
   document.querySelectorAll('[data-nav]').forEach(button=>button.onclick=()=>navigate(button.dataset.nav));
   $('#refresh-page').onclick=()=>state.refresh();
   state.selectCompany=async id=>{
