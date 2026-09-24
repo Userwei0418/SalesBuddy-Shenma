@@ -49,7 +49,7 @@ async def retry_import(
 ) -> dict:
     try:
         async with database.transaction(identity.actor) as connection:
-            await require_capability(connection, identity.actor, "visit.create")
+            await require_capability(connection, identity.actor, "visit.retry_import")
             return await retry_import_record(connection, identity.actor, import_id)
     except PermissionError as exc:
         raise HTTPException(403, str(exc)) from exc

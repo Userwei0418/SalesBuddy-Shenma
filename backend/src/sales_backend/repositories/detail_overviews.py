@@ -116,10 +116,8 @@ class DetailOverviewRepository:
         return await connection.fetchrow(
             """SELECT id::text,customer_id::text FROM crm.opportunity WHERE id=$1::uuid AND deleted_at IS NULL
               AND ($2::uuid IS NULL OR customer_id=$2)
-              AND ($3::text IS NULL OR $3<>'sales' OR owner_user_ref_id=$4::uuid)
-              AND ($3::text IS NULL OR $3<>'supervisor' OR owner_team_id=ANY($5::uuid[]))""",
-            opportunity_id, customer_id, actor.role.value if actor else None,
-            actor.user_id if actor else None, list(actor.team_ids) if actor else [],
+              AND security.authorization_opportunity('opportunity.read',id)""",
+            opportunity_id, customer_id,
         )
 
     async def customer(self, connection, customer_id):

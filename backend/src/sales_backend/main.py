@@ -4,7 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Response, status
+from fastapi import Depends, FastAPI, Response, status
 from fastapi.responses import JSONResponse
 
 from sales_backend import __version__
@@ -16,6 +16,8 @@ from sales_backend.api.agent_audit import router as agent_audit_router
 from sales_backend.api.assistant import router as assistant_router
 from sales_backend.api.audio import router as audio_router
 from sales_backend.api.auth import router as auth_router
+from sales_backend.api.authorization import router as authorization_router
+from sales_backend.api.permission_gate import enforce_route_permission
 from sales_backend.api.business import router as business_router
 from sales_backend.api.business_activity import router as business_activity_router
 from sales_backend.api.collaboration import router as collaboration_router
@@ -81,11 +83,12 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(
-    title="销售智助 Sales SaaS API",
+    title="Raccoon SalesBuddy Sales SaaS API",
     version=__version__,
     docs_url="/api/docs",
     openapi_url="/api/openapi.json",
     lifespan=lifespan,
+    dependencies=[Depends(enforce_route_permission)],
 )
 
 app.middleware("http")(request_id_middleware)
@@ -123,6 +126,7 @@ app.include_router(demo_scenes_router)
 app.include_router(targets_router)
 app.include_router(operations_targets_router)
 app.include_router(auth_router)
+app.include_router(authorization_router)
 app.include_router(console_auth_router)
 app.include_router(companies_router)
 app.include_router(operations_customers_router)

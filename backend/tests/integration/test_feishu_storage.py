@@ -238,6 +238,8 @@ async def test_real_target_migration_is_company_scoped_and_rolls_back_atomically
     await seed_execute(connection, f'CREATE ROLE {role} NOLOGIN NOSUPERUSER NOBYPASSRLS')
     await seed_execute(connection, f'GRANT USAGE ON SCHEMA config,ops,security,common TO {role}')
     await seed_execute(connection, f'GRANT SELECT,UPDATE ON config.feishu_connection TO {role}')
+    # This isolated console role needs the same bounded RLS predicate as the application role.
+    await seed_execute(connection, f'GRANT EXECUTE ON FUNCTION security.authorization_has(text) TO {role}')
     await seed_execute(connection,
         f'GRANT SELECT ON ops.feishu_event,ops.feishu_record_map,ops.feishu_config_audit TO {role}')
     await seed_execute(connection, f'GRANT EXECUTE ON FUNCTION security.prepare_feishu_migration(uuid) TO {role}')
@@ -323,6 +325,8 @@ async def test_recovery_verifies_unknown_before_retry_and_audits_with_company_is
     await seed_execute(connection, f'CREATE ROLE {role} NOLOGIN NOSUPERUSER NOBYPASSRLS')
     await seed_execute(connection, f'GRANT USAGE ON SCHEMA config,ops,security,common TO {role}')
     await seed_execute(connection, f'GRANT SELECT,UPDATE ON config.feishu_connection TO {role}')
+    # This isolated console role needs the same bounded RLS predicate as the application role.
+    await seed_execute(connection, f'GRANT EXECUTE ON FUNCTION security.authorization_has(text) TO {role}')
     await seed_execute(connection,
         f'GRANT SELECT ON ops.feishu_event,ops.feishu_delivery,ops.feishu_config_audit TO {role}')
     await seed_execute(connection,

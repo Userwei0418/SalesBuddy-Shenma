@@ -8,18 +8,17 @@ from sales_backend.repositories.dashboard_scope import resolve_selection
 def owner_scope(alias):
     if alias not in {"o", "c", "fact"}:
         raise ValueError("Unknown internal SQL alias")
-    # $1 role, $2 actor UUID, $3 allowed teams, $4 personal view.
-    fde_oid = f"{alias}.id" if alias == "o" else "o.id"
-    fde = (f"security.fde_customer_in_scope({alias}.id)" if alias == "c" else
-           f"""(security.fde_opportunity_in_scope({fde_oid}) AND (NOT $4::boolean OR EXISTS(
-             SELECT 1 FROM crm.opportunity_participant fp WHERE fp.opportunity_id={fde_oid}
-             AND fp.user_ref_id=$2::uuid AND fp.participant_role='fde'
-             AND clock_timestamp()>=fp.valid_from AND clock_timestamp()<fp.valid_to)))""")
-    return f"""(($1::text IN('fde','fde_lead') AND {fde}) OR
-      ($4::boolean AND {alias}.owner_user_ref_id=$2::uuid) OR
-      (NOT $4::boolean AND ($1::text='manager' OR
-        ($1='supervisor' AND {alias}.owner_team_id=ANY($3::uuid[])) OR
-        ($1='sales' AND {alias}.owner_user_ref_id=$2::uuid))))"""
+    # $1 exact feature, $2 selected member, $3 authenticated tenant, $4 personal view.
+    if alias in {'o', 'c'}:
+        kind = 'opportunity' if alias == 'o' else 'customer'
+        permitted = f"security.authorization_{kind}($1::text,{alias}.id)"
+    else:
+        permitted = """security.authorization_allows($1::text,$3::uuid,fact.owner_user_ref_id,ARRAY[fact.owner_team_id],
+          EXISTS(SELECT 1 FROM crm.opportunity_participant p WHERE p.opportunity_id=o.id
+          AND p.workspace_id=$3::uuid AND p.user_ref_id=common.current_user_ref_id()
+          AND clock_timestamp()>=p.valid_from AND clock_timestamp()<p.valid_to))"""
+    return f"""($3::uuid=common.current_workspace_id() AND {permitted}
+      AND (NOT $4::boolean OR {alias}.owner_user_ref_id=$2::uuid))"""
 
 
 def selected_scope(alias):
@@ -27,7 +26,7 @@ def selected_scope(alias):
 
 
 def scope_arguments(actor, selection):
-    return (actor.role.value, selection.member_id, list(actor.team_ids), selection.personal,
+    return (selection.permission, selection.member_id, actor.workspace_id, selection.personal,
             list(selection.team_ids) if selection.team_ids is not None else None)
 
 
@@ -72,7 +71,7 @@ class DashboardRepository:
         )
         as_of = await connection.fetchval("SELECT clock_timestamp()")
         scope = ("self" if selection.member_id == actor.user_id else "member") if personal else (
-            "team" if selection.team_ids is not None else actor.data_scope.value
+            "team" if selection.team_ids is not None else "authorized"
         )
         return dict(
             data_source="database",
@@ -91,8 +90,8 @@ class DashboardRepository:
             summary=dict(source_date=as_of),
         )
 
-    async def opportunities(self, connection, actor, *, personal=False, selection=None):
-        selection = selection or await resolve_selection(connection, actor, personal=personal)
+    async def opportunities(self, connection, actor, *, personal=False, selection=None, permission="dashboard.read"):
+        selection = selection or await resolve_selection(connection, actor, personal=personal, permission=permission)
         args = scope_arguments(actor, selection)
         rows = await connection.fetch(
             f"""SELECT o.id::text,o.customer_id::text,o.name,o.amount,o.probability,o.stage_code,
@@ -110,8 +109,8 @@ class DashboardRepository:
         )
         return [dict(row) for row in rows]
 
-    async def forecasts(self, connection, actor, *, personal=False, selection=None):
-        selection = selection or await resolve_selection(connection, actor, personal=personal)
+    async def forecasts(self, connection, actor, *, personal=False, selection=None, permission="dashboard.read"):
+        selection = selection or await resolve_selection(connection, actor, personal=personal, permission=permission)
         args = scope_arguments(actor, selection)
         rows = await connection.fetch(
             f"""SELECT f.year,f.quarter,f.recognized_amount,f.collection_amount,
@@ -129,8 +128,8 @@ class DashboardRepository:
         )
         return [dict(row) for row in rows]
 
-    async def recent_visits(self, connection, actor, *, personal=False, selection=None):
-        selection = selection or await resolve_selection(connection, actor, personal=personal)
+    async def recent_visits(self, connection, actor, *, personal=False, selection=None, permission="dashboard.read"):
+        selection = selection or await resolve_selection(connection, actor, personal=personal, permission=permission)
         args = scope_arguments(actor, selection)
         rows = await connection.fetch(
             """SELECT v.id::text,v.customer_id::text,v.interaction_at,v.status,v.opportunity_id::text,
@@ -147,10 +146,8 @@ class DashboardRepository:
               AND ($5::uuid[] IS NULL OR v.recorder_team_id=ANY($5::uuid[]))
               AND v.interaction_at < (((statement_timestamp() AT TIME ZONE 'Asia/Shanghai')::date+1)
                 ::timestamp AT TIME ZONE 'Asia/Shanghai')
-              AND (($4::boolean AND v.recorder_user_ref_id=$2::uuid) OR
-                (NOT $4::boolean AND ($1::text='manager' OR
-                  ($1='supervisor' AND v.recorder_team_id=ANY($3::uuid[])) OR
-                  ($1='sales' AND v.recorder_user_ref_id=$2::uuid))))
+              AND $3::uuid=common.current_workspace_id() AND security.authorization_visit($1::text,v.id)
+              AND (NOT $4::boolean OR v.recorder_user_ref_id=$2::uuid)
             ORDER BY v.interaction_at,v.id""",
             *args,
         )

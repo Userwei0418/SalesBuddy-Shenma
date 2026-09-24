@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.db import Database
-from sales_backend.domain.capabilities import FDE_ROLES
 from sales_backend.domain.concurrency import VersionConflict
 from sales_backend.repositories.collaboration import fde_directory, fde_scope_options
 from sales_backend.repositories.fde_dashboard import fde_activity, fde_dashboard
@@ -171,7 +170,8 @@ async def activity(
         raise HTTPException(422, str(exc)) from exc
 
 
-@router.get("/fde/visit-opportunities")
+@router.get("/fde/visit-opportunities", description="仅返回本人可录入跟进的商机；包含 sales_channel、partner_id、"
+            "partner_name，供跟进复用商机伙伴，空伙伴保持未知。")
 async def visit_opportunities(
     customer_id: UUID | None = None,
     opportunity_id: UUID | None = None,
@@ -181,8 +181,6 @@ async def visit_opportunities(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ):
-    if identity.actor.role.value not in FDE_ROLES:
-        raise HTTPException(403, "此入口仅提供FDE本人可录入的商机")
     try:
         async with database.transaction(identity.actor, readonly=True) as connection:
             await require_capability(connection, identity.actor, "visit.create")

@@ -1,4 +1,3 @@
-from contextlib import asynccontextmanager
 from copy import deepcopy
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -9,7 +8,7 @@ import pytest
 from sales_backend.domain.advice import AdviceError, AdviceRequest, messages, prompt_text, validate_advice
 from sales_backend.domain.agent import ActorContext
 from sales_backend.repositories.advice_facts import AdviceFactsRepository
-from sales_backend.services.advice import AdviceService, cache_key, configuration
+from sales_backend.services.advice import cache_key, configuration
 
 
 def output():
@@ -104,24 +103,16 @@ def test_fde_opportunity_prompt_uses_professional_focus_and_distinct_configurati
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("role", ["fde", "fde_lead"])
-async def test_fde_customer_advice_blocks_generate_existing_read_and_fact_loading(role):
+async def test_customer_advice_checks_configured_subject_permission_before_loading_facts(role):
     actor = ActorContext(workspace_id=str(uuid4()), user_id=str(uuid4()), role=role, data_scope="self")
-
-    @asynccontextmanager
-    async def transaction(*args, **kwargs):
-        yield None
-
-    service = AdviceService(SimpleNamespace(settings=object(), transaction=transaction))
-    service.repo.get = AsyncMock(return_value={"subject_kind": "customer"})
-    with pytest.raises(AdviceError, match="FDE客户资料仅供查看") as generated:
-        await service.request(actor, AdviceRequest(subject_kind="customer", subject_id=str(uuid4())))
-    assert generated.value.status == 403
-    with pytest.raises(AdviceError) as retrieved:
-        await service.get(actor, str(uuid4()))
-    assert retrieved.value.status == 403
-    with pytest.raises(AdviceError) as loaded:
-        await AdviceFactsRepository().load(None, actor, "customer", str(uuid4()))
-    assert loaded.value.status == 403
+    connection = SimpleNamespace(fetchval=AsyncMock(return_value=False), fetchrow=AsyncMock(), execute=AsyncMock())
+    customer_id = str(uuid4())
+    with pytest.raises(AdviceError) as rejected:
+        await AdviceFactsRepository().load(connection, actor, "customer", customer_id)
+    assert rejected.value.status == 404
+    assert connection.fetchval.await_args.args[1:] == ("advice.customer", customer_id)
+    connection.fetchrow.assert_not_awaited()
+    connection.execute.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -130,6 +121,9 @@ async def test_fde_facts_and_fingerprint_capture_actual_actor_and_project_partic
     subject_id, customer_id, owner_id = (str(uuid4()) for _ in range(3))
 
     class Connection:
+        async def execute(self, sql, *args):
+            assert "app.authorized_feature" in sql and args == ("advice.opportunity",)
+
         async def fetchrow(self, sql, *args):
             if "FROM crm.opportunity " in sql:
                 return {
@@ -144,6 +138,9 @@ async def test_fde_facts_and_fingerprint_capture_actual_actor_and_project_partic
             return {"recognized_amount": None, "collection_amount": None}
 
         async def fetchval(self, sql, *args):
+            if "security.authorization_opportunity" in sql:
+                assert args == ("advice.opportunity", subject_id)
+                return True
             if "security.customer_reference" in sql:
                 return {"name": "示例客户"}
             assert args == (owner_id, actor.workspace_id)

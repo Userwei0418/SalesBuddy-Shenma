@@ -1,7 +1,7 @@
 <view class="login-page">
   <view class="product-hero" style="{{heroTop ? 'padding-top:' + heroTop + 'px;' : ''}}">
     <view class="brand-row">
-      <image class="brand-logo" src="/images/raccoon-salesbuddy-white.png" mode="widthFix" aria-label="商汤销售小浣熊 Raccoon SalesBuddy" />
+      <image class="brand-logo" src="/images/raccoon-salesbuddy-white.png" mode="widthFix" aria-label="Raccoon SalesBuddy" />
     </view>
     <view class="welcome-copy">
       <view class="welcome-title"><view>记录每一次沟通，</view><view>让 AI 助力销售增长。</view></view>

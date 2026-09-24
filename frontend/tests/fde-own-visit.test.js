@@ -139,7 +139,7 @@ test('商机详情未获本人录入资格时不可发起录入，取得资格�
 test('普通FDE不编辑销售名单，拜访页无协同人和协助FDE选择',()=>{
  const detail=make('pages/customer-assets/index.js');detail.data.isFde=true;detail.fdeMembersChanged({detail:{members:[own]}});assert.equal(detail.data.fdeRelationDirty,undefined);
  const markup=fs.readFileSync(path.join(base,'pages/visit-confirm/index.wxml'),'utf8');
- assert.match(markup,/wx:if="\{\{!isFde\}\}" class="collaborator-row"/);assert.match(markup,/!isFde && !editing && customerConfirmed && opportunityEditing/);assert.doesNotMatch(markup,/<fde-picker/);
+ assert.match(markup,/wx:if="\{\{canManageAttendance\}\}" class="collaborator-row"/);assert.match(markup,/canUpdateOpportunity\) && !editing && customerConfirmed && opportunityEditing/);assert.doesNotMatch(markup,/<fde-picker/);
 });
 
 test('FDE主管独立商机页保留名单管理，本人拜访页仍不代选参与人',async()=>{

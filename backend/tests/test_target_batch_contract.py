@@ -81,7 +81,11 @@ async def test_target_read_editability_matches_current_quarter_limit(monkeypatch
     for name in ("list", "requests", "batches"):
         monkeypatch.setattr(TargetRepository, name, AsyncMock(return_value={"items": [], "total": 0}))
     monkeypatch.setattr(TargetRepository, "allowed", AsyncMock(return_value=True))
-    connection = SimpleNamespace(fetchval=AsyncMock(return_value=date(2026, 9, 15)))
+    async def fetchval(sql):
+        if "authorization_has" in sql:
+            return role == "operations"
+        return date(2026, 9, 15)
+    connection = SimpleNamespace(fetchval=AsyncMock(side_effect=fetchval))
     actor = SimpleNamespace(user_id="self", role=SimpleNamespace(value=role))
     result = await read_targets(connection, actor, period_type=period_type, anchor_date=anchor)
     assert result["editable"] is expected

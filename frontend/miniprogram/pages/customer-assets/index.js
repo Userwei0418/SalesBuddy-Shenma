@@ -29,7 +29,7 @@ Page({
     if(options.opportunity_id&&wx.setNavigationBarTitle)wx.setNavigationBarTitle({title:'商机详情'});
   },
   onShow(){
-    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'customer-assets')) return;if(!getApp().ensureLogin()) return;const session=getApp().globalData.session||{};const fde=['fde','fde_lead'].includes(session.role);this.setData({demos:[],demoError:'',opportunityTabs:Object.entries(TABS).map(([key,label])=>({key,label})).concat(fde?[{key:'demo',label:'Demo 场景'}]:[]),opportunityTab:!fde&&this.data.opportunityTab==='demo'?'overview':this.data.opportunityTab,fdeRestrictToTeams:session.role==='fde_lead',fdeAllowedTeamIds:session.teamIds||[]});this.load();this.loadOpportunity();this.loadQuarterActuals();},
+    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'customer-assets')) return;if(!getApp().ensureLogin()) return;const session=getApp().globalData.session||{};const fde=['fde','fde_lead'].includes(session.role),showDemo=session.permissions?access.can(session,'demo_scene.read'):fde;this.setData({demos:[],demoError:'',opportunityTabs:Object.entries(TABS).map(([key,label])=>({key,label})).concat(showDemo?[{key:'demo',label:'Demo 场景'}]:[]),canReadDemo:showDemo,opportunityTab:!showDemo&&this.data.opportunityTab==='demo'?'overview':this.data.opportunityTab,fdeRestrictToTeams:session.role==='fde_lead',fdeAllowedTeamIds:session.teamIds||[]});this.load();this.loadOpportunity();this.loadQuarterActuals();},
   // BACKEND-CONTRACT /opportunities/{id}/header 先呈现商机；/overview 按需补全量统计，历史独立分页。
   // 建议通过原生 /advice 对象缓存，人工决定后可创建待办；季度计划来自 quarterly_forecasts，实绩另读 /customer-assets，严禁混算。
   // 详见 docs/backend-handoff/客户与商机详解.md「商机经营详情/客户实绩」。
@@ -58,7 +58,7 @@ Page({
         statusLabel:statusText(opportunity.status),ownerLabel:opportunity.owner_name||customer.owner||'未记录',teamLabel:opportunity.team_name||customer.team||'未记录',
         createdLabel:dateTime(opportunity.created_at),updatedLabel:dateTime(opportunity.updated_at)},fdeMembers:opportunity.fde_members||[],canManageFdeRelation:Boolean(opportunity.can_manage_fde_members),fdeRelationDirty:false,fdeRelationError:""});
       this.renderOpportunityHistory();this.loadOpportunitySections();this.prefetchOpportunityAdvice();
-      if(this.data.isFde){this.loadDemoScenes();this.checkFdeVisitEligibility();this.loadFdeOwnVisits();}
+      if(this.data.canReadDemo)this.loadDemoScenes();if(this.data.isFde){this.checkFdeVisitEligibility();this.loadFdeOwnVisits();}
     }catch(e){if(serial===this.opportunitySerial&&reader.current(token))this.setData({opportunity:null,opportunityError:e.message||'商机信息加载失败'});}
     finally{if(serial===this.opportunitySerial&&reader.current(token))this.setData({opportunityLoading:false});}
   },
@@ -97,9 +97,9 @@ Page({
   moreOpportunitySection(e){return this.loadOpportunitySection(e.currentTarget.dataset.section,{more:true});},
   retryOpportunitySection(e){return this.loadOpportunitySection(e.currentTarget.dataset.section,{retry:true});},
   openProgressEvent(e){const row=this.data.progressEvents.find(item=>item.key===e.currentTarget.dataset.key);if(!row)return;if(row.object_type==='visit' && row.object_id)wx.navigateTo({url:visitDetailUrl({id:row.object_id})});if(row.object_type==='task')wx.navigateTo({url:`/pages/task-detail/index?id=${encodeURIComponent(row.object_id)}`});},
-  fdeMembersChanged(e){if(this.data.isFde && !this.data.isFdeLead)return;this.setData({fdeMembers:e.detail.members,fdeRelationDirty:true,fdeRelationError:''});},
+  fdeMembersChanged(e){const session=getApp().globalData.session;if(session.permissions?!access.can(session,'opportunity.fde_members'):this.data.isFde&&!this.data.isFdeLead)return;this.setData({fdeMembers:e.detail.members,fdeRelationDirty:true,fdeRelationError:''});},
   async saveFdeMembers(){
-    const op=this.data.opportunity;if(this.data.isFde && !this.data.isFdeLead)return;if(!op||!this.data.canManageFdeRelation||this.data.fdeRelationSaving)return;
+    const op=this.data.opportunity,session=getApp().globalData.session;if(session.permissions?!access.can(session,'opportunity.fde_members'):this.data.isFde&&!this.data.isFdeLead)return;if(!op||!this.data.canManageFdeRelation||this.data.fdeRelationSaving)return;
     const removed=(op.fde_members||[]).filter(p=>!this.data.fdeMembers.some(m=>m.id===p.id));
     if(removed.length){const result=await new Promise(resolve=>wx.showModal({title:'确认移出协助人员？',content:`${removed.map(p=>p.name).join('、')}将退出本商机。未完成任务不会自动完成；请在任务详情检查并协调交接。`,success:resolve,fail:()=>resolve({confirm:false})}));if(!result.confirm)return;}
     this.setData({fdeRelationSaving:true,fdeRelationError:''});
@@ -108,7 +108,7 @@ Page({
   onHide(){if(this._adviceOwner)advicePool.release(this._adviceOwner);this._formGeneration=(this._formGeneration||0)+1;clearTimeout(this._formSearchTimer);this.setData({formOpen:false});if(this._detailReader)this._detailReader.close();if(this._formReader)this._formReader.close();this._adviceGeneration=(this._adviceGeneration||0)+1;this.quarterActualSerial=(this.quarterActualSerial||0)+1;this.loadSerial=(this.loadSerial||0)+1;this.fdeOwnSerial=(this.fdeOwnSerial||0)+1;this.fdeEligibilitySerial=(this.fdeEligibilitySerial||0)+1;},
   onUnload(){this.onHide();clearTimeout(this._formSearchTimer);this.fdeOwnSerial=(this.fdeOwnSerial||0)+1;this.fdeEligibilitySerial=(this.fdeEligibilitySerial||0)+1;this._adviceGeneration=(this._adviceGeneration||0)+1;this.opportunitySerial=(this.opportunitySerial||0)+1;this.quarterActualSerial=(this.quarterActualSerial||0)+1;this.loadSerial=(this.loadSerial||0)+1;},
   async loadDemoScenes(more=false){
-    if(!this.data.isFde||!this.data.opportunity||this.data.demosLoading)return;
+    if(!(this.data.canReadDemo||!getApp().globalData.session.permissions&&this.data.isFde)||!this.data.opportunity||this.data.demosLoading)return;
     const owner=access.identity(getApp().globalData.session),id=this.data.opportunityId;
     this.setData({demosLoading:true,demoError:''});
     try{
@@ -117,19 +117,20 @@ Page({
       if(owner!==access.identity(getApp().globalData.session)||id!==this.data.opportunityId)return;
       if(result.data_source!=='database'||!Array.isArray(result.items)||!Number.isInteger(result.total))throw Error('场景数据暂未加载完成');
       const rows=result.items.map(row=>({...row,createdLabel:dateTime(row.created_at)}));
-      this.setData({demos:more?this.data.demos.concat(rows):rows,demoTotal:result.total,demosMore:offset+rows.length<result.total});
+      this.setData({canCreateDemoHere:result.can_create===true&&access.can(getApp().globalData.session,'demo_scene.create'),demos:more?this.data.demos.concat(rows):rows,demoTotal:result.total,demosMore:offset+rows.length<result.total});
     }catch(error){this.setData({demoError:error.message||'场景读取失败'});}
     finally{this.setData({demosLoading:false});}
   },
   moreDemoScenes(){return this.loadDemoScenes(true);},
   viewDemoScene(e){
-    if(!this.data.isFde)return;
+    if(!(this.data.canReadDemo||!getApp().globalData.session.permissions&&this.data.isFde))return;
     const id=e.currentTarget.dataset.id;
     if(!this.data.demos.some(row=>row.id===id))return;
     wx.navigateTo({events:{demoSaved:()=>this.loadDemoScenes()},url:'/pages/demo-create/index?customer_id='+encodeURIComponent(this.data.customerId)+'&opportunity_id='+encodeURIComponent(this.data.opportunityId)+'&demo_id='+encodeURIComponent(id)+'&view=1'});
   },
   openDemoScenes() {
-    if(!this.data.isFde || !this.data.canRecordThisOpportunity)return;
+    const session=getApp().globalData.session;
+    if(session.permissions?!this.data.canCreateDemoHere:!this.data.isFde||!this.data.canRecordThisOpportunity)return;
     wx.navigateTo({events:{demoSaved:()=>{this.setData({opportunityTab:'demo'});this.loadDemoScenes();}},url:'/pages/demo-create/index?customer_id='+encodeURIComponent(this.data.customerId)+'&opportunity_id='+encodeURIComponent(this.data.opportunityId)});
   },
   async checkFdeVisitEligibility() {
@@ -160,7 +161,7 @@ Page({
   openFdeOwnVisit(e){const row=this.data.fdeOwnVisits.find(item=>item.id===e.currentTarget.dataset.id);if(!row)return;if(!row.can_read_detail){wx.showToast({title:'仅保留本人归档摘要，当前无完整资料权限',icon:'none'});return;}wx.navigateTo({url:visitDetailUrl(row)});},
   selectOpportunityTab(e){
     const tab=e.currentTarget.dataset.tab;
-    if(!TABS[tab]&&!(this.data.isFde&&tab==='demo'))return;
+    if(!TABS[tab]&&!(this.data.canReadDemo&&tab==='demo'))return;
     this.setData({opportunityTab:tab});this.loadOpportunityAdvice();this.loadOpportunitySections();
   },
   prefetchOpportunityAdvice(){
@@ -170,6 +171,8 @@ Page({
   },
   toggleAdvice(){const tab=this.data.opportunityTab;this.setData({adviceExpanded:{...this.data.adviceExpanded,[tab]:!(this.data.adviceExpanded||{})[tab]}});},
   async loadOpportunityAdvice(event,section,priority=100){
+    const session=getApp().globalData.session;
+    if(session.permissions&&!(access.can(session,'advice.request')&&access.can(session,'advice.opportunity')))return;
     const tab=section||this.data.opportunityTab,raw=this._opportunityContext,id=this.data.opportunityId;
     if(!raw||!TABS[tab])return;
     const previous=this.data.opportunityAdvice[tab],refresh=Boolean(event&&event.currentTarget);
@@ -221,7 +224,7 @@ Page({
       if(serial!==this.loadSerial||identity!==access.identity(getApp().globalData.session)) return;
       // 实绩与来源类型沿用后台记录；页面只派生金额格式和客户首字。
       const rows=result.items.map(r=>({...r,taxBasisText:({inclusive:'含税',exclusive:'不含税',not_applicable:'不适用',unknown:'税口径未确认'})[r.tax_basis] || '税口径未确认',customerInitial:String(r.customer_name||'客').replace(/^【演示】\s*/, '').substring(0,1),amountText:amountWan(r.amount),recognizedText:amountWan(r.recognized_amount),collectionText:amountWan(r.collection_amount),totalText:amountWan(r[`${this.data.kind}_amount`])}));
-      this.setData({items:more?[...this.data.items,...rows]:rows,summary:result.summary,basis:result.basis || this.data.basis,historicalCount:result.historical_count || 0,totalText:amountWan(result.summary[`${this.data.kind}_amount`] === null ? 0 : result.summary[`${this.data.kind}_amount`]),hasMore:result.has_more,canManage:result.can_manage && this.data.canManageActual !== false,asOf:result.as_of});
+      this.setData({items:more?[...this.data.items,...rows]:rows,summary:result.summary,basis:result.basis || this.data.basis,historicalCount:result.historical_count || 0,totalText:amountWan(result.summary[`${this.data.kind}_amount`] === null ? 0 : result.summary[`${this.data.kind}_amount`]),hasMore:result.has_more,canManage:result.can_manage && this.data.canCreateActual !== false,asOf:result.as_of});
       if(this.data.customerId && !this.data.customerName){const c=await api.getCustomerReference(this.data.customerId);if(serial===this.loadSerial&&identity===access.identity(getApp().globalData.session))this.setData({customerName:c.name});}
     }catch(e){if(serial===this.loadSerial&&identity===access.identity(getApp().globalData.session))this.setData({error:e.message||'加载失败，请重试',items:more?this.data.items:[],summary:null,totalText:'—'});}
     finally{if(serial===this.loadSerial&&identity===access.identity(getApp().globalData.session))this.setData({loading:false});}
@@ -302,8 +305,9 @@ Page({
     finally{this.setData({saving:false});}
   },
   voidEntry(e){
-    if(!this.data.canManage||this.data.readOnly||this.data.basis==='historical')return;
-    const id=e.currentTarget.dataset.id;
+    if(this.data.readOnly||this.data.basis==='historical')return;
+    const id=e.currentTarget.dataset.id,session=getApp().globalData.session,row=this.data.items.find(item=>item.id===id);
+    if(session.permissions?!(access.can(session,'actual.void')&&row&&row.can_void===true):!this.data.canManage)return;
     wx.showModal({title:'作废这条实绩',content:'作废后不再计入汇总，原记录仍保留。',editable:true,placeholderText:'请填写作废原因',confirmText:'确认作废',success:async r=>{
       if(!r.confirm)return;
       if(!String(r.content||'').trim()){wx.showToast({title:'请填写作废原因',icon:'none'});return;}

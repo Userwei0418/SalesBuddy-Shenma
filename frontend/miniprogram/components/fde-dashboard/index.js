@@ -27,7 +27,7 @@ Component({
         this.loadActivity(); return;
       }
       const session = getApp().globalData.session || {}, year = new Date(Date.now() + 28800000).getUTCFullYear();
-      this.setData({canViewTeam: access.can(session, 'team.view'), scope: !this.properties.personal && session.role === 'fde_lead' ? 'team' : 'self', year, yearOptions: Array.from({length: 8}, (_, i) => year - 5 + i), yearIndex: 5, periodLabel: year + '年 · 全年'});
+      this.setData({canViewTeam: access.canViewTeam(session, 'profile.fde_read'), scope: !this.properties.personal && session.role === 'fde_lead' ? 'team' : 'self', year, yearOptions: Array.from({length: 8}, (_, i) => year - 5 + i), yearIndex: 5, periodLabel: year + '年 · 全年'});
       this.load();
     },
     detached() { this.closed = true; this.serial = (this.serial || 0) + 1; this.activitySerial = (this.activitySerial || 0) + 1; },
@@ -40,7 +40,7 @@ Component({
       return {scope:memberId?'team':this.data.scope,member_id:memberId,year:this.data.year,quarters:this.data.quarters};
     },
     async load() {
-      const session = getApp().globalData.session || {}, canViewTeam = access.can(session, 'team.view');
+      const session = getApp().globalData.session || {}, canViewTeam = access.canViewTeam(session, 'profile.fde_read');
       this.setData({canViewTeam});
       if (this.properties.memberId) this.setData({scope: canViewTeam ? 'team' : 'self', memberIndex: 0});
       else if (!canViewTeam && this.data.scope === 'team') this.setData({scope: 'self', memberIndex: 0});
@@ -63,6 +63,7 @@ Component({
           ranking: response.ranking.map(row => ({...row, openAcvText: present.money(row.open_acv)})),
           recentVisits: response.recent_visits.map(present.visitItem), stages: present.visibleStageBars(response.stages || []), rhythmSource:response.rhythm || [],rhythmWeeks:response.rhythm_weeks||[], rhythm: present.progressBars(this.data.rhythmMode==='week'?(response.rhythm_weeks||[]):(response.rhythm||[]),this.data.rhythmMode), loading: false, ready: true});
         this.sortRanking();this.updateMemberPicker();
+        if(session.permissions&&!access.can(session,'dashboard.ranking')){this.setData({companyCards:[],companyRankingReady:false});return;}
         try {
           const source=response.company_rankings,selection=source&&source.selection;
           const personal=!!query.member_id||query.scope==='self',target=query.member_id||session.userId;

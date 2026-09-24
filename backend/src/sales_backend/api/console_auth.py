@@ -126,8 +126,11 @@ async def me(
     database: Database = Depends(get_database),
 ):
     response.headers["Cache-Control"] = "no-store"
+    from sales_backend.services.capabilities import capability_snapshot
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        effective = await capability_snapshot(connection, identity.actor)
     return {
-        "actor": AuthService.actor_response(identity.profile),
+        "actor": AuthService.actor_response(identity.profile).model_copy(update=effective),
         "must_change_password": identity.must_change_password,
     }
 

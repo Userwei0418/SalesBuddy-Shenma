@@ -1,6 +1,6 @@
 # SalesBuddy 神码版
 
-独立维护神码销售系统和小浣熊 Agent 中台。销售系统派生自商汤 1.0.8，源码来源提交 `3e5b904645fdcafda46e177eedae7f9e2dd1d957`（业务发行 `7a414b4`，数据库 V125）；中台基于用户提供的 20260923 定制 Dify 1.17.0 安装包。
+独立维护神码销售系统和小浣熊 Agent 中台。销售系统最初由商汤 1.0.8 派生，本次同步到内部 1.0.9 及后台性能补丁，来源提交 `be421b12b9dce38aa940e8b546dde1796c3bdef5`，数据库迁移头 V151；中台基于用户提供的 20260923 定制 Dify 1.17.0 安装包。
 
 | 目录 | 内容 |
 |---|---|
@@ -12,7 +12,7 @@
 | scripts | 隔离与交付检查 |
 | docs | 计划、状态和来源证据 |
 
-已确认销售入口 `https://salesbuddy.shenzhoukuntai.com:28899`；中台入口 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。证书采用 DNS-01 自动验证，待对方运维完成 DNS 验证与证书配置；证书和实际业务能力按验收记录判断。
+已确认销售入口 `https://salesbuddy.shenzhoukuntai.com:28899`；中台入口 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。客户提供的可信 HTTPS 证书已安装；续签及自动下发由对方运维确认。
 
 中台完整安装包存放在本公开仓库 Release 中，Web 编译产物不入 Git。下载后以包内 SHA256SUMS 校验；对源码的后续修改需要生成新的发行包和校验清单，不能冒用原版哈希。
 
@@ -20,4 +20,6 @@
 
 模型接入与后续替换见 [模型配置](docs/MODELS.md)。
 
-2026-09-24：销售运行 7c7a376 / V125，中台已发布 12 个销售 Agent，4 项核心能力限管理员试点；尚待可信证书、客户 AppID 和其余业务验收。详见 [部署记录](docs/DEPLOYMENT.md)、[核心能力验收](docs/CORE_AGENT_ACCEPTANCE.md)、[辅导建议验收](docs/COACHING_ACCEPTANCE.md)。
+本轮同步及验收见 [1.0.9 神码同步记录](docs/SYNC_1.0.9_20260924.md)。源码版本、服务器运行版本、中台发布及微信预览分别记录；不以源码更新代替部署验收。
+
+已有服务器升级使用 [升级说明](docs/UPGRADE_1.0.9.md)，不要重跑首次安装脚本。

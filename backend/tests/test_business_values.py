@@ -108,7 +108,10 @@ class _CustomerCreateConnection:
     async def fetchrow(self, *_args):
         return {"id": "01000000-0000-0000-0000-000000000002", "name": "南区"}
 
-    async def fetchval(self, *_args):
+    async def fetchval(self, sql, *args):
+        if "security.authorization_snapshot" in sql:
+            from tests.authorization_fixtures import permission_snapshot
+            return permission_snapshot(self.actor, {"customer.create": "workspace"})
         return False
 
     async def execute(self, statement: str, *_args):
@@ -126,6 +129,7 @@ async def test_new_customer_does_not_create_opportunity() -> None:
         team_ids=("01000000-0000-0000-0000-000000000002",),
     )
 
+    connection.actor = actor
     await CustomerMutationRepository().create(
         connection,
         actor,

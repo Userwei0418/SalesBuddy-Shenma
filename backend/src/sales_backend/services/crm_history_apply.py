@@ -165,7 +165,7 @@ class CrmHistoryApply:
             str(self.actor),
             self.role,
         )
-        if not await self.connection.fetchval("SELECT security.management_actor()"):
+        if not await self.connection.fetchval("SELECT security.management_actor() AND security.authorization_has('history.import')"):
             raise ImportBlocked("active_management_identity_required")
 
     def _target(self, entry):

@@ -43,7 +43,7 @@ async def test_bound_visit_uses_allowed_customer_reference_without_broader_custo
     }
     assert "不得传入模型的历史联系人" not in str(facts)
     assert "owner_team_id" not in str(facts)
-    with pytest.raises(LookupError, match="客户不存在"):
+    with pytest.raises(PermissionError, match="授权范围"):
         await loader.load(replace(run, customer_id=str(uuid4())))
 
 

@@ -102,6 +102,9 @@ async def compared(connection, **overrides):
     expected = [overlay_customer_attributes(dict(row)) for row in await connection.fetch(
         LEGACY_LIST_SQL, params["query"], params["level"], params["unassigned"], params["limit"],
     )]
+    for row in expected:
+        row["can_edit"] = await connection.fetchval(
+            "SELECT security.authorization_customer('customer.update',$1::uuid)", row["id"])
     actual = await CustomerRepository().list(connection, **params)
     # plan_close_dates has no SQL ORDER BY in the legacy contract: its multiset,
     # including NULL and duplicate dates, is meaningful; physical row order is not.
@@ -231,8 +234,9 @@ async def test_list_page_crosses_visit_and_null_visit_boundary(connection):
     for limit in (1, 50):
         page = await compared(connection, query=data["prefix"], limit=limit)
         assert page == all_rows[:limit]
-    # Management customer visibility does not bypass ownership-table RLS.
-    assert await compared(connection, query=data["prefix"], unassigned=True, limit=50) == []
+    # The configured company-wide customer grant also covers unassigned records.
+    unassigned = await compared(connection, query=data["prefix"], unassigned=True, limit=50)
+    assert len(unassigned) == 50 and all(row["owner_name"] is None for row in unassigned)
     await actor(connection, "OPS001")
     only_unclaimed = await compared(connection, query=data["prefix"], unassigned=True, limit=50)
     assert len(only_unclaimed) == 50

@@ -10,6 +10,14 @@ MODEL_RECORD_LIMIT = 50
 class AdviceFactsRepository:
     async def load(self, connection, actor, kind, subject_id, *, advice_id=None):
         require_advice_subject(kind, actor.role.value)
+        from sales_backend.repositories.authorization_checks import require_permission
+
+        try:
+            await require_permission(connection, 'advice.' + kind, **{kind + '_id': subject_id})
+        except PermissionError as exc:
+            raise AdviceError("记录不存在或无权查看", 404) from exc
+        # Scope all fact queries to the requested analysis feature, even in workers.
+        await connection.execute("SELECT set_config('app.authorized_feature',$1,true)", 'advice.' + kind)
         if kind == "customer":
             subject = await connection.fetchrow(
                 "SELECT id::text,name,industry_code,customer_type_code,level_code,main_business,demand_summary,"

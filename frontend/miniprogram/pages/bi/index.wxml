@@ -1,5 +1,6 @@
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
+<view wx:if="{{presentationOptions.length > 1}}" class="permission-perspectives"><button wx:for="{{presentationOptions}}" wx:key="value" size="mini" class="{{presentation===item.value?'selected':''}}" data-kind="{{item.value}}" bindtap="changePresentation">{{item.label}}</button></view>
 <fde-dashboard id="fdeContent" wx:if="{{isFde}}"/>
 <block wx:if="{{!isFde}}">
 <view class="bi-page">
@@ -17,19 +18,19 @@
   <view class="metrics-section">
     <view class="metrics-heading">
       <text class="metrics-title">经营数据</text>
-      <view wx:if="{{role === 'supervisor' || role === 'manager'}}" class="metrics-controls">
+      <view wx:if="{{canViewTeam}}" class="metrics-controls">
         <view class="metrics-scope-switch">
           <button size="mini" class="metrics-scope-option {{viewMode === 'team' ? 'selected' : ''}}" data-mode="team" bindtap="changeView">团队</button>
           <button size="mini" class="metrics-scope-option {{viewMode === 'personal' ? 'selected' : ''}}" data-mode="personal" bindtap="changeView">个人</button>
         </view>
-        <view wx:if="{{viewMode === 'personal' || role === 'manager'}}" class="metrics-picker">
+        <view wx:if="{{canViewTeam}}" class="metrics-picker">
           <dashboard-picker wx:if="{{viewMode === 'personal'}}" title="选择成员" subtitle="选择本人或授权范围内的成员" label="{{memberLabel}}" options="{{memberOptions}}" selected="{{memberSelected}}" loading="{{optionsLoading}}" error="{{optionsError}}" bind:change="selectMember" bind:retry="loadOptions"/>
           <dashboard-picker wx:else title="选择团队" subtitle="单选一个团队；全部团队查看部门合计" selection-kind="team" label="{{teamLabel}}" options="{{teamOptions}}" selected="{{teamPickerSelected}}" loading="{{optionsLoading}}" error="{{optionsError}}" bind:change="selectTeams" bind:retry="loadOptions"/>
         </view>
       </view>
     </view>
     <view class="metrics-meta">
-      <text class="metrics-context">{{viewMode === 'personal' ? memberLabel : role === 'manager' ? teamLabel : '本团队'}} · {{selectedQuarter.label}}</text>
+      <text class="metrics-context">{{viewMode === 'personal' ? memberLabel : teamLabel}} · {{selectedQuarter.label}}</text>
       <view class="freshness"><text class="source-pill">{{dataModeLabel}}</text><text>更新至 {{sourceDate}}</text></view>
     </view>
   <view wx:if="{{loading}}" class="loading-card">正在加载经营数据…</view>
@@ -85,7 +86,7 @@
   </view>
   <view class="view-scope-note rankings-heading"><text>公共排名</text><label>{{rankingSubjectLabel}}</label></view>
   <dashboard-ranking wx:for="{{rankingCards}}" wx:key="key" title="{{item.title}}" subtitle="{{item.subtitle}}" period="{{item.period}}" symbol="{{item.symbol}}" tone="{{item.tone}}" rows="{{item.rows}}" summary-ids="{{item.summaryIds}}" loading="{{rankingLoading}}" error="{{rankingMessage}}" empty-summary="{{item.emptySummary || '所选对象暂未纳入当前榜单'}}" bind:retry="reloadRankings"/>
-  <view class="data-note"><text>数据口径</text><label>经营数据按所选成员或团队汇总；确收、回款按发生季度统计，预测按已填季度计划乘阶段概率计算，包含10%阶段。实际为0与未登记分别展示。商机榜和区域榜按所选季度预计关单的在推商机ACV排名；跟进榜按近7天已确认记录排名。完整榜单只展示授权范围内的汇总数据。</label></view>
+  <view class="data-note"><text>数据口径</text><label>经营数据按所选成员或团队汇总；确收、回款按发生季度统计，预测按已填季度计划乘阶段概率计算，包含10%阶段。实际为0与未登记分别展示。商机榜和区域榜按所选季度预计关单的在推商机ACV排名；团队跟进榜按近7天已确认次数除以当前有效销售业务成员数排名，含零次成员，不含纯运营；点击团队查看成员次数。个人跟进榜按次数排名。FDE团队不参与公共销售排名，商机数只作辅助信息。完整榜单只展示授权范围内的汇总数据。</label></view>
 </view>
 </block>
 </block>

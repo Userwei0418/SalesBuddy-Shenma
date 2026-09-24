@@ -11,6 +11,8 @@ App({
       sales: { name: "一线销售", scope: "仅本人" },
       supervisor: { name: "销售主管", scope: "直属团队" },
       manager: { name: "销售总经理", scope: "全部团队" },
+      operations: {name:"运营",scope:"已授权范围"},
+      administrator: {name:"系统管理员",scope:"已授权范围"},
     },
   },
 
@@ -43,7 +45,7 @@ App({
     access.protectActions(this,page,route);
     if(!this.globalData.session.capabilities)page._awaitingInitialCapabilities=true;
     const allowed=access.pageAllowed(this.globalData.session,route,page._accessOptions);
-    page.setData({...access.flags(this.globalData.session),accessBlocked:!allowed,accessMessage:allowed?'':'当前身份未开放此项操作。权限可能已调整，请返回重新查看。'});
+    page.setData({...access.flags(this.globalData.session,route),...(['visit-entry','visit-confirm'].includes(route)?{isFde:access.assignedVisitOnly(this.globalData.session)}:{}),accessBlocked:!allowed,accessMessage:allowed?'':'当前身份未开放此项操作。权限可能已调整，请返回重新查看。'});
     this.refreshCapabilities().catch(()=>undefined);
     return allowed;
   },
@@ -56,12 +58,12 @@ App({
       if(access.identity(this.globalData.session)!==context)return null;
       const actor=result.actor||result;
       if(actor.user_id!==previous.userId||!this.globalData.roles[actor.role])throw new Error('账号身份已变化，请重新登录');
-      const next={...previous,role:actor.role,roleName:actor.role_name||this.globalData.roles[actor.role].name,scope:actor.scope_name||this.globalData.roles[actor.role].scope,capabilities:actor.capabilities||{},permissionVersion:actor.permission_version||'',teamIds:actor.team_ids||[],team:(actor.team_names||[])[0]||previous.team};
-      const changed=JSON.stringify(previous.capabilities)!==JSON.stringify(next.capabilities)||previous.permissionVersion!==next.permissionVersion||previous.role!==next.role;
+      const next={...previous,role:actor.role,roleName:actor.role_name||this.globalData.roles[actor.role].name,scope:actor.scope_name||this.globalData.roles[actor.role].scope,capabilities:actor.capabilities||{},permissions:actor.permissions||null,permissionGrants:actor.permission_grants||[],permissionVersion:actor.permission_version||'',teamIds:actor.team_ids||[],team:(actor.team_names||[])[0]||previous.team};
+      const changed=JSON.stringify(previous.permissions)!==JSON.stringify(next.permissions)||JSON.stringify(previous.capabilities)!==JSON.stringify(next.capabilities)||previous.permissionVersion!==next.permissionVersion||previous.role!==next.role;
       this.globalData.session=next;this.globalData.role=next.role;wx.setStorageSync('salesSession',next);this._capabilityCheckedAt=Date.now();
       const auth=apiClient.getAuth();if(auth)apiClient.updateActor(actor);
       if(changed&&typeof getCurrentPages==='function'){
-        const pages=getCurrentPages();pages.forEach(page=>{if(access.isFde(next.role))page.setData({customer:null,selectedCustomer:null,selectedBattleCustomer:null,opportunity:null,messages:[],visit:null,task:null,risk:null,customers:[],plotCustomers:[],items:[]});if(page._accessRoute)this.guardPage(page,page._accessRoute);if(page._awaitingInitialCapabilities&&!page.data.accessBlocked){page._awaitingInitialCapabilities=false;if(page.onLoad)page.onLoad(page._accessOptions||{});}});
+        const pages=getCurrentPages();pages.forEach(page=>{if(!['visit-entry','visit-confirm','customer-create','customer-edit','opportunity-create','management-task-create','demo-create'].includes(page._accessRoute))page.setData({customer:null,selectedCustomer:null,selectedBattleCustomer:null,opportunity:null,messages:[],visit:null,task:null,risk:null,customers:[],plotCustomers:[],items:[]});if(page._accessRoute)this.guardPage(page,page._accessRoute);if(page._awaitingInitialCapabilities&&!page.data.accessBlocked){page._awaitingInitialCapabilities=false;if(page.onLoad)page.onLoad(page._accessOptions||{});}});
         const current=pages[pages.length-1];if(current&&current.onShow&&!current.data.accessBlocked){current.onShow();if(current.selectComponent){const component=current.selectComponent('#fdeContent');if(component&&component.load)component.load();}}
       }
       return next;
@@ -79,9 +81,14 @@ App({
       const role = actor.role;
       const roleInfo = this.globalData.roles[role];
       if (!roleInfo) throw new Error("服务端返回了不支持的身份");
+      if(actor.permissions && actor.permissions['access.mini_program']!==true){
+        apiClient.logout();throw new Error("当前账号未获小程序使用授权，请联系管理员");
+      }
       const session = {
         role,
         capabilities: actor.capabilities || null,
+        permissions: actor.permissions || null,
+        permissionGrants: actor.permission_grants || [],
         permissionVersion: actor.permission_version || "",
         roleName: actor.role_name || roleInfo.name,
         scope: actor.scope_name || roleInfo.scope,

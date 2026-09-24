@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from sales_backend.domain.agent import ActorContext, AgentMode, AssigneeContext, RoleCode
+from sales_backend.domain.capabilities import BUSINESS_ROLES, CONSOLE_ROLES
 
 
 class AgentModeForbidden(PermissionError):
@@ -28,6 +29,7 @@ ROLE_MODES: dict[RoleCode, frozenset[AgentMode]] = {
             AgentMode.MANAGEMENT_TASK,
             AgentMode.OPERATING_REPORT,
             AgentMode.VISIT_ENTRY,
+            AgentMode.OPPORTUNITY_DRAFT,
         }
     ),
     RoleCode.MANAGER: frozenset(
@@ -37,6 +39,7 @@ ROLE_MODES: dict[RoleCode, frozenset[AgentMode]] = {
             AgentMode.MANAGEMENT_TASK,
             AgentMode.OPERATING_REPORT,
             AgentMode.VISIT_ENTRY,
+            AgentMode.OPPORTUNITY_DRAFT,
         }
     ),
 }
@@ -53,7 +56,7 @@ def assert_customer_reassign_allowed(actor: ActorContext) -> None:
 
 
 def assert_opportunity_create_allowed(actor: ActorContext) -> None:
-    if actor.role not in {RoleCode.SALES, RoleCode.OPERATIONS, RoleCode.ADMINISTRATOR}:
+    if actor.role.value not in BUSINESS_ROLES | CONSOLE_ROLES:
         raise AgentModeForbidden("current role cannot create opportunities")
 
 

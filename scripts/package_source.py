@@ -79,7 +79,7 @@ def main() -> None:
         'customer_appid': 'pending' if project['appid'].startswith('REPLACE_') else project['appid'],
         'deployment_status': 'See docs/DEPLOYMENT.md; source packaging is not runtime acceptance.',
         'agent_platform_installer': 'https://github.com/Userwei0418/SalesBuddy-Shenma/releases/tag/agent-platform-20260923',
-        'agent_platform_web_source': 'Not supplied; compiled Web bundle is in the private installer release.',
+        'agent_platform_web_source': 'Not supplied; compiled Web bundle is in the separate installer release.',
     }
     files['DELIVERY.json'] = ((json.dumps(metadata, ensure_ascii=False, indent=2) + '\n').encode(), 0o644)
     checksums = ''.join(hashlib.sha256(content).hexdigest() + '  ' + path + '\n'

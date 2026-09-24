@@ -309,8 +309,14 @@ function listCustomers(options = {}) {
 
 // Company reference directory only; total includes every matching claim state.
 // Legacy listCustomers callers keep their first-page contract and scope rules.
-function listCustomerClaimPool({ q = '', pageSize = 50, offset = 0 } = {}) {
-  return request({ path: `/customers/claim-pool?q=${encodeURIComponent(q)}&page_size=${Number(pageSize)}&offset=${Number(offset)}` });
+function listCustomerClaimPool({ q = '', pageSize = 50, offset = 0, industry = '', claimStatus = '' } = {}) {
+  const filters = (industry ? `&industry=${encodeURIComponent(industry)}` : '')
+    + (claimStatus ? `&claim_status=${encodeURIComponent(claimStatus)}` : '');
+  return request({ path: `/customers/claim-pool?q=${encodeURIComponent(q)}&page_size=${Number(pageSize)}&offset=${Number(offset)}${filters}` });
+}
+
+function listCustomerClaimOptions() {
+  return request({ path: '/customers/claim-pool/options' });
 }
 
 // BACKEND-CONTRACT：客户详情直接消费聚合对象（contacts/opportunities/tasks/visits/risks 等）。
@@ -496,22 +502,21 @@ function respondTask(taskId, eventType, note, versionNo) {
 
 // BACKEND-CONTRACT：due_at 转 ISO 时间；关联 customer_id/opportunity_id 缺失时明确传 null。
 // priority 中文普通/中/高 -> normal/medium/high；其他值当前回退 normal。
-function createTask({ description, assigneeAccount, targetPosition, dueAt, priority, customerId, opportunityId, associationKind }) {
-  const priorityMap = { 普通: "normal", 中: "medium", 高: "high" };
-  return request({
-    path: "/tasks",
-    method: "POST",
-    data: {
-      description,
-      association_kind: associationKind,
-      assignee_account_code: targetPosition ? null : assigneeAccount,
-      target_position: targetPosition || null,
-      due_at: new Date(dueAt).toISOString(),
-      priority_code: priorityMap[priority] || "normal",
-      customer_id: customerId || null,
-      opportunity_id: opportunityId || null,
-    },
-  });
+function taskCreateBody({ description, assigneeAccount, targetPosition, dueAt, priority, customerId, opportunityId, associationKind }) {
+  return {
+    description, association_kind: associationKind,
+    assignee_account_code: targetPosition ? null : assigneeAccount,
+    target_position: targetPosition || null,
+    due_at: new Date(dueAt).toISOString(),
+    priority_code: ({ 普通: "normal", 中: "medium", 高: "high" })[priority] || "normal",
+    customer_id: customerId || null, opportunity_id: opportunityId || null,
+  };
+}
+function createTask(input) {
+  return request({path: "/tasks", method: "POST", data: taskCreateBody(input)});
+}
+function createTasks(inputs) {
+  return request({path: "/tasks/batch", method: "POST", data: {tasks: inputs.map(taskCreateBody)}});
 }
 
 // BACKEND-CONTRACT：通知 GET 与已读 POST 独立；当前自动已读操作失败静默，不保证全部已落库。
@@ -590,6 +595,7 @@ module.exports = {
   getMemberSalesGrowth,
   listCustomers,
   listCustomerClaimPool,
+  listCustomerClaimOptions,
   getCustomer,
   getDirectoryMembers,
   getTaskAssignees,
@@ -613,6 +619,8 @@ module.exports = {
   completeTask,
   respondTask,
   createTask,
+  createTasks,
+  taskCreateBody,
   listNotifications,
   markNotificationRead,
   listRisks,
@@ -770,3 +778,5 @@ const catalogReads=['getWorkbench','getDashboard','listOpportunities','getOpport
  'getCustomer','getCustomerMap','getCustomerHeader','getOpportunityDetailHeader','getCustomerOpportunityHeader','listAllOpportunities','getOpportunityOverview','getOpportunityDetailOverview','getCustomerOpportunityOverview',
  'getFdeDashboard','getFdeProfile','listCustomerOpportunities','listFdeVisitOpportunities'];
 catalogReads.forEach(name=>{const read=module.exports[name];if(read)module.exports[name]=(...args)=>getBusinessOptions().then(()=>read(...args));});
+
+module.exports.getOpportunityCreateOptions=()=>request({path:'/opportunities/create-options'});

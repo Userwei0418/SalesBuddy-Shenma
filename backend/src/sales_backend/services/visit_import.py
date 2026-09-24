@@ -141,7 +141,7 @@ class VisitImportHandler:
 
     async def handle(self, import_id, actor):
         async with self.database.transaction(actor) as connection:
-            await require_capability(connection, actor, "visit.create")
+            await require_capability(connection, actor, "visit.upload")
             row = await connection.fetchrow(
                 "SELECT * FROM activity.visit_import WHERE id=$1::uuid AND created_by_user_ref_id=$2::uuid",
                 import_id,
@@ -149,6 +149,8 @@ class VisitImportHandler:
             )
             if not row:
                 raise ValueError("文件任务不存在或不可见")
+            if Path(row["filename"]).suffix.lower() in AUDIO_EXTENSIONS:
+                await require_capability(connection, actor, "visit.transcribe")
             if row["status"] == "succeeded":
                 return
             await connection.execute(
@@ -174,7 +176,7 @@ class VisitImportHandler:
             finally:
                 await client.close()
         async with self.database.transaction(actor) as connection:
-            await require_capability(connection, actor, "visit.create")
+            await require_capability(connection, actor, "visit.upload")
             await connection.execute(
                 """UPDATE activity.visit_import SET
                 status='succeeded',extracted_text=$2,evidence=$3::jsonb,error_message=NULL,updated_at=clock_timestamp()
@@ -183,4 +185,6 @@ class VisitImportHandler:
                 text,
                 evidence,
             )
+            if Path(row["filename"]).suffix.lower() in AUDIO_EXTENSIONS:
+                await require_capability(connection, actor, "visit.transcribe")
             await record_job_effect(connection, actor.workspace_id)

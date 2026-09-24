@@ -8,6 +8,7 @@ from sales_backend.api.operations_reports import router as reports
 from sales_backend.api.dependencies import get_database
 from sales_backend.api.management_dependencies import get_password_identity
 from sales_backend.domain.agent import ActorContext, RoleCode
+from tests.authorization_fixtures import permission_snapshot
 
 
 @pytest.mark.parametrize("role", [RoleCode.SALES, RoleCode.SUPERVISOR, RoleCode.MANAGER])
@@ -15,8 +16,17 @@ def test_business_roles_cannot_access_console(role):
     app = FastAPI()
     app.include_router(accounts)
     app.include_router(reports)
-    app.dependency_overrides[get_password_identity] = lambda: SimpleNamespace(actor=SimpleNamespace(role=role))
-    app.dependency_overrides[get_database] = lambda: None
+    actor = SimpleNamespace(role=role, workspace_id="workspace", user_id="user")
+    class DB:
+        @asynccontextmanager
+        async def transaction(self, actual, **kwargs):
+            assert actual is actor
+            yield self
+        async def fetchval(self, sql, *args):
+            assert "authorization_snapshot" in sql
+            return permission_snapshot(actor, {})
+    app.dependency_overrides[get_password_identity] = lambda: SimpleNamespace(actor=actor)
+    app.dependency_overrides[get_database] = lambda: DB()
     client = TestClient(app)
     for path in ["/organization", "/audit", "/ai/overview", "/system-events"]:
         assert client.get("/api/v1/console" + path).status_code == 403
@@ -37,6 +47,8 @@ def test_read_endpoints_derive_workspace_from_identity():
             yield self
 
         async def fetchval(self, sql, *args):
+            if "authorization_snapshot" in sql:
+                return permission_snapshot(actor, {"access.console": "workspace"})
             if "count(*)" in sql.lower():
                 return 0
             return {"must_change_password": False, "auth_method": "password"}

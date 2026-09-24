@@ -90,6 +90,6 @@ test('地图同角色换账号丢弃旧人员筛选；普通FDE不会发送团�
   await p.loadData();await p.changeFdeMapMember({detail:{ids:['member']}});
   app.globalData.session={...lead,userId:'new-lead'};await p.loadData();
   assert.equal(calls.map.at(-1).scope,'team');assert.deepEqual(Array.from(calls.map.at(-1).member_ids),[]);
-  app.globalData.role='fde';app.globalData.session={...lead,role:'fde'};p.data.fdeScope='team';p.data.fdeMapMemberIds=['member'];await p.loadData();
+  app.globalData.role='fde';app.globalData.session={...lead,role:'fde',capabilities:{...lead.capabilities,'team.view':false}};p.data.fdeScope='team';p.data.fdeMapMemberIds=['member'];await p.loadData();
   assert.equal(calls.map.at(-1).scope,'self');assert.deepEqual(Array.from(calls.map.at(-1).member_ids),[]);assert.equal(p.data.isFdeLead,false);
 });

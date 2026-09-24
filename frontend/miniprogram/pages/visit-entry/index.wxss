@@ -24,3 +24,14 @@
 
 /* style:v2 gives default buttons a fixed width; these controls stay compact. */
 .entry-navigation .entry-back{width:88rpx;min-width:0;padding:0;max-width:88rpx}.note-tools .note-clear{width:130rpx;min-width:0;padding:0 12rpx;max-width:130rpx}.draft-state.undo button{width:auto;min-width:0;max-width:130rpx}
+
+.recording-guide{margin-top:24rpx;border-top:1rpx solid #e4edf5}
+.recording-guide-toggle{display:flex;align-items:center;justify-content:space-between;gap:16rpx;width:100%;min-height:76rpx;margin:0;padding:18rpx 0;text-align:left;white-space:normal;line-height:1.5;font-size:26rpx;font-weight:600;color:#345b7a;background:transparent;border-radius:0}
+.recording-guide-toggle::after{border:0}
+.recording-guide-action{flex-shrink:0;color:#1677c8;font-size:24rpx;font-weight:500}
+.recording-guide-content{padding:0 0 8rpx}
+.recording-guide-section{margin-top:16rpx;padding:20rpx;background:#f5f9fd;border-radius:16rpx}
+.recording-guide-section:first-child{margin-top:0}
+.recording-guide-title{display:block;margin-bottom:10rpx;font-size:26rpx;line-height:1.5;font-weight:600;color:#2b4e6b}
+.recording-guide-line{display:block;margin-top:8rpx;font-size:25rpx;line-height:1.7;color:#536f88;overflow-wrap:break-word}
+.recording-guide-note{margin-top:20rpx;font-size:23rpx;line-height:1.7;color:#71879c}

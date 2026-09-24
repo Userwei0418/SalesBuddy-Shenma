@@ -5,7 +5,7 @@ function setup(userId='owner', status='pending_execution',creator='creator'){
  const task={id:'11111111-1111-1111-1111-111111111111',status,creator_user_ref_id:creator,creator_name:'发起人',assignees:[{user_id:'owner',name:'接收人',responsibility:'owner'}],version_no:3,completion_note:'已交付',events:[]};
  const api={getTask:async()=>task,completeTask:async(...args)=>{calls.push(args);return {...task,status:creator==='owner'?'completed':'pending_review'};},respondTask:async(...args)=>{calls.push(args);return {...task,status:args[1]==='approve_completion'?'completed':'in_progress'};}};
  const session={userId,role:'sales'};
- vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>page=p,require:n=>n.includes('apiClient')?api:n.includes('/access')?{can:()=>true}:require(path.resolve(path.dirname(file),n)),getApp:()=>({globalData:{session}}),setTimeout(){},wx:{showModal:m=>modals.push(m),showToast:m=>toasts.push(m),setStorageSync:(...a)=>stored.push(a),vibrateShort(){}}});
+ vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>page=p,require:n=>n.includes('apiClient')?api:n.includes('/access')?{can:()=>true,identity:s=>s.userId}:require(path.resolve(path.dirname(file),n)),getApp:()=>({globalData:{session}}),setTimeout(){},wx:{showModal:m=>modals.push(m),showToast:m=>toasts.push(m),setStorageSync:(...a)=>stored.push(a),vibrateShort(){}}});
  page.data=JSON.parse(JSON.stringify(page.data));page.setData=v=>Object.assign(page.data,v);page.setData({taskId:task.id});page.loadTask();
  return {page,calls,toasts,modals,stored};
 }

@@ -72,3 +72,5 @@ page{background:#eef4fb;color:#19324d}.bi-page{min-height:100vh;padding:24rpx 22
 .team-financial-error>text{display:block;line-height:1.6}.team-financial-error>view{margin-top:14rpx;color:#2678ba;font-weight:650}.team-financial-board{margin-bottom:12rpx}
 
 .rankings-heading{margin-top:36rpx}
+
+.permission-perspectives{display:flex;gap:16rpx;padding:16rpx 32rpx}.permission-perspectives button{flex:1;background:#eef4fa;color:#50657d}.permission-perspectives .selected{background:#207ccc;color:#fff}

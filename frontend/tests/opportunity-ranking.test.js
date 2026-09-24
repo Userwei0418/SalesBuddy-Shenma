@@ -13,3 +13,15 @@ test('缺少统计契约报错，空行仍为真实空状态',()=>{
  assert.throws(()=>rankingDisplay({rows:[]}),/格式/);
  assert.deepEqual(rankingDisplay({rows:[],groups:[]}),{rows:[],total:0,unassignedCount:0,unassignedAmount:'¥0'});
 });
+
+test('人均格式保留服务端排名，总数与占比按次数计算；零分母不显示虚假条长',()=>{
+ const payload={calculation:'team_followup_per_capita_v1',groups:[],rows:[
+  {code:'team:b',value:1,average:1,member_count:1,record_count:1,rank:1,members:[]},
+  {code:'team:a',value:2/3,average:0.67,member_count:3,record_count:2,rank:2,members:[]},
+  {code:'team:z',value:null,average:null,member_count:0,record_count:0,rank:null,members:[]},
+ ]};
+ const display=rankingDisplay(payload);
+ assert.equal(display.total,3);assert.equal(display.rows[0].share,33.3);
+ assert.equal(display.rows[1].rank,2);assert.equal(display.rows[2].width,'0%');
+ assert.throws(()=>rankingDisplay({...payload,rows:[{...payload.rows[0],members:undefined}]}),/不完整/);
+});

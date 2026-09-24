@@ -11,10 +11,8 @@ async def _current_operator(connection, actor):
         "SELECT common.current_workspace_id()::text AS workspace_id,"
         "common.current_user_ref_id()::text AS user_id,common.current_role_code() AS role"
     )
-    if not scope or not scope["workspace_id"] or not scope["user_id"] or scope["role"] not in {
-        "operations", "administrator",
-    }:
-        raise PermissionError("需要当前有效运营或管理员身份")
+    if not scope or not scope["workspace_id"] or not scope["user_id"] or not scope["role"]:
+        raise PermissionError("需要当前有效登录身份")
     if actor is not None and (actor.workspace_id, actor.user_id, actor.role.value) != (
         scope["workspace_id"], scope["user_id"], scope["role"],
     ):
@@ -75,23 +73,29 @@ class OperationsCustomerRepository:
 
     async def list(self, connection, *, q=None, industry=None, level=None, state=None, owner=None, limit=50, offset=0):
         rows = await connection.fetch(
-            """SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
-            c.lifecycle_status,c.owner_team_id::text,t.name AS team_name,c.primary_partner_name,
+            """WITH page AS MATERIALIZED (
+            SELECT c.id,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
+            c.lifecycle_status,c.owner_team_id,c.primary_partner_name,
             c.created_at,c.version_no,c.company_reference,c.company_verified_at,
-            o.state AS ownership_state,o.version_no AS ownership_version,o.owner_user_ref_id::text,u.display_name
-            AS owner_name,
-            p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,p.phone AS
-            contact_phone,p.email AS contact_email,
+            o.state AS ownership_state,o.version_no AS ownership_version,o.owner_user_ref_id,
             count(*) OVER()::integer AS total_count
             FROM crm.customer c JOIN crm.customer_ownership o ON o.customer_id=c.id
-            LEFT JOIN platform.user_ref u ON u.id=o.owner_user_ref_id LEFT JOIN platform.team t ON t.id=c.owner_team_id
-            LEFT JOIN LATERAL(SELECT * FROM crm.contact WHERE customer_id=c.id AND deleted_at IS NULL
-            ORDER BY is_primary DESC,created_at LIMIT 1) p ON true
             WHERE c.deleted_at IS NULL AND ($1::text IS NULL OR c.name ILIKE '%'||$1||'%' OR c.company_reference
             ILIKE '%'||$1||'%')
             AND ($2::text IS NULL OR c.industry_code=$2) AND ($3::text IS NULL OR c.level_code=$3)
             AND ($4::text IS NULL OR o.state=$4) AND ($5::uuid IS NULL OR o.owner_user_ref_id=$5)
-            ORDER BY c.created_at DESC,c.id LIMIT $6 OFFSET $7""",
+            ORDER BY c.created_at DESC,c.id LIMIT $6 OFFSET $7)
+            SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
+            c.lifecycle_status,c.owner_team_id::text,t.name AS team_name,c.primary_partner_name,
+            c.created_at,c.version_no,c.company_reference,c.company_verified_at,
+            c.ownership_state,c.ownership_version,c.owner_user_ref_id::text,u.display_name AS owner_name,
+            p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,
+            p.phone AS contact_phone,p.email AS contact_email,c.total_count
+            FROM page c LEFT JOIN platform.user_ref u ON u.id=c.owner_user_ref_id
+            LEFT JOIN platform.team t ON t.id=c.owner_team_id
+            LEFT JOIN LATERAL(SELECT * FROM crm.contact WHERE customer_id=c.id AND deleted_at IS NULL
+            ORDER BY is_primary DESC,created_at LIMIT 1) p ON true
+            ORDER BY c.created_at DESC,c.id""",
             q,
             industry,
             level,

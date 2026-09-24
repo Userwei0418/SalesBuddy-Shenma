@@ -31,18 +31,19 @@ Page({
       if(!this.editId){
         const permission=await api.listDemoScenes(this.opportunityId,{limit:1,offset:0});
         if(this.closed||this.owner!==access.identity(getApp().globalData.session))return;
-        this.canCreate=permission&&permission.editable===true;
+        this.canCreate=access.can(session,'demo_scene.create')&&permission&&permission.editable===true;
         if(!this.canCreate)throw Error('当前账号不可创建 Demo 场景');
       }
       this.setData({eligible:true,opportunity,accessMessage:''});
     }catch(error){if(!this.closed)this.setData({accessMessage:error.message||'商机加载失败，请返回重试'});}
   },
-  canWriteScene(allowViewing=false){return !this.closed&&this.data.eligible&&(allowViewing||!this.data.viewing)&&this.owner===access.identity(getApp().globalData.session)&&(this.editId?!!this.data.sceneDetail&&this.data.sceneDetail.can_edit===true:this.canCreate===true);},
+  canWriteScene(allowViewing=false){return !this.closed&&this.data.eligible&&(allowViewing||!this.data.viewing)&&this.owner===access.identity(getApp().globalData.session)&&(this.editId?!!this.data.sceneDetail&&this.data.sceneDetail.can_edit===true&&(!getApp().globalData.session.permissions||access.can(getApp().globalData.session,'demo_scene.update')):this.canCreate===true);},
   startEditing(){if(!this.editId||this.data.saving||!this.canWriteScene(true))return;this.setData({viewing:false});wx.setNavigationBarTitle({title:'编辑 Demo 场景'});},
+  canDeleteScene(){return !this.closed&&this.owner===access.identity(getApp().globalData.session)&&access.can(getApp().globalData.session,'demo_scene.delete')&&this.data.sceneDetail&&this.data.sceneDetail.can_delete===true;},
   deleteScene(){
-    if(!this.editId||this.data.saving||!this.canWriteScene(true))return;
+    if(!this.editId||this.data.saving||!this.canDeleteScene())return;
     wx.showModal({title:'删除 Demo 场景',content:'确定删除该场景？删除后无法恢复。',confirmText:'删除',confirmColor:'#d75555',success:async r=>{
-      if(!r.confirm||this.data.saving||!this.canWriteScene(true))return;
+      if(!r.confirm||this.data.saving||!this.canDeleteScene())return;
       try{this.setData({saving:true});await api.deleteDemoScene(this.editId,this.data.sceneDetail.version_no);}
       catch(error){this.setData({saving:false});wx.showToast({title:error.message||'删除失败',icon:'none'});return;}
       const channel=this.getOpenerEventChannel();if(channel&&channel.emit)channel.emit('demoSaved');wx.navigateBack();
@@ -54,6 +55,7 @@ Page({
   cancelVoice(){this.voiceSerial=(this.voiceSerial||0)+1;if(this.recorder && ['recording','starting'].includes(this.data.voiceState))this.recorder.stop();this.setData({voiceId:null,voiceState:''});},
   async toggleVoice(e){
     if(!this.canWriteScene())return;
+    const session=getApp().globalData.session;if(session.permissions&&!access.can(session,'visit.transcribe'))return;
     const id=Number(e.currentTarget.dataset.id);
     if(this.data.voiceState==='recording' && this.data.voiceId===id){this.setData({voiceState:'stopping'});this.recorder.stop();return;}
     if(this.data.voiceState)return;

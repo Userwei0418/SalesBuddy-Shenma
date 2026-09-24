@@ -50,10 +50,13 @@ class PasswordAuthService(AuthService):
                 scope = "network" if account_allowed else "account" if ip_allowed else "account_network"
                 raise LoginThrottled(scope, max(item["retry_after_seconds"] for item in blocked))
             candidate = await repository.candidate(connection, workspace, account, role)
-            # The same person can administer the console and lead a sales team.
-            # Select only a role actually bound to this authenticated identity.
-            if role is None and client_channel == "wechat-mini-program" and candidate and candidate["role_code"] in {"administrator", "operations"}:
-                for business_role in ("manager", "supervisor", "fde_lead", "fde", "sales"):
+            # Console/FDE duties must not mask this person's active sales appointment
+            # in the mini-program. Explicit role selection and console login stay unchanged.
+            if (
+                role is None and client_channel == "wechat-mini-program" and candidate
+                and candidate["role_code"] in {"administrator", "operations", "fde_lead", "fde"}
+            ):
+                for business_role in ("manager", "supervisor", "sales", "fde_lead", "fde"):
                     business = await repository.candidate(connection, workspace, account, business_role)
                     if business and (business["workspace_id"], business["user_id"]) == (candidate["workspace_id"], candidate["user_id"]):
                         candidate = business

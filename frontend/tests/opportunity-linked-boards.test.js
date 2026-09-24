@@ -36,11 +36,11 @@ test('商机经营首页整合总览、筛选和商机卡片', () => {
   assert.ok(wxml.indexOf('head-create-opportunity') < opportunityStart);
   assert.doesNotMatch(wxml, /截至\{\{sourceDate\}\}/);
   assert.doesNotMatch(wxml, /class="workbench-create-row"/);
-  assert.match(js, /canCreateOpportunity:\s*can\(session,'opportunity.edit'\)/);
+  assert.match(js, /canCreateOpportunity:\s*can\(session,'opportunity.create'\)/);
   assert.equal((opportunityCard.match(/class="workbench-filter-item filter-/g) || []).length, 5);
-  assert.match(opportunityCard, /wx:if="\{\{role === 'manager'\}\}" class="workbench-filter-item filter-team"/);
+  assert.match(opportunityCard, /wx:if="\{\{canViewTeam\}\}" class="workbench-filter-item filter-team"/);
   assert.match(opportunityCard, /bindchange="changeExecutionTeam"/);
-  assert.match(opportunityCard, /wx:if="\{\{role !== 'sales'\}\}" class="workbench-filter-item filter-owner"/);
+  assert.match(opportunityCard, /wx:if="\{\{canViewTeam\}\}" class="workbench-filter-item filter-owner"/);
   assert.match(opportunityCard, /class="workbench-filter-item filter-stage/);
   assert.match(opportunityCard, /class="workbench-stage-panel"/);
   assert.match(opportunityCard, /bindtap="toggleOpportunityStage"/);
@@ -62,8 +62,8 @@ test('商机经营首页整合总览、筛选和商机卡片', () => {
 test('总经理在商机列表和商机经营页均可创建商机', () => {
   const workbench = fs.readFileSync(__dirname + '/../miniprogram/pages/workbench/index.js', 'utf8');
   const opportunities = fs.readFileSync(__dirname + '/../miniprogram/pages/opportunities/index.js', 'utf8');
-  assert.match(workbench, /can\(session,'opportunity.edit'\)/);
-  assert.match(opportunities, /access\.can\(session,'opportunity.edit'\)/);
+  assert.match(workbench, /can\(session,'opportunity.create'\)/);
+  assert.match(opportunities, /access\.can\(session,'opportunity.create'\)/);
 });
 
 test('商机经营页移除总监和总经理的客户下发入口与弹层', () => {

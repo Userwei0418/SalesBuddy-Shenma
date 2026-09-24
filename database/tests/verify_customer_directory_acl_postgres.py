@@ -26,6 +26,8 @@ async def main():
     roles = []
     old = "security.company_customer_directory(text,integer,integer)"
     new = "security.company_customer_directory_page(text,integer,integer)"
+    added = ["security.company_customer_directory_search(text,integer,integer,text,text,text[])",
+             "security.company_customer_directory_search_names(text)", "security.company_customer_directory_industries()"]
     acl_sql = """SELECT a.grantee,a.privilege_type,a.is_grantable FROM pg_proc p
       CROSS JOIN LATERAL aclexplode(COALESCE(p.proacl,acldefault('f',p.proowner))) a
       WHERE p.oid=$1::regprocedure ORDER BY a.grantee,a.privilege_type,a.is_grantable"""
@@ -47,9 +49,12 @@ async def main():
         before_acl = await connection.fetch(acl_sql, old)
         before_owner = await connection.fetchval("SELECT proowner FROM pg_proc WHERE oid=$1::regprocedure", old)
         await migrate(connection)
-        for function in (old, new):
+        for function in (old, new, *added):
             assert await connection.fetch(acl_sql, function) == before_acl
             assert await connection.fetchval("SELECT proowner FROM pg_proc WHERE oid=$1::regprocedure", function) == before_owner
+        for function in added:
+            assert not await connection.fetchval("SELECT has_function_privilege($1,$2,'EXECUTE')", observer, function)
+            assert await connection.fetchval("SELECT prosecdef AND proconfig=ARRAY['search_path=pg_catalog'] FROM pg_proc WHERE oid=$1::regprocedure", function)
         for privilege in ("EXECUTE", "EXECUTE WITH GRANT OPTION"):
             for role in (observer, runtime):
                 assert await connection.fetchval("SELECT has_function_privilege($1,$2,$3)", role, new, privilege) == (role == runtime)
@@ -63,8 +68,15 @@ async def main():
         result = json.loads(await connection.fetchval(f"SELECT {new.split('(')[0]}(NULL,50,0)"))
         assert result == {"items": [], "total": 0, "has_more": False, "next_offset": None}
         assert await connection.fetch(f"SELECT * FROM {old.split('(')[0]}(NULL,50,0)") == []
+        assert json.loads(await connection.fetchval("SELECT security.company_customer_directory_search(NULL,50,0,NULL,NULL,ARRAY['商汤'])")) == result
+        assert await connection.fetch("SELECT * FROM security.company_customer_directory_search_names(NULL)") == []
+        assert json.loads(await connection.fetchval("SELECT security.company_customer_directory_industries()")) == []
         await connection.execute("RESET ROLE")
         assert all(step["status"] == "unchanged" for step in await migrate(connection))
+        await connection.execute((ROOT / "migrations/V147__customer_claim_directory_filters.sql").read_text())
+        for function in added:
+            assert await connection.fetch(acl_sql, function) == before_acl
+            assert await connection.fetchval("SELECT proowner FROM pg_proc WHERE oid=$1::regprocedure", function) == before_owner
         print(json.dumps({"passed": 4, "checks": ["original_owner_acl_and_grant_options_preserved",
             "deployer_default_acl_removed", "no_identity_has_no_references_or_total", "repeat_migration_unchanged"]}))
     finally:

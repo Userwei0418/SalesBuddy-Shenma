@@ -55,14 +55,18 @@ Page({
     if(getApp().guardPage&&!getApp().guardPage(this,'profile'))return;
     if(!getApp().ensureLogin())return;
     this.visible=true;
-    const role=this.sync();
-    if(['fde','fde_lead'].includes(role)){
+    const role=this.sync(),session=getApp().globalData.session;
+    const options=access.presentationOptions(session,'profile');
+    const selected=options.find(row=>row.value===this.data.presentation)||options.find(row=>row.value===(access.isFde(role)?'fde':'sales'))||options[0];
+    this.setData({presentationOptions:options,presentation:selected&&selected.value,canViewFdeTeam:access.canViewTeam(session,'profile.fde_read')});
+    if(selected&&selected.value==='fde'){
       this.setData({isFde:true,isFdeLead:role==='fde_lead',efficiencyPeriods:[{key:'week',label:'本周'},{key:'month',label:'本月'},{key:'quarter',label:'本季度'},{key:'year',label:'本年'}],efficiencyPeriod:'week',efficiencyMetric:'opportunities',efficiencyMetrics:[{key:'opportunities',label:'商机'},{key:'followup',label:'跟进记录'},{key:'demo',label:'Demo 场景'}],profileTabs:[{key:'maturity',label:'项目成效'},{key:'efficiency',label:'协作效率'},{key:'profile',label:'FDE 画像'}]});
-      this.loadFdeEfficiency();if(role==='fde_lead')this.loadFdeMembers();return;
+      this.loadFdeEfficiency();if(this.data.canViewFdeTeam)this.loadFdeMembers();return;
     }
     this.setData({isFde:false,efficiencyMetrics:[{key:'customers',label:'客户'},{key:'opportunities',label:'商机'},{key:'followup',label:'跟进记录'}],profileTabs:[{key:'maturity',label:'营销成熟度'},{key:'efficiency',label:'营销效率'},{key:'profile',label:'销售画像'}]});
     this.loadProfileDirectory();
   },
+  changePresentation(e){const choice=e.currentTarget.dataset.kind;if(!this.data.presentationOptions.some(row=>row.value===choice))return;this.clearSubjectData();this.setData({presentation:choice});return this.onShow();},
   pause(){this.visible=false;if(this.growthTimer)clearTimeout(this.growthTimer);['growthRequestId','performanceRequestId','directoryRequestId','fdeEfficiencySerial'].forEach(key=>{this[key]=(this[key]||0)+1;});},
   onHide(){this.pause();},onUnload(){this.pause();},
   clearSubjectData(message='正在确认当前查看范围'){
@@ -100,7 +104,7 @@ Page({
       const teamId=teams.some(row=>row.id===this.data.profileTeamId)?this.data.profileTeamId:teams.some(row=>row.id===defaultTeamId)?defaultTeamId:(teams[0]||{}).id||'';
       const mode=(result.allowed_scopes||[]).includes(this.data.profileScopeMode)?this.data.profileScopeMode:(result.defaults||{}).scope||'self';
       this.profilePeople=members;
-      this.setData({directoryLoading:false,scopeMembers:members,scopeTeams:teams,profileSelectedMemberId:memberId,profileTeamId:teamId,profileScopeMode:mode});
+      this.setData({profileScopeOptions:session.permissions?[{value:'department',label:'部门'},{value:'team',label:'团队'},{value:'person',label:'个人'}].filter(row=>(result.allowed_scopes||[]).includes(row.value)):this.data.profileScopeOptions,directoryLoading:false,scopeMembers:members,scopeTeams:teams,profileSelectedMemberId:memberId,profileTeamId:teamId,profileScopeMode:mode});
       this.refreshProfileScope();
     }catch(error){if(serial===this.directoryRequestId&&identity===this.identity()&&this.visible!==false){this.clearSubjectData('查看范围加载失败，重试后再查看画像');this.profilePeople=[];this.setData({directoryLoading:false,directoryError:error.message||'查看范围加载失败，请重试',scopeMembers:[],scopeTeams:[],organizationReady:false});}}
   },
@@ -112,7 +116,7 @@ Page({
     const label=context.query.scope==='self'?this.data.userName+'（本人）':context.query.scope==='person'?(member||{}).name||'请选择成员':context.query.scope==='team'?(team||{}).name||'请选择团队':'部门汇总';
     this.setData({profileScopeLabel:label,profileSelectedMemberName:(member||{}).name||'',profileSelectedMemberAccount:(member||{}).account_code||'',targetQueryScope:context.query.scope,targetQueryMemberId:context.query.member_id||'',targetContextKey:context.key,profileNotApplicable:this.data.role==='manager'&&(context.query.scope==='self'||(member&&member.role==='manager'&&context.query.scope==='person')),growthReady:false,history:[],dimensions:[],aiAdvice:[],overallScore:'--'});
     this.updateTargetContext();
-    if(this.data.role==='sales')this.loadSalesGrowth();else this.loadScopedGrowth();
+    if(context.query.scope==='self')this.loadSalesGrowth();else this.loadScopedGrowth();
   },
   loadMarketingAnalytics(){return this.loadProfilePerformance();},
   // BACKEND-CONTRACT GROWTH: 进入我的页会POST复盘请求，再轮询GET /profile/sales-growth。
@@ -120,6 +124,8 @@ Page({
   loadSalesGrowth(){
     const identity=this.identity(),serial=this.growthRequestId=(this.growthRequestId||0)+1;
     this.setData({ overallScore:"--", profileScoreInfo:{}, growthReady:false, growthLoading: true, growthStatusText: "正在整理近期拜访复盘" });
+    const session=getApp().globalData.session;
+    if(session.permissions&&!access.can(session,'profile.sales_review'))return this.pollGrowth(60,serial,identity);
     apiClient.ensureSalesGrowthReview()
       .then(() => {if(identity===this.identity()&&serial===this.growthRequestId&&this.visible!==false)this.pollGrowth(0,serial,identity);})
       .catch((error) => {
@@ -144,7 +150,6 @@ Page({
     });
   },
   loadScopedGrowth(){
-    if (this.data.role === 'sales') return;
     if(this.data.profileNotApplicable){this.setData({growthLoading:false,growthReady:false,growthStatusText:'该岗位暂不适用销售六维画像'});return;}
     const context = this.targetContext();
     const requestId = this.growthRequestId = (this.growthRequestId || 0) + 1;
@@ -243,7 +248,7 @@ Page({
   selectEfficiencyPeriod(e){const period=e.currentTarget.dataset.period;if(!this.data.efficiencyPeriods.some(row=>row.key===period))return;this.setData({efficiencyPeriod:period,...(!this.data.isFde?{[this.data.efficiencyMetric==='followup'?'followupPeriod':'structurePeriod']:period}:{})});return this.data.isFde?this.loadFdeEfficiency():this.loadProfilePerformance();},
   async loadFdeMembers(){
     const session=getApp().globalData.session,identity=this.identity(),serial=this.fdeDirectorySerial=(this.fdeDirectorySerial||0)+1;
-    if(!access.can(session,'team.view'))return;
+    if(!access.canViewTeam(session,'profile.fde_read'))return;
     try{const result=await apiClient.getFdeScopeOptions();if(identity!==this.identity()||serial!==this.fdeDirectorySerial||this.visible===false)return;
       if(result.data_source!=='database'||!Array.isArray(result.members)||!Array.isArray(result.teams))throw Error('成员范围加载失败');
       const teams=result.teams,members=result.members.map(row=>{const id=row.user_id||row.id,name=row.display_name||row.name;return {...row,id,name:name+(id===session.userId?'（本人）':''),initial:String(name||'人').slice(0,1),teamLabel:teams.filter(team=>(row.team_ids||[]).includes(team.id)).map(team=>team.name).join(' · ')};});
@@ -256,15 +261,15 @@ Page({
   changeFdeScopeMode(e){return this.changeFdeProfileScope({currentTarget:{dataset:{scope:e.detail.mode==='team'?'team':'self'}}});},
   changeFdeScopeSubject(e){if(e.detail.kind==='team'){const team=this.data.fdeScopeTeams.find(row=>row.id===e.detail.id);if(team){this.setData({fdeTeamId:team.id,fdeTeamLabel:team.name});this.loadFdeEfficiency();}return;}const id=e.detail.id,own=getApp().globalData.session.userId,index=this.data.fdeMemberOptions.findIndex(row=>(row.id||own)===id);if(index>=0)this.changeFdeMember({detail:{value:index}});},
   changeFdeMember(e) {
-    if(!this.data.isFdeLead||!access.can(getApp().globalData.session,'team.view'))return;
+    if(!access.canViewTeam(getApp().globalData.session,'profile.fde_read'))return;
     const index=Number(e.detail.value),row=this.data.fdeMemberOptions[index];if(!row)return;
     this.setData({fdeMemberIndex:index,fdeMemberId:row.id,fdeMemberName:row.id?row.name:''});
     this.loadFdeEfficiency();
   },
   changeFdeProfileScope(e) {
     const scope=e.currentTarget.dataset.scope;
-    if(!['self','team'].includes(scope)||!this.data.isFdeLead)return;
-    if(scope==='team'&&!access.can(getApp().globalData.session,'team.view')){wx.showToast({title:'当前账号未开放团队权限',icon:'none'});return;}
+    if(!['self','team'].includes(scope)||!access.canViewTeam(getApp().globalData.session,'profile.fde_read'))return;
+    if(scope==='team'&&!access.canViewTeam(getApp().globalData.session,'profile.fde_read')){wx.showToast({title:'当前账号未开放团队权限',icon:'none'});return;}
     if(scope===this.data.fdeProfileScope)return;
     if(scope==='team'&&!this.data.fdeTeamId){wx.showToast({title:'请等待团队范围加载完成',icon:'none'});return;}
     this.setData({fdeProfileScope:scope});
@@ -283,14 +288,15 @@ Page({
       if(result.data_source!=='database'||!result.summary)throw Error('协作效率数据暂未加载完成');
       const summary=result.summary;
       const value=summary[{followup:'period_visits',opportunities:'period_opportunities',demo:'own_demo_scene_count'}[metric]];
-      const company=result.company_rankings;
+      const session=getApp().globalData.session,canRank=!session.permissions||access.can(session,'dashboard.ranking');
+      const company=canRank?result.company_rankings:{data_source:'database',items:[]};
       if(!company||company.data_source!=='database'||!Array.isArray(company.items))throw Error('同级排名暂未加载完成');
       const teamRanking=company.scope==='company_fde_teams';
       const selectedId=teamRanking?this.data.fdeTeamId:this.data.fdeMemberId||(getApp().globalData.session||{}).userId;
       const ranking=memberRanking(company.items,metric,period,selectedId,teamRanking?'team':'person');
       this.setData({organizationLoading:false,organizationReady:true,efficiencyTotal:value==null?'—':value,
         efficiencyUnit:metric==='followup'?'次':'个',efficiencyAggregateLabel:this.data.fdeProfileScope==='team'?this.data.fdeTeamLabel||'团队汇总':this.data.fdeMemberName||'本人统计',efficiencyRanking:ranking,
-        fdeEfficiencyNote:teamRanking?'公司同类团队按所选周期排名，同值并列。商机按期间跟进项目去重，同一商机在团队内仅计一次；Demo 按团队成员登记记录统计。':'同级成员按所选周期排名，同值并列。商机按期间跟进项目去重，Demo 按本人登记记录统计。'});
+        fdeEfficiencyNote:!canRank?'当前查看范围的工作统计。':teamRanking?'公司同类团队按所选周期排名，同值并列。商机按期间跟进项目去重，同一商机在团队内仅计一次；Demo 按团队成员登记记录统计。':'同级成员按所选周期排名，同值并列。商机按期间跟进项目去重，Demo 按本人登记记录统计。'});
 
     } catch(error) {if(serial===this.fdeEfficiencySerial && this.data.isFde && account===this.data.account && identity===this.identity() && this.visible!==false)this.setData({organizationLoading:false,organizationReady:false,organizationError:error.message||'协作效率加载失败'});}
   },
@@ -299,7 +305,7 @@ Page({
   buildPerformanceBoard(){const targets=(this.profilePerformance||{}).targets||{},actuals=this.performanceActuals||{};return ['collection','recognized'].map(kind=>({...profileMetrics.performanceMetric({targets},kind,actuals[kind]),targetLabel:this.data.targetScopeLabel}));},
   targetContext(){
     const role=this.data.role,mode=this.data.profileScopeMode;
-    const query=role==='sales'?{scope:'self'}:mode==='department'?{scope:'department'}:mode==='team'?{scope:'team',team_id:this.data.profileTeamId||undefined}:mode==='person'?{scope:'person',member_id:this.data.profileSelectedMemberId||undefined}:{scope:'self'};
+    const query=role==='sales'&&!getApp().globalData.session.permissions?{scope:'self'}:mode==='department'?{scope:'department'}:mode==='team'?{scope:'team',team_id:this.data.profileTeamId||undefined}:mode==='person'?{scope:'person',member_id:this.data.profileSelectedMemberId||undefined}:{scope:'self'};
     return {query,key:JSON.stringify([this.identity(),query,this.data.targetYear,this.data.targetQuarter]),label:query.scope==='department'?'部门目标':query.scope==='team'?'团队目标':'个人目标'};
   },
   readCurrentTargets(){return (this.profilePerformance||{}).targets||{};},
@@ -317,7 +323,7 @@ Page({
       this.profilePerformance=result;this.performanceActuals=result.actuals;
       const retention=result.retention||{},score=profileScores.displayScore((result.scores||{}).maturity),period=result.target_period||{};
       const self=context.query.scope==='self'||(context.query.scope==='person'&&context.query.member_id===getApp().globalData.session.userId);
-      this.setData({organizationReady:true,organizationLoading:false,maturityScopeLabel:'经营事实',performanceLoading:false,performanceError:'',canEditSalesTarget:result.editable===true&&self,maturityScore:score.text,maturityScoreInfo:score,targetScopeLabel:(period.year||this.data.targetYear)+' Q'+(period.quarter||this.data.targetQuarter)+' '+context.label,
+      this.setData({organizationReady:true,organizationLoading:false,maturityScopeLabel:'经营事实',performanceLoading:false,performanceError:'',canEditSalesTarget:result.editable===true&&(getApp().globalData.session.permissions?access.can(getApp().globalData.session,'target.submit'):self),maturityScore:score.text,maturityScoreInfo:score,targetScopeLabel:(period.year||this.data.targetYear)+' Q'+(period.quarter||this.data.targetQuarter)+' '+context.label,
         maturityFacts:[{key:'active',name:'在推商机 ACV',value:profileMetrics.money(result.active_opportunity_amount),detail:'当前进行中的商机金额'},{key:'won',name:'已赢单金额',value:profileMetrics.money(result.won_amount),detail:'已赢单商机累计金额，非确收'},{key:'retention',name:'客户保有率',value:retention.rate==null?'待计算':Number(retention.rate).toFixed(1)+'%',detail:retention.rate==null?'去年暂无已登记收入，暂不能计算':retention.customer_count+' 家去年有收入客户：今年 '+profileMetrics.money(retention.current)+' ÷ 去年 '+profileMetrics.money(retention.previous)}]});
       this.setData({performanceBoard:this.buildPerformanceBoard()});this.applyEfficiencySupplemental();
     }catch(error){if(!current())return;this.profilePerformance=null;this.performanceActuals={};this.setData({organizationReady:false,performanceLoading:false,performanceError:error.message||'经营数据加载失败',canEditSalesTarget:false,performanceBoard:this.buildPerformanceBoard(),maturityFacts:[],efficiencyRatio:{}});}

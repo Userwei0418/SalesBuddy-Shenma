@@ -8,7 +8,7 @@ async def profile_facts(connection, actor, days, *, member_ids=None, team_id=Non
     ids = member_ids if member_ids is not None else [actor.user_id]
     now = await connection.fetchval("SELECT clock_timestamp()")
     start, _ = window(now, days)
-    permission_version = await connection.fetchval("SELECT security.fde_permission_version()")
+    permission_version = await connection.fetchval("SELECT security.authorization_snapshot()->>'permission_version'")
     runtime = await connection.fetchrow(
         """SELECT enabled,llm_model,updated_at::text,
           md5(COALESCE(prompt_overrides->>'operating_report','')) AS prompt_digest

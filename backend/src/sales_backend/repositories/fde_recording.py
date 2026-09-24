@@ -29,7 +29,8 @@ async def recording_opportunities(connection, *, customer_id=None, opportunity_i
     total = await connection.fetchval("SELECT count(*) " + predicate, customer_id, opportunity_id, query)
     rows = await connection.fetch(
         "SELECT o.id::text,o.customer_id::text,o.name,c.name AS customer_name,"
-        "o.status,o.stage_code,o.probability,true AS can_record_visit "
+        "o.status,o.stage_code,o.probability,o.sales_channel,o.partner_id::text,o.partner_name,"
+        "true AS can_record_visit "
         + predicate + " ORDER BY c.name,o.name,o.id LIMIT $4 OFFSET $5",
         customer_id, opportunity_id, query, limit, offset,
     )

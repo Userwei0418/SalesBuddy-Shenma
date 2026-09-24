@@ -5,10 +5,11 @@ from sales_backend.domain.tasks import TaskConflict, TaskForbidden, TaskNotFound
 from sales_backend.repositories.task_mutations import TaskMutationRepository
 from sales_backend.repositories.task_targets import TaskTargetRepository
 from sales_backend.repositories.tasks import TaskRepository
+from sales_backend.services.authorization import require_permission
 
 
 async def coordinate_task(connection, *, actor, task_id, event_type, note, expected_version, account=None):
-
+    await require_permission(connection, "task.cancel" if event_type == "cancel" else "task.coordinate", task_id=task_id)
     if not (note or "").strip() or expected_version is None:
         raise TaskConflict("任务转交或取消需要原因及当前版本")
     task = await connection.fetchrow(

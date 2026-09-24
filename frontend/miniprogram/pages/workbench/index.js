@@ -94,7 +94,7 @@ Page({
       label: item.label
     }))],
     opportunityGradeIndex: 0,
-    opportunityFilterActive: false,
+    opportunityFilterActive: false, canViewTeam:false,
     opportunityQuery: '',
     filterRole: "",
     executionTeamOptions: [{
@@ -166,9 +166,9 @@ Page({
     this.setData({opportunityStageOptions:[{value:'all',label:'全部阶段'},...STAGES.map(s=>({value:s.code,label:s.text,selected:this.data.opportunitySelectedStages.includes(s.code)}))],
       opportunityGradeOptions:[{value:'all',label:'全部等级'},...OPPORTUNITY_GRADES.map(g=>({value:g.code,label:g.label}))]});
     if (!response || !Array.isArray(response.items) || !response.summary || !Number.isInteger(response.summary.total) || typeof response.has_more !== 'boolean' || response.has_more && (!response.items.length || !Number.isInteger(response.next_offset))) throw new Error('商机分页数据不完整');
-    if(this.data.role==='manager'&&!Array.isArray(response.team_options))throw Error('团队目录暂不可用，请稍后重试');
+    if(this.data.canViewTeam&&!Array.isArray(response.team_options))throw Error('团队目录暂不可用，请稍后重试');
     const session = getApp().globalData.session || {};
-    const added = response.items.map(item => ({...decorateOpportunity(item), canEdit: can(session, 'opportunity.edit') && (session.role !== 'sales' || item.owner_id === session.userId)})),
+    const added = response.items.map(item => ({...decorateOpportunity(item), canEdit: can(session, 'opportunity.update') && (item.can_edit === true || (!session.permissions && (session.role !== 'sales' || item.owner_id === session.userId)))})),
       previous = this.listOpportunities || [];
     const items = append ? previous.concat(added.filter(r => !previous.some(old => old.id === r.id))) : added;
     this.listOpportunities = items;
@@ -395,14 +395,14 @@ Page({
   },
   applyOpportunityFilters() {
     this.setData({
-      opportunityFilterActive: Boolean(this.data.opportunityQuery.trim()) || this.data.listQuarter.quarters.length > 0 || [this.data.opportunityOwnerIndex, this.data.opportunityCloseIndex, this.data.opportunityGradeIndex].some(index => index > 0) || this.data.opportunitySelectedStages.length > 0 || this.data.role === 'manager' && this.data.executionTeamIndex > 0
+      opportunityFilterActive: Boolean(this.data.opportunityQuery.trim()) || this.data.listQuarter.quarters.length > 0 || [this.data.opportunityOwnerIndex, this.data.opportunityCloseIndex, this.data.opportunityGradeIndex].some(index => index > 0) || this.data.opportunitySelectedStages.length > 0 || this.data.canViewTeam && this.data.executionTeamIndex > 0
     });
     return this.loadAllOpportunities();
   },
   onShow() {
     const app = getApp();
     if (app.guardPage && !app.guardPage(this, 'workbench')) return;
-    if (['fde', 'fde_lead'].includes(app.globalData.role)) {
+    if (require('../../utils/access').fdeProjectView(app.globalData.session)) {
       this.setData({
         isFde: true
       });
@@ -465,7 +465,7 @@ Page({
       roleName: session.roleName || roleInfo.name,
       scope: roleInfo.scope,
       filterRole: role,
-      canCreateOpportunity: can(session,'opportunity.edit'),
+      canCreateOpportunity: can(session,'opportunity.create'),
       dataReady: true,
       loading: false,
       loadError: ''

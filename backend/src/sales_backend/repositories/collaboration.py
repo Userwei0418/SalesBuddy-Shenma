@@ -136,10 +136,6 @@ async def write_members(connection, actor, opportunity_id, desired, *, source="m
     desired = set(desired)
     before = await effective_ids(connection, opportunity_id)
     removed, added = before - desired, desired - before
-    if actor.role.value == "fde_lead":
-        for uid in added | removed:
-            if not await connection.fetchval("SELECT security.fde_manages_user($1::uuid)", uid):
-                raise PermissionError("FDE 负责人只能调整本部门成员")
     for uid in sorted(added):
         await connection.execute(
             """INSERT INTO crm.opportunity_participant
@@ -196,69 +192,69 @@ async def write_visit_participants(connection, actor, visit_id, collaborators, f
         )
 
 
-async def scope_members(connection, actor, scope=None, selected=None, selected_ids=None, team_id=None):
-    if actor.role.value not in FDE_ROLES:
-        raise PermissionError("此视图仅供 FDE 成员与负责人使用")
-    scope = scope or ("team" if actor.role.value == "fde_lead" else "self")
-    if scope not in {"self", "team"} or (scope == "team" and actor.role.value != "fde_lead"):
-        raise PermissionError("没有部门协作数据权限")
-    available = await fde_directory(connection)
-    managed = set()
-    if actor.role.value == "fde_lead" and available:
-        managed = {
-            str(row["user_id"])
-            for row in await connection.fetch(
-                "SELECT user_id FROM unnest($1::uuid[]) AS person(user_id) WHERE security.fde_manages_user(user_id)",
-                [person["id"] for person in available],
-            )
-        }
-    visible = [person for person in available if person["id"] == actor.user_id or person["id"] in managed]
-    ids = [p["id"] for p in visible] if scope == "team" else [actor.user_id]
+async def scope_members(connection, actor, scope=None, selected=None, selected_ids=None, team_id=None,
+                        *, permission='profile.fde_read', fde_cohort=False):
+    from sales_backend.repositories.authorization_checks import require_permission
+    from sales_backend.repositories.team_directory import selectable_teams
+
+    await require_permission(connection, permission)
+    teams = await selectable_teams(connection, actor, 'fde', permission=permission)
+    if fde_cohort or permission.startswith('profile.fde'):
+        available = await fde_directory(connection)
+    else:
+        available = [dict(row) for row in await connection.fetch(
+            "SELECT u.id::text,u.display_name AS name FROM platform.user_ref u "
+            "WHERE u.workspace_id=$1::uuid AND u.status='active' AND u.deleted_at IS NULL",
+            actor.workspace_id)]
+    allowed_ids = {row['id'] for row in await connection.fetch(
+        "SELECT u.id::text FROM platform.user_ref u WHERE u.workspace_id=$1::uuid "
+        "AND u.status='active' AND u.deleted_at IS NULL "
+        "AND security.authorization_subject($2,'person',u.id,NULL)", actor.workspace_id, permission)}
+    visible = [person for person in available if person['id'] in allowed_ids]
+    scope = scope or ('team' if teams else 'self')
+    if scope == 'person':
+        scope = 'team' if selected and str(selected) != actor.user_id else 'self'
+    if scope not in {'self', 'team'} or (scope == 'team' and not teams):
+        raise PermissionError('所选协作视图不在授权范围内')
+    ids = [p['id'] for p in visible] if scope == 'team' else [actor.user_id] if actor.user_id in allowed_ids else []
+    if scope == 'self' and actor.user_id not in {p['id'] for p in visible}:
+        raise PermissionError('当前账号没有可查看的本人业务画像')
     if team_id:
         if scope != 'team' or selected or selected_ids:
             raise ValueError('团队视角请只指定团队，个人视角请只指定成员')
-        allowed = await connection.fetchval(
-            "SELECT security.fde_user_is_active($1::uuid,'fde_lead',$2::uuid)", actor.user_id, str(team_id))
-        if not allowed:
-            raise PermissionError('所选团队不在当前负责范围内')
-        team_people = {str(row['user_ref_id']) for row in await connection.fetch(
-            "SELECT DISTINCT user_ref_id FROM platform.team_membership WHERE team_id=$1::uuid "
-            "AND workspace_id=$2::uuid AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to "
-            "AND membership_role IN ('fde','fde_lead')", str(team_id), actor.workspace_id)}
+        if str(team_id) not in {team['id'] for team in teams}:
+            raise PermissionError('所选团队不在授权范围内')
+        team_people = {row['user_id'] for row in await connection.fetch(
+            "SELECT DISTINCT user_ref_id::text AS user_id FROM platform.team_membership "
+            "WHERE workspace_id=$1::uuid AND team_id=$2::uuid "
+            "AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to", actor.workspace_id, str(team_id))}
         ids = [uid for uid in ids if uid in team_people]
-        visible = [person for person in visible if person['id'] in team_people]
+        visible = [p for p in visible if p['id'] in team_people]
     requested = sorted({str(UUID(str(value))) for value in [*(selected_ids or []), *([selected] if selected else [])]})
-    if len(requested) > 100:
-        raise ValueError("最多筛选100名成员")
+    if len(requested)>100:
+        raise ValueError('最多筛选100名成员')
     missing = set(requested) - set(ids)
     if missing:
         historical = set()
-        if scope == "team":
-            historical = {
-                str(row["user_ref_id"])
-                for row in await connection.fetch(
-                    "SELECT DISTINCT user_ref_id FROM security.fde_recorded_visit_history() "
-                    "WHERE user_ref_id=ANY($1::uuid[])",
-                    list(missing),
-                )
-            }
+        if scope == 'team' and permission.startswith('profile.fde'):
+            historical = {str(row['user_ref_id']) for row in await connection.fetch(
+                "SELECT DISTINCT user_ref_id FROM security.fde_recorded_visit_history() "
+                "WHERE user_ref_id=ANY($1::uuid[])",list(missing))}
         if missing - historical:
-            raise PermissionError("所选成员不在当前数据范围内")
-    if requested:
-        ids = requested
-    return scope, ids, visible
+            raise PermissionError('所选成员不在当前授权范围内')
+    return scope, requested or ids, visible
 
 
-async def scoped_opportunity_ids(connection, actor, scope=None, member_id=None, member_ids=None, team_id=None):
-    scope, ids, members = await scope_members(connection, actor, scope, member_id, member_ids, team_id)
+async def scoped_opportunity_ids(connection, actor, scope=None, member_id=None, member_ids=None, team_id=None,
+                                 *, permission='profile.fde_read', fde_cohort=False):
+    scope, ids, members = await scope_members(connection, actor, scope, member_id, member_ids, team_id, permission=permission, fde_cohort=fde_cohort)
     rows = await connection.fetch(
         """SELECT DISTINCT o.id::text,o.customer_id::text FROM crm.opportunity o
-        JOIN crm.opportunity_participant p ON p.opportunity_id=o.id
-        WHERE o.deleted_at IS NULL AND p.user_ref_id=ANY($1::uuid[])
+        WHERE o.deleted_at IS NULL AND security.authorization_opportunity_direct($2,o.id)
+          AND (o.owner_user_ref_id=ANY($1::uuid[]) OR EXISTS(SELECT 1 FROM crm.opportunity_participant p
+          WHERE p.opportunity_id=o.id AND p.user_ref_id=ANY($1::uuid[])
           AND p.participant_role='fde' AND clock_timestamp()>=p.valid_from AND clock_timestamp()<p.valid_to
-          AND security.fde_user_is_active(p.user_ref_id)""",
-        ids,
-    )
+          AND security.fde_user_is_active(p.user_ref_id)))""", ids, permission)
     return scope, ids, members, [dict(r) for r in rows]
 
 
@@ -276,6 +272,6 @@ async def fde_scope_options(connection, actor):
             'members': [{**p, 'user_id': p['id'], 'display_name': p['name'],
                          'team_ids': sorted({r['team_id'] for r in memberships if r['user_ref_id'] == p['id']})}
                         for p in people],
-            'allowed_scopes': ['self', 'person', 'team'] if actor.role.value == 'fde_lead' else ['self'],
+            'allowed_scopes': (['self'] if any(p['id']==actor.user_id for p in people) else []) + (['person'] if people else []) + (['team'] if teams else []),
             'defaults': {'scope': 'team' if teams else 'self', 'member_id': actor.user_id,
                          'team_id': teams[0]['id'] if teams else None}}

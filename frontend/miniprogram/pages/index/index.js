@@ -283,7 +283,7 @@ Page({
         card: {
           timeLabel: todayLabel,
           title: `${greeting}，${session.userName}`,
-          text: "我是销售智助，今天可以帮你查看客户、商机和待办。",
+          text: "我是Raccoon SalesBuddy，今天可以帮你查看客户、商机和待办。",
         },
       }] : [];
       const currentMessages = this.data.messages || [];

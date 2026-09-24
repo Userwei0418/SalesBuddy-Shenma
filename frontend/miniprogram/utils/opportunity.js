@@ -73,6 +73,7 @@ function payload(form, row) {
   if (!['direct','partner'].includes(form.partner_mode)) throw new Error('请确认销售渠道：直销或合作伙伴');
   if (form.partner_mode === 'partner' && !form.partner_id) throw new Error('请选择已有合作伙伴，目录中没有时请联系运营');
   return { action: row ? 'update' : 'create', opportunity_id: row ? row.id : null,
+    ...(!row&&form.owner_team_id?{owner_team_id:form.owner_team_id}:{}),
     ...(Array.isArray(form.fde_member_ids)?{fde_member_ids:[...new Set(form.fde_member_ids)]}:{}),
     name: form.name.trim(), amount: amount(form.amount, true), expected_close_date: form.expected_close_date,
     probability: s.probability, status: s.status, version_no: row ? row.version_no : undefined,

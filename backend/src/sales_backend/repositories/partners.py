@@ -1,6 +1,7 @@
 """Workspace partner directory. All SQL runs with the caller's RLS identity."""
 
 from sales_backend.domain.concurrency import require_version
+from sales_backend.repositories.authorization_checks import require_permission
 
 
 class PartnerRepository:
@@ -22,6 +23,7 @@ class PartnerRepository:
         return {"items": [dict(row) for row in rows], "total": total}
 
     async def save(self, connection, actor, data):
+        await require_permission(connection, 'partner.manage')
         name = data["name"].strip()
         if not name or name == "直销":
             raise ValueError("请填写有效伙伴名称；直销不需要创建伙伴")

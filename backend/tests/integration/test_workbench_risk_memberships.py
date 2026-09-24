@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
+from tests.integration.feishu_fixtures import seed_execute
 
 from sales_backend.repositories.workbench import WorkbenchRepository
 from sales_backend.services.tasks import TaskService
@@ -18,8 +19,8 @@ async def risk_fixture(connection, *, owned=True):
     owner = await actor(connection, "XS001")
     admin = await actor(connection, "ADMIN001")
     risk_id = uuid4()
-    await connection.execute(
-        """INSERT INTO insight.risk(id,workspace_id,customer_id,opportunity_id,risk_type_code,
+    await seed_execute(
+        connection, """INSERT INTO insight.risk(id,workspace_id,customer_id,opportunity_id,risk_type_code,
            title,severity_code,status,owner_user_ref_id,owner_team_id)
         VALUES($1,$2::uuid,$3::uuid,$4::uuid,'followup','重叠团队风险投影回归','high','new',$5::uuid,$6::uuid)""",
         risk_id,
@@ -199,8 +200,10 @@ async def test_workbench_task_order_and_active_statuses_survive_overlapping_team
         for index in range(len(statuses))
     ]
     await actor(connection, "ZJL001")
+    from tests.integration.feishu_fixtures import seed_execute
     for task, status in zip(tasks, statuses, strict=True):
-        await connection.execute(
+        # This fixture deliberately seeds historical workflow states, not user transitions.
+        await seed_execute(connection,
             "UPDATE workflow.task SET status=$2,completed_at=CASE WHEN $2='completed' "
             "THEN clock_timestamp() ELSE NULL END WHERE id=$1::uuid",
             task["id"], status,

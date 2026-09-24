@@ -21,6 +21,8 @@ from sales_backend.domain.company_rules import (
     validate_policy,
 )
 from sales_backend.repositories.company_rules import CompanyRulesRepository
+from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.services.authorization import require_permission
 from sales_backend.services.operations import management_write
 
 router = APIRouter(prefix="/api/v1", tags=["Company policies"])
@@ -73,12 +75,13 @@ async def catalog(
                                       identity.actor.workspace_id, capability)
                 for capability in TECHNICAL_CAPABILITIES}
     async with database.transaction(identity.actor, readonly=True) as connection:
+        permissions = await AuthorizationRepository().effective(connection)
         items = await repository.catalog(connection)
         for item in items:
             item["management"] = management_metadata(item["code"], bindings)
         return {
             "items": items,
-            "can_publish": identity.actor.role.value == "administrator",
+            "can_publish": permissions.allows("rule.publish"),
             "management": {"workspace_id": str(identity.actor.workspace_id),
                            "rule_count": len(items), "capability_count": len(TECHNICAL_CAPABILITIES)},
         }
@@ -96,6 +99,7 @@ async def execution_catalog(
     from sales_backend.services.runtime_config import apply_execution_policy
 
     async with database.transaction(identity.actor, readonly=True) as connection:
+        permissions = await AuthorizationRepository().effective(connection)
         items = await repository.catalog(connection, technical=True)
         business = {item["code"]: item for item in await repository.catalog(connection, business=True)}
         provider = await AgentRuntimeConfigRepository().current(connection, identity.actor, include_ciphertext=False)
@@ -118,7 +122,7 @@ async def execution_catalog(
             "platform_seconds": effective.agent_inference_platform_seconds,
             "total_seconds": effective.agent_inference_total_seconds,
         }
-    return {"items": items, "can_publish": identity.actor.role.value == "administrator",
+    return {"items": items, "can_publish": permissions.allows("rule.publish"),
             "management": {"workspace_id": str(identity.actor.workspace_id),
                            "rule_count": 8, "capability_count": len(items)}}
 
@@ -134,8 +138,8 @@ async def save_draft(
     data = body.model_dump(mode="json")
 
     async def write(connection):
-        if code in TECHNICAL_RULES and identity.actor.role.value != "administrator":
-            raise PermissionError("仅系统管理员可编辑 Agent 运行配置")
+        if code in TECHNICAL_RULES:
+            await require_permission(connection, "ai.config_publish")
         data["definition"] = validate_policy(code, body.definition)
         return {"id": await repository.save(connection, code, data)}
 
@@ -180,8 +184,8 @@ async def restore(
         if not row or row["status"] not in {"active", "retired"}:
             raise LookupError("已发布版本不存在")
         code = row["rule_code"]
-        if code in TECHNICAL_RULES and identity.actor.role.value != "administrator":
-            raise PermissionError("仅系统管理员可恢复 Agent 运行配置")
+        if code in TECHNICAL_RULES:
+            await require_permission(connection, "ai.config_publish")
         snapshot = policy_snapshot(code, row)
         data = {
             "definition": snapshot["definition"],

@@ -6,7 +6,7 @@ function ranking(role='sales',value=100,query={personal:true}){
  const groups=[{code:'north_east',name:'北区＋东区',value:200,rank:1,record_count:1,customer_count:1},{code:'south_hkmo',name:'南区＋港澳',value,rank:2,record_count:2,customer_count:1}];
  return {contract_version:2,data_source:'database',scope:query.personal?'peer':'company_teams',selection:{personal:query.personal,member_id:query.personal?query.member_id||'a':null,cohort_role:query.member_id?'sales':role,team_groups:query.personal?[query.member_id==='b'?'north_east':'south_hkmo']:(query.team_groups&&query.team_groups.length?query.team_groups:['south_hkmo'])},own_region_codes:['south_hkmo'],
    opportunity_acv:{rows:query.personal?[row('b',200),row('a',value,2),row('z',0,3)]:groups,groups},
-   region:{rows:groups,groups:[]},followup:{rows:query.personal?[row('b',3),row('a',2,2),row('z',0,3)]:groups,groups:[]},
+   region:{rows:groups,groups:[]},followup:{calculation:query.personal?'personal':'team_followup_per_capita_v1',rows:query.personal?[row('b',3),row('a',2,2),row('z',0,3)]:groups.map(g=>({...g,member_count:1,average:g.value,members:[]})),groups:[]},
    active_opportunities:{rows:[row('a',1),row('b',2)],groups:[{code:'north_east',value:2},{code:'south_hkmo',value:1}]}};
 }
 function pageWith(role='sales',overrides={}){
@@ -18,7 +18,7 @@ function pageWith(role='sales',overrides={}){
    getDashboardRankings:async query=>{calls.push(query);return ranking(role,100,query);},
    getDashboardOptions:async()=>({members:[{id:'a',name:'本人',team:'南区'},{id:'b',name:'另一成员',team:'北区'}],team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
    getDirectoryMembers:()=>{throw Error('不应为排名查询目录');},...overrides};
- const app={globalData:{role,session:{userId:'a',userName:'本人',workspaceId:'w'}},ensureLogin:()=>true};
+ const app={globalData:{role,session:{role,userId:'a',userName:'本人',workspaceId:'w',capabilities:{'team.view':['supervisor','manager'].includes(role)}}},ensureLogin:()=>true};
  const filename=path.resolve(__dirname,'../miniprogram/pages/bi/index.js');
  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{Page:value=>page=value,require:name=>name.endsWith('/apiClient')?api:require(path.resolve(path.dirname(filename),name)),getApp:()=>app,wx:{showNavigationBarLoading(){},hideNavigationBarLoading(){},showToast(){}}});
  page.data=JSON.parse(JSON.stringify(page.data));page.setData=data=>Object.assign(page.data,data);
@@ -38,7 +38,7 @@ test('主管选择成员显示该人名次，团队切换到公司团队榜',asy
  await page.selectMember({detail:{ids:['b']}});
  assert.equal(page.data.totalAcv,'¥200');assert.equal(page.data.activeOpportunityCount,2);
  assert.notEqual(JSON.stringify(page.data.rankingCards),before);assert.equal(calls.length,2);assert.deepEqual(Array.from(page.data.rankingCards[0].summaryIds),['b']);assert.deepEqual(Array.from(page.data.rankingCards[2].summaryIds),['north_east']);
- await page.changeView({currentTarget:{dataset:{mode:'team'}}});assert.equal(page.data.activeOpportunityCount,3);assert.equal(calls.length,3);assert.deepEqual(Array.from(page.data.rankingCards[0].summaryIds),['south_hkmo']);assert.equal(page.data.rankingCards.length,2);
+ await page.changeView({currentTarget:{dataset:{mode:'team'}}});assert.equal(page.data.activeOpportunityCount,3);assert.equal(calls.length,3);assert.deepEqual(Array.from(page.data.rankingCards[0].summaryIds),['north_east','south_hkmo']);assert.equal(page.data.rankingCards.length,2);
 });
 test('总经理团队单选、全部团队和个人切换均可用，团队筛选不改变完整区域排名',async()=>{
  const {page,calls,facts}=pageWith('manager');await page.onShow();
@@ -161,4 +161,27 @@ test('具体团队与全部团队的活跃商机分别计算',async()=>{
  page.updateSelectionLabels();assert.equal(page.data.teamLabel,'南区');
  page.data.selectedTeamChoice='all';page.data.selectedTeamGroups=['team:east','team:north','team:south'];page.updateActiveCount();assert.equal(page.data.activeOpportunityCount,12);
  page.updateSelectionLabels();assert.equal(page.data.teamLabel,'部门合计 · 全部团队');
+});
+
+test('团队跟进显示人均、总数和人数，个人次数与ACV辅助商机数保持原口径',async()=>{
+ const {page,api}=pageWith('manager');
+ api.getDashboardRankings=async query=>{
+  const payload=ranking('manager',100,query);
+  payload.followup.rows=[{code:'south_hkmo',name:'南区',value:2/3,average:0.67,member_count:3,record_count:2,customer_count:1,rank:2,members:[{user_id:'a',followup_count:2},{user_id:'z',followup_count:0}]}];
+  return payload;
+ };
+ await page.onShow();assert.equal(page.data.rankingMessage,'');
+ const card=page.data.rankingCards.find(c=>c.key==='followup'),row=card.rows[0];
+ assert.equal(card.title,'团队人均跟进排名');assert.equal(row.displayValue,'0.67 次/人');
+ assert.equal(row.meta,'共 2 次 · 3 名有效成员 · 1 家客户');assert.equal(row.members.length,2);
+ assert.match(row.memberSummary,/总次数 2 ÷ 有效成员 3/);
+ assert.equal(page.data.rankingCards.length,2);assert.match(page.data.rankingCards[0].rows[1].meta,/个在推商机/);
+});
+
+test('旧后端团队总次数不能冒充人均接口，明确显示配套版本错误',async()=>{
+ const {page}=pageWith('manager',{getDashboardRankings:async query=>{
+  const payload=ranking('manager',100,query);delete payload.followup.calculation;return payload;
+ }});
+ await page.onShow();assert.match(page.data.rankingMessage,/当前后端尚未提供人均/);
+ assert.equal(page.data.rankingCards[1].rows.length,0);
 });

@@ -62,8 +62,9 @@ async def read_targets(
     selected = target_scope(actor, scope, user_id, team_id, department_code) if scope is not None else None
     if selected and not await repo.allowed(connection, selected):
         raise PermissionError("当前账号无权查看这个范围的目标")
-    if selected is None and actor.role.value not in {"operations", "administrator"}:
-        raise PermissionError("目标管理需要运营权限")
+    management = await connection.fetchval("SELECT security.authorization_has('target.manage')")
+    if selected is None and not await connection.fetchval("SELECT security.authorization_has('target.read')"):
+        raise PermissionError("当前账号未获目标查看权限")
     period = target_period(period_type, anchor_date)
     result = await repo.list(
         connection, actor, period=period, scope=selected, kind=kind, limit=limit, offset=offset, q=q
@@ -71,8 +72,8 @@ async def read_targets(
     pending = await repo.requests(connection, actor, period=period, scope=selected, status="pending", limit=100)
     batches = await repo.batches(connection, actor, period=period, scope=selected, status="pending", limit=100)
     recent = await repo.batches(connection, actor, period=period, scope=selected, limit=10)
-    editable = await repo.allowed(connection, selected, write=True) if selected else True
-    if actor.role.value not in {"operations", "administrator"}:
+    editable = await repo.allowed(connection, selected, write=True) if selected else management
+    if not management:
         current = await connection.fetchval("SELECT timezone('Asia/Shanghai',clock_timestamp())::date")
         editable = editable and period == target_period("quarter", current)
     return {

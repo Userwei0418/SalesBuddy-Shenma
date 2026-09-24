@@ -4073,5 +4073,12 @@
       "path": "frontend/tests/workbench-quarters.test.js",
       "sha256": "eeb152f48d37f99ae422e1ba3b0136802cb310925f4e2307f348a3e794d88947"
     }
-  ]
+  ],
+  "latest_upstream_sync": {
+    "source_base": "3e5b904645fdcafda46e177eedae7f9e2dd1d957",
+    "source_target": "be421b12b9dce38aa940e8b546dde1796c3bdef5",
+    "customer_base": "a6e9a3cabd3f966d70ebc2359ac901d599350a48",
+    "source_release": "1.0.9",
+    "database_head": "V151"
+  }
 }

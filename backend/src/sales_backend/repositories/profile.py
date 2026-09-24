@@ -40,6 +40,14 @@ def evaluation_metrics(values: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 
 class ProfileRepository:
+    async def is_competency_subject(self, connection, actor):
+        return await connection.fetchval(
+            "SELECT EXISTS(SELECT 1 FROM platform.role_binding WHERE workspace_id=$1::uuid "
+            "AND user_ref_id=$2::uuid AND role_code IN ('sales','supervisor') "
+            "AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to)",
+            actor.workspace_id, actor.user_id,
+        )
+
     async def evaluation_summary(self, connection: asyncpg.Connection, actor: ActorContext) -> dict[str, Any]:
         """Return database-backed maturity/efficiency facts within the actor's RLS scope."""
         row = await connection.fetchrow(
@@ -54,25 +62,21 @@ class ProfileRepository:
               SELECT c.id, c.level_code
                 FROM crm.customer c
                WHERE c.deleted_at IS NULL AND
-                 ($1='manager' OR ($1='sales' AND EXISTS(SELECT 1 FROM crm.customer_sales_member cm
-                   WHERE cm.customer_id=c.id AND cm.user_ref_id=$2::uuid))
-                   OR ($1='supervisor' AND security.has_customer_access(c.id)))
+                 security.authorization_customer('profile.sales_read',c.id)
             ),
             visible_opportunities AS (
               SELECT o.id, o.customer_id, COALESCE(o.amount, 0) AS amount,
                      o.status, o.created_at, o.updated_at
                 FROM crm.opportunity o
                WHERE o.deleted_at IS NULL AND
-                 ($1='manager' OR ($1='sales' AND o.owner_user_ref_id=$2::uuid)
-                   OR ($1='supervisor' AND o.owner_team_id=ANY($3::uuid[])))
+                 security.authorization_opportunity('profile.sales_read',o.id)
             ),
             visible_visits AS (
               SELECT v.id, v.customer_id, v.opportunity_id, v.interaction_at,
                      v.next_action, v.follow_up_record
                 FROM activity.visit v
                WHERE v.deleted_at IS NULL AND v.status IN ('confirmed','archived')
-                 AND ($1='manager' OR ($1='sales' AND v.recorder_user_ref_id=$2::uuid)
-                   OR ($1='supervisor' AND v.recorder_team_id=ANY($3::uuid[])))
+                 AND security.authorization_visit('profile.sales_read',v.id)
                  AND timezone('Asia/Shanghai',v.interaction_at)::date
                    <= timezone('Asia/Shanghai',clock_timestamp())::date
             )
@@ -96,14 +100,11 @@ class ProfileRepository:
               (SELECT count(*) FROM visible_visits
                 WHERE NULLIF(trim(next_action), '') IS NOT NULL) AS visits_with_next_action
             """,
-            actor.role.value,
-            actor.user_id,
-            list(actor.team_ids),
         )
         values = dict(row)
         members: list[dict[str, Any]] = []
         teams: list[dict[str, Any]] = []
-        if actor.role.value in {"supervisor", "manager"}:
+        if await connection.fetchval("SELECT EXISTS(SELECT 1 FROM security.authorization_current_grants() WHERE permission_code='profile.sales_read' AND effect='allow' AND scope_code IN ('teams','workspace'))"):
             members = [
                 dict(item)
                 for item in await connection.fetch(
@@ -130,18 +131,13 @@ class ProfileRepository:
                          WHERE x.owner_user_ref_id = u.id AND x.deleted_at IS NULL AND x.status = 'open'
                       ) o ON true
                      WHERE u.workspace_id = $1::uuid AND u.status = 'active' AND u.deleted_at IS NULL
-                       AND (
-                         $2 = 'manager'
-                         OR ($2 = 'supervisor' AND tm.team_id = ANY($3::uuid[]))
-                       )
+                       AND security.authorization_subject('profile.sales_read','person',u.id,NULL)
                      ORDER BY visit_count DESC, opportunity_amount DESC, u.display_name
                     """,
                     actor.workspace_id,
-                    actor.role.value,
-                    list(actor.team_ids),
                 )
             ]
-        if actor.role.value == "manager":
+        if await connection.fetchval("SELECT security.authorization_subject('profile.sales_read','department',NULL,NULL)"):
             teams = [
                 dict(item)
                 for item in await connection.fetch(
@@ -163,6 +159,7 @@ class ProfileRepository:
                            AND x.deleted_at IS NULL AND x.status = 'open'
                       ) o ON true
                      WHERE t.workspace_id = $1::uuid AND t.deleted_at IS NULL
+                       AND security.authorization_subject('profile.sales_read','team',NULL,t.id)
                      GROUP BY t.id, t.name, o.opportunity_amount
                      ORDER BY visit_count DESC, t.name
                     """,
@@ -201,14 +198,11 @@ class ProfileRepository:
              WHERE u.workspace_id = $1::uuid
                AND u.account_code = upper($2)
                AND u.status = 'active' AND u.deleted_at IS NULL
-               AND (($3 = 'manager' AND rb.role_code IN ('sales', 'supervisor'))
-                    OR ($3 = 'supervisor' AND rb.role_code = 'sales' AND t.id = ANY($4::uuid[])))
+               AND security.authorization_subject('profile.sales_read','person',u.id,NULL)
              LIMIT 1
             """,
             actor.workspace_id,
             account_code,
-            actor.role.value,
-            list(actor.team_ids),
         )
         return dict(row) if row else None
 
@@ -305,6 +299,8 @@ class ProfileRepository:
         subject_user_id: str | None = None,
     ) -> dict[str, Any]:
         subject_id = subject_user_id or actor.user_id
+        if not await connection.fetchval("SELECT security.authorization_subject('profile.sales_read','person',$1::uuid,NULL)", subject_id):
+            raise PermissionError("该成员不在画像查看范围内")
         framework = await competency_framework(connection, actor.workspace_id)
         reviews = await connection.fetch(
             """

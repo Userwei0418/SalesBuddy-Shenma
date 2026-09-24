@@ -52,22 +52,24 @@ async def test_operating_report_keeps_owned_opportunity_without_full_customer_ac
     assert not await connection.fetchval("SELECT id FROM crm.customer WHERE id=$1::uuid", customer["id"])
     own_id = str(uuid4())
     await connection.execute(
-        """INSERT INTO crm.opportunity(id,workspace_id,customer_id,name,owner_user_ref_id,created_by_user_ref_id)
-        VALUES($1::uuid,$2::uuid,$3::uuid,'合成本人商机',$4::uuid,$4::uuid)""",
+        """INSERT INTO crm.opportunity(id,workspace_id,customer_id,name,owner_user_ref_id,created_by_user_ref_id,owner_team_id)
+        VALUES($1::uuid,$2::uuid,$3::uuid,'合成本人商机',$4::uuid,$4::uuid,$5::uuid)""",
         own_id,
         sales_actor.workspace_id,
         customer["id"],
         sales_actor.user_id,
+        sales_actor.team_ids[0],
     )
     await set_request_context(connection, record.context)
     other_id = str(uuid4())
     await connection.execute(
-        """INSERT INTO crm.opportunity(id,workspace_id,customer_id,name,owner_user_ref_id,created_by_user_ref_id)
-        VALUES($1::uuid,$2::uuid,$3::uuid,'合成他人商机',$4::uuid,$4::uuid)""",
+        """INSERT INTO crm.opportunity(id,workspace_id,customer_id,name,owner_user_ref_id,created_by_user_ref_id,owner_team_id)
+        VALUES($1::uuid,$2::uuid,$3::uuid,'合成他人商机',$4::uuid,$4::uuid,$5::uuid)""",
         other_id,
         record.context.workspace_id,
         customer["id"],
         record.context.user_id,
+        record.context.team_ids[0],
     )
     await set_request_context(connection, sales_actor)
     facts = await AgentFactsLoader(None)._load_operating_report_facts(connection, report_run(sales_actor))

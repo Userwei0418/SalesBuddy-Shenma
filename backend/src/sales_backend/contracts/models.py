@@ -128,6 +128,26 @@ class TaskCreate(BaseModel):
         return text or None
 
 
+class TaskBatchCreate(BaseModel):
+    """One human-confirmed assignment, one independently owned task per colleague."""
+    tasks: list[TaskCreate] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def distinct_people_same_assignment(self):
+        accounts = set()
+        common = self.tasks[0].model_dump(exclude={"assignee_account_code", "target_position"})
+        for task in self.tasks:
+            account = (task.assignee_account_code or "").strip().casefold()
+            if not account or task.target_position:
+                raise ValueError("多人派发须逐人指定账号，不支持岗位领取")
+            if account in accounts:
+                raise ValueError("同一负责人不能重复选择")
+            accounts.add(account)
+            if task.model_dump(exclude={"assignee_account_code", "target_position"}) != common:
+                raise ValueError("同一次派发的任务内容、关联和执行设置必须一致")
+        return self
+
+
 class TaskEventCreate(BaseModel):
     event_type: str = Field(pattern="^(accept|reject|complete|approve_completion|reject_completion|cancel|reassign)$")
     note: str | None = Field(default=None, max_length=2000)
@@ -209,6 +229,7 @@ class QuarterForecast(BaseModel):
 
 
 class OpportunityCreate(BaseModel):
+    owner_team_id: UUID | None = Field(default=None, description="新增商机所属团队；须在创建权限的数据范围内")
     fde_member_ids: list[UUID] | None = Field(default=None, max_length=30)
     sales_channel: Literal['direct', 'partner'] | None = None
     partner_id: UUID | None = None

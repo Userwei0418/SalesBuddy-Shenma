@@ -51,9 +51,11 @@ class AuthService:
                     actor=record.context,
                     refresh_token_hash=self.tokens.hash_refresh_token(issued.refresh_token),
                     expires_at=issued.refresh_expires_at,
-                    client=client,
+                    client={**client, "channel": "wechat-mini-program"},
                 )
-        return self._response(record, issued)
+                effective = await capability_snapshot(connection, record.context)
+        response = self._response(record, issued)
+        return response.model_copy(update={"actor": response.actor.model_copy(update=effective)})
 
     async def refresh(
         self, refresh_token: str, *, require_password: bool = False,

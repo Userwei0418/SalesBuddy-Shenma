@@ -4,7 +4,6 @@ import hashlib
 import json
 from uuid import UUID
 
-from sales_backend.domain.capabilities import FDE_ROLES
 from sales_backend.domain.company_rules import VisitAdmissionPolicy
 from sales_backend.repositories.visit_reviews import VisitReviewRepository
 from sales_backend.services.agent_access import require_agent_access
@@ -18,21 +17,20 @@ async def consume_review(connection, actor, customer_id, fields):
     row = await VisitReviewRepository().lock_review(connection, actor, run_id)
     if not row or row["status"] not in {"pending_confirm", "pending_supplement"}:
         raise ValueError("审核记录不存在、已使用或不属于当前账号")
-    if actor.role.value in FDE_ROLES:
-        context = row["business_context"] or {}
-        identity = row["identity_context"] or {}
-        if context.get("customer_id") != customer_id or context.get("opportunity_id") != fields.get("opportunity_id"):
-            raise ValueError("关联商机已修改，请按当前商机重新执行AI审核")
-        if not identity.get("permission_version"):
-            raise PermissionError("审核权限信息已失效，请重新执行AI审核")
-        await require_agent_access(
-            connection,
-            actor,
-            "visit_entry",
-            customer_id,
-            opportunity_id=fields.get("opportunity_id"),
-            permission_version=identity["permission_version"],
-        )
+    context = row["business_context"] or {}
+    identity = row["identity_context"] or {}
+    if context.get("customer_id") != customer_id or context.get("opportunity_id") != fields.get("opportunity_id"):
+        raise ValueError("关联商机已修改，请按当前商机重新执行AI审核")
+    if not identity.get("permission_version"):
+        raise PermissionError("审核权限信息已失效，请重新执行AI审核")
+    await require_agent_access(
+        connection,
+        actor,
+        "visit_entry",
+        customer_id,
+        opportunity_id=fields.get("opportunity_id"),
+        permission_version=identity["permission_version"],
+    )
     from sales_backend.contracts.visit_flow import archival_snapshot, reviewed_archival_snapshot
     from sales_backend.repositories.company_rules import CompanyRulesRepository
 

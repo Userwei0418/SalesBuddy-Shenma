@@ -1,5 +1,5 @@
 /**
- * Create a task for one company colleague. Customer tasks link an existing
+ * Create independent tasks for human-selected company colleagues. Customer tasks link an existing
  * opportunity that the creator can associate; recipients need no prior CRM role.
  */
 const apiClient = require("../../utils/apiClient");
@@ -15,9 +15,9 @@ Page({
     description: "",
     descriptionCount: 0,
     members: [], recipientLoading:false, recipientError:"",
-    selectedAssignee: "",
-    selectedAssigneeIndex: -1,
-    selectedMember: null,
+    selectedMembers: [], selectedNames: "",
+    recipientOpen: false, recipientQuery: "", recipientRows: [],
+    submissionPending: false,
     priorities: ["普通", "中", "高"],
     selectedPriority: "中",
     selectedDue: "",
@@ -94,21 +94,20 @@ Page({
   loadRecipients(retryDraft=null) {
     const generation=this.recipientGeneration=(this.recipientGeneration||0)+1,identity=draftScope(getApp().globalData.session);
     const current=()=>!this.isUnloading&&generation===this.recipientGeneration&&identity===draftScope(getApp().globalData.session);
-    this.setData({recipientLoading:true,recipientError:'',members:[],selectedMember:null,selectedAssignee:'',selectedAssigneeIndex:-1});
+    this.setData({recipientLoading:true,recipientError:'',members:[],selectedMembers:[],selectedNames:'',recipientRows:[]});
     allTaskRecipients(apiClient,current).then((rows) => {
       if(!current())return;
       const members = (rows || []).map((item) => {
         const roleLabel = ({ fde:"FDE",fde_lead:"FDE主管",sales: "一线销售", supervisor: "销售主管", manager: "销售总经理",operations:"运营",administrator:"系统管理员" })[item.role] || item.role;
         return { ...item, account: item.account_code, initial: item.name.substring(0, 1), roleLabel, pickerLabel: `${item.name} · ${roleLabel} · ${item.team || item.team_name || "未填写部门"}` };
       });
-      const selectedAssigneeIndex = retryDraft ? members.findIndex((item) => item.id === retryDraft.assigneeId) : -1;
-      const selectedMember = selectedAssigneeIndex >= 0 ? members[selectedAssigneeIndex] : null;
-      this.setData({ recipientLoading:false,members, selectedMember, selectedAssigneeIndex, selectedAssignee: selectedMember ? selectedMember.name : "" });
+      this.setData({recipientLoading:false,members});
+      this.setSelectedRecipients(retryDraft ? [retryDraft.assigneeId] : []);
     }).catch((error) => {if(current())this.setData({recipientLoading:false,recipientError:error.message || "负责人列表加载失败"});});
   },
   retryRecipients(){this.loadRecipients();},
   changeTaskType(e){
-    if(this.data.submitting||this.data.adviceSource||this.data.adviceLoading)return;
+    if(this.data.submitting||this.data.submissionPending||this.data.adviceSource||this.data.adviceLoading)return;
     const type=e.currentTarget.dataset.type;if(!['daily','customer'].includes(type)||type===this.data.taskType)return;
     this.linkGeneration=(this.linkGeneration||0)+1;this.selectorGeneration=(this.selectorGeneration||0)+1;
     this.setData({taskType:type,customerId:'',customerName:'',opportunityId:'',opportunityName:'',linkVerified:false,linkLoading:false,linkError:'',selectorOpen:false});this.loadRecipients();
@@ -134,7 +133,7 @@ Page({
     finally{if(current())this.setData({linkLoading:false});}
   },
   openTaskSelector(e){
-    if(this.data.submitting||this.data.adviceLoading)return;
+    if(this.data.submitting||this.data.submissionPending||this.data.adviceLoading)return;
     const kind=e.currentTarget.dataset.kind;
     if(kind==='customer'&&this.data.adviceSource)return;
     if(kind==='opportunity'&&!this.data.customerId){wx.showToast({title:'请先选择客户',icon:'none'});return;}
@@ -196,6 +195,7 @@ Page({
   },
 
   inputDescription(e) {
+    if(this.data.submitting || this.data.submissionPending)return;
     const description = e.detail.value;
     this.setData({ description, descriptionCount: description.length, voiceFilled: false });
   },
@@ -235,6 +235,7 @@ Page({
   },
 
   toggleTaskVoice() {
+    if(this.data.submitting || this.data.submissionPending)return;
     if (this.data.isParsing || this.data.isStarting || this.data.isStopping) return;
     if (this.data.isRecording) {
       this.setData({ isStopping: true });
@@ -303,18 +304,43 @@ Page({
     wx.showToast({ title: "语音内容已填入", icon: "success" });
   },
 
-  changeAssignee(e) {
-    const selectedAssigneeIndex = Number(e.detail.value);
-    const selectedMember = this.data.members[selectedAssigneeIndex] || null;
-    this.setData({ selectedAssigneeIndex, selectedAssignee: selectedMember ? selectedMember.name : "", selectedMember });
-    wx.vibrateShort({ type: "light" });
+  setSelectedRecipients(ids) {
+    const selected = new Set(ids);
+    const selectedMembers = this.data.members.filter(member => selected.has(member.id));
+    this.setData({selectedMembers, selectedNames:selectedMembers.map(member=>member.name).join('、')});
+    this.filterRecipients();
+  },
+  filterRecipients() {
+    const query = this.data.recipientQuery.trim().toLocaleLowerCase();
+    const selected = new Set(this.data.selectedMembers.map(member=>member.id));
+    const recipientRows = this.data.members.filter(member =>
+      [member.name,member.account,member.team,member.team_name,member.roleLabel].join(' ').toLocaleLowerCase().includes(query)
+    ).map(member=>({...member,selected:selected.has(member.id)}));
+    this.setData({recipientRows});
+  },
+  openRecipients() {
+    if(this.data.submitting || this.data.submissionPending || this.data.recipientLoading)return;
+    this.setData({recipientOpen:true,recipientQuery:''});this.filterRecipients();
+  },
+  closeRecipients(){this.setData({recipientOpen:false});},
+  searchRecipients(e){this.setData({recipientQuery:e.detail.value});this.filterRecipients();},
+  toggleRecipient(e) {
+    if(this.data.submitting || this.data.submissionPending)return;
+    const id=e.currentTarget.dataset.id;
+    if(!this.data.members.some(member=>member.id===id))return;
+    const ids=this.data.selectedMembers.map(member=>member.id);
+    if(ids.includes(id))this.setSelectedRecipients(ids.filter(value=>value!==id));
+    else if(ids.length<100)this.setSelectedRecipients([...ids,id]);
+    else wx.showToast({title:'单次最多选择100人，请分次派发',icon:'none'});
   },
 
   selectPriority(e) {
+    if(this.data.submitting || this.data.submissionPending)return;
     this.setData({ selectedPriority: e.currentTarget.dataset.value });
   },
 
   changeDueDate(e) {
+    if(this.data.submitting || this.data.submissionPending)return;
     const value = e.detail.value;
     const [year, month, day] = value.split("-").map(Number);
     const customDueDateLabel = this.formatDateLabel(new Date(year, month - 1, day));
@@ -324,6 +350,7 @@ Page({
   },
 
   changeDueTime(e) {
+    if(this.data.submitting || this.data.submissionPending)return;
     this.setData({ customDueTime: e.detail.value }, () => {
       this.setData({ selectedDue: this.getCustomDueLabel() });
     });
@@ -334,6 +361,8 @@ Page({
   },
 
   submitTask() {
+    if(this.data.submitting || this._confirming || this._submitted)return;
+    if(this.pendingSubmission){this.sendSubmission();return;}
     if(this.data.taskType==='customer'&&(!this.data.customerId||!this.data.opportunityId||!this.data.linkVerified||this.data.linkLoading||this.data.linkError)){
       wx.showToast({title:this.data.linkError||(!this.data.customerId?'请先选择客户':!this.data.opportunityId?'请选择该客户的商机':'请等待关联信息核验'),icon:'none'});return;
     }
@@ -347,8 +376,8 @@ Page({
       wx.showToast({ title: "请填写清晰的任务描述", icon: "none" });
       return;
     }
-    const recipient=this.data.selectedMember;
-    if (!recipient) {
+    const recipients=this.data.selectedMembers.slice();
+    if (!recipients.length) {
       wx.showToast({ title: "请选择任务负责人", icon: "none" });
       return;
     }
@@ -357,44 +386,60 @@ Page({
       wx.showToast({ title: "截止时间需要晚于当前时间", icon: "none" });
       return;
     }
-    if (this.data.submitting) return;
+    const session=getApp().globalData.session;
+    const ownerScope=draftScope(session);
+    const source=this.data.adviceSource;
+    const inputs=recipients.map(recipient=>({description,associationKind:this.data.taskType,
+      assigneeAccount:recipient.account,targetPosition:null,dueAt,priority:this.data.selectedPriority,
+      customerId:this.data.taskType==='customer'?this.data.customerId:'',
+      opportunityId:this.data.taskType==='customer'?this.data.opportunityId:''}));
+    this._confirming=true;
     wx.showModal({
-      title: "确认创建任务？",
-      content: `将任务发送给${recipient.team}的${recipient.name}，对方接受后开始执行，截止${this.data.selectedDue}。`,
-      confirmText: "确认下发",
-      confirmColor: "#1677FF",
-      success: (result) => {
-        if (!result.confirm || this.isUnloading || this.data.submitting) return;
-        this.setData({ submitting: true });
-        const session = getApp().globalData.session;
-        const ownerScope = draftScope(session);
-        const taskInput={
-          description,
-          associationKind:this.data.taskType,
-          assigneeAccount: recipient.account,
-          targetPosition: null,
-          dueAt,
-          priority: this.data.selectedPriority,
-          customerId: this.data.taskType==='customer'?this.data.customerId:"",
-          opportunityId: this.data.taskType==='customer'?this.data.opportunityId:"",
-        };
-        const source=this.data.adviceSource;
-        const save=source ? apiClient.decideSuggestion(source.id,{decision:'adopted',version_no:source.version,task:{
-          description,association_kind:taskInput.associationKind,assignee_account_code:taskInput.assigneeAccount,target_position:taskInput.targetPosition,
-          due_at:new Date(dueAt).toISOString(),priority_code:({'普通':'normal','中':'medium','高':'high'})[taskInput.priority]||'normal',
-          customer_id:taskInput.customerId||null,opportunity_id:taskInput.opportunityId||null
-        }}).then(result=>result.task) : apiClient.createTask(taskInput);
-        save.then((task) => {
-          if(this.isUnloading || draftScope(getApp().globalData.session)!==ownerScope)return;
-          wx.setStorageSync("lastManagementTaskCreated", {id:task.id, ownerUserId:session.userId, workspaceId:session.workspaceId});
-          wx.showToast({ title: "任务已发送，等待接受", icon: "success" });
-          setTimeout(() => wx.navigateBack(), 850);
-        }).catch((error) => {
-          if(this.isUnloading || draftScope(getApp().globalData.session)!==ownerScope)return;
-          this.setData({ submitting: false });
-          wx.showToast({ title: error.message || "任务发送失败", icon: "none" });
-        });
+      title: `确认创建${recipients.length}条待办？`,
+      content: `负责人：${recipients.map(member=>member.name).join('、')}。每人各一条，独立接受和完成；截止${this.data.selectedDue}。`,
+      confirmText: "确认下发", confirmColor: "#1677FF",
+      success: result=>{
+        this._confirming=false;
+        if(!result.confirm || this.isUnloading || this.data.submitting || this._submitted ||
+            ownerScope!==draftScope(getApp().globalData.session))return;
+        this.pendingSubmission={inputs,source,ownerScope,session};
+        this.sendSubmission();
       },
+      fail:()=>{this._confirming=false;},
     });
+  },
+  async sendSubmission() {
+    const pending=this.pendingSubmission;
+    if(!pending || this.isUnloading || this.data.submitting || this._submitted ||
+        pending.ownerScope!==draftScope(getApp().globalData.session))return;
+    const current=()=>!this.isUnloading && pending.ownerScope===draftScope(getApp().globalData.session);
+    this.setData({submitting:true,submissionPending:true});
+    const {inputs,source,session}=pending;
+    try {
+      let tasks;
+      if(source){
+        const bodies=inputs.map(input=>({description:input.description,association_kind:input.associationKind,
+          assignee_account_code:input.assigneeAccount,target_position:null,due_at:new Date(input.dueAt).toISOString(),
+          priority_code:({'普通':'normal','中':'medium','高':'high'})[input.priority]||'normal',
+          customer_id:input.customerId||null,opportunity_id:input.opportunityId||null}));
+        const result=await apiClient.decideSuggestion(source.id,{decision:'adopted',version_no:source.version,
+          ...(bodies.length===1?{task:bodies[0]}:{tasks:bodies})});
+        tasks=result.tasks || [result.task];
+      }else if(inputs.length===1){tasks=[await apiClient.createTask(inputs[0])];}
+      else {tasks=(await apiClient.createTasks(inputs)).items;}
+      if(!current())return;
+      // Receipt-cache failure must never turn a confirmed success into another business submission.
+      this._submitted=true;this.pendingSubmission=null;
+      try {wx.setStorageSync("lastManagementTaskCreated", {id:tasks[0].id,ids:tasks.map(task=>task.id),
+        ownerUserId:session.userId,workspaceId:session.workspaceId});} catch (_) { /* list refresh reads server */ }
+      wx.showToast({title:`已发送${tasks.length}条待办`,icon:'success'});
+      setTimeout(()=>{if(current())wx.navigateBack();},850);
+    }catch(error){
+      if(!current())return;
+      const rejected=[400,403,404,409,422].includes(error.statusCode);
+      if(rejected)this.pendingSubmission=null;
+      this.setData({submitting:false,submissionPending:!rejected});
+      wx.showToast({title:error.message || '发送结果未确认，请重试',icon:'none'});
+    }
   },
 });

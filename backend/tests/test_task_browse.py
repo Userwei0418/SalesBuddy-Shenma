@@ -19,7 +19,7 @@ def test_filters_keep_fde_scope_and_use_bound_owner_period_values():
         member="销售甲",
         team="华东",
     )
-    assert "security.fde_can_coordinate_task(t.id)" in where
+    assert "security.authorization_task('task.read',t.id)" in where
     assert uid not in where and "销售甲" not in where and "华东" not in where
     assert uid in args and "销售甲" in args and "华东" in args
     assert "a.responsibility='owner'" in where

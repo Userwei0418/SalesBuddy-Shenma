@@ -264,7 +264,9 @@ async def test_custom_runtime_preserves_agent_route_prompts_without_old_key(sett
     assert runtime.prompt_overrides == {"visit_entry": "preserve"}
 
 
-def test_validation_never_echoes_invalid_key():
+def test_validation_never_echoes_invalid_key(monkeypatch):
+    from tests.authorization_fixtures import install_http_authorization
+    install_http_authorization(monkeypatch, app, ACTOR, {p: "workspace" for p in ("access.console", "ai.config_test")})
     from sales_backend.api.dependencies import get_settings as api_settings
 
     app.dependency_overrides[api_settings] = get_settings

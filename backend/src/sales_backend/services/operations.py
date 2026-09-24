@@ -16,7 +16,7 @@ async def management_write(database, actor, key, operation, payload, action):
     try:
         async with database.transaction(actor) as connection:
             return await execute_mutation(connection, actor, key, operation, payload, lambda: action(connection))
-    except VersionConflict as exc:
+    except (VersionConflict, asyncpg.SerializationError) as exc:
         raise OperationsError(str(exc), 409) from exc
     except asyncpg.InsufficientPrivilegeError as exc:
         raise OperationsError("当前账号无权执行此操作", 403) from exc

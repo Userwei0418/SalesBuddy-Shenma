@@ -19,7 +19,6 @@ from sales_backend.contracts.types import UUIDString
 from sales_backend.db import Database
 from sales_backend.domain.agent import RoleCode
 from sales_backend.domain.capabilities import role_capabilities
-from sales_backend.domain.policy import AgentModeForbidden, assert_mode_allowed
 from sales_backend.repositories.assistant import AssistantRepository, MessageReplayConflict
 from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.services.agent_access import require_agent_access
@@ -92,10 +91,6 @@ async def create_conversation(
     database: Database = Depends(get_database),
     idempotency_key: MutationKey = None,
 ) -> ConversationResponse:
-    try:
-        assert_mode_allowed(identity.actor.role, body.mode)
-    except AgentModeForbidden as exc:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "MODE_FORBIDDEN") from exc
     async with database.transaction(identity.actor) as connection:
         try:
             await require_agent_access(connection, identity.actor, body.mode, body.customer_id,

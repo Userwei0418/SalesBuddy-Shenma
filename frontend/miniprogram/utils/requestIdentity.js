@@ -68,7 +68,7 @@ function supports(options) {
   if(options.method==='PUT' && /^\/opportunities\/[^/?]+\/fde-members$/.test(options.path)) return true;
   return ['POST','PATCH'].includes(options.method) && (
     /^\/customers(?:\/[^/?]+(?:\/(?:assignments|claims|opportunities))?)?$/.test(options.path) ||
-    /^\/tasks(?:\/[^/?]+\/events)?$/.test(options.path) ||
+    /^\/tasks(?:\/batch|\/[^/?]+\/events)?$/.test(options.path) ||
     /^\/advice\/suggestions\/[^/?]+\/decision$/.test(options.path) ||
     /^\/visits(?:\/[^/?]+)?$/.test(options.path) ||
     /^\/customer-assets(?:\/[^/?]+\/void)?$/.test(options.path) ||

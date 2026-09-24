@@ -77,7 +77,7 @@ class CustomerRepository:
             ), page AS MATERIALIZED (
               SELECT * FROM visited UNION ALL SELECT * FROM without_date
             )
-            SELECT c.id::text, c.name, c.industry_code, c.customer_type_code, c.level_code,
+            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code, c.level_code,
                    c.lifecycle_status, c.source_code, c.data_kind, c.attributes,
                    c.import_meta, c.owner_user_ref_id::text,
                    u.display_name AS owner_name, CASE WHEN u.id IS NULL THEN '[]'::jsonb
@@ -138,7 +138,7 @@ class CustomerRepository:
     async def base(self, connection: asyncpg.Connection, *, customer_id: str) -> dict[str, Any] | None:
         customer = await connection.fetchrow(
             """
-            SELECT c.id::text, c.name, c.industry_code, c.customer_type_code, c.level_code,
+            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code, c.level_code,
                    c.lifecycle_status, c.source_code, c.data_kind, c.primary_partner_name,
                    c.demand_summary, c.attributes, c.import_meta, c.version_no,
                    c.next_action, c.operation_type, c.cooperation_years, c.main_business, c.customer_budget,

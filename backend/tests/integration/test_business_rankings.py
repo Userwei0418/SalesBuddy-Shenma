@@ -2,6 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 import pytest
+from tests.integration.feishu_fixtures import seed_execute
 
 from sales_backend.repositories.customer_assets import today
 from sales_backend.repositories.marketing import efficiency_rankings
@@ -175,11 +176,11 @@ async def test_supervisor_ranks_nonprimary_team_members_without_cross_team_facts
         south_team,
         member.user_id,
     )
-    await connection.execute(
-        "UPDATE crm.opportunity SET owner_team_id=$2::uuid WHERE id=$1::uuid", north_op["id"], north_team
+    await seed_execute(
+        connection, "UPDATE crm.opportunity SET owner_team_id=$2::uuid WHERE id=$1::uuid", north_op["id"], north_team
     )
-    await connection.execute(
-        "UPDATE crm.customer SET owner_team_id=$2::uuid WHERE id=$1::uuid", north_op["customer_id"], north_team
+    await seed_execute(
+        connection, "UPDATE crm.customer SET owner_team_id=$2::uuid WHERE id=$1::uuid", north_op["customer_id"], north_team
     )
     # A different person with only an expired south-team membership remains outside the cohort.
     unrelated = await OperationsAccountRepository().create(
@@ -214,8 +215,8 @@ async def test_supervisor_ranks_nonprimary_team_members_without_cross_team_facts
             },
         )
         await actor(connection, "ADMIN001")
-        await connection.execute(
-            "UPDATE activity.visit SET recorder_team_id=$2::uuid WHERE id=$1::uuid", visit["id"], team
+        await seed_execute(
+            connection, "UPDATE activity.visit SET recorder_team_id=$2::uuid WHERE id=$1::uuid", visit["id"], team
         )
 
     supervisor = await actor(connection, "ZJ001")

@@ -71,7 +71,7 @@ test('只读实绩页隐藏登记和作废入口', () => {
   assert.match(wxml, /商业资料只读；协助名单由有权人员单独维护/);
   assert.match(wxml, /商机等级/);
   assert.match(wxml, /<block wx:if="\{\{!readOnly\}\}">/);
-  assert.equal((wxml.match(/canManage && !readOnly/g) || []).length, 1);
+  assert.match(wxml,/canVoidActual && item.can_void && !readOnly/);
 });
 
 test('详情默认当前季度、切换季度只更改两项实绩，迟到响应不覆盖新商机', async () => {

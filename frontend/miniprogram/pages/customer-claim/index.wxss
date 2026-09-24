@@ -2,3 +2,10 @@ page{background:#edf5fc}.claim-page{min-height:100vh;padding-bottom:136rpx;color
 
 .claim-result { margin-bottom:24rpx; padding:24rpx; border-radius:20rpx; background:#eaf5ff; color:#245b86; font-size:26rpx; line-height:1.6; }
 .claim-pagination{padding:24rpx 0 4rpx;text-align:center}.claim-load-more{margin-top:18rpx;padding:0 28rpx;min-width:220rpx;height:70rpx;line-height:70rpx;border:1rpx solid #d5e5f4;border-radius:18rpx;color:#23659a;background:#f9fcff;font-size:22rpx}.claim-load-more::after{border:0}.claim-page-error{display:block;color:#9c6847;font-size:21rpx;line-height:1.5}.claim-list-end{padding:26rpx 0 6rpx;text-align:center;font-size:20rpx;color:#8195a8}
+
+.claim-search-hint{margin:12rpx 4rpx;color:#7890a5;font-size:20rpx;line-height:1.6}
+.claim-filters{display:flex;gap:14rpx;margin-top:16rpx}.claim-filter{flex:1;min-width:0}
+.claim-filter-value{display:flex;align-items:center;gap:10rpx;padding:19rpx 16rpx;border:1rpx solid #d5e5f4;border-radius:16rpx;background:#f9fcff;color:#345d7e;font-size:23rpx}
+.claim-filter-value text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.claim-filter-value label{flex:0 0 auto}
+.claim-filter-message,.claim-filter-error{margin:12rpx 4rpx;font-size:21rpx;line-height:1.5;color:#7890a5}.claim-filter-error{color:#a46743}
+.claim-filter-reset{margin-top:14rpx;text-align:right;color:#23659a;font-size:22rpx;padding:6rpx 0}

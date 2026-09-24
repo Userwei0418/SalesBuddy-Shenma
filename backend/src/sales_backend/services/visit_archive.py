@@ -20,7 +20,7 @@ from sales_backend.repositories.visit_reviews import VisitReviewRepository
 from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.capabilities import require_capability
 from sales_backend.services.opportunities import save_opportunity
-from sales_backend.services.visit_access import require_visit_recording_scope, validate_visit_attendance
+from sales_backend.services.visit_access import require_visit_recording_scope, validate_visit_attendance, validate_visit_optional_actions
 from sales_backend.services.visit_review_gate import consume_review
 
 COMPETENCY_SUBJECT_ROLES = frozenset({"sales", "supervisor"})
@@ -41,12 +41,11 @@ async def archive_visit(
     await require_visit_recording_scope(connection, actor, customer_id, fields.get("opportunity_id"))
     participants = member_ids(fields.get("_fde_participant_ids", []))
     mutation = fields.get("_opportunity_mutation")
-    if actor.role.value in FDE_ROLES:
-        if set(participants) - {actor.user_id}:
-            raise PermissionError("FDE本人录入不能代其他FDE登记参与，请由对方本人填写")
-        if mutation:
-            raise PermissionError("FDE录入只能关联已参与商机，不能创建或修改商机商业信息")
-        participants = [actor.user_id]
+    await validate_visit_optional_actions(connection, actor, customer_id, fields.get("opportunity_id"),
+        mutation=mutation, collaborators=fields.get("collaborator_ids", []), first_visit=fields.get("is_first_visit", False))
+    if actor.role.value in FDE_ROLES and fields.get("opportunity_id"):
+        # Keep the real recording identity; extra permissions never create a sales appointment.
+        participants = sorted(set(participants) | {actor.user_id})
     mutation_data = OpportunityCreate.model_validate(mutation).model_dump() if mutation else None
     mutation_hash = (
         hashlib.sha256(json.dumps(mutation, sort_keys=True, ensure_ascii=False).encode()).hexdigest()

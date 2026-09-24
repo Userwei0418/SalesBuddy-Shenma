@@ -154,11 +154,13 @@ def test_runtime_credential_error_has_sanitized_503():
     ("/api/v1/admin/agent-config/releases/1/rollback", {}),
     ("/api/v1/admin/agent-config/releases/2147483647/rollback", {"expected_version": 1}),
 ])
-def test_admin_api_requires_cas_version_before_database(actor, settings, path, payload):
+def test_admin_api_requires_cas_version_before_database(actor, settings, path, payload, monkeypatch):
     from sales_backend.api.dependencies import get_database
     from sales_backend.api.dependencies import get_settings as settings_dependency
     from sales_backend.api.management_dependencies import get_system_identity
     from sales_backend.main import app
+    from tests.authorization_fixtures import install_http_authorization
+    install_http_authorization(monkeypatch, app, actor, {p: "workspace" for p in ("access.console", "ai.config_publish", "ai.config_rollback")})
     class NoDatabase:
         def transaction(self, *args, **kwargs):
             raise AssertionError("invalid input reached database")
@@ -177,6 +179,8 @@ def test_admin_api_version_conflict_is_409(actor, settings, monkeypatch):
     from sales_backend.api.dependencies import get_settings as settings_dependency
     from sales_backend.api.management_dependencies import get_system_identity
     from sales_backend.main import app
+    from tests.authorization_fixtures import install_http_authorization
+    install_http_authorization(monkeypatch, app, actor, {p: "workspace" for p in ("access.console", "ai.config_publish", "ai.config_rollback")})
     class DB:
         @asynccontextmanager
         async def transaction(self, *args, **kwargs):

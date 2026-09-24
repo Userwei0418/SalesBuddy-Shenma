@@ -4,7 +4,7 @@ from typing import Any
 
 import asyncpg
 
-from sales_backend.domain.agent import ActorContext, RoleCode
+from sales_backend.domain.agent import ActorContext
 from sales_backend.domain.concurrency import require_version
 from sales_backend.repositories.attribute_overlay import overlay_risk_attributes
 
@@ -112,8 +112,8 @@ class RiskRepository:
         if not risk:
             raise RiskNotFound("RISK_NOT_FOUND")
         require_version(risk["version_no"], expected_version)
-        if actor.role is RoleCode.SALES and risk["owner_user_ref_id"] != actor.user_id:
-            raise RiskForbidden("ONLY_RISK_OWNER_CAN_RESOLVE")
+        if not await connection.fetchval("SELECT security.authorization_risk('risk.resolve',$1::uuid)", risk_id):
+            raise RiskForbidden("当前风险不在处置授权范围")
         if risk["status"] in {"resolved", "accepted"}:
             existing = await self.detail(connection, risk_id=risk_id)
             if existing is None:

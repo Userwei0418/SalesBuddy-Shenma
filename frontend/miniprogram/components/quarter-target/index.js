@@ -43,7 +43,7 @@ Component({
     const now=new Date(Date.now()+28800000),currentQuarter=now.getUTCFullYear()===p.year&&Math.floor(now.getUTCMonth()/3)+1===p.quarter;
     const latest=(result.recent_batches||[]).find(row=>['approved','rejected','cancelled'].includes(row.status));
     const decision=latest?{label:{approved:'已通过',rejected:'已驳回',cancelled:'已关闭'}[latest.status],status:latest.status,reason:latest.decision_reason||'',reviewer:latest.reviewer_name||'运营',date:String(latest.reviewed_at||latest.decided_at||latest.updated_at||'').slice(0,10)}:null;
-    this.setData({loading:false,rows,pending,decision,canEdit:p.editable&&result.editable===true&&own&&currentQuarter,notice:pending.length?'目标变更待运营审批，完成率仍按当前生效值计算。':''});
+    this.setData({loading:false,rows,pending,decision,canEdit:p.editable&&result.editable===true&&(getApp().globalData.session.permissions?access.can(getApp().globalData.session,'target.submit'):own)&&currentQuarter,notice:pending.length?'目标变更待运营审批，完成率仍按当前生效值计算。':''});
    }catch(error){if(this.current(serial,key))this.setData({loading:false,error:error.message||'目标加载失败，请重试'});}
   },
   show(){if(!this.data.canEdit||this.data.loading||this.data.pending.length)return;this.formKey=this.key();const values={};this.data.rows.forEach(row=>{values[row.kind]=row.inputAmount||amountInput(row.amount);});this.setData({...values,open:true,reason:'',error:'',isChange:this.data.rows.some(row=>row.amount!=null)});},

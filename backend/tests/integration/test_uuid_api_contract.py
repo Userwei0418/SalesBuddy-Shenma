@@ -57,6 +57,8 @@ async def test_uuid_normalization_does_not_expand_customer_task_visit_run_or_ris
         customer_id=op["customer_id"],
         opportunity_id=op["id"],
     )
+    risk_id, _ = await risk_fixture(connection)
+    owner = await actor(connection, "XS001")
     repo = AssistantRepository()
     conversation = await repo.create_conversation(
         connection, owner, mode=AgentMode.VISIT_ENTRY, customer_id=op["customer_id"]
@@ -69,7 +71,6 @@ async def test_uuid_normalization_does_not_expand_customer_task_visit_run_or_ris
         client_message_id="client:opaque-unit-1",
         input_source="text",
     )
-    risk_id, _ = await risk_fixture(connection)
     paths = [
         f"/customers/{op['customer_id']}",
         f"/tasks/{task['id']}",

@@ -67,7 +67,7 @@ def build(args: argparse.Namespace) -> dict:
     if output == repo or repo in output.parents:
         raise ValueError("交付目录必须在 Git 工作目录外。")
     now = datetime.now(timezone.utc)
-    release_name = args.release_name or f"销售智助-前端交付包-{now.astimezone():%Y%m%d-%H%M}-{head[:7]}"
+    release_name = args.release_name or f"Raccoon SalesBuddy-前端交付包-{now.astimezone():%Y%m%d-%H%M}-{head[:7]}"
     if not re.fullmatch(r"[\w\-]+", release_name) or release_name in {".", ".."}:
         raise ValueError("交付名称只允许文字、数字、下划线和短横线。")
     targets = [output / release_name, output / (release_name + ".zip"),
@@ -149,7 +149,7 @@ def build(args: argparse.Namespace) -> dict:
                     "交付包仅发送给指定协作人员，不上传公开仓库或公开 Release。\n"
                     if args.private_accounts_file else "\n本包不含账号密码，登录账号由运营提供。\n")
     files["打开说明.md"] = (
-        f"# 销售智助前端交付\n\n前端版本：`{head}`。\n\n"
+        f"# Raccoon SalesBuddy前端交付\n\n前端版本：`{head}`。\n\n"
         f"后端版本：`{args.backend_revision}`；数据库迁移：`{args.database_version}`。\n\n"
         "在微信开发者工具中导入本目录下的 **frontend/**，该目录包含 project.config.json。"
         "本机无需启动后端、数据库或安装 npm 依赖。详见 [前端说明](frontend/README.md) 和"

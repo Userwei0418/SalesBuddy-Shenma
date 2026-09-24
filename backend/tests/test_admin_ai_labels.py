@@ -64,7 +64,7 @@ def test_ai_call_and_agent_audit_lists_and_details_use_readable_business_names(p
         const rendered=page.html+Object.values(regions).map(region=>region.innerHTML).join('');
         for(const record of records) assert.ok(rendered.includes(record.label),record.label);
         assert.doesNotMatch(rendered, /future<agent>|\[object Object\]/);
-        if(pageName==='runs') assert.match(rendered,/销售智助·商机新建更新判断/);
+        if(pageName==='runs') assert.match(rendered,/Raccoon SalesBuddy·商机新建更新判断/);
         if(pageName==='runs') assert.match(rendered,
           /value="competency_review" selected>销售六维能力复盘<\/option>/);
         for(const record of records){
@@ -95,11 +95,11 @@ def test_recorded_agent_identity_is_not_inferred_from_business_purpose():
 import assert from 'node:assert/strict';
 const row={capability:'opportunity_change',configuration:{agent_id:'01a09022-b58f-7214-85eb-29d035ea6f2c'},
   attempts:[{provider:'agent_platform',model:'agent:01a09684-1968-77da-bfd0-e5e0ab59f015'}]};
-assert.equal(calledAgents(row),'销售智助·商机经营建议（第一版）');
+assert.equal(calledAgents(row),'Raccoon SalesBuddy·商机经营建议（第一版）');
 row.attempts[0].model='agent:01a09fca-4a3b-7da4-8522-e68ca2b78074';
-assert.equal(calledAgents(row),'销售智助·商机经营建议（第二版）');
+assert.equal(calledAgents(row),'Raccoon SalesBuddy·商机经营建议（第二版）');
 row.attempts[0].model='agent:01a09022-b58f-7214-85eb-29d035ea6f2c';
-assert.equal(calledAgents(row),'销售智助·商机新建更新判断');
+assert.equal(calledAgents(row),'Raccoon SalesBuddy·商机新建更新判断');
 row.attempts[0].network_dispatch_suppressed=true;
 assert.equal(calledAgents(row),'未记录中台请求');
 assert.equal(label(stopStates,'not_requested'),'无需停止请求');

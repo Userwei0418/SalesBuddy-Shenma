@@ -251,7 +251,7 @@ async def verify(connection, runtime, f):
 
     await context(connection, workspace, member, "fde", team)
     recorded = {r["visit_id"] for r in await connection.fetch("SELECT * FROM security.fde_recorded_visit_history()")}
-    assert recorded == {f["own_history"], own, draft}
+    assert recorded == {f["own_history"], own, draft}, {"actual": list(map(str,recorded)),"own_history":str(f["own_history"]),"own":str(own),"draft":str(draft)}
     participated = {r["visit_id"] for r in await connection.fetch("SELECT * FROM security.fde_participation_history()")}
     assert f["colleague_history"] in participated and f["colleague_history"] not in recorded
     assert own not in participated  # Authorship never depends on self being selected as a participant.

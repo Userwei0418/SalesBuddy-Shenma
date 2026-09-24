@@ -1,18 +1,19 @@
-// Names describe the recorded Agent ID, never the business purpose of a call.
+// Current product display names follow the recorded Agent ID, never the business purpose of a call.
+// Remote publication titles and historical receipts remain separate evidence.
 const names = Object.freeze({
-  "01a09022-c5ff-7562-bd7d-f8d6c74f5486": "销售智助·销售经营问数",
-  "01a09021-b848-7e7f-9567-e20859d29bf8": "销售智助·客户作战地图评估",
-  "01a09022-bb1a-7dab-8481-917e0472c528": "销售智助·个人客户风险识别",
-  "01a09022-b58f-7214-85eb-29d035ea6f2c": "销售智助·商机新建更新判断",
-  "01a09684-1968-77da-bfd0-e5e0ab59f015": "销售智助·商机经营建议（第一版）",
-  "01a09fca-4a3b-7da4-8522-e68ca2b78074": "销售智助·商机经营建议（第二版）",
-  "01a09eff-d317-7725-8941-7b8e37f4a641": "销售智助·拜访记录质检",
-  "01a09022-c06d-7ac3-b863-8a1345b069ae": "销售智助·拜访记录结构化",
-  "01a09a6c-97c7-7631-b580-c3b2b14739ad": "销售智助·销售六维能力复盘",
-  "01a09022-d0ec-7703-b59f-0699150d63a7": "销售智助·销售经营即时总结",
-  "01a09022-cb7b-7f33-8b58-410850ac1d8a": "销售智助·今日待办规划",
-  "01a09684-1692-78ec-b1e7-07838158bb36": "销售智助·客户经营建议",
-  "01a09684-1c0b-763f-b70c-84ea7d2dac08": "销售智助·单次拜访建议",
+  "01a09022-c5ff-7562-bd7d-f8d6c74f5486": "Raccoon SalesBuddy·销售经营问数",
+  "01a09021-b848-7e7f-9567-e20859d29bf8": "Raccoon SalesBuddy·客户作战地图评估",
+  "01a09022-bb1a-7dab-8481-917e0472c528": "Raccoon SalesBuddy·个人客户风险识别",
+  "01a09022-b58f-7214-85eb-29d035ea6f2c": "Raccoon SalesBuddy·商机新建更新判断",
+  "01a09684-1968-77da-bfd0-e5e0ab59f015": "Raccoon SalesBuddy·商机经营建议（第一版）",
+  "01a09fca-4a3b-7da4-8522-e68ca2b78074": "Raccoon SalesBuddy·商机经营建议（第二版）",
+  "01a09eff-d317-7725-8941-7b8e37f4a641": "Raccoon SalesBuddy·拜访记录质检",
+  "01a09022-c06d-7ac3-b863-8a1345b069ae": "Raccoon SalesBuddy·拜访记录结构化",
+  "01a09a6c-97c7-7631-b580-c3b2b14739ad": "Raccoon SalesBuddy·销售六维能力复盘",
+  "01a09022-d0ec-7703-b59f-0699150d63a7": "Raccoon SalesBuddy·销售经营即时总结",
+  "01a09022-cb7b-7f33-8b58-410850ac1d8a": "Raccoon SalesBuddy·今日待办规划",
+  "01a09684-1692-78ec-b1e7-07838158bb36": "Raccoon SalesBuddy·客户经营建议",
+  "01a09684-1c0b-763f-b70c-84ea7d2dac08": "Raccoon SalesBuddy·单次拜访建议",
 });
 export const providers = Object.freeze({agent_platform:"中台智能体", senseaudio:"原模型接口", direct_api:"后台配置接口", rules:"原规则兜底"});
 export const label = (map, key, fallback = "历史未记录") => Object.hasOwn(map, key) ? map[key] : fallback;

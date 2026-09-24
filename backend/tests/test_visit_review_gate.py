@@ -9,6 +9,7 @@ from sales_backend.domain.agent import RoleCode
 from sales_backend.domain.company_rules import VisitAdmissionPolicy
 from sales_backend.domain.visit_review import review_text
 from sales_backend.services.visit_review_gate import consume_review
+from tests.authorization_fixtures import visit_authorization_query
 
 FIELDS = {
     "_quality_review_run_id": "11111111-1111-1111-1111-111111111111",
@@ -17,7 +18,8 @@ FIELDS = {
     "next_action": "9月10日提交方案",
     "_follow_up_quality_score": 100,
 }
-ACTOR = SimpleNamespace(workspace_id="workspace", user_id="user", role=RoleCode.SALES)
+ACTOR = SimpleNamespace(workspace_id="workspace", user_id="user", role=RoleCode.SALES, team_ids=(),
+                        model_dump=lambda **kwargs: {"workspace_id": "workspace", "user_id": "user"})
 
 
 def connection(**changes):
@@ -27,6 +29,7 @@ def connection(**changes):
     payload.update(visit_stage="quality", company_policy=policy)
     row = {
         "id": "artifact",
+        "identity_context": {"permission_version": "rbac-test:1"},
         "status": "pending_confirm",
         "text_content": review_text(FIELDS),
         "payload": payload,
@@ -48,7 +51,8 @@ def connection(**changes):
             }
         return row
 
-    return SimpleNamespace(fetchrow=AsyncMock(side_effect=read), execute=AsyncMock(), row=row)
+    return SimpleNamespace(fetchrow=AsyncMock(side_effect=read), execute=AsyncMock(), row=row,
+                           fetchval=AsyncMock(side_effect=visit_authorization_query(ACTOR)))
 
 
 def test_uses_stored_score_and_records_confirmation():
@@ -138,5 +142,13 @@ def test_legacy_extraction_cannot_reuse_score_even_with_same_fields():
 def test_legacy_success_cannot_override_explicit_current_review_rejection(quality, legacy):
     db = connection(payload={"quality_review": quality, "next_action": legacy})
     with pytest.raises(ValueError, match="下一步审核未通过"):
+        asyncio.run(consume_review(db, ACTOR, "customer", FIELDS))
+    db.execute.assert_not_awaited()
+
+
+def test_permission_change_blocks_archive_without_confirmation_writes():
+    db = connection()
+    db.row["identity_context"]["permission_version"] = "rbac-test:old"
+    with pytest.raises(PermissionError, match="权限已变化"):
         asyncio.run(consume_review(db, ACTOR, "customer", FIELDS))
     db.execute.assert_not_awaited()

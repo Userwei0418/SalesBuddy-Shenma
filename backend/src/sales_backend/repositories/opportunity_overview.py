@@ -1,15 +1,15 @@
 # ruff: noqa: S608 -- Only the internal owner-scope fragment is interpolated; inputs are bound.
 """Complete opportunity counts, independently scoped from the paginated list."""
 
-from sales_backend.repositories.collaboration import FDE_ROLES, scoped_opportunity_ids
+from sales_backend.repositories.collaboration import scoped_opportunity_ids
 from sales_backend.repositories.dashboard import owner_scope
 from sales_backend.repositories.opportunity_business_date import business_created_on, creation_date_projection
 
 
 async def opportunity_overview(connection, actor, *, year, quarters, scope=None, member_id=None, member_ids=None):
     scoped_ids = None
-    if actor.role.value in FDE_ROLES:
-        scope, _, _, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids)
+    if scope or member_id or member_ids:
+        scope, _, _, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids, permission='opportunity.read')
         scoped_ids = [r["id"] for r in scoped]
     row = await connection.fetchrow(
         f"""WITH scoped AS (
@@ -18,7 +18,7 @@ async def opportunity_overview(connection, actor, *, year, quarters, scope=None,
             cardinality($6::integer[])=0 OR (
               extract(year FROM timezone('Asia/Shanghai',o.closed_at))=$5::integer AND
               extract(quarter FROM timezone('Asia/Shanghai',o.closed_at))::integer=ANY($6::integer[])) AS in_won_period
-          FROM crm.opportunity o WHERE o.deleted_at IS NULL
+          FROM crm.opportunity o WHERE o.deleted_at IS NULL AND security.authorization_opportunity_direct('opportunity.read',o.id)
             AND (($7::uuid[] IS NOT NULL AND o.id=ANY($7::uuid[]))
               OR ($7::uuid[] IS NULL AND {owner_scope("o")}))
         ) SELECT (SELECT count(*) FROM crm.opportunity_demo_scenes d
@@ -43,10 +43,10 @@ async def opportunity_overview(connection, actor, *, year, quarters, scope=None,
           count(*) FILTER(WHERE cardinality($6::integer[])>0 
             AND status='won' AND closed_at IS NULL) AS "missingWonDates"
           FROM scoped""",
-        actor.role.value,
+        "opportunity.read",
         actor.user_id,
-        list(actor.team_ids),
-        actor.role.value == "sales",
+        actor.workspace_id,
+        False,
         year,
         quarters,
         scoped_ids,
@@ -62,6 +62,6 @@ async def opportunity_overview(connection, actor, *, year, quarters, scope=None,
         "metrics": metrics,
         "year": year,
         "quarters": sorted(set(quarters)),
-        "scope": scope or ("self" if actor.role.value == "sales" else "authorized"),
+        "scope": scope or "authorized",
         "definition_version": "opportunity_overview_v3",
     }

@@ -105,9 +105,65 @@ async def test_native_fde_login_cannot_use_claim_directory_and_keeps_existing_cu
     async with await client_for(connection) as client:
         await login_fde(connection, client, people[person])
         assert (await client.get("/api/v1/customers/claim-pool")).status_code == 403
+        assert (await client.get("/api/v1/customers/claim-pool/options")).status_code == 403
         before = await client.get("/api/v1/customers", params={"scope": "mine"})
         legacy = await client.get("/api/v1/customers", params={"scope": "company"})
         assert before.status_code == legacy.status_code == 200
         assert before.json() == legacy.json()
         if person == "first":
             assert project["customer_id"] in {row["id"] for row in before.json()["items"]}
+
+
+async def test_industries_states_pinyin_and_pagination_share_server_criteria(connection):
+    prefix, customers = await company_customers(connection, 5)
+    await actor(connection, "OPS001")
+    for index, customer in enumerate(customers):
+        await connection.execute("UPDATE crm.customer SET name=$2,industry_code=$3 WHERE id=$1::uuid",
+            customer["id"], "商汤筛选" + prefix + str(index), "软件" if index < 4 else "金融")
+    await actor(connection, "XS002")
+    claim = await connection.fetchval("SELECT security.claim_customer($1::uuid)", customers[0]["id"])
+    await actor(connection, "OPS001")
+    await connection.fetchval("SELECT security.review_customer_claim($1::uuid,'approved','筛选测试')", claim["request_id"])
+    await actor(connection, "XS001")
+    mine = await connection.fetchval("SELECT security.claim_customer($1::uuid)", customers[1]["id"])
+    await actor(connection, "OPS001")
+    await connection.fetchval("SELECT security.review_customer_claim($1::uuid,'approved','本人筛选')", mine["request_id"])
+    await actor(connection, "XS001")
+    await connection.fetchval("SELECT security.claim_customer($1::uuid)", customers[2]["id"])
+    async with await client_for(connection, auth_mode="demo") as client:
+        await business_login(client, "XS001")
+        options = await client.get("/api/v1/customers/claim-pool/options")
+        assert options.status_code == 200, options.text
+        assert {"value": "金融", "label": "金融"} in options.json()["industries"]
+        for term in ("商汤筛选" + prefix, "shangtangshaixuan", "STSX"):
+            all_rows = (await client.get("/api/v1/customers/claim-pool", params={"q": term})).json()
+            assert all_rows["total"] == 5, all_rows
+            assert {row["id"] for row in all_rows["items"]} == {c["id"] for c in customers}
+            for state, indices in [("claimed", [0, 1]), ("mine", [1]), ("pending", [2]), ("unclaimed", [2, 3])]:
+                pages = []
+                for offset in range(len(indices)):
+                    response = await client.get("/api/v1/customers/claim-pool", params={
+                        "q": term, "industry": "软件", "claim_status": state, "page_size": 1, "offset": offset})
+                    assert response.status_code == 200, response.text
+                    page = response.json()
+                    assert page["total"] == len(indices)
+                    assert page["next_offset"] == (offset + 1 if offset < len(indices) - 1 else None)
+                    if state == "pending":
+                        assert all(row["claim_status"] == "pending" for row in page["items"])
+                    pages += page["items"]
+                assert {row["id"] for row in pages} == {customers[i]["id"] for i in indices}
+        empty = await client.get("/api/v1/customers/claim-pool", params={"q": "st", "industry": "不存在行业"})
+        assert empty.json() == {"items": [], "total": 0, "has_more": False, "next_offset": None}
+        assert (await client.get("/api/v1/customers/" + customers[0]["id"])).status_code == 404
+        # Percent and underscore are literal customer-name characters, not SQL wildcards.
+        assert (await client.get("/api/v1/customers/claim-pool", params={"q": "%_"})).json()["total"] == 0
+    sales = await actor(connection, "XS001")
+    repository = CustomerMemberRepository()
+    # Cached phonetic keys must not preserve access after a workspace change.
+    await set_request_context(connection, sales.model_copy(update={"workspace_id": str(uuid4())}))
+    assert (await repository.claim_pool_page(connection, query="shangtang"))["total"] == 0
+    assert (await repository.claim_pool_options(connection))["industries"] == [{"value": "", "label": "全部行业"}]
+    await actor(connection, "OPS001")
+    await connection.execute("UPDATE crm.customer SET name='改名后客户' WHERE id=ANY($1::uuid[])", [c["id"] for c in customers])
+    await actor(connection, "XS001")
+    assert (await repository.claim_pool_page(connection, query="shangtangshaixuan"))["total"] == 0

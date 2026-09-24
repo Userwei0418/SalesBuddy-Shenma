@@ -112,7 +112,7 @@ test('商机经营补齐含关闭商机的列表后同步总览完整统计', as
 
 test('列表团队筛选和重置不改变商机总览', async () => {
   const {page} = load('workbench',{listOpportunities:async options=>pageResponse(page.baseOpportunities.map(row=>({...row,team_name:row.team,owner_name:row.owner})),options)});
-  page.data.role = 'manager';
+  page.data.role = 'manager'; page.data.canViewTeam = true;
   page.data.executionTeamOptions = [{value:'all',label:'全部团队'},{value:'南区',label:'南区'},{value:'东区',label:'东区'}];
   page.baseMembers = [{name:'销售甲',team:'南区',role:'sales'},{name:'销售乙',team:'东区',role:'sales'}];
   page.baseCustomers = []; page.baseTasks = []; page.baseRisks = [];
@@ -206,22 +206,22 @@ test('拒绝后重发草稿按账号隔离，并按用户ID选回同名接收人
   const api={getTaskPositions:async()=>({items:[]}),listTaskRecipients:async()=>({items:[{id:'u3',name:'同名',role:'sales'},{id:'u2',name:'同名',role:'sales'}]})};
   const create=load('management-task-create',api,Object.fromEntries(original.storage));
   create.page.onLoad({retry:1});await tick();
-  assert.equal(create.page.data.selectedMember.id,'u2');
+  assert.equal(create.page.data.selectedMembers[0].id,'u2');
   assert.equal(create.storage.has('retryTaskDraft:w1:u1'),false);
   const foreign=load('management-task-create',api,{'retryTaskDraft:w1:u2':{description:'他人的任务',assigneeId:'u3'}});
   foreign.page.onLoad({retry:1});await tick();
-  assert.equal(foreign.page.data.description,'');assert.equal(foreign.page.data.selectedMember,null);
+  assert.equal(foreign.page.data.description,'');assert.equal(foreign.page.data.selectedMembers.length,0);
 });
 
 test('负责人来自全员目录，切换负责人保留表单内容', async () => {
   const api={listTaskRecipients:async()=>({items:[{id:'ops',name:'运营',account_code:'OPS001',role:'operations'},{id:'fde',name:'技术同事',account_code:'FDE001',role:'fde'}]})};
   const {page}=load('management-task-create',api);
   page.onLoad({});await tick();
-  page.changeAssignee({detail:{value:0}});assert.equal(page.data.selectedMember.id,'ops');
+  page.toggleRecipient({currentTarget:{dataset:{id:'ops'}}});assert.equal(page.data.selectedMembers[0].id,'ops');
   page.inputDescription({detail:{value:'需要协助核对资料'}});
-  page.changeAssignee({detail:{value:1}});
+  page.toggleRecipient({currentTarget:{dataset:{id:'ops'}}});page.toggleRecipient({currentTarget:{dataset:{id:'fde'}}});
   assert.equal(page.data.description,'需要协助核对资料');
-  assert.equal(page.data.selectedMember.id,'fde');
+  assert.equal(page.data.selectedMembers[0].id,'fde');
 });
 
 test('待领取候选可以响应，其他人领取后只能查看且不能代完成', async () => {
@@ -247,7 +247,7 @@ test('采纳建议从后台回查并允许人工修改，原生保存带建议�
   page.onLoad({adviceId:'advice1',suggestionId:'s1'});await tick();
   assert.equal(page.data.description,'建议联系客户核对试点范围');
   page.inputDescription({detail:{value:'人工修改：先请客户补充验收标准'}});
-  page.changeAssignee({detail:{value:0}});
+  page.toggleRecipient({currentTarget:{dataset:{id:'u1'}}});
   page.submitTask();await tick();
   assert.equal(decision.id,'s1');assert.equal(decision.body.version_no,3);assert.equal(decision.body.decision,'adopted');
   assert.equal(decision.body.task.description,'人工修改：先请客户补充验收标准');

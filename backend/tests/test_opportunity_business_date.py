@@ -113,7 +113,7 @@ def test_sql_projection_rejects_aliases_outside_its_fixed_internal_contract(alia
     (2025, [4], 1), (2026, [1], 1), (2026, [2, 3], 1), (2030, [2], 1), (2026, [], 4),
 ])
 async def test_overview_counts_source_business_dates_and_never_returns_raw_date_facts(year, quarters, expected_new):
-    actor = SimpleNamespace(role=SimpleNamespace(value="manager"), user_id="fixture-user", team_ids=[])
+    actor = SimpleNamespace(role=SimpleNamespace(value="manager"), user_id="fixture-user", workspace_id="fixture-workspace", team_ids=[])
     metrics = {
         "demo_scene_count": 0, "won": 1, "total": 6, "active": 1,
         "missingCloseDates": 2, "missingWonDates": 0,

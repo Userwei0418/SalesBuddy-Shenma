@@ -15,6 +15,8 @@ from sales_backend.domain.customer_risk import (
 from sales_backend.job_context import current_job_lease
 from sales_backend.repositories.customer_risk import CONTRACT, load_customer_risk_facts
 from sales_backend.repositories.identity import IdentityRepository
+from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.services.authorization import require_permission
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.services.agent_business_rules import (
     business_policy_metadata,
@@ -46,6 +48,7 @@ def configuration_fingerprint(runtime, actor):
 
 
 async def assert_current_owner(connection, actor, row):
+    await require_permission(connection, "risk.auto_review", customer_id=str(row["customer_id"]))
     current = await IdentityRepository().find_actor_by_id(
         connection, workspace_id=actor.workspace_id, user_id=actor.user_id, role=actor.role.value,
     )
@@ -83,6 +86,8 @@ class CustomerRiskReviewHandler:
                 await record_job_effect(connection, actor.workspace_id)
                 return
             await assert_current_owner(connection, actor, row)
+            permission_version = (await AuthorizationRepository().snapshot(connection))["permission_version"]
+            await connection.execute("SELECT set_config('app.authorized_feature','risk.auto_review',true)")
             if (row["fact_scope_version"] != await connection.fetchval("SELECT security.current_fact_scope_version()")
                 or not await self._is_latest(connection, row)):
                 await self._supersede(connection, assessment_id, actor)
@@ -136,6 +141,9 @@ class CustomerRiskReviewHandler:
                 "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", "customer-risk:" + str(row["customer_id"]),
             )
             await assert_current_owner(connection, actor, row)
+            if permission_version != (await AuthorizationRepository().snapshot(connection))["permission_version"]:
+                raise PermissionError("客户风险评估权限已变化，本次结果不再采用")
+            await connection.execute("SELECT set_config('app.authorized_feature','risk.auto_review',true)")
             locked = await connection.fetchrow(
                 "SELECT id FROM insight.customer_risk_assessment WHERE id=$1::uuid FOR UPDATE", assessment_id,
             )

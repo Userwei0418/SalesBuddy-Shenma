@@ -6,7 +6,7 @@ function setup(extra={}){
  vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:v=>page=v,getApp:()=>({ensureLogin:()=>true,globalData:{session,roles:{sales:{name:"销售",scope:"本人"}}}}),setTimeout(){},clearTimeout(){},require:n=>n.includes('apiClient')?api:require(path.resolve(path.dirname(file),n)),wx:{showToast(){},showModal:v=>modals.push(v),setStorageSync(){},navigateBack(){}}});
  page.data=JSON.parse(JSON.stringify(page.data));page.setData=(v,cb)=>{Object.assign(page.data,v);if(cb)cb();};
  page.getSelectedDueAt=()=>Date.now()+86400000;
- page.setData({description:'请整理实施方案并确认下一步',selectedMember:{id:'u',account:'u',name:'同事',team:'团队'},selectedDue:'明天'});
+ page.setData({description:'请整理实施方案并确认下一步',selectedMembers:[{id:'u',account:'u',name:'同事',team:'团队'}],selectedDue:'明天'});
  return {page,sent,modals};
 }
 const tick=()=>new Promise(r=>setImmediate(r));
@@ -17,7 +17,7 @@ test('客户任务必须先有客户和已核验的商机，发送携带两层�
 });
 test('日常任务发送不携带残留关联，切换类型清空关联和接收人',async()=>{
  const {page,sent,modals}=setup();page.setData({customerId:'old',opportunityId:'old-op'});page.submitTask();modals[0].success({confirm:true});await tick();assert.equal(sent[0].customerId,'');assert.equal(sent[0].opportunityId,'');
- page.setData({submitting:false});page.changeTaskType({currentTarget:{dataset:{type:'customer'}}});assert.equal(page.data.customerId,'');assert.equal(page.data.opportunityId,'');assert.equal(page.data.selectedMember,null);
+ page.setData({submitting:false,submissionPending:false});page.changeTaskType({currentTarget:{dataset:{type:'customer'}}});assert.equal(page.data.customerId,'');assert.equal(page.data.opportunityId,'');assert.equal(page.data.selectedMembers.length,0);
 });
 test('更换客户清空旧商机，拒绝其他客户的候选商机',()=>{
  const {page}=setup();page.setData({taskType:'customer',selectorKind:'customer',selectorRows:[{id:'c2',name:'客户二'}],customerId:'c1',opportunityId:'o1',linkVerified:true});
@@ -39,7 +39,7 @@ test('客户待办按客户查询并保留该客户不同商机任务',async()=>
 for(const taskType of ['daily','customer']) test(taskType+'任务不查询岗位，旧岗位草稿必须重新选择负责人',async()=>{
  let calls=0;const {page}=setup({getTaskPositions:async()=>{calls++;return {items:[]};}});
  page.setData({taskType});page.loadRecipients({targetPosition:'self'});await tick();
- assert.equal(calls,0);assert.equal(page.data.selectedMember,null);
+ assert.equal(calls,0);assert.equal(page.data.selectedMembers.length,0);
 });
 test('客户任务即便残留岗位模式，也只向指定同事发送',async()=>{
  const {page,sent,modals}=setup();page.setData({taskType:'customer',customerId:'c',opportunityId:'o',linkVerified:true,targetMode:'position',selectedPosition:{code:'self',available:true}});

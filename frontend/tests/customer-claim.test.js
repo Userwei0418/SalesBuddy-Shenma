@@ -24,13 +24,22 @@ test('实际API封装编码认领查询和分页参数，旧company/department�
   let url = new URL(requests.at(-1).url);
   assert.equal(url.pathname, '/api/v1/customers/claim-pool');
   assert.equal(url.searchParams.get('q'), '客户 & %_'); assert.equal(url.searchParams.get('offset'), '100');
+  await api.listCustomerClaimPool({q: 'ST', industry: '软件 & 服务', claimStatus: 'pending'});
+  url = new URL(requests.at(-1).url);
+  assert.equal(url.searchParams.get('industry'), '软件 & 服务');
+  assert.equal(url.searchParams.get('claim_status'), 'pending');
+  await api.listCustomerClaimOptions();
+  assert.equal(new URL(requests.at(-1).url).pathname, '/api/v1/customers/claim-pool/options');
   for (const scope of ['company', 'department']) {
     await api.listCustomers({ scope, q: '旧调用' }); url = new URL(requests.at(-1).url);
     assert.equal(url.pathname, '/api/v1/customers'); assert.equal(url.searchParams.get('scope'), scope);
     assert.equal(url.searchParams.get('page_size'), '100'); assert.equal(url.searchParams.has('offset'), false);
   }
 });
+const filterOptions = () => ({ industries: [{value: '', label: '全部行业'}, {value: '软件', label: '软件'}, {value: '金融', label: '金融'}],
+  claim_statuses: [{value: '', label: '全部认领状态'}, {value: 'unclaimed', label: '未认领'}, {value: 'pending', label: '我的申请待审批'}] });
 function pageFor(api) {
+  api = { listCustomerClaimOptions: async () => filterOptions(), ...api };
   let definition, timerId = 0;
   const toasts = [], store = new Map(), timers = new Map();
   const app = { ensureLogin: () => true, globalData: { role: 'sales', session: {
@@ -240,4 +249,67 @@ test('申请回调和确认弹窗均不能越过换号；卸载后的读取不�
   const read = deferred(); const unloaded = pageFor({ listCustomerClaimPool: () => read.promise }).page;
   const loading = unloaded.loadCustomers(); unloaded.onUnload(); read.resolve(directory([customer('late')])); await loading;
   assert.equal(unloaded.data.customers.length, 0);
+});
+
+test('后端提供行业与状态选项，组合筛选翻页保留条件，切换立即清选择且旧页不串入', async () => {
+  const calls = [], late = deferred();
+  const { page } = pageFor({ listCustomerClaimPool: async opts => {
+    calls.push({ ...opts });
+    if (opts.offset) return late.promise;
+    return opts.claimStatus ? directory([customer('filtered')])
+      : directory(Array.from({length: 50}, (_, i) => customer(i)), 51);
+  } });
+  await page.loadCustomers('st');
+  assert.equal(page.data.industryOptions[1].label, '软件');
+  await page.changeIndustry({detail: {value: '1'}});
+  page.selectCustomer({currentTarget: {dataset: {id: '0'}}});
+  const more = page.loadMore();
+  assert.equal(calls.at(-1).industry, '软件'); assert.equal(calls.at(-1).offset, 50);
+  await page.changeClaimStatus({detail: {value: '2'}});
+  assert.equal(page.data.selectedCustomerId, '');
+  assert.deepEqual(calls.at(-1), {q: 'st', pageSize: 50, offset: 0, industry: '软件', claimStatus: 'pending'});
+  late.resolve(directory([customer('late')], 51, 50)); await more;
+  assert.deepEqual(Array.from(page.data.customers, x => x.id), ['filtered']);
+  await page.clearFilters();
+  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0});
+  assert.equal(page.data.hasFilters, false);
+});
+
+test('筛选选项失败可重试，不编造选项；缺失选项响应显式报错', async () => {
+  let attempts = 0;
+  const { page } = pageFor({ listCustomerClaimOptions: async () => {
+    if (++attempts === 1) throw new Error('筛选暂时不可用');
+    return attempts === 2 ? {industries: [], claim_statuses: []} : filterOptions();
+  }, listCustomerClaimPool: async () => directory([]) });
+  await page.loadCustomers();
+  assert.equal(page.data.industryOptions.length, 0); assert.match(page.data.optionsError, /暂时不可用/);
+  assert.equal(page.data.total, 0);
+  await page.retryFilterOptions(); assert.match(page.data.optionsError, /不完整/);
+  await page.retryFilterOptions(); assert.equal(page.data.optionsError, '');
+  assert.equal(page.data.industryOptions.length, 3);
+});
+
+test('换账号清空筛选和旧选项，旧选项响应不能带回原公司数据', async () => {
+  const late = deferred(), calls = []; let count = 0;
+  const {page, app} = pageFor({listCustomerClaimOptions: () => ++count === 2 ? late.promise : Promise.resolve(filterOptions()),
+    listCustomerClaimPool: async opts => {calls.push({...opts}); return directory([]);} });
+  await page.loadCustomers(); await page.changeIndustry({detail: {value: 1}});
+  const refresh = page.refreshCustomers();
+  app.globalData.session.userId = 'other'; await page.onShow();
+  assert.equal(page.data.industry, ''); assert.equal(page.data.query, '');
+  const foreign = filterOptions(); foreign.industries.push({value: '旧公司行业', label: '旧公司行业'});
+  late.resolve(foreign); await refresh;
+  assert.equal(page.data.industryOptions.some(x => x.label === '旧公司行业'), false);
+  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0});
+});
+
+test('行业被移除后刷新同时移除旧筛选，不能显示全部行业却暗中带条件', async () => {
+  let removed = false; const calls = [];
+  const {page} = pageFor({listCustomerClaimOptions: async () => {
+    const options = filterOptions(); if (removed) options.industries.splice(1, 1); return options;
+  }, listCustomerClaimPool: async opts => {calls.push({...opts}); return directory([]);} });
+  await page.loadCustomers(); await page.changeIndustry({detail: {value: 1}});
+  removed = true; await page.refreshCustomers();
+  assert.equal(page.data.industry, ''); assert.equal(page.data.industryIndex, 0);
+  assert.equal(page.data.hasFilters, false); assert.equal(calls.at(-1).industry, undefined);
 });

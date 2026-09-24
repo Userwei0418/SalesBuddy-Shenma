@@ -1,19 +1,22 @@
 """Registered Demo deliverables; all visibility remains opportunity scoped."""
 
 from sales_backend.domain.concurrency import require_version
+from sales_backend.repositories.authorization_checks import require_permission
 
 
 class DemoSceneRepository:
     async def opportunity(self, connection, opportunity_id, *, write=False):
+        if write:
+            await require_permission(connection, 'demo_scene.create', opportunity_id=opportunity_id)
         row = await connection.fetchrow(
-            "SELECT id,security.can_write_demo_scene(id) AS writable FROM crm.opportunity "
+            "SELECT id,security.authorization_opportunity('demo_scene.create',id) AS can_create,"
+            "security.authorization_opportunity('demo_scene.update',id) AS writable,"
+            "security.authorization_opportunity('demo_scene.delete',id) AS can_delete FROM crm.opportunity "
             "WHERE id=$1::uuid AND deleted_at IS NULL",
             opportunity_id,
         )
         if not row:
             raise LookupError("商机不存在或不在当前权限范围")
-        if write and not row["writable"]:
-            raise PermissionError("仅商机负责人、授权管理者和参与FDE可维护Demo")
         return row
 
     async def list(self, connection, opportunity_id, *, limit=50, offset=0):
@@ -33,17 +36,18 @@ class DemoSceneRepository:
             offset,
         )
         return {
-            "items": [{**dict(r), "can_edit": permission["writable"]} for r in rows],
+            "items": [{**dict(r), "can_edit": permission["writable"], "can_delete": permission["can_delete"]} for r in rows],
             "total": total,
             "limit": limit,
             "offset": offset,
-            "editable": permission["writable"],
+            "editable": permission["can_create"], "can_create": permission["can_create"],
             "data_source": "database",
         }
 
     async def get(self, connection, scene_id, *, lock=False):
         row = await connection.fetchrow(
-            "SELECT d.*,u.display_name AS creator_name,security.can_write_demo_scene(d.opportunity_id) AS editable "
+            "SELECT d.*,u.display_name AS creator_name,security.can_write_demo_scene(d.opportunity_id) AS editable,"
+            "security.authorization_opportunity('demo_scene.delete',d.opportunity_id) AS can_delete "
             "FROM crm.opportunity_demo_scenes d LEFT JOIN platform.user_ref u "
             "ON u.id=d.created_by AND u.workspace_id=d.workspace_id "
             "WHERE d.id=$1::uuid AND d.deleted_at IS NULL" + (" FOR UPDATE OF d" if lock else ""),
@@ -73,8 +77,8 @@ class DemoSceneRepository:
 
     async def update(self, connection, scene_id, body, *, delete=False):
         current = await self.get(connection, scene_id, lock=True)
-        if not current["editable"]:
-            raise PermissionError("当前账号不可修改此Demo")
+        await require_permission(connection, 'demo_scene.delete' if delete else 'demo_scene.update',
+                                 opportunity_id=current['opportunity_id'])
         require_version(current["version_no"], body.version_no)
         if delete:
             await connection.execute(

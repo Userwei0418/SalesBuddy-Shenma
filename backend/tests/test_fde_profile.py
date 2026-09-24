@@ -21,6 +21,20 @@ from sales_backend.services.agent_run.models import RunInput
 from sales_backend.services.agent_run.persist import AgentRunStore
 from sales_backend.services.agent_run.prompts import AgentPromptBuilder
 
+from tests.authorization_fixtures import permission_snapshot
+
+
+def profile_connection(actor, *, active=True):
+    connection = AsyncMock()
+    async def read(sql, *args):
+        if "authorization_snapshot" in sql:
+            return permission_snapshot(actor, {"profile.fde_review": "self", "agent.operating_report": "assigned"}, version="permission-1")
+        assert "fde_user_is_active" in sql
+        return active
+    connection.fetchval.side_effect = read
+    return connection
+
+
 NOW = datetime(2026, 9, 13, 12, tzinfo=TZ)
 
 
@@ -176,9 +190,11 @@ def test_fingerprint_stable_on_clock_progress_but_not_data_identity_or_configura
 
 
 @pytest.mark.parametrize("role", [RoleCode.SALES, RoleCode.SUPERVISOR, RoleCode.MANAGER, RoleCode.OPERATIONS])
-def test_portrait_rejects_sales_and_management_roles(role):
-    with pytest.raises(PermissionError):
-        fde_profile.require_fde(person(role))
+@pytest.mark.asyncio
+async def test_own_fde_portrait_requires_active_fde_appointment_even_with_permission(role):
+    actor = person(role)
+    with pytest.raises(PermissionError, match="有效 FDE 任职"):
+        await fde_profile.request_review(profile_connection(actor, active=False), actor, 30)
 
 
 @pytest.mark.asyncio
@@ -200,8 +216,8 @@ async def test_stale_facts_or_permission_block_both_load_and_late_persistence(mo
     )
     fresh = AsyncMock(return_value=loaded)
     monkeypatch.setattr(fde_profile.fde_profile, "profile_facts", fresh)
-    assert (await fde_profile.current_run_facts(AsyncMock(), run))["scope"]["user_id"] == actor.user_id
-    connection = AsyncMock()
+    assert (await fde_profile.current_run_facts(profile_connection(actor), run))["scope"]["user_id"] == actor.user_id
+    connection = profile_connection(actor)
 
     @asynccontextmanager
     async def transaction(*args, **kwargs):
@@ -216,7 +232,8 @@ async def test_stale_facts_or_permission_block_both_load_and_late_persistence(mo
     monkeypatch.setattr(persist_module, "require_agent_access", AsyncMock())
     with pytest.raises(PermissionError, match="事实已变化"):
         await AgentRunStore(db, SimpleNamespace()).persist_result(run, {"summary": "obsolete"}, loaded)
-    connection.execute.assert_not_awaited()
+    assert all("SELECT set_config('app.authorized_feature'" in call.args[0]
+               for call in connection.execute.await_args_list)
     fresh.return_value = {**loaded, "permission_version": "revoked"}
     with pytest.raises(PermissionError, match="权限已变化"):
         await fde_profile.current_run_facts(connection, run)
@@ -224,7 +241,8 @@ async def test_stale_facts_or_permission_block_both_load_and_late_persistence(mo
 
 @pytest.mark.asyncio
 async def test_same_success_is_reused_and_empty_profile_does_not_enqueue(monkeypatch):
-    actor, connection = person(), AsyncMock()
+    actor = person()
+    connection = profile_connection(actor)
     loaded = facts(actor, visits=[visit()])
     monkeypatch.setattr(fde_profile, "require_agent_access", AsyncMock())
     monkeypatch.setattr(fde_profile.fde_profile, "lock_profile", AsyncMock())

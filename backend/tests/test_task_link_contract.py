@@ -57,7 +57,7 @@ def test_opportunity_choice_includes_exact_source_filter_and_empty_page_is_valid
     })
     assert response.status_code == 200
     assert response.json() == {"items": [], "has_more": False, "next_offset": None}
-    assert database.calls[0][3:] == (customer, "客户项目", 21, 20, opportunity)
+    assert database.calls[0] == (customer, "客户项目", 21, 20, opportunity)
 
 
 @pytest.mark.parametrize("params", [

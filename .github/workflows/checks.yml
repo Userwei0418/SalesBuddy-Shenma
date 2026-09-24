@@ -41,6 +41,8 @@ jobs:
         run: python scripts/check_isolation.py
       - name: Verify certificate deployment and rollback
         run: python deployment/tls/test_deploy_certificate.py
+      - name: Verify customer Agent prompt selection
+        run: python deployment/test_agent_specs.py
       - name: Backend unit suite
         run: cd backend && python -m pytest tests -q
       - name: Migration checks
@@ -55,3 +57,6 @@ jobs:
       - name: Customer bootstrap and runtime grants
         if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
         run: python deployment/check-provisioning-ci.py
+      - name: Existing V125 customer upgrade and identity preservation
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: python deployment/check-upgrade-ci.py

@@ -24,6 +24,22 @@ class AdviceRepository:
                 advice_id,
             )
         ]
+        rows = await connection.fetch(
+            """SELECT t.source_suggestion_id::text AS suggestion_id,t.id::text,t.status,
+            COALESCE(string_agg(u.display_name,'、' ORDER BY u.display_name),'待确认负责人') AS assignee_name,
+            COALESCE(string_agg(u.account_code,'、' ORDER BY u.display_name),'') AS assignee_account
+            FROM workflow.task t
+            JOIN insight.business_suggestion s ON s.id=t.source_suggestion_id
+            LEFT JOIN workflow.task_assignee a ON a.task_id=t.id AND a.responsibility='owner'
+            LEFT JOIN platform.user_ref u ON u.id=a.assignee_user_ref_id
+            WHERE s.advice_id=$1::uuid GROUP BY t.id ORDER BY t.created_at,t.id""", advice_id,
+        )
+        by_suggestion = {}
+        for task in rows:
+            ref = dict(task)
+            by_suggestion.setdefault(ref.pop("suggestion_id"), []).append(ref)
+        for suggestion in value["suggestions"]:
+            suggestion["tasks"] = by_suggestion.get(suggestion["id"], [])
         return value
 
     async def enqueue(self, connection, actor, analysis_id):

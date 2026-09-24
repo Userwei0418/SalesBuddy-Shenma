@@ -109,7 +109,7 @@ async def main():
         checks.append("upgrade_grants_nonsuper_nonbypass_runtime_without_delete")
 
         await context(connection, workspace, fde, "fde", team)
-        assert await connection.fetchval("SELECT security.profile_customer_owner($1)", customer) is None
+        assert await connection.fetchval("SELECT security.profile_customer_owner($1)", customer) == owner
         assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", customer) == owner
         assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", other_customer) is None
         actual_owner = await IdentityRepository().find_actor_by_id(connection, workspace_id=str(workspace), user_id=str(owner), role="sales")

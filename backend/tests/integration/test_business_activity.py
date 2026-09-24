@@ -94,6 +94,8 @@ async def test_opportunity_changes_and_tasks_have_human_business_semantics(conne
     customer = await create_customer(connection)
     sales = await actor(connection, "XS001")
     ops = await actor(connection, "OPS001")
+    from tests.integration.provision import authorize_opportunity_operations
+    await authorize_opportunity_operations(connection, ops)
     data = dict(
         name="活动商机" + uuid4().hex,
         amount=Decimal("200000"),

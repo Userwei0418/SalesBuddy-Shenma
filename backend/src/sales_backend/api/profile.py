@@ -17,14 +17,9 @@ from sales_backend.services.profile_performance import performance, save_target
 from sales_backend.services.profile_scores import competency_score
 
 
-def require_sales_profile_identity(identity: RequestIdentity = Depends(get_identity)) -> None:
-    if identity.actor.role.value not in {"sales", "supervisor", "manager"}:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "SALES_PROFILE_UNAVAILABLE")
-
-
-router = APIRouter(
-    prefix="/api/v1/profile", tags=["Profile"], dependencies=[Depends(require_sales_profile_identity)]
-)
+# Each route declares its own server action gate; business subject identity is
+# checked separately for self-assessments and never inferred from a login role.
+router = APIRouter(prefix="/api/v1/profile", tags=["Profile"])
 
 
 @router.get("/scope-options")
@@ -75,9 +70,9 @@ async def update_sales_target(
     )
 
 
-def _require_competency_subject(identity: RequestIdentity) -> None:
-    if identity.actor.role.value not in {"sales", "supervisor"}:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "COMPETENCY_PROFILE_UNAVAILABLE")
+async def _require_competency_subject(connection, identity):
+    if not await ProfileRepository().is_competency_subject(connection, identity.actor):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "当前账号没有销售评估任职")
 
 
 @router.post("/sales-growth/review", status_code=202)
@@ -85,8 +80,8 @@ async def ensure_sales_growth_review(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict[str, object]:
-    _require_competency_subject(identity)
     async with database.transaction(identity.actor) as connection:
+        await _require_competency_subject(connection, identity)
         review = await ProfileRepository().ensure_daily_competency_review(connection, identity.actor)
     return {"review_id": review["id"], "status": review["status"]}
 
@@ -97,8 +92,8 @@ async def sales_growth(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict[str, object]:
-    _require_competency_subject(identity)
     async with database.transaction(identity.actor, readonly=True) as connection:
+        await _require_competency_subject(connection, identity)
         result = await ProfileRepository().competency_growth(connection, identity.actor, days=days)
         return await competency_score(connection, result)
 
@@ -142,8 +137,6 @@ async def team_member_sales_growth(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict[str, object]:
-    if identity.actor.role.value not in {"supervisor", "manager"}:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "TEAM_GROWTH_FORBIDDEN")
     repository = ProfileRepository()
     async with database.transaction(identity.actor, readonly=True) as connection:
         subject = await repository.visible_sales_subject(connection, identity.actor, account_code=account_code)

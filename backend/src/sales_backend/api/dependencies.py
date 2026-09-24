@@ -25,6 +25,7 @@ class RequestIdentity:
     auth_method: str = ""
     must_change_password: bool = True
     authenticated_profile: ActorRecord | None = None
+    client_channel: str = "wechat-mini-program"
 
 
 def get_database(request: Request) -> Database:
@@ -51,6 +52,9 @@ async def get_identity(
     database: Database = Depends(get_database),
     settings: Settings = Depends(get_settings),
 ) -> RequestIdentity:
+    verified = getattr(request.state, "verified_identity", None)
+    if verified is not None:
+        return verified
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "AUTH_REQUIRED")
     try:
@@ -73,6 +77,7 @@ async def get_identity(
         actor=actor, session_id=session_id, profile=profile,
         auth_method=session_credentials.get("auth_method", ""),
         must_change_password=bool(session_credentials.get("must_change_password", True)),
+        client_channel=session_credentials.get("client_channel", "wechat-mini-program"),
     )
     request.state.identity = identity
     current_actor.set(actor)
@@ -103,4 +108,5 @@ async def get_identity(
                                authenticated_profile=profile)
             request.state.identity = identity
             current_actor.set(identity.actor)
+    request.state.verified_identity = identity
     return identity

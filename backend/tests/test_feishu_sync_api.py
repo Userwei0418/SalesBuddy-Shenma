@@ -1,34 +1,32 @@
-from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 
 from sales_backend.api import feishu_sync
 from sales_backend.api.dependencies import get_database
+from sales_backend.api.permission_gate import enforce_route_permission
+from tests.authorization_fixtures import install_http_authorization
 from sales_backend.api.management_dependencies import get_password_identity
 from sales_backend.domain.agent import RoleCode
 
 
 @pytest.fixture
 def console(monkeypatch):
-    app = FastAPI()
-    app.state.settings = SimpleNamespace()
+    app = FastAPI(dependencies=[Depends(enforce_route_permission)])
     app.include_router(feishu_sync.router)
-    identity = SimpleNamespace(
-        actor=SimpleNamespace(role=RoleCode.OPERATIONS, workspace_id="company"), must_change_password=False
-    )
+    person = SimpleNamespace(role=RoleCode.OPERATIONS, workspace_id="company", user_id="operator", team_ids=())
+    grants = {p: "workspace" for p in ("access.console", "feishu.read", "feishu.configure", "feishu.control", "feishu.recover")}
+    db, identity = install_http_authorization(monkeypatch, app, person, grants)
+    identity.grants = grants
     app.dependency_overrides[get_password_identity] = lambda: identity
-
-    class DB:
-        @asynccontextmanager
-        async def transaction(self, actor, **kwargs):
-            assert actor is identity.actor
-            yield object()
-
-    app.dependency_overrides[get_database] = DB
+    app.dependency_overrides[get_database] = lambda: db
+    from fastapi.responses import JSONResponse
+    @app.exception_handler(PermissionError)
+    async def denied(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=403)
     repository = SimpleNamespace(config=AsyncMock(), action=AsyncMock(), initialize=AsyncMock())
     monkeypatch.setattr(feishu_sync, "repository", repository)
     return TestClient(app), identity, repository
@@ -37,6 +35,7 @@ def console(monkeypatch):
 def test_non_management_role_cannot_read_or_enable(console):
     client, identity, repo = console
     identity.actor.role = RoleCode.SALES
+    identity.grants.clear()
     assert client.get("/api/v1/console/feishu-sync").status_code == 403
     assert client.post("/api/v1/console/feishu-sync/enable", json={"expected_revision": 1}).status_code == 403
     repo.config.assert_not_called()

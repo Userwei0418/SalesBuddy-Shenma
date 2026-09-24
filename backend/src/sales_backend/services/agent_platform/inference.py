@@ -155,8 +155,10 @@ class InferenceService:
         self.database, self.settings = database, settings
         self.platform, self.direct_factory = platform, direct_factory
 
-    async def assert_actor_current(self, actor):
+    async def assert_actor_current(self, actor, permission):
         async with self.database.transaction(actor, readonly=True) as connection:
+            from sales_backend.services.authorization import require_permission
+            await require_permission(connection, permission)
             current = await IdentityRepository().find_actor_by_id(
                 connection,
                 workspace_id=actor.workspace_id,
@@ -182,14 +184,13 @@ class InferenceService:
         rule_fallback: Callable[[], dict[str, Any]] | None = None,
     ) -> InferenceResult:
         if surface == "customer_risk":
-            if mode != "personal_risks" or actor.role.value not in {"sales", "supervisor", "manager"}:
-                raise PermissionError("客户风险评估须由客户经营角色使用 personal_risks 能力")
+            if mode != "personal_risks":
+                raise PermissionError("客户风险评估须使用 personal_risks 能力")
             if not messages:
                 raise ValueError("客户风险评估必须提供明确的后端提示词")
         elif surface is not None and (
             surface != "fde_profile"
             or mode != "operating_report"
-            or actor.role.value not in {"fde", "fde_lead"}
             or facts.get("coaching_inputs", {}).get("contract_version") != "fde.coaching.v1"
         ):
             raise PermissionError("推理场景来源不合法")
@@ -199,10 +200,17 @@ class InferenceService:
         business_policy = facts.get("agent_business_policy")
         if business_policy and business_policy.get("code") != "agent_business." + capability:
             raise ValueError("业务规则与当前能力不一致")
+        from sales_backend.domain.route_permissions import AGENT_PERMISSIONS
+        permission = ({"customer_risk": "risk.auto_review", "fde_profile": "profile.fde_review"}.get(surface)
+                      or {"customer_advice": "advice.customer", "opportunity_advice": "advice.opportunity",
+                          "visit_advice": "advice.visit", "visit_quality": "visit.quality_review",
+                          "opportunity_change": "opportunity.update", "battle_map_review": "battle_map.read",
+                          "competency_review": "profile.sales_review"}.get(mode)
+                      or AGENT_PERMISSIONS.get(mode, ""))
         operation_id = str(uuid4())  # fresh per worker attempt; run_id remains the stable business reference
         if run_id:
             UUID(run_id)
-        await self.assert_actor_current(actor)
+        await self.assert_actor_current(actor, permission)
         binding = binding_for(self.settings.agent_platform_bindings_json, actor.workspace_id, capability)
         audit = InferenceAudit(
             self.database,
@@ -359,7 +367,7 @@ class InferenceService:
             }
             if operation:
                 trace["platform_run"] = operation.diagnostics()
-            await self.assert_actor_current(actor)
+            await self.assert_actor_current(actor, permission)
             logger.info(
                 "inference completed capability=%s operation=%s provider=%s fallback=%s elapsed_ms=%s",
                 capability,

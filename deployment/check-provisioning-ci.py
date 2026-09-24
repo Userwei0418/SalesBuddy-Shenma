@@ -88,7 +88,7 @@ async def main():
                 == 1
             )
         print(
-            "Customer V125 grants, empty business data, bootstrap password and overwrite guards passed"
+            "Customer runtime grants, empty business data, bootstrap password and overwrite guards passed"
         )
     finally:
         if c:

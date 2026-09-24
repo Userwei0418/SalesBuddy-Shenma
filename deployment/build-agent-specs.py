@@ -35,10 +35,13 @@ def prompt_for(capability):
         )
     else:
         directory = ROOT / "backend/agent_platform" / capability
-        candidates = [p for p in (directory / "prompt.json", directory / "prompt.txt",
-                                  directory / "system_prompt.txt") if p.is_file()]
+        # The upstream release also ships system_prompt.txt publication copies.
+        # Customer-reviewed prompt.json/prompt.txt retain the extra fact guards.
+        candidates = [p for p in (directory / "prompt.json", directory / "prompt.txt") if p.is_file()]
+        if not candidates and (directory / "system_prompt.txt").is_file():
+            candidates = [directory / "system_prompt.txt"]
         if len(candidates) != 1:
-            raise ValueError(f"Expected exactly one maintained prompt: {capability}")
+            raise ValueError(f"Expected exactly one authoritative prompt: {capability}")
         source = candidates[0]
         prompt = (json.loads(source.read_text())["prompt"]["system_prompt"]
                   if source.suffix == ".json" else source.read_text())

@@ -59,9 +59,13 @@ async def test_unlock_validates_target_role_version_and_reason_before_mutation(r
         member=AsyncMock(return_value={"roles": ["administrator"], "version_no": 3}),
         unlock_login=AsyncMock(),
     )
-    actor = SimpleNamespace(role=role, workspace_id="workspace")
+    actor = SimpleNamespace(role=role, workspace_id="workspace", user_id="operator", team_ids=())
+    from tests.authorization_fixtures import configured_database
+    permissions={"account.unlock": "workspace"}
+    if role==RoleCode.ADMINISTRATOR:permissions["authorization.accounts_manage"]="workspace"
+    connection=configured_database(actor, permissions).connection
     with pytest.raises(error):
-        await service.unlock_login(object(), actor, "target", version, reason)
+        await service.unlock_login(connection, actor, "target", version, reason)
     service.repository.unlock_login.assert_not_awaited()
 
 

@@ -79,6 +79,8 @@ async def test_admin_opportunity_and_change_card_without_customer_ownership(conn
     sales = await actor(connection, "XS001")
     assert not await connection.fetchval("SELECT security.has_customer_access($1::uuid)", customer["id"])
     ops = await actor(connection, "OPS001")
+    from tests.integration.provision import authorize_opportunity_operations
+    await authorize_opportunity_operations(connection, ops)
     data = dict(
         name="隔离商机" + uuid4().hex,
         amount=Decimal("200000"),

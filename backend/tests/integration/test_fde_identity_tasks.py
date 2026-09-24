@@ -264,7 +264,7 @@ async def test_fde_http_capabilities_policy_refresh_and_analysis_revoke(connecti
         assert message.status_code == 202, message.text
         run_id = message.json()["run_id"]
         snapshot = await connection.fetchval("SELECT identity_context FROM agent.run WHERE id=$1::uuid", run_id)
-        assert snapshot["permission_version"] == await connection.fetchval("SELECT security.fde_permission_version()")
+        assert snapshot["permission_version"] == (await connection.fetchval("SELECT security.authorization_snapshot()"))["permission_version"]
         await actor(connection, "ADMIN001")
         rules = CompanyRulesRepository()
         current = await rules.active(connection, "fde_capabilities")
