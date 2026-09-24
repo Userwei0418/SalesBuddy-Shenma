@@ -1,0 +1,110 @@
+[
+  {
+    "capability": "chatbi",
+    "agent_id": "01a0cf84-2d2b-7e4e-8c9c-12e943470c9d",
+    "previous_snapshot": "01a0cfa8-b7ec-747c-baa3-0362beca75ba",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-c832-79d9-be81-c76e20aff6cc",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "battle_map_review",
+    "agent_id": "01a0cf84-2e82-76af-a5a4-38d815154f39",
+    "previous_snapshot": "01a0cfb6-76ad-7228-98fd-6275f81e1e4a",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-ca49-7e08-8e88-70bcfa061f3a",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "opportunity_draft",
+    "agent_id": "01a0cf84-2fab-7142-8e66-7c92f4a7a27a",
+    "previous_snapshot": "01a0cf84-3069-7c4d-8fb1-e059894afd0d",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-cb9f-71ff-bcf4-0f2c51ba3cc0",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "personal_risks",
+    "agent_id": "01a0cf84-30cf-7d38-af94-df8b9a352cd3",
+    "previous_snapshot": "01a0cfa8-ba01-70d1-994e-d9d5a4af21a7",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-ccf3-726a-81f0-bf06806f3bc9",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "visit_entry",
+    "agent_id": "01a0cf84-31d4-7077-8d65-d9b7422c0b7e",
+    "previous_snapshot": "01a0cf84-328d-7319-a120-3db890abccff",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf84-328d-7319-a120-3db890abccff",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "visit_quality",
+    "agent_id": "01a0cf84-32e0-709d-b729-0e6bdbe63ce7",
+    "previous_snapshot": "01a0cf84-33af-716c-892e-337e555fa37b",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-cf0d-7d01-9a8d-de7b7377cca6",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "today_tasks",
+    "agent_id": "01a0cf84-3402-77a2-818b-e87bb055fa6d",
+    "previous_snapshot": "01a0cf84-34ad-74c3-bf76-fcd5d3025ec3",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf84-34ad-74c3-bf76-fcd5d3025ec3",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "operating_report",
+    "agent_id": "01a0cf84-34f8-7ffa-9691-cb5b7d97e440",
+    "previous_snapshot": "01a0cfb6-7879-7e06-9a7c-d3912c9e7703",
+    "prompt_changed": true,
+    "published": true,
+    "snapshot_id": "01a0d349-d0a7-7eb0-9a0b-91a5d90bcd0b",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "customer_advice",
+    "agent_id": "01a0cf6f-2cf2-71b2-8f36-719f08920280",
+    "previous_snapshot": "01a0cf72-da8c-7465-82e2-3c82ee892a2c",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf72-da8c-7465-82e2-3c82ee892a2c",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "opportunity_advice",
+    "agent_id": "01a0cf84-3639-7d5f-8786-565739bb73db",
+    "previous_snapshot": "01a0cf9b-115d-7e1a-9fb1-0e6c8ee690ee",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf9b-115d-7e1a-9fb1-0e6c8ee690ee",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "visit_advice",
+    "agent_id": "01a0cf84-372a-7827-ab25-0dcfc145ce69",
+    "previous_snapshot": "01a0cf90-6ab0-72fd-aadd-91124cc52370",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf90-6ab0-72fd-aadd-91124cc52370",
+    "model_and_tools_preserved": true
+  },
+  {
+    "capability": "competency_review",
+    "agent_id": "01a0cf84-3826-7d85-9abe-7b17cdecc409",
+    "previous_snapshot": "01a0cf92-3b43-7ddd-962c-eca507f6f34e",
+    "prompt_changed": false,
+    "published": true,
+    "snapshot_id": "01a0cf92-3b43-7ddd-962c-eca507f6f34e",
+    "model_and_tools_preserved": true
+  }
+]
