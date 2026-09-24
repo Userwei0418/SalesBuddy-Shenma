@@ -49,7 +49,7 @@ python3_bin=/opt/shenma-sales/current/backend/.venv/bin/python
 
 ## 3. 配置销售 HTTPS
 
-本项目正式证书使用 Let's Encrypt；自动申请、续期定时器和重载配置见 [证书与自动续期](TLS.md)。下列路径也是自动续期后写入的位置。
+当前使用客户提供的国科云证书，已通过系统 CA 校验；续签与自动下发尚待客户运维确认，见 [证书与续期](TLS.md)。下列路径为实际服务使用位置。
 
 准备匹配 `salesbuddy.shenzhoukuntai.com` 的完整证书链和私钥，将下例 `/path/to/` 替换成实际安全交付路径：
 
@@ -89,7 +89,7 @@ python3 /opt/raccoon-agent/healthcheck.py --wait 300
 
 ## 5. 网关、小程序与验收
 
-用户已确认使用带端口地址：销售 `https://salesbuddy.shenzhoukuntai.com:28899`，中台 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。保留现有 NAT 映射，不要求新增公网 80/443。证书通过 DNS-01 自动验证，配置要求见 TLS.md。
+用户已确认使用带端口地址：销售 `https://salesbuddy.shenzhoukuntai.com:28899`，中台 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。保留现有 NAT 映射，不要求新增公网 80/443。当前已安装客户提供的正式证书，后续续签要求见 TLS.md。
 
 客户 AppID 填入 `frontend/project.config.json`；前端 API 固定指向销售域名的 `:28899/api/v1`。在客户小程序后台配置实际所用的合法请求/上传/下载域名，须包含 `:28899` 并与请求一致，再使用客户工程做真机登录、录音上传与业务操作验收。正式微信审核发布另行安排。
 

@@ -4,7 +4,7 @@
 
 | 目录 | 内容 |
 |---|---|
-| frontend | 客户小程序，AppID 待提供 |
+| frontend | 客户小程序，AppID `wx2824bdeb58528fd8` |
 | backend | 销售 API、管理端、Worker、受控中台适配器 |
 | database | 结构基线、系统种子及迁移，不含业务数据 |
 | agent-platform | 中台安装配置、API 源码、CLI、品牌资源和许可证 |

@@ -43,7 +43,7 @@
     "swc": false,
     "disableSWC": true
   },
-  "appid": "REPLACE_WITH_SHENMA_APPID",
+  "appid": "wx2824bdeb58528fd8",
   "projectname": "SalesBuddy-Shenma",
   "libVersion": "3.17.2",
   "condition": {
