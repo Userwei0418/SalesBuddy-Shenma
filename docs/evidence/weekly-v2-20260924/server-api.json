@@ -1,0 +1,35 @@
+{
+  "version": {
+    "mode": "release",
+    "revision": "605e6306d5abcd3c63f1961cd152836f5d676739",
+    "release": "605e6306d5abcd3c63f1961cd152836f5d676739",
+    "expected_schema": "V152"
+  },
+  "company": "神码测试公司",
+  "workspace_id": "b4613ad0-8944-4db1-9d55-96ba4cd80598",
+  "checks": [
+    "business_web_login_and_http_only_cookie",
+    "request_idempotency",
+    "self_scope_other_sales_denied",
+    "sales_console_denied",
+    "ZG001_self_report_only",
+    "ZJL001_self_report_only",
+    "operations_not_business_web",
+    "native_session_rejected",
+    "original_mini_program_login_works"
+  ],
+  "generation": {
+    "id": "9d84f703-6dd8-409e-944c-a182cf3ca75e",
+    "status": "succeeded",
+    "result_status": "insufficient_data",
+    "statistics": {
+      "record_count": 0,
+      "customer_count": 0,
+      "opportunity_count": 0
+    },
+    "input_sha256": "fd55b938f864dcfbb20ae41d424d69c876bea79e54b856004ee72ffc4b258223",
+    "draft_version": 0,
+    "runtime_snapshot_verified": false
+  },
+  "business_records_created": 0
+}

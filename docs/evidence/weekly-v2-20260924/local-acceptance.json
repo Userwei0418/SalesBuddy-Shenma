@@ -25,5 +25,5 @@
   },
   "agent_api_cases": "agent-api-cases.json",
   "runtime_snapshot_verified": false,
-  "remaining": "Customer deployment and actual server worker probe; business Web UI pending separate delivery"
+  "remaining": "Local-stage receipt; customer deployment and Worker completion are recorded separately in server-api.json, server-worker.json and upgrade.json"
 }

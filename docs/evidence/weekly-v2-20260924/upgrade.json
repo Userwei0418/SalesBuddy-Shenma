@@ -1,0 +1,15 @@
+{
+  "revision": "605e6306d5abcd3c63f1961cd152836f5d676739",
+  "previous": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+  "database": "V152",
+  "backup": "/var/backups/shenma-sales/20260924T151142Z-v152",
+  "restore_table_counts_verified": 112,
+  "existing_rows_unchanged": true,
+  "migration_repeat_unchanged": true,
+  "version": {
+    "mode": "release",
+    "revision": "605e6306d5abcd3c63f1961cd152836f5d676739",
+    "release": "605e6306d5abcd3c63f1961cd152836f5d676739",
+    "expected_schema": "V152"
+  }
+}

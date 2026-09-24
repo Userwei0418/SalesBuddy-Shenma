@@ -1,0 +1,20 @@
+{
+  "runtime_nonsuper_nonbypass": true,
+  "queue_claim_and_ack": true,
+  "job_effect_receipt": true,
+  "agent_contract_validated": true,
+  "original_result_preserved": true,
+  "manual_version_conflict": true,
+  "runtime_metadata": {
+    "task_id": "84323312-5760-4138-8057-0d57d53f88ff",
+    "message_id": "a7822700-fe53-4869-a14e-9d7cfe953b17",
+    "input_tokens": 5853,
+    "output_tokens": 835,
+    "conversation_id": "838be4c8-5f8b-4f5e-bef8-12977f83d355",
+    "actual_snapshot_id": null,
+    "expected_snapshot_id": "01a0d3f4-aae0-7858-99ee-11e38f2d99dd",
+    "runtime_snapshot_verified": false
+  },
+  "body_sha256": "943b3315109300427c964d913802030616417c987a9e6dbded6c15c27ee219b7",
+  "synthetic_rows_rolled_back": true
+}
