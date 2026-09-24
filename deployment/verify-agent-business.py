@@ -194,7 +194,7 @@ def check(case, answer):
     return clean
 
 
-async def run(bindings, output, suite, case_names=None):
+async def run(bindings, output, suite, case_names=None, ca_bundle_path=""):
     results = []
     cases = {"core": lambda: list(CASES), "coaching": coaching_cases,
              "workbench": workbench_cases, "report_map": report_map_cases}[suite]()
@@ -205,7 +205,7 @@ async def run(bindings, output, suite, case_names=None):
     for case in cases:
         binding = bindings[case["capability"]]
         config = FdeConfig("https://ops-salesbuddy.shenzhoukuntai.com:18899/v1", binding["api_key"],
-                           "agent_final", timeout_seconds=30, ca_bundle_path="/etc/shenma-sales/agent-ca.pem")
+                           "agent_final", timeout_seconds=30, ca_bundle_path=ca_bundle_path)
         query = {"mode": case["capability"], "role": case.get("role", "sales"), "user_text": case["text"],
                  "current_time": case["facts"]["data_as_of"], "facts": case["facts"]}
         if "backend_prompt" in case:
@@ -230,6 +230,9 @@ async def run(bindings, output, suite, case_names=None):
         except (AssertionError, ValueError, TypeError, KeyError, RuntimeError, OSError) as error:
             # Never include upstream response bodies or credential-bearing exception strings.
             result["error_type"] = type(error).__name__
+            if hasattr(error, "code"):
+                result["error_code"] = error.code
+                result["http_status"] = error.status
         result["elapsed_ms"] = round((monotonic() - started) * 1000)
         results.append(result)
         print(json.dumps({k: v for k, v in result.items() if k not in {"answer", "validated"}},
@@ -249,13 +252,16 @@ def main():
     if os.geteuid() != 0 or socket.gethostname() != "salesbuddy":
         raise SystemExit("Run as root on customer salesbuddy only")
     bindings = json.loads(Path("/var/lib/shenma-provision/agent-runtime-bindings.json").read_text())
+    runtime = dict(line.split("=", 1) for line in Path("/etc/shenma-sales/runtime.env").read_text().splitlines()
+                   if line and not line.startswith("#") and "=" in line)
+    ca_bundle_path = runtime.get("AGENT_FDE_CA_BUNDLE", "")
     fd = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     service = pwd.getpwnam("shenma-sales")
     os.initgroups(service.pw_name, service.pw_gid)
     os.setgid(service.pw_gid)
     os.setuid(service.pw_uid)
     with os.fdopen(fd, "w") as output:
-        passed = asyncio.run(run(bindings, output, args.suite, args.case_names))
+        passed = asyncio.run(run(bindings, output, args.suite, args.case_names, ca_bundle_path))
     raise SystemExit(0 if passed else 1)
 
 

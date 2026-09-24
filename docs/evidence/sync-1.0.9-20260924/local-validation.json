@@ -27,5 +27,11 @@
   },
   "customer_fresh_install": true,
   "tls_deployment_checks": true,
-  "runtime_deployed": false
+  "runtime_deployed": true,
+  "runtime_evidence": "runtime-validation.json",
+  "helper_tls_regression": {
+    "passed": 2,
+    "actual_contract_cases_passed": 8
+  },
+  "agent_prompt_selection_tests": 2
 }

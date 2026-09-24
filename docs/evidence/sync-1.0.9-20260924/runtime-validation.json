@@ -1,0 +1,385 @@
+{
+  "upgrade": {
+    "revision": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+    "previous": "7c7a376cc36873a7ba122c2663f075c2dfc85102",
+    "database": "V151",
+    "backup": "/var/backups/shenma-sales/20260924T115926Z-v151",
+    "restore_table_counts_verified": 103,
+    "existing_rows_unchanged": true,
+    "migration_repeat_unchanged": true,
+    "version": {
+      "mode": "release",
+      "revision": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+      "release": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+      "expected_schema": "V151"
+    }
+  },
+  "accounts": {
+    "revision": {
+      "mode": "release",
+      "revision": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+      "release": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816",
+      "expected_schema": "V151"
+    },
+    "accounts": [
+      {
+        "account": "OPSADMIN",
+        "role": "administrator",
+        "login_permissions": true,
+        "business_home": false,
+        "console_scope": true
+      },
+      {
+        "account": "XS001",
+        "role": "sales",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "ZG001",
+        "role": "supervisor",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "ZJL001",
+        "role": "manager",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "FDE001",
+        "role": "fde",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "FDEZG001",
+        "role": "fde_lead",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "YY001",
+        "role": "operations",
+        "login_permissions": true,
+        "business_home": false,
+        "console_scope": true
+      },
+      {
+        "account": "XS002",
+        "role": "sales",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "ZG002",
+        "role": "supervisor",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "ZJL002",
+        "role": "manager",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "FDE002",
+        "role": "fde",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "FDEZG002",
+        "role": "fde_lead",
+        "login_permissions": true,
+        "business_home": true,
+        "console_scope": true
+      },
+      {
+        "account": "YY002",
+        "role": "operations",
+        "login_permissions": true,
+        "business_home": false,
+        "console_scope": true
+      }
+    ],
+    "cross_company_denied": true,
+    "passwords_preserved": true,
+    "business_records_created": 0
+  },
+  "snapshot_reconciliation": {
+    "updated": [
+      {
+        "workspace": "f98b0486-0f83-4930-8219-b86c73c764ef",
+        "capability": "opportunity_draft"
+      },
+      {
+        "workspace": "f98b0486-0f83-4930-8219-b86c73c764ef",
+        "capability": "visit_quality"
+      },
+      {
+        "workspace": "b4613ad0-8944-4db1-9d55-96ba4cd80598",
+        "capability": "opportunity_draft"
+      },
+      {
+        "workspace": "b4613ad0-8944-4db1-9d55-96ba4cd80598",
+        "capability": "visit_quality"
+      }
+    ],
+    "credentials_models_rollout_unchanged": true,
+    "runtime_snapshot_verified": false
+  },
+  "worker_probes": [
+    {
+      "target": "customer_advice",
+      "status": "passed",
+      "elapsed_ms": 5428,
+      "fallback_used": false,
+      "business_writes": false,
+      "execution_process": "worker",
+      "business_acceptance": false,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "target": "opportunity_draft",
+      "status": "passed",
+      "elapsed_ms": 2104,
+      "fallback_used": false,
+      "business_writes": false,
+      "execution_process": "worker",
+      "business_acceptance": false,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "target": "visit_entry",
+      "status": "passed",
+      "elapsed_ms": 1963,
+      "fallback_used": false,
+      "business_writes": false,
+      "execution_process": "worker",
+      "business_acceptance": false,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "target": "visit_quality",
+      "status": "passed",
+      "elapsed_ms": 2543,
+      "fallback_used": false,
+      "business_writes": false,
+      "execution_process": "worker",
+      "business_acceptance": false,
+      "runtime_snapshot_verified": false
+    }
+  ],
+  "pilot_expires_at": "2026-09-26T06:48:44.304731+00:00",
+  "contract_checks": [
+    {
+      "file": "contracts-core.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "opportunity_create",
+          "capability": "opportunity_draft",
+          "passed": false,
+          "elapsed_ms": 262,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "opportunity_none",
+          "capability": "opportunity_draft",
+          "passed": false,
+          "elapsed_ms": 36,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "visit_repeat",
+          "capability": "visit_entry",
+          "passed": false,
+          "elapsed_ms": 55,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    },
+    {
+      "file": "contracts-workbench.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "chatbi_counts",
+          "capability": "chatbi",
+          "passed": false,
+          "elapsed_ms": 308,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "risks_budget",
+          "capability": "personal_risks",
+          "passed": false,
+          "elapsed_ms": 32,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    },
+    {
+      "file": "contracts-report-map.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "report_empty_sales",
+          "capability": "operating_report",
+          "passed": false,
+          "elapsed_ms": 197,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "map_visit",
+          "capability": "battle_map_review",
+          "passed": false,
+          "elapsed_ms": 49,
+          "error_type": "FdeError",
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    },
+    {
+      "file": "contracts-core-v2.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "opportunity_create",
+          "capability": "opportunity_draft",
+          "passed": true,
+          "elapsed_ms": 2367,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "opportunity_none",
+          "capability": "opportunity_draft",
+          "passed": true,
+          "elapsed_ms": 1678,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "visit_repeat",
+          "capability": "visit_entry",
+          "passed": true,
+          "elapsed_ms": 2424,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "visit_quality",
+          "capability": "visit_quality",
+          "passed": true,
+          "elapsed_ms": 2709,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    },
+    {
+      "file": "contracts-workbench-v2.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "chatbi_counts",
+          "capability": "chatbi",
+          "passed": true,
+          "elapsed_ms": 1938,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "risks_budget",
+          "capability": "personal_risks",
+          "passed": true,
+          "elapsed_ms": 1950,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    },
+    {
+      "file": "contracts-report-map-v2.json",
+      "synthetic_only": true,
+      "business_writes": false,
+      "results": [
+        {
+          "case": "report_empty_sales",
+          "capability": "operating_report",
+          "passed": true,
+          "elapsed_ms": 1932,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        },
+        {
+          "case": "map_visit",
+          "capability": "battle_map_review",
+          "passed": true,
+          "elapsed_ms": 1994,
+          "error_type": null,
+          "error_code": null,
+          "http_status": null
+        }
+      ]
+    }
+  ],
+  "processes": [
+    {
+      "service": "shenma-api",
+      "active": "active",
+      "cwd": "/opt/shenma-sales/releases/bb02f639da4dbdd0d5a8f704d61ae7d234a4e816/backend",
+      "revision": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816"
+    },
+    {
+      "service": "shenma-worker",
+      "active": "active",
+      "cwd": "/opt/shenma-sales/releases/bb02f639da4dbdd0d5a8f704d61ae7d234a4e816/backend",
+      "revision": "bb02f639da4dbdd0d5a8f704d61ae7d234a4e816"
+    }
+  ],
+  "database": {
+    "head": "V151",
+    "checksums": 119,
+    "runtime_superuser": false,
+    "runtime_bypassrls": false
+  }
+}

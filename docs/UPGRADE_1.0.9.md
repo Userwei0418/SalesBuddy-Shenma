@@ -2,7 +2,7 @@
 
 适用：销售主机 `salesbuddy` / `172.22.9.234`，已有 V125 数据库。首次安装脚本不用于本次升级。
 
-1. 在干净的神码提交运行 `scripts/package_source.py --output-dir <仓库外目录>`，记录源码 SHA、包 SHA256；按 `deployment/runtime-requirements.txt` 准备 Linux Python 3.12 离线 wheel 包，附 SHA256SUMS。
+1. 在干净的神码提交运行 `scripts/package_source.py --output-dir <仓库外目录>`，记录源码 SHA、包 SHA256；按 `deployment/runtime-requirements.txt` 准备 Linux Python 3.12 离线 wheel 包，附 SHA256SUMS。离线包还必须包含构建所需的 `hatchling`、`editables==0.5` 及其依赖；运行依赖列表不含这些构建依赖。
 2. 将两个包及本版 `deployment/upgrade-sales.py` 传到销售主机，核对当前 REVISION 与计划一致。
 3. 以 root 执行：
 
