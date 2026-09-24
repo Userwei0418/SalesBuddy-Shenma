@@ -40,6 +40,12 @@ class Settings:
     agent_platform_bindings_json: str = "{}"
     agent_fde_pilot_json: str = "{}"
     agent_fde_pilot_path: str = ""
+    weekly_agent_api_key: str = field(default="", repr=False)
+    weekly_agent_app_id: str = ""
+    weekly_agent_snapshot_id: str = ""
+    weekly_enabled_workspaces: str = ""
+    weekly_timeout_seconds: float = 180.0
+    weekly_max_input_bytes: int = 180000
     agent_fde_base_url: str = ""
     agent_fde_ca_bundle: str = ""
     agent_fde_chatbi_id: str = ""
@@ -135,6 +141,12 @@ def get_settings() -> Settings:
         agent_platform_bindings_json=os.getenv("AGENT_PLATFORM_BINDINGS_JSON", "{}"),
         agent_fde_pilot_json=os.getenv("AGENT_FDE_PILOT_JSON", "{}"),
         agent_fde_pilot_path=os.getenv("AGENT_FDE_PILOT_PATH", ""),
+        weekly_agent_api_key=os.getenv("WEEKLY_AGENT_API_KEY", ""),
+        weekly_agent_app_id=os.getenv("WEEKLY_AGENT_APP_ID", ""),
+        weekly_agent_snapshot_id=os.getenv("WEEKLY_AGENT_SNAPSHOT_ID", ""),
+        weekly_enabled_workspaces=os.getenv("WEEKLY_ENABLED_WORKSPACES", ""),
+        weekly_timeout_seconds=float(os.getenv("WEEKLY_TIMEOUT_SECONDS", "180")),
+        weekly_max_input_bytes=int(os.getenv("WEEKLY_MAX_INPUT_BYTES", "180000")),
         agent_fde_base_url=os.getenv("AGENT_FDE_BASE_URL", ""),
         agent_fde_ca_bundle=os.getenv("AGENT_FDE_CA_BUNDLE", ""),
         agent_fde_chatbi_id=os.getenv("AGENT_FDE_CHATBI_ID", ""),

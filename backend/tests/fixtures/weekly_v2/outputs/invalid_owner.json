@@ -1,0 +1,28 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "invalid_input",
+  "title": "周报",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "",
+  "sections": [],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": [
+    {
+      "code": "recorder_mismatch",
+      "message": "记录x3的recorder_id=another-person与author.id=sales-demo不一致，无法确认归属本人，拒绝生成周报",
+      "source_ids": [
+        "x3"
+      ],
+      "field": "records[0].recorder_id"
+    }
+  ]
+}

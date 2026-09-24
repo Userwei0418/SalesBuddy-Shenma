@@ -1,0 +1,71 @@
+{
+  "contract_version": "weekly.v2",
+  "generation_id": "synthetic-weekly-v2",
+  "current_time": "2026-09-24T12:00:00+08:00",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "author": {
+    "id": "sales-demo",
+    "display_name": "演示销售"
+  },
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "records": [
+    {
+      "id": "z1",
+      "recorder_id": "sales-demo",
+      "recorder_name": "演示销售",
+      "customer_id": "c-a",
+      "customer_name": "演示甲公司",
+      "opportunity_id": "o-kb",
+      "opportunity_name": "知识库试点",
+      "created_at": "2026-09-23T02:00:00Z",
+      "visit_date": "2026-09-23",
+      "follow_up_record": "客户仅讨论概念验证。",
+      "next_action": "",
+      "status": "archived",
+      "version_no": 1,
+      "source_ref": {
+        "type": "visit",
+        "id": "z1",
+        "version_no": 1,
+        "snapshot_ref": "synthetic:visit:z1:v1"
+      }
+    }
+  ],
+  "context": {
+    "as_of": "2026-09-24T12:00:00+08:00",
+    "customers": [],
+    "opportunities": [
+      {
+        "id": "o-kb",
+        "customer_id": "c-a",
+        "name": "知识库试点",
+        "amount": 0,
+        "currency": "CNY",
+        "stage_label": "方案沟通",
+        "status": "open",
+        "probability": 50,
+        "expected_close_date": "2026-10-30",
+        "product_line": "知识库",
+        "sales_channel": "direct",
+        "partner_name": null,
+        "follow_up_plan": null,
+        "updated_at": "2026-09-24T03:00:00Z",
+        "source_ref": {
+          "type": "opportunity",
+          "id": "o-kb",
+          "version_no": 1,
+          "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+        }
+      }
+    ]
+  }
+}

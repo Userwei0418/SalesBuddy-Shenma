@@ -2273,6 +2273,17 @@ components:
       - note
       title: FeishuRecovery
       type: object
+    GenerateRequest:
+      additionalProperties: false
+      properties:
+        request_id:
+          format: uuid
+          title: Request Id
+          type: string
+      required:
+      - request_id
+      title: GenerateRequest
+      type: object
     HTTPValidationError:
       properties:
         detail:
@@ -3870,6 +3881,23 @@ components:
       - amount
       title: SalesTargetUpdate
       type: object
+    SaveDraftRequest:
+      additionalProperties: false
+      properties:
+        body_markdown:
+          maxLength: 200000
+          minLength: 1
+          title: Body Markdown
+          type: string
+        expected_version:
+          minimum: 1.0
+          title: Expected Version
+          type: integer
+      required:
+      - expected_version
+      - body_markdown
+      title: SaveDraftRequest
+      type: object
     SaveFeishuConfig:
       additionalProperties: false
       properties:
@@ -4950,6 +4978,262 @@ components:
       - created_date
       - within_seven_days
       title: VisitSummary
+      type: object
+    WeeklyDetail:
+      properties:
+        actual_snapshot_id:
+          title: Actual Snapshot Id
+          type: 'null'
+        body_markdown:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Body Markdown
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        draft_references_validated:
+          title: Draft References Validated
+          type: boolean
+        draft_source:
+          anyOf:
+          - enum:
+            - agent
+            - manual
+            type: string
+          - type: 'null'
+          title: Draft Source
+        draft_version:
+          title: Draft Version
+          type: integer
+        error_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error Code
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        input_sha256:
+          title: Input Sha256
+          type: string
+        original_result:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Original Result
+        period:
+          $ref: '#/components/schemas/WeeklyPeriod'
+        request_id:
+          format: uuid
+          title: Request Id
+          type: string
+        result_status:
+          anyOf:
+          - enum:
+            - ready
+            - insufficient_data
+            - invalid_input
+            type: string
+          - type: 'null'
+          title: Result Status
+        runtime_metadata:
+          additionalProperties: true
+          title: Runtime Metadata
+          type: object
+        runtime_snapshot_verified:
+          const: false
+          title: Runtime Snapshot Verified
+          type: boolean
+        statistics:
+          $ref: '#/components/schemas/WeeklyStatistics'
+        status:
+          enum:
+          - queued
+          - running
+          - succeeded
+          - failed
+          - cancelled
+          title: Status
+          type: string
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - id
+      - request_id
+      - status
+      - result_status
+      - period
+      - statistics
+      - input_sha256
+      - draft_version
+      - error_code
+      - created_at
+      - updated_at
+      - finished_at
+      - runtime_snapshot_verified
+      - actual_snapshot_id
+      - title
+      - body_markdown
+      - original_result
+      - draft_source
+      - draft_references_validated
+      - runtime_metadata
+      title: WeeklyDetail
+      type: object
+    WeeklyList:
+      properties:
+        has_more:
+          title: Has More
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/WeeklySummary'
+          title: Items
+          type: array
+      required:
+      - items
+      - has_more
+      title: WeeklyList
+      type: object
+    WeeklyPeriod:
+      properties:
+        date_basis:
+          const: created_at
+          title: Date Basis
+          type: string
+        end_date:
+          format: date
+          title: End Date
+          type: string
+        start_date:
+          format: date
+          title: Start Date
+          type: string
+        timezone:
+          const: Asia/Shanghai
+          title: Timezone
+          type: string
+      required:
+      - start_date
+      - end_date
+      - timezone
+      - date_basis
+      title: WeeklyPeriod
+      type: object
+    WeeklyStatistics:
+      properties:
+        customer_count:
+          title: Customer Count
+          type: integer
+        opportunity_count:
+          title: Opportunity Count
+          type: integer
+        record_count:
+          title: Record Count
+          type: integer
+      required:
+      - record_count
+      - customer_count
+      - opportunity_count
+      title: WeeklyStatistics
+      type: object
+    WeeklySummary:
+      properties:
+        actual_snapshot_id:
+          title: Actual Snapshot Id
+          type: 'null'
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        draft_version:
+          title: Draft Version
+          type: integer
+        error_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Error Code
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        id:
+          format: uuid
+          title: Id
+          type: string
+        input_sha256:
+          title: Input Sha256
+          type: string
+        period:
+          $ref: '#/components/schemas/WeeklyPeriod'
+        request_id:
+          format: uuid
+          title: Request Id
+          type: string
+        result_status:
+          anyOf:
+          - enum:
+            - ready
+            - insufficient_data
+            - invalid_input
+            type: string
+          - type: 'null'
+          title: Result Status
+        runtime_snapshot_verified:
+          const: false
+          title: Runtime Snapshot Verified
+          type: boolean
+        statistics:
+          $ref: '#/components/schemas/WeeklyStatistics'
+        status:
+          enum:
+          - queued
+          - running
+          - succeeded
+          - failed
+          - cancelled
+          title: Status
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - id
+      - request_id
+      - status
+      - result_status
+      - period
+      - statistics
+      - input_sha256
+      - draft_version
+      - error_code
+      - created_at
+      - updated_at
+      - finished_at
+      - runtime_snapshot_verified
+      - actual_snapshot_id
+      title: WeeklySummary
       type: object
     sales_backend__contracts__detail_reads__ProfileDimension:
       properties:
@@ -14177,6 +14461,253 @@ paths:
       summary: Supplement Visit
       tags:
       - Business
+  /api/v1/web/auth/login:
+    post:
+      operationId: login_api_v1_web_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordLogin'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Login
+      tags:
+      - Business Web authentication
+  /api/v1/web/auth/logout:
+    post:
+      operationId: logout_api_v1_web_auth_logout_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Logout
+      tags:
+      - Business Web authentication
+  /api/v1/web/auth/me:
+    get:
+      operationId: me_api_v1_web_auth_me_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Me
+      tags:
+      - Business Web authentication
+  /api/v1/web/auth/password:
+    post:
+      operationId: change_password_api_v1_web_auth_password_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Change Password
+      tags:
+      - Business Web authentication
+  /api/v1/web/auth/refresh:
+    post:
+      operationId: refresh_api_v1_web_auth_refresh_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Refresh
+      tags:
+      - Business Web authentication
+  /api/v1/web/weekly-reports:
+    get:
+      operationId: list_reports_api_v1_web_weekly_reports_get
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyList'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: List Reports
+      tags:
+      - Business Web weekly reports
+    post:
+      operationId: generate_api_v1_web_weekly_reports_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySummary'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Generate
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}:
+    get:
+      operationId: detail_api_v1_web_weekly_reports__report_id__get
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDetail'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Detail
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}/cancel:
+    post:
+      operationId: cancel_api_v1_web_weekly_reports__report_id__cancel_post
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySummary'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Cancel
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}/draft:
+    patch:
+      operationId: save_draft_api_v1_web_weekly_reports__report_id__draft_patch
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveDraftRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDetail'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Save Draft
+      tags:
+      - Business Web weekly reports
   /api/v1/workbench:
     get:
       operationId: workbench_api_v1_workbench_get

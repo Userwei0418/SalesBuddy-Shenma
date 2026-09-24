@@ -21,6 +21,7 @@ VISIT_ENTRY = frozenset({
 })
 SALES_COMMON = BUSINESS_COMMON | VISIT_ENTRY | frozenset({
     "visit.first_visit", "visit.attendance_manage",
+    "access.business_web", "weekly_report.generate", "weekly_report.read", "weekly_report.edit", "weekly_report.cancel",
     "customer.update", "customer.claim", "customer.claim_directory", "opportunity.create", "opportunity.update", "opportunity.close",
     "opportunity.reopen", "opportunity.fde_members", "task.assign", "risk.read", "risk.resolve", "risk.auto_review", "advice.customer",
     "actual.read", "dashboard.read", "dashboard.ranking", "profile.sales_read", "profile.sales_review",

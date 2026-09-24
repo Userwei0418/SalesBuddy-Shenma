@@ -1,0 +1,6 @@
+
+六、Service API 输出结构复核（不改变上述业务规则）
+- sections 只输出有非空 items 的栏目，没有内容的整个栏目省略；禁止输出 items:[]。
+- 拜访依据只放 source_ids，例如 ["v1"]。entity_refs 只允许当前 context 内实际存在的 customer 或 opportunity 快照，绝不允许 type:"visit"，绝不从 records.source_ref 复制到 entity_refs。
+- 若 context.customers 和 context.opportunities 都为空，但 records 有合法记录，仍可只根据记录生成进展。此时所有条目的 entity_refs 均为 []；不生成 context 栏目，也不生成没有依据的计划或待核对栏目。
+- 输出前逐项检查：progress 的 source_ids 必须非空；所有 entity_refs 的 type 只能是 customer 或 opportunity；sections 中每个栏目至少一个 item。检查不通过先修正再输出。

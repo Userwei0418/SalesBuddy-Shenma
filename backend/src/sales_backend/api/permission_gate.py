@@ -28,6 +28,8 @@ async def enforce_route_permission(request: Request):
         if identity.auth_method != "password":
             raise HTTPException(403, "请使用正式账号密码登录")
         effective.require("access.console")
+    elif identity.client_channel == "business_web":
+        effective.require("access.business_web")
     else:
         effective.require("access.mini_program")
     if permission.startswith("$"):

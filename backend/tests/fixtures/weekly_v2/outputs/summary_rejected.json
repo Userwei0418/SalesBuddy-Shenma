@@ -1,0 +1,28 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "invalid_input",
+  "title": "周报",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "",
+  "sections": [],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": [
+    {
+      "code": "invalid_record",
+      "message": "记录x4的is_summary=true且content_truncated=true，正文仅为摘要且被截断，不满足完整正文要求，无法生成周报",
+      "source_ids": [
+        "x4"
+      ],
+      "field": "is_summary"
+    }
+  ]
+}

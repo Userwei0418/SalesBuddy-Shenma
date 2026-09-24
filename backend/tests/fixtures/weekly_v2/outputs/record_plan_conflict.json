@@ -1,0 +1,79 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026-09-11至2026-09-24）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026-09-11至2026-09-24）\n\n## 演示甲公司\n行业：企业软件｜客户类型：商机客户\n\n### 知识库试点\nACV：20万元人民币｜当前阶段：方案沟通｜预计关单：2026-10-30\n产品线：知识库｜销售渠道：直销\n\n- 需核对：跟进记录显示客户表示本轮不采购，原定9月30日签约安排取消；商机档案计划仍为9月30日销售与客户签约，双方信息冲突，需核对当前安排。",
+  "sections": [
+    {
+      "key": "context",
+      "title": "客观信息",
+      "items": [
+        {
+          "text": "演示甲公司：行业企业软件，客户类型商机客户",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "customer",
+              "id": "c-a",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:customer:c-a:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        },
+        {
+          "text": "知识库试点：ACV 20万元人民币，当前阶段方案沟通，预计关单2026-10-30，产品线知识库，销售渠道直销",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-kb",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "gaps",
+      "title": "需核对",
+      "items": [
+        {
+          "text": "跟进记录显示客户表示本轮不采购，原定9月30日签约安排取消；商机档案计划仍为9月30日销售与客户签约，需核对当前安排",
+          "source_ids": [
+            "c1"
+          ],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-kb",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": true
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": []
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026年9月11日至9月24日）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026年9月11日至9月24日）\n\n## 演示甲公司\n\n### 知识库试点\n- 进展：9月11日完成需求评审，客户确认试点范围。",
+  "sections": [
+    {
+      "key": "progress",
+      "title": "进展",
+      "items": [
+        {
+          "text": "9月11日完成需求评审，客户确认试点范围。",
+          "source_ids": [
+            "v14"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": []
+}

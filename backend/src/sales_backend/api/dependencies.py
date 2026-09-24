@@ -84,6 +84,7 @@ async def get_identity(
     # Initial-password sessions may only inspect identity, change password or log out.
     if session_credentials.get("auth_method") == "password" and session_credentials.get("must_change_password"):
         allowed = {"/api/v1/auth/me", "/api/v1/auth/password", "/api/v1/auth/logout",
+                   "/api/v1/web/auth/me", "/api/v1/web/auth/password", "/api/v1/web/auth/logout",
                    "/api/v1/console/auth/me", "/api/v1/console/auth/password", "/api/v1/console/auth/logout"}
         if request.url.path not in allowed:
             raise HTTPException(403, "PASSWORD_CHANGE_REQUIRED")

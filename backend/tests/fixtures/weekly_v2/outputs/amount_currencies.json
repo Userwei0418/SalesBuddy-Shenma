@@ -1,0 +1,112 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026-09-11至2026-09-24）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026-09-11至2026-09-24）\n\n## 演示甲公司\n行业：企业软件｜客户类型：商机客户\n\n### 知识库试点\nACV：12.505万元人民币｜预计关单：2026-10-30\n产品线：知识库\n- 进展：客户年度预算100万元，拟报价20万元；未发报价、未签合同。\n\n## 演示乙公司\n行业：制造业｜客户类型：商机客户\n\n### 视觉检测试点\nACV：30000美元｜当前阶段：方案沟通｜预计关单：2026-10-30\n- 进展：已安排测试，尚无验收结论。",
+  "sections": [
+    {
+      "key": "context",
+      "title": "客观信息",
+      "items": [
+        {
+          "text": "演示甲公司：行业企业软件，客户类型商机客户",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "customer",
+              "id": "c-a",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:customer:c-a:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        },
+        {
+          "text": "知识库试点：ACV 12.505万元人民币，预计关单2026-10-30，产品线知识库",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-kb",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        },
+        {
+          "text": "演示乙公司：行业制造业，客户类型商机客户",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "customer",
+              "id": "c-b",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:customer:c-b:v1"
+            }
+          ],
+          "customer_id": "c-b",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        },
+        {
+          "text": "视觉检测试点：ACV 30000美元，当前阶段方案沟通，预计关单2026-10-30",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-vision",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-vision:v1"
+            }
+          ],
+          "customer_id": "c-b",
+          "opportunity_id": "o-vision",
+          "needs_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "progress",
+      "title": "进展",
+      "items": [
+        {
+          "text": "客户年度预算100万元，拟报价20万元；未发报价、未签合同。",
+          "source_ids": [
+            "a1"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        },
+        {
+          "text": "已安排测试，尚无验收结论。",
+          "source_ids": [
+            "a2"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-b",
+          "opportunity_id": "o-vision",
+          "needs_confirmation": false
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 2,
+    "customer_count": 2,
+    "opportunity_count": 2
+  },
+  "warnings": []
+}

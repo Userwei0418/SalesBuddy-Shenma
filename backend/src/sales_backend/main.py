@@ -23,6 +23,8 @@ from sales_backend.api.business_activity import router as business_activity_rout
 from sales_backend.api.collaboration import router as collaboration_router
 from sales_backend.api.company_rules import router as company_rules_router
 from sales_backend.api.console_auth import router as console_auth_router
+from sales_backend.api.web_auth import router as web_auth_router
+from sales_backend.api.weekly_reports import router as weekly_reports_router
 from sales_backend.api.companies import router as companies_router
 from sales_backend.api.customer_assets import router as customer_assets_router
 from sales_backend.api.customers import router as customers_router
@@ -128,6 +130,8 @@ app.include_router(operations_targets_router)
 app.include_router(auth_router)
 app.include_router(authorization_router)
 app.include_router(console_auth_router)
+app.include_router(web_auth_router)
+app.include_router(weekly_reports_router)
 app.include_router(companies_router)
 app.include_router(operations_customers_router)
 app.include_router(operations_accounts_router)

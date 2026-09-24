@@ -60,6 +60,7 @@ class AuthService:
     async def refresh(
         self, refresh_token: str, *, require_password: bool = False,
         expected_session: SessionReference | None = None,
+        expected_channel: str | None = None,
     ) -> SessionResponse:
         new_refresh_token = secrets.token_urlsafe(48)
         new_refresh = self.tokens.hash_refresh_token(new_refresh_token)
@@ -88,6 +89,11 @@ class AuthService:
                 credentials = await PasswordRepository().session_credentials(connection, refreshed.session_id)
                 if require_password and credentials.get("auth_method") != "password":
                     raise AuthenticationFailed("password session is required")
+                if expected_channel and credentials.get("client_channel") != expected_channel:
+                    raise AuthenticationFailed("session surface mismatch")
+                if expected_channel == "business_web":
+                    from sales_backend.services.authorization import require_permission
+                    await require_permission(connection, "access.business_web")
                 effective = await capability_snapshot(connection, refreshed.actor.context)
                 session = self._response(refreshed.actor, issued)
                 # Do not commit rotation until every required response read succeeds.

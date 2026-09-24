@@ -1,0 +1,148 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026年9月11日至9月24日）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026年9月11日至9月24日）\n## 演示甲公司\n行业：企业软件｜客户类型：商机客户\n### 知识库试点\nACV：20万元人民币｜当前阶段：方案沟通｜预计关单：2026-10-30\n产品线：知识库\n- 进展：客户认可演示效果，但验收标准未确定，要求补充准确率测试口径。\n- 后续行动：9月25日由销售提交验收清单。\n### 客服助手\n- 进展：方案已提交客户评审，客户尚未反馈。\n## 演示乙公司\n行业：制造业｜客户类型：商机客户\n### 视觉检测试点\nACV：80万元人民币｜当前阶段：商机确认｜预计关单：2026-11-15\n产品线：视觉检测｜合作伙伴：演示伙伴\n- 进展：客户确认仅讨论2个工厂的试点，合同未签。\n- 后续行动：9月28日由售前与客户核对测试样本。",
+  "sections": [
+    {
+      "key": "context",
+      "title": "客观信息",
+      "items": [
+        {
+          "text": "演示甲公司：行业企业软件，客户类型商机客户",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "customer",
+              "id": "c-a",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:customer:c-a:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        },
+        {
+          "text": "知识库试点：ACV 20万元人民币，当前阶段方案沟通，预计关单2026-10-30，产品线知识库",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-kb",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        },
+        {
+          "text": "演示乙公司：行业制造业，客户类型商机客户",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "customer",
+              "id": "c-b",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:customer:c-b:v1"
+            }
+          ],
+          "customer_id": "c-b",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        },
+        {
+          "text": "视觉检测试点：ACV 80万元人民币，当前阶段商机确认，预计关单2026-11-15，产品线视觉检测，合作伙伴演示伙伴",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-vision",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-vision:v1"
+            }
+          ],
+          "customer_id": "c-b",
+          "opportunity_id": "o-vision",
+          "needs_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "progress",
+      "title": "进展",
+      "items": [
+        {
+          "text": "客户认可演示效果，但验收标准未确定，要求补充准确率测试口径。",
+          "source_ids": [
+            "v1"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        },
+        {
+          "text": "方案已提交客户评审，客户尚未反馈。",
+          "source_ids": [
+            "v3"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-cs",
+          "needs_confirmation": false
+        },
+        {
+          "text": "客户确认仅讨论2个工厂的试点，合同未签。",
+          "source_ids": [
+            "v2"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-b",
+          "opportunity_id": "o-vision",
+          "needs_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "next_actions",
+      "title": "后续行动",
+      "items": [
+        {
+          "text": "9月25日由销售提交验收清单。",
+          "source_ids": [
+            "v1"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        },
+        {
+          "text": "9月28日由售前与客户核对测试样本。",
+          "source_ids": [
+            "v2"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-b",
+          "opportunity_id": "o-vision",
+          "needs_confirmation": false
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 3,
+    "customer_count": 2,
+    "opportunity_count": 3
+  },
+  "warnings": []
+}

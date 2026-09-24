@@ -1,0 +1,48 @@
+{
+  "contract_version": "weekly.v2",
+  "generation_id": "synthetic-weekly-v2",
+  "current_time": "2026-09-24T12:00:00+08:00",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "author": {
+    "id": "sales-demo",
+    "display_name": "演示销售"
+  },
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "records": [
+    {
+      "id": "v15",
+      "recorder_id": "sales-demo",
+      "recorder_name": "演示销售",
+      "customer_id": "c-a",
+      "customer_name": "演示甲公司",
+      "opportunity_id": "o-kb",
+      "opportunity_name": "知识库试点",
+      "created_at": "2026-09-10T15:59:59Z",
+      "visit_date": "2026-09-10",
+      "follow_up_record": "客户认可演示效果，但验收标准未确定。",
+      "next_action": "",
+      "status": "archived",
+      "version_no": 1,
+      "source_ref": {
+        "type": "visit",
+        "id": "v15",
+        "version_no": 1,
+        "snapshot_ref": "synthetic:visit:v15:v1"
+      }
+    }
+  ],
+  "context": {
+    "as_of": "2026-09-24T12:00:00+08:00",
+    "customers": [],
+    "opportunities": []
+  }
+}

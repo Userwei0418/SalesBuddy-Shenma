@@ -1,0 +1,276 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "title",
+    "period",
+    "body_markdown",
+    "sections",
+    "statistics",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "weekly.v2"
+    },
+    "status": {
+      "enum": [
+        "ready",
+        "insufficient_data",
+        "invalid_input"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "period": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start_date",
+            "end_date",
+            "timezone",
+            "date_basis"
+          ],
+          "properties": {
+            "start_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "end_date": {
+              "type": "string",
+              "format": "date"
+            },
+            "timezone": {
+              "const": "Asia/Shanghai"
+            },
+            "date_basis": {
+              "const": "created_at"
+            }
+          }
+        }
+      ]
+    },
+    "body_markdown": {
+      "type": "string"
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "title",
+          "items"
+        ],
+        "properties": {
+          "key": {
+            "enum": [
+              "context",
+              "progress",
+              "next_actions",
+              "gaps"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "text",
+                "source_ids",
+                "entity_refs",
+                "customer_id",
+                "opportunity_id",
+                "needs_confirmation"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "entity_refs": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "type",
+                          "id",
+                          "version_no",
+                          "snapshot_ref"
+                        ],
+                        "properties": {
+                          "type": {
+                            "const": "customer"
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "version_no": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ],
+                            "minimum": 1
+                          },
+                          "snapshot_ref": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                          "type",
+                          "id",
+                          "version_no",
+                          "snapshot_ref"
+                        ],
+                        "properties": {
+                          "type": {
+                            "const": "opportunity"
+                          },
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "version_no": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ],
+                            "minimum": 1
+                          },
+                          "snapshot_ref": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "uniqueItems": true
+                },
+                "customer_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "opportunity_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "needs_confirmation": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_count",
+        "customer_count",
+        "opportunity_count"
+      ],
+      "properties": {
+        "record_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "customer_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "opportunity_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "source_ids",
+          "field"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "field": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "weekly.v2 output"
+}

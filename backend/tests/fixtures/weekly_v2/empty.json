@@ -1,0 +1,26 @@
+{
+  "contract_version": "weekly.v2",
+  "generation_id": "synthetic-weekly-v2",
+  "current_time": "2026-09-24T12:00:00+08:00",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "author": {
+    "id": "sales-demo",
+    "display_name": "演示销售"
+  },
+  "statistics": {
+    "record_count": 0,
+    "customer_count": 0,
+    "opportunity_count": 0
+  },
+  "records": [],
+  "context": {
+    "as_of": "2026-09-24T12:00:00+08:00",
+    "customers": [],
+    "opportunities": []
+  }
+}

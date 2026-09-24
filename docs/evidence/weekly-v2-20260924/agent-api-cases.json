@@ -1,0 +1,147 @@
+{
+  "agent_id": "01a0d3ec-fbc9-7f9e-a3a7-fac507f4c459",
+  "app_id": "8f0b3182-4aa6-492b-963e-603e33a29e04",
+  "expected_snapshot_id": "01a0d3f4-aae0-7858-99ee-11e38f2d99dd",
+  "runtime_snapshot_verified": false,
+  "actual_snapshot_id": null,
+  "protocol": "agent_final",
+  "cases": [
+    {
+      "case": "amount_currencies",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "c791829d-ec12-46c9-99f2-de543d451d66",
+      "input_tokens": 6103,
+      "output_tokens": 842
+    },
+    {
+      "case": "day14_included",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "d2d2eda6-d65a-4f24-b921-20fb5aca708c",
+      "input_tokens": 5312,
+      "output_tokens": 241
+    },
+    {
+      "case": "day15_rejected",
+      "status": "invalid_input",
+      "passed": true,
+      "errors": [],
+      "message_id": "22b8d833-7eb7-4622-a862-ed5e2643cf69",
+      "input_tokens": 5310,
+      "output_tokens": 191
+    },
+    {
+      "case": "empty",
+      "status": "insufficient_data",
+      "passed": true,
+      "errors": [],
+      "message_id": "6fd51e62-88aa-4934-8d52-df1de9e841ce",
+      "input_tokens": 5116,
+      "output_tokens": 121
+    },
+    {
+      "case": "explicit_zero",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "64deac13-6d71-4404-884d-0c898c834548",
+      "input_tokens": 5493,
+      "output_tokens": 548
+    },
+    {
+      "case": "injection_long",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "da9e2d57-dcbc-4d5d-84cd-8d78e509f036",
+      "input_tokens": 6101,
+      "output_tokens": 617
+    },
+    {
+      "case": "invalid_owner",
+      "status": "invalid_input",
+      "passed": true,
+      "errors": [],
+      "message_id": "d74290b6-4627-4812-86cd-6f71e0aab277",
+      "input_tokens": 5310,
+      "output_tokens": 147
+    },
+    {
+      "case": "late_entry",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "218c29a4-7858-4ef8-8764-24d8123cde02",
+      "input_tokens": 5622,
+      "output_tokens": 790
+    },
+    {
+      "case": "merge_completed_plan",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "a7f65a3e-e67f-4d7e-b0b8-d600501434cf",
+      "input_tokens": 6042,
+      "output_tokens": 582
+    },
+    {
+      "case": "missing_master",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "96553790-03a3-4161-9579-dd3ddcbbbd02",
+      "input_tokens": 5304,
+      "output_tokens": 209
+    },
+    {
+      "case": "normal_enriched",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "7d648774-b701-4b6d-baef-4abb4b66264f",
+      "input_tokens": 6499,
+      "output_tokens": 943
+    },
+    {
+      "case": "record_plan_conflict",
+      "status": "ready",
+      "passed": true,
+      "errors": [],
+      "message_id": "8b6abcc4-a542-4cd0-9729-b4a9431f34f8",
+      "input_tokens": 5624,
+      "output_tokens": 640
+    },
+    {
+      "case": "summary_rejected",
+      "status": "invalid_input",
+      "passed": true,
+      "errors": [],
+      "message_id": "3c25ef20-2e6a-456a-b956-2cb645098a28",
+      "input_tokens": 5317,
+      "output_tokens": 137
+    },
+    {
+      "case": "unrelated_entity",
+      "status": "invalid_input",
+      "passed": true,
+      "errors": [],
+      "message_id": "c562e277-0c62-40f4-a8de-81e15b29e8a4",
+      "input_tokens": 5721,
+      "output_tokens": 141
+    },
+    {
+      "case": "wrong_entity_link",
+      "status": "invalid_input",
+      "passed": true,
+      "errors": [],
+      "message_id": "e4f22030-de1c-469a-b99c-d0581c4d831e",
+      "input_tokens": 5611,
+      "output_tokens": 176
+    }
+  ],
+  "all_passed": true,
+  "data": "synthetic fixtures only; no business rows written"
+}
