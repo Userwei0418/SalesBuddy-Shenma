@@ -73,9 +73,9 @@ class Database:
             yield connection
 
     @asynccontextmanager
-    async def transaction(self, actor: ActorContext, *, readonly: bool = False) -> AsyncIterator[asyncpg.Connection]:
+    async def transaction(self, actor: ActorContext, *, readonly: bool = False, isolation: str | None = None) -> AsyncIterator[asyncpg.Connection]:
         async with self.connection() as connection:
-            async with connection.transaction(readonly=readonly):
+            async with connection.transaction(readonly=readonly, isolation=isolation):
                 await set_request_context(connection, actor)
                 lease = current_job_lease.get()
                 if lease is not None:

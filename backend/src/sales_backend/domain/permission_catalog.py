@@ -28,7 +28,9 @@ def _module(module, resource, actions, *, scopes=BUSINESS_SCOPES, sensitive=()):
 
 
 PERMISSIONS = (
-    *_module("使用入口", "access", (("mini_program", "使用小程序"), ("console", "使用运营后台")),
+    *_module("个人周报", "weekly_report", (("generate", "生成本人周报"), ("read", "查看本人周报"),
+        ("edit", "编辑本人周报"), ("cancel", "取消本人周报生成")), scopes=("self",)),
+    *_module("使用入口", "access", (("mini_program", "使用小程序"), ("console", "使用运营后台"), ("business_web", "使用业务 Web")),
              scopes=COMPANY_SCOPE),
     *_module("总览与经营", "overview", (("read", "查看总览"),)),
     *_module("客户管理", "customer", (

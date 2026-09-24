@@ -72,6 +72,8 @@ def main():
         parser.add_argument("--" + name + "-sha256", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--expected-current", required=True)
+    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151"))
+    parser.add_argument("--target-schema", default="V152", choices=("V151", "V152"))
     args = parser.parse_args()
     assert os.geteuid() == 0 and socket.gethostname() == "salesbuddy"
     assert "172.22.9.234" in subprocess.check_output(["hostname", "-I"], text=True).split()
@@ -79,7 +81,7 @@ def main():
     root = Path("/opt/shenma-sales")
     old = (root / "current").resolve()
     assert (old / "REVISION").read_text().strip() == args.expected_current
-    assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == "V125"
+    assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == args.expected_schema
     for name in ("archive", "wheels"):
         assert hashlib.sha256(getattr(args, name).read_bytes()).hexdigest() == getattr(args, name + "_sha256")
     new = root / "releases" / args.revision
@@ -107,7 +109,7 @@ def main():
     run(["sudo", "-u", "shenma-sales", str(python), "-c",
          "import sales_backend,pypinyin;from pathlib import Path;assert Path(sales_backend.__file__).resolve().is_relative_to(Path(" + repr(str(new)) + "))"], cwd=new)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    backup = Path("/var/backups/shenma-sales") / (stamp + "-v151")
+    backup = Path("/var/backups/shenma-sales") / (stamp + "-" + args.target_schema.lower())
     backup.mkdir(parents=True, mode=0o700)
     os.umask(0o077)
     restored = "shenma_restore_" + stamp.lower()
@@ -132,13 +134,13 @@ def main():
         tables = sql("shenma_sales", "SELECT quote_ident(schemaname)||'.'||quote_ident(tablename) FROM pg_tables WHERE schemaname IN ('platform','crm','activity','workflow','insight','ops','config','security','agent') ORDER BY 1").splitlines()
         for table in tables:
             assert sql("shenma_sales", f"SELECT count(*) FROM {table}") == sql(restored, f"SELECT count(*) FROM {table}"), table
-        assert sql(restored, "SELECT max(version) FROM ops.schema_migration") == "V125"
+        assert sql(restored, "SELECT max(version) FROM ops.schema_migration") == args.expected_schema
         (backup / "SHA256SUMS").write_text("".join(hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n" for p in sorted(backup.iterdir()) if p.is_file()))
         migration_started = True
         with (backup / "migration.json").open("w") as stream:
             run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
-        assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == "V151"
+        assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == args.target_schema
         # Identity/password/appointment/ownership rows must be exactly preserved.
         for table in ("platform.user_ref", "platform.password_credential", "platform.role_binding", "platform.team_membership", "crm.customer", "crm.customer_ownership"):
             query = f"SELECT md5(coalesce(string_agg(to_jsonb(t)::text, E'\\n' ORDER BY to_jsonb(t)::text),'')) FROM {table} t"
@@ -152,7 +154,7 @@ def main():
         run(["systemctl", "start", "shenma-api", "shenma-worker"])
         version = healthy(args.revision)
         switch(root, "previous", old)
-        receipt = {"revision": args.revision, "previous": args.expected_current, "database": "V151",
+        receipt = {"revision": args.revision, "previous": args.expected_current, "database": args.target_schema,
                    "backup": str(backup), "restore_table_counts_verified": len(tables),
                    "existing_rows_unchanged": True, "migration_repeat_unchanged": True, "version": version}
         (backup / "upgrade.json").write_text(json.dumps(receipt, indent=2) + "\n")

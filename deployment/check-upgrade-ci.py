@@ -77,7 +77,7 @@ async def main():
             return {table: sorted(json.dumps(dict(row), default=str, sort_keys=True) for row in await c.fetch(f"SELECT * FROM {table}")) for table in preserved}
         before = await snapshot()
         result = await migrate(c)
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 152)]
+        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 153)]
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -109,7 +109,7 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V151", "applied": 26, "companies": 2,
+        print(json.dumps({"upgrade": "V125->V152", "applied": 27, "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
                           "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True}))
     finally:

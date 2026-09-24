@@ -1,0 +1,143 @@
+{
+  "contract_version": "weekly.v2",
+  "generation_id": "synthetic-weekly-v2",
+  "current_time": "2026-09-24T12:00:00+08:00",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "author": {
+    "id": "sales-demo",
+    "display_name": "演示销售"
+  },
+  "statistics": {
+    "record_count": 2,
+    "customer_count": 2,
+    "opportunity_count": 2
+  },
+  "records": [
+    {
+      "id": "a1",
+      "recorder_id": "sales-demo",
+      "recorder_name": "演示销售",
+      "customer_id": "c-a",
+      "customer_name": "演示甲公司",
+      "opportunity_id": "o-kb",
+      "opportunity_name": "知识库试点",
+      "created_at": "2026-09-23T02:00:00Z",
+      "visit_date": "2026-09-23",
+      "follow_up_record": "客户年度预算100万元，拟报价20万元；未发报价、未签合同。",
+      "next_action": "",
+      "status": "archived",
+      "version_no": 1,
+      "source_ref": {
+        "type": "visit",
+        "id": "a1",
+        "version_no": 1,
+        "snapshot_ref": "synthetic:visit:a1:v1"
+      }
+    },
+    {
+      "id": "a2",
+      "recorder_id": "sales-demo",
+      "recorder_name": "演示销售",
+      "customer_id": "c-b",
+      "customer_name": "演示乙公司",
+      "opportunity_id": "o-vision",
+      "opportunity_name": "视觉检测试点",
+      "created_at": "2026-09-23T02:00:00Z",
+      "visit_date": "2026-09-23",
+      "follow_up_record": "已安排测试，尚无验收结论。",
+      "next_action": "",
+      "status": "archived",
+      "version_no": 1,
+      "source_ref": {
+        "type": "visit",
+        "id": "a2",
+        "version_no": 1,
+        "snapshot_ref": "synthetic:visit:a2:v1"
+      }
+    }
+  ],
+  "context": {
+    "as_of": "2026-09-24T12:00:00+08:00",
+    "customers": [
+      {
+        "id": "c-a",
+        "name": "演示甲公司",
+        "industry": "企业软件",
+        "customer_type": "商机客户",
+        "demand_summary": null,
+        "updated_at": "2026-09-24T03:00:00Z",
+        "source_ref": {
+          "type": "customer",
+          "id": "c-a",
+          "version_no": 1,
+          "snapshot_ref": "synthetic:customer:c-a:v1"
+        }
+      },
+      {
+        "id": "c-b",
+        "name": "演示乙公司",
+        "industry": "制造业",
+        "customer_type": "商机客户",
+        "demand_summary": null,
+        "updated_at": "2026-09-24T03:00:00Z",
+        "source_ref": {
+          "type": "customer",
+          "id": "c-b",
+          "version_no": 1,
+          "snapshot_ref": "synthetic:customer:c-b:v1"
+        }
+      }
+    ],
+    "opportunities": [
+      {
+        "id": "o-kb",
+        "customer_id": "c-a",
+        "name": "知识库试点",
+        "amount": 125050,
+        "currency": "CNY",
+        "stage_label": null,
+        "status": "open",
+        "probability": 70,
+        "expected_close_date": "2026-10-30",
+        "product_line": "知识库",
+        "sales_channel": "direct",
+        "partner_name": null,
+        "follow_up_plan": null,
+        "updated_at": "2026-09-24T03:00:00Z",
+        "source_ref": {
+          "type": "opportunity",
+          "id": "o-kb",
+          "version_no": 1,
+          "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+        }
+      },
+      {
+        "id": "o-vision",
+        "customer_id": "c-b",
+        "name": "视觉检测试点",
+        "amount": 30000,
+        "currency": "USD",
+        "stage_label": "方案沟通",
+        "status": "open",
+        "probability": 50,
+        "expected_close_date": "2026-10-30",
+        "product_line": null,
+        "sales_channel": "direct",
+        "partner_name": null,
+        "follow_up_plan": null,
+        "updated_at": "2026-09-24T03:00:00Z",
+        "source_ref": {
+          "type": "opportunity",
+          "id": "o-vision",
+          "version_no": 1,
+          "snapshot_ref": "synthetic:opportunity:o-vision:v1"
+        }
+      }
+    ]
+  }
+}

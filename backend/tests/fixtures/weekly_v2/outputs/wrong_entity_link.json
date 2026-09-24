@@ -1,0 +1,28 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "invalid_input",
+  "title": "周报",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "",
+  "sections": [],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": [
+    {
+      "code": "opportunity_customer_mismatch",
+      "message": "商机档案o-kb的customer_id为c-b，与跟进记录x1的customer_id（c-a）不匹配",
+      "source_ids": [
+        "x1"
+      ],
+      "field": "context.opportunities[0].customer_id"
+    }
+  ]
+}

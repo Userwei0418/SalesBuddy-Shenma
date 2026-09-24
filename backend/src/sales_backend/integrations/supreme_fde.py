@@ -342,6 +342,9 @@ class FdeClient:
         if response.headers.get("content-type", "").split(";", 1)[0].strip().lower() != expected:
             raise FdeError("unexpected_content_type", status=response.status_code)
 
+    async def info(self) -> dict[str, Any]:
+        return await self._json_request("GET", "info")
+
     async def parameters(self) -> dict[str, Any]:
         """Read variable definitions; does not infer variables from the prompt."""
         result = await self._json_request("GET", "parameters")

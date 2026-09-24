@@ -1,0 +1,57 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026年9月11日至9月24日）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026年9月11日至9月24日）\n## 演示甲公司\n### 知识库试点\nACV：0万元人民币｜当前阶段：方案沟通｜预计关单：2026-10-30\n产品线：知识库\n- 进展：客户仅讨论概念验证。",
+  "sections": [
+    {
+      "key": "context",
+      "title": "客观信息",
+      "items": [
+        {
+          "text": "知识库试点：ACV 0万元人民币，当前阶段方案沟通，预计关单2026-10-30，产品线知识库",
+          "source_ids": [],
+          "entity_refs": [
+            {
+              "type": "opportunity",
+              "id": "o-kb",
+              "version_no": 1,
+              "snapshot_ref": "synthetic:opportunity:o-kb:v1"
+            }
+          ],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        }
+      ]
+    },
+    {
+      "key": "progress",
+      "title": "进展",
+      "items": [
+        {
+          "text": "客户仅讨论概念验证。",
+          "source_ids": [
+            "z1"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": "o-kb",
+          "needs_confirmation": false
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": []
+}

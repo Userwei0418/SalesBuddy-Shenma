@@ -1,0 +1,29 @@
+{
+  "scope": "Shenma customer backend only; business Web, no mini-program or operations UI",
+  "backend_unit": {
+    "passed": 1861
+  },
+  "postgres_integration": {
+    "passed": 716,
+    "skipped": 20
+  },
+  "weekly_and_openapi_targeted": {
+    "passed": 29
+  },
+  "database_unit": {
+    "passed": 5,
+    "skipped": 12
+  },
+  "upgrade": {
+    "upgrade": "V125->V152",
+    "applied": 27,
+    "companies": 2,
+    "accounts_verified": 26,
+    "existing_rows_unchanged": true,
+    "repeat_migration_unchanged": true,
+    "runtime_acl_and_isolation": true
+  },
+  "agent_api_cases": "agent-api-cases.json",
+  "runtime_snapshot_verified": false,
+  "remaining": "Local-stage receipt; customer deployment and Worker completion are recorded separately in server-api.json, server-worker.json and upgrade.json"
+}

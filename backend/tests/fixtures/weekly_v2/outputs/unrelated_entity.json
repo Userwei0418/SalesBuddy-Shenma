@@ -1,0 +1,26 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "invalid_input",
+  "title": "周报",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "",
+  "sections": [],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 1
+  },
+  "warnings": [
+    {
+      "code": "context_out_of_scope",
+      "message": "context.customers包含ID为c-b的客户（演示乙公司），该客户不在本次records涉及范围内，档案与记录范围不匹配",
+      "source_ids": [],
+      "field": "context.customers"
+    }
+  ]
+}

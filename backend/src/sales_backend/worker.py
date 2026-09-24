@@ -136,6 +136,9 @@ class Worker:
             from sales_backend.services.connectivity import ConnectivityService
 
             await ConnectivityService(self.database, self.settings).handle(actor, job.aggregate_id)
+        elif job.job_type == "weekly_report.generate":
+            from sales_backend.services.weekly_reports import WeeklyReportService
+            await WeeklyReportService(self.database).handle(actor, job.aggregate_id)
         elif job.job_type == "agent.run":
             await AgentRunHandler(self.database, self.settings).handle(job.aggregate_id, actor)
         elif job.job_type == "visit.import":

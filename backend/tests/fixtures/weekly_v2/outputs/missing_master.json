@@ -1,0 +1,36 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "ready",
+  "title": "周报（2026-09-11至2026-09-24）",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "# 周报（2026-09-11至2026-09-24）\n## 演示甲公司\n- 进展：客户提出私有部署要求，规格尚未提供。",
+  "sections": [
+    {
+      "key": "progress",
+      "title": "进展",
+      "items": [
+        {
+          "text": "客户提出私有部署要求，规格尚未提供。",
+          "source_ids": [
+            "u1"
+          ],
+          "entity_refs": [],
+          "customer_id": "c-a",
+          "opportunity_id": null,
+          "needs_confirmation": false
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "record_count": 1,
+    "customer_count": 1,
+    "opportunity_count": 0
+  },
+  "warnings": []
+}

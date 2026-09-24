@@ -53,7 +53,7 @@ class PasswordAuthService(AuthService):
             # Console/FDE duties must not mask this person's active sales appointment
             # in the mini-program. Explicit role selection and console login stay unchanged.
             if (
-                role is None and client_channel == "wechat-mini-program" and candidate
+                role is None and client_channel in {"wechat-mini-program", "business_web"} and candidate
                 and candidate["role_code"] in {"administrator", "operations", "fde_lead", "fde"}
             ):
                 for business_role in ("manager", "supervisor", "sales", "fde_lead", "fde"):
@@ -72,6 +72,9 @@ class PasswordAuthService(AuthService):
         async with self.database.transaction(record.context) as connection:
             if not await repository.lock_login_identifier(connection, account):
                 raise AuthenticationFailed("登录账号已变更，请重新登录")
+            if client_channel == "business_web":
+                from sales_backend.services.authorization import require_permission
+                await require_permission(connection, "access.business_web")
             await self.repository.create_session(
                 connection,
                 session_id=session_id,

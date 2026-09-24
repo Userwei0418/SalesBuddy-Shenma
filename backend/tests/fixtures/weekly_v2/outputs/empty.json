@@ -1,0 +1,19 @@
+{
+  "schema_version": "weekly.v2",
+  "status": "insufficient_data",
+  "title": "周报",
+  "period": {
+    "start_date": "2026-09-11",
+    "end_date": "2026-09-24",
+    "timezone": "Asia/Shanghai",
+    "date_basis": "created_at"
+  },
+  "body_markdown": "本期（2026-09-11至2026-09-24）未提供任何跟进记录，材料不足，无法生成周报正文。",
+  "sections": [],
+  "statistics": {
+    "record_count": 0,
+    "customer_count": 0,
+    "opportunity_count": 0
+  },
+  "warnings": []
+}
