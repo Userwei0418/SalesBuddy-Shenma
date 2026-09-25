@@ -108,3 +108,10 @@
 销售依赖就绪后，以 root 在销售 release 目录运行 `bash deployment/install-sales.sh`。它只接受 salesbuddy 主机，创建新库、受限运行角色、客户公司及强制首次改密管理员，再启动 API/Worker。初始账号凭据只保存在服务器 `/var/lib/shenma-provision/initial-admin.json`（root 0600）。脚本发现已有数据库时停止，不会删除或重建；部分失败需检查已完成阶段后继续。
 
 AppID、可信证书和模型 Key 不进入仓库。当前源码包不含任何数据库业务数据；数据库结构和系统规则通过迁移创建。
+
+
+## 神码业务 Web 与周报（V153）
+
+业务 Web 的源码在 `business-web/`，由现有 API 进程提供静态页面 `/workspace/`。销售账号与小程序共用 `/api/v1/auth/*`；周报 UI 仅在 Web，运营后台仍为 `/admin`。详见 [周报后端接口与 Web 联调](神码周报后端接口与Web联调.md)。
+
+本地先构建 `npm --prefix business-web run verify`，提交代码后重新构建，再调用打包脚本 `--include-business-web`。打包器检查构建版本等于本次 Git 提交。客户服务器无需安装 Node.js。升级脚本指定 `--expected-schema V152 --target-schema V153` 并核对实际旧版本，保留现有 Agent 绑定和配置。

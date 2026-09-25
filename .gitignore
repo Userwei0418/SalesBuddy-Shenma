@@ -27,3 +27,8 @@ project.private.config.json
 *.tar.gz
 *.tgz
 .agent-build/
+
+# Customer business Web
+business-web/dist/
+business-web/.runtime/
+business-web/验收/

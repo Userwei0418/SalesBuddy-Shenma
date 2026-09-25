@@ -194,3 +194,24 @@ async def health_ready(response: Response) -> dict[str, object]:
     if not ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     return {"status": "ok" if ready else "degraded", "checks": checks}
+
+
+# The customer business Web is a static release artifact; API/auth remain shared.
+BUSINESS_WEB_DIST = Path(__file__).resolve().parents[3] / "business-web" / "dist"
+if BUSINESS_WEB_DIST.is_dir():
+    app.mount("/workspace", RevalidatingStaticFiles(directory=BUSINESS_WEB_DIST, html=True), name="business-web")
+
+
+@app.get("/web-capabilities", include_in_schema=False)
+async def web_capabilities():
+    return {"previewOnly": False}
+
+
+@app.get("/connection-status", include_in_schema=False)
+async def web_connection_status():
+    from datetime import datetime, timezone
+    probe = Response()
+    health = await health_ready(probe)
+    return {"configured": True, "reachable": health['status'] == 'ok', "checks": health['checks'],
+            "environment": "神码 SalesBuddy", "label": "神码 SalesBuddy", "apiPrefix": "/api/v1",
+            "checkedAt": datetime.now(timezone.utc).isoformat(), "localQuickLogin": {"available": False}}

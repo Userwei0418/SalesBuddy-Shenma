@@ -1,0 +1,14 @@
+/* 外框改用组件后，原来给侧栏和顶栏的内边距、渐变都不要了；容器只负责定位与宽度 */
+body .web-sidebar, body.department-design .web-sidebar { padding: 0; background: var(--ui-sidebar); overflow: hidden; display: block; }
+.web-sidebar > .sb-sidenav .ant-layout-sider { flex: none; }
+.web-sidebar > .sb-sidenav, .web-sidebar .ant-layout-sider { height: 100%; }
+body #frame-topbar, body:not(.web-login) #frame-topbar { padding: 0; background: var(--ui-surface); backdrop-filter: none; display: block; }
+#frame-topbar .sb-topbar { height: var(--web-header); padding-inline: var(--ui-space-6); }
+/* 顶栏左右留白和页面内容一致（24px） */
+.ds-frame-icon { display: inline-flex; width: 18px; height: 18px; }
+.ds-frame-icon > svg { width: 100%; height: 100%; }
+.ds-frame-environment { font-size: var(--ui-text-small); color: var(--ui-secondary); white-space: nowrap; }
+@media (max-width: 900px) { body.department-design .web-sidebar { display: none; } }
+
+/* 演示模式的身份条也和页面内容一样留 24 */
+body #preview-notice { padding-inline: var(--ui-space-6); }

@@ -1,0 +1,7 @@
+.ds-sync-filters,.ds-sync-perspective{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 0}
+.ds-sync-note{font-size:12px;margin:8px 12px}
+.ds-sync-members{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0}
+.ds-sync-history{margin:20px 0;padding:16px;border:1px solid var(--ui-line);border-radius:12px}
+.ds-sync-history h3{margin:0 0 12px}
+.ds-sync-recovery{padding:16px;margin:12px 0;border:1px solid var(--ui-line);border-radius:8px}
+@media(max-width:700px){.ds-sync-filters>*{min-width:0;max-width:100%}}

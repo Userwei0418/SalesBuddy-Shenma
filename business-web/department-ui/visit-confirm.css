@@ -1,0 +1,59 @@
+/* 核对拜访：一张白卡，顶部步骤，中间表单或质检结果自己滚动，底部动作。抽屉在页面容器之外，所以抽屉里的样式不带前缀 */
+.department-ui[data-department-page="pages/visit-confirm/index"] { height: 100%; }
+.department-ui .ds-vconfirm { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.department-ui .ds-vc-main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.department-ui .ds-vc-steps { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-vc-steps .ant-steps { max-width: 560px; }
+.department-ui .ds-vc-banner { margin: 0; padding: var(--ui-space-2) var(--ui-space-4); background: var(--ui-danger-soft); }
+.department-ui .ds-vc-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-vc-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-4); }
+.department-ui .ds-vc-form { display: flex; flex-direction: column; gap: var(--ui-space-3); max-width: 1040px; }
+.department-ui .ds-vc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3) var(--ui-space-6); }
+.department-ui .ds-vc-hint { margin: var(--ui-space-1) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-vc-results { max-height: 240px; overflow: auto; margin-top: var(--ui-space-2); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); }
+.department-ui .ds-vc-chosen { display: flex; flex-direction: column; gap: 2px; padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); } .department-ui .ds-vc-chosen b { font-weight: 600; } .department-ui .ds-vc-chosen span { font-size: var(--ui-text-small); }
+.department-ui .ds-vc-readonly { min-height: var(--ui-control-height); display: flex; align-items: center; padding: var(--ui-space-1) var(--ui-space-3); background: var(--ui-background); border-radius: var(--ui-radius-control); white-space: pre-wrap; }
+.department-ui .ds-vc-picker { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: var(--ui-control-height); display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-1) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); }
+.department-ui .ds-vc-picker:hover { border-color: var(--ui-focus); } .department-ui .ds-vc-picker:focus-visible { outline: 2px solid var(--ui-focus); } .department-ui .ds-vc-picker:disabled { cursor: default; color: var(--ui-muted); }
+.department-ui .ds-vc-picker-link { color: var(--ui-primary); font-size: var(--ui-text-small); flex: none; }
+.department-ui .ds-vc-date { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; } .department-ui .ds-vc-date span { font-size: var(--ui-text-small); }
+.department-ui .ds-vc-first { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-vc-first-head { display: flex; align-items: baseline; gap: var(--ui-space-2); flex-wrap: wrap; } .department-ui .ds-vc-first-head b { font-weight: 600; } .department-ui .ds-vc-first-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-vc-colleagues { display: flex; flex-direction: column; gap: var(--ui-space-2); margin-top: var(--ui-space-2); padding: var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); }
+.department-ui .ds-vc-colleagues .ant-checkbox-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-space-2); max-height: 200px; overflow: auto; }
+.department-ui .ds-vc-review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); }
+.department-ui .ds-vc-card { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-vc-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-3); } .department-ui .ds-vc-card-head > div:first-child { display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-vc-card-head b { font-weight: 600; } .department-ui .ds-vc-card-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-vc-score { display: flex; flex-direction: column; align-items: flex-end; padding: var(--ui-space-2) var(--ui-space-3); border-radius: var(--ui-radius-panel); background: var(--ui-neutral-soft); color: var(--ui-neutral); }
+.department-ui .ds-vc-score b { font-size: var(--ui-text-metric); font-weight: 650; line-height: 1.1; font-variant-numeric: tabular-nums; } .department-ui .ds-vc-score span { font-size: var(--ui-text-small); }
+.department-ui .ds-vc-score-good { background: var(--ui-success-soft); color: var(--ui-success); } .department-ui .ds-vc-score-watch { background: var(--ui-warning-soft); color: var(--ui-warning); } .department-ui .ds-vc-score-bad { background: var(--ui-danger-soft); color: var(--ui-danger); }
+.department-ui .ds-vc-rule { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-vc-suggestions { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .ds-vc-bar { border-top: 1px solid var(--ui-line); }
+.department-ui .ds-vc-done { padding: var(--ui-space-6); display: flex; flex-direction: column; gap: var(--ui-space-4); align-items: flex-start; max-width: 760px; }
+.department-ui .ds-vc-done h1 { margin: 0; font-size: var(--ui-text-page); font-weight: 650; }
+.department-ui .ds-vc-done .sb-mstrip { width: 100%; }
+.department-ui .ds-vc-next { width: 100%; padding: var(--ui-space-3) var(--ui-space-4); border-left: 3px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); } .department-ui .ds-vc-next b { font-weight: 600; } .department-ui .ds-vc-next p { margin: var(--ui-space-1) 0 0; white-space: pre-wrap; }
+.department-ui .ds-vc-done-actions { display: flex; gap: var(--ui-space-2); }
+/* 抽屉内容 */
+.ds-vc-opp { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.ds-vc-opp-list { display: flex; flex-direction: column; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); max-height: 320px; overflow: auto; }
+.ds-vc-opp-row { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); min-height: var(--ui-control-height); border-bottom: 1px solid var(--ui-line); }
+.ds-vc-opp-row:last-child { border-bottom: 0; } .ds-vc-opp-row:hover { background: var(--ui-selected); } .ds-vc-opp-row:focus-visible { outline: 2px solid var(--ui-focus); }
+.ds-vc-opp-row.is-selected { background: var(--ui-selected); color: var(--ui-primary); font-weight: 600; }
+.ds-vc-advice { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.ds-vc-advice-head { display: flex; align-items: center; gap: var(--ui-space-2); font-size: var(--ui-text-small); flex-wrap: wrap; }
+.ds-vc-advice-summary { margin: 0; font-weight: 600; }
+.ds-vc-advice-list { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--ui-space-2); } .ds-vc-advice-list li > * { display: block; } .ds-vc-advice-list li span { font-size: var(--ui-text-small); }
+.ds-vc-advice .ds-vc-error { color: var(--ui-danger); }
+/* 创建客户抽屉内容也在容器之外 */
+.ds-cc-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-2); }
+.ds-cc-option { all: unset; box-sizing: border-box; cursor: pointer; padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); min-height: var(--ui-control-height); display: flex; align-items: center; }
+.ds-cc-option:hover { background: var(--ui-selected); } .ds-cc-option:focus-visible { outline: 2px solid var(--ui-focus); }
+.ds-cc-option.is-selected { border-color: var(--ui-primary); background: var(--ui-selected); color: var(--ui-primary); font-weight: 600; }
+.ds-cc-helper { margin: var(--ui-space-3) 0 0; font-size: var(--ui-text-small); color: var(--ui-muted); }
+@media (max-width: 900px) { .department-ui[data-department-page="pages/visit-confirm/index"] { height: auto; } .department-ui .ds-vconfirm { height: auto; } .department-ui .ds-vc-grid, .department-ui .ds-vc-review { grid-template-columns: minmax(0, 1fr); } .department-ui .ds-vc-body { overflow: visible; } }
+/* FDE 选商机与内嵌商机表单占整行 */
+.department-ui .ds-vc-span { grid-column: 1 / -1; }
+.department-ui .ds-vc-inline-form { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); background: var(--ui-background); display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-vc-inline-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ui-space-3); flex-wrap: wrap; } .department-ui .ds-vc-inline-head b { font-weight: 600; } .department-ui .ds-vc-inline-head span { font-size: var(--ui-text-small); }

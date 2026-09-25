@@ -1,0 +1,65 @@
+/* 商机详情：左栏商机身份固定，右栏页签内容自己滚动 */
+.department-ui[data-department-page="pages/customer-assets/index"] { height: 100%; }
+.department-ui .ds-odetail { display: grid; grid-template-columns: minmax(280px, 320px) minmax(0, 1fr); gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-od-side { padding: var(--ui-space-4); overflow: auto; min-height: 0; }
+.department-ui .ds-od-eyebrow { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-od-side h1 { margin: var(--ui-space-1) 0 0; font-size: var(--ui-text-section); font-weight: 650; line-height: 1.4; }
+.department-ui .ds-od-tags { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); margin-top: var(--ui-space-3); align-items: center; }
+.department-ui .ds-od-grade { display: inline-flex; align-items: center; padding: 0 var(--ui-space-2); line-height: 20px; border-radius: 999px; font-size: var(--ui-text-small); background: var(--ui-neutral-soft); color: var(--ui-secondary); }
+.department-ui .ds-od-grade-A { background: var(--ui-warning-soft); color: var(--ui-warning); } .department-ui .ds-od-grade-B { background: var(--ui-success-soft); color: var(--ui-success); }
+.department-ui .ds-od-actions { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); margin: var(--ui-space-4) 0; padding-bottom: var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-od-facts { display: flex; flex-direction: column; gap: var(--ui-space-3); margin: 0; }
+.department-ui .ds-od-facts > div { display: flex; flex-direction: column; gap: 2px; }
+.department-ui .ds-od-facts dt { color: var(--ui-muted); font-size: var(--ui-text-small); } .department-ui .ds-od-facts dd { margin: 0; }
+.department-ui .ds-od-amount { font-size: var(--ui-text-metric); font-weight: 650; color: var(--ui-primary); font-variant-numeric: tabular-nums; }
+.department-ui .ds-od-main { display: flex; flex-direction: column; min-height: 0; padding: 0 var(--ui-space-4); }
+.department-ui .ds-od-main .ant-tabs-nav { margin-bottom: 0; }
+.department-ui .ds-od-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-4) 0; }
+.department-ui .ds-od-summary { margin: 0 0 var(--ui-space-3); font-size: var(--ui-text-small); }
+.department-ui .ds-od-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-od-ai { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); margin-bottom: var(--ui-space-4); }
+.department-ui .ds-od-ai-head { display: flex; align-items: center; gap: var(--ui-space-2); font-size: var(--ui-text-small); flex-wrap: wrap; } .department-ui .ds-od-ai-head .ant-btn { margin-left: auto; }
+.department-ui .ds-od-ai-summary { margin: var(--ui-space-2) 0; font-weight: 600; }
+.department-ui .ds-od-ai-rows { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-od-ai-rows li > * { display: block; } .department-ui .ds-od-ai-rows li span { font-size: var(--ui-text-small); }
+.department-ui .ds-od-ai-source { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-od-h { display: flex; align-items: baseline; gap: var(--ui-space-2); margin: var(--ui-space-4) 0 var(--ui-space-2); font-size: var(--ui-text-body); font-weight: 600; }
+.department-ui .ds-od-h small { color: var(--ui-muted); font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-od-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3) var(--ui-space-6); margin: 0; }
+.department-ui .ds-od-grid > div { display: flex; flex-direction: column; gap: 2px; padding-bottom: var(--ui-space-2); border-bottom: 1px solid var(--ui-line); min-width: 0; }
+.department-ui .ds-od-grid dt { color: var(--ui-muted); font-size: var(--ui-text-small); } .department-ui .ds-od-grid dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.department-ui .ds-od-fde { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ui-space-2); }
+.department-ui .ds-od-chip { display: inline-flex; align-items: center; padding: 0 var(--ui-space-2); line-height: 22px; border-radius: 999px; background: var(--ui-selected); color: var(--ui-primary); font-size: var(--ui-text-small); }
+.department-ui .ds-od-fde-note { font-size: var(--ui-text-small); margin-left: auto; }
+.department-ui .ds-od-actual-head { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); }
+.department-ui .ds-od-note, .department-ui .ds-od-caption { margin: var(--ui-space-2) 0; font-size: var(--ui-text-small); }
+.department-ui .ds-od-strip { padding: var(--ui-space-2) 0; border-bottom: 1px solid var(--ui-line); margin-bottom: var(--ui-space-3); }
+.department-ui .ds-od-two { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-od-two b { font-weight: 600; }
+.department-ui .ds-od-clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.department-ui .ds-od-more { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) 0; font-size: var(--ui-text-small); }
+.department-ui .ds-od-stage { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-od-stage p { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-od-stage-head { display: flex; justify-content: space-between; align-items: center; }
+.department-ui .ds-od-stage-name { font-size: var(--ui-text-section); font-weight: 650; }
+.department-ui .ds-od-events-head { display: flex; justify-content: space-between; align-items: center; }
+.department-ui .ds-od-events { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--ui-line); }
+.department-ui .ds-od-events li { position: relative; padding: 0 0 var(--ui-space-3) var(--ui-space-4); }
+.department-ui .ds-od-events li::before { content: ''; position: absolute; left: -6px; top: 8px; width: 10px; height: 10px; border-radius: 50%; background: var(--ui-primary); border: 2px solid var(--ui-surface); }
+.department-ui .ds-od-events button { all: unset; cursor: pointer; display: flex; flex-direction: column; gap: 2px; width: 100%; box-sizing: border-box; border-radius: var(--ui-radius-control); padding: var(--ui-space-1) var(--ui-space-2); }
+.department-ui .ds-od-events button:hover { background: var(--ui-selected); } .department-ui .ds-od-events button:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-od-events b { font-weight: 600; } .department-ui .ds-od-events span { font-size: var(--ui-text-small); }
+@media (max-width: 900px) {
+  .department-ui[data-department-page="pages/customer-assets/index"] { height: auto; }
+  .department-ui .ds-odetail { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .department-ui .ds-od-body { overflow: visible; }
+  .department-ui .ds-od-grid { grid-template-columns: minmax(0, 1fr); }
+}
+/* FDE 视角：Demo 场景页签、本人记录切换 */
+.department-ui .ds-od-note { margin-top: var(--ui-space-2); }
+.department-ui .ds-od-demo-head { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-od-demos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .ds-od-demos button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); }
+.department-ui .ds-od-demos button:hover { background: var(--ui-selected); } .department-ui .ds-od-demos button:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-od-demos b { flex: 1; font-weight: 600; } .department-ui .ds-od-demos .ds-muted { flex: none; }
+.department-ui .ds-od-demo-no { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--ui-background); color: var(--ui-secondary); font-size: var(--ui-text-small); font-weight: 600; }
+.department-ui .ds-od-visit-mode { margin-bottom: var(--ui-space-2); }

@@ -1,0 +1,1 @@
+<view class="detail-page-state"><text wx:if="{{state.loading}}">正在加载…</text><view wx:elif="{{state.error}}" class="error"><text>{{state.error}}</text><button bindtap="retry" size="mini">重新加载</button></view><button wx:elif="{{state.hasMore}}" bindtap="more" size="mini">加载更多</button><text wx:elif="{{state.loaded && !state.count && emptyText}}">{{emptyText}}</text></view>

@@ -1,0 +1,67 @@
+.department-ui .department-tasks,
+.department-ui .department-task-create { min-width: 0; color: var(--ui-ink); font-size: var(--ui-text-body); }
+.department-ui .department-task-panel { background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); overflow: hidden; }
+.department-ui .department-task-scope,
+.department-ui .department-task-tabs,
+.department-ui .department-task-context { padding: var(--ui-space-3) var(--ui-space-4) 0; }
+.department-ui .department-task-context { margin: 0; color: var(--ui-secondary); }
+.department-ui .department-task-tabs .ant-tabs-nav { margin-bottom: 0; }
+.department-ui .department-task-overview { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); background: var(--ui-selected); }
+.department-ui .department-task-overview strong { display: block; }
+.department-ui .department-task-toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .department-task-table { min-width: 0; }
+.department-ui .department-task-table .ant-table-cell { vertical-align: top; }
+.department-ui .department-task-table .ant-table-tbody > tr.ant-table-row > td { padding-block: var(--ui-space-2); }
+.department-ui .department-task-table .ant-btn-link { height: auto; min-height: var(--ui-control-height); padding-inline: var(--ui-space-1); }
+.department-ui .department-task-table .department-task-title { display: block; width: 100%; min-height: 0; padding: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; color: var(--ui-ink); font-weight: 600; line-height: 1.5; }
+.department-ui .department-task-table .department-task-title:hover { color: var(--ui-primary); }
+.department-ui .department-task-table .department-task-related { min-height: 0; padding-block: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; font-size: var(--ui-text-small); line-height: 1.5; }
+.department-ui .department-task-meta { margin-top: var(--ui-space-1); color: var(--ui-secondary); font-size: var(--ui-text-small); font-weight: 400; }
+.department-ui .department-task-time { font-variant-numeric: tabular-nums; }
+.department-ui .department-task-time-overdue { color: var(--ui-danger); font-weight: 600; }
+.department-ui .department-task-time-today,
+.department-ui .department-task-priority { color: var(--ui-warning); font-weight: 600; }
+.department-ui .department-task-expanded { padding: var(--ui-space-2); color: var(--ui-secondary); }
+.department-ui .department-task-expanded strong { font-size: var(--ui-text-small); }
+.department-ui .department-task-expanded p { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ui-ink); margin: var(--ui-space-2) 0; }
+.department-ui .department-task-expanded > span { font-size: var(--ui-text-small); }
+.department-ui .department-task-pagination { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); border-top: 1px solid var(--ui-line); color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-task-pagination [role=alert] { color: var(--ui-danger); }
+.department-ui .department-task-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.department-ui .department-task-create-grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr); gap: var(--ui-space-4); align-items: start; }
+.department-ui .department-task-form-panel { min-width: 0; padding: var(--ui-space-4); background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.department-ui .department-task-form-panel h2 { font-size: var(--ui-text-section); font-weight: 600; margin: 0 0 var(--ui-space-4); }
+.department-ui .department-task-form-panel .ant-form-item { margin-bottom: var(--ui-space-4); }
+.department-ui .department-task-form-panel .ant-select,
+.department-ui .department-task-form-panel .ant-picker { width: 100%; }
+.department-ui .department-task-form-panel .ant-input-textarea-show-count { margin-bottom: var(--ui-space-4); }
+.department-ui .department-task-link-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--ui-space-3); }
+.department-ui .department-task-link-feedback { grid-column: 1 / -1; color: var(--ui-danger); margin-bottom: var(--ui-space-3); }
+.department-ui .department-task-choice { width: 100%; height: auto; min-height: var(--ui-field-height); display: flex; justify-content: space-between; white-space: normal; text-align: left; }
+.department-ui .department-task-choice > span:first-child { overflow-wrap: anywhere; }
+.department-ui .department-task-advice { margin-bottom: var(--ui-space-4); padding: var(--ui-space-3); border-left: 3px solid var(--ui-primary); background: var(--ui-selected); }
+.department-ui .department-task-advice-error { color: var(--ui-danger); background: var(--ui-danger-soft); border-color: var(--ui-danger); }
+.department-ui .department-task-voice { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); align-items: center; padding-top: var(--ui-space-2); }
+.department-ui .department-task-voice > span { color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-task-delivery { margin-top: var(--ui-space-4); padding: var(--ui-space-3); border-radius: var(--ui-radius-control); background: var(--ui-selected); }
+.department-ui .department-task-delivery p { color: var(--ui-secondary); margin: var(--ui-space-1) 0 0; font-size: var(--ui-text-small); }
+.department-ui .department-task-form > .sb-bottombar { margin-top: var(--ui-space-4); padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); z-index: 2; }
+.department-ui .department-task-choice-results { max-height: min(55vh, 460px); margin-top: var(--ui-space-3); overflow: auto; }
+.department-ui .department-task-selector-row { display: flex; width: 100%; height: auto; min-height: var(--ui-field-height); justify-content: space-between; gap: var(--ui-space-4); margin-bottom: var(--ui-space-2); padding: var(--ui-space-3); white-space: normal; text-align: left; }
+.department-ui .department-task-selector-row > span:first-child { overflow-wrap: anywhere; }
+.department-ui .department-task-selector-row > span:last-child { color: var(--ui-primary); flex-shrink: 0; }
+.department-ui .department-task-selector-more { display: block; margin: var(--ui-space-3) auto; }
+@media (max-width: 900px) {
+  .department-ui .department-task-create-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .department-ui .department-task-toolbar { align-items: stretch; flex-direction: column; }
+  .department-ui .department-task-overview { align-items: flex-start; flex-direction: column; gap: var(--ui-space-1); }
+  .department-ui .department-task-overview .ant-btn { padding-inline: 0; }
+  .department-ui .department-task-link-fields { grid-template-columns: minmax(0, 1fr); }
+  .department-ui .department-task-form > .sb-bottombar { flex-wrap: wrap; }
+  .department-ui .department-task-form > .sb-bottombar .sb-bottombar-reason { width: 100%; }
+  .department-ui .department-task-form > .sb-bottombar .sb-primary { width: 100%; }
+}
+
+.department-ui .department-task-status { display: flex; flex-direction: column; gap: var(--ui-space-1); align-items: flex-start; }

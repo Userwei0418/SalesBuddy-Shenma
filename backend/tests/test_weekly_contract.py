@@ -44,3 +44,15 @@ def test_cross_customer_source_and_invented_stats_rejected():
 @pytest.mark.parametrize('text',['{"a":1,"a":2}','{"a":NaN}','prefix {"a":1}','{"a":1} {"b":2}'])
 def test_bad_json_never_becomes_a_report(text):
     with pytest.raises(ValueError):decode_response(text)
+
+
+def test_report_week_is_separate_from_fourteen_day_window():
+    from datetime import date
+    from sales_backend.services.weekly_source import report_dates
+    now=datetime.fromisoformat('2027-01-04T01:00:00+00:00')
+    week=date(2026,12,28)
+    period,start,end=window(now,week)
+    assert period['start_date']=='2026-12-21' and period['end_date']=='2027-01-03'
+    assert report_dates(now,week)[1].isoformat()=='2027-01-03T23:59:59.999999+08:00'
+    for invalid in (date(2027,1,11),date(2027,1,5)):
+        with pytest.raises(ValueError,match='WEEKLY_INVALID_REPORT_WEEK'):window(now,invalid)

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "客户认领",
+  "navigationBarBackgroundColor": "#F8FBFF",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": false,
+  "homeButton": true
+}

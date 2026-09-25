@@ -1,0 +1,5 @@
+/* FDE 选商机：已选一行，未选时搜索加列表 */
+.department-ui .ds-fvo-selected { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); } .department-ui .ds-fvo-selected b { flex: 1; font-weight: 600; }
+.department-ui .ds-fvo-list { margin-top: var(--ui-space-2); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); max-height: 260px; overflow: auto; } .department-ui .ds-fvo-list:empty { display: none; } .department-ui .ds-fvo-list .ant-btn { margin: var(--ui-space-2); }
+.department-ui .ds-fvo-state { margin: var(--ui-space-1) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-fvo-error { margin: var(--ui-space-1) 0 0; color: var(--ui-danger); font-size: var(--ui-text-small); }

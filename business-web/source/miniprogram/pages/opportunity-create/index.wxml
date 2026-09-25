@@ -1,0 +1,67 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="page page-shell">
+  <view class="opportunity-create-hero">
+    <view class="hero-glow"></view>
+    <view class="hero-content">
+      <view class="hero-eyebrow">OPPORTUNITY SETUP</view>
+      <view class="hero-title">{{existing ? '修改商机' : '新增商机'}}</view>
+      <view class="hero-subtitle">{{customerName ? '补充关键信息，持续推进成交' : '先选择客户，再完善商机信息'}}</view>
+      <view wx:if="{{customerName}}" class="customer-context">
+        <view class="customer-context-icon">客</view>
+        <view class="customer-context-copy">
+          <text>关联客户</text>
+          <view>{{customerName}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!customerId}}" class="surface customer-picker-card">
+    <view class="section-head">
+      <view>
+        <view class="card-title">选择所属客户</view>
+        <view class="card-description">商机将归档到所选客户名下</view>
+      </view>
+      <view class="step-chip">第 1 步</view>
+    </view>
+    <view class="search-shell">
+      <text class="search-icon">⌕</text>
+      <input class="search" placeholder="搜索客户名称" placeholder-class="search-placeholder" value="{{query}}" bindinput="inputCustomer"/>
+    </view>
+    <view wx:if="{{query && !customers.length}}" class="empty-hint">输入客户名称后，从搜索结果中选择</view>
+    <view wx:for="{{customers}}" wx:key="id" class="customer" data-id="{{item.id}}" bindtap="selectCustomer">
+      <view class="customer-avatar">客</view>
+      <view class="customer-result-name">{{item.name}}</view>
+      <view class="customer-arrow">›</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="surface loading-card">
+    <view class="loading-dot"></view>
+    <text>正在加载商机信息…</text>
+  </view>
+
+  <view wx:elif="{{customerName}}" class="surface form-card">
+    <view class="section-head form-heading">
+      <view>
+        <view class="card-title">完善商机信息</view>
+        <view class="card-description">必填信息完整后即可保存</view>
+      </view>
+      <view class="step-chip">第 2 步</view>
+    </view>
+    <opportunity-form id="opportunityForm" customer-id="{{customerId}}" existing="{{existing}}" disabled="{{busy}}"/>
+  </view>
+
+  <view wx:if="{{error}}" class="error-card">
+    <view class="error-icon">!</view>
+    <view>{{error}}</view>
+  </view>
+
+  <view wx:if="{{customerName}}" class="footer">
+    <view class="footer-hint">请确认商机名称、阶段、金额和预计关单日期</view>
+    <button class="submit {{busy ? 'submit-disabled' : ''}}" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">{{busy ? '正在保存' : '确认保存商机'}}</button>
+  </view>
+</view>
+
+</block>

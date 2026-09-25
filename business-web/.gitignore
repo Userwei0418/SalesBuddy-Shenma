@@ -1,0 +1,22 @@
+/dist/
+.runtime/
+.env
+.env.*
+!.env.example
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
+.DS_Store
+*.zip
+*.log
+*.pem
+*.key
+.claude/settings.local.json
+/CHECKSUMS.sha256
+/scripts/package_crm_handoff.py
+# Local evidence and symlinks stay in the original delivery archive.
+/docs/*
+!/docs/cloud/
+/.cache/

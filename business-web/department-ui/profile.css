@@ -1,0 +1,61 @@
+/* 我的：账号一行，页签内容在一张白卡里 */
+.department-ui .ds-profile { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-pf-head { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .ds-pf-avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--ui-selected); color: var(--ui-primary); display: grid; place-items: center; font-weight: 600; }
+.department-ui .ds-pf-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-pf-id b { font-size: var(--ui-text-section); font-weight: 650; } .department-ui .ds-pf-id span { font-size: var(--ui-text-small); }
+.department-ui .ds-pf-logout { margin-left: auto; }
+.department-ui .ds-pf-main { padding: 0 var(--ui-space-4) var(--ui-space-4); }
+.department-ui .ds-pf-main .ant-tabs-nav { margin-bottom: 0; }
+.department-ui .ds-pf-body { padding-top: var(--ui-space-4); }
+.department-ui .ds-pf-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-pf-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-3); margin-bottom: var(--ui-space-3); }
+.department-ui .ds-pf-section-head h2 { margin: 0; font-size: var(--ui-text-section); font-weight: 650; }
+.department-ui .ds-pf-score { all: unset; cursor: pointer; display: grid; grid-template-columns: auto auto; column-gap: var(--ui-space-1); align-items: baseline; padding: var(--ui-space-2) var(--ui-space-3); border-radius: var(--ui-radius-panel); background: var(--ui-neutral-soft); color: var(--ui-neutral); text-align: right; }
+.department-ui .ds-pf-score b { font-size: var(--ui-text-metric); font-weight: 650; font-variant-numeric: tabular-nums; } .department-ui .ds-pf-score span { font-size: var(--ui-text-small); }
+.department-ui .ds-pf-score small { grid-column: 1 / -1; font-size: var(--ui-text-small); color: var(--ui-secondary); }
+.department-ui .ds-pf-score:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-pf-score-good { background: var(--ui-success-soft); color: var(--ui-success); } .department-ui .ds-pf-score-watch { background: var(--ui-warning-soft); color: var(--ui-warning); } .department-ui .ds-pf-score-bad { background: var(--ui-danger-soft); color: var(--ui-danger); }
+.department-ui .ds-pf-h { display: flex; align-items: baseline; gap: var(--ui-space-2); margin: var(--ui-space-4) 0 var(--ui-space-2); font-size: var(--ui-text-body); font-weight: 600; flex-wrap: wrap; }
+.department-ui .ds-pf-h small { color: var(--ui-muted); font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-pf-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3); }
+.department-ui .ds-pf-metric { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-pf-metric-head { display: flex; justify-content: space-between; align-items: baseline; } .department-ui .ds-pf-metric-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-pf-metric-value { display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-pf-metric-value span { font-size: var(--ui-text-small); } .department-ui .ds-pf-metric-value b { font-size: var(--ui-text-metric); font-weight: 650; font-variant-numeric: tabular-nums; }
+.department-ui .ds-pf-metric-target { font-size: var(--ui-text-small); } .department-ui .ds-pf-metric-target b { color: var(--ui-ink); }
+.department-ui .ds-pf-facts { margin-top: var(--ui-space-3); }
+.department-ui .ds-pf-switches { display: flex; gap: var(--ui-space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--ui-space-3); }
+.department-ui .ds-pf-ratio { display: flex; flex-direction: column; gap: var(--ui-space-1); padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.department-ui .ds-pf-ratio b { font-size: var(--ui-text-metric); font-weight: 650; color: var(--ui-primary); font-variant-numeric: tabular-nums; } .department-ui .ds-pf-ratio p { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-pf-window, .department-ui .ds-pf-meta { margin: var(--ui-space-2) 0 var(--ui-space-3); font-size: var(--ui-text-small); }
+.department-ui .ds-pf-summary { margin: 0; font-weight: 600; }
+.department-ui .ds-pf-dim { display: flex; align-items: center; gap: var(--ui-space-2); } .department-ui .ds-pf-dim .ant-progress { flex: 1; margin: 0; }
+.department-ui .ds-pf-advice { margin-top: var(--ui-space-4); padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.department-ui .ds-pf-advice-head { display: flex; align-items: center; gap: var(--ui-space-2); font-size: var(--ui-text-small); }
+.department-ui .ds-pf-advice ol { margin: var(--ui-space-2) 0 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .ds-pf-growth-head { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-pf-spark { width: 100%; height: auto; display: block; }
+.department-ui .ds-pf-spark-grid { stroke: var(--ui-line); stroke-width: 1; } .department-ui .ds-pf-spark-line { fill: none; stroke: var(--ui-primary); stroke-width: 2; } .department-ui .ds-pf-spark-dot { fill: var(--ui-primary); }
+.department-ui .ds-pf-empty { margin: var(--ui-space-2) 0; font-size: var(--ui-text-small); }
+@media (max-width: 900px) { .department-ui .ds-pf-board { grid-template-columns: minmax(0, 1fr); } .department-ui .ds-pf-logout { margin-left: 0; width: 100%; } }
+
+.department-ui .ds-pf-scope { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; padding: var(--ui-space-3) 0 0; font-size: var(--ui-text-small); }
+/* FDE 视角：雷达、季度目标、效率排名 */
+.department-ui .ds-pf-score-static { cursor: default; }
+.department-ui .ds-pf-portrait { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--ui-space-4); align-items: start; }
+.department-ui .ds-pf-radar { width: 100%; height: auto; }
+.department-ui .ds-pf-radar-grid { fill: none; stroke: var(--ui-line); stroke-width: 1; }
+.department-ui .ds-pf-radar-shape { fill: var(--ui-selected); stroke: var(--ui-primary); stroke-width: 2; }
+.department-ui .ds-pf-radar-label { font-size: 12px; fill: var(--ui-secondary); }
+.department-ui .ds-pf-dims { display: flex; flex-direction: column; gap: var(--ui-space-2); min-width: 0; }
+.department-ui .ds-pf-target { display: flex; flex-direction: column; gap: var(--ui-space-1); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-background); }
+.department-ui .ds-pf-target-bar { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); } .department-ui .ds-pf-target-bar b { font-weight: 600; }
+.department-ui .ds-pf-target-note { margin: 0; }
+.ds-pf-target-form { display: flex; flex-direction: column; gap: var(--ui-space-3); } .ds-pf-target-form p { margin: 0; font-size: var(--ui-text-small); }
+.ds-pf-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-pf-ranking { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .ds-pf-ranking li { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2); border-radius: var(--ui-radius-control); } .department-ui .ds-pf-ranking li.is-selected { background: var(--ui-selected); }
+.department-ui .ds-pf-rank-no { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--ui-background); color: var(--ui-secondary); font-size: var(--ui-text-small); font-weight: 600; }
+.department-ui .ds-pf-rank-main { flex: 1; min-width: 0; display: flex; flex-direction: column; } .department-ui .ds-pf-rank-main b { font-weight: 600; } .department-ui .ds-pf-rank-main > span { font-size: var(--ui-text-small); } .department-ui .ds-pf-rank-main .ant-progress { margin: 0; }
+.department-ui .ds-pf-rank-value { flex: none; font-weight: 650; font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) { .department-ui .ds-pf-portrait { grid-template-columns: 1fr; } }
+.department-ui .ds-pf-rank-value small { font-variant-numeric: normal; }

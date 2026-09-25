@@ -1,0 +1,17 @@
+/* 登录：只占壳层留出的表单格，高度随内容；壳层的品牌、标题、错误条在页面容器之外 */
+.web-login #page-root.department-host, .web-login .department-host { height: auto !important; min-height: 0 !important; }
+.web-login .department-ui { padding: 0; min-height: 0; }
+.department-ui .ds-login { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-login .form-area { display: flex; flex-direction: column; gap: var(--ui-space-3); margin: 0; }
+.department-ui .ds-login .field-group { margin: 0; }
+.department-ui .ds-login-suggest { margin-top: var(--ui-space-2); display: flex; flex-direction: column; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); overflow: hidden; }
+.department-ui .ds-login-suggest > span { padding: var(--ui-space-1) var(--ui-space-3); background: var(--ui-background); }
+.department-ui .ds-login-suggest button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); min-height: var(--ui-control-height); padding: var(--ui-space-1) var(--ui-space-3); }
+.department-ui .ds-login-suggest button:hover { background: var(--ui-selected); } .department-ui .ds-login-suggest button:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-login-suggest button b { font-weight: 500; } .department-ui .ds-login-suggest button span { color: var(--ui-primary); font-size: var(--ui-text-small); }
+.department-ui .ds-login-checks { display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-login-agree { display: flex; align-items: center; flex-wrap: wrap; }
+.department-ui .ds-login-link { all: unset; cursor: pointer; color: var(--ui-primary); text-decoration: underline; text-underline-offset: var(--ui-space-1); } .department-ui .ds-login-link:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-login-note { margin: 0; text-align: center; }
+/* 示例模式下壳层用「选择身份」入口代替账号表单（workspace-frame.css 的约定），页面容器不显示 */
+.web-login[data-mode=preview] #page-root.department-host { display: none !important; }

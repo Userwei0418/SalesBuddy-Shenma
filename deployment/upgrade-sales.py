@@ -72,8 +72,8 @@ def main():
         parser.add_argument("--" + name + "-sha256", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--expected-current", required=True)
-    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151"))
-    parser.add_argument("--target-schema", default="V152", choices=("V151", "V152"))
+    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152"))
+    parser.add_argument("--target-schema", default="V153", choices=("V151", "V152", "V153"))
     args = parser.parse_args()
     assert os.geteuid() == 0 and socket.gethostname() == "salesbuddy"
     assert "172.22.9.234" in subprocess.check_output(["hostname", "-I"], text=True).split()

@@ -1,0 +1,41 @@
+/* 新建／修改商机：左栏客户与步骤，右栏表单两列；页面一屏，表单区自己滚动。抽屉里的选择器不带前缀 */
+.department-ui[data-department-page="pages/opportunity-create/index"] { height: 100%; }
+.department-ui .ds-ocreate { display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-oc-side { padding: var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-4); overflow: auto; }
+.department-ui .ds-oc-side .ant-steps { flex: none; }
+.department-ui .ds-oc-chosen { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3); border: 1px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); }
+.department-ui .ds-oc-mark { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: var(--ui-radius-control); background: var(--ui-primary); color: var(--ui-on-primary); font-weight: 600; }
+.department-ui .ds-oc-chosen-main { display: flex; flex-direction: column; min-width: 0; } .department-ui .ds-oc-chosen-main span { font-size: var(--ui-text-small); } .department-ui .ds-oc-chosen-main b { font-weight: 600; overflow-wrap: anywhere; }
+.department-ui .ds-oc-results { margin-top: var(--ui-space-2); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); max-height: 320px; overflow: auto; } .department-ui .ds-oc-results p { padding: var(--ui-space-2) var(--ui-space-3); font-size: var(--ui-text-small); }
+.department-ui .ds-oc-main { display: flex; flex-direction: column; min-height: 0; padding: 0; overflow: hidden; }
+.department-ui .ds-oc-head { display: flex; align-items: baseline; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-oc-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-4); }
+.department-ui .ds-oc-banner { margin: 0 0 var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); background: var(--ui-danger-soft); border-radius: var(--ui-radius-control); }
+.department-ui .ds-oc-error { color: var(--ui-danger); font-size: var(--ui-text-small); } .ds-oc-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-oc-errlink { all: unset; cursor: pointer; color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-oc-bar { border-top: 1px solid var(--ui-line); }
+.department-ui .ds-oc-form { display: flex; flex-direction: column; gap: var(--ui-space-3); max-width: 1040px; }
+.department-ui .ds-oc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3) var(--ui-space-6); }
+.department-ui .ds-oc-track { list-style: none; margin: var(--ui-space-2) 0 0; padding: 0; display: flex; gap: var(--ui-space-1); } .department-ui .ds-oc-track li { flex: 1; height: 4px; border-radius: 2px; background: var(--ui-line); } .department-ui .ds-oc-track li.is-active { background: var(--ui-primary); } .department-ui .ds-oc-track.is-lost li { background: var(--ui-danger-soft); }
+.department-ui .ds-oc-partner { display: flex; flex-direction: column; gap: var(--ui-space-2); align-items: flex-start; }
+.department-ui .ds-oc-picker-btn { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: var(--ui-control-height); display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-1) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); }
+.department-ui .ds-oc-picker-btn:hover { border-color: var(--ui-focus); } .department-ui .ds-oc-picker-btn:focus-visible { outline: 2px solid var(--ui-focus); } .department-ui .ds-oc-picker-btn:disabled { cursor: default; color: var(--ui-muted); }
+.department-ui .ds-oc-link { color: var(--ui-primary); font-size: var(--ui-text-small); flex: none; }
+.department-ui .ds-oc-fde { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; min-height: var(--ui-control-height); }
+.department-ui .ds-oc-tags, .ds-oc-tags { display: flex; flex-wrap: wrap; gap: var(--ui-space-1); }
+.department-ui .ds-oc-tag, .ds-oc-tag { display: inline-flex; align-items: center; padding: 0 var(--ui-space-2); min-height: 24px; border-radius: var(--ui-radius-control); background: var(--ui-background); border: 1px solid var(--ui-line); font-size: var(--ui-text-small); color: var(--ui-ink); }
+.ds-oc-tag.is-removable { cursor: pointer; font-family: inherit; }
+.ds-oc-picker { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.ds-oc-picker-list { display: flex; flex-direction: column; gap: var(--ui-space-1); } .ds-oc-picker-list p { margin: var(--ui-space-2) 0; font-size: var(--ui-text-small); }
+.ds-oc-person { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-2); border-radius: var(--ui-radius-control); cursor: pointer; } .ds-oc-person:hover { background: var(--ui-selected); } .ds-oc-person.is-off { cursor: default; opacity: .6; }
+.ds-oc-person-main { flex: 1; display: flex; flex-direction: column; min-width: 0; } .ds-oc-person-main b { font-weight: 600; } .ds-oc-person-main span { font-size: var(--ui-text-small); }
+.department-ui .ds-oc-fold { all: unset; box-sizing: border-box; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); font-weight: 600; }
+.department-ui .ds-oc-fold:hover { background: var(--ui-background); } .department-ui .ds-oc-fold:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-oc-fold small { font-weight: 400; font-size: var(--ui-text-small); margin-left: var(--ui-space-1); } .department-ui .ds-oc-required { color: var(--ui-danger); }
+.department-ui .ds-oc-forecast { display: flex; flex-direction: column; gap: var(--ui-space-3); padding: var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); background: var(--ui-background); }
+.department-ui .ds-oc-forecast-head { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; } .department-ui .ds-oc-forecast-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-oc-calc { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ui-space-3); padding: var(--ui-space-2) var(--ui-space-3); background: var(--ui-surface); border-radius: var(--ui-radius-control); } .department-ui .ds-oc-calc b { font-weight: 650; font-variant-numeric: tabular-nums; }
+.department-ui .ds-oc-note { margin: 0; }
+@media (max-width: 900px) {
+  .department-ui .ds-ocreate { grid-template-columns: 1fr; height: auto; } .department-ui .ds-oc-grid { grid-template-columns: 1fr; }
+}

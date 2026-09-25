@@ -2276,6 +2276,12 @@ components:
     GenerateRequest:
       additionalProperties: false
       properties:
+        report_week:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Report Week
         request_id:
           format: uuid
           title: Request Id
@@ -5033,6 +5039,14 @@ components:
           title: Original Result
         period:
           $ref: '#/components/schemas/WeeklyPeriod'
+        report_week:
+          format: date
+          title: Report Week
+          type: string
+        report_week_end:
+          format: date
+          title: Report Week End
+          type: string
         request_id:
           format: uuid
           title: Request Id
@@ -5054,6 +5068,14 @@ components:
           const: false
           title: Runtime Snapshot Verified
           type: boolean
+        snapshot_at:
+          format: date-time
+          title: Snapshot At
+          type: string
+        source_cutoff_at:
+          format: date-time
+          title: Source Cutoff At
+          type: string
         statistics:
           $ref: '#/components/schemas/WeeklyStatistics'
         status:
@@ -5077,6 +5099,10 @@ components:
       required:
       - id
       - request_id
+      - report_week
+      - report_week_end
+      - source_cutoff_at
+      - snapshot_at
       - status
       - result_status
       - period
@@ -5099,6 +5125,10 @@ components:
       type: object
     WeeklyList:
       properties:
+        current_week:
+          format: date
+          title: Current Week
+          type: string
         has_more:
           title: Has More
           type: boolean
@@ -5108,6 +5138,7 @@ components:
           title: Items
           type: array
       required:
+      - current_week
       - items
       - has_more
       title: WeeklyList
@@ -5136,6 +5167,132 @@ components:
       - timezone
       - date_basis
       title: WeeklyPeriod
+      type: object
+    WeeklySourceRecord:
+      properties:
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        customer_id:
+          format: uuid
+          title: Customer Id
+          type: string
+        customer_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Name
+        follow_up_record:
+          title: Follow Up Record
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        next_action:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Action
+        opportunity_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Opportunity Id
+        opportunity_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Opportunity Name
+        recorder_id:
+          format: uuid
+          title: Recorder Id
+          type: string
+        recorder_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recorder Name
+        status:
+          title: Status
+          type: string
+        version_no:
+          title: Version No
+          type: integer
+        visit_date:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Visit Date
+      required:
+      - id
+      - recorder_id
+      - recorder_name
+      - customer_id
+      - customer_name
+      - opportunity_id
+      - opportunity_name
+      - created_at
+      - visit_date
+      - follow_up_record
+      - next_action
+      - status
+      - version_no
+      title: WeeklySourceRecord
+      type: object
+    WeeklySources:
+      properties:
+        has_more:
+          title: Has More
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/WeeklySourceRecord'
+          title: Items
+          type: array
+        next_offset:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Offset
+        period:
+          $ref: '#/components/schemas/WeeklyPeriod'
+        report_week:
+          format: date
+          title: Report Week
+          type: string
+        report_week_end:
+          format: date
+          title: Report Week End
+          type: string
+        snapshot_at:
+          format: date-time
+          title: Snapshot At
+          type: string
+        source_cutoff_at:
+          format: date-time
+          title: Source Cutoff At
+          type: string
+        statistics:
+          $ref: '#/components/schemas/WeeklyStatistics'
+        total:
+          title: Total
+          type: integer
+      required:
+      - report_week
+      - report_week_end
+      - period
+      - source_cutoff_at
+      - snapshot_at
+      - statistics
+      - items
+      - total
+      - has_more
+      - next_offset
+      title: WeeklySources
       type: object
     WeeklyStatistics:
       properties:
@@ -5186,6 +5343,14 @@ components:
           type: string
         period:
           $ref: '#/components/schemas/WeeklyPeriod'
+        report_week:
+          format: date
+          title: Report Week
+          type: string
+        report_week_end:
+          format: date
+          title: Report Week End
+          type: string
         request_id:
           format: uuid
           title: Request Id
@@ -5203,6 +5368,14 @@ components:
           const: false
           title: Runtime Snapshot Verified
           type: boolean
+        snapshot_at:
+          format: date-time
+          title: Snapshot At
+          type: string
+        source_cutoff_at:
+          format: date-time
+          title: Source Cutoff At
+          type: string
         statistics:
           $ref: '#/components/schemas/WeeklyStatistics'
         status:
@@ -5221,6 +5394,10 @@ components:
       required:
       - id
       - request_id
+      - report_week
+      - report_week_end
+      - source_cutoff_at
+      - snapshot_at
       - status
       - result_status
       - period
@@ -5923,7 +6100,8 @@ paths:
       - Auth
   /api/v1/auth/password/login:
     post:
-      description: Bearer sessions for native clients; shared password verification, no Web cookie dependency.
+      description: Shared password login for Mini Program and business Web; same accounts and Bearer session
+        contract.
       operationId: password_login_api_v1_auth_password_login_post
       requestBody:
         content:
@@ -14571,6 +14749,15 @@ paths:
           minimum: 0
           title: Offset
           type: integer
+      - in: query
+        name: report_week
+        required: false
+        schema:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Report Week
       responses:
         '200':
           content:
@@ -14613,6 +14800,55 @@ paths:
       security:
       - HTTPBearer: []
       summary: Generate
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/sources:
+    get:
+      operationId: sources_api_v1_web_weekly_reports_sources_get
+      parameters:
+      - in: query
+        name: report_week
+        required: false
+        schema:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Report Week
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySources'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Sources
       tags:
       - Business Web weekly reports
   /api/v1/web/weekly-reports/{report_id}:
@@ -14706,6 +14942,53 @@ paths:
       security:
       - HTTPBearer: []
       summary: Save Draft
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}/sources:
+    get:
+      operationId: report_sources_api_v1_web_weekly_reports__report_id__sources_get
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySources'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Report Sources
       tags:
       - Business Web weekly reports
   /api/v1/workbench:

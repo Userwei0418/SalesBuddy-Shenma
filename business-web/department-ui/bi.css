@@ -1,0 +1,14 @@
+/* 经营分析：一行范围与季度，两排指标卡，图两列 */
+.department-ui .ds-bi { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-bi-bar { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .ds-bi-quarter { display: flex; align-items: center; gap: var(--ui-space-2); }
+.department-ui .ds-bi-quarters { display: flex; gap: var(--ui-space-1); }
+.department-ui .ds-bi-meta { margin-left: auto; font-size: var(--ui-text-small); white-space: nowrap; }
+.department-ui .ds-bi-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ui-space-3); }
+.department-ui .ds-bi-kpis > * { min-width: 0; }
+.department-ui .ds-bi-countdown { font-size: var(--ui-text-small); padding: 0 var(--ui-space-1); }
+.department-ui .ds-bi-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); }
+.department-ui .ds-bi-charts > * { min-width: 0; }
+.department-ui .ds-bi-h { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-section); font-weight: 650; display: flex; align-items: baseline; gap: var(--ui-space-2); }
+.department-ui .ds-bi-h small { font-weight: 400; font-size: var(--ui-text-small); }
+@media (max-width: 1100px) { .department-ui .ds-bi-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .department-ui .ds-bi-charts { grid-template-columns: minmax(0, 1fr); } .department-ui .ds-bi-meta { margin-left: 0; white-space: normal; } }

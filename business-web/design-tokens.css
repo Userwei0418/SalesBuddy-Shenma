@@ -1,0 +1,48 @@
+/* SalesBuddy Web design specification V1.0. Single source for shared tokens.
+ * Existing --ui-* names and effective values are preserved for compatibility.
+ * New tokens apply incrementally; they do not imply all legacy pages migrated. */
+:root {
+  color-scheme: light;
+  --ui-background: #f3f5f9;
+  --ui-surface: #ffffff;
+  --ui-surface-subtle: #f7f9fc;
+  --ui-accent: #8171b1;
+  --ui-accent-soft: #f0edfb;
+  --ui-control-height-compact: 32px;
+  --ui-sidebar: #142f54;
+  --ui-ink: #192842;
+  --ui-secondary: #5b6c82;
+  --ui-muted: #617188;
+  --ui-primary: #2863cd;
+  --ui-primary-hover: #2055b5;
+  --ui-line: #e2e8f0;
+  --ui-selected: #edf3ff;
+  --ui-focus: #5786dc;
+  --ui-hover: var(--ui-selected);
+  --ui-duration-fast: 120ms;
+  --ui-danger: #a73f38;
+  --ui-danger-soft: #fbe4df;
+  --ui-warning: #805919;
+  --ui-warning-soft: #fff0cf;
+  --ui-success: #27694c;
+  --ui-success-soft: #e8f5ee;
+  --ui-neutral: #56677e;
+  --ui-neutral-soft: #eef2f7;
+  --ui-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --ui-text-small: 12px;
+  --ui-text-body: 14px;
+  --ui-text-section: 16px;
+  --ui-text-page: 24px;
+  --ui-text-metric: 32px;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+  --ui-radius-control: 6px;
+  --ui-radius-panel: 12px;
+  --ui-control-height: 36px;
+  --ui-field-height: 40px;
+  --ui-shadow-popup: 0 8px 28px #1928421a, 0 2px 6px #19284208;
+}

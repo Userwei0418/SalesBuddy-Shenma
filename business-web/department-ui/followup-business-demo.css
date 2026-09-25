@@ -1,0 +1,22 @@
+.ds-vc-business { display:flex; flex-direction:column; gap:var(--ui-space-3); min-width:0; }
+.ds-vc-followup-select { width: min(100%, 400px); }
+.ds-vc-business-panel { border:1px solid var(--ui-line); border-radius:var(--ui-radius-panel); padding:var(--ui-space-4); }
+.ds-vc-business-head { display:flex; align-items:center; justify-content:space-between; gap:var(--ui-space-3); }
+.ds-vc-business-head h3 { margin:0; font-size:var(--ui-text-body); font-weight:600; }
+.ds-vc-business-head p { margin:var(--ui-space-1) 0 0; font-size:var(--ui-text-small); }
+.ds-vc-required { color:var(--ui-danger); }
+.ds-vc-business-empty { margin:var(--ui-space-4) 0 0; }
+.ds-vc-business-chips { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--ui-space-2); list-style:none; margin:var(--ui-space-3) 0 0; padding:0; }
+.ds-vc-business-chips li { display:flex; align-items:flex-start; gap:var(--ui-space-2); min-width:0; border:1px solid var(--ui-line); background:var(--ui-background); border-radius:var(--ui-radius-control); padding:var(--ui-space-3); }
+.ds-vc-business-chips li > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--ui-space-1); }
+.ds-vc-business-chips b,.ds-vc-business-cell b { font-weight:500; overflow-wrap:anywhere; }
+.ds-vc-business-status { display:flex; justify-content:space-between; flex-wrap:wrap; gap:var(--ui-space-2); font-size:var(--ui-text-small); }
+.ds-vc-business-summary { display:flex; flex-direction:column; gap:var(--ui-space-2); padding:var(--ui-space-3) 0; overflow-wrap:anywhere; }
+.ds-vc-business-modal { max-width:calc(100vw - 32px); }
+.ds-vc-business-modal .ant-modal-body { max-height:65vh; overflow:auto; }
+.ds-vc-business-modal .ant-table-wrapper { margin-top:var(--ui-space-3); }
+.ds-vc-business-cell { display:flex; flex-direction:column; gap:var(--ui-space-1); white-space:normal; min-width:0; }
+.ds-vc-business-footer { display:flex; align-items:center; gap:var(--ui-space-2); }
+.ds-vc-business-footer > span { margin-right:auto; }
+@media(max-width:900px) { .ds-vc-business-chips { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:480px) { .ds-vc-business-head { align-items:flex-start; flex-direction:column; } }

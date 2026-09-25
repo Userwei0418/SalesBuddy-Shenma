@@ -1,0 +1,5 @@
+/* Shared opportunity editing entry; text wraps beside a stable tap target. */
+.opportunity-card-heading,.workbench-opportunity-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}
+.workbench-opportunity-card-top>.card-view{min-width:0;flex:1}
+.opportunity-card-edit{box-sizing:border-box;flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-width:88rpx;min-height:56rpx;padding:10rpx 18rpx;border:1rpx solid #cbe2f5;border-radius:14rpx;background:#eff7ff;color:#1979bd;font-size:22rpx;font-weight:600;line-height:1.4}
+.opportunity-card-edit-active{background:#dfefff}

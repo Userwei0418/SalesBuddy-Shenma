@@ -22,6 +22,10 @@ class WeeklyStatistics(BaseModel):
 class WeeklySummary(BaseModel):
     id: UUID
     request_id: UUID
+    report_week: date
+    report_week_end: date
+    source_cutoff_at: datetime
+    snapshot_at: datetime
     status: Literal['queued', 'running', 'succeeded', 'failed', 'cancelled']
     result_status: Literal['ready', 'insufficient_data', 'invalid_input'] | None
     period: WeeklyPeriod
@@ -46,5 +50,35 @@ class WeeklyDetail(WeeklySummary):
 
 
 class WeeklyList(BaseModel):
+    current_week: date
     items: list[WeeklySummary]
     has_more: bool
+
+
+class WeeklySourceRecord(BaseModel):
+    id: UUID
+    recorder_id: UUID
+    recorder_name: str | None
+    customer_id: UUID
+    customer_name: str | None
+    opportunity_id: UUID | None
+    opportunity_name: str | None
+    created_at: datetime
+    visit_date: date | None
+    follow_up_record: str
+    next_action: str | None
+    status: str
+    version_no: int
+
+
+class WeeklySources(BaseModel):
+    report_week: date
+    report_week_end: date
+    period: WeeklyPeriod
+    source_cutoff_at: datetime
+    snapshot_at: datetime
+    statistics: WeeklyStatistics
+    items: list[WeeklySourceRecord]
+    total: int
+    has_more: bool
+    next_offset: int | None

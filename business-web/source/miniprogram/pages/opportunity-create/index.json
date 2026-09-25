@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "维护商机",
+  "usingComponents": {
+    "opportunity-form": "/components/opportunity-form/index"
+  },
+  "homeButton": true
+}

@@ -1,0 +1,15 @@
+<view class="actions">
+  <block wx:if="{{suggestion.decision==='pending' && (canDecide || isFde)}}">
+    <button class="adopt" disabled="{{saving || !canDecide}}" bindtap="adopt">采纳并建待办</button>
+    <button class="dismiss" disabled="{{saving || !canDecide}}" bindtap="dismiss">{{saving?'保存中…':isFde?'不采纳':'无需待办'}}</button>
+    <text wx:if="{{isFde && !canDecide}}" class="handled">建议处理暂未开放</text>
+  </block>
+  <view wx:elif="{{suggestion.decision==='adopted'}}" class="adopted-tasks">
+    <text class="handled">已采纳{{suggestion.tasks.length > 1 ? ' · 每人独立待办' : ''}}</text>
+    <block wx:if="{{suggestion.tasks.length}}"><button wx:for="{{suggestion.tasks}}" wx:key="id" class="done" data-id="{{item.id}}" bindtap="openTask">{{item.assignee_name}}{{item.assignee_account ? '（' + item.assignee_account + '）' : ''}} · 查看待办 ›</button></block>
+    <button wx:elif="{{suggestion.task_id && !suggestion.tasks}}" class="done" bindtap="openTask">查看待办 ›</button>
+    <text wx:else class="handled">当前无可查看的待办</text>
+  </view>
+  <text wx:elif="{{suggestion.decision==='pending'}}" class="handled">建议供协作参考，由有权负责人决定</text>
+  <text wx:else class="handled">{{isFde ? '已处理 · 不采纳' : '已处理 · 无需待办'}}{{suggestion.decision_note?' · '+suggestion.decision_note:''}}</text>
+</view>

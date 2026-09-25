@@ -1,0 +1,33 @@
+{
+  "name": "shenma-salesbuddy-web",
+  "version": "0.6.12",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python3 scripts/build.py && node scripts/build-department-ui.mjs",
+    "dev": "npm run build && node server.mjs",
+    "start": "node server.mjs",
+    "preview:crm": "npm run build && node scripts/start_crm_preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "preview": "npm run build && node scripts/start_preview.mjs",
+    "verify": "npm run build && npm test",
+    "preview:department": "npm run build && node scripts/start_department_preview.mjs",
+    "test:weekly-browser": "node --test tests/weekly-live.browser.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@ant-design/x": "2.9.0",
+    "@shandiant/tokens": "https://raw.githubusercontent.com/shandianT/desgin/main/release/shandiant-tokens-1.2.0-draft.1.tgz",
+    "@shandiant/ui-react": "https://raw.githubusercontent.com/shandianT/desgin/main/release/shandiant-ui-react-0.7.0.tgz",
+    "antd": "6.6.5",
+    "dayjs": "1.11.23",
+    "echarts": "6.1.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

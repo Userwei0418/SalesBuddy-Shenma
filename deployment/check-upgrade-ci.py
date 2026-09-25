@@ -76,8 +76,30 @@ async def main():
         async def snapshot():
             return {table: sorted(json.dumps(dict(row), default=str, sort_keys=True) for row in await c.fetch(f"SELECT * FROM {table}")) for table in preserved}
         before = await snapshot()
-        result = await migrate(c)
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 153)]
+        # Seed a real persisted weekly draft at V152 before adding report weeks.
+        with tempfile.TemporaryDirectory(prefix="shenma-v152-") as directory:
+            baseline = Path(directory)
+            shutil.copytree(ROOT / "database", baseline, dirs_exist_ok=True)
+            (baseline / "migrations/V153__weekly_report_weeks.sql").unlink()
+            result = await migrate(c, baseline)
+        report_id = uuid4()
+        source = json.dumps({"period": {"end_date": "2026-01-01"},
+                             "current_time": "2026-01-01T08:00:00+08:00"})
+        await c.execute("""INSERT INTO insight.weekly_report(id,workspace_id,author_id,request_id,
+          status,result_status,input_snapshot,input_sha256,binding,original_result,draft_markdown,draft_version)
+          VALUES($1,$2,$3,$4,'succeeded','ready',$5,repeat('a',64),'{}','{}','保留人工正文',1)""",
+          report_id, companies[0][0], companies[0][2]['XS001'], uuid4(), source)
+        await c.execute("""INSERT INTO insight.weekly_report_revision
+          (workspace_id,author_id,report_id,version_no,body_markdown,source)
+          SELECT workspace_id,author_id,id,1,draft_markdown,'manual' FROM insight.weekly_report WHERE id=$1""", report_id)
+        old_report = dict(await c.fetchrow("SELECT * FROM insight.weekly_report WHERE id=$1", report_id))
+        result += [row for row in await migrate(c) if row['status'] == 'applied']
+        new_report = dict(await c.fetchrow("SELECT * FROM insight.weekly_report WHERE id=$1", report_id))
+        assert {key:new_report[key] for key in old_report} == old_report
+        assert new_report['report_week'].isoformat() == '2025-12-29'
+        assert new_report['source_cutoff_at'].isoformat() == '2026-01-01T00:00:00+00:00'
+        assert await c.fetchval("SELECT body_markdown FROM insight.weekly_report_revision WHERE report_id=$1", report_id) == '保留人工正文'
+        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 154)]
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -109,9 +131,10 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V152", "applied": 27, "companies": 2,
+        print(json.dumps({"upgrade": "V125->V153", "applied": 28, "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
-                          "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True}))
+                          "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True,
+                          "v152_weekly_draft_preserved": True, "week_year_boundary": True}))
     finally:
         if c:
             await c.close()

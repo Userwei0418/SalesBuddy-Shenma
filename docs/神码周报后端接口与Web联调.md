@@ -2,23 +2,19 @@
 
 适用对象：神码业务 Web 前端与联调人员。周报仅在业务 Web 提供；本次不增加小程序或运营后台页面。代码位于神码独立仓库，使用神码服务器、数据库和独立中台 Agent。
 
-## 当前交付状态（2026-09-24）
+## 本次接入（2026-09-25）
 
-已部署到神码销售服务器，后端版本 `605e6306d5abcd3c63f1961cd152836f5d676739`，数据库 V152。神码正式公司与测试公司均已启用周报。
+业务 Web 已纳入神码独立仓库的 `business-web/`。正式入口为 `/workspace/`，运营后台为 `/admin`，小程序本次不增加周报入口。部署与验收状态单独记录，不能用源码版本代替服务器版本。
 
-- 业务 Web 登录、幂等生成、本人权限、主管/总经理本人范围、原小程序登录均已线上验证。
-- 测试公司无正式跟进记录，生成接口返回 `insufficient_data`，不伪造周报。
-- 客户服务器使用非超级用户、无 RLS 绕过权限的运行账号，在回滚事务内验证了任务领取、真实中台生成、结果保存、人工版本冲突和任务完成回执。合成客户、商机、拜访及周报数据均已回滚。
-- 独立 Agent 的 15 个真实 Service API 用例全部通过。
-- 1861 项后端单测通过；PostgreSQL 集成 716 通过、20 跳过；周报/OpenAPI 定向 29 项通过。GitHub 代码检查通过。
-- 业务 Web 页面及销售人员的实际业务内容验收，待前端代码接入后完成。
+本次增加共享登录接入、本周／上周筛选、完整素材分页、服务端周报历史和人工保存。后端需要数据库 V153；V152 既有周报会补齐归属周，原始输入、AI 结果、人工正文及修改历史均保留。
 
-部署与运行证据位于 `docs/evidence/weekly-v2-20260924/`。升级已备份并恢复核对 112 张既有表，账号、密码、任职和客户数据保持一致。
+周报 Agent 沿用神码独立 `weekly.v2`，运行 Key 保存在客户服务器。前次真实 Agent、Worker 与 V152 部署证据见 `docs/evidence/weekly-v2-20260924/`。
 
 ## 业务口径
 
 - 本人周报：销售、销售主管、销售总经理使用各自账号。主管、总经理本期也只生成本人周报。
-- 统计最近 14 个上海自然日（含今天），按跟进记录的系统上传时间 `created_at` 选取，截止到生成请求的数据快照时间。
+- 报告归属自然周，周一至周日。默认本周；本周素材为截至生成时最近 14 个上海自然日。上周素材为截至上周日的 14 天。按系统上传时间 `created_at` 取数，不以拜访日期替代。
+- `report_week` 是归属周的周一，`period` 是 14 天素材范围。历史周的客户、商机档案仍取生成时可见版本，不能理解为回放当时的 CRM 档案。
 - 归属以跟进记录的销售负责人 `recorder_user_ref_id` 为准；代录人不改变归属。
 - 读取已确认、已归档且未删除的完整跟进正文。实际拜访日期用于正文说明，不替代上传时间筛选。
 - 只补充这些记录关联的客户、商机档案。金额保持币种基本单位，阶段用系统字典。关联档案权限缺失时明确报错，不伪装成空数据。
@@ -28,33 +24,35 @@
 
 部署 API 根地址：`https://salesbuddy.shenzhoukuntai.com:28899`。
 
-业务 Web 使用同源 `/api/v1/web/auth`，复用现有销售账号。登录不会赋予运营后台权限。浏览器写入类登录请求需要与地址一致的 `Origin`；本地开发建议通过代理保持同源。
+业务 Web 与小程序使用同一套销售账号、密码登录和 Bearer 会话。周报功能仅在 Web 界面提供，不以另开账号或登录接口区分端。
 
 | 方法 | 路径 | 用途 |
 |---|---|---|
-| POST | `/api/v1/web/auth/login` | `{ "account_code": "XS001", "password": "用户输入" }` |
-| GET | `/api/v1/web/auth/me` | 当前身份、功能权限、是否需要修改初始密码 |
-| POST | `/api/v1/web/auth/refresh` | 空请求体；自动携带同源 Cookie |
-| POST | `/api/v1/web/auth/password` | `{ "old_password": "原密码", "new_password": "新密码" }` |
-| POST | `/api/v1/web/auth/logout` | 退出业务 Web 会话 |
+| POST | `/api/v1/auth/password/login` | `{ "account_code": "XS001", "password": "用户输入" }` |
+| GET | `/api/v1/auth/me` | 当前身份与权限 |
+| POST | `/api/v1/auth/refresh` | `{ "refresh_token": "登录返回值" }` |
+| POST | `/api/v1/auth/password` | `{ "old_password": "原密码", "new_password": "新密码" }` |
+| POST | `/api/v1/auth/logout` | 撤销当前会话 |
 
-登录返回 `access_token`、`expires_at`、`actor`、`must_change_password`。Access Token 保存在内存，业务请求发送 `Authorization: Bearer <access_token>`；刷新凭据由 HttpOnly Cookie 管理，前端不读取、不放入 localStorage。初始密码需修改时，先完成密码修改并重新登录。
+登录返回 `access_token`、`refresh_token`、`actor`、`must_change_password`。请求携带 `Authorization: Bearer <access_token>`；Web 通过同源 `/api/v1` 访问，沿用已交接的 `apiClient` 刷新及身份切换保护。初始密码需要修改时先完成密码修改。
 
-小程序 Token 和运营后台 Token 不能直接调用周报接口。业务 Web 登录的销售账号也不能据此进入运营后台。
+周报继续按 `weekly_report.*` 权限和公司／本人范围鉴权，登录成功不授予运营后台权限。V152 的 `/web/auth/*` 保留兼容已有会话，当前 Web 不再调用它。
 
 ## 周报接口
 
-所有接口均须登录，且只操作本人当前公司下的周报。前端不传作者、公司、时间范围或原始记录，防止客户端改变取数范围。
+所有接口均须登录，且只操作本人当前公司下的周报。前端只选报告归属周，不传作者、公司、任意时间范围或原始记录。服务端确定本人数据及 14 天素材窗口。
 
 | 方法 | 路径 | 请求与结果 |
 |---|---|---|
-| POST | `/api/v1/web/weekly-reports` | `{ "request_id": "客户端生成的UUID" }`；HTTP 202，返回周报任务 |
-| GET | `/api/v1/web/weekly-reports?limit=20&offset=0` | 返回 `items`、`has_more`；limit 最大 100 |
+| POST | `/api/v1/web/weekly-reports` | `{ "request_id": "客户端生成的UUID", "report_week": "2026-09-21" }`；HTTP 202，返回周报任务 |
+| GET | `/api/v1/web/weekly-reports?limit=20&offset=0` | 可选 `report_week=YYYY-MM-DD`；返回 `items`、`has_more`、服务端 `current_week`；limit 最大 100 |
+| GET | `/api/v1/web/weekly-reports/sources?report_week=2026-09-21&limit=50&offset=0` | 预览本人完整素材，返回 `items`、`total`、`has_more`、`next_offset`；不截断正文 |
+| GET | `/api/v1/web/weekly-reports/{id}/sources?limit=50&offset=0` | 本次周报实际使用的不可变素材快照；仍校验当前读取权限 |
 | GET | `/api/v1/web/weekly-reports/{id}` | 查询任务、正文、原始结果、草稿版本 |
 | PATCH | `/api/v1/web/weekly-reports/{id}/draft` | `{ "expected_version": 1, "body_markdown": "修改后的完整正文" }` |
 | POST | `/api/v1/web/weekly-reports/{id}/cancel` | 取消本地生成任务，后续模型结果不再写入草稿 |
 
-生成按钮每次新操作生成一个 UUID；网络重发使用原 `request_id`。同一用户重复提交这个 ID 返回同一任务。明确重新生成时使用新 UUID，保留之前的周报与人工修改。
+生成按钮每次新操作生成一个 UUID；网络重发使用原 `request_id`。同一用户重复提交这个 ID 返回同一任务；相同 ID 指定不同归属周返回 409。生成响应未知时保留 ID，避免重试创建重复任务。明确重新生成时使用新 UUID，保留之前的周报与人工修改。
 
 建议每 2–3 秒查询任务详情，页面离开后停止轮询，重进页面可从列表恢复。后端有任务队列，不要求浏览器保持长连接。
 
@@ -74,7 +72,7 @@
 
 ### 返回字段
 
-列表和生成响应：`id`、`request_id`、`status`、`result_status`、`period`、`statistics`、`input_sha256`、`draft_version`、`error_code`、`created_at`、`updated_at`、`finished_at`。
+列表和生成响应包含 `report_week`、`report_week_end`、`source_cutoff_at`（上传截止时间）、`snapshot_at`（实际取数时间），以及 `id`、`request_id`、`status`、`result_status`、`period`、`statistics`、`input_sha256`、`draft_version`、`error_code`、`created_at`、`updated_at`、`finished_at`。
 
 详情额外返回：
 
@@ -93,8 +91,7 @@
 
 | HTTP / 错误码 | 处理 |
 |---|---|
-| 401 | 会话过期，尝试业务 Web 刷新或重新登录 |
-| 403 / `BUSINESS_WEB_LOGIN_REQUIRED` | 使用业务 Web 登录入口 |
+| 401 / 登录失效 | 使用与小程序相同的密码登录和刷新流程 |
 | 403 / `WEEKLY_SOURCE_ACCESS_INCOMPLETE`、`WEEKLY_ENTITY_ACCESS_INCOMPLETE`、`WEEKLY_SOURCE_ACCESS_CHANGED` | 记录或关联档案的权限/状态已变化，联系管理员确认后重新生成 |
 | 404 / `WEEKLY_REPORT_NOT_FOUND` | 任务不存在，或不属于当前账号/公司 |
 | 409 / `WEEKLY_DRAFT_NOT_READY` | 当前没有可保存的生成草稿 |
@@ -107,7 +104,7 @@
 
 ## 部署与维护
 
-数据库增量迁移为 V152，新增周报、草稿版本表和业务 Web 权限。保留用户、密码、客户、商机、原有 Agent 绑定及小程序配置。内置销售、主管、总经理模板新增本人周报权限；自定义模板由管理员显式授予。
+数据库 V152 新增周报、草稿版本表和权限；本次 V153 增加报告归属周及素材截止时间。保留用户、密码、客户、商机、原有 Agent 绑定及小程序配置。内置销售、主管、总经理模板新增本人周报权限；自定义模板由管理员显式授予。
 
 后端与 Worker 同时部署。仅在服务器的 `/etc/shenma-sales/runtime.env` 配置：
 
@@ -137,3 +134,18 @@ WEEKLY_MAX_INPUT_BYTES=180000
 5. 由销售核对实际跟进、客户分组、金额、下一步计划后验收业务页面。
 
 OpenAPI 由应用生成，见 `backend/openapi/openapi.yaml`；Agent 输入输出契约见 `backend/src/sales_backend/weekly_contract/`。
+
+## Web 构建与部署
+
+1. 在独立神码仓库执行 `cd business-web && npm ci --ignore-scripts && npm run verify`。
+2. 提交并审核源码后，再次构建，使 `dist/build.json` 的版本与本次提交一致。
+3. 使用 `python3 scripts/package_source.py --include-business-web --output-dir <仓库外目录>` 打包。源码包不含数据库数据、账号密码或模型 Key。
+4. 按 `deployment/upgrade-sales.py` 从 V152 升级至 V153。该流程备份、恢复核对既有数据库，再迁移并切换 API／Worker；出错恢复旧版本。
+5. 业务 Web 静态文件由 API 服务直接提供，无需在客户服务器新增 Node.js 服务。访问 `/workspace/`，登录后进入“周报”。本地开发的 Node 服务仅用于代理和调试。
+
+## 本期边界
+
+- Web 正式模式调用服务端周报与 Agent；显式 `?mode=preview` 仍为独立合成示例，不作为真实接口验收。
+- 素材预览不等于生成快照。生成后左侧改为本次实际使用的素材；后续补录不会改写已有周报。
+- 当前 `weekly.v2` 要求每条记录有客户且商机关联不歧义。无客户或关联多个商机的历史记录会明确阻止生成，不能擅自忽略或归并。须先确认业务归属规则再扩展契约。
+- 神码新增商机／跟进字段、选项编码和 CRM 同步协议尚待正式映射，本次保留现有字段含义。

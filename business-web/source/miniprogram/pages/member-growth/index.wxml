@@ -1,0 +1,24 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-dashboard id="fdeContent" wx:if="{{isFde}}" member-id="{{fdeMemberId}}"/>
+<block wx:if="{{!isFde}}">
+<view class="page-shell member-growth-page">
+  <view class="member-hero surface"><view class="member-avatar">{{subject.initial}}</view><view><view>{{subject.name}}</view><text>{{subjectRoleName}} · {{subject.team}}</text></view><view class="review-badge">每日复盘</view></view>
+  <view wx:if="{{loading}}" class="state-card surface"><view></view><text>{{statusText}}</text></view>
+  <view wx:elif="{{!ready}}" class="empty-card surface"><view>暂无能力画像</view><text>{{statusText}}</text></view>
+  <block wx:if="{{ready}}">
+    <view class="section-heading"><view><text>六维能力画像</text><label>基于近30天真实拜访记录</label></view><view class="overall"><text>{{overallScore}}</text><label>综合得分</label></view></view>
+    <view class="capability-card surface">
+      <canvas canvas-id="memberAbilityRadar" class="radar-canvas"></canvas>
+      <view class="review-summary">{{reviewSummary}}</view>
+      <view class="review-meta"><text>{{statusText}}</text><label>{{visitCount}} 次拜访 · {{reviewDate}}</label></view>
+      <view class="dimension-grid"><view wx:for="{{dimensions}}" wx:key="code" class="dimension-item"><view><text>{{item.name}}</text><label>{{item.score}}</label></view><view class="score-track"><view style="width:{{item.score}}%"></view></view><text>{{item.coachingAction}}</text></view></view>
+      <view class="ai-advice-card"><view class="ai-advice-head"><view>AI</view><view><text>资深销售教练建议</text><label>围绕六项能力给出提升方法</label></view><view class="readonly">只读</view></view><view class="ai-advice-list"><view wx:for="{{aiAdvice}}" wx:key="*this"><text>{{index + 1}}</text><label>{{item}}</label></view></view></view>
+    </view>
+    <view class="section-heading growth-heading"><view><text>成长趋势</text><label>综合评分与单项能力变化</label></view><view class="history-count">{{history.length}} 个快照</view></view>
+    <view class="growth-card surface"><scroll-view class="growth-tabs" scroll-x enhanced show-scrollbar="false"><view class="growth-tab-list"><view wx:for="{{growthOptions}}" wx:key="code" class="growth-tab {{selectedGrowthCode === item.code ? 'selected' : ''}}" data-code="{{item.code}}" bindtap="selectGrowthDimension">{{item.name}}</view></view></scroll-view><view class="chart-title">{{selectedGrowthName}}变化</view><canvas canvas-id="memberGrowthLine" class="growth-canvas"></canvas></view>
+  </block>
+</view>
+
+</block>
+</block>

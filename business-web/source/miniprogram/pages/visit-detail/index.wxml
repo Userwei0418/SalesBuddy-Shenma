@@ -1,0 +1,68 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{visit && visit.fdeParticipantNames}}" class="fde-note">本次实际协助 FDE：{{visit.fdeParticipantNames}}{{visit.isParticipant?' · 本人参与':''}}</view>
+<view class="visit-page">
+  <view wx:if="{{loading}}" class="state-card">正在同步拜访记录…</view>
+  <view wx:elif="{{error}}" class="state-card error"><text>{{error}}</text><button bindtap="loadVisit">重新加载</button></view>
+  <block wx:elif="{{visit}}">
+    <view class="visit-hero">
+      <view class="hero-eyebrow">VISIT RECORD · 只读</view>
+      <view class="hero-title">{{visit.title}}</view><view class="visit-health"><text class="traffic-badge traffic-{{visit.signal.tone}}">{{visit.signal.badgeText}}</text><label>{{visit.signal.reason}}</label></view>
+      <view class="hero-meta"><text>{{visit.date}}</text><text>{{visit.mode}}</text><text>{{visit.firstVisitText === '是' ? '首次拜访' : '客户跟进'}}</text></view>
+    </view>
+
+    <view class="section-card">
+      <view class="section-title">结构化信息</view>
+      <view class="field-grid">
+        <view><text>客户类型</text><label>{{visit.customerType}}</label></view>
+        <view wx:if="{{visit.customerId}}"><text>客户名称</text><label>{{visit.customerName}}</label></view>
+        <view class="wide"><text>商机名称</text><label>{{visit.opportunityName}}</label></view>
+        <view class="wide"><text>伙伴名称</text><label>{{visit.partnerName}}</label></view>
+        <view><text>跟进日期</text><label>{{visit.date}}</label></view>
+        <view><text>创建时间</text><label>{{visit.createdAt}}</label></view>
+        <view><text>对接人</text><label>{{visit.contactNames}}</label></view>
+        <view wx:if="{{visit.originalRecorderName}}"><text>原始跟进人</text><label>{{visit.originalRecorderName}}</label></view>
+        <view wx:else><text>跟进人</text><label>{{visit.owner}}</label></view>
+        <view wx:if="{{visit.managerName}}"><text>当前管理人</text><label>{{visit.managerName}}</label></view>
+        <view><text>协同人</text><label>{{visit.collaborators}}</label></view>
+        <view><text>是否七天内</text><label>{{visit.sevenDaysText}}</label></view>
+        <view><text>拜访方式</text><label>{{visit.mode}}</label></view>
+        <view><text>拜访时长</text><label>{{visit.duration}}</label></view>
+        <view><text>拜访地点</text><label>{{visit.location}}</label></view>
+        <view><text>是否首次拜访</text><label>{{visit.firstVisitText}}</label></view>
+      </view>
+      <view wx:for="{{visit.linkedOpportunities}}" wx:key="id" class="opportunity-link" hover-class="opportunity-link-active" data-id="{{item.id}}" bindtap="openOpportunity"><text>{{item.name}}</text><label>查看商机详情 ›</label></view>
+    </view>
+
+    <view wx:if="{{visit.isFirstVisit}}" class="section-card first-visit">
+      <view class="section-title">首次拜访信息</view>
+      <view class="content-row"><text>客户主营业务</text><label>{{visit.customerMainBusiness}}</label></view>
+      <view class="content-row"><text>客户需求</text><label>{{visit.customerNeeds}}</label></view>
+      <view class="content-row"><text>客户预算</text><label>{{visit.customerBudget}}</label></view>
+      <view class="content-row"><text>联系人角色</text><label>{{visit.contactRole}}</label></view>
+    </view>
+
+    <view class="section-card narrative">
+      <view class="section-title">拜访内容</view>
+      <view class="content-row"><text>拜访目标</text><label>{{visit.visitGoal}}</label></view>
+      <view class="content-row"><text>沟通内容</text><label>{{visit.followUpRecord}}</label></view>
+      <view class="content-row"><text>达成结果</text><label>{{visit.expectation}}</label></view>
+      <view class="next-action"><text>下一步计划</text><label>{{visit.nextAction}}</label></view>
+    </view>
+    <view class="section-card narrative">
+      <view class="section-title">本次拜访建议</view>
+      <view wx:if="{{visitAdvice.status==='loading'}}" class="readonly-note">正在分析这次拜访…</view>
+      <view wx:elif="{{visitAdvice.status==='error'}}" class="readonly-note">{{visitAdvice.error}}</view>
+      <block wx:elif="{{visitAdvice.status==='ready'}}">
+        <view class="readonly-note">{{visitAdvice.summary}}</view>
+        <view wx:for="{{visitAdvice.rows}}" wx:key="id" class="content-row"><text>{{item.title}}</text><label>{{item.detail}}</label>
+          <advice-actions analysis-id="{{visitAdvice.id}}" suggestion="{{item}}" bind:changed="loadVisitAdvice" />
+        </view>
+      </block>
+      <view wx:if="{{visitAdvice.status!=='loading'}}" class="opportunity-link" bindtap="loadVisitAdvice">检查建议更新 ›</view>
+    </view>
+    <view class="readonly-note">已归档正文只读；建议由你确认后形成待办。</view>
+  </block>
+</view>
+
+</block>

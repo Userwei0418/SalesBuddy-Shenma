@@ -1,0 +1,106 @@
+/* Shared opportunity columns: facts retain their source formatting and full dates.
+   Wider tables stay dense; narrow windows reflow labels instead of hiding fields. */
+body:not(.web-login) #page-root .web-review-opportunity-table {
+  --review-op-columns: minmax(176px, 2.1fr) minmax(128px, 1.35fr) minmax(68px, .65fr) minmax(68px, .65fr) minmax(92px, .85fr) minmax(76px, .8fr) 48px;
+  display:block; min-width:0; margin:0; padding:0; border:0;
+}
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-columns,
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row {
+  display:grid; grid-template-columns:var(--review-op-columns); grid-template-rows:auto;
+  align-items:center; gap:var(--ui-space-2); margin:0; padding:var(--ui-space-2) var(--ui-space-3);
+  min-width:0; border:0; border-bottom:1px solid var(--ui-line); border-radius:0;
+  box-shadow:none; background:var(--ui-surface); color:var(--ui-ink); text-align:left;
+}
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-columns {
+  position:sticky; top:var(--web-review-tools-height, 0px); z-index:7;
+  min-height:36px; background:var(--ui-surface-subtle); color:var(--ui-secondary);
+  font-size:var(--ui-text-small); line-height:1.5; font-weight:500;
+}
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row {
+  min-height:72px; font-size:var(--ui-text-body); line-height:1.5;
+  transition:background var(--ui-duration-fast);
+}
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row:hover,
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row:focus-within { background:var(--ui-hover); }
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row:focus-visible { outline:2px solid var(--ui-focus); outline-offset:-2px; }
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row > view { min-width:0; margin:0; overflow-wrap:anywhere; }
+body:not(.web-login) #page-root .web-review-op-name { display:flex; flex-wrap:wrap; gap:var(--ui-space-1); align-items:baseline; font-weight:600; }
+body:not(.web-login) #page-root .web-review-op-name > text { min-width:0; }
+body:not(.web-login) #page-root .web-review-op-name .opportunity-grade { margin:0; padding:0 var(--ui-space-1); font-size:var(--ui-text-small); line-height:1.5; border-radius:var(--ui-radius-control); white-space:nowrap; }
+body:not(.web-login) #page-root .web-review-op-customer,
+body:not(.web-login) #page-root .web-review-op-owner { color:var(--ui-secondary); font-size:var(--ui-text-small); line-height:1.5; }
+body:not(.web-login) #page-root .web-review-stage-title { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:var(--ui-space-1); }
+body:not(.web-login) #page-root .web-review-stage-title > label { color:var(--ui-secondary); font-size:var(--ui-text-small); font-variant-numeric:tabular-nums; }
+body:not(.web-login) #page-root .web-review-stage-track { height:3px; margin:var(--ui-space-1) 0; border-radius:var(--ui-radius-control); overflow:hidden; background:var(--ui-line); }
+body:not(.web-login) #page-root .web-review-stage-track > text { display:block; height:100%; max-width:100%; background:var(--ui-primary); }
+body:not(.web-login) #page-root .web-review-op-signal { display:block; font-size:var(--ui-text-small); line-height:1.5; }
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-op-amount,
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-money-heading { text-align:right; font-variant-numeric:tabular-nums; }
+body:not(.web-login) #page-root .web-review-op-date { font-size:var(--ui-text-small); font-variant-numeric:tabular-nums; white-space:nowrap; }
+body:not(.web-login) #page-root .web-review-op-product { font-size:var(--ui-text-small); }
+body:not(.web-login) #page-root .web-review-op-actions { display:flex; flex-direction:column; align-items:flex-end; gap:var(--ui-space-1); color:var(--ui-primary); font-size:var(--ui-text-small); }
+body:not(.web-login) #page-root .web-review-op-actions .web-review-row-edit { display:flex; align-items:center; justify-content:center; width:48px; min-width:0; min-height:32px; padding:0 var(--ui-space-2); margin:0; border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface); color:var(--ui-primary); font-size:var(--ui-text-small); font-weight:500; }
+body:not(.web-login) #page-root .web-review-op-actions .web-review-row-edit:hover { border-color:var(--ui-primary); background:var(--ui-selected); }
+body:not(.web-login) #page-root .web-review-op-actions .web-review-row-edit:focus-visible { outline:2px solid var(--ui-focus); outline-offset:2px; }
+body:not(.web-login) #page-root .web-review-row-open { white-space:nowrap; }
+body:not(.web-login) #page-root .web-review-opportunity-table .opportunity-quarter-group { margin:0; padding:0; }
+body:not(.web-login) #page-root .web-review-opportunity-table .web-review-quarter-heading { display:block; margin:0; padding:var(--ui-space-2) var(--ui-space-3); background:var(--ui-surface-subtle); border:0; border-bottom:1px solid var(--ui-line); border-radius:0; font-size:var(--ui-text-small); }
+body:not(.web-login) #page-root .web-review-quarter-label { display:flex; align-items:center; justify-content:space-between; gap:var(--ui-space-2); }
+body:not(.web-login) #page-root .web-review-quarter-label > label { font-weight:400; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+body:not(.web-login) #page-root .web-review-list-scope { color:var(--ui-secondary); }
+/* Status remains readable. The native handler can still explain why a row is unavailable. */
+body:not(.web-login) #page-root .claim-card[data-eligible="false"] { background:var(--ui-surface-subtle); }
+body:not(.web-login) #page-root .claim-card[data-eligible="false"] .claim-name > text { color:var(--ui-secondary); }
+body:not(.web-login) #page-root .claim-card[data-eligible="false"] .web-claim-state > text { color:var(--ui-secondary); background:var(--ui-neutral-soft); }
+body:not(.web-login) #page-root .claim-card[data-eligible="false"]::before { content:'—'; text-align:center; color:var(--ui-secondary); }
+body:not(.web-login) #page-root .claim-card[data-eligible="true"] .web-claim-state > text { color:var(--ui-primary); background:var(--ui-selected); }
+body:not(.web-login) #page-root .claim-card[data-claim-status="pending"] .web-claim-state > text { color:var(--ui-warning); background:var(--ui-warning-soft); }
+/* A list-only route has no independent business summary to fill a left rail. */
+body:not(.web-login) #page-root .web-review-opportunities-page.web-collection-columns { display:flex; flex-direction:column; gap:0; }
+body:not(.web-login) #page-root .web-review-opportunities-page > .web-collection-aside { flex:none; min-height:0; max-height:none; overflow:visible; padding:var(--ui-space-4); border:0; border-bottom:1px solid var(--ui-line); background:var(--ui-surface); }
+body:not(.web-login) #page-root .web-review-opportunities-page .web-insights-titlebar { display:flex; flex-direction:row; align-items:center; justify-content:space-between; gap:var(--ui-space-4); }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:var(--ui-space-1) var(--ui-space-4); min-width:0; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero > .title { grid-column:1; grid-row:1; margin:0; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero > .eyebrow { grid-column:1; grid-row:2; margin:0; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero > .subtitle { display:none; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero-summary { display:flex; flex-direction:row; grid-column:2; grid-row:1/3; margin:0; align-self:center; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero-summary > view { display:flex; flex-direction:column; align-items:flex-start; gap:0; border:0; padding:0; }
+body:not(.web-login) #page-root .web-review-opportunities-page .hero-summary > view > text { order:0; font-size:var(--ui-text-section); }
+body:not(.web-login) #page-root .web-review-opportunities-page > .web-collection-main { display:block; flex:1 1 0; min-height:0; overflow:auto; padding:var(--ui-space-4); container-type:inline-size; }
+body:not(.web-login) #page-root .web-review-opportunities-page .web-collection-results { display:block; overflow:visible; height:auto; }
+@media(max-width:1179px) {
+  body:not(.web-login) #page-root .web-review-opportunity-table { --review-op-columns:minmax(180px,2fr) minmax(128px,1.35fr) minmax(64px,.7fr) minmax(64px,.7fr) 92px minmax(72px,.8fr) 48px; }
+}
+@media(max-width:1000px) {
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-columns { display:none; }
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row { grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--ui-space-2) var(--ui-space-3); padding:var(--ui-space-3); }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-identity { grid-column:1/4; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-stage { grid-column:1/-1; grid-row:2; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-actions { grid-column:4; grid-row:1; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > :is(.web-review-op-amount,.web-review-op-date,.web-review-op-product)::before { display:block; content:attr(data-column); color:var(--ui-secondary); font-size:var(--ui-text-small); }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-date { white-space:normal; }
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-op-amount { text-align:left; }
+}
+/* The workbench also has a context rail: respond to remaining content width,
+   not only viewport width, so the last columns stay reachable on laptops. */
+@container(max-width:828px) {
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-columns { display:none; }
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row { grid-template-columns:repeat(4,minmax(0,1fr)); gap:var(--ui-space-2) var(--ui-space-3); padding:var(--ui-space-3); }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-identity { grid-column:1/4; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-stage { grid-column:1/-1; grid-row:2; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-actions { grid-column:4; grid-row:1; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > :is(.web-review-op-amount,.web-review-op-date,.web-review-op-product)::before { display:block; content:attr(data-column); color:var(--ui-secondary); font-size:var(--ui-text-small); }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-date { white-space:normal; }
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-op-amount { text-align:left; }
+}
+@media(max-width:600px) {
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-identity { grid-column:1/-1; padding-right:56px; }
+  body:not(.web-login) #page-root .web-review-opportunity-row > .web-review-op-actions { grid-column:2; justify-self:end; align-self:start; }
+  body:not(.web-login) #page-root .web-review-opportunities-page > .web-collection-aside,
+  body:not(.web-login) #page-root .web-review-opportunities-page > .web-collection-main { padding:var(--ui-space-3); }
+  body:not(.web-login) #page-root .web-review-opportunities-page .hero-summary { display:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body:not(.web-login) #page-root .web-review-opportunity-table .web-review-opportunity-row.web-review-opportunity-row { transition:none; }
+}

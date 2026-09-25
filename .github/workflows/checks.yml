@@ -43,6 +43,8 @@ jobs:
         run: python deployment/tls/test_deploy_certificate.py
       - name: Verify customer Agent prompt selection
         run: python deployment/test_agent_specs.py
+      - name: Business Web build and contract suite
+        run: cd business-web && npm ci --ignore-scripts && npm run verify
       - name: Backend unit suite
         run: cd backend && python -m pytest tests -q
       - name: Migration checks

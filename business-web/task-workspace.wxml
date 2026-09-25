@@ -1,0 +1,49 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{loadError}}" class="access-empty" bindtap="loadTasks">{{loadError}} · 点击重试</view>
+<view class="tasks-page web-task-workspace" aria-label="任务工作区">
+  <view class="web-task-overview">
+<view wx:if="{{completedYear}}" class="fde-note">已完成记录按 {{completedYear}} 年{{completedQuarters.length?'所选季度':'全年'}}筛选；未完成任务为当前状态。</view>
+<view wx:if="{{isFde && canViewTeam}}" class="fde-note"><text data-view="self" bindtap="changeTaskView">{{taskView==='self'?'✓ ':''}}本人任务</text>　<text data-view="team" bindtap="changeTaskView">{{taskView==='team'?'✓ ':''}}团队任务</text></view>
+
+  <view class="web-task-heading">
+    <view><h1>{{opportunityOnly ? '商机待办' : overviewTitle || (taskView === 'team' ? '团队任务' : '我的任务')}}</h1><p>{{overviewDescription || '看清截止时间，安排好每一步'}}</p></view>
+    <view wx:if="{{!overviewFilter}}" class="web-task-progress"><text class="web-task-progress-icon">✓</text><text>已完成 <b>{{loading || loadError ? '—' : completedCount}}</b><label> / {{loading || loadError ? '—' : totalCount}} 项</label></text></view>
+  </view>
+  <view class="web-task-controls">
+    <view wx:if="{{overviewFilter}}" class="web-task-overview-filter">
+      <view><text>总览筛选</text><button data-key="{{activeTab}}" bindtap="selectTab" aria-label="清除总览筛选">清除</button></view>
+      <b>{{overviewTitle}}</b><text>{{loading ? '正在加载…' : loadError ? '加载未完成' : '共 ' + filteredTotal + ' 项'}}</text>
+      <label>切换状态将退出总览筛选</label>
+    </view>
+    <nav class="web-task-tabs" aria-label="任务状态">
+      <button wx:for="{{webTaskTabs}}" wx:key="key" class="web-task-tab {{activeTab === item.key ? 'active' : ''}}" aria-pressed="{{activeTab === item.key}}" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}<span>{{item.count}}</span></button>
+    </nav>
+    <picker mode="selector" range="{{sortOptions}}" range-key="label" value="{{sortIndex}}" bindchange="changeSort"><view class="web-task-sort"><span>↕</span><text>{{sortOptions[sortIndex].label}}</text><span class="web-task-chevron">⌄</span></view></picker>
+  </view>
+  </view>
+  <view class="web-task-content" data-web-page-scroll="true" aria-label="任务列表">
+  <view class="web-task-list-note"><text>{{webTaskGrouped ? '先处理逾期，再安排今天和后续任务' : sortOptions[sortIndex].hint}}</text><text>时间按北京时间</text></view>
+  <view wx:if="{{webTaskRows.length}}" class="web-task-list">
+    <block wx:for="{{webTaskRows}}" wx:key="id">
+      <view wx:if="{{item.webGroup}}" class="web-task-group group-{{item.webTime.tone}}"><h2><span></span>{{item.webGroup}}</h2><text>{{item.webGroupHint}}</text></view>
+      <article class="task-card web-task-row time-{{item.webTime.tone}}" data-id="{{item.id}}">
+        <view class="web-task-main">
+          <button class="web-task-title" data-id="{{item.id}}" bindtap="openTask"><span>{{item.webTitle}}</span><span wx:if="{{item.webPriority}}" class="web-task-priority">{{item.webPriority}}</span></button>
+          <text wx:if="{{item.webDescription}}" class="web-task-description">{{item.webDescription}}</text>
+          <view class="web-task-context"><text class="web-task-customer" title="{{item.customer}}">{{item.customer}}</text><text wx:if="{{item.opportunityId}}" class="web-task-separator">/</text><button wx:if="{{item.opportunityId}}" class="web-task-opportunity" title="{{item.opportunityName || '查看关联商机'}}" data-customer-id="{{item.customerId}}" data-opportunity-id="{{item.opportunityId}}" catchtap="openOpportunity">{{item.opportunityName || '查看关联商机'}} ↗</button></view>
+        </view>
+        <view class="web-task-deadline"><text>{{item.webTime.label}}</text><label>{{item.webTime.detail}}</label></view>
+        <view class="web-task-state"><text class="state-{{item.webState}}">{{item.statusLabel}}</text><label title="{{item.owner}}">{{item.owner}}</label></view>
+        <button class="web-task-action action-{{item.webState}}" data-id="{{item.id}}" bindtap="openTask" aria-label="{{item.webAction + '：' + item.webTitle}}">{{item.webAction}}<span> →</span></button>
+      </article>
+    </block>
+  </view>
+  <view wx:elif="{{!loadError}}" class="empty-state"><view>{{loading ? '…' : '✓'}}</view><text>{{loading ? '正在同步任务' : overviewEmptyTitle || (activeTab === 'pending' ? '当前没有未完成任务' : '暂无对应任务')}}</text><label>{{overviewFilter ? '任务更新后，返回页面即可查看最新结果' : '新的任务会自动同步到这里'}}</label></view>
+  <view wx:if="{{loadingMore}}" class="task-pagination">正在加载下一页…</view>
+  <view wx:elif="{{moreError}}" class="task-pagination"><text>{{moreError}}</text><button size="mini" bindtap="loadMore">重试下一页</button></view>
+  <view wx:elif="{{hasMore}}" class="task-pagination"><text>已加载 {{filteredTasks.length}} / {{filteredTotal}} 项</text><button size="mini" bindtap="loadMore">加载更多</button></view>
+  <view wx:elif="{{filteredTasks.length && !loading}}" class="task-pagination">已显示全部 {{filteredTotal}} 项</view>
+  </view>
+</view>
+</block>

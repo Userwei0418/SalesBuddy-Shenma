@@ -1,0 +1,100 @@
+/* Read-only presentation adapter for the original task, risk, visit and report
+ * records.  Keep one primary content scroller, with object context beside it. */
+@media (min-width:1180px) {
+ body:not(.web-login) #page-root .web-extended-detail.web-record-detail {
+  display:grid;grid-template-columns:280px minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr) auto;gap:12px 16px;
+  height:100%;min-height:0;overflow:hidden;align-items:stretch;
+ }
+ body:not(.web-login) #page-root .web-record-detail>.detail-hero,
+ body:not(.web-login) #page-root .web-record-detail .visit-hero,
+ body:not(.web-login) #page-root .web-record-detail>.report-hero {
+  grid-column:1;grid-row:1;min-width:0;align-self:start;
+  padding:16px;margin:0;background:var(--ui-surface);
+ }
+ body:not(.web-login) #page-root .web-record-detail :is(.hero-title,.hero-customer,.report-name) {
+  font-size:18px;line-height:26px;overflow-wrap:anywhere;
+ }
+ body:not(.web-login) #page-root .web-record-detail .hero-top {
+  align-items:flex-start;flex-wrap:wrap;gap:8px;
+ }
+ body:not(.web-login) #page-root .web-record-detail .hero-meta {
+  flex-wrap:wrap;gap:4px 8px;line-height:1.65;
+ }
+ body:not(.web-login) #page-root .web-record-detail :is(.hero-eyebrow,.eyebrow) {
+  color:var(--ui-muted);font-size:11px;line-height:18px;letter-spacing:.08em;
+ }
+ body:not(.web-login) #page-root .web-record-detail .web-extended-grid {
+  display:contents;
+ }
+ body:not(.web-login) #page-root .web-record-detail .web-extended-aside {
+  grid-column:1;grid-row:2;min-width:0;min-height:0;overflow:auto;
+  scrollbar-gutter:auto;overscroll-behavior:contain;
+ }
+ body:not(.web-login) #page-root .web-record-detail .web-extended-scroll {
+  grid-column:2;grid-row:1 / 3;min-width:0;min-height:0;overflow:auto;
+  padding:0 4px 0 0;scrollbar-gutter:stable;overscroll-behavior:contain;
+ }
+ body:not(.web-login) #page-root .web-record-detail :is(.web-extended-scroll,.web-extended-aside)>.section-card:last-child {
+  margin-bottom:0;
+ }
+ body:not(.web-login) #page-root .web-record-detail>.bottom-bar {
+  grid-column:2;grid-row:3;align-self:end;margin:0;padding:12px 0 0;
+ }
+ body:not(.web-login) #page-root .web-record-detail .info-row {
+  display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;
+ }
+ body:not(.web-login) #page-root .web-record-detail .info-row>view {
+  max-width:none;min-width:0;text-align:left;overflow-wrap:anywhere;
+ }
+ body:not(.web-login) #page-root .web-extended-detail.web-record-detail.web-record-visit-detail {
+  display:flex;
+ }
+ body:not(.web-login) #page-root .web-record-detail .web-visit-record {
+  display:grid;grid-template-columns:300px minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr) auto;gap:12px 16px;
+  min-height:0;min-width:0;overflow:hidden;
+ }
+ body:not(.web-login) #page-root .web-record-detail .web-visit-record>.readonly-note {
+  grid-column:2;grid-row:3;align-self:end;margin:0;padding:0;
+ }
+ body:not(.web-login) #page-root .web-record-detail .visit-hero .fde-note {
+  padding:8px 0 0;margin:8px 0 0;border:0;border-top:1px solid var(--ui-line);
+  border-radius:0;background:transparent;font-size:12px;line-height:1.6;
+ }
+ body:not(.web-login) #page-root .web-record-detail .field-grid {
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+ }
+ body:not(.web-login) #page-root .web-record-detail .field-grid>.wide {
+  grid-column:1 / -1;
+ }
+ body:not(.web-login) #page-root .web-record-detail.web-record-report-detail {
+  grid-template-rows:auto minmax(0,1fr);
+ }
+ body:not(.web-login) #page-root .web-record-report-detail>.web-extended-scroll {
+  display:contents;
+ }
+ body:not(.web-login) #page-root .web-record-report-detail .web-record-report-body {
+  grid-column:2;grid-row:1 / 3;margin:0;min-width:0;min-height:0;
+  overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;
+ }
+ body:not(.web-login) #page-root .web-record-report-detail .source-card {
+  grid-column:1;grid-row:2;align-self:start;margin:0;min-width:0;
+  display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.65;
+ }
+ body:not(.web-login) #page-root .web-record-report-detail .source-card>view {
+  min-width:0;overflow-wrap:anywhere;
+ }
+ body:not(.web-login) #page-root .web-record-report-detail .report-meta {
+  display:flex;flex-direction:column;gap:4px;
+ }
+}
+@media (min-width:601px) and (max-width:1179px) {
+ /* Risk facts remain before evidence and resolution in the narrow layout. */
+ body:not(.web-login) #page-root .web-record-risk-detail .web-extended-grid {
+  display:block;overflow:auto;min-height:0;
+ }
+ body:not(.web-login) #page-root .web-record-risk-detail :is(.web-extended-scroll,.web-extended-aside) {
+  overflow:visible;height:auto;scrollbar-gutter:auto;padding-right:0;
+ }
+}

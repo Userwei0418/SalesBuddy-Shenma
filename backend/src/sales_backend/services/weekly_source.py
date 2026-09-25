@@ -1,7 +1,7 @@
 """Build one immutable, exact-money weekly.v2 snapshot under REPEATABLE READ."""
 import hashlib
 import json
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
@@ -30,8 +30,20 @@ def decode_snapshot(text):
     return json.loads(text, parse_float=Decimal)
 
 
-def window(now):
-    end = now.astimezone(SHANGHAI).date()
+def report_dates(now, report_week=None):
+    today = now.astimezone(SHANGHAI).date()
+    current_week = today - timedelta(days=today.weekday())
+    week = report_week or current_week
+    if not isinstance(week, date) or week.weekday() != 0 or week > current_week:
+        raise ValueError('WEEKLY_INVALID_REPORT_WEEK')
+    end_day = min(today, week + timedelta(days=6))
+    cutoff = min(now, datetime.combine(end_day + timedelta(days=1), time.min, SHANGHAI) - timedelta(microseconds=1))
+    return week, cutoff
+
+
+def window(now, report_week=None):
+    _, cutoff = report_dates(now, report_week)
+    end = cutoff.astimezone(SHANGHAI).date()
     start = end - timedelta(days=13)
     return ({'start_date': start.isoformat(), 'end_date': end.isoformat(),
              'timezone': 'Asia/Shanghai', 'date_basis': 'created_at'},
@@ -66,20 +78,30 @@ async def assert_snapshot_access(connection, actor, source):
             raise PermissionError('WEEKLY_SOURCE_ACCESS_CHANGED')
 
 
-async def build_snapshot(connection, actor, generation):
+async def build_snapshot(connection, actor, generation, report_week=None):
     for code in ('weekly_report.generate', 'weekly_report.read', 'visit.read', 'customer.read', 'opportunity.read'):
         await require_permission(connection, code)
     now = await connection.fetchval('SELECT transaction_timestamp()')
-    period, start, end = window(now)
+    _, cutoff = report_dates(now, report_week)
+    period, start, end = window(now, report_week)
     rows = await connection.fetch('''SELECT id,customer_id,opportunity_id,recorder_user_ref_id,
         created_at,interaction_at,recorded_on,follow_up_record,next_action,status,version_no
         FROM activity.visit WHERE workspace_id=$1::uuid AND recorder_user_ref_id=$2::uuid
         AND deleted_at IS NULL AND status IN ('confirmed','archived')
         AND created_at >= $3 AND created_at < $4 AND created_at <= $5 ORDER BY created_at,id''',
-        actor.workspace_id, actor.user_id, start, end, now)
-    total = await connection.fetchval('SELECT security.weekly_source_count($1,$2,$3)', start, end, now)
+        actor.workspace_id, actor.user_id, start, end, cutoff)
+    total = await connection.fetchval('SELECT security.weekly_source_count($1,$2,$3)', start, end, cutoff)
     if total != len(rows):
         raise PermissionError('WEEKLY_SOURCE_ACCESS_INCOMPLETE')
+    # weekly.v2 requires a customer and one unambiguous opportunity per record.
+    # Do not invent a customer or silently drop extra historical associations.
+    if any(r['customer_id'] is None for r in rows):
+        raise ValueError('WEEKLY_SOURCE_SUBJECT_UNSUPPORTED')
+    if rows and await connection.fetchval("""SELECT EXISTS(
+        SELECT 1 FROM activity.visit_opportunity vo JOIN activity.visit v ON v.id=vo.visit_id
+        WHERE v.id=ANY($1::uuid[]) AND vo.opportunity_id IS DISTINCT FROM v.opportunity_id)""",
+        [r['id'] for r in rows]):
+        raise ValueError('WEEKLY_SOURCE_ASSOCIATION_UNSUPPORTED')
     cids = sorted({str(r['customer_id']) for r in rows})
     oids = sorted({str(r['opportunity_id']) for r in rows if r['opportunity_id']})
     customers = await connection.fetch('''SELECT id,name,industry_code,customer_type_code,demand_summary,
