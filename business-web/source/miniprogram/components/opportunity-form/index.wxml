@@ -1,0 +1,41 @@
+<view class="opp-form">
+  <view wx:if="{{requiresOwnerTeam}}" class="field"><view class="label">所属团队 <text class="required">必填</text></view><view wx:if="{{ownerTeamsLoading}}" class="hint">正在加载可选团队…</view><view wx:elif="{{ownerTeamsError}}" class="error" bindtap="loadOwnerTeams">{{ownerTeamsError}} · 点击重试</view><picker wx:else disabled="{{disabled}}" range="{{ownerTeams}}" range-key="name" value="{{ownerTeamIndex}}" bindchange="changeOwnerTeam"><view class="control row"><text>{{ownerTeamLabel}}</text><text class="chevron">⌄</text></view></picker></view>
+  <view class="field"><view class="label">商机名称 <text class="required">必填</text></view><input class="control" disabled="{{disabled}}" value="{{form.name}}" maxlength="200" placeholder="填写项目名，可用部门、场景区分" data-key="name" bindinput="input"/><view class="hint" wx:if="{{checking}}">正在检查名称…</view><view class="error" wx:if="{{error}}" bindtap="retryCatalog">{{error}}</view></view>
+  <view class="field"><view class="label">商机阶段 <text class="required">必填</text></view><picker disabled="{{disabled || !stages.length}}" range="{{stages}}" range-key="text" value="{{form.stageIndex < 0 ? 0 : form.stageIndex}}" bindchange="stage"><view class="control row"><text>{{stageText}}</text><text class="chevron">⌄</text></view></picker><view class="track"><view wx:for="{{stages}}" wx:key="code" class="step {{form.stageIndex >= index && stages[form.stageIndex].status !== 'lost' && item.status !== 'lost' ? 'active' : ''}} {{stages[form.stageIndex].status === 'lost' ? 'lost' : ''}}"></view></view></view>
+  <view class="grid"><view class="field"><view class="label">ACV（万元）<text class="required">必填</text></view><input class="control" disabled="{{disabled}}" type="digit" value="{{form.amount}}" placeholder="请输入金额" data-key="amount" bindinput="input"/></view><view class="field"><view class="label">预计关单日期 <text class="required">必填</text></view><picker disabled="{{disabled}}" mode="date" value="{{form.expected_close_date}}" bindchange="date"><view class="control row"><text>{{form.expected_close_date || '选择日期'}}</text><text class="chevron">⌄</text></view></picker></view></view>
+  <view class="hint" wx:if="{{dateHint}}">{{dateHint}}</view>
+  <view class="field"><view class="label">所属伙伴 <text class="required">必填</text></view>
+    <picker disabled="{{disabled}}" range="{{partnerModes}}" value="{{partnerIndex}}" bindchange="partnerMode"><view class="control row"><text>{{form.partner_mode === 'unknown' ? '请确认销售渠道' : partnerModes[partnerIndex]}}</text><text class="chevron">⌄</text></view></picker>
+    <view wx:if="{{form.partner_mode === 'partner'}}" class="partner-directory">
+      <view class="control row partner-name" bindtap="openPartners"><text>{{form.partner_name || '选择合作伙伴'}}</text><text class="chevron">⌄</text></view>
+      <view wx:if="{{showPartnerSearch}}" class="partner-results">
+        <input class="control" disabled="{{disabled}}" value="{{partnerQuery}}" placeholder="搜索伙伴名称" maxlength="100" bindinput="partnerSearch"/>
+        <view wx:for="{{partners}}" wx:key="id" class="partner-option" data-id="{{item.id}}" bindtap="choosePartner">{{item.name}}<text class="chevron">选择</text></view>
+        <view class="hint" wx:if="{{partnersLoading}}">正在加载…</view>
+        <view class="error" wx:elif="{{partnersError}}" bindtap="loadPartners">{{partnersError}} · 点击重试</view>
+        <view class="hint" wx:elif="{{!partners.length}}">没有找到伙伴，请联系运营维护目录。</view>
+        <view class="partner-more" wx:elif="{{partners.length < partnerTotal}}" data-more="true" bindtap="loadPartners">加载更多</view>
+      </view>
+    </view>
+  </view>
+  <fde-picker id="opportunityFdePicker" compact-form="{{true}}" selected="{{visitContext ? form.visit_fde_members : form.fde_members}}" hint="{{visitContext ? '仅选择本次拜访参与的 FDE；保存后追加到商机协助名单' : '商机协助人员，可搜索并选择多位 FDE'}}" disabled="{{disabled}}" bind:change="fdeChanged"/>
+  <view class="fold" bindtap="toggleForecast"><view>季度回款与确收 <text class="{{forecastRequired ? 'required' : 'optional'}}">{{forecastRequired ? '必填' : '选填'}}</text></view><text class="fold-text">{{showForecast ? '收起 ⌃' : '填写 ⌄'}}</text></view>
+  <view wx:if="{{showForecast}}" class="forecast">
+    <picker range="{{quarterOptions}}" range-key="label" value="{{quarterIndex}}" bindchange="quarter"><view class="quarter">{{quarterLabel}} <text class="quarter-text">切换季度 ⌄</text></view></picker>
+    <view class="grid">
+      <view class="field"><view class="label">回款（万元）<text wx:if="{{forecastRequired}}" class="required">必填</text></view><input class="control" disabled="{{disabled}}" type="digit" value="{{collection}}" placeholder="未填写" data-key="collection" bindinput="forecast"/></view>
+      <view class="field"><view class="label">确收（万元）<text wx:if="{{forecastRequired}}" class="required">必填</text></view><input class="control" disabled="{{disabled}}" type="digit" value="{{recognized}}" placeholder="未填写" data-key="recognized" bindinput="forecast"/></view>
+    </view>
+    <view class="forecast-results">
+      <view class="forecast-results-head"><text>自动计算</text><label>阶段概率 {{forecastRate}}</label></view>
+      <view class="grid">
+        <view class="forecast-result"><text>预测回款（万元）</text><label>{{predictedCollection}}</label></view>
+        <view class="forecast-result"><text>预测确收（万元）</text><label>{{predictedRecognized}}</label></view>
+      </view>
+      <view class="hint">预测金额 = 填写金额 × 商机阶段百分比</view>
+    </view>
+    <view wx:if="{{forecastError}}" class="error">{{forecastError}}</view>
+    <view class="hint">{{forecastRequired ? '30%及以上阶段，至少填写一个季度；已填写的季度须同时填写回款和确收，金额为零请填 0。' : '当前阶段可选填；未填写与 0 不同。'}}填写金额为季度计划，实际回款和确收以已确认实绩为准。</view>
+  </view>
+  <view class="fold" bindtap="toggleMore"><view>更多信息 <text class="optional">选填</text></view><text class="fold-text">{{showMore ? '收起 ⌃' : '补充 ⌄'}}</text></view><view wx:if="{{showMore}}" class="field"><view class="label">产品线</view><input class="control" disabled="{{disabled}}" value="{{form.product_line}}" maxlength="200" placeholder="填写产品线" data-key="product_line" bindinput="input"/></view>
+</view>

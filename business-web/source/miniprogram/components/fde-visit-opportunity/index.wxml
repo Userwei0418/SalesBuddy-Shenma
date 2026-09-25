@@ -1,0 +1,15 @@
+<view class="fde-choice">
+  <view class="fde-choice-head"><view class="fde-choice-heading"><text class="fde-choice-title">选择商机</text><text class="fde-choice-required">必填</text></view><button wx:if="{{selected || selectedId}}" class="fde-choice-change" disabled="{{disabled}}" bindtap="change">更换</button></view>
+  <view class="fde-choice-hint">仅可选择本人参与的商机</view>
+  <view wx:if="{{selected}}" class="fde-choice-selected"><text class="fde-choice-name">{{selected.name}}</text><text class="fde-choice-status">已选择</text></view>
+  <block wx:elif="{{!selectedId}}">
+    <input class="fde-choice-search" maxlength="100" value="{{query}}" placeholder="搜索该客户下本人参与的商机" disabled="{{disabled}}" bindinput="search" />
+    <scroll-view class="fde-choice-list" scroll-y>
+      <view class="fde-choice-row" wx:for="{{items}}" wx:key="id"><text class="fde-choice-name">{{item.name}}</text><button class="fde-choice-select" size="mini" data-id="{{item.id}}" disabled="{{disabled}}" bindtap="choose" aria-label="选择商机：{{item.name}}">选择</button></view>
+      <button wx:if="{{hasMore}}" class="fde-choice-more" disabled="{{loading || disabled}}" bindtap="more">加载更多</button>
+    </scroll-view>
+  </block>
+  <view wx:if="{{loading}}" class="fde-choice-state">正在核对商机协助关系…</view>
+  <view wx:elif="{{error}}" class="fde-choice-error">{{error}}<button class="fde-choice-retry" bindtap="retry" disabled="{{disabled}}">重新加载</button></view>
+  <view wx:elif="{{!selected && !items.length}}" class="fde-choice-state">{{query ? '没有匹配的本人商机，请调整关键词。' : '该客户暂无你参与的商机，请先由销售添加协助 FDE。'}}</view>
+</view>

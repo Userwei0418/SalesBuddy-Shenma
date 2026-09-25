@@ -1,0 +1,67 @@
+/* One reading surface for a collection's filters and rows; original mobile order remains.
+   Match the task page frame without inventing content to fill short overviews. */
+body #page-root .web-collection-main{display:contents}
+@media(min-width:601px) and (max-width:1179px){
+ body #page-root .web-collection-columns>.web-collection-aside{max-height:34%;flex:0 1 auto;min-height:0}
+ body #page-root .web-collection-columns>.web-collection-main{display:flex;flex-direction:column;flex:1 1 0;min-height:0;min-width:0;overflow:hidden;gap:8px}
+ body #page-root .web-collection-main>.web-collection-results{flex:1 1 0;min-height:0;height:0}
+ body #page-root .web-collection-main>:is(.filter-card,.risk-tabs,.workbench-opportunity-tools,.fde-result-note){flex:none;min-width:0}
+ body #page-root .web-collection-main>:is(.filter-card,.workbench-opportunity-tools){max-height:40%;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+}
+@media(min-width:1180px){
+ body #page-root:has(.web-collection-columns){padding:12px 16px;scrollbar-gutter:auto}
+ body #page-root .web-insights-workspace.web-collection-columns{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;align-items:stretch;padding:0;overflow:hidden;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+ body #page-root .web-collection-columns>.web-collection-aside{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:20px 18px;background:var(--ui-surface-subtle);border:0;border-right:1px solid var(--ui-line);border-radius:0}
+ body #page-root .web-collection-columns>.web-collection-main{display:block;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;background:var(--ui-surface);border:0;border-radius:0;padding:16px}
+ body #page-root .web-collection-main>.web-collection-results{display:block;overflow:visible;height:auto;min-height:0;padding:0;margin:0;scrollbar-gutter:auto}
+ body #page-root .web-collection-main>:is(.filter-card,.risk-tabs,.workbench-opportunity-tools,.fde-result-note){position:static;max-height:none;overflow:visible;min-width:0;margin:0 0 16px}
+ body #page-root .web-collection-main>:is(.filter-card,.workbench-opportunity-tools){padding:0 0 12px;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;background:transparent}
+ body #page-root .web-collection-main .workbench-opportunity-filter{border:0;padding:0;background:transparent;border-radius:0}
+ body #page-root .web-collection-main>.risk-tabs,
+ body #page-root .web-collection-main>.filter-card:not(:has(.stage-panel)),
+ body #page-root .web-collection-main>.workbench-opportunity-tools:not(:has(.workbench-stage-panel,.quarter-filter-list)){position:sticky;top:-16px;z-index:8;padding-top:16px;background:var(--ui-surface)}
+ body #page-root .web-collection-main :is(.filter-line,.workbench-filter-line){display:flex;flex-wrap:wrap;gap:8px}
+ body #page-root .web-collection-main :is(.filter-scroll,.workbench-filter-scroll){display:block;overflow:visible;min-width:0;width:100%;flex:1 1 100%}
+ body #page-root .web-collection-main :is(.filter-row,.workbench-filter-row){display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+ body #page-root .web-collection-main :is(.filter-item,.workbench-filter-item){flex:1 1 150px;min-width:140px;max-width:260px;margin:0}
+ body #page-root .web-collection-main :is(.filter-control,.workbench-filter-control){display:flex;gap:6px;min-width:0;min-height:36px;white-space:normal}
+ body #page-root .web-collection-main :is(.filter-control,.workbench-filter-control)>text:not(.chevron):not(.workbench-filter-chevron){overflow-wrap:anywhere}
+ body #page-root .web-collection-main :is(.filter-reset,.workbench-filter-reset){margin:0;white-space:nowrap}
+ body #page-root .web-collection-main .fde-member-filter{width:100%;flex-basis:100%;min-width:0}
+ body #page-root .web-collection-aside .web-insights-titlebar{display:flex;flex-direction:column;align-items:stretch;gap:16px}
+ body #page-root .web-collection-aside .create-opportunity{justify-content:center}
+ body #page-root .web-collection-aside :is(.hero-summary,.hero-stats){display:flex;flex-direction:column;align-items:stretch;gap:0;margin-top:16px}
+ body #page-root .web-collection-aside :is(.hero-summary,.hero-stats)>view{display:flex;flex-direction:row;align-items:baseline;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--ui-line)}
+ body #page-root .web-collection-aside :is(.hero-summary,.hero-stats)>view>text{order:1;font-size:24px;font-variant-numeric:tabular-nums}
+ body #page-root .web-collection-aside .opportunity-summary-card{padding:16px 0 0;border:0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent;box-shadow:none}
+ body #page-root .web-collection-aside .opportunity-summary-head{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+ body #page-root .web-collection-aside .opportunity-summary-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
+ body #page-root .web-collection-aside .opportunity-summary-metric{border:0;padding:0}
+ body #page-root .web-collection-aside .opportunity-summary-value{font-size:24px;line-height:32px}
+ body #page-root .web-collection-aside .quarter-filter-summary{margin:16px 0 0;padding:12px 0 0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent;gap:8px}
+ body #page-root .web-collection-aside .quarter-filter-head{display:flex;float:none;flex-wrap:wrap;width:100%;gap:8px;justify-content:space-between;margin:0}
+ body #page-root .web-collection-aside .quarter-options{display:flex;flex-wrap:wrap;min-width:0;width:100%;flex:1 1 100%;gap:4px;margin:0}
+ body #page-root .web-collection-aside .quarter-option{flex:1 0 36px;min-width:0;padding:4px 5px}
+ body #page-root .web-collection-aside .quarter-filter-foot{padding:0;line-height:1.6}
+ body #page-root .web-collection-aside .fde-summary-note{margin-top:8px}
+ body #page-root .web-collection-risks .risk-list{display:flex;flex-direction:column;gap:12px}
+ body #page-root .web-collection-risks .risk-card{padding:14px;margin:0}
+ body #page-root .web-collection-risks .risk-tabs{display:flex;flex-wrap:wrap;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--ui-line)}
+ body #page-root .web-collection-projects .workbench-opportunity-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto auto;gap:8px 16px;padding:14px;margin:0 0 12px}
+ body #page-root .web-collection-projects .workbench-opportunity-card-top{grid-column:1/-1;grid-row:1;min-width:0}
+ body #page-root .web-collection-projects .workbench-opportunity-stage{grid-column:1;grid-row:2;margin:0;align-self:center}
+ body #page-root .web-collection-projects .workbench-status{grid-column:2;grid-row:2;margin:0;align-self:center;justify-self:end}
+ body #page-root .web-collection-projects .workbench-opportunity-meta{grid-column:1/-1;grid-row:3;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-top:8px;border-top:1px solid var(--ui-line)}
+ body #page-root .web-collection-projects .workbench-opportunity-owner{grid-column:1/-1;grid-row:4;overflow-wrap:anywhere}
+ body #page-root .web-collection-projects .workbench-opportunity-title{overflow-wrap:anywhere}
+ body #page-root .web-collection-projects .workbench-opportunity-name{flex-wrap:wrap}
+ body #page-root .web-collection-projects .workbench-opportunity-card-top>.card-view{min-width:0}
+ body #page-root .web-collection-opportunities .opportunity-quarter-heading{margin:8px 0;padding:8px 0}
+ body #page-root .web-collection-opportunities .card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto auto;gap:8px 16px;padding:14px}
+ body #page-root .web-collection-opportunities .card-top{grid-column:1/-1;grid-row:1;margin:0}
+ body #page-root .web-collection-opportunities .card>.stage-progress-head{grid-column:1;grid-row:2;margin:0;align-self:center}
+ body #page-root .web-collection-opportunities .card>view:has(>.traffic-badge){grid-column:2;grid-row:2;margin:0!important;align-self:center;justify-self:end}
+ body #page-root .web-collection-opportunities .card>.progress{display:none}
+ body #page-root .web-collection-opportunities .card>.meta{grid-column:1/-1;grid-row:3;margin:0;padding-top:8px;border-top:1px solid var(--ui-line)}
+ body #page-root .web-collection-opportunities .card>.owner{grid-column:1/-1;grid-row:4;margin:0}
+}

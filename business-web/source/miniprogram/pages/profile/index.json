@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "我的",
+  "usingComponents": {
+    "fde-profile": "../../components/fde-profile/index",
+    "quarter-target": "../../components/quarter-target/index",
+    "profile-scope-picker": "../../components/profile-scope-picker/index"
+  }
+}

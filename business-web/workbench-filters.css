@@ -1,0 +1,70 @@
+/* Group overview controls and list controls with the results they affect. */
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-card{padding:20px 24px;background:#fff;color:#304762;border:1px solid #dfe6ef;border-radius:12px;box-shadow:0 2px 6px #20365403}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-head{margin-bottom:0;gap:16px;align-items:center}
+body:not(.web-login)[data-route=workbench] #page-root .web-summary-title-group{display:flex;gap:12px;align-items:center}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-title{font-size:16px;color:#23364d}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-scope{font-size:11px;padding:3px 8px;background:#f2f5f9;color:#617187}
+body:not(.web-login)[data-route=workbench] #page-root .metric-help{font-size:12px;color:#6c7d91;white-space:nowrap}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:16px 0 0;padding:12px 0;border:0;border-top:1px solid #edf0f4;border-bottom:1px solid #edf0f4}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-head{float:none;display:flex;align-items:center;gap:12px;margin:0;min-height:30px}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-title{font-size:12px;font-weight:500;color:#57677c}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-selection-label{display:none}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-options{margin:0;gap:5px;display:flex;align-items:center}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-option{min-width:40px;padding:6px 10px;line-height:18px;border-radius:6px;font-size:12px;box-shadow:none;white-space:nowrap;background:#f5f7fa;color:#788ba4;border:1px solid #edf0f5}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-option.selected{background:#eaf3ff;border-color:#d5e6fc;color:#2674d4}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-year{background:#f5f8fc;color:#65809e;border:1px solid #e8edf5;font-size:12px;padding:6px 9px;line-height:18px}
+body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-foot{margin:0 0 0 auto;padding:0;clear:none;font-size:11px;line-height:20px;color:#79889b}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-metrics{margin-top:18px}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-label{font-size:12px;color:#65758a}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-value{font-size:28px;color:#2d61a1}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-won .opportunity-summary-value{color:#249770}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-value>text{color:#879bb5}
+body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-results{margin-top:24px;padding:0;background:#fff;border:1px solid #dfe6ef;border-radius:12px;min-width:0;box-shadow:0 2px 6px #20365403}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-tools{position:sticky;top:0;z-index:8;display:block;margin:0;background:#fff;border-radius:12px 12px 0 0;border-bottom:1px solid #e4eaf2}
+body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-list-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px 0}
+body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-list-title{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:650;color:#23364d}
+body:not(.web-login)[data-route=workbench] #page-root .web-list-count{padding:1px 7px;border-radius:5px;background:#edf2f8;color:#51647c;font-size:12px;font-weight:600;line-height:20px;font-variant-numeric:tabular-nums}
+body:not(.web-login)[data-route=workbench] #page-root .web-list-scope,body:not(.web-login)[data-route=workbench] #page-root .web-list-loading{font-size:12px;line-height:20px;font-weight:400;color:#738297}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-filter{padding:14px 22px 16px;border:0;border-radius:0;background:transparent;box-shadow:none;margin:0}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-line{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-title{display:none}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-scroll{display:block;flex:1;min-width:0;width:100%;overflow:visible;white-space:normal}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-row{display:flex;flex-wrap:wrap;gap:8px;min-width:0}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-item{height:auto;border:0;background:transparent;overflow:visible;min-width:0;width:auto;max-width:270px;flex:0 1 auto}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-control{height:auto;min-height:36px;padding:7px 10px;border:1px solid #e0e6ef;background:#fff;border-radius:6px;display:flex;align-items:center;gap:8px;box-shadow:none}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-control label{font-size:12px;color:#758297;flex-shrink:0}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-control>text:not(.workbench-filter-chevron){font-size:12px;font-weight:500;color:#344760;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-control:hover{border-color:#a0bbdf;background:#f8fbff}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-item.active .workbench-filter-control{background:#f0f6ff;border-color:#b9d2f3}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-chevron{font-size:13px;color:#8b9ab0;margin-left:auto}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-reset{margin:0;white-space:nowrap;font-size:12px;font-weight:500;color:#3370cc;cursor:pointer}
+body:not(.web-login)[data-route=workbench] #page-root .web-list-conditions{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:12px;line-height:22px}
+body:not(.web-login)[data-route=workbench] #page-root .web-list-conditions-label{font-size:11px;color:#8390a2;margin-right:2px}
+body:not(.web-login)[data-route=workbench] #page-root .web-list-condition{font-size:11px;color:#486386;background:#f0f5fb;padding:1px 8px;border-radius:4px;overflow-wrap:anywhere}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-list{padding:0 22px 14px;margin:0}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-order-note{margin:12px 0;font-size:11px;color:#8793a5}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-quarter-heading{padding:8px 12px;margin:16px 0 0;background:#f5f7fa;border-left:0;border-radius:6px;font-size:13px;color:#52647c}
+body:not(.web-login)[data-route=workbench] #page-root .opportunity-quarter-heading label{font-size:11px;background:none;padding:0}
+body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-results>.summary-data-note{margin:12px 22px;font-size:12px}
+body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-empty{border:0;box-shadow:none;padding:50px 20px;font-size:14px;border-radius:0 0 12px 12px;margin:0}
+@media(max-width:1150px){
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-foot{flex-basis:100%;margin-left:0}
+}
+@media(max-width:900px){
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-card{padding:16px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary{gap:8px;margin-top:12px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-head{justify-content:space-between;width:100%}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-options{width:100%;gap:4px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-option{flex:1;min-width:0;padding:5px 4px;font-size:11px}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-metrics{gap:12px}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-value{font-size:24px}
+ body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-results{margin-top:18px}
+ body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-list-heading{padding:16px 14px 0;align-items:flex-start;flex-wrap:wrap;gap:4px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-filter{padding:12px 14px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-tools{position:static}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-line{display:block}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-item{width:100%;max-width:100%}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-reset{display:block;margin-top:12px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-list{padding:0 10px 12px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-filter-control>text:not(.workbench-filter-chevron){margin-left:auto}
+}

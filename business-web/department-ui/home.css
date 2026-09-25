@@ -1,0 +1,126 @@
+.department-ui .department-home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  gap: var(--ui-space-4);
+  color: var(--ui-ink);
+  font: var(--ui-text-body)/1.5 var(--ui-font);
+}
+
+.department-ui .department-home .sb-pagehead { margin: 0; }
+.department-ui .department-home .sb-pagehead h1 { margin: 0; }
+.department-ui .department-home-quick-actions { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); }
+.department-ui .department-home-summary {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(0, 3fr);
+  align-items: center;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
+  padding: var(--ui-space-3) var(--ui-space-4);
+  gap: var(--ui-space-4);
+}
+.department-ui .department-home-welcome { display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .department-home-welcome strong { font-size: var(--ui-text-section); }
+.department-ui .department-home-activity-heading > span,
+.department-ui .department-home-activity-heading > div > span { color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-home-metrics { flex: 1; min-width: 0; }
+.department-ui .department-home-metric-link:focus-visible,
+.department-ui .department-home-event-open:focus-visible,
+.department-ui .department-home-receipt-action:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: -2px; }
+.department-ui .department-home-team-entry { align-self: flex-start; max-width: 100%; height: auto; min-height: var(--ui-control-height); white-space: normal; text-align: left; }
+.department-ui .department-home-activity {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  background: var(--ui-surface);
+  overflow: hidden;
+}
+.department-ui .department-home-activity-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); padding: var(--ui-space-4) var(--ui-space-4) var(--ui-space-2); }
+.department-ui .department-home-activity-heading > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--ui-space-3); }
+.department-ui .department-home-activity h2 { margin: 0; font-size: var(--ui-text-section); }
+.department-ui .department-home-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ui-space-2) var(--ui-space-4); padding: 0 var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .department-home-toolbar > .ant-tabs { flex: 1 1 540px; min-width: 0; }
+.department-ui .department-home-toolbar .ant-tabs-nav { margin: 0; }
+.department-ui .department-home-toolbar .ant-tabs-content-holder { display: none; }
+.department-ui .department-home-search { flex: 0 1 280px; min-width: 220px; padding-block: var(--ui-space-2); }
+.department-ui .department-home-feed { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.department-ui .department-home-date { background: var(--ui-background); color: var(--ui-secondary); padding: var(--ui-space-2) var(--ui-space-4); font-size: var(--ui-text-small); font-weight: 600; }
+.department-ui .department-home-event { display: flex; align-items: center; gap: var(--ui-space-2); border-bottom: 1px solid var(--ui-line); }
+.department-ui .department-home-event:last-child { border-bottom: 0; }
+.department-ui .department-home-event:hover { background: var(--ui-background); }
+.department-ui .department-home-event-open { display: flex; flex: 1; align-items: center; gap: var(--ui-space-3); min-width: 0; padding: var(--ui-space-3) 0 var(--ui-space-3) var(--ui-space-4); background: transparent; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.department-ui .department-home-event-icon { width: var(--ui-control-height); height: var(--ui-control-height); flex: 0 0 var(--ui-control-height); display: grid; place-items: center; color: var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); font-weight: 600; }
+.department-ui .department-home-event-copy { display: flex; flex-direction: column; flex: 1; gap: var(--ui-space-1); min-width: 0; }
+.department-ui .department-home-event-copy > strong { color: var(--ui-ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.department-ui .department-home-event-change { color: var(--ui-secondary); font-size: var(--ui-text-small); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.department-ui .department-home-event-state { display: flex; align-items: flex-end; flex-direction: column; gap: var(--ui-space-1); max-width: 180px; flex-shrink: 0; }
+.department-ui .department-home-event-state time { color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-home-process-status { display: inline-block; background: var(--ui-neutral-soft); color: var(--ui-neutral); padding: 0 var(--ui-space-2); border-radius: var(--ui-radius-control); font-size: var(--ui-text-small); line-height: 2; white-space: normal; }
+.department-ui .department-home-event-actions { flex: 0 0 144px; display: flex; justify-content: flex-end; padding-right: var(--ui-space-4); }
+.department-ui .department-home-event-actions .ant-btn { white-space: normal; height: auto; text-align: right; }
+.department-ui .department-home-filter-summary { display: flex; align-items: center; justify-content: space-between; padding: var(--ui-space-2) var(--ui-space-4); border-top: 1px solid var(--ui-line); color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-home-detail-time { margin-bottom: var(--ui-space-3); font-size: var(--ui-text-small); color: var(--ui-secondary); }
+.department-ui .department-home-detail-content { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .department-home-detail-meta { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .department-home-detail-text { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; color: var(--ui-ink); }
+.department-ui .department-home-detail-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3); }
+.department-ui .department-home-detail-metrics .sb-metric { min-width: 0; overflow-wrap: anywhere; }
+.department-ui .department-home-detail-metrics .sb-metric > b { font-size: var(--ui-text-page); }
+.department-ui .department-home-detail-metrics .department-home-metric-link { padding: 0; }
+.department-ui .department-home-detail-metrics .department-home-metric-link > span { display: block; color: var(--ui-primary); padding-top: var(--ui-space-1); }
+.department-ui .department-home-receipt-section { border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); overflow: hidden; }
+.department-ui .department-home-receipt-section > header { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); background: var(--ui-background); padding: var(--ui-space-3); }
+.department-ui .department-home-receipt-section h3 { font-size: var(--ui-text-body); margin: 0; }
+.department-ui .department-home-receipt-section header p { font-size: var(--ui-text-small); color: var(--ui-secondary); margin: var(--ui-space-1) 0 0; }
+.department-ui .department-home-receipt-section header > span { font-size: var(--ui-text-small); color: var(--ui-secondary); flex-shrink: 0; }
+.department-ui .department-home-receipt-row { display: flex; align-items: flex-start; gap: var(--ui-space-3); width: 100%; padding: var(--ui-space-3); border: 0; border-bottom: 1px solid var(--ui-line); color: var(--ui-ink); background: var(--ui-surface); font: inherit; text-align: left; }
+.department-ui .department-home-receipt-row:last-child { border-bottom: 0; }
+.department-ui .department-home-receipt-action { cursor: pointer; }
+.department-ui .department-home-receipt-action:hover { background: var(--ui-selected); }
+.department-ui .department-home-receipt-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: var(--ui-space-1); white-space: pre-wrap; overflow-wrap: anywhere; }
+.department-ui .department-home-receipt-copy > span { color: var(--ui-secondary); }
+.department-ui .department-home-detail-muted { margin: 0; color: var(--ui-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.department-ui .department-home-receipt-section > .department-home-detail-muted { padding: var(--ui-space-3); }
+.department-ui .department-home-detail-footer { display: flex; justify-content: flex-end; padding-top: var(--ui-space-3); border-top: 1px solid var(--ui-line); }
+
+@media (max-width: 1000px) {
+  .department-ui .department-home-summary { grid-template-columns: 1fr; gap: var(--ui-space-2); }
+  .department-ui .department-home-welcome { flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: var(--ui-space-2); }
+  .department-ui .department-home-search { flex-basis: 100%; }
+  .department-ui .department-home-toolbar > .ant-tabs { flex-basis: 100%; }
+}
+@media (max-width: 600px) {
+  .department-ui .department-home { height: auto; min-height: 100%; gap: var(--ui-space-3); }
+  .department-ui .department-home .sb-pagehead { align-items: flex-start; flex-direction: column; gap: var(--ui-space-3); }
+  .department-ui .department-home .sb-pagehead h1 small { display: block; margin-left: 0; margin-top: var(--ui-space-1); }
+  .department-ui .department-home-quick-actions { gap: var(--ui-space-2); }
+  .department-ui .department-home-quick-actions .ant-btn { min-height: var(--ui-touch-target); padding-inline: var(--ui-space-2); }
+  .department-ui .department-home-summary { padding: var(--ui-space-3); }
+  .department-ui .department-home-metrics { gap: var(--ui-space-1); }
+  .department-ui .department-home-metric-link { padding: var(--ui-space-2) var(--ui-space-1); }
+  .department-ui .department-home-activity { flex: none; overflow: visible; }
+  .department-ui .department-home-activity-heading { flex-wrap: wrap; padding: var(--ui-space-3); }
+  .department-ui .department-home-toolbar { padding-inline: var(--ui-space-3); }
+  .department-ui .department-home-feed { overflow: visible; flex: none; }
+  .department-ui .department-home-event { flex-wrap: wrap; gap: 0; }
+  .department-ui .department-home-event-open { flex-basis: 100%; padding: var(--ui-space-3); align-items: flex-start; gap: var(--ui-space-2); }
+  .department-ui .department-home-event-icon { display: none; }
+  .department-ui .department-home-event-copy > strong { white-space: normal; }
+  .department-ui .department-home-event-state { max-width: 100px; }
+  .department-ui .department-home-event-actions { flex: 1; padding: 0 var(--ui-space-3) var(--ui-space-2); }
+  .department-ui .department-home-event-actions .ant-btn { min-height: var(--ui-touch-target); }
+  .department-ui .department-home-detail-metrics { gap: var(--ui-space-2); }
+  .department-ui .department-home-receipt-row { flex-wrap: wrap; }
+  .department-ui .department-home-receipt-copy { min-width: 70%; }
+}
+
+/* 需关注：有数才上色，0 保持中性 */
+.department-ui .department-home-attention { color: var(--ui-muted); }
+.department-ui .department-home-attention.is-on { color: var(--ui-warning); }

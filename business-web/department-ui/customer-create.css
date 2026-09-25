@@ -1,0 +1,44 @@
+/* 创建客户：直接填写，客户与联系人分区，动作固定在表单底部。 */
+.department-ui[data-department-page="pages/customer-create/index"] { height: 100%; }
+.department-ui .ds-ccreate { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.department-ui .ds-cc-main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.department-ui .ds-cc-top { display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-cc-progress { display: flex; flex-direction: column; gap: var(--ui-space-2); justify-content: center; }
+.department-ui .ds-cc-progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-cc-progress-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-cc-progress .ant-progress { margin: 0; }
+.department-ui .ds-cc-notice { margin: 0; padding: var(--ui-space-2) var(--ui-space-4); font-size: var(--ui-text-small); color: var(--ui-secondary); background: var(--ui-background); border-bottom: 1px solid var(--ui-line); display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; }
+.department-ui .ds-cc-form { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--ui-space-6); padding: var(--ui-space-6); align-content: start; }
+.department-ui .ds-cc-group { min-width: 0; }
+.department-ui .ds-cc-group h2 { font-size: var(--ui-text-section); font-weight: 600; margin: 0 0 var(--ui-space-4); }
+.department-ui .ds-cc-group-contact { border-left: 1px solid var(--ui-line); padding-left: var(--ui-space-6); }
+.department-ui .ds-cc-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); align-content: start; }
+.department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: minmax(0, 1fr); }
+.department-ui .ds-cc-field { min-width: 0; display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-cc-field-wide { grid-column: 1 / -1; }
+.department-ui .ds-cc-field-label { display: flex; align-items: baseline; gap: var(--ui-space-2); color: var(--ui-ink); font-size: var(--ui-text-body); }
+.department-ui .ds-cc-required { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.department-ui .ds-cc-field .ant-select { width: 100%; height: var(--ui-field-height); }
+.department-ui .ds-cc-field .ant-input { min-height: var(--ui-field-height); }
+.department-ui .ds-cc-field-error { font-size: var(--ui-text-small); color: var(--ui-danger); }
+.department-ui .ds-cc-bar { border-top: 1px solid var(--ui-line); flex-shrink: 0; }
+/* 其他页面的旧编辑抽屉仍复用这组选择项样式。 */
+.department-ui .ds-cc-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-2); }
+.department-ui .ds-cc-option { all: unset; box-sizing: border-box; cursor: pointer; padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); min-height: var(--ui-control-height); display: flex; align-items: center; }
+.department-ui .ds-cc-option:hover { background: var(--ui-selected); }
+.department-ui .ds-cc-option:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-cc-option.is-selected { border-color: var(--ui-primary); background: var(--ui-selected); color: var(--ui-primary); font-weight: 600; }
+.department-ui .ds-cc-helper { margin: var(--ui-space-3) 0 0; font-size: var(--ui-text-small); }
+@media (max-width: 900px) {
+  /* 外框的桌面选择器优先级更高，仅在本页恢复窄屏隐藏侧栏。 */
+  body.department-design[data-route="customer-create"] .web-sidebar { display: none; }
+  .department-ui[data-department-page="pages/customer-create/index"] { height: auto; }
+  .department-ui .ds-ccreate { height: auto; }
+  .department-ui .ds-cc-form { grid-template-columns: minmax(0, 1fr); }
+  .department-ui .ds-cc-form { overflow: visible; padding: var(--ui-space-4); }
+  .department-ui .ds-cc-group-contact { border-left: 0; padding-left: 0; border-top: 1px solid var(--ui-line); padding-top: var(--ui-space-4); }
+  .department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .department-ui .ds-cc-fields, .department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: minmax(0, 1fr); }
+}

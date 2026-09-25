@@ -1,0 +1,7 @@
+{
+  "apiTarget": "https://salesbuddy.shenzhoukuntai.com:28899/api/v1",
+  "environment": "神码 SalesBuddy",
+  "adminUrl": "/admin",
+  "contractRevision": "shenma-weekly-web-v153",
+  "documentationVersion": "1.0.9-shenma-web-20260925"
+}

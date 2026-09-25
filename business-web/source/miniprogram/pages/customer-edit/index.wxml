@@ -1,0 +1,33 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="edit-page">
+  <view class="hero">
+    <view class="eyebrow">CUSTOMER DATA · MANUAL</view>
+    <view class="title">维护客户信息</view>
+    <view class="subtitle">仅人工录入字段可修改；保存后 Agent 会重新评估客户画像与作战地图位置。</view>
+  </view>
+  <view wx:if="{{loading}}" class="loading">正在加载客户信息…</view>
+  <block wx:else>
+    <view class="agent-card">
+      <view class="agent-head"><view>AI</view><view><text>Agent 计算结果</text><label>只读，不支持人工修改</label></view><view class="lock">锁定</view></view>
+      <view class="agent-grid"><view><text>{{agentView.quadrant}}</text><label>作战象限</label></view><view><text>{{agentView.potential}}</text><label>客户潜力</label></view><view><text>{{agentView.relationship}}</text><label>关系深度</label></view></view>
+      <view class="agent-risk">当前风险：{{agentView.risk}}</view>
+    </view>
+    <view class="form-card">
+      <view class="section-head"><text>人工维护字段</text><label>修改后将成为 Agent 的新分析依据</label></view>
+      <view class="field"><text>客户名称</text><view class="picker customer-name-readonly"><text>{{form.name}}</text><label>不可修改</label></view></view>
+      <view class="field"><text>所属行业 *</text><picker mode="selector" range="{{industryOptions}}" value="{{industryIndex}}" bindchange="changeIndustry"><view class="picker">{{form.industry}}<label>›</label></view></picker></view>
+      <view class="field"><text>客户类型 *</text><picker mode="selector" range="{{customerTypeOptions}}" value="{{customerTypeIndex}}" bindchange="changeCustomerType"><view class="picker">{{form.customer_type}}<label>›</label></view></picker></view>
+      <view class="field"><text>客户优先级 *</text><picker mode="selector" range="{{customerLevelOptions}}" value="{{customerLevelIndex}}" bindchange="changeCustomerLevel"><view class="picker">{{form.level_code || '请选择 Tier-1 / Tier-2 / Tier-3'}}<label>›</label></view></picker></view>
+      <view class="field"><text>客户 / 线索来源 *</text><picker mode="selector" range="{{sourceOptions}}" value="{{sourceIndex}}" bindchange="changeSource"><view class="picker">{{form.source}}<label>›</label></view></picker></view>
+      <view class="field"><text>合作伙伴 *</text><input value="{{form.partner_name}}" data-key="partner_name" bindinput="inputField" /></view>
+      <view class="section-head contact-head"><text>首要联系人</text><label>角色仅限决策者 / 影响者 / 使用者</label></view>
+      <view class="field"><text>联系人姓名</text><input value="{{form.contact_name}}" data-key="contact_name" bindinput="inputField" /></view>
+      <view class="field"><text>联系人职位</text><input value="{{form.contact_title}}" data-key="contact_title" bindinput="inputField" /></view>
+      <view class="field"><text>联系人角色</text><picker mode="selector" range="{{contactRoleOptions}}" value="{{contactRoleIndex}}" bindchange="changeContactRole"><view class="picker">{{form.contact_role}}<label>›</label></view></picker></view>
+    </view>
+    <view class="submit-bar"><button loading="{{saving}}" disabled="{{saving}}" bindtap="submit">保存修改并触发 Agent 重评</button></view>
+  </block>
+</view>
+
+</block>

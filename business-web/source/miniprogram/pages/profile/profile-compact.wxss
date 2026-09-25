@@ -1,0 +1,38 @@
+.profile-page .maturity-card{padding:25rpx 23rpx 27rpx}
+.profile-page .maturity-card .capability-title{margin-top:7rpx;font-size:28rpx}
+.profile-page .maturity-definition{margin-top:14rpx;padding:14rpx 16rpx;border-radius:16rpx;font-size:18rpx;line-height:1.45}
+.profile-page .performance-board{gap:14rpx;margin-top:18rpx}
+.profile-page .performance-metric{padding:18rpx 18rpx 16rpx;border-radius:18rpx}
+.profile-page .performance-metric-head{align-items:flex-start}
+.profile-page .performance-metric-head>text{font-size:20rpx;line-height:1.35}
+.profile-page .performance-metric-head>label{max-width:116rpx;padding:4rpx 8rpx;border-radius:999rpx;color:#3776aa;background:#e8f3fc;font-size:13rpx;line-height:1.3;text-align:center}
+.profile-page .performance-completed{margin-top:14rpx}
+.profile-page .performance-completed>label{display:block;color:#8293a4;font-size:15rpx;line-height:1.3}
+.profile-page .performance-completed>text{display:block;margin-top:5rpx;overflow:hidden;color:#174f7c;font-size:29rpx;font-weight:780;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+.profile-page .performance-target{display:flex;align-items:center;justify-content:space-between;gap:8rpx;margin-top:13rpx;padding-top:11rpx;border-top:1rpx solid #dfebf4;border-radius:8rpx}
+.profile-page .performance-target>view{display:flex;align-items:baseline;min-width:0;gap:7rpx}
+.profile-page .performance-target label{flex:0 0 auto;color:#8192a3;font-size:14rpx}
+.profile-page .performance-target>view>text{overflow:hidden;color:#315d80;font-size:17rpx;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.profile-page .target-edit{flex:0 0 auto;color:#1675bd;font-size:14rpx;font-weight:700}
+.profile-page .editable-target:active{background:#e2f0fb}
+.profile-page .performance-track{height:6rpx;margin-top:11rpx}
+.profile-page .maturity-facts{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:15rpx}
+.profile-page .maturity-fact{min-width:0;padding:18rpx 19rpx;border-radius:18rpx}
+.profile-page .maturity-fact.wide{grid-column:1 / -1}
+.profile-page .maturity-fact>text{font-size:19rpx;line-height:1.35}
+.profile-page .maturity-fact>view{margin:9rpx 0 6rpx;font-size:27rpx;font-weight:760;line-height:1.25}
+.profile-page .maturity-fact>label{display:block;font-size:16rpx;line-height:1.45}
+.profile-page .maturity-note{gap:9rpx;margin-top:11rpx;padding:12rpx 14rpx}
+.profile-page .maturity-note>view{font-size:15rpx;line-height:1.4}
+.profile-page .maturity-note>text{font-size:15rpx;line-height:1.4}
+.profile-page .profile-scope-card{margin-top:10rpx;padding:10rpx 12rpx;border-radius:20rpx}
+.profile-page .profile-scope-modes{display:grid;grid-auto-columns:1fr;grid-auto-flow:column;gap:6rpx;padding:5rpx;border-radius:15rpx;background:#eef3f8}
+.profile-page .profile-scope-modes>view{padding:10rpx 6rpx;border-radius:11rpx;color:#718297;font-size:17rpx;font-weight:650;text-align:center}
+.profile-page .profile-scope-modes>view.active{color:#fff;background:linear-gradient(135deg,#1e659f,#1685e6);box-shadow:0 4rpx 12rpx rgba(27,103,173,.16)}
+.profile-page .profile-scope-selectors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8rpx;margin-top:9rpx}
+.profile-page .profile-scope-selectors>picker:only-child{grid-column:1 / -1}
+.profile-page .profile-scope-selectors picker>view,.profile-page .profile-person-only>view{display:flex;align-items:center;gap:6rpx;box-sizing:border-box;height:48rpx;padding:0 10rpx;border:1rpx solid #dfe9f2;border-radius:12rpx;background:#f7fafc}
+.profile-page .profile-person-only{display:block;margin-top:9rpx}
+.profile-page .profile-scope-selectors label,.profile-page .profile-person-only label{flex:0 0 auto;color:#8797a6;font-size:14rpx}
+.profile-page .profile-scope-selectors picker text:nth-child(2),.profile-page .profile-person-only text:nth-child(2){min-width:0;flex:1;overflow:hidden;color:#30506b;font-size:16rpx;font-weight:680;text-overflow:ellipsis;white-space:nowrap}
+.profile-page .profile-scope-selectors picker text:last-child,.profile-page .profile-person-only text:last-child{flex:0 0 auto;color:#7f9ab1;font-size:14rpx}

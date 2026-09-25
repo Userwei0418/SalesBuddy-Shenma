@@ -9,7 +9,7 @@ scoped grants again at object access and mutation boundaries.
 ROUTES = {
  'web_auth': {name:'*' for name in ('login','refresh','me','change_password','logout')},
  'weekly_reports': {'generate':'weekly_report.generate','list_reports':'weekly_report.read',
-  'detail':'weekly_report.read','save_draft':'weekly_report.edit','cancel':'weekly_report.cancel'},
+  'detail':'weekly_report.read','sources':'weekly_report.generate','report_sources':'weekly_report.read','save_draft':'weekly_report.edit','cancel':'weekly_report.cancel'},
  'admin': {'admin_page':'*','get_agent_config':'ai.config_read','get_agent_config_releases':'ai.config_read',
            'rollback_agent_config':'ai.config_rollback','update_agent_config':'ai.config_publish'},
  'advice': {'request_advice':'advice.request','advice_statistics':'advice.read','advice_detail':'advice.read','decide_suggestion':'advice.decide'},
@@ -72,7 +72,7 @@ ROUTES = {
   'task_detail':'task.read','create_task_event':'$task_event'},
  'visit_flow': {'structure':'visit.structure','quality':'visit.quality_review'},
  'visit_imports': {'upload_visit_file':'visit.upload','import_status':'visit.read','retry_import':'visit.retry_import','download_original':'visit.download_original'},
- 'main': {'health_live':'*','health_version':'*','health_ready':'*'},
+ 'main': {'health_live':'*','health_version':'*','health_ready':'*','web_capabilities':'*','web_connection_status':'*'},
 }
 EXPORTS = {'customer.read':'customer.export','opportunity.read':'opportunity.export','ai.run_read':'ai.run_export',
  'ai.usage_read':'ai.usage_export','audit.business_read':'audit.business_export','audit.read':'audit.export','audit.events_read':'audit.events_export'}

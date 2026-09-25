@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "记录客户拜访",
+  "navigationBarBackgroundColor": "#F7FAFE",
+  "navigationBarTextStyle": "black",
+  "usingComponents": {
+    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index"
+  },
+  "homeButton": true,
+  "navigationStyle": "custom"
+}

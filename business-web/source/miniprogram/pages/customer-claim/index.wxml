@@ -1,0 +1,57 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="claim-page">
+  <view class="claim-hero">
+    <view class="claim-eyebrow">公司客户</view>
+    <view class="claim-title">选择要认领的客户</view>
+    <view class="claim-subtitle">提交申请后由运营审批，通过后加入你的作战地图</view>
+  </view>
+
+  <view class="claim-main">
+    <view wx:if="{{resultMessage}}" class="claim-result">{{resultMessage}}</view>
+    <view class="claim-search">
+      <view class="search-icon"></view>
+      <input value="{{query}}" placeholder="客户名称 / 拼音 / 首字母" maxlength="100" bindinput="inputQuery" />
+      <view wx:if="{{query && total !== null}}" class="search-count">共 {{total}} 个结果</view>
+    </view>
+    <view class="claim-search-hint">支持中文、全拼或首字母，例如：商汤 / shangtang / st</view>
+    <view class="claim-filters">
+      <picker class="claim-filter" mode="selector" range="{{industryOptions}}" range-key="label" value="{{industryIndex}}" disabled="{{optionsLoading || !industryOptions.length || submitting}}" bindchange="changeIndustry">
+        <view class="claim-filter-value"><text>{{industryOptions[industryIndex].label || '行业'}}</text><label>⌄</label></view>
+      </picker>
+      <picker class="claim-filter" mode="selector" range="{{statusOptions}}" range-key="label" value="{{statusIndex}}" disabled="{{optionsLoading || !statusOptions.length || submitting}}" bindchange="changeClaimStatus">
+        <view class="claim-filter-value"><text>{{statusOptions[statusIndex].label || '认领状态'}}</text><label>⌄</label></view>
+      </picker>
+    </view>
+    <view wx:if="{{optionsLoading}}" class="claim-filter-message">正在加载筛选选项…</view>
+    <view wx:elif="{{optionsError}}" class="claim-filter-error" bindtap="retryFilterOptions">{{optionsError}} · 点击重试</view>
+    <view wx:if="{{hasFilters}}" class="claim-filter-reset" bindtap="clearFilters">清除搜索与筛选</view>
+    <view class="claim-section-head"><text>公司客户</text><label>{{loading ? '加载中…' : total !== null ? '已加载 ' + customers.length + ' / 共 ' + total + ' 家' : '暂未加载'}}</label></view>
+
+    <view wx:if="{{customers.length}}" class="claim-list">
+      <view wx:for="{{customers}}" wx:key="id" class="claim-card {{selectedCustomerId === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectCustomer">
+        <view class="claim-radio"><text></text></view>
+        <view class="claim-card-main">
+          <view class="claim-name"><text>{{item.name}}</text><label wx:if="{{item.level}}">{{item.level}}</label></view>
+          <view class="claim-meta">{{item.industry || '行业待补充'}} · {{item.team || '当前部门'}}</view>
+          <view class="claim-owner">负责销售：{{item.owner || '未分配'}} · {{item.claimLabel}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:elif="{{loading}}" class="claim-empty"><view class="loading-dot"></view><text>正在加载公司客户</text></view>
+    <view wx:elif="{{loadError}}" class="claim-empty"><text>{{loadError}}</text><button class="claim-load-more" bindtap="refreshCustomers">重新加载</button></view>
+    <view wx:else class="claim-empty"><view class="empty-search"></view><text>{{hasFilters ? '没有匹配的客户' : '公司客户名单暂为空'}}</text><label>{{hasFilters ? '请调整搜索词或筛选条件' : '运营完成客户建档后，可在这里申请认领'}}</label></view>
+    <view wx:if="{{customers.length && hasMore}}" class="claim-pagination">
+      <text wx:if="{{loadMoreError}}" class="claim-page-error">{{loadMoreError}}</text>
+      <button class="claim-load-more" loading="{{loadingMore}}" disabled="{{loadingMore}}" bindtap="retryMore">{{loadingMore ? '正在加载' : refreshRequired ? '刷新名单' : loadMoreError ? '重试加载' : '加载更多客户'}}</button>
+    </view>
+    <view wx:elif="{{customers.length && !loading}}" class="claim-list-end">已显示全部匹配客户</view>
+  </view>
+
+  <view class="claim-footer">
+    <button class="claim-cancel" bindtap="refreshCustomers">刷新名单</button>
+    <button disabled="{{!selectedCustomerId || submitting}}" loading="{{submitting}}" class="claim-confirm" bindtap="confirmClaim">提交认领申请</button>
+  </view>
+</view>
+
+</block>

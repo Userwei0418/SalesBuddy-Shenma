@@ -1,0 +1,30 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{loading}}" class="source-card">正在读取报告…</view>
+<view wx:if="{{error}}" class="source-card" bindtap="loadReport">{{error}} · 点击重试</view>
+<view wx:if="{{detail}}" class="report-page">
+  <view class="report-hero">
+    <view class="eyebrow">AGENT INSTANT SUMMARY</view>
+    <view class="report-name">{{detail.reportTitle}}</view>
+    <view class="report-meta"><text>{{detail.scope}}</text><text>{{detail.period}}</text></view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-kicker">{{detail.sectionTitle}}</view>
+    <view class="section-description">{{detail.sectionSubtitle}}</view>
+    <view class="detail-title">{{detail.title}}</view>
+    <view class="detail-copy">{{detail.detail}}</view>
+    <view wx:if="{{detail.isAttention}}" class="recommendation-block">
+      <view class="recommendation-head"><text>AI</text><view>推荐行动</view></view>
+      <view class="recommendation-title">{{detail.recommendationTitle || '针对该客户的下一步建议'}}</view>
+      <view class="recommendation-copy">{{detail.recommendationDetail || '当前尚未形成可执行建议，请重新生成即时总结。'}}</view>
+    </view>
+  </view>
+
+  <view class="source-card">
+    <view class="source-dot"></view>
+    <view><text>AI 基于权限范围内的业务数据分析</text><label>生成于 {{detail.generatedAt}}</label></view>
+  </view>
+</view>
+
+</block>

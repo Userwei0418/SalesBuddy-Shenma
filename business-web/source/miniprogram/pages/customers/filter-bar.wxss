@@ -1,0 +1,138 @@
+/* 作战地图：固定展示的单行胶囊筛选。 */
+.customer-page .operating-filters {
+  padding: 8rpx 10rpx;
+}
+
+.customer-page .operating-filter-line {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.customer-page .operating-filter-title {
+  flex: 0 0 auto;
+  color: #405d76;
+  font-size: 19rpx;
+  font-weight: 700;
+}
+
+.customer-page .operating-picker-scroll {
+  width: 0;
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.customer-page .operating-picker-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7rpx;
+  padding-right: 6rpx;
+}
+
+.customer-page .operating-picker {
+  flex: 0 0 auto;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: 50rpx;
+  padding: 0 10rpx;
+  border: 1rpx solid #dfe9f2;
+  border-radius: 12rpx;
+  background: #f6f9fc;
+}
+
+.customer-page .operating-picker-content {
+  display: flex;
+  align-items: center;
+  flex-flow: row nowrap;
+  gap: 6rpx;
+  height: 48rpx;
+  min-width: 0;
+}
+
+.customer-page .operating-picker.filter-plan,
+.customer-page .operating-picker.filter-level,
+.customer-page .operating-picker.filter-amount,
+.customer-page .operating-picker.filter-team,
+.customer-page .operating-picker.filter-member {
+  width: 188rpx;
+}
+
+.customer-page .operating-picker.active,
+.customer-page .operating-picker.filter-level.active {
+  border-color: #9bc9ee;
+  background: #eaf5ff;
+}
+
+.customer-page .map-level-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10rpx;
+  margin-top: 12rpx;
+  padding-top: 13rpx;
+  border-top: 1rpx solid #e7eef5;
+}
+
+.customer-page .map-level-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  min-width: 0;
+  height: 52rpx;
+  border: 1rpx solid #dfe9f2;
+  border-radius: 14rpx;
+  color: #526b82;
+  background: #f8fafc;
+  font-size: 17rpx;
+}
+
+.customer-page .map-level-option > text {
+  width: 15rpx;
+  color: #1778ca;
+  font-size: 15rpx;
+}
+
+.customer-page .map-level-option.selected {
+  border-color: #93c9f1;
+  color: #176fb7;
+  background: #eaf5ff;
+  font-weight: 680;
+}
+
+.customer-page .operating-picker text {
+  display: block;
+  overflow: hidden;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.customer-page .operating-picker .operating-picker-label {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #8a99a8;
+  font-size: 15rpx;
+}
+
+.customer-page .operating-picker .operating-picker-value {
+  min-width: 0;
+  flex: 1;
+  color: #304e68;
+  font-size: 17rpx;
+  font-weight: 650;
+  text-overflow: ellipsis;
+}
+
+.customer-page .operating-picker .operating-picker-caret {
+  flex: 0 0 auto;
+  color: #86a0b7;
+  font-size: 15rpx;
+}
+
+.customer-page .operating-filter-reset {
+  flex: 0 0 auto;
+  padding: 8rpx 4rpx;
+  color: #2477b9;
+  font-size: 18rpx;
+}

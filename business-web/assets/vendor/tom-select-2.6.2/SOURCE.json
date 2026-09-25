@@ -1,0 +1,11 @@
+{
+  "name": "tom-select",
+  "version": "2.6.2",
+  "tarball": "https://registry.npmjs.org/tom-select/-/tom-select-2.6.2.tgz",
+  "integrity": "sha512-eiXIkk82XzzUTOVQDFpy+ZGejuqdTvMukyUyeZBQaKnqW42UoTiTZnrod/eX0rkqJEc4rZY9DZ3zdjV07i29wQ==",
+  "files_sha256": {
+    "tom-select.complete.min.js": "8f9d7d3420e938c2c9817818b56df43ea46feae5bf1f5a2e828863c034df0e37",
+    "tom-select.default.min.css": "f1d39d120d83e42f08a4f0fbc33f99e92333079e05fecfecd3c22da37b8427c8",
+    "LICENSE": "f15dc64ea1f373c8af0ee7c020064360497addf335c9c2bcf27c3a6f56a6f0bd"
+  }
+}

@@ -1,0 +1,46 @@
+body.department-design { --web-sidebar: 232px; }
+.department-design .web-sidebar { padding: var(--ui-space-4) var(--ui-space-3); }
+.department-design .web-brand { margin-bottom: var(--ui-space-6); }
+.department-design .web-nav-item { height: var(--ui-field-height); border-radius: var(--ui-radius-control); }
+.department-design .web-topbar { background: var(--ui-surface); padding-inline: var(--ui-page-gutter); }
+.department-design .web-workspace { border-radius: var(--ui-radius-control); margin-bottom: var(--ui-space-4); }
+.department-design .web-preview-notice { padding-inline: var(--ui-page-gutter); font-size: var(--ui-text-small); }
+body.department-design #page-root.department-host { padding: 0 !important; overflow: auto !important; display: block !important; }
+.department-host > .ant-app { min-height: 100%; height: 100%; }
+.department-ui { padding: var(--ui-page-gutter); min-height: 100%; color: var(--ui-ink); font: var(--ui-text-body)/1.65 var(--ui-font); }
+.department-ui[data-department-page="pages/index/index"] { height: 100%; }
+.department-ui * { box-sizing: border-box; }
+.department-ui h2,.department-ui h3 { color: var(--ui-ink); font-size: var(--ui-text-section); line-height: 1.5; margin: 0; }
+.department-ui p { margin: 0; }
+.department-ui button { font-family: var(--ui-font); }
+.department-ui .ds-panel { background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); min-width: 0; }
+.department-ui .ds-muted { color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-page-actions { display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; }
+.department-ui .sb-pagehead-actions { flex-wrap: wrap; }
+.department-ui .ant-table { font-variant-numeric: tabular-nums; }
+.department-ui .ant-table-cell { overflow-wrap: anywhere; }
+.department-ui .ant-table-wrapper { min-width: 0; }
+.department-ui .ant-btn { box-shadow: none; }
+.department-ui .ant-btn-primary { color: var(--ui-on-primary); }
+.department-ui .ant-table-row > td { vertical-align: middle; }
+.department-ui a,.department-ui .ant-btn-link { text-underline-offset: var(--ui-space-1); }
+@media (min-width: 901px) {
+  .department-host { height: calc(100dvh - var(--web-header) - var(--web-notice)); }
+}
+@media (max-width: 900px) {
+  body.department-design { --web-sidebar: 0px; }
+  .department-ui { padding: var(--ui-space-4); }
+}
+@media (max-width: 600px) {
+  .department-ui { padding: var(--ui-space-3); }
+  .department-ui .sb-pagehead h1 small { display: block; margin-left: 0; margin-top: var(--ui-space-1); }
+  .department-ui .ant-table-cell { font-size: var(--ui-text-small); }
+}
+
+/* 示例模式的提示条：不用警告色，只是一行说明加角色切换（正式登录时本来就不显示） */
+.department-design .web-preview-notice { background: var(--ui-surface); color: var(--ui-secondary); border-bottom: 1px solid var(--ui-line); }
+/* 搜索框：输入框与放大镜按钮同高（全局 runtime.css 把 input 压成 24，这里对齐到控件高） */
+.department-ui .ant-input-search .ant-input-affix-wrapper, .department-ui .ant-input-search .ant-input-search-button { height: var(--ui-control-height); }
+.department-ui .ant-input-affix-wrapper > input.ant-input { height: auto; }
+/* 子组件接线：原模板补建组件的那一帧不显示，避免闪一下旧皮肤 */
+body.department-design #page-root.department-pending { visibility: hidden; }

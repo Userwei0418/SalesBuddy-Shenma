@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "跟进记录",
+  "usingComponents": {
+    "fde-dashboard": "../../components/fde-dashboard/index"
+  },
+  "homeButton": true
+}

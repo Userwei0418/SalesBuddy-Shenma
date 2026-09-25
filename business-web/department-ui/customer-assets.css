@@ -1,0 +1,17 @@
+/* 客户资产明细：一条汇总，一张列表 */
+.department-ui .ds-cassets { display: flex; flex-direction: column; gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-ca-summary { flex: none; padding: var(--ui-space-2) var(--ui-space-4); }
+.department-ui .ds-ca-list { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.department-ui .ds-ca-tools { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); flex-wrap: wrap; }
+.department-ui .ds-ca-tools h2 { margin: 0; font-size: var(--ui-text-body); font-weight: 600; display: flex; align-items: baseline; gap: var(--ui-space-2); } .department-ui .ds-ca-tools h2 small { font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-ca-actions { margin-left: auto; display: flex; gap: var(--ui-space-2); align-items: center; }
+.department-ui .ds-ca-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .ds-ca-two { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-ca-two b { font-weight: 600; }
+.department-ui .ds-ca-num { font-variant-numeric: tabular-nums; font-weight: 600; }
+.department-ui .ds-ca-note { margin: 0; padding: var(--ui-space-1) 0; white-space: pre-wrap; color: var(--ui-secondary); }
+.department-ui .ds-ca-more { display: flex; justify-content: center; padding: var(--ui-space-3) 0 0; font-size: var(--ui-text-small); margin: 0; }
+.ds-ca-form { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.ds-ca-form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-space-3); }
+.ds-ca-choices { margin-top: var(--ui-space-2); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); max-height: 220px; overflow: auto; display: flex; flex-direction: column; }
+.ds-ca-hint { margin: 0; font-size: var(--ui-text-small); color: var(--ui-muted); } .ds-ca-error { margin: 0; color: var(--ui-danger); font-size: var(--ui-text-small); }
+@media (max-width: 900px) { .department-ui .ds-cassets { height: auto; } .department-ui .ds-ca-body { overflow: visible; } .ds-ca-form-grid { grid-template-columns: minmax(0, 1fr); } }

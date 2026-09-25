@@ -33,7 +33,7 @@ async def password_login(
     body: PasswordLogin, request: Request, response: Response,
     database: Database = Depends(get_database), settings: Settings = Depends(get_settings),
 ) -> SessionResponse:
-    """Bearer sessions for native clients; shared password verification, no Web cookie dependency."""
+    """Shared password login for Mini Program and business Web; same accounts and Bearer session contract."""
     try:
         session, _ = await PasswordAuthService(database, settings).login(
             account=body.account_code, password=body.password.get_secret_value(),

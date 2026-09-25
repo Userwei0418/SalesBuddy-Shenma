@@ -27,6 +27,10 @@ class TestDatabase:
             weekly_agent_snapshot_id='synthetic-snapshot',
             agent_fde_base_url='https://ops-salesbuddy.shenzhoukuntai.com:18899/v1')
     @asynccontextmanager
+    async def connection(self):
+        yield self.conn
+
+    @asynccontextmanager
     async def transaction(self,actor,readonly=False,isolation=None):
         async with self.conn.transaction():
             await set_request_context(self.conn,actor)
@@ -166,7 +170,9 @@ async def test_business_web_login_keeps_console_and_mini_program_separate(connec
         assert (await client.post('/api/v1/web/auth/refresh',headers={'Origin':'https://evil.invalid'})).status_code==403
         native=await client.post('/api/v1/auth/password/login',json={'account_code':code,'password':'Weekly-Changed-2026'})
         client.headers['Authorization']='Bearer '+native.json()['access_token']
-        assert (await client.get('/api/v1/web/weekly-reports')).status_code==403
+        from sales_backend.main import app
+        app.state.database.settings = get_settings()
+        assert (await client.get('/api/v1/web/weekly-reports')).status_code==200
 
 
 async def test_dates_money_stage_snapshot_and_immutable_input(connection,sales_actor):
@@ -200,3 +206,83 @@ async def test_dates_money_stage_snapshot_and_immutable_input(connection,sales_a
     with pytest.raises(asyncpg.RaiseError):
         async with connection.transaction():
             await connection.execute("UPDATE insight.weekly_report SET input_snapshot='{}' WHERE id=$1::uuid",r['id'])
+
+
+async def test_shared_login_sources_and_cross_account_isolation(connection,sales_actor):
+    from sales_backend.main import app
+    await seed(connection,sales_actor,65)
+    from sales_backend.auth.passwords import encode_password
+    admin=await IdentityRepository().find_maintenance_administrator(connection,workspace_external_id='demo-sales-workspace',account_code='ADMIN001')
+    await set_request_context(connection,admin.context)
+    for code in ('XS001','XS002'):
+        uid=await connection.fetchval('SELECT id FROM platform.user_ref WHERE account_code=$1',code)
+        await connection.execute('SELECT security.set_account_password($1,$2,false)',uid,encode_password('Isolated-Testing-2026'))
+    await set_request_context(connection,sales_actor)
+    async with await client_for(connection) as client:
+        app.state.database=TestDatabase(connection,sales_actor)
+        app.state.database.settings=replace(app.state.database.settings,weekly_max_input_bytes=2_000_000)
+        login=await client.post('/api/v1/auth/password/login',json={
+            'account_code':'XS001','password':'Isolated-Testing-2026'})
+        assert login.status_code==200,login.text
+        client.headers['Authorization']='Bearer '+login.json()['access_token']
+        listing=await client.get('/api/v1/web/weekly-reports')
+        assert listing.status_code==200,listing.text
+        week=listing.json()['current_week']
+        first=await client.get('/api/v1/web/weekly-reports/sources',params={'report_week':week,'limit':50})
+        assert first.status_code==200,first.text
+        assert first.json()['total']==65 and first.json()['has_more']
+        assert all(len(row['follow_up_record'])>600 for row in first.json()['items'])
+        last=await client.get('/api/v1/web/weekly-reports/sources',params={'report_week':week,'offset':50,'limit':50})
+        assert last.status_code==200 and len(last.json()['items'])==15 and last.json()['next_offset'] is None
+        assert len({r['id'] for r in first.json()['items']+last.json()['items']})==65
+        request_id=str(uuid4())
+        report=await client.post('/api/v1/web/weekly-reports',json={'request_id':request_id,'report_week':week})
+        assert report.status_code==202,report.text
+        ident=report.json()['id']
+        assert (await client.post('/api/v1/web/weekly-reports',json={'request_id':request_id,'report_week':week})).json()['id']==ident
+        source=await client.get(f'/api/v1/web/weekly-reports/{ident}/sources')
+        assert source.status_code==200 and source.json()['total']==65
+        login=await client.post('/api/v1/auth/password/login',json={'account_code':'XS002','password':'Isolated-Testing-2026'})
+        assert login.status_code==200,login.text
+        client.headers['Authorization']='Bearer '+login.json()['access_token']
+        assert (await client.get(f'/api/v1/web/weekly-reports/{ident}/sources')).status_code==404
+        assert (await client.get('/api/v1/web/weekly-reports/sources')).json()['total']==0
+        assert (await client.get('/api/v1/console/organization')).status_code==403
+        assert (await client.post('/api/v1/auth/logout')).status_code==204
+        assert (await client.get('/api/v1/web/weekly-reports')).status_code==401
+
+
+async def test_historical_week_cutoff_idempotence_and_frozen_sources(connection,sales_actor):
+    from datetime import timedelta
+    from sales_backend.services.weekly_source import report_dates,window
+    now=await connection.fetchval('SELECT transaction_timestamp()')
+    current=report_dates(now)[0];previous=current-timedelta(days=7)
+    _,start,end=window(now,previous)
+    cid=await seed(connection,sales_actor,1)
+    for stamp in (start-timedelta(microseconds=1),start,end-timedelta(microseconds=1),end):
+        await connection.execute('''INSERT INTO activity.visit(workspace_id,customer_id,recorder_user_ref_id,
+            recorder_team_id,created_by_user_ref_id,form_version_id,status,created_at,follow_up_record)
+            VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$3::uuid,
+            (SELECT id FROM config.form_version WHERE status='active' ORDER BY version_no DESC LIMIT 1),
+            'confirmed',$5,'历史周全文')''',sales_actor.workspace_id,cid,sales_actor.user_id,sales_actor.team_ids[0],stamp)
+    svc=WeeklyReportService(TestDatabase(connection,sales_actor),FakeAgent)
+    ident=str(uuid4());r=await svc.generate(sales_actor,ident,previous)
+    assert r['report_week']==previous and r['source_cutoff_at']==end-timedelta(microseconds=1)
+    assert r['statistics']['record_count']==2
+    assert r['period']['end_date']==(previous+timedelta(days=6)).isoformat()
+    assert r['snapshot_at']==now.isoformat()
+    assert (await svc.generate(sales_actor,ident,previous))['id']==r['id']
+    with pytest.raises(HTTPException) as error:await svc.generate(sales_actor,ident,current)
+    assert error.value.status_code==409
+    with pytest.raises(HTTPException) as error:await svc.generate(sales_actor,str(uuid4()),current+timedelta(days=7))
+    assert error.value.detail=='WEEKLY_INVALID_REPORT_WEEK'
+    with pytest.raises(HTTPException) as error:await svc.generate(sales_actor,str(uuid4()),current+timedelta(days=1))
+    assert error.value.detail=='WEEKLY_INVALID_REPORT_WEEK'
+    assert (await svc.list(sales_actor,20,0,previous))['items'][0]['id']==r['id']
+    assert (await svc.list(sales_actor,20,0,current))['items']==[]
+    await seed(connection,sales_actor,2)
+    assert (await svc.report_sources(sales_actor,r['id'],50,0))['total']==2
+    import asyncpg
+    with pytest.raises(asyncpg.RaiseError):
+        async with connection.transaction():
+            await connection.execute('UPDATE insight.weekly_report SET report_week=$2 WHERE id=$1::uuid',r['id'],current)

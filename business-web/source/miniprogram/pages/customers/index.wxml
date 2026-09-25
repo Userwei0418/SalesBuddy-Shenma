@@ -1,0 +1,236 @@
+<template name="customer-advice-panel">
+<view wx:if="{{detailFocusError}}" class="customer-agent-state error">{{detailFocusError}}</view>
+        <view class="customer-agent-panel surface">
+          <view class="customer-agent-head"><view><text class="customer-agent-icon">AI</text><text>{{detailAdvice[detailTab].title}}建议</text></view><text wx:if="{{detailAdvice[detailTab].status !== 'loading'}}" bindtap="loadCustomerAdvice">{{detailAdvice[detailTab].status === 'ready' ? '检查更新' : '生成建议'}}</text></view>
+          <view wx:if="{{detailAdvice[detailTab].status === 'loading'}}" class="customer-agent-state">Agent 正在结合当前客户资料分析…</view>
+          <view wx:elif="{{detailAdvice[detailTab].status === 'error'}}" class="customer-agent-state error">{{detailAdvice[detailTab].error}}</view>
+          <block wx:elif="{{detailAdvice[detailTab].status === 'ready'}}">
+            <view wx:if="{{detailAdvice[detailTab].summary}}" class="customer-agent-summary">{{detailAdvice[detailTab].summary}}</view>
+            <view wx:for="{{detailAdvice[detailTab].rows}}" wx:key="index" class="customer-agent-row"><text>{{index+1}}. {{item.title}}</text><label>{{item.detail}}</label><advice-actions analysis-id="{{detailAdvice[detailTab].id}}" suggestion="{{item}}" bind:changed="loadCustomerAdvice" /></view>
+            <view class="customer-agent-source">Agent 分析 · 基于当前客户资料，建议供人工判断</view>
+          </block>
+          <view wx:else class="customer-agent-state">点击生成当前标签页的 AI 建议</view>
+        </view>
+</template>
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="page-shell customer-page">
+  <view class="asset-page-heading"><view><view class="asset-page-title">客户经营</view><text class="asset-page-sub">管理客户 {{scopeCustomerCount}} 家 · {{selectedMember !== 'all' ? memberLabel : selectedTeam !== 'all' ? teamLabel : scope}}</text></view><view wx:if="{{canClaimCustomer}}" class="map-claim-entry" bindtap="openCustomerClaim">客户认领</view></view>
+  <view class="asset-overview">
+    <view class="asset-overview-head"><view class="asset-title-row"><text>{{isFde ? "协作客户整体资产" : "客户资产"}}</text></view><view class="asset-period"><view class="{{assetPeriod==='year'?'selected':''}}" data-period="year" bindtap="changeAssetPeriod">本年</view><view class="{{assetPeriod==='all'?'selected':''}}" data-period="all" bindtap="changeAssetPeriod">历年累计</view></view></view>
+    <view class="asset-metrics">
+      <view class="asset-metric"><view class="asset-metric-label">客户 ACV</view><view class="asset-number">{{acvLoading ? '…' : acvText}}<text>万元</text></view></view>
+      <view class="asset-metric" data-kind="recognized" bindtap="openAssets"><view class="asset-metric-label">确收 <text>›</text></view><view class="asset-number">{{assetLoading ? '…' : recognizedText}}<text>万元</text></view></view>
+      <view class="asset-metric" data-kind="collection" bindtap="openAssets"><view class="asset-metric-label">回款 <text>›</text></view><view class="asset-number">{{assetLoading ? '…' : collectionText}}<text>万元</text></view></view>
+    </view>
+    <view class="asset-acv-note">资产统计包含当前范围的全部客户；本年／历年仅切换确收和回款</view>
+    <view wx:if="{{acvError || assetError}}" class="asset-retry" bindtap="loadAssets">{{acvError || assetError}} · 点击重试</view>
+  </view>
+  <view class="map-toolbar"><view class="map-search"><text class="map-search-icon">⌕</text><input placeholder="搜索活跃客户或负责人" value="{{keyword}}" bindinput="search" /></view></view>
+  <view wx:if="{{directoryError}}" class="asset-acv-note" bindtap="loadData">{{directoryError}}</view>
+  <view class="operating-filters surface">
+    <view class="operating-filter-line">
+      <text class="operating-filter-title">筛选</text>
+      <scroll-view class="operating-picker-scroll" scroll-x enhanced show-scrollbar="false">
+        <view class="operating-picker-row">
+          <picker class="operating-picker {{quadrantIndex ? 'active' : ''}}" range="{{quadrantOptions}}" range-key="label" value="{{quadrantIndex}}" bindchange="changeQuadrant"><view class="operating-picker-content"><text class="operating-picker-label">象限</text><text class="operating-picker-value">{{quadrantOptions[quadrantIndex].label}}</text><text class="operating-picker-caret">⌄</text></view></picker>
+          <view wx:if="{{isFdeLead && canViewTeam}}" class="fde-member-filter"><member-scope-filter members="{{fdeMapMembers}}" selected="{{fdeMapMemberIds}}" bind:change="changeFdeMapMember"/></view>
+          <picker wx:if="{{canViewTeam}}" class="operating-picker filter-team {{selectedTeam !== 'all' ? 'active' : ''}}" disabled="{{directoryLoading || directoryError}}" range="{{teamOptions}}" range-key="label" value="{{teamIndex}}" bindchange="changeTeam"><view class="operating-picker-content"><text class="operating-picker-label">团队</text><text class="operating-picker-value">{{teamLabel}}</text><text class="operating-picker-caret">⌄</text></view></picker>
+          <picker wx:if="{{!isFde && canViewTeam}}" class="operating-picker filter-member {{selectedMember !== 'all' ? 'active' : ''}}" disabled="{{directoryLoading || directoryError}}" range="{{memberOptions}}" range-key="label" value="{{memberIndex}}" bindchange="changeMember"><view class="operating-picker-content"><text class="operating-picker-label">{{role === 'supervisor' ? '团队成员' : '人员'}}</text><text class="operating-picker-value">{{memberLabel}}</text><text class="operating-picker-caret">⌄</text></view></picker>
+          <picker class="operating-picker filter-plan" range="{{planOptions}}" range-key="label" value="{{planIndex}}" bindchange="changePlan"><view class="operating-picker-content"><text class="operating-picker-label">计划</text><text class="operating-picker-value">{{planOptions[planIndex].label}}</text><text class="operating-picker-caret">⌄</text></view></picker>
+          <view class="operating-picker filter-level {{mapSelectedLevels.length ? 'active' : ''}}" bindtap="toggleMapLevelFilter"><view class="operating-picker-content"><text class="operating-picker-label">客户优先级</text><text class="operating-picker-value">{{mapLevelLabel}}</text><text class="operating-picker-caret">⌄</text></view></view>
+          <picker class="operating-picker filter-amount" range="{{mapAmountOptions}}" range-key="label" value="{{mapAmountIndex}}" bindchange="changeMapAmount"><view class="operating-picker-content"><text class="operating-picker-label">金额</text><text class="operating-picker-value">{{mapAmountOptions[mapAmountIndex].label}}</text><text class="operating-picker-caret">⌄</text></view></picker>
+        </view>
+      </scroll-view>
+      <text wx:if="{{mapFilterActive}}" class="operating-filter-reset" bindtap="resetAllFilters">重置</text>
+    </view>
+    <view wx:if="{{showMapLevelFilter}}" class="map-level-panel">
+      <view class="map-level-option {{!mapSelectedLevels.length ? 'selected' : ''}}" data-value="all" bindtap="toggleMapLevel"><text>{{!mapSelectedLevels.length ? '✓' : ''}}</text><label>全部优先级</label></view>
+      <view wx:for="{{mapLevelOptions}}" wx:key="value" class="map-level-option {{item.selected ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="toggleMapLevel"><text>{{item.selected ? '✓' : ''}}</text><label>{{item.label}}</label></view>
+    </view>
+  </view>
+  <view class="battle-section">
+    <view wx:if="{{mapLoading}}" class="map-active-summary">正在加载活跃客户…</view>
+    <view wx:elif="{{mapError}}" class="map-load-error" bindtap="loadData">{{mapError}} · 点击重试</view>
+    <view class="battle-section-head"><view><view class="section-title">{{quadrantIndex ? mapQuadrant : '已定位客户分布'}}</view><text>客户潜力 × 关系深度{{keyword || mapFilterActive ? ' · 筛选结果' : ''}}</text></view><view class="map-result-count">{{mapLoading ? '加载中' : mapError ? '暂不可用' : '已定位 ' + plotCustomers.length + ' 家'}}</view></view>
+    <view class="map-axis-legend"><view><text>↑</text><label>客户潜力</label><small>小 → 大</small></view><view><text>→</text><label>关系深度</label><small>生 → 熟</small></view></view>
+    <view class="battle-map surface" bindtouchstart="startMapTouch" bindtouchmove="moveMapTouch" bindtouchcancel="cancelMapTouch">
+      <block wx:if="{{!quadrantIndex}}">
+      <view class="map-zone zone-attack" data-quadrant="{{quadrantOptions[1].value}}" bindtap="tapMapQuadrant" role="button" aria-label="放大主攻区"></view>
+      <view class="map-zone zone-asset" data-quadrant="{{quadrantOptions[2].value}}" bindtap="tapMapQuadrant" role="button" aria-label="放大客户资产"></view>
+      <view class="map-zone zone-order" data-quadrant="{{quadrantOptions[3].value}}" bindtap="tapMapQuadrant" role="button" aria-label="放大见单打单"></view>
+      <view class="map-zone zone-resource" data-quadrant="{{quadrantOptions[4].value}}" bindtap="tapMapQuadrant" role="button" aria-label="放大客户资源"></view>
+      <view class="map-divider map-divider-x"></view><view class="map-divider map-divider-y"></view>
+      <view class="map-quadrant-name name-attack"><text>主攻区</text><label>潜力大 · 关系不熟</label></view>
+      <view class="map-quadrant-name name-asset"><text>客户资产</text><label>潜力大 · 关系深</label></view>
+      <view class="map-quadrant-name name-order"><text>见单打单</text><label>潜力小 · 关系不熟</label></view>
+      <view class="map-quadrant-name name-resource"><text>客户资源</text><label>潜力小 · 关系深</label></view>
+      </block>
+      <view wx:else class="map-zone zone-expanded" data-quadrant="all" bindtap="tapMapQuadrant" role="button" aria-label="返回全部象限"></view>
+      <view wx:if="{{!plotCustomers.length}}" class="map-empty">{{mapLoading ? '正在加载活跃客户…' : mapError ? '地图暂不可用' : pendingCustomers.length ? '活跃客户待评估，见下方清单' : '当前筛选范围暂无已评估活跃客户'}}</view>
+      <view wx:for="{{plotCustomers}}" wx:key="id" class="plot-hit-area" style="{{item.plotStyle}}" data-id="{{item.id}}" aria-label="{{item.plotLabel}}" catchtap="openBattleCustomer"><view class="plot-point"></view></view>
+      <view class="map-axis map-axis-y">客户潜力</view><view class="map-axis map-axis-x">关系深度</view>
+    </view>
+    <view class="quadrant-note">{{quadrantIndex ? '点击空白处或选择“全部象限”返回全图。' : '点击象限空白处放大。'}}点击点位查看客户；相邻点位可从弹出的名单中选择</view>
+  </view>
+  <view class="asset-list-heading"><text>已定位客户列表</text><text class="asset-list-count">{{mapLoading ? '加载中' : mapError ? '暂不可用' : customers.length + ' 家'}}{{!mapLoading && !mapError && (keyword || mapFilterActive) ? ' · 筛选结果' : ''}}</text></view>
+  <view class="customer-list">
+    <view wx:for="{{customers}}" wx:key="id" class="customer-card surface" data-id="{{item.id}}" bindtap="openCustomer">
+      <view class="customer-top"><view class="logo">{{item.initial}}</view><view class="customer-main"><view class="name-row"><text class="name">{{item.name}}</text><text wx:if="{{item.level}}" class="level">{{item.level}}</text></view><view class="meta">{{item.team}} · 负责人 {{item.owner}}</view></view><view class="arrow">›</view></view>
+      <view class="customer-tags"><text>{{item.quadrant}}</text><text>潜力 {{item.potential}}</text><text>关系 {{item.relationship}}</text><text class="risk traffic-badge traffic-{{item.signal.tone}}">{{item.signal.label}} · {{item.risk}}</text></view>
+      <view wx:if="{{isFde && item.fde_members.length}}" class="fde-tags"><text wx:for="{{item.fde_members}}" wx:key="id">{{item.name}}</text></view><view class="last">最近沟通：{{item.lastVisit}}</view>
+    </view>
+    <view wx:if="{{!mapLoading && !mapError && !customers.length}}" class="empty surface"><view>没有匹配的客户</view><text>试试调整搜索词或筛选条件</text></view>
+  </view>
+
+  <block wx:if="{{pendingCustomers.length}}">
+    <view class="asset-list-heading"><text>活跃客户 · 待评估</text><text class="asset-list-count">{{pendingCustomers.length}} 家</text></view>
+    <view class="map-pending-note">潜力或关系评分尚未完整，不计入四象限；可继续查看客户和跟进。</view>
+    <view class="customer-list">
+      <view wx:for="{{pendingCustomers}}" wx:key="id" class="customer-card surface" data-id="{{item.id}}" bindtap="openCustomer">
+        <view class="customer-top"><view class="logo">{{item.initial}}</view><view class="customer-main"><view class="name-row"><text class="name">{{item.name}}</text></view><view class="meta">{{item.team}} · 负责人 {{item.owner}}</view></view><view class="arrow">›</view></view>
+        <view class="customer-tags"><text>潜力 {{item.potentialText}}</text><text>关系 {{item.relationshipText}}</text></view>
+        <view class="last">最近沟通：{{item.lastVisit}}</view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{plotCandidates.length}}" class="customer-sheet-layer" catchtouchmove="stopPropagation">
+    <view class="customer-sheet-mask" bindtap="closePlotCandidates"></view>
+    <view class="plot-candidates-sheet">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header"><view><view class="sheet-customer-name">选择客户</view><view class="sheet-customer-meta">此处有 {{plotCandidates.length}} 个相邻点位，请选择要查看的客户</view></view><view class="sheet-close" bindtap="closePlotCandidates">×</view></view>
+      <scroll-view class="plot-candidates-scroll" scroll-y enhanced>
+        <view wx:for="{{plotCandidates}}" wx:key="id" class="plot-candidate" data-id="{{item.id}}" bindtap="choosePlotCustomer">
+          <view class="plot-candidate-name">{{item.name}}<text>›</text></view>
+          <view class="plot-candidate-meta">{{item.team}} · {{item.owner}}</view>
+          <view class="plot-candidate-scores">{{item.quadrant}} · 潜力 {{item.potential}} · 关系 {{item.relationship}}</view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedBattleCustomer}}" class="customer-sheet-layer">
+    <view class="customer-sheet-mask" bindtap="closeBattleCustomer"></view>
+    <view class="customer-sheet sheet-{{selectedBattleCustomer.quadrantTone}}" catchtap="stopPropagation">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <view><view class="sheet-eyebrow">CUSTOMER BATTLE CARD</view><view class="sheet-customer-name">{{selectedBattleCustomer.name}}</view><view class="sheet-customer-meta">{{selectedBattleCustomer.industry}} · {{selectedBattleCustomer.team}}</view></view>
+        <view class="sheet-close" bindtap="closeBattleCustomer">×</view>
+      </view>
+      <view class="sheet-status"><view>{{selectedBattleCustomer.quadrant}}</view><text class="traffic-badge traffic-{{selectedBattleCustomer.signal.tone}}">{{selectedBattleCustomer.signal.label}} · {{selectedBattleCustomer.risk}}</text></view>
+      <view class="customer-profile-chart">
+        <view class="profile-title"><text>客户六维画像</text><label>{{selectedBattleCustomer.profileHint}}</label></view>
+        <view class="radar-wrap">
+          <view class="radar-grid radar-grid-outer"></view><view class="radar-grid radar-grid-mid"></view><view class="radar-grid radar-grid-inner"></view>
+          <view class="radar-axis axis-1"></view><view class="radar-axis axis-2"></view><view class="radar-axis axis-3"></view>
+          <view class="radar-series">
+            <view wx:if="{{selectedBattleCustomer.profileComplete}}" class="radar-value" style="{{selectedBattleCustomer.customerRadar.fillStyle}}"></view>
+            <view wx:for="{{selectedBattleCustomer.customerRadar.segments}}" wx:key="index" class="radar-segment" style="{{item.style}}"></view>
+            <view wx:for="{{selectedBattleCustomer.customerRadar.points}}" wx:key="index" class="radar-point" style="{{item.style}}"></view>
+          </view>
+          <view wx:if="{{!selectedBattleCustomer.customerRadar.points.length}}" class="radar-empty">{{selectedBattleCustomer.summaryPending ? '画像待加载' : '暂无画像数据'}}</view>
+          <view wx:for="{{selectedBattleCustomer.customerProfile}}" wx:key="label" class="radar-label label-{{index + 1}} {{item.hasValue ? '' : 'radar-label-missing'}}">{{item.label}}<text>{{item.value}}</text></view>
+        </view>
+        <view wx:if="{{!selectedBattleCustomer.profileComplete && selectedBattleCustomer.customerRadar.points.length}}" class="radar-note">蓝色为已有数据，缺项处断开</view>
+      </view>
+      <view class="sheet-scores"><view><text>{{selectedBattleCustomer.relationshipLevel}}</text><label>关系等级 / 10</label></view><view><text>{{selectedBattleCustomer.potentialText}}</text><label>客户潜力 / 100</label></view><view><text>{{selectedBattleCustomer.opportunity.probability}}%</text><label>赢单概率</label></view></view>
+      <scroll-view class="sheet-scroll" scroll-y enhanced>
+        <view class="sheet-fields">
+          <view wx:for="{{selectedBattleCustomer.mapDetailRows}}" wx:key="label" class="sheet-field {{item.emphasis ? 'emphasis' : ''}}"><view class="sheet-field-label"><text wx:if="{{item.emphasis}}"></text>{{item.label}}</view><view class="sheet-field-content"><view>{{item.value}}</view><text wx:if="{{item.note}}">{{item.note}}</text></view></view>
+        </view>
+        <view class="sheet-next"><view wx:if="{{!isFde}}" class="sheet-ai">AI</view><view><text>{{isFde ? '已记录的下一步行动' : '建议下一步'}}</text><label>{{selectedBattleCustomer.nextAction}}</label></view></view>
+      </scroll-view>
+      <view class="sheet-actions"><button bindtap="viewFullCustomer">查看完整客户</button></view>
+    </view>
+  </view>
+
+  <view wx:if="{{selectedCustomer}}" class="detail-overlay">
+    <view class="detail-nav"><view class="detail-back" bindtap="closeCustomer">‹</view><view>客户经营详情</view><view class="detail-nav-space"></view></view>
+    <scroll-view class="detail-scroll" scroll-y enhanced scroll-with-animation scroll-into-view="{{detailScrollTarget}}">
+      <view class="detail-body">
+        <view class="detail-hero">
+          <view class="detail-sync"><text></text>数据已同步</view>
+          <view class="detail-identity"><view class="detail-logo">{{selectedCustomer.initial}}</view><view><view class="detail-name">{{selectedCustomer.name}}</view><text>{{selectedCustomer.industry}} · {{selectedCustomer.customerType}}</text></view></view>
+          <view class="detail-tags"><text>{{selectedCustomer.quadrant}}</text><text class="detail-risk traffic-badge traffic-{{selectedCustomer.signal.tone}}">{{selectedCustomer.signal.label}} · {{selectedCustomer.risk}}</text><text wx:if="{{selectedCustomer.level}}" class="detail-level">{{selectedCustomer.level}}</text></view>
+          <view class="detail-owner"><text>{{selectedCustomer.team}} · 负责人 {{selectedCustomer.owner}}</text><text>{{selectedCustomer.updatedAt}}</text></view>
+          <view wx:if="{{canEditCustomer}}" class="manual-edit-entry" bindtap="editCustomer"><view><text>维护人工录入信息</text><label>客户事实可修改，Agent 计算结果只读</label></view><view>编辑 ›</view></view>
+        </view>
+
+        <view class="detail-score surface">
+          <view class="detail-section-head"><view><text>象限判断依据</text><label>{{selectedCustomer.quadrantDefinition}}</label></view><view>{{selectedCustomer.quadrant}}</view></view>
+          <view class="detail-score-row"><view><text>客户潜力</text><label>{{selectedCustomer.potentialText}}</label></view><view wx:if="{{selectedCustomer.potential !== null}}" class="detail-track"><text style="width: {{selectedCustomer.potential}}%"></text></view></view>
+          <view class="detail-evidence"><text wx:for="{{selectedCustomer.potentialEvidence}}" wx:key="*this">{{item}}</text></view>
+          <view class="detail-score-row relation"><view><text>关系深度</text><label>{{selectedCustomer.relationshipText}}</label></view><view wx:if="{{selectedCustomer.relationship !== null}}" class="detail-track"><text style="width: {{selectedCustomer.relationship}}%"></text></view></view>
+          <view class="detail-evidence"><text wx:for="{{selectedCustomer.relationshipEvidence}}" wx:key="*this">{{item}}</text></view>
+          <view class="detail-rule">象限由客户事实自动计算，事实变化后系统重新评估。</view>
+        </view>
+
+        <view class="detail-tabs"><view wx:for="{{detailTabs}}" wx:key="key" class="{{detailTab === item.key ? 'active' : ''}}" data-tab="{{item.key}}" bindtap="selectDetailTab">{{item.label}}</view></view>
+
+  <view wx:if="{{!detailSummary.loaded}}" class="detail-summary-state"><text class="detail-summary-copy">{{detailSummary.loading ? '经营汇总加载中，其他资料可继续查看' : detailSummary.error ? '经营汇总暂不可用，已加载资料不受影响' : '经营汇总按需加载'}}</text><button class="detail-summary-button" wx:if="{{!detailSummary.loading}}" bindtap="retryCustomerSummary">{{detailSummary.error ? '重试汇总' : '查看汇总'}}</button></view>
+        <view wx:if="{{detailTab === 'tasks'}}" class="customer-tasks-panel"><view class="customer-task-scope-note">当前客户名下全部商机的待办汇总</view>
+          <view class="customer-task-summary surface">
+            <view><text>{{selectedCustomer.taskCount}}</text><label>全部事项</label></view>
+            <view><text class="done-number">{{selectedCustomer.completedTaskCount}}</text><label>已完成</label></view>
+            <view><text class="pending-number">{{selectedCustomer.pendingTaskCount}}</text><label>未完成</label></view>
+          </view>
+          <template wx:if="{{canCustomerAdvice}}" is="customer-advice-panel" data="{{detailFocusError: detailFocusError, detailAdvice: detailAdvice, detailTab: detailTab}}"/>
+          <view wx:if="{{selectedCustomer.tasks.length}}" class="customer-task-timeline surface">
+            <view wx:for="{{selectedCustomer.tasks}}" wx:key="id" class="customer-task-item task-{{item.statusTone}} traffic-{{item.signal.tone}}">
+              <view class="customer-task-rail"><view><text>{{item.statusSymbol}}</text></view></view>
+              <view class="customer-task-card" data-id="{{item.id}}" bindtap="openCustomerTask">
+                <view class="customer-task-meta"><text>{{item.timelineAt}}</text><label class="traffic-badge traffic-{{item.signal.tone}}">{{item.signal.label}} · {{item.statusLabel}}</label></view>
+                <view class="customer-task-title">{{item.title}}</view>
+                <view wx:if="{{item.description && item.description !== item.title}}" class="customer-task-description">{{item.description}}</view>
+                <view class="customer-task-owner"><text>负责人 {{item.assigneeName}}</text><label>查看任务详情 ›</label></view>
+                <view wx:if="{{item.opportunityId}}" class="customer-task-opportunity" data-id="{{item.opportunityId}}" catchtap="openTaskOpportunity"><text>关联商机</text><label>{{item.opportunityName || '查看对应商机'}} ›</label></view>
+              </view>
+            </view>
+          </view>
+          <view wx:elif="{{detailPages.tasks.loaded && !detailPages.tasks.loading && !detailPages.tasks.error}}" class="customer-task-empty surface"><view>✓</view><text>当前客户暂无待办事项</text><label>从经营建议创建任务后，会按时间轴显示在这里</label><button wx:if="{{canCreateTask}}" bindtap="createTask">创建任务</button></view>
+        </view>
+
+        <view wx:if="{{detailTab === 'tasks'}}"><detail-pagination state="{{detailPages.tasks}}" data-section="tasks" bind:more="moreDetailSection" bind:retry="retryDetailSection" /></view>
+        <template wx:if="{{canCustomerAdvice && detailTab !== 'tasks'}}" is="customer-advice-panel" data="{{detailFocusError: detailFocusError, detailAdvice: detailAdvice, detailTab: detailTab}}"/>
+
+        <view wx:if="{{detailTab === 'overview'}}">
+          <view class="detail-metrics surface"><view><text>{{selectedCustomer.annualValue}}</text><label>客户年价值</label></view><view><text>{{selectedCustomer.opportunity.amount}}</text><label>在推金额</label></view><view><text>{{selectedCustomer.cooperationYears}}</text><label>合作时间</label></view></view>
+          <view class="detail-ai"><view class="detail-ai-head"><text>已记录的下一步行动</text></view><view class="detail-ai-copy">{{selectedCustomer.nextAction}}</view><view class="detail-ai-action" wx:if="{{canCreateTask}}" bindtap="createTask"><text>创建下一步任务</text><view>→</view></view></view>
+          <view class="detail-title"><text>当前商机</text><label>{{selectedCustomer.opportunityCount}} 个商机</label></view>
+          <view wx:for="{{selectedCustomer.opportunities}}" wx:key="id" wx:for-item="opportunity" class="detail-opportunity surface opportunity-list-card"><view class="detail-opportunity-top"><view><text>{{opportunity.name}}</text><label>{{opportunity.stage}}</label></view><text>{{opportunity.amount}}</text></view><view class="detail-track"><text style="width: {{opportunity.probability}}%"></text></view><view class="detail-opportunity-meta"><text>{{opportunity.stageText}}</text><text>预计签约 {{opportunity.expectedDate}}</text></view><view class="customer-signal-row"><text class="customer-signal signal-{{opportunity.signal.tone}}">● {{opportunity.signal.label}} · {{opportunity.signal.detail}}</text><label>{{opportunity.signal.reason}}</label></view><view class="opportunity-actual-link" hover-class="opportunity-actual-link-active" data-id="{{opportunity.id}}" bindtap="viewOpportunityActuals">实绩明细</view>
+          </view>
+          <detail-pagination state="{{detailPages.opportunities}}" data-section="opportunities" bind:more="moreDetailSection" bind:retry="retryDetailSection" /><view class="detail-title"><text>关键联系人</text><label>{{selectedCustomer.contactCount}} 人</label></view>
+          <view class="detail-contacts surface"><view wx:for="{{selectedCustomer.contacts}}" wx:key="id" class="detail-contact"><view class="detail-contact-logo">{{item.initial}}</view><view><text>{{item.name}} · {{item.title}}</text><label>{{item.role}}</label></view><view>{{item.strength}}</view></view></view><detail-pagination state="{{detailPages.contacts}}" data-section="contacts" bind:more="moreDetailSection" bind:retry="retryDetailSection" />
+        </view>
+
+        <view wx:if="{{detailTab === 'opportunity'}}" class="customer-signal-legend">状态规则：绿色健康 · 黄色提醒 · 红色告警 · 灰色待评估</view>
+        <view wx:if="{{detailTab === 'visits'}}" class="customer-signal-legend">质检评价沟通记录质量，不代表销售目标达成</view>
+        <view wx:if="{{detailTab === 'visits'}}" class="detail-visit-order">最新录入在前</view>
+        <view wx:if="{{detailTab === 'visits'}}" class="detail-visits surface">
+          <view wx:for="{{selectedCustomer.visits}}" wx:key="id" class="detail-visit" data-id="{{item.id}}" bindtap="openVisitDetail">
+            <view class="detail-dot"><text></text></view>
+            <view class="detail-visit-main">
+              <view class="detail-visit-head"><label>录入 {{item.recordedAt}}</label><view class="detail-visit-arrow">›</view></view>
+              <text>{{item.title}}</text>
+              <view class="detail-visit-date">拜访 {{item.date}} · {{item.mode}}</view>
+              <view class="detail-visit-excerpt">{{item.followUpRecord}}</view>
+              <view class="customer-signal-row"><text class="customer-signal signal-{{item.signal.tone}}">● {{item.signal.badgeText}}</text><label>{{item.signal.reason}}</label></view>
+              <view class="detail-visit-summary">跟进人 {{item.owner}}<label>查看完整记录</label></view>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{detailTab === 'visits'}}"><detail-pagination state="{{detailPages.visits}}" data-section="visits" bind:more="moreDetailSection" bind:retry="retryDetailSection" /></view>
+        <view wx:if="{{detailTab === 'opportunity'}}">
+          <view wx:if="{{canCreateOpportunity}}" class="opportunity-edit-entry" bindtap="createOpportunity"><text>＋ 新增商机</text><label>创建 ›</label></view>
+          <view wx:for="{{selectedCustomer.opportunities}}" wx:key="id" wx:for-item="opportunity" id="{{opportunity.anchorId}}" class="detail-stage-card surface opportunity-list-card {{opportunity.isFocused ? 'opportunity-focused' : ''}}"><view class="opportunity-card-heading"><view class="detail-eyebrow">{{opportunity.status === 'won' ? '已赢单' : opportunity.status === 'lost' ? '已丢单' : '推进中'}}</view><view wx:if="{{canEditOpportunity}}" class="opportunity-card-edit" hover-class="opportunity-card-edit-active" role="button" aria-label="编辑商机" data-id="{{opportunity.id}}" catchtap="editOpportunity">编辑</view></view><view class="detail-stage-name">{{opportunity.name}}</view><view class="detail-pipeline"><view wx:for="{{opportunity.stageSteps}}" wx:key="label" class="{{item.status}}"><text></text><label>{{item.label}}</label></view></view><view class="detail-rows"><view><text>所属伙伴</text><label>{{opportunity.partner_name || '未填写'}}</label></view><view><text>产品线</text><label>{{opportunity.product_line || '未填写'}}</label></view><view wx:if="{{opportunity.originalOwnerName}}"><text>原商机负责人</text><label>{{opportunity.originalOwnerName}}</label></view><view wx:if="{{opportunity.ownershipResolutionText}}"><text>当前归属状态</text><label>{{opportunity.ownershipResolutionText}}</label></view><view wx:for="{{opportunity.quarterDetails}}" wx:key="label" wx:for-item="q"><text>{{q.label}} 预测</text><label>含税确收 {{q.recognized}} · 回款 {{q.collection}}<text wx:if="{{q.collectionConfidenceText}}"> · 回款信心度 {{q.collectionConfidenceText}}</text></label></view></view><view class="detail-rows"><view><text>ACV（商机金额）</text><label>{{opportunity.amount}}</label></view><view><text>商机阶段</text><label>{{opportunity.stageText}}</label></view><view><text>预计签约</text><label>{{opportunity.expectedDate}}</label></view></view><view class="customer-signal-row"><text class="customer-signal signal-{{opportunity.signal.tone}}">● {{opportunity.signal.label}} · {{opportunity.signal.detail}}</text><label>{{opportunity.signal.reason}}</label></view><view class="opportunity-actual-link" hover-class="opportunity-actual-link-active" data-id="{{opportunity.id}}" bindtap="viewOpportunityActuals">实绩明细</view>
+          </view>
+          <detail-pagination state="{{detailPages.opportunities}}" data-section="opportunities" bind:more="moreDetailSection" bind:retry="retryDetailSection" /><view class="detail-risk-card traffic-surface-{{selectedCustomer.signal.tone}}"><view>{{selectedCustomer.signal.tone === 'green' ? '✓' : '!'}}</view><view><text>当前风险</text><label>{{selectedCustomer.riskDetail}}</label></view></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>
+
+</block>

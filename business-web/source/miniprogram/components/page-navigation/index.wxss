@@ -1,0 +1,1 @@
+.page-navigation{display:flex;justify-content:space-between;gap:24rpx;padding:16rpx 28rpx;background:#f4f8fd}.page-navigation button{font-size:24rpx;color:#5b7f9f;background:transparent;margin:0;padding:4rpx 10rpx;line-height:1.7}.page-navigation button:after{border:0}

@@ -1,0 +1,41 @@
+{
+  "artifact_kind": "web_frontend_demo_delivery",
+  "product_name": "神舟数码 Web UI",
+  "archive_title": "神舟数码WebUI",
+  "mini_program_version": "1.0.9",
+  "web_presentation_baseline": "0.6.12",
+  "frontend_revision": "de08496ec861716a4d9ce026534abfee5d0ec099",
+  "revision_meaning": "完整小程序来源修订；Web本轮提交以本地Git为准",
+  "packaged_at": "2026-09-25T00:19:40.559604+08:00",
+  "release_label": "1.0.9共享业务同步与Web交互适配，保留神舟定制及14天周报Demo",
+  "pages": 27,
+  "components": 14,
+  "shared_source_files": 259,
+  "frontend_only": true,
+  "backend_modified": false,
+  "middleware_modified": false,
+  "agent_modified": false,
+  "backend_transport_verified": false,
+  "live_contract_semantic_match": false,
+  "business_authentication_verified": false,
+  "live_business_workflows_verified": false,
+  "agent_integration_verified": false,
+  "operations_claim_approval_verified": false,
+  "cross_client_readback_verified": false,
+  "local_crm_data_included": false,
+  "credentials_included": false,
+  "revision_verification": {
+    "scope": "合成数据与隔离浏览器中的当前Web前端；真实后端与Agent未联调",
+    "build": "PASS",
+    "unit_tests_passed": 134,
+    "browser_tests_passed": 23,
+    "shared_source_files_reverified": 259,
+    "evidence": "验收/1.0.9同步-20260925/验收记录.md"
+  },
+  "origin_web_delivery": {
+    "web_version": "0.6.12",
+    "mini_program_version": "1.0.6",
+    "frontend_revision": "6b8aa7a8a5e5bed99341551986f3525df54197dc",
+    "note": "历史来源信息，不继承旧版本正式联调或测试通过标记"
+  }
+}

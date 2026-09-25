@@ -1,6 +1,7 @@
 """Durable, self-scoped business Web weekly report jobs and versioned drafts."""
 import hashlib
 from dataclasses import asdict
+from datetime import datetime, timedelta
 from uuid import uuid4
 
 import asyncpg
@@ -9,7 +10,7 @@ from fastapi import HTTPException
 from sales_backend.integrations.supreme_fde import FdeClient, FdeConfig, FdeError
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.services.authorization import require_permission
-from sales_backend.services.weekly_source import assert_snapshot_access, build_snapshot, decode_snapshot
+from sales_backend.services.weekly_source import assert_snapshot_access, build_snapshot, decode_snapshot, report_dates
 from sales_backend.weekly_contract.decode_response import decode_response
 from sales_backend.weekly_contract.validate_response import validate
 
@@ -30,19 +31,20 @@ class WeeklyReportService:
         return {'app_id': s.weekly_agent_app_id, 'expected_snapshot_id': s.weekly_agent_snapshot_id,
                 'contract_version': 'weekly.v2'}
 
-    async def generate(self, actor, request_id):
+    async def generate(self, actor, request_id, report_week=None):
         # An idempotent replay still works if the Agent was subsequently disabled.
         async with self.database.transaction(actor, readonly=True) as c:
             await require_permission(c, 'weekly_report.generate')
             old = await c.fetchrow('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
                     LEFT JOIN ops.job j ON j.id=r.job_id WHERE r.request_id=$1::uuid''', request_id)
             if old:
-                return self.view(old)
+                return self.replay(old, report_week)
         binding = self.binding(actor)
         generation, job_id = str(uuid4()), str(uuid4())
         try:
             async with self.database.transaction(actor, isolation='repeatable_read') as c:
-                source, raw, digest = await build_snapshot(c, actor, generation)
+                source, raw, digest = await build_snapshot(c, actor, generation, report_week)
+                week, cutoff = report_dates(datetime.fromisoformat(source['current_time']), report_week)
                 if len(raw.encode()) > self.settings.weekly_max_input_bytes:
                     raise HTTPException(422, 'WEEKLY_CONTEXT_TOO_LARGE')
                 empty = not source['records']
@@ -55,21 +57,60 @@ class WeeklyReportService:
                         payload,max_attempts) VALUES($1::uuid,$2::uuid,'weekly_report.generate','weekly_report',$3::uuid,$4,1)''',
                         job_id, actor.workspace_id, generation, actor.model_dump(mode='json'))
                 row = await c.fetchrow('''INSERT INTO insight.weekly_report(id,workspace_id,author_id,request_id,
-                    job_id,status,result_status,input_snapshot,input_sha256,binding,original_result,finished_at)
+                    job_id,status,result_status,input_snapshot,input_sha256,binding,original_result,finished_at,report_week,source_cutoff_at)
                     VALUES($1::uuid,$2::uuid,$3::uuid,$4::uuid,$5::uuid,$6,$7,$8,$9,$10,$11,
-                    CASE WHEN $6='succeeded' THEN clock_timestamp() END) RETURNING *''', generation,
+                    CASE WHEN $6='succeeded' THEN clock_timestamp() END,$12,$13) RETURNING *''', generation,
                     actor.workspace_id, actor.user_id, request_id, None if empty else job_id,
-                    'succeeded' if empty else 'queued', 'insufficient_data' if empty else None, raw, digest, binding, result)
+                    'succeeded' if empty else 'queued', 'insufficient_data' if empty else None, raw, digest, binding, result, week, cutoff)
                 return self.view(row)
-        except ValueError:
-            raise HTTPException(422, 'WEEKLY_INVALID_SOURCE') from None
+        except ValueError as exc:
+            code = str(exc)
+            raise HTTPException(422, code if code in {
+                'WEEKLY_INVALID_REPORT_WEEK', 'WEEKLY_SOURCE_SUBJECT_UNSUPPORTED',
+                'WEEKLY_SOURCE_ASSOCIATION_UNSUPPORTED'} else 'WEEKLY_INVALID_SOURCE') from None
         except asyncpg.UniqueViolationError:
             async with self.database.transaction(actor, readonly=True) as c:
                 old = await c.fetchrow('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
                     LEFT JOIN ops.job j ON j.id=r.job_id WHERE r.request_id=$1::uuid''', request_id)
                 if old:
-                    return self.view(old)
+                    return self.replay(old, report_week)
             raise HTTPException(409, 'WEEKLY_GENERATION_IN_PROGRESS') from None
+
+    @classmethod
+    def replay(cls, row, report_week):
+        if report_week is not None and row['report_week'] != report_week:
+            raise HTTPException(409, 'WEEKLY_REQUEST_ID_CONFLICT')
+        return cls.view(row)
+
+    @staticmethod
+    def source_page(source, week, cutoff, limit, offset):
+        records = source['records']
+        return dict(report_week=week, report_week_end=week + timedelta(days=6), period=source['period'],
+            source_cutoff_at=cutoff, snapshot_at=source['context']['as_of'], statistics=source['statistics'],
+            items=[{k: v for k, v in row.items() if k != 'source_ref'} for row in records[offset:offset+limit]],
+            total=len(records), has_more=offset+limit < len(records),
+            next_offset=offset+limit if offset+limit < len(records) else None)
+
+    async def sources(self, actor, report_week, limit, offset):
+        try:
+            async with self.database.transaction(actor, readonly=True, isolation='repeatable_read') as c:
+                source, _, _ = await build_snapshot(c, actor, str(uuid4()), report_week)
+                week, cutoff = report_dates(datetime.fromisoformat(source['current_time']), report_week)
+                return self.source_page(source, week, cutoff, limit, offset)
+        except ValueError as exc:
+            code = str(exc)
+            raise HTTPException(422, code if code in {'WEEKLY_INVALID_REPORT_WEEK',
+                'WEEKLY_SOURCE_SUBJECT_UNSUPPORTED', 'WEEKLY_SOURCE_ASSOCIATION_UNSUPPORTED'} else 'WEEKLY_INVALID_SOURCE') from None
+
+    async def report_sources(self, actor, ident, limit, offset):
+        async with self.database.transaction(actor, readonly=True) as c:
+            await require_permission(c, 'weekly_report.read')
+            row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid', ident)
+            if not row:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
+            source = decode_snapshot(row['input_snapshot'])
+            await assert_snapshot_access(c, actor, source)
+            return self.source_page(source, row['report_week'], row['source_cutoff_at'], limit, offset)
 
     @staticmethod
     def view(row, *, content=False):
@@ -81,6 +122,8 @@ class WeeklyReportService:
             status, error = 'failed', 'WEEKLY_WORKER_INTERRUPTED'
         view = dict(id=str(row['id']), request_id=str(row['request_id']), status=status,
             result_status=row['result_status'], period=source['period'], statistics=source['statistics'],
+            report_week=row['report_week'], report_week_end=row['report_week']+timedelta(days=6),
+            source_cutoff_at=row['source_cutoff_at'], snapshot_at=source['context']['as_of'],
             input_sha256=row['input_sha256'], draft_version=row['draft_version'], error_code=error,
             created_at=row['created_at'], updated_at=row['updated_at'], finished_at=row['finished_at'],
             runtime_snapshot_verified=False, actual_snapshot_id=None)
@@ -92,12 +135,14 @@ class WeeklyReportService:
                 runtime_metadata=row['runtime_metadata'])
         return view
 
-    async def list(self, actor, limit, offset):
+    async def list(self, actor, limit, offset, report_week=None):
         async with self.database.transaction(actor, readonly=True) as c:
             await require_permission(c, 'weekly_report.read')
             rows = await c.fetch('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
-                LEFT JOIN ops.job j ON j.id=r.job_id ORDER BY r.created_at DESC,r.id DESC LIMIT $1 OFFSET $2''', limit+1, offset)
-            return dict(items=[self.view(r) for r in rows[:limit]], has_more=len(rows)>limit)
+                LEFT JOIN ops.job j ON j.id=r.job_id WHERE ($3::date IS NULL OR r.report_week=$3)
+                ORDER BY r.created_at DESC,r.id DESC LIMIT $1 OFFSET $2''', limit+1, offset, report_week)
+            return dict(items=[self.view(r) for r in rows[:limit]], has_more=len(rows)>limit,
+                current_week=report_dates(await c.fetchval('SELECT transaction_timestamp()'))[0])
 
     async def read(self, actor, ident):
         async with self.database.transaction(actor, readonly=True) as c:

@@ -1,0 +1,27 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view class="risk-page">
+  <view class="risk-hero">
+    <view class="hero-eyebrow">RISK CENTER · {{scope}}</view>
+    <view class="hero-title">{{opportunityOnly ? '商机风险' : '风险中心'}}</view>
+    <view class="hero-subtitle">{{opportunityOnly ? '风险项均绑定商机，可直接返回查看商机卡片' : '查看识别依据、处理建议与风险解除记录'}}</view>
+    <view class="hero-stats"><view><text>{{openCount}}</text><label>待解除</label></view><view><text>{{resolvedCount}}</text><label>已解除</label></view><view><text>{{risks.length}}</text><label>全部风险</label></view></view>
+  </view>
+
+  <view class="risk-tabs"><view wx:for="{{tabs}}" wx:key="key" class="risk-tab {{activeTab === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="selectTab">{{item.label}}<text wx:if="{{item.key === 'open'}}">{{openCount}}</text></view></view>
+
+  <view wx:if="{{filteredRisks.length}}" class="risk-list">
+    <view wx:for="{{filteredRisks}}" wx:key="id" class="risk-card status-{{item.status}} traffic-{{item.signal.tone}}" data-id="{{item.id}}" bindtap="openRisk">
+      <view class="risk-top"><view class="risk-state traffic-badge traffic-{{item.signal.tone}}"><text></text>{{item.signal.label}} · {{item.statusLabel}}</view><view class="risk-level traffic-badge traffic-{{item.signal.tone}}">{{item.severity}}风险</view></view>
+      <view class="risk-customer">{{item.customerName}}</view>
+      <view class="risk-title">{{item.title}}</view>
+      <view class="risk-description">{{item.description}}</view>
+      <view wx:if="{{item.opportunityId}}" class="risk-opportunity" data-customer-id="{{item.customerId}}" data-opportunity-id="{{item.opportunityId}}" catchtap="openOpportunity"><view><text>关联商机</text><label>{{item.opportunityName || '查看对应商机'}}</label></view><text>查看商机 ›</text></view>
+      <view class="risk-meta"><view><text>负责人</text><label>{{item.owner}}</label></view><view><text>{{item.status === 'resolved' ? '解除时间' : '识别时间'}}</text><label>{{item.status === 'resolved' ? item.resolvedLabel : item.openedLabel}}</label></view></view>
+      <view class="risk-action"><text>{{item.team || '客户经营风险'}}</text><view>查看详情与依据 <label>›</label></view></view>
+    </view>
+  </view>
+  <view wx:else class="empty-state"><view>✓</view><text>{{activeTab === 'open' ? '当前没有待解除风险' : '暂无对应风险记录'}}</text><label>新识别的风险会自动进入这里</label></view>
+</view>
+
+</block>

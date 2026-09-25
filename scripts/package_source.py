@@ -24,6 +24,7 @@ def git(*args: str) -> bytes:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
+    parser.add_argument('--include-business-web', action='store_true')
     args = parser.parse_args()
     output = args.output_dir.expanduser().resolve()
     if output == ROOT or ROOT in output.parents:
@@ -64,6 +65,16 @@ def main() -> None:
             if re.search(rb'^-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----\s*$', content, re.M):
                 parser.error('Private key found in ' + item.name)
             files[item.name] = (content, item.mode & 0o777)
+    if args.include_business_web:
+        dist = ROOT / 'business-web/dist'
+        build = json.loads((dist / 'build.json').read_text())
+        if build.get('revision') != revision or build.get('customer') != 'shenzhoukuntai':
+            parser.error('Rebuild the customer Web at the committed release revision')
+        for file in sorted(dist.rglob('*')):
+            if file.is_symlink():
+                parser.error('Web distribution cannot contain symlinks')
+            if file.is_file():
+                files[file.relative_to(ROOT).as_posix()] = (file.read_bytes(), 0o644)
     project = json.loads(files['frontend/project.config.json'][0])
     migrations = [int(match.group(1)) for path in files
                   if (match := re.fullmatch(r'database/(?:migrations/)?V(\d+)__[^/]+\.sql', path))]
@@ -76,6 +87,7 @@ def main() -> None:
         'source_commit_time': datetime.fromtimestamp(timestamp, timezone.utc).isoformat(),
         'database_head': f'V{max(migrations):03d}', 'contains_business_data': False,
         'contains_runtime_credentials': False,
+        'business_web_included': args.include_business_web,
         'customer_appid': 'pending' if project['appid'].startswith('REPLACE_') else project['appid'],
         'deployment_status': 'See docs/DEPLOYMENT.md; source packaging is not runtime acceptance.',
         'agent_platform_installer': 'https://github.com/Userwei0418/SalesBuddy-Shenma/releases/tag/agent-platform-20260923',

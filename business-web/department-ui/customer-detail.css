@@ -1,0 +1,58 @@
+/* 客户详情：左栏身份与象限依据固定，右栏页签内容自己滚动，页面不整页滚动 */
+.department-ui[data-department-page="pages/customer-detail/index"] { height: 100%; }
+.department-ui .ds-cdetail { display: grid; grid-template-columns: minmax(280px, 320px) minmax(0, 1fr); gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-cd-side { padding: var(--ui-space-4); overflow: auto; min-height: 0; }
+.department-ui .ds-cd-identity { display: flex; gap: var(--ui-space-3); align-items: flex-start; }
+.department-ui .ds-cd-mark { flex: none; width: 40px; height: 40px; border-radius: var(--ui-radius-control); background: var(--ui-selected); color: var(--ui-primary); display: grid; place-items: center; font-weight: 600; }
+.department-ui .ds-cd-id-main { min-width: 0; }
+.department-ui .ds-cd-id-main h1 { margin: 0; font-size: var(--ui-text-section); font-weight: 650; line-height: 1.4; word-break: break-all; }
+.department-ui .ds-cd-id-main p { margin: var(--ui-space-1) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-tags { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); margin-top: var(--ui-space-3); align-items: center; }
+.department-ui .ds-cd-chip { display: inline-flex; align-items: center; padding: 0 var(--ui-space-2); line-height: 20px; border-radius: 999px; background: var(--ui-neutral-soft); color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .ds-cd-owner { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-actions { display: flex; flex-wrap: wrap; gap: var(--ui-space-2); margin: var(--ui-space-4) 0; padding-bottom: var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-cd-quadrant h2 { margin: 0 0 var(--ui-space-2); font-size: var(--ui-text-body); font-weight: 600; }
+.department-ui .ds-cd-quadrant > p { margin: 0 0 var(--ui-space-3); color: var(--ui-secondary); }
+.department-ui .ds-cd-score { margin-bottom: var(--ui-space-3); }
+.department-ui .ds-cd-score-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--ui-space-1); }
+.department-ui .ds-cd-score-head b { font-variant-numeric: tabular-nums; color: var(--ui-primary); }
+.department-ui .ds-cd-score ul { margin: var(--ui-space-1) 0 0; padding-left: 1.2em; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-rule { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-main { display: flex; flex-direction: column; min-height: 0; padding: 0 var(--ui-space-4); }
+.department-ui .ds-cd-main .ant-tabs-nav { margin-bottom: 0; }
+.department-ui .ds-cd-summary { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-error { margin: var(--ui-space-2) 0 0; color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-cd-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-4) 0; }
+.department-ui .ds-cd-strip { padding: var(--ui-space-2) 0; border-bottom: 1px solid var(--ui-line); margin-bottom: var(--ui-space-4); }
+.department-ui .ds-cd-ai { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); margin-bottom: var(--ui-space-4); }
+.department-ui .ds-cd-ai-head { display: flex; align-items: center; gap: var(--ui-space-2); font-size: var(--ui-text-small); }
+.department-ui .ds-cd-ai-text { margin: var(--ui-space-2) 0; font-weight: 600; }
+.department-ui .ds-cd-h { display: flex; align-items: baseline; gap: var(--ui-space-2); margin: var(--ui-space-4) 0 var(--ui-space-2); font-size: var(--ui-text-body); font-weight: 600; }
+.department-ui .ds-cd-h small { color: var(--ui-muted); font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-two { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-cd-two b { font-weight: 600; }
+.department-ui .ds-cd-contacts { display: flex; flex-direction: column; }
+.department-ui .ds-cd-more { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2) 0; font-size: var(--ui-text-small); }
+.department-ui .ds-cd-visit { padding: var(--ui-space-2) 0; }
+.department-ui .ds-cd-dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-2) var(--ui-space-6); margin: 0 0 var(--ui-space-3); }
+.department-ui .ds-cd-dl > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.department-ui .ds-cd-dl dt { color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-cd-dl dd { margin: 0; overflow-wrap: anywhere; }
+.department-ui .ds-cd-dl .is-next { grid-column: 1 / -1; padding: var(--ui-space-2) var(--ui-space-3); border-left: 3px solid var(--ui-primary); background: var(--ui-selected); }
+.department-ui .ds-cd-dl-inline { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+.department-ui .ds-cd-toolbar { display: flex; justify-content: flex-end; margin-bottom: var(--ui-space-3); }
+.department-ui .ds-cd-opp { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); margin-bottom: var(--ui-space-3); }
+.department-ui .ds-cd-opp header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-3); }
+.department-ui .ds-cd-opp h4 { margin: 0; font-size: var(--ui-text-body); font-weight: 600; }
+.department-ui .ds-cd-eyebrow { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.department-ui .ds-cd-opp-right { display: flex; align-items: center; gap: var(--ui-space-2); } .department-ui .ds-cd-opp-right b { font-variant-numeric: tabular-nums; }
+.department-ui .ds-cd-steps { display: flex; gap: var(--ui-space-2); list-style: none; margin: var(--ui-space-3) 0; padding: 0; flex-wrap: wrap; }
+.department-ui .ds-cd-steps li { padding: 0 var(--ui-space-2); line-height: 22px; border-radius: 999px; font-size: var(--ui-text-small); background: var(--ui-neutral-soft); color: var(--ui-muted); }
+.department-ui .ds-cd-steps li.is-done { background: var(--ui-selected); color: var(--ui-primary); }
+.department-ui .ds-cd-steps li.is-current, .department-ui .ds-cd-steps li.is-active { background: var(--ui-primary); color: var(--ui-on-primary); }
+.department-ui .ds-cd-risk { display: flex; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-space-4); border-left: 3px solid var(--ui-warning); background: var(--ui-warning-soft); border-radius: var(--ui-radius-control); margin-top: var(--ui-space-3); }
+@media (max-width: 900px) {
+  .department-ui[data-department-page="pages/customer-detail/index"] { height: auto; }
+  .department-ui .ds-cdetail { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .department-ui .ds-cd-body { overflow: visible; }
+  .department-ui .ds-cd-dl, .department-ui .ds-cd-dl-inline { grid-template-columns: minmax(0, 1fr); }
+}

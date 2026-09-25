@@ -1,0 +1,89 @@
+<import src="../../templates/opportunity-list-card.wxml"/>
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-projects id="fdeContent" wx:if="{{isFde}}" initial-scope="{{fdeScope}}" member-id="{{fdeMemberId}}" customer-id="{{fdeCustomerId}}"/>
+<block wx:if="{{!isFde}}">
+<view class="page-shell workbench">
+  <view wx:if="{{loading && !dataReady}}" class="workbench-state surface">正在读取经营数据…</view>
+  <view wx:elif="{{loadError && !dataReady}}" class="workbench-state surface"><view>{{loadError}}</view><button bindtap="loadData">重新加载</button></view>
+  <block wx:if="{{dataReady}}">
+  <view class="page-head">
+    <view><view class="title">商机</view><view class="eyebrow">{{roleName}} · {{scope}}</view></view>
+  </view>
+
+  <view class="overview-board opportunity-overview opportunity-summary-card surface">
+    <view class="opportunity-summary-head"><view class="opportunity-summary-title">商机总览</view><view class="opportunity-summary-scope">{{role === 'sales' ? '本人' : (role === 'supervisor' ? '直属团队' : '销售部门')}}</view></view>
+    <view class="opportunity-summary-metrics">
+      <view class="opportunity-summary-metric opportunity-summary-won"><view class="opportunity-summary-label">已成单商机</view><view class="opportunity-summary-value">{{opportunityDataReady ? opportunityBoard.won : '—'}}<text>个</text></view></view>
+      <view class="opportunity-summary-metric"><view class="opportunity-summary-label">全部商机</view><view class="opportunity-summary-value">{{opportunityDataReady ? opportunityBoard.total : '—'}}<text>个</text></view></view>
+      <view class="opportunity-summary-metric"><view class="opportunity-summary-label">活跃商机</view><view class="opportunity-summary-value">{{opportunityDataReady ? opportunityBoard.active : '—'}}<text>个</text></view></view>
+      <view class="opportunity-summary-metric"><view class="opportunity-summary-label">新增商机</view><view class="opportunity-summary-value">{{opportunityDataReady ? opportunityBoard.newCount : '—'}}<text>个</text></view></view>
+    </view>
+    <view class="summary-data-note">全部商机为当前存量（含丢单）；成单、活跃、新增按所选时间统计。</view>
+    <view class="quarter-filter quarter-filter-summary">
+      <view class="quarter-filter-head"><view><text class="quarter-filter-title">统计时间</text><text class="quarter-selection-label">{{summaryQuarter.label}}</text></view><picker mode="selector" range="{{quarterYearOptions}}" range-key="label" value="{{summaryYearIndex}}" data-scope="summary" bindchange="changeQuarterYear"><view class="quarter-year">{{summaryQuarter.quarters.length ? summaryQuarter.year + '年' : '选择年份'}} <text>⌄</text></view></picker></view>
+      <view class="quarter-options">
+        <view class="quarter-option {{!summaryQuarter.quarters.length ? 'selected' : ''}}" data-scope="summary" data-value="all" bindtap="toggleQuarter">全部时间</view>
+        <view wx:for="{{summaryQuarter.options}}" wx:key="value" class="quarter-option {{item.selected ? 'selected' : ''}}" data-scope="summary" data-value="{{item.value}}" bindtap="toggleQuarter"><text>{{item.selected ? '✓ ' : ''}}{{item.label}}</text></view>
+      </view>
+      <view class="quarter-filter-foot"><text>季度可多选 · 全部商机不随季度变化</text><text class="metric-help" bindtap="showOpportunityMetricHelp">统计口径 ⓘ</text></view>
+    </view>
+    <view wx:if="{{opportunityOverviewLoading}}" class="summary-data-note">正在更新商机总览…</view>
+    <view wx:if="{{opportunityDataError}}" class="summary-data-note summary-data-error">{{opportunityDataError}}<text bindtap="applyOpportunitySummary">重试</text></view>
+    <view wx:if="{{opportunityDataReady && summaryQuarter.quarters.length && (opportunityBoard.missingWonDates || opportunityBoard.missingCreatedDates)}}" class="summary-data-note">
+      <view wx:if="{{opportunityBoard.missingWonDates}}">{{opportunityBoard.missingWonDates}} 个已成单商机缺少实际成单日期，未计入季度统计</view>
+      <view wx:if="{{opportunityBoard.missingCreatedDates}}">{{opportunityBoard.missingCreatedDates}} 个商机缺少原始建单日期，未计入新增的季度统计</view>
+    </view>
+  </view>
+
+  <view wx:if="{{opportunityListLoading}}" class="summary-data-note">正在读取商机列表…</view>
+  <view wx:if="{{opportunityListError}}" class="summary-data-note summary-data-error">{{opportunityListError}}<text bindtap="loadAllOpportunities">重试</text></view>
+  <view id="workbench-opportunity-list" class="workbench-opportunity-tools">
+    <view class="workbench-opportunity-filter surface">
+      <view class="workbench-filter-line">
+        <text class="workbench-filter-title">列表筛选</text>
+        <scroll-view class="workbench-filter-scroll" scroll-x enhanced show-scrollbar="false">
+          <view class="workbench-filter-row">
+            <picker wx:if="{{canViewTeam}}" class="workbench-filter-item filter-team" mode="selector" range="{{executionTeamOptions}}" range-key="label" value="{{executionTeamIndex}}" bindchange="changeExecutionTeam"><view class="workbench-filter-control"><label>团队</label><text>{{executionTeamLabel}}</text><text class="workbench-filter-chevron">⌄</text></view></picker>
+            <picker wx:if="{{canViewTeam}}" class="workbench-filter-item filter-owner" mode="selector" range="{{opportunityOwnerOptions}}" range-key="label" value="{{opportunityOwnerIndex}}" data-key="Owner" bindchange="changeOpportunityFilter"><view class="workbench-filter-control"><label>负责人</label><text>{{opportunityOwnerOptions[opportunityOwnerIndex].label}}</text><text class="workbench-filter-chevron">⌄</text></view></picker>
+            <view class="workbench-filter-item filter-stage {{opportunitySelectedStages.length ? 'active' : ''}}" bindtap="toggleOpportunityStageFilter"><view class="workbench-filter-control"><label>商机阶段</label><text>{{opportunityStageLabel}}</text><text class="workbench-filter-chevron">⌄</text></view></view>
+            <view class="workbench-filter-item filter-close {{listQuarter.quarters.length || opportunityCloseIndex ? 'active' : ''}}" bindtap="toggleOpportunityQuarterFilter"><view class="workbench-filter-control"><label>关单时间</label><text>{{opportunityCloseIndex ? opportunityCloseOptions[opportunityCloseIndex].label : listQuarter.label}}</text><text class="workbench-filter-chevron">{{showOpportunityQuarterFilter ? '⌃' : '⌄'}}</text></view></view>
+            <picker class="workbench-filter-item filter-grade" mode="selector" range="{{opportunityGradeOptions}}" range-key="label" value="{{opportunityGradeIndex}}" data-key="Grade" bindchange="changeOpportunityFilter"><view class="workbench-filter-control"><label>商机等级</label><text>{{opportunityGradeOptions[opportunityGradeIndex].label}}</text><text class="workbench-filter-chevron">⌄</text></view></picker>
+          </view>
+        </scroll-view>
+        <text wx:if="{{opportunityFilterActive}}" class="workbench-filter-reset" bindtap="resetOpportunityFilters">重置</text>
+      </view>
+      <view wx:if="{{showOpportunityQuarterFilter}}" class="quarter-filter quarter-filter-list">
+        <view class="quarter-filter-head"><view><text class="quarter-filter-title">关单时间</text><text class="quarter-selection-label">{{opportunityCloseIndex ? opportunityCloseOptions[opportunityCloseIndex].label : listQuarter.label}}</text></view><picker mode="selector" range="{{quarterYearOptions}}" range-key="label" value="{{listYearIndex}}" data-scope="list" bindchange="changeQuarterYear"><view class="quarter-year">{{listQuarter.year}}年 <text>⌄</text></view></picker></view>
+        <view class="close-period-shortcuts"><block wx:for="{{opportunityCloseOptions}}" wx:key="value"><view wx:if="{{index > 0}}" class="close-period-shortcut {{opportunityCloseIndex === index ? 'selected' : ''}}" data-index="{{index}}" bindtap="selectOpportunityClosePeriod">{{item.label}}</view></block></view>
+        <view class="quarter-options">
+          <view class="quarter-option {{!listQuarter.quarters.length && !opportunityCloseIndex ? 'selected' : ''}}" data-scope="list" data-value="all" bindtap="toggleQuarter">全部时间</view>
+          <view wx:for="{{listQuarter.options}}" wx:key="value" class="quarter-option {{item.selected ? 'selected' : ''}}" data-scope="list" data-value="{{item.value}}" bindtap="toggleQuarter"><text>{{item.selected ? '✓ ' : ''}}{{item.label}}</text></view>
+        </view>
+        <view class="quarter-filter-foot"><text>按预计关单时间 · {{opportunityTotal}} 个筛选结果</text><view class="quarter-filter-done" bindtap="toggleOpportunityQuarterFilter">完成</view></view>
+      </view>
+      <view wx:if="{{showOpportunityStageFilter}}" class="workbench-stage-panel">
+        <view class="workbench-stage-option {{!opportunitySelectedStages.length ? 'selected' : ''}}" data-value="all" bindtap="toggleOpportunityStage"><text>{{!opportunitySelectedStages.length ? '✓' : ''}}</text><label>全部阶段</label></view>
+        <block wx:for="{{opportunityStageOptions}}" wx:key="value"><view wx:if="{{item.value !== 'all'}}" class="workbench-stage-option {{item.selected ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="toggleOpportunityStage"><text>{{item.selected ? '✓' : ''}}</text><label>{{item.label}}</label></view></block>
+      </view>
+      <input class="opportunity-search" value="{{opportunityQuery}}" maxlength="100" placeholder="搜索客户、商机或产品线" placeholder-class="opportunity-search-placeholder" aria-label="搜索客户、商机或产品线" confirm-type="search" bindinput="searchOpportunities" bindconfirm="applyOpportunityFilters"/>
+    </view>
+  </view>
+
+  <view wx:if="{{filteredOpportunities.length}}" class="workbench-opportunity-list">
+    <view class="opportunity-order-note">按预计关单季度分组 · 季度内按阶段进度降序</view>
+    <view wx:for="{{opportunityGroups}}" wx:for-item="group" wx:key="key" class="opportunity-quarter-group">
+      <view class="opportunity-quarter-heading"><text>{{group.label}}</text><label>已显示 {{group.items.length}} 个商机</label></view>
+      <view wx:for="{{group.items}}" wx:key="id" class="workbench-opportunity-card surface" data-customer-id="{{item.customer_id}}" data-opportunity-id="{{item.id}}" bindtap="openOpportunity">
+      <template is="opportunity-list-card" data="{{item: item}}"/>
+      </view>
+    </view>
+  </view>
+  <view wx:elif="{{!opportunityListLoading && !opportunityListError}}" class="workbench-opportunity-empty surface">当前筛选条件下没有商机</view>
+  <view wx:if="{{opportunityLoadingMore}}" class="summary-data-note">正在加载更多…</view><view wx:elif="{{opportunityMoreError}}" class="summary-data-note summary-data-error" bindtap="loadMoreOpportunities">{{opportunityMoreError}} · 点击重试</view><view wx:elif="{{opportunityHasMore}}" class="summary-data-note" bindtap="loadMoreOpportunities">已显示 {{filteredOpportunities.length}} / {{opportunityTotal}} 个商机 · 加载更多</view>
+
+  </block>
+</view>
+
+</block>
+</block>

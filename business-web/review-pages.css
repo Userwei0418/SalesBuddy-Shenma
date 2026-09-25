@@ -1,0 +1,90 @@
+/* Focused presentation changes from the UI review; source facts and handlers stay shared. */
+#page-root [data-web-review-stage] [hidden]{display:none!important}
+#page-root .web-review-metric-note{margin-top:var(--ui-space-2);color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.65}
+#page-root .web-review-selection-help{margin-top:var(--ui-space-3);padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--ui-line);border-left:2px solid var(--ui-primary);border-radius:var(--ui-radius-control);background:var(--ui-selected);color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.65}
+#page-root .web-review-response-notice{margin:var(--ui-space-2) 0;padding:var(--ui-space-2) var(--ui-space-3);border-left:2px solid var(--ui-primary);background:var(--ui-selected);color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.65}
+body:not(.web-login)[data-route=index] #page-root .web-home-summary .web-home-section-heading>label{display:none}
+body:not(.web-login)[data-route=index] #page-root .web-home-workspace .greeting{font-size:var(--ui-text-section);line-height:1.5}
+body:not(.web-login)[data-route=index] #page-root .web-home-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--ui-space-1)}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric{display:flex;position:relative;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:var(--ui-space-1);min-width:0;min-height:0;padding:var(--ui-space-2)!important;border:1px solid var(--ui-line);background:var(--ui-surface);border-radius:var(--ui-radius-control);box-shadow:none;text-align:left}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric:is([data-key=today_pending],[data-key=today_completed]){background:var(--ui-surface)}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric-top{display:block;min-width:0;width:100%}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric .metric-label{font-size:var(--ui-text-small);line-height:1.65;white-space:nowrap;text-align:left}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric .metric-num{font-size:var(--ui-text-page)!important;line-height:1.5;margin:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+body:not(.web-login)[data-route=index] #page-root .web-home-enter{display:inline;position:absolute;right:var(--ui-space-2);bottom:var(--ui-space-4);color:var(--ui-primary);font-size:var(--ui-text-small);flex:none}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric-hint{display:none}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric:hover{background:var(--ui-hover);border-color:var(--ui-primary)}
+body:not(.web-login)[data-route=index] #page-root .web-home-metric:focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
+
+/* Customer names keep their line; indicators never squeeze a long title. */
+body:not(.web-login) #page-root .web-customer-detail-layout :is(.detail-identity,.identity-row){align-items:flex-start}
+body:not(.web-login) #page-root .web-customer-detail-layout :is(.identity-main,.detail-identity>view:last-child){min-width:0;flex:1}
+body:not(.web-login) #page-root .web-customer-detail-layout :is(.detail-name,.customer-name){font-size:var(--ui-text-section);line-height:1.65;word-break:normal;overflow-wrap:anywhere;white-space:normal}
+body:not(.web-login) #page-root .web-customer-list-scroll .name-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--ui-space-1) var(--ui-space-2)}
+body:not(.web-login) #page-root .web-customer-list-scroll .name-row>.name{flex:0 1 auto;min-width:0;word-break:normal;overflow-wrap:anywhere}
+body:not(.web-login)[data-route=customers] #page-root .web-customer-content .operating-picker{flex:0 1 auto;min-width:104px;max-width:100%;width:auto;height:auto;min-height:var(--ui-control-height);padding:0;border:0;border-radius:var(--ui-radius-control);overflow:visible;background:transparent}
+body:not(.web-login)[data-route=customers] #page-root .operating-picker-content{display:flex;flex-wrap:nowrap;align-items:center;gap:var(--ui-space-1);width:auto;min-height:var(--ui-control-height);height:auto;padding:var(--ui-space-1) var(--ui-space-2);box-sizing:border-box;overflow:visible}
+body:not(.web-login)[data-route=customers] #page-root .operating-picker-label::after{content:'：'}
+body:not(.web-login)[data-route=customers] #page-root .operating-picker-value{display:inline-block;flex:0 1 auto;min-width:0;max-width:180px;font-size:var(--ui-text-small);line-height:1.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* All eight KPI cards share a surface. Keep exact amounts, missing values and chart units. */
+body:not(.web-login)[data-route=bi] #page-root .web-insights-bi .web-kpi-groups{display:flex!important;flex-direction:column;gap:var(--ui-space-4);margin-block:var(--ui-space-4)}
+body:not(.web-login)[data-route=bi] #page-root .web-insights-bi :is(.web-kpi-primary,.web-kpi-secondary){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--ui-space-3);margin:0;padding:0;border:0;border-radius:0;background:transparent}
+body:not(.web-login)[data-route=bi] #page-root .web-review-kpi-heading{grid-column:1/-1;margin:0;font-size:var(--ui-text-section);font-weight:600;line-height:1.5;color:var(--ui-ink)}
+body:not(.web-login)[data-route=bi] #page-root .web-insights-bi :is(.web-kpi-primary,.web-kpi-secondary) .kpi-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:112px;margin:0;padding:var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);box-shadow:none;box-sizing:border-box}
+body:not(.web-login)[data-route=bi] #page-root .web-insights-bi .kpi-card>text{font-size:var(--ui-text-page);line-height:1.5;margin:var(--ui-space-1) 0;color:var(--ui-ink);font-variant-numeric:tabular-nums}
+body:not(.web-login)[data-route=bi] #page-root .web-insights-bi .kpi-card>:is(label,view){font-size:var(--ui-text-small);color:var(--ui-secondary);line-height:1.65}
+body:not(.web-login)[data-route=bi] #page-root .countdown-card{background:var(--ui-selected);border-color:var(--ui-line);border-left:2px solid var(--ui-primary);border-radius:var(--ui-radius-control);padding:var(--ui-space-3) var(--ui-space-4);gap:var(--ui-space-3);color:var(--ui-ink)}
+body:not(.web-login)[data-route=bi] #page-root .countdown-copy text{font-size:var(--ui-text-body);font-weight:600;color:var(--ui-ink)}
+body:not(.web-login)[data-route=bi] #page-root .countdown-copy label{font-size:var(--ui-text-small);color:var(--ui-secondary)}
+
+/* The three native steps remain unchanged and are readable before editing. */
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace>.entry-hero{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--ui-space-3)}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace .web-review-visit-steps{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:var(--ui-space-2);width:100%;padding:var(--ui-space-2) var(--ui-space-3);box-sizing:border-box;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-subtle);white-space:normal}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps>view{display:flex;align-items:center;gap:var(--ui-space-2);flex:1;min-width:0}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps>view>text{display:flex;align-items:center;justify-content:center;flex:none;width:var(--ui-space-6);height:var(--ui-space-6);margin:0;border-radius:50%;background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-small)}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps label{font-size:var(--ui-text-small);line-height:1.65;color:var(--ui-secondary)}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor{align-self:start}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .note-card{flex:0 0 auto;height:auto;min-height:0;overflow:visible}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .capture-card{flex:none;max-height:none;margin:var(--ui-space-2) 0;padding:var(--ui-space-2) 0;border:0;border-top:1px solid var(--ui-line);border-bottom:1px solid var(--ui-line);border-radius:0;background:transparent;box-shadow:none}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .note-input{flex:none;display:block;height:260px;min-height:160px;max-height:480px;resize:vertical;overflow:auto;padding:var(--ui-space-2);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);line-height:1.65;background:var(--ui-surface)}
+body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace .first-visit-field{margin-top:var(--ui-space-3)}
+@supports(field-sizing:content){
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .note-input{field-sizing:content;height:auto;min-height:260px}
+}
+@media(min-width:1180px){
+ body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--ui-space-2);padding-top:var(--ui-space-3);border-top:1px solid var(--ui-line)}
+ body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis>view{display:flex;flex-direction:column;gap:var(--ui-space-1);padding:0;border:0;min-width:0}
+ body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis>view>text{font-size:var(--ui-text-section);line-height:1.5;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+ body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis>view>label{font-size:var(--ui-text-small);line-height:1.65}
+}
+@media(max-width:999px){
+ body:not(.web-login)[data-route=bi] #page-root .web-insights-bi :is(.web-kpi-primary,.web-kpi-secondary){grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps{gap:var(--ui-space-1)}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps>view{flex:1 1 100%}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-review-visit-steps>text{display:none}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .note-input{height:240px;min-height:160px;max-height:400px}
+}
+@media(min-width:601px) and (max-height:720px){
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace .web-review-visit-steps{padding-block:var(--ui-space-1)}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor .note-input{height:160px;min-height:160px;max-height:320px}
+}
+
+body:not(.web-login)[data-route=customers] #page-root .operating-picker-label{display:inline-block;flex:none;margin:0;font-size:var(--ui-text-small);line-height:1.65;white-space:nowrap}
+body:not(.web-login)[data-route=customers] #page-root .operating-picker-caret{flex:none;margin-left:auto}
+body:not(.web-login)[data-route=customers] #page-root .filter-level{min-width:144px}
+body:not(.web-login) #page-root .web-customer-detail-layout .customer-hero{display:flex;flex-direction:column;gap:0}
+body:not(.web-login) #page-root .web-customer-detail-layout .customer-hero .identity-row{order:0;width:100%}
+body:not(.web-login) #page-root .web-customer-detail-layout .customer-hero .hero-top{order:1;float:none;align-self:flex-start;margin:var(--ui-space-1) 0 0 var(--ui-field-height)}
+body:not(.web-login) #page-root .web-customer-detail-layout .customer-hero .hero-tags{order:2}
+body:not(.web-login) #page-root .web-customer-detail-layout .customer-hero .hero-footer{order:3}
+body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis{align-items:start}
+body:not(.web-login) #page-root .web-customer-detail-layout .web-customer-kpis>view{justify-content:flex-start}
+@media(min-width:901px){
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-content>.customer-picker-card{align-self:start;height:auto;min-height:0;max-height:100%;margin:0;overflow:auto;box-sizing:border-box}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-editor{max-height:100%;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace .customer-results{flex:0 1 auto;height:auto;min-height:0;max-height:none;overflow:visible}
+ body:not(.web-login)[data-route=visit-entry] #page-root .web-visit-workspace .fde-choice-list{min-height:0;max-height:none;overflow:visible}
+}

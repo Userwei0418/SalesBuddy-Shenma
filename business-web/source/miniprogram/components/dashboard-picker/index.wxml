@@ -1,0 +1,23 @@
+<button size="mini" class="picker-trigger" bindtap="open" aria-label="{{title}}，当前{{label || '未选择'}}"><text class="trigger-title">{{title}}</text><view class="trigger-caret"></view></button>
+<view wx:if="{{open}}" class="sheet-layer">
+  <view class="sheet-mask" catchtap="close" catchtouchmove="noop"></view>
+  <view class="sheet-panel">
+    <view class="sheet-handle-area" bindtap="close" bindtouchstart="touchStart" bindtouchend="touchEnd" role="button" aria-label="收起选择面板"><view class="sheet-handle"></view></view>
+    <view class="sheet-heading"><text>{{title}}</text><label>{{subtitle || (multiple ? '可选择多个团队' : '选择一位成员查看经营数据')}}</label></view>
+    <input wx:if="{{!multiple}}" class="sheet-search" value="{{query}}" placeholder="{{selectionKind === 'team' ? '搜索团队' : '搜索姓名、账号或团队'}}" bindinput="search"/>
+    <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="sheet-scroll">
+      <view wx:if="{{loading}}" class="sheet-empty">正在加载可选范围…</view>
+      <view wx:elif="{{error}}" class="sheet-empty" bindtap="retry">{{error}} · 点击重试</view>
+      <block wx:else>
+        <view wx:for="{{groups}}" wx:key="name" class="option-group">
+          <text wx:if="{{!multiple && selectionKind !== 'team'}}" class="group-name">{{item.name}}</text>
+          <view wx:for="{{item.rows}}" wx:for-item="option" wx:key="id" class="option-row {{option.checked?'selected':''}}" data-id="{{option.id}}" bindtap="select" role="button" aria-label="{{option.name}}{{option.checked?'，已选中':''}}">
+            <view class="option-copy"><text>{{option.name}}</text><label wx:if="{{option.meta}}">{{option.meta}}</label></view><view class="option-check {{multiple?'square':''}}">{{option.checked?'✓':''}}</view>
+          </view>
+        </view>
+        <view wx:if="{{!groups.length}}" class="sheet-empty">{{selectionKind === 'team' ? '没有匹配的团队' : '没有匹配的成员'}}</view>
+      </block>
+    </scroll-view>
+    <view class="sheet-footer"><text>{{selectionKind === 'team' ? '选择全部团队查看部门合计，或选择一个具体团队' : multiple ? '全部选中时查看部门合计' : '仅切换经营数据，排名保持独立'}}</text><button class="sheet-confirm" disabled="{{!canApply || loading || error}}" bindtap="apply">确认选择</button></view>
+  </view>
+</view>

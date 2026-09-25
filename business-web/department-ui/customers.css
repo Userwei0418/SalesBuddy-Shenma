@@ -1,0 +1,65 @@
+/* 页面固定一屏，不整页滚动。四象限撑满左栏，左栏宽度等于图的高度（行高减去标题与内边距），所以接近正方形；列表每页条数按剩余高度算。 */
+.department-ui[data-department-page="pages/customers/index"] { height: 100%; padding: var(--ui-space-4); }
+.department-ui .ds-customers { display: flex; flex-direction: column; gap: var(--ui-space-3); height: 100%; min-height: 0; }
+.department-ui .ds-customers .sb-pagehead { margin: 0; align-items: center; flex-shrink: 0; }
+.department-ui .ds-customer-assets { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); background: var(--ui-surface); }
+.department-ui .ds-customer-workbench { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.department-ui .ds-customer-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ui-space-2); padding: var(--ui-space-3); border-bottom: 1px solid var(--ui-line); flex-shrink: 0; }
+.department-ui .ds-customer-search { display: flex; align-items: center; flex: 1.6 1 190px; min-width: 0; }
+.department-ui .ds-customer-search > .ant-input-search { width: 100%; }
+.department-ui .ds-customer-filters { display: contents; }
+.department-ui .ds-customer-tools > .ant-alert { flex-basis: 100%; }
+.department-ui .ds-customer-reset { flex: 0 0 auto; padding-inline: 4px; }
+.department-ui .ds-customer-workspace-wrap { flex: 1; min-height: 0; display: flex; container-type: size; }
+.department-ui .ds-customer-workspace { display: grid; grid-template-columns: minmax(280px, min(52%, calc(100cqh - 99px))) minmax(0,1fr); flex: 1; min-height: 0; }
+.department-ui .ds-customer-map-panel { padding: var(--ui-space-3); display: flex; gap: var(--ui-space-3); flex-direction: column; min-height: 0; min-width: 0; }
+.department-ui .ds-customer-map-panel header,.department-ui .ds-customer-list header,.department-ui .ds-customer-list footer { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-2); flex-shrink: 0; }
+.department-ui .ds-customer-map-panel header { height: 28px; }
+.department-ui .ds-customer-map-panel header h2 { white-space: nowrap; }
+.department-ui .ds-customer-map-note { font-size: var(--ui-text-small); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.department-ui .ds-customer-map-panel .sb-bmap { flex: 1; min-height: 0; width: 100%; }
+.department-ui .ds-customer-map-panel header .ant-btn { padding-inline: 0; font-size: 12px; }
+.department-ui .ds-customer-list { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-left: 1px solid var(--ui-line); }
+.department-ui .ds-customer-list header { height: 52px; padding: var(--ui-space-3); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-customer-list footer { min-height: 48px; padding: var(--ui-space-2) var(--ui-space-3); border-top: 1px solid var(--ui-line); flex-wrap: wrap; }
+.department-ui .ds-customer-table-viewport { flex: 1; min-height: 0; overflow: hidden; }
+.department-ui .ds-customer-count { display: inline-block; padding: 0 var(--ui-space-2); background: var(--ui-neutral-soft); color: var(--ui-secondary); font-size: var(--ui-text-small); border-radius: var(--ui-radius-control); }
+.department-ui .ds-customer-list .ant-table { font-size: 13px; }
+.department-ui .ds-customer-list .ant-table-thead > tr > th { height: 40px; padding: 8px; white-space: nowrap; }
+.department-ui .ds-customer-list .ant-table-tbody > tr.ant-table-row > td { height: 56px; padding: 7px 8px; }
+.department-ui .ds-customer-identity { padding: 0; min-width: 0; }
+.department-ui .ds-customer-identity .ds-muted { line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.department-ui .ds-text-action { padding: 0; color: var(--ui-ink); text-align: left; background: none; border: none; font-size: var(--ui-text-body); line-height: 20px; font-weight: 600; }
+.department-ui .ds-text-action:hover { color: var(--ui-primary); text-decoration: underline; }
+.department-ui .ds-customer-name { max-width: 100%; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.department-ui .ds-customer-health { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+.department-ui .ds-customer-health p { line-height: 18px; font-size: 12px; margin: 0; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.department-ui .ds-customer-expanded { white-space: normal; overflow-wrap: anywhere; line-height: 1.7; }
+.department-ui .ds-customer-expanded p { margin-top: 4px; }
+.ds-map-candidate { margin-top: var(--ui-space-3); height: auto; white-space: normal; text-align: left; }
+@media (max-width:1100px) and (min-width:901px) {
+  .department-ui .ds-customer-workspace { grid-template-columns: minmax(260px, min(46%, calc(100cqh - 99px))) minmax(0,1fr); }
+}
+@media (max-width:900px) {
+  .department-ui[data-department-page="pages/customers/index"] { height: auto; }
+  .department-ui .ds-customers { height: auto; }
+  .department-ui .ds-customer-workbench { flex: none; }
+  .department-ui .ds-customer-workspace-wrap { flex: none; display: block; }
+  .department-ui .ds-customer-workspace { grid-template-columns: minmax(0,1fr); flex: none; }
+  .department-ui .ds-customer-list { border-left: 0; border-top: 1px solid var(--ui-line); }
+  .department-ui .ds-customer-table-viewport { flex: none; }
+}
+@media (max-width:600px) {
+  .department-ui[data-department-page="pages/customers/index"] { padding: var(--ui-space-3); }
+  .department-ui .ds-customer-search { flex-basis: 100%; }
+  .department-ui .ds-customer-list footer { justify-content: center; }
+}
+
+@media (min-width:901px) and (max-height:650px) {
+  .department-ui[data-department-page="pages/customers/index"] { padding: var(--ui-space-3); }
+  .department-ui .ds-customers { gap: var(--ui-space-2); }
+  .department-ui .ds-customer-tools { padding-block: var(--ui-space-2); }
+  .department-ui .ds-customer-map-panel { gap: var(--ui-space-2); padding-block: var(--ui-space-2); }
+  .department-ui .ds-customer-list header { height: 44px; }
+  .department-ui .ds-customer-list footer { min-height: 40px; padding-block: var(--ui-space-1); }
+}
