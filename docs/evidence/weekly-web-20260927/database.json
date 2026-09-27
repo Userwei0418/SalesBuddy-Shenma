@@ -1,0 +1,38 @@
+{
+  "runtime_role": {
+    "rolsuper": false,
+    "rolbypassrls": false
+  },
+  "synthetic_source_count": 2,
+  "isolated_database": true,
+  "customer_crm_writes": false,
+  "real_customer_agent": true,
+  "git_head": "d4d2c379abdf74297f95753ebb3c4464b615f055",
+  "reports": [
+    {
+      "id": "ced95752-7bf0-4a8d-bbf4-e2f349904b95",
+      "status": "succeeded",
+      "result_status": "ready",
+      "draft_version": 3,
+      "input_sha256": "8161d1a26dda76c9db9eccb614e22a7b1a206da829789180abbc6841b7014682",
+      "runtime_metadata": {
+        "task_id": "e0d0d948-b051-4de8-baeb-8bbca2601c33",
+        "message_id": "e41aee3f-0437-4b4f-9435-e570ff91fa6f",
+        "input_tokens": 6224,
+        "output_tokens": 1446,
+        "conversation_id": "ff80447f-b153-49d1-ac4a-d0518d831bc2",
+        "actual_snapshot_id": null,
+        "expected_snapshot_id": "01a0d3f4-aae0-7858-99ee-11e38f2d99dd",
+        "runtime_snapshot_verified": false
+      },
+      "created_at": "2026-09-27 06:13:11.133974+00:00",
+      "started_at": "2026-09-27 06:13:11.179613+00:00",
+      "finished_at": "2026-09-27 06:14:10.553858+00:00",
+      "job_status": "succeeded",
+      "attempts": 1,
+      "effect_count": 1,
+      "revision_count": 3
+    }
+  ],
+  "browser_exit_code": 0
+}

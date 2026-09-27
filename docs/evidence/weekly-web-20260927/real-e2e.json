@@ -1,0 +1,33 @@
+{
+  "at": "2026-09-27T06:14:17.185Z",
+  "passed": true,
+  "real_browser_login": true,
+  "synthetic_source_count": 2,
+  "real_http_api": true,
+  "real_worker_and_agent": true,
+  "ready_body": true,
+  "body_characters": 285,
+  "manual_saved_version": 2,
+  "refresh_readback": true,
+  "fresh_login_readback": true,
+  "concurrent_stale_save_status": 409,
+  "unsaved_text_preserved": true,
+  "other_user_detail_status": 404,
+  "other_user_list_empty": true,
+  "original_agent_result_preserved": true,
+  "report_id": "ced95752-7bf0-4a8d-bbf4-e2f349904b95",
+  "runtime_metadata": {
+    "task_id": "e0d0d948-b051-4de8-baeb-8bbca2601c33",
+    "message_id": "e41aee3f-0437-4b4f-9435-e570ff91fa6f",
+    "input_tokens": 6224,
+    "output_tokens": 1446,
+    "conversation_id": "ff80447f-b153-49d1-ac4a-d0518d831bc2",
+    "actual_snapshot_id": null,
+    "expected_snapshot_id": "01a0d3f4-aae0-7858-99ee-11e38f2d99dd",
+    "runtime_snapshot_verified": false
+  },
+  "errors": [],
+  "external_browser_requests": [],
+  "environment": "local disposable PostgreSQL with real customer Agent",
+  "customer_crm_writes": false
+}
