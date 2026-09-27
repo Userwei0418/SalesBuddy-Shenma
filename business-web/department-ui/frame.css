@@ -8,7 +8,18 @@ body #frame-topbar, body:not(.web-login) #frame-topbar { padding: 0; background:
 .ds-frame-icon { display: inline-flex; width: 18px; height: 18px; }
 .ds-frame-icon > svg { width: 100%; height: 100%; }
 .ds-frame-environment { font-size: var(--ui-text-small); color: var(--ui-secondary); white-space: nowrap; }
-@media (max-width: 900px) { body.department-design .web-sidebar { display: none; } }
+@media (max-width: 900px) {
+  body.department-design .web-sidebar { display: none; }
+  #frame-topbar .sb-topbar { padding-inline: var(--ui-space-3); gap: var(--ui-space-2); }
+  #frame-topbar .sb-topbar-actions { gap: var(--ui-space-2); }
+  #frame-topbar .sb-topbar-crumb { flex: 1; overflow: hidden; }
+  #frame-topbar .sb-topbar-back { flex-shrink: 0; }
+  #frame-topbar .ant-breadcrumb { min-width: 0; overflow: hidden; }
+  #frame-topbar .ant-breadcrumb ol { flex-wrap: nowrap; }
+  #frame-topbar .ant-breadcrumb li { min-width: 0; }
+  #frame-topbar .ant-breadcrumb li:not(:last-child) { display: none; }
+  #frame-topbar .ant-breadcrumb-link { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+}
 
 /* 演示模式的身份条也和页面内容一样留 24 */
 body #preview-notice { padding-inline: var(--ui-space-6); }

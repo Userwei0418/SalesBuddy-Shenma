@@ -121,7 +121,7 @@ WEEKLY_MAX_INPUT_BYTES=180000
 
 沿用客户 `AGENT_FDE_BASE_URL=https://ops-salesbuddy.shenzhoukuntai.com:18899/v1` 和可信 TLS 配置。后端限制周报只能发往这个客户中台地址。
 
-通过 `python3 deployment/build-weekly-agent-spec.py --output /安全目录/weekly-agent.json` 生成可发布规范。提示词由交接原文和只针对输出结构的补充组成；`senseaudio-s2`，temperature=0，客户插件 max_tokens=4096，不挂工具和知识库。输出缺失或结构不合格时任务失败，不能用半份结果。
+通过 `python3 deployment/build-weekly-agent-spec.py --output /安全目录/weekly-agent.json` 生成可发布规范。提示词由交接原文和只针对输出结构的补充组成；`senseaudio-s2`，temperature=0，客户插件 max_tokens=16384（模型连接允许上限须同步配置为至少 16384；其他 Agent 预算保持原值），不挂工具和知识库。输出缺失或结构不合格时任务失败，不能用半份结果。
 
 迁移前备份数据库、上传目录和运行配置，并演练恢复。现有升级脚本支持 `--expected-schema V151 --target-schema V152`；升级后检查 API/Worker 健康与版本。关闭周报可移除 `WEEKLY_ENABLED_WORKSPACES` 并重启服务，历史数据保留。
 

@@ -89,7 +89,7 @@ export function Risks({ page, data: d, invoke }) {
     <div className="ds-panel ds-sp-card ds-sp-col">
       <SbTabs activeKey={d.activeTab} onChange={key => call('selectTab', { dataset: { key } })} items={(d.tabs || []).map(t => ({ key: t.key, label: t.label, count: t.key === 'open' ? d.openCount : t.key === 'resolved' ? d.resolvedCount : (d.risks || []).length }))} />
       <div className="ds-sp-body ds-sp-body-pad">
-        <SbTable rowKey="id" density="compact" columns={cols} rows={d.filteredRisks || []} state={d.loading ? 'loading' : (d.filteredRisks || []).length ? 'normal' : 'empty'} emptyTitle={d.activeTab === 'open' ? '当前没有待解除风险' : '暂无对应风险记录'} emptyDescription="新识别的风险会自动进入这里" onRowClick={r => call('openRisk', { dataset: { id: r.id } })} />
+        <SbTable rowKey="id" density="compact" columns={cols} scrollX={1000} rows={d.filteredRisks || []} state={d.loading ? 'loading' : (d.filteredRisks || []).length ? 'normal' : 'empty'} emptyTitle={d.activeTab === 'open' ? '当前没有待解除风险' : '暂无对应风险记录'} emptyDescription="新识别的风险会自动进入这里" onRowClick={r => call('openRisk', { dataset: { id: r.id } })} />
       </div>
     </div>
   </section>;

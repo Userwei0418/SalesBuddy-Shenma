@@ -133,6 +133,45 @@ async def test_timeout_not_retried_and_cancelled_late_result_discarded(connectio
     assert out['status']=='cancelled' and out['body_markdown'] is None
 
 
+@pytest.mark.parametrize('rejection', ['statistics', 'json', 'root_key', 'nested_key'])
+async def test_rejected_output_preserves_trace_without_accepting_or_retrying(connection,sales_actor,rejection):
+    await seed(connection,sales_actor,1)
+    class RejectedAgent(FakeAgent):
+        calls=0
+        fail=False
+        hook=None
+        async def chat(self, **kwargs):
+            response=await super().chat(**kwargs)
+            output=json.loads(response.answer)
+            # A transport success is not a valid business result.
+            if rejection=='statistics':output['statistics']['record_count']+=1
+            if rejection=='root_key':output['unaccepted private prose']=True
+            if rejection=='nested_key':output['sections'][0]['items'][0]['unaccepted private prose']=True
+            return replace(response, answer='unaccepted private prose' if rejection=='json' else json.dumps(output),
+                ids=RunIds(task_id='task-rejected',message_id='message-rejected',conversation_id='conversation-rejected'))
+    service=WeeklyReportService(TestDatabase(connection,sales_actor),RejectedAgent)
+    report=await service.generate(sales_actor,str(uuid4()))
+    await service.handle(sales_actor,report['id'])
+    result=await service.read(sales_actor,report['id'])
+    assert result['status']=='failed' and result['error_code']=='WEEKLY_GENERATION_REJECTED'
+    assert result['original_result'] is None and result['body_markdown'] is None and result['draft_version']==0
+    metadata=result['runtime_metadata']
+    assert metadata['message_id']=='message-rejected' and metadata['task_id']=='task-rejected'
+    assert metadata['conversation_id']=='conversation-rejected'
+    assert metadata['input_tokens']==50 and metadata['output_tokens']==60
+    assert metadata['actual_snapshot_id'] is None and metadata['runtime_snapshot_verified'] is False
+    assert metadata['rejection_code']==('WEEKLY_OUTPUT_JSON_INVALID' if rejection=='json' else 'WEEKLY_OUTPUT_CONTRACT_INVALID')
+    expected=[] if rejection=='json' else ['statistics_mismatch'] if rejection=='statistics' else ['output_schema_invalid']
+    assert metadata['validation_errors']==expected
+    assert metadata['validation_error_count']==len(expected)
+    assert 'unaccepted private prose' not in json.dumps(result,default=str)
+    await service.handle(sales_actor,report['id'])
+    assert RejectedAgent.calls==1
+    assert await connection.fetchval('SELECT count(*) FROM insight.weekly_report_revision WHERE report_id=$1::uuid',report['id'])==0
+    with pytest.raises(HTTPException) as error:await service.save(sales_actor,report['id'],0,'Cannot save a rejected result')
+    assert error.value.status_code==409
+
+
 async def test_empty_and_context_limit_and_platform_isolation(connection,sales_actor):
     db=TestDatabase(connection,sales_actor);service=WeeklyReportService(db,FakeAgent)
     r=await service.generate(sales_actor,str(uuid4()))
