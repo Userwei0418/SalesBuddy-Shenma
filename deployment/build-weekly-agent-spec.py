@@ -18,7 +18,7 @@ def build():
                                        (CONTRACT/'runtime-guard.txt').read_text()},
             'model': {'plugin_id': 'langgenius/openai_api_compatible',
                       'model_provider': 'langgenius/openai_api_compatible/openai_api_compatible',
-                      'model': 'senseaudio-s2', 'model_settings': {'temperature': 0, 'max_tokens': 4096}},
+                      'model': 'senseaudio-s2', 'model_settings': {'temperature': 0, 'max_tokens': 16384}},
             'tools': {'dify_tools': [], 'cli_tools': []}, 'knowledge': {'sets': []},
         },
     }

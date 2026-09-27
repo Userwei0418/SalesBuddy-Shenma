@@ -1,8 +1,10 @@
 # 神码部署记录与操作入口
 
-## 当前版本（2026-09-27 复核）
+本轮双端验收与修复见 [验收记录](FULL_ACCEPTANCE_20260927.md)。后续发布的实际版本以 `/api/v1/health/version`、`/workspace/build.json` 及对应 Release 回执为准。
 
-销售 API 与业务 Web 的公开版本均为 `fd2fb2eb2912d95e57d97e280e25df87cabf3fab`，期望数据库结构 V153；对应 [PR #21](https://github.com/Userwei0418/SalesBuddy-Shenma/pull/21) 已合并至主线 `d4d2c379abdf74297f95753ebb3c4464b615f055`。9 月 27 日重新核对版本和 `/api/v1/health/ready`，数据库、模型配置与认证检查正常。
+## 2026-09-27 周报接续基线
+
+本次接续复核时，销售 API 与业务 Web 的公开版本均为 `fd2fb2eb2912d95e57d97e280e25df87cabf3fab`，期望数据库结构 V153；对应 [PR #21](https://github.com/Userwei0418/SalesBuddy-Shenma/pull/21) 已合并至主线 `d4d2c379abdf74297f95753ebb3c4464b615f055`。9 月 27 日重新核对版本和 `/api/v1/health/ready`，数据库、模型配置与认证检查正常。
 
 业务 Web 已部署在 [销售工作区](https://salesbuddy.shenzhoukuntai.com:28899/workspace/)，与小程序共用销售账号和 `/api/v1/auth/*`。周报已接入客户独立 `weekly.v2` Agent，支持生成、历史和人工草稿保存。9 月 25 日线上测试账号无素材，只证明无素材分支；不能据此宣称客户真实正文质量已验收。接口及完整边界见 [周报联调说明](神码周报后端接口与Web联调.md)。
 

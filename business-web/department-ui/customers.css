@@ -44,7 +44,8 @@
   .department-ui[data-department-page="pages/customers/index"] { height: auto; }
   .department-ui .ds-customers { height: auto; }
   .department-ui .ds-customer-workbench { flex: none; }
-  .department-ui .ds-customer-workspace-wrap { flex: none; display: block; }
+  /* Stacked content must determine its height; size containment collapses it to zero. */
+  .department-ui .ds-customer-workspace-wrap { flex: none; display: block; container-type: normal; }
   .department-ui .ds-customer-workspace { grid-template-columns: minmax(0,1fr); flex: none; }
   .department-ui .ds-customer-list { border-left: 0; border-top: 1px solid var(--ui-line); }
   .department-ui .ds-customer-table-viewport { flex: none; }

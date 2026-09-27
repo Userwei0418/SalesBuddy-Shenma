@@ -15,6 +15,28 @@ from sales_backend.weekly_contract.decode_response import decode_response
 from sales_backend.weekly_contract.validate_response import validate
 
 
+class WeeklyOutputRejected(ValueError):
+    """Keep transport receipts on rejection without storing unaccepted prose."""
+
+    def __init__(self, code, metadata, errors=()):
+        super().__init__(code)
+        # Validator paths can include model-controlled unknown property names.
+        # Persist only fixed categories; the upstream message ID locates details.
+        categories = {
+            'Statistics changed/invented': 'statistics_mismatch',
+            'Period changed or invalid period preserved': 'period_mismatch',
+            'Unknown visit source': 'unknown_evidence',
+            'Unknown entity source': 'unknown_evidence',
+            'Visit reference crosses customer/opportunity': 'cross_subject_evidence',
+            'Entity reference crosses customer': 'cross_subject_evidence',
+            'Entity reference crosses opportunity': 'cross_subject_evidence',
+        }
+        self.metadata = {**metadata, 'rejection_code': code,
+            'validation_error_count': len(errors),
+            'validation_errors': sorted({categories.get(error,
+                'output_schema_invalid' if error.startswith('$') else 'output_rule_violation') for error in errors})}
+
+
 class WeeklyReportService:
     def __init__(self, database, client_factory=FdeClient):
         self.database, self.settings, self.client_factory = database, database.settings, client_factory
@@ -192,7 +214,8 @@ class WeeklyReportService:
         except (FdeError, ValueError, PermissionError, HTTPException) as exc:
             code = 'WEEKLY_UPSTREAM_' + exc.code.upper() if isinstance(exc, FdeError) else (
                 'WEEKLY_PERMISSION_CHANGED' if isinstance(exc, PermissionError) else 'WEEKLY_GENERATION_REJECTED')
-            metadata = dict(**asdict(exc.ids), dispatch_started=exc.dispatch_started) if isinstance(exc, FdeError) else {}
+            metadata = (exc.metadata if isinstance(exc, WeeklyOutputRejected) else
+                dict(**asdict(exc.ids), dispatch_started=exc.dispatch_started) if isinstance(exc, FdeError) else {})
             async with self.database.transaction(actor) as c:
                 await c.execute('''UPDATE insight.weekly_report SET status='failed',error_code=$2,runtime_metadata=$3,
                     finished_at=clock_timestamp(),updated_at=clock_timestamp() WHERE id=$1::uuid
@@ -226,9 +249,16 @@ class WeeklyReportService:
             if parameters.get('user_input_form'):
                 raise ValueError('WEEKLY_UNEXPECTED_INPUT_FORM')
             response = await client.chat(query=row['input_snapshot'], user=user, inputs={}, conversation_id='')
-        result = decode_response(response.answer)
-        if validate(source, result):
-            raise ValueError('WEEKLY_OUTPUT_CONTRACT_INVALID')
+        metadata = dict(**asdict(response.ids), input_tokens=response.input_tokens,
+            output_tokens=response.output_tokens, expected_snapshot_id=binding['expected_snapshot_id'],
+            actual_snapshot_id=None, runtime_snapshot_verified=False)
+        try:
+            result = decode_response(response.answer)
+        except ValueError:
+            raise WeeklyOutputRejected('WEEKLY_OUTPUT_JSON_INVALID', metadata) from None
+        errors = validate(source, result)
+        if errors:
+            raise WeeklyOutputRejected('WEEKLY_OUTPUT_CONTRACT_INVALID', metadata, errors)
         async with self.database.transaction(actor) as c:
             await require_permission(c, 'weekly_report.generate')
             await assert_snapshot_access(c, actor, source)
@@ -238,9 +268,7 @@ class WeeklyReportService:
                 finished_at=clock_timestamp(),updated_at=clock_timestamp()
                 WHERE id=$1::uuid AND status='running' AND draft_version=0 RETURNING id''', ident,
                 result['status'], result, result['body_markdown'] if ready else None, 1 if ready else 0,
-                dict(**asdict(response.ids), input_tokens=response.input_tokens, output_tokens=response.output_tokens,
-                     expected_snapshot_id=binding['expected_snapshot_id'], actual_snapshot_id=None,
-                     runtime_snapshot_verified=False))
+                metadata)
             if saved and ready:
                 await c.execute('''INSERT INTO insight.weekly_report_revision
                     (workspace_id,author_id,report_id,version_no,body_markdown,source)
