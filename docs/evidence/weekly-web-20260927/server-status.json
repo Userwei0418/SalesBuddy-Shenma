@@ -1,0 +1,14 @@
+{
+  "hostname": "salesbuddy",
+  "internal_ip": "172.22.9.234",
+  "api": "active",
+  "worker": "active",
+  "release": "/opt/shenma-sales/releases/fd2fb2eb2912d95e57d97e280e25df87cabf3fab",
+  "checked_at": "2026-09-27T06:12:55.313104+00:00",
+  "schema": "V153",
+  "runtime_role": {
+    "name": "shenma_runtime",
+    "superuser": false,
+    "bypassrls": false
+  }
+}

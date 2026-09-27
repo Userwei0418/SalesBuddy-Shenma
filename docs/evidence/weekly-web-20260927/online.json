@@ -1,0 +1,16 @@
+{
+  "revision": "fd2fb2eb2912d95e57d97e280e25df87cabf3fab",
+  "business_web": "https://salesbuddy.shenzhoukuntai.com:28899/workspace/",
+  "checked_at": "2026-09-27T06:10:28.263Z",
+  "shared_login": true,
+  "read_and_generate": true,
+  "source_count": 0,
+  "report_id": "9290d8e7-5c3c-40c4-b698-60884fe5e7a8",
+  "report_week": "2026-09-21",
+  "result": "insufficient_data",
+  "reload_preserved": true,
+  "previous_week": true,
+  "page_errors": [],
+  "api_failures": [],
+  "synthetic_business_data_created": false
+}

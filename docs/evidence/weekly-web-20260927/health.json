@@ -1,0 +1,8 @@
+{
+  "status": "ok",
+  "checks": {
+    "database": true,
+    "model_gateway_configured": true,
+    "auth_configured": true
+  }
+}

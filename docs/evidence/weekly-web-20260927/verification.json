@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-09-27",
+  "source_head": "d4d2c379abdf74297f95753ebb3c4464b615f055",
+  "deployed_revision": "fd2fb2eb2912d95e57d97e280e25df87cabf3fab",
+  "source_tree_equals_deployed_revision": true,
+  "handoff_zip_sha256": "3f994eef4367c42362a2d262f8a9885437b5795ea195653cf3fad0da49cd5648",
+  "handoff_files": 147,
+  "files_identical_to_20260925": 147,
+  "web_tests": {
+    "passed": 134
+  },
+  "contract_tests": {
+    "passed": 22
+  },
+  "browser_synthetic_api": {
+    "passed": 10,
+    "execution": "serial",
+    "initial_parallel_timeouts": 3
+  },
+  "postgres_weekly_integration": {
+    "passed": 8,
+    "agent": "FakeAgent"
+  },
+  "real_e2e": "real HTTP API, real Worker, customer Agent; synthetic data in disposable local DB",
+  "customer_crm_test_writes": false,
+  "new_application_deployment_required": false
+}
