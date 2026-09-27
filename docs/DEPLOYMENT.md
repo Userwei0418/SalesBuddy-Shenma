@@ -122,4 +122,4 @@ AppID、可信证书和模型 Key 不进入仓库。当前源码包不含任何�
 
 业务 Web 的源码在 `business-web/`，由现有 API 进程提供静态页面 `/workspace/`。销售账号与小程序共用 `/api/v1/auth/*`；周报 UI 仅在 Web，运营后台仍为 `/admin`。详见 [周报后端接口与 Web 联调](神码周报后端接口与Web联调.md)。
 
-本地先构建 `npm --prefix business-web run verify`，提交代码后重新构建，再调用打包脚本 `--include-business-web`。打包器检查构建版本等于本次 Git 提交。客户服务器无需安装 Node.js。升级脚本指定 `--expected-schema V152 --target-schema V153` 并核对实际旧版本，保留现有 Agent 绑定和配置。
+本地先构建 `npm --prefix business-web run verify`，提交代码后重新构建，再调用打包脚本 `--include-business-web`。打包器检查构建版本等于本次 Git 提交。客户服务器无需安装 Node.js。从 V152 升级时指定 `--expected-schema V152 --target-schema V153`；现场已为 V153 的代码更新指定 `--expected-schema V153 --target-schema V153`。两种情况都必须核对实际旧版本，并保留现有 Agent 绑定和配置。升级器在操作主机、目录或服务前拒绝结构降级；同结构更新仍执行备份、恢复验证、迁移幂等核对和健康检查。
