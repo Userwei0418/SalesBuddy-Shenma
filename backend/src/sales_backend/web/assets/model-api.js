@@ -10,7 +10,7 @@ export async function modelApis() {
   const readOnly = locked || unified.managed;
   return {
     html:head("模型接口配置",readOnly?'模型连接由维护方统一管理。':'按用途管理直连接口。修改经测试、发布后生效。','<a class="button" href="#ai">查看调用记录 →</a>') + unifiedKeyCard(unified) + `
-      <div class="model-api-note">业务智能体仍按已发布的运行策略优先调用中台；这里管理通用能力及原接口兜底。${unified.managed?'统一密钥由本次部署的所有公司共用，更新后对所有公司生效。':`各公司独立配置，当前操作仅影响 <strong>${esc(state.company?.name || '当前公司')}</strong>。`}</div>
+      <div class="model-api-note">业务智能体仍按已发布的运行策略优先调用中台；这里管理通用能力及原接口兜底。${unified.managed?'以下为各用途的当前连接信息，仅供查看。':`各公司独立配置，当前操作仅影响 <strong>${esc(state.company?.name || '当前公司')}</strong>。`}</div>
       <div class="model-api-grid">${items.map(item=>{
         const c=item.configuration, mode=c.mode;
         return `<section class="card model-api-card"><div class="card-head"><div><h2>${esc(item.label)}</h2><small>${esc(item.impact)}</small></div><span class="badge ${mode==='disabled'?'red':mode==='custom'?'green':'blue'}">${mode==='custom'?'独立接口':mode==='disabled'?'已停用':'继承默认'}</span></div>
@@ -39,15 +39,24 @@ export async function modelApis() {
 
 function unifiedKeyCard(info) {
   if (!info.managed) return '';
-  return `<section class="card"><div class="card-head"><h2>统一模型密钥</h2></div>
-    <p>文字、转写、兜底与中台模型统一使用此密钥。更新时先验证连接，再同步生效。</p>
-    <p data-unified-key-hint>${esc(info.key_hint || (info.configured?'已配置':'未配置'))}</p>
-    <p data-unified-key-status role="status">${esc(info.message || '当前配置可用')}</p>
-    ${info.can_manage?`<form data-unified-key-form autocomplete="off">
-      <label>新的统一 Key <input name="api_key" type="password" autocomplete="new-password" required spellcheck="false" /></label>
-      <button type="submit" class="primary">验证并更新统一Key</button>
-      <p class="muted">密钥不会回显。更新可能需要一些时间，请等待完成。</p>
-    </form>`:'<p class="muted">仅指定维护账号可更新统一密钥。</p>'}</section>`;
+  return `<section class="card unified-key-card">
+    <div class="card-head">
+      <h2>统一模型密钥</h2>
+      <span class="badge blue unified-key-current" data-unified-key-hint>${esc(info.key_hint || (info.configured?'已配置':'未配置'))}</span>
+    </div>
+    <div class="unified-key-body">
+      <p class="unified-key-description">文字、语音与中台模型共用，更新后对所有公司生效。</p>
+      ${info.can_manage?`<form data-unified-key-form autocomplete="off">
+        <label class="unified-key-label" for="unified-api-key">新的 Token Plan Key</label>
+        <div class="unified-key-controls">
+          <input id="unified-api-key" name="api_key" type="password" placeholder="填写要更换的 Key" aria-describedby="unified-key-help" autocomplete="new-password" required spellcheck="false" />
+          <button type="submit" class="primary">验证并更新</button>
+        </div>
+        <p class="unified-key-help" id="unified-key-help">密钥不会回显。验证通过后统一生效，请等待更新完成。</p>
+      </form>`:'<p class="unified-key-help">仅指定维护账号可更新统一密钥。</p>'}
+      <p class="unified-key-feedback" data-unified-key-status role="status" aria-live="polite">${info.rotation_status==='pending'?esc(info.message || '上次更新未完成，请重新提交以恢复同步'):''}</p>
+    </div>
+  </section>`;
 }
 
 function bindUnifiedKey(root, info) {

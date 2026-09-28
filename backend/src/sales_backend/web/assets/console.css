@@ -1103,6 +1103,26 @@ dialog::backdrop {background:#101e35a6;backdrop-filter:blur(3px);}
 /* Direct model connections share the console card and form language. */
 .model-api-grid{display:grid;gap:20px}.model-api-note{padding:16px 20px;margin:0 0 20px;border:1px solid #dce7f3;border-radius:14px;background:#f6faff;color:#61738d;font-size:13px;line-height:1.8}.model-api-card .card-head{align-items:flex-start;gap:16px}.model-api-card .card-head small{display:block;margin-top:8px;max-width:760px;line-height:1.7}.model-api-summary{display:grid;grid-template-columns:1fr 1fr;gap:20px 32px;padding:24px;margin:0}.model-api-summary .full{grid-column:1/-1}.model-api-summary dt{color:#8593a7;font-size:12px;margin-bottom:7px}.model-api-summary dd{margin:0;color:#304966;font-size:14px;overflow-wrap:anywhere}.model-api-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px;border-top:1px solid #edf1f7}.model-api-footer>div{display:flex;gap:10px}.model-api-footer small{color:#8593a7}.model-api-test{display:flex;align-items:center;gap:16px;background:#f4f8fc;padding:16px;border-radius:12px;margin-top:16px}.model-api-test [role=status]{font-size:13px;line-height:1.6;color:#56718d}.model-api-version{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 0;border-bottom:1px solid #e5edf6}.model-api-version small{display:block;color:#8492a5;margin-top:6px}@media(max-width:650px){.model-api-summary{grid-template-columns:1fr}.model-api-footer,.model-api-test{align-items:flex-start;flex-direction:column}}
 
+/* The deployment Key uses one padded form, with status separate from the action. */
+.unified-key-card .card-head {padding:20px 24px;flex-wrap:wrap;}
+.unified-key-current {font-weight:500;white-space:normal;line-height:1.6;}
+.unified-key-body {padding:24px;}
+.unified-key-description {margin:0 0 24px;color:#61738d;font-size:13px;line-height:1.8;}
+.unified-key-label {display:block;margin-bottom:10px;color:#304966;font-size:13px;font-weight:600;}
+.unified-key-controls {display:flex;align-items:stretch;gap:12px;max-width:800px;}
+.unified-key-controls input {flex:1 1 auto;min-width:0;width:100%;height:44px;min-height:44px;padding:0 14px;border-radius:8px;font-size:14px;}
+.unified-key-controls button {flex:0 0 auto;min-width:144px;min-height:44px;padding:0 24px;border-radius:8px;white-space:nowrap;}
+.unified-key-help {margin:10px 0 0;color:#8593a7;font-size:12px;line-height:1.8;}
+.unified-key-feedback {margin:20px 0 0;padding:12px 16px;border:1px solid #dce7f3;border-radius:8px;background:#f6faff;color:#304966;font-size:13px;line-height:1.8;overflow-wrap:anywhere;}
+.unified-key-feedback:empty {display:none;}
+@media(max-width:650px) {
+  .unified-key-card .card-head {padding:18px 20px;gap:10px;}
+  .unified-key-body {padding:20px;}
+  .unified-key-description {margin-bottom:20px;}
+  .unified-key-controls {flex-direction:column;gap:12px;}
+  .unified-key-controls button {width:100%;}
+}
+
 .customer-profile .section-title {margin:24px 0 16px}
 .customer-profile .section-title:first-child {margin-top:0}
 .customer-profile-text {margin:0 0 18px}
