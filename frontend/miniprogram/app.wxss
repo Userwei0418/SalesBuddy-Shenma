@@ -56,6 +56,3 @@ button::after { border:0; }
 .sb-seg .sb-seg-item.on.disabled,.sb-seg.is-disabled .sb-seg-item.on { color:var(--ui-muted); background:var(--ui-neutral-soft); }
 .sb-lselect.on .sb-lselect-arrow,.sb-lselect.on .sb-lselect-clear { color:var(--ui-primary); }
 .sb-lselect.on.disabled .sb-lselect-arrow,.sb-lselect.on.disabled .sb-lselect-clear { color:var(--ui-muted); }
-/* Only existing abnormal labels receive black fill. Pending/unset stay neutral. */
-.sb-tag.sb-tag-bad,.workbench-status .sb-tag-watch,.risk-state .sb-tag-watch,.customer-tags .risk .sb-tag-watch,.risk-head .sb-tag-watch,.status-open .detail-hero .sb-tag-watch { color:var(--sb-status-ink); background:var(--sb-status-bg); }
-.traffic-badge.traffic-red,.sheet-status .traffic-badge.traffic-yellow,.detail-tags .detail-risk.traffic-yellow,.opportunity-status.traffic-yellow { --ui-warning:var(--sb-status-ink); --ui-warning-soft:var(--sb-status-bg); --ui-danger:var(--sb-status-ink); --ui-danger-soft:var(--sb-status-bg); }

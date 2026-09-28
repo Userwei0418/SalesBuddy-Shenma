@@ -38,4 +38,3 @@ page{background:var(--ui-background)}
 
 
 /* Palette only: original geometry is preserved. */
-.traffic-red .detail-hero { --ui-danger:var(--sb-status-ink); --ui-danger-soft:var(--sb-status-bg); --ui-danger-accent:var(--sb-status-bg); }

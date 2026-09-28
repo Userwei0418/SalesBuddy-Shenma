@@ -1,5 +1,5 @@
 /* Application palette based on the approved LBS reference. ui/ stays generated.
- * Blue is interactive, ink is structural; explicit labels and red reasons identify abnormal states.
+ * Blue is interactive, ink is structural; status colors follow the original red/yellow/green tokens.
  */
 page {
   --ui-background:#E9EDF3;
@@ -13,14 +13,14 @@ page {
   --ui-line:#D5DCE7;
   --ui-neutral:#56677E;
   --ui-neutral-soft:#EDF0F5;
-  --ui-danger:#A73F38;
-  --ui-danger-soft:#FBE4DF;
-  --ui-danger-accent:#A73F38;
-  --ui-warning:#192842;
-  --ui-warning-soft:#EDF0F5;
-  --ui-warning-accent:#192842;
-  --ui-success:#4F6078;
-  --ui-success-soft:#EDF0F5;
+  --ui-danger:#AC2F28;
+  --ui-danger-soft:#FDE2E2;
+  --ui-danger-accent:#F54A45;
+  --ui-warning:#8F4F04;
+  --ui-warning-soft:#FEEAD2;
+  --ui-warning-accent:#FF8800;
+  --ui-success:#237B19;
+  --ui-success-soft:#D9F5D6;
   --ui-chart-1:var(--ui-primary);
   --ui-overlay:#19284273;
   --sb-link-blue:var(--ui-primary);
@@ -36,8 +36,8 @@ page {
   --sb-group-bg:#FFFFFF;
   --sb-status-bg:#1F2329;
   --sb-status-ink:#FFFFFF;
-  --sb-alert-ink:#A73F38;
-  --sb-alert-soft:#FBE4DF;
+  --sb-alert-ink:var(--ui-danger);
+  --sb-alert-soft:var(--ui-danger-soft);
   --td-brand-color-1:#EDF3FF;
   --td-brand-color-2:#E2ECFF;
   --td-brand-color-3:#C7D9FC;

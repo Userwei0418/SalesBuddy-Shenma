@@ -123,3 +123,5 @@
 .permission-perspectives button{display:flex;align-items:center;justify-content:center;flex:1;min-height:var(--ui-touch-target);line-height:1.5;padding:8rpx 16rpx;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-neutral-soft);color:var(--ui-ink)}
 .permission-perspectives button::after{border:0}
 .permission-perspectives .selected{background:var(--ui-primary);color:var(--ui-on-primary)}
+/* Score magnitude uses the same blue as opportunity progress; status text keeps its signal color. */
+.profile-page .dimension-grid .score-track view { background:var(--ui-primary)!important; }

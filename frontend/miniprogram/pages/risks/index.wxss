@@ -26,5 +26,4 @@ page{background:var(--ui-background)}
 .risk-state-panel{padding:16rpx 32rpx}
 
 /* Palette only: original geometry is preserved. */
-.risk-card.status-open .risk-state { --ui-warning:var(--sb-status-ink); --ui-warning-soft:var(--sb-status-bg); --ui-danger:var(--sb-status-ink); --ui-danger-soft:var(--sb-status-bg); }
 .risk-card.status-open .risk-description { color:var(--sb-alert-ink); }
