@@ -72,8 +72,8 @@ def main():
         parser.add_argument("--" + name + "-sha256", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--expected-current", required=True)
-    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152", "V153"))
-    parser.add_argument("--target-schema", default="V153", choices=("V151", "V152", "V153"))
+    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152", "V153", "V154"))
+    parser.add_argument("--target-schema", default="V154", choices=("V151", "V152", "V153", "V154"))
     args = parser.parse_args()
     if int(args.target_schema[1:]) < int(args.expected_schema[1:]):
         parser.error("Schema downgrade is not supported; target must be at least the current schema")
@@ -127,6 +127,8 @@ def main():
             run(["sudo", "-u", "postgres", "pg_dump", "-Fc", "shenma_sales"], stdout=stream)
         run(["tar", "-czf", str(backup / "uploads.tar.gz"), "-C", "/var/lib/sales-backend", "."])
         run(["tar", "-czf", str(backup / "runtime-secrets.tar.gz"), "-C", "/etc", "shenma-sales"])
+        if Path("/var/lib/shenma-model-key").is_dir():
+            run(["tar", "-czf", str(backup / "unified-model-key.tar.gz"), "-C", "/var/lib", "shenma-model-key"])
         run(["tar", "-czf", str(backup / "provision-secrets.tar.gz"), "-C", "/var/lib", "shenma-provision"])
         (backup / "previous-release.txt").write_text(str(old) + "\n")
         run(["sudo", "-u", "postgres", "createdb", "-T", "template0", restored])

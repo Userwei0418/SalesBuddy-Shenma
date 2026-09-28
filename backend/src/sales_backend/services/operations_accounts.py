@@ -50,6 +50,10 @@ class OperationsAccountService:
         return {**result, "must_change_password": policy["require_initial_change"]}
 
     async def update(self, connection, actor, uid, data):
+        from sales_backend.config import get_settings
+        from sales_backend.security.unified_model_key import is_key_operator
+        if is_key_operator(get_settings(), uid):
+            raise PermissionError("此账号为专用运维身份，请通过运维维护")
         await require_permission(connection, "account.update")
         await require_assignable_roles(connection, data["roles"])
         if not data["display_name"].strip():
@@ -88,6 +92,10 @@ class OperationsAccountService:
         return result
 
     async def reset_password(self, connection, actor, uid, version, password):
+        from sales_backend.config import get_settings
+        from sales_backend.security.unified_model_key import is_key_operator
+        if is_key_operator(get_settings(), uid):
+            raise PermissionError("此账号为专用运维身份，请通过运维维护")
         await require_permission(connection, "account.reset_password")
         await self.repository.lock_workspace(connection, actor.workspace_id)
         current = await self.repository.member(connection, uid)

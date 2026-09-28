@@ -3827,6 +3827,23 @@ components:
       - reason
       title: RoleSave
       type: object
+    RotationRequest:
+      additionalProperties: false
+      properties:
+        api_key:
+          format: password
+          title: Api Key
+          type: string
+          writeOnly: true
+        expected_revision:
+          minimum: 1.0
+          title: Expected Revision
+          type: integer
+      required:
+      - api_key
+      - expected_revision
+      title: RotationRequest
+      type: object
     RunAccepted:
       properties:
         run_id:
@@ -5667,9 +5684,6 @@ paths:
         name: kind
         required: true
         schema:
-          enum:
-          - direct
-          - agent
           title: Kind
           type: string
       - in: path
@@ -5857,6 +5871,45 @@ paths:
       summary: Get Test
       tags:
       - Model API configuration
+  /api/v1/admin/unified-model-key:
+    get:
+      operationId: key_status_api_v1_admin_unified_model_key_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Key Status
+      tags:
+      - Unified model credential
+    post:
+      operationId: rotate_key_api_v1_admin_unified_model_key_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RotationRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Rotate Key
+      tags:
+      - Unified model credential
   /api/v1/advice:
     post:
       description: 请求经营建议。销售未关联商机的拜访可生成日常待办建议；已关联商机的拜访生成客户待办建议。

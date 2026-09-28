@@ -6,32 +6,77 @@ const modes = [['custom','使用独立接口'],['inherit','继承现有默认接
 const protocols = {chat_completions:'文字对话 · 兼容 Chat Completions',audio_transcriptions:'语音转写 · 兼容 Audio Transcriptions',senseaudio_tts:'语音合成 · 现有语音协议'};
 
 export async function modelApis() {
-  if (state.actor?.role !== 'administrator') return {html:'<div class="card"><div class="card-head"><h2>模型接口配置</h2></div><div class="empty">此页面需要系统管理员权限。</div></div>'};
-  const {items} = await api(base);
+  const [{items, locked}, unified] = await Promise.all([api(base), api('/api/v1/admin/unified-model-key')]);
+  const readOnly = locked || unified.managed;
   return {
-    html:head("模型接口配置","按用途管理直连接口。修改经测试、发布后生效。",'<a class="button" href="#ai">查看调用记录 →</a>') + `
-      <div class="model-api-note">业务智能体仍按已发布的运行策略优先调用中台；这里管理通用能力及原接口兜底。各公司独立配置，当前操作仅影响 <strong>${esc(state.company?.name || '当前公司')}</strong>。</div>
+    html:head("模型接口配置",readOnly?'模型连接由维护方统一管理。':'按用途管理直连接口。修改经测试、发布后生效。','<a class="button" href="#ai">查看调用记录 →</a>') + unifiedKeyCard(unified) + `
+      <div class="model-api-note">业务智能体仍按已发布的运行策略优先调用中台；这里管理通用能力及原接口兜底。${unified.managed?'统一密钥由本次部署的所有公司共用，更新后对所有公司生效。':`各公司独立配置，当前操作仅影响 <strong>${esc(state.company?.name || '当前公司')}</strong>。`}</div>
       <div class="model-api-grid">${items.map(item=>{
         const c=item.configuration, mode=c.mode;
         return `<section class="card model-api-card"><div class="card-head"><div><h2>${esc(item.label)}</h2><small>${esc(item.impact)}</small></div><span class="badge ${mode==='disabled'?'red':mode==='custom'?'green':'blue'}">${mode==='custom'?'独立接口':mode==='disabled'?'已停用':'继承默认'}</span></div>
-          <dl class="model-api-summary"><div><dt>服务商</dt><dd>${esc(c.provider_name || '未设置')}</dd></div><div><dt>模型</dt><dd>${esc(c.model || '未设置')}</dd></div><div class="full"><dt>请求地址</dt><dd>${esc(c.endpoint_url || '未设置')}</dd></div><div><dt>密钥</dt><dd>${esc(item.key_hint)}</dd></div><div><dt>发布版本</dt><dd>${item.version ? '第 '+item.version+' 版' : '现有基线'}</dd></div></dl>
-          <div class="model-api-footer"><small>${item.published_at?'发布于 '+esc(date(item.published_at)):'尚未发布独立配置'}</small><div><button data-connectivity-kind="direct" data-connectivity-target="${item.purpose}" data-connectivity-label="${esc(item.label)}">测试连通性</button><button data-history="${item.purpose}">版本记录</button><button class="primary" data-edit="${item.purpose}">编辑接口</button></div></div></section>`;
+          <dl class="model-api-summary"><div><dt>服务商</dt><dd>${esc(c.provider_name || '未设置')}</dd></div><div><dt>模型</dt><dd>${esc(c.model || '未设置')}</dd></div><div class="full"><dt>请求地址</dt><dd>${esc(c.endpoint_url || '未设置')}</dd></div><div><dt>密钥</dt><dd${unified.managed?' data-unified-connection-key':''}>${esc(unified.managed?(unified.key_hint || '统一密钥未配置'):item.key_hint)}</dd></div><div><dt>发布版本</dt><dd>${item.version ? '第 '+item.version+' 版' : '现有基线'}</dd></div></dl>
+          <div class="model-api-footer"><small>${item.published_at?'发布于 '+esc(date(item.published_at)):'尚未发布独立配置'}</small><div>${readOnly?'':`<button data-connectivity-kind="direct" data-connectivity-target="${item.purpose}" data-connectivity-label="${esc(item.label)}">测试连通性</button>`}<button data-history="${item.purpose}">版本记录</button>${readOnly?'':`<button class="primary" data-edit="${item.purpose}">编辑接口</button>`}</div></div></section>`;
       }).join('')}</div>
-      <div class="model-api-note">密钥加密保存，不会回显或写入浏览器存储。连接测试使用固定样本，可能产生少量调用费用；通过连接测试不代表所有业务场景已验收。相同协议可直接更换服务商，不同协议需要适配。</div>`,
+      <div class="model-api-note">${readOnly?'各用途连接仅供查看，统一密钥由指定维护账号更新。':'连接测试使用固定样本，可能产生少量调用费用；通过连接测试不代表所有业务场景已验收。'} 密钥不会回显或写入浏览器存储。</div>`,
     bind(root) {
+      bindUnifiedKey(root, unified);
       bindConnectivityTests(root);
       root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(items.find(i=>i.purpose===b.dataset.edit)));
       root.querySelectorAll('[data-history]').forEach(b=>b.onclick=async()=>{
         const item=items.find(i=>i.purpose===b.dataset.history), company=state.company?.id;
         try {
           const {items:history}=await api(`${base}/${item.purpose}/releases`);
-          const d=dialog(`${item.label} · 版本记录`, `<p class="muted">载入历史配置后，需使用当前密钥或新密钥重新测试、发布。不会恢复旧密钥。</p>${history.length?history.map(r=>`<div class="model-api-version"><div><strong>第 ${r.version_no} 版</strong><small>${esc(date(r.created_at))} · ${esc(r.created_by || '管理员')}</small><small>${esc(modes.find(m=>m[0]===r.config_snapshot.mode)?.[1])} · ${esc(r.config_snapshot.model)}</small></div><button type="button" data-restore="${r.version_no}">载入配置</button></div>`).join(''):'<div class="empty">尚无发布记录</div>'}`,{wide:true});
+          const d=dialog(`${item.label} · 版本记录`, `<p class="muted">${readOnly?'当前仅支持查看历史记录。':'载入历史配置后，需使用当前密钥或新密钥重新测试、发布。不会恢复旧密钥。'}</p>${history.length?history.map(r=>`<div class="model-api-version"><div><strong>第 ${r.version_no} 版</strong><small>${esc(date(r.created_at))} · ${esc(r.created_by || '管理员')}</small><small>${esc(modes.find(m=>m[0]===r.config_snapshot.mode)?.[1])} · ${esc(r.config_snapshot.model)}</small></div>${readOnly?'':`<button type="button" data-restore="${r.version_no}">载入配置</button>`}</div>`).join(''):'<div class="empty">尚无发布记录</div>'}`,{wide:true});
           d.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>{
             if(state.company?.id!==company){d.close();return;}
             const r=history.find(v=>v.version_no===Number(b.dataset.restore));d.close();edit(item,r);
           });
         }catch(e){toast(e.message);}
       });
+    }
+  };
+}
+
+function unifiedKeyCard(info) {
+  if (!info.managed) return '';
+  return `<section class="card"><div class="card-head"><h2>统一模型密钥</h2></div>
+    <p>文字、转写、兜底与中台模型统一使用此密钥。更新时先验证连接，再同步生效。</p>
+    <p data-unified-key-hint>${esc(info.key_hint || (info.configured?'已配置':'未配置'))}</p>
+    <p data-unified-key-status role="status">${esc(info.message || '当前配置可用')}</p>
+    ${info.can_manage?`<form data-unified-key-form autocomplete="off">
+      <label>新的统一 Key <input name="api_key" type="password" autocomplete="new-password" required spellcheck="false" /></label>
+      <button type="submit" class="primary">验证并更新统一Key</button>
+      <p class="muted">密钥不会回显。更新可能需要一些时间，请等待完成。</p>
+    </form>`:'<p class="muted">仅指定维护账号可更新统一密钥。</p>'}</section>`;
+}
+
+function bindUnifiedKey(root, info) {
+  const form=root.querySelector('[data-unified-key-form]');
+  if (!form || !info.can_manage) return;
+  const company=state.company?.id, input=form.elements.api_key, button=form.querySelector('button');
+  const status=root.querySelector('[data-unified-key-status]'), hint=root.querySelector('[data-unified-key-hint]');
+  let revision=info.revision, running=false;
+  form.onsubmit=async event=>{
+    event.preventDefault();
+    if (running || !form.reportValidity()) return;
+    if (state.company?.id!==company) { input.value=''; return; }
+    const key=input.value;
+    input.value='';
+    running=true; button.disabled=true; status.textContent='正在验证并同步统一密钥，请稍候…';
+    try {
+      const response=await api('/api/v1/admin/unified-model-key',{method:'POST',body:{api_key:key,expected_revision:revision}});
+      if (!root.isConnected || state.company?.id!==company) return;
+      revision=response.revision;
+      hint.textContent=response.key_hint || (response.configured?'已配置':'未配置');
+      root.querySelectorAll('[data-unified-connection-key]').forEach(item=>{item.textContent=hint.textContent;});
+      status.textContent=response.message || (response.rotation_status==='ready'?'统一密钥已更新':'请刷新查看更新结果');
+      running=false;
+    } catch(error) {
+      running=false;
+      if (root.isConnected && state.company?.id===company) status.textContent=error.message;
+    } finally {
+      input.value='';
+      button.disabled=running;
     }
   };
 }

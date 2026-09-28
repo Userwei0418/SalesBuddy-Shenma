@@ -6,6 +6,7 @@ from fastapi.routing import APIRoute
 
 from sales_backend.api.dependencies import get_database, get_settings
 from sales_backend.api.management_dependencies import get_system_identity
+from sales_backend.api.model_connection_lock import connection_policy, require_model_connection_unlocked
 from sales_backend.domain.model_api import ConnectionPublish, ConnectionTest, Purpose
 from sales_backend.services.model_api import ModelApiError, ModelApiService, receipt
 
@@ -28,7 +29,8 @@ class PrivateValidationRoute(APIRoute):
 
 
 router = APIRouter(
-    prefix="/api/v1/admin/model-apis", tags=["Model API configuration"], route_class=PrivateValidationRoute
+    prefix="/api/v1/admin/model-apis", tags=["Model API configuration"], route_class=PrivateValidationRoute,
+    dependencies=[Depends(require_model_connection_unlocked)],
 )
 
 
@@ -38,7 +40,7 @@ def service(database=Depends(get_database), settings=Depends(get_settings)):
 
 @router.get("")
 async def list_connections(identity=Depends(get_system_identity), manager=Depends(service)):
-    return await manager.list(identity.actor)
+    return {**await manager.list(identity.actor), **connection_policy(manager.settings)}
 
 
 @router.get("/{purpose}/releases")

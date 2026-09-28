@@ -7,6 +7,7 @@ scoped grants again at object access and mutation boundaries.
 # module -> handler -> required action. '*' declares intentionally public/auth-only
 # endpoints. '$...' denotes a body-dependent action checked by the dispatcher.
 ROUTES = {
+ 'unified_model_key': {'key_status':'ai.config_read','rotate_key':'ai.config_publish'},
  'web_auth': {name:'*' for name in ('login','refresh','me','change_password','logout')},
  'weekly_reports': {'generate':'weekly_report.generate','list_reports':'weekly_report.read',
   'detail':'weekly_report.read','sources':'weekly_report.generate','report_sources':'weekly_report.read','save_draft':'weekly_report.edit','cancel':'weekly_report.cancel'},

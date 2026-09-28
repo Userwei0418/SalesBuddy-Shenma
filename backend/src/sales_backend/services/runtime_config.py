@@ -32,14 +32,15 @@ async def _load_provider_configuration(
         binding = await ModelApiRepository().current(connection, actor, purpose)
         row = await AgentRuntimeConfigRepository().current(connection, actor)
         if binding and binding["config_snapshot"]["mode"] != "inherit":
-            key = await decrypt_credential(connection, binding, defaults)
+            # A managed deployment never depends on the superseded company key.
+            key = None if defaults.unified_model_key_file else await decrypt_credential(connection, binding, defaults)
             settings = connection_settings(defaults, actor, purpose, binding["config_snapshot"], key,
                                            binding["version_no"])
             prompts = (row or {}).get("prompt_overrides") if row and row["enabled"] else {}
             return RuntimeConfiguration(settings, prompts if isinstance(prompts, dict) else {})
         if not row or not row["enabled"]:
             return RuntimeConfiguration(defaults, {})
-        api_key = await decrypt_credential(connection, row, defaults)
+        api_key = None if defaults.unified_model_key_file else await decrypt_credential(connection, row, defaults)
     configured = replace(
         defaults,
         senseaudio_base_url=str(row["provider_base_url"] or defaults.senseaudio_base_url).rstrip("/"),

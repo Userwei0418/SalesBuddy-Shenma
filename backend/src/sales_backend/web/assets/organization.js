@@ -185,6 +185,7 @@ export async function accounts() {
           btn("＋ 开通账号", "create", "", "primary"),
       ) +
       passwordPolicyCard() +
+      (state.org.account_quota ? `<section class="card"><div class="card-pad"><strong>体验账号额度：${num(state.org.account_quota.used)} / ${num(state.org.account_quota.limit)}</strong><p class="help">整个部署内所有公司共用，剩余 ${num(state.org.account_quota.remaining)} 个名额。启用账号占用名额，停用后释放；同一账号的多个部门和登录端不重复计数，平台管理身份不占用。额度由部署维护人员设置。</p></div></section>` : '') +
       stats([
         ["账号总数", num(state.org.accounts.length), "当前公司"],
         [

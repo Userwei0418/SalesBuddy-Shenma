@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_settings
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_system_identity
+from sales_backend.api.model_connection_lock import connection_policy, require_model_connection_unlocked
 from sales_backend.api.models import AgentRuntimeConfigRollback, AgentRuntimeConfigUpdate
 from sales_backend.config import Settings
 from sales_backend.db import Database
@@ -39,7 +40,7 @@ async def get_agent_config(
     settings: Settings = Depends(get_settings),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        return await RuntimeConfigService(settings).get(connection, identity.actor)
+        return {**await RuntimeConfigService(settings).get(connection, identity.actor), **connection_policy(settings)}
 
 
 @router.get("/api/v1/admin/agent-config/releases")
@@ -52,7 +53,10 @@ async def get_agent_config_releases(
         return {"items": await AgentRuntimeConfigRepository().releases(connection, identity.actor, limit=limit)}
 
 
-@router.post("/api/v1/admin/agent-config/releases/{version}/rollback")
+@router.post(
+    "/api/v1/admin/agent-config/releases/{version}/rollback",
+    dependencies=[Depends(require_model_connection_unlocked)],
+)
 async def rollback_agent_config(
     version: Annotated[int, ApiPath(ge=1, le=2147483646)],
     body: AgentRuntimeConfigRollback,
@@ -71,7 +75,7 @@ async def rollback_agent_config(
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc
 
 
-@router.put("/api/v1/admin/agent-config")
+@router.put("/api/v1/admin/agent-config", dependencies=[Depends(require_model_connection_unlocked)])
 async def update_agent_config(
     body: AgentRuntimeConfigUpdate,
     key: MutationKey = None,
