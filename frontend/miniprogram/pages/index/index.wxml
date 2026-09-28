@@ -44,7 +44,7 @@ module.exports = { tagTone: tagTone, zh: zh };
         <view wx:if="{{item.kind === 'data-card'}}" class="business-card tone-{{item.card.tone}}">
           <view class="business-head">
             <view><view wx:if="{{ui.zh(item.card.eyebrow)}}" class="business-eyebrow">{{item.card.eyebrow}}</view><view class="business-title">{{item.card.title}}</view></view>
-            <sb-status-tag wx:if="{{item.card.statusLabel}}" class="change-status" tone="{{ui.tagTone(item.card.tone)}}" label="{{item.card.statusLabel}}" /><view wx:else class="database-badge">数据已同步</view>
+            <sb-status-tag wx:if="{{item.card.statusLabel}}" class="change-status" tone="{{ui.tagTone(item.card.tone)}}" label="{{item.card.statusLabel}}" />
           </view>
           <view class="business-subtitle">{{item.card.subtitle}}</view>
           <view wx:if="{{item.card.metrics.length}}" class="business-metrics metrics-{{item.card.metrics.length}}">

@@ -630,4 +630,3 @@ page {
 .agent-avatar { background:var(--sb-link-blue); }
 .insight-link,.business-action,.business-metrics .metric-enter { color:var(--sb-link-blue); }
 .greeting-card,.insight-bubble { background:var(--sb-group-bg); }
-.tone-red .row-tag { color:var(--sb-status-ink); background:var(--sb-status-bg); }

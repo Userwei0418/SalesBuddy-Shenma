@@ -21,5 +21,4 @@ page{background:var(--ui-background)}
 
 
 /* Palette only: original geometry is preserved. */
-.status-open .detail-hero { --ui-warning:var(--sb-status-ink); --ui-warning-soft:var(--sb-status-bg); --ui-warning-accent:var(--sb-status-bg); --ui-danger:var(--sb-status-ink); --ui-danger-soft:var(--sb-status-bg); --ui-danger-accent:var(--sb-status-bg); }
 .status-open .summary-text { color:var(--sb-alert-ink); }
