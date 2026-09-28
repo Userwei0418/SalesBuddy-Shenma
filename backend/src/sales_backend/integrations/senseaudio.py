@@ -109,6 +109,8 @@ class SenseAudioClient:
         breaker: GatewayCircuitBreaker | None = None,
         observer: ModelObserver | None = None,
     ):
+        from sales_backend.security.unified_model_key import effective_settings
+        settings = effective_settings(settings)
         if settings.model_api_metadata.get("connection_mode") != "disabled":
             settings.require_model_gateway()
         self._settings = settings

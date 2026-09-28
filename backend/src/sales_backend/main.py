@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from sales_backend import __version__
 from sales_backend.api.admin import router as admin_router
 from sales_backend.api.model_api import router as model_api_router
+from sales_backend.api.unified_model_key import router as unified_model_key_router
 from sales_backend.api.connectivity import router as connectivity_router
 from sales_backend.api.advice import router as advice_router
 from sales_backend.api.agent_audit import router as agent_audit_router
@@ -142,6 +143,7 @@ app.include_router(partners_router)
 app.include_router(business_activity_router)
 app.include_router(admin_router)
 app.include_router(model_api_router)
+app.include_router(unified_model_key_router)
 app.include_router(connectivity_router)
 app.include_router(advice_router)
 app.include_router(agent_audit_router)

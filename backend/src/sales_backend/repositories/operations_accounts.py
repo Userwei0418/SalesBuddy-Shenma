@@ -44,9 +44,12 @@ class OperationsAccountRepository:
         accounts = [dict(r) for r in users]
         for account in accounts:
             account["memberships"] = [dict(m) for m in appointments if m["user_ref_id"] == account["id"]]
-        return {"departments": [dict(r) for r in teams], "accounts": accounts}
+        quota = json_value(await connection.fetchval("SELECT security.deployment_account_quota_status()"))
+        return {"departments": [dict(r) for r in teams], "accounts": accounts, "account_quota": quota}
 
     async def lock_workspace(self, connection, workspace_id):
+        # Match the database guard's global-before-company lock order.
+        await connection.execute("SELECT security.lock_deployment_account_quota()")
         await connection.execute(
             "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", f"account-management:{workspace_id}"
         )

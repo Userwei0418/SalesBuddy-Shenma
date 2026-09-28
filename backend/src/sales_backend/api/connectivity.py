@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from sales_backend.api.dependencies import get_database, get_settings
 from sales_backend.api.management_dependencies import get_system_identity
 from sales_backend.api.model_api import PrivateValidationRoute
+from sales_backend.api.model_connection_lock import require_direct_connection_unlocked
 from sales_backend.services.connectivity import ConnectivityService
 
 router = APIRouter(prefix="/api/v1/admin/ai-connectivity", tags=["AI connectivity"], route_class=PrivateValidationRoute)
@@ -23,7 +24,7 @@ def manager(database=Depends(get_database), settings=Depends(get_settings)):
     return ConnectivityService(database, settings)
 
 
-@router.post("/{kind}/{target}/tests")
+@router.post("/{kind}/{target}/tests", dependencies=[Depends(require_direct_connection_unlocked)])
 async def test_current_connection(
     kind: Literal["direct", "agent"],
     target: str,

@@ -80,7 +80,9 @@ async def main():
         with tempfile.TemporaryDirectory(prefix="shenma-v152-") as directory:
             baseline = Path(directory)
             shutil.copytree(ROOT / "database", baseline, dirs_exist_ok=True)
-            (baseline / "migrations/V153__weekly_report_weeks.sql").unlink()
+            for migration in (baseline / "migrations").glob("V*.sql"):
+                if int(migration.name.split("__")[0][1:]) > 152:
+                    migration.unlink()
             result = await migrate(c, baseline)
         report_id = uuid4()
         source = json.dumps({"period": {"end_date": "2026-01-01"},
@@ -99,7 +101,7 @@ async def main():
         assert new_report['report_week'].isoformat() == '2025-12-29'
         assert new_report['source_cutoff_at'].isoformat() == '2026-01-01T00:00:00+00:00'
         assert await c.fetchval("SELECT body_markdown FROM insight.weekly_report_revision WHERE report_id=$1", report_id) == '保留人工正文'
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 154)]
+        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 155)]
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -131,7 +133,7 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V153", "applied": 28, "companies": 2,
+        print(json.dumps({"upgrade": "V125->V154", "applied": 29, "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
                           "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True,
                           "v152_weekly_draft_preserved": True, "week_year_boundary": True}))

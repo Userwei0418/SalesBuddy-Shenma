@@ -102,6 +102,10 @@ async def update_account(
     user_id: UUID, body: AccountAuthorizationSave, idempotency_key: MutationKey = None,
     identity: RequestIdentity = Depends(manage_accounts), database: Database = Depends(get_database),
 ):
+    from sales_backend.config import get_settings
+    from sales_backend.security.unified_model_key import is_key_operator
+    if is_key_operator(get_settings(), user_id):
+        raise HTTPException(403, "此账号为专用运维身份，请通过运维维护")
     return await management_write(database, identity.actor, idempotency_key, f"authorization.account.update:{user_id}",
         body.model_dump(mode="json"), lambda c: repository.save_account(c, user_id, body.model_dump(mode="json")))
 

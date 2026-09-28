@@ -75,6 +75,10 @@ class Settings:
     agent_today_tasks_acceptance_path: str = ""
     agent_today_tasks_acceptance_target: str = ""
     model_api_endpoint: str = ""
+    model_connections_locked: bool = False
+    unified_model_key_file: str = ""
+    model_key_operator_ids: str = ""
+    model_key_rotation_command_json: str = "[]"
     model_api_metadata: dict = field(default_factory=dict, repr=False)
     agent_execution_policy: dict = field(default_factory=dict, repr=False)
     agent_inference_total_seconds: float = 45.0
@@ -112,6 +116,10 @@ def get_settings() -> Settings:
         database_url=os.getenv("DATABASE_URL", ""),
         senseaudio_base_url=os.getenv("SENSEAUDIO_BASE_URL", "https://api.senseaudio.cn").rstrip("/"),
         senseaudio_api_key=os.getenv("SENSEAUDIO_API_KEY", ""),
+        model_connections_locked=os.getenv("MODEL_CONNECTIONS_LOCKED", "false").strip().lower() in {"1", "true", "yes", "on"},
+        unified_model_key_file=os.getenv("UNIFIED_MODEL_KEY_FILE", ""),
+        model_key_operator_ids=os.getenv("MODEL_KEY_OPERATOR_IDS", ""),
+        model_key_rotation_command_json=os.getenv("MODEL_KEY_ROTATION_COMMAND_JSON", "[]"),
         asr_model=os.getenv("SENSEAUDIO_ASR_MODEL", "senseaudio-asr-lite-1.5-260319"),
         tts_model=os.getenv("SENSEAUDIO_TTS_MODEL", "senseaudio-tts-1.5-260319"),
         llm_model=os.getenv("SENSEAUDIO_LLM_MODEL", "senseaudio-s2-lite"),
