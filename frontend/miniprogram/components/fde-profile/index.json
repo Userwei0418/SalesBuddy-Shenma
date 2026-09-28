@@ -1,6 +1,9 @@
 {
   "component": true,
   "usingComponents": {
-    "quarter-target": "../quarter-target/index"
+    "quarter-target": "../quarter-target/index",
+    "sb-tabs": "/ui/sb/sb-tabs/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index"
   }
 }

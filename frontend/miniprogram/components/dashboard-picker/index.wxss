@@ -1,5 +1,20 @@
-.picker-trigger.picker-trigger{display:flex;align-items:center;justify-content:center;gap:12rpx;box-sizing:border-box;width:176rpx;max-width:176rpx;min-width:0;min-height:0;height:56rpx;margin:0;padding:0 18rpx;border:1rpx solid #c9deef;border-radius:14rpx;background:#f6fbff;color:#2678b6;font-size:22rpx;font-weight:600;line-height:1;white-space:nowrap}
+/* 触发片：和 sb-labeled-select small 同尺寸（64rpx 灰底、chevron-down），外层按钮按 px 补足 44px 点击区。
+   始终显示当前值（label，没有才显示标题），超长省略；只有调用方传 active（选了非默认的成员或团队）才用浅蓝底主色字，
+   默认值是灰底正文色，和季度触发片 quarter-picker-on（改过周期才变蓝）、sb-labeled-select small 的约定一致 */
+.picker-trigger.picker-trigger{display:flex;align-items:center;box-sizing:border-box;width:auto;min-width:176rpx;max-width:280rpx;min-height:0;height:44px;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--ui-ink);font-size:14px;font-weight:400;line-height:1;white-space:nowrap}
 .picker-trigger::after{border:0}
-.trigger-title{line-height:1.2}
-.trigger-caret{width:9rpx;height:9rpx;margin-top:-4rpx;border-right:2rpx solid #5286ae;border-bottom:2rpx solid #5286ae;transform:rotate(45deg);flex-shrink:0}
-.sheet-layer{position:fixed;inset:0;z-index:2000}.sheet-mask{position:absolute;inset:0;background:rgba(25,48,70,.38)}.sheet-panel{position:absolute;bottom:0;left:0;right:0;background:#f7fbff;border-radius:32rpx 32rpx 0 0;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}.sheet-handle-area{height:48rpx;display:flex;align-items:center;justify-content:center}.sheet-handle{width:68rpx;height:7rpx;border-radius:10rpx;background:#bdcddb}.sheet-heading{padding:10rpx 30rpx 22rpx}.sheet-heading>text{display:block;font-size:34rpx;font-weight:600;color:#203d56}.sheet-heading>label{display:block;margin-top:10rpx;font-size:24rpx;color:#7990a4;line-height:1.5}.sheet-search{margin:0 30rpx 18rpx;height:76rpx;padding:0 22rpx;border:1rpx solid #dae6f1;border-radius:16rpx;background:#fff;font-size:28rpx;color:#28465e}.sheet-scroll{height:44vh}.option-group{padding:0 30rpx 18rpx}.group-name{display:block;color:#7a91a5;font-size:23rpx;font-weight:600;padding:16rpx 2rpx 12rpx}.option-row{display:flex;align-items:center;gap:20rpx;background:#fff;border:1rpx solid #e2ebf3;border-radius:16rpx;padding:22rpx;margin-bottom:12rpx}.option-copy{flex:1;min-width:0}.option-copy>text{display:block;font-size:29rpx;color:#25445e;line-height:1.4}.option-copy>label{display:block;font-size:22rpx;color:#7b91a3;margin-top:6rpx}.option-check{flex-shrink:0;width:34rpx;height:34rpx;border:2rpx solid #c4d6e5;border-radius:50%;line-height:34rpx;text-align:center;font-size:24rpx;color:#fff}.option-check.square{border-radius:9rpx}.selected{border-color:#9dcaed;background:#edf7ff}.selected .option-check{background:#1b81cc;border-color:#1b81cc}.sheet-empty{padding:50rpx 30rpx;text-align:center;font-size:27rpx;color:#8096aa;line-height:1.6}.sheet-footer{padding:20rpx 30rpx 24rpx;border-top:1rpx solid #e2ecf4}.sheet-footer>text{display:block;font-size:22rpx;color:#8095a8;text-align:center;margin-bottom:16rpx}.sheet-confirm.sheet-confirm{display:flex;align-items:center;justify-content:center;width:100%;height:86rpx;margin:0;border:0;border-radius:18rpx;background:#197fca;color:#fff;font-size:29rpx;font-weight:600}.sheet-confirm:after{border:0}.sheet-confirm[disabled]{background:#e2ebf2;color:#9badbc}
+.trigger-chip{display:flex;align-items:center;justify-content:center;gap:8rpx;width:100%;min-width:0;height:64rpx;box-sizing:border-box;padding:0 12rpx 0 16rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.picker-trigger-pressed .trigger-chip{opacity:.7}
+.trigger-title{min-width:0;overflow:hidden;line-height:1.2;white-space:nowrap;text-overflow:ellipsis}
+.trigger-caret{display:inline-flex;flex-shrink:0;color:var(--ui-secondary)}
+.picker-trigger-on .trigger-chip{background:var(--ui-selected);color:var(--ui-primary)}
+.picker-trigger-on .trigger-title{font-weight:600}
+.picker-trigger-on .trigger-caret{color:var(--ui-primary)}
+
+/* 弹层正文：t-cell 一行一项，勾在右；分隔线从文字起点开始 */
+.sheet-fixed{padding-top:4rpx}
+.option-list{--td-cell-horizontal-padding:0;--td-cell-vertical-padding:12px;--td-cell-right-icon-color:var(--ui-primary);--td-cell-right-icon-size:40rpx;padding-bottom:8px}
+.option-group{padding-bottom:8px}
+.group-name{display:block;padding:24rpx 0 4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.sheet-empty{padding:32px 0;text-align:center;font-size:14px;color:var(--ui-secondary);line-height:1.6}
+.sheet-note{padding:8px 0 0;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.5;text-align:center}

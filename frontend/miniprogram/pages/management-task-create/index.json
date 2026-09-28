@@ -1,6 +1,18 @@
 {
   "navigationBarTitleText": "创建任务",
-  "navigationBarBackgroundColor": "#F7FAFE",
+  "navigationBarBackgroundColor": "#FFFFFF",
   "navigationBarTextStyle": "black",
-  "homeButton": true
+  "homeButton": true,
+  "usingComponents": {
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-date-picker": "/ui/sb/sb-date-picker/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon",
+    "t-checkbox": "/ui/tdesign/checkbox/checkbox"
+  }
 }

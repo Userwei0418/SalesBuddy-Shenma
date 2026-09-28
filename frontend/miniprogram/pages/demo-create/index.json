@@ -1,4 +1,10 @@
 {
   "navigationBarTitleText": "创建 Demo 场景",
-  "homeButton": true
+  "homeButton": true,
+  "usingComponents": {
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "t-icon": "/ui/tdesign/icon/icon"
+  }
 }

@@ -25,6 +25,7 @@ Component({
     hide() { this.pause(); },
   },
   methods: {
+    onHistoryTab(e){return this.selectHistory({currentTarget:{dataset:{code:e.detail.key}}});},
     pause() { this.visible = false; clearTimeout(this.reviewTimer); this.serial = (this.serial || 0) + 1; this.recordSerial = (this.recordSerial || 0) + 1; this.taskSerial = (this.taskSerial || 0) + 1; this.metricSerial = (this.metricSerial || 0) + 1; this.setData({tasksLoading:false}); },
     profileParams(){return {days:30,team_id:this.properties.profileScope==='team'?this.properties.selectedTeamId||undefined:undefined,scope:this.properties.profileScope==='team'?'team':'self',member_id:this.properties.profileScope==='team'?undefined:this.properties.selectedMemberId||undefined};},
     activityParams(){return {team_id:this.properties.profileScope==='team'?this.properties.selectedTeamId||undefined:undefined,scope:this.properties.profileScope==='team'||this.properties.selectedMemberId?'team':'self',member_id:this.properties.profileScope==='team'?undefined:this.properties.selectedMemberId||undefined};},

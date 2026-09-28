@@ -1,6 +1,16 @@
 {
   "component": true,
   "usingComponents": {
-    "fde-picker": "../fde-picker/index"
+    "fde-picker": "../fde-picker/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-amount-input": "/ui/sb/sb-amount-input/index",
+    "sb-date-picker": "/ui/sb/sb-date-picker/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-pagination": "/ui/sb/sb-pagination/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
   }
 }

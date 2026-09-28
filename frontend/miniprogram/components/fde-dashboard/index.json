@@ -2,6 +2,14 @@
   "component": true,
   "usingComponents": {
     "dashboard-picker": "../dashboard-picker/index",
-    "dashboard-ranking": "../dashboard-ranking/index"
+    "dashboard-ranking": "../dashboard-ranking/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-kpi-card": "/ui/sb/sb-kpi-card/index",
+    "sb-summary-card": "/components/review-summary-card/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-pagination": "/ui/sb/sb-pagination/index",
+    "t-button": "/ui/tdesign/button/button",
+    "t-icon": "/ui/tdesign/icon/icon"
   }
 }

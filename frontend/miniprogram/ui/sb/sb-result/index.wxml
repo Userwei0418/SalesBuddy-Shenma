@@ -1,0 +1,8 @@
+<view class="sb-result sb-result-{{s}}" aria-role="status">
+  <t-result theme="{{theme}}" title="{{title}}" description="{{description}}" t-class-title="sb-result-title" t-class-description="sb-result-desc" />
+  <view class="sb-result-extra"><slot name="extra"></slot></view>
+  <view wx:if="{{primaryLabel || secondaryLabel}}" class="sb-result-actions">
+    <t-button wx:if="{{primaryLabel}}" class="sb-result-primary" theme="primary" size="large" block loading="{{primaryLoading}}" disabled="{{primaryDisabled || primaryLoading}}" bind:tap="onPrimary">{{primaryLabel}}</t-button>
+    <t-button wx:if="{{secondaryLabel}}" variant="outline" size="large" block disabled="{{secondaryDisabled}}" bind:tap="onSecondary">{{secondaryLabel}}</t-button>
+  </view>
+</view>

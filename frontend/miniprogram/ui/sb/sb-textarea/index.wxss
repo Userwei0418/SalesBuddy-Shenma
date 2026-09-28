@@ -1,0 +1,14 @@
+.sb-textarea { display: flex; flex-direction: column; gap: var(--ui-space-1); padding: var(--ui-space-2) var(--ui-page-gutter); background: var(--ui-surface); }
+.sb-textarea-label { display: flex; align-items: center; font-size: var(--ui-text-small); color: var(--ui-secondary); }
+.sb-req { color: var(--ui-danger); }
+
+/* stacked：标签在上 14px，下面控件框高 var(--ui-field-height)（小程序 44px）、一圈细线、控件圆角（和页面手写表单一致）；plain：不带白底与页边距 */
+.sb-textarea.is-plain { padding: var(--ui-space-2) 0; background: transparent; }
+.sb-textarea.is-stacked { --td-textarea-padding: var(--ui-space-2) var(--ui-space-3); --td-textarea-background-color: transparent; flex-direction: column; align-items: stretch; gap: var(--ui-space-2); } /* t-textarea 自带 32rpx 内边距，变量挂在真实节点上改成框内边距（t-textarea 是虚拟宿主） */
+.sb-textarea.is-stacked .sb-textarea-label { font-size: 14px; font-weight: 400; color: var(--ui-ink); } /* 飞书表单标签：常规字重、正文色、下方 8px */
+.sb-textarea-box { display: block; min-width: 0; }
+.sb-textarea.is-stacked .sb-textarea-box { border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); overflow: hidden; } /* 框画在自己的 view 上，不靠 t-textarea 宿主的外部样式类 */
+.sb-textarea-control { font-size: var(--ui-text-body); color: var(--ui-ink); }
+.sb-form-tips { font-size: var(--ui-text-small); line-height: 1.5; color: var(--ui-muted); }
+.sb-form-tips.is-error { color: var(--ui-danger); }
+.sb-textarea.is-stacked.is-error .sb-textarea-box { border-color: var(--ui-danger); }

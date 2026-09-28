@@ -1,0 +1,18 @@
+.sb-input { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ui-space-2); min-height: var(--ui-field-height); padding: var(--ui-space-2) var(--ui-page-gutter); background: var(--ui-surface); }
+.sb-input-label { flex: 0 0 auto; font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-req { color: var(--ui-danger); }
+.sb-input-box { --td-input-vertical-padding: 0; --td-input-bg-color: transparent; flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--ui-space-2); } /* 变量挂在真实节点上往下继承（t-input 是虚拟宿主） */
+.sb-input-control { --td-input-vertical-padding: 0; --td-input-bg-color: transparent; flex: 1; min-width: 0; font-size: var(--ui-text-body); color: var(--ui-ink); }
+.sb-input-suffix { flex: 0 0 auto; font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-input-eye { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; position: relative; min-width: 44px; min-height: calc(var(--ui-field-height) - 2px); color: var(--ui-muted); }
+.sb-input-eye::after { content: ''; position: absolute; left: 0; right: 0; top: calc(50% - 22px); bottom: calc(50% - 22px); } /* 框高减去上下描边，不把框撑高；点击区 44px */
+.sb-input-tips { flex: 0 0 100%; font-size: var(--ui-text-small); line-height: 1.5; color: var(--ui-muted); }
+.sb-input-tips.is-error { color: var(--ui-danger); }
+.sb-pressed { opacity: .7; }
+/* stacked：标签在上 14px 常规字重（飞书表单），下面白底细线 6px 圆角的框，高 var(--ui-field-height)（小程序 44px） */
+.sb-input.is-plain { padding: var(--ui-space-2) 0; background: transparent; }
+.sb-input.is-stacked { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
+.sb-input.is-stacked .sb-input-label { font-size: 14px; font-weight: 400; color: var(--ui-ink); }
+.sb-input.is-stacked .sb-input-box { min-height: var(--ui-field-height); padding: 0 var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); }
+.sb-input.is-stacked.is-error .sb-input-box { border-color: var(--ui-danger); }
+.sb-input.is-stacked.disabled .sb-input-box { background: var(--ui-background); }

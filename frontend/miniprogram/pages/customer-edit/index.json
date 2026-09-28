@@ -1,4 +1,11 @@
 {
   "navigationBarTitleText": "编辑客户",
+  "usingComponents": {
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index"
+  },
   "homeButton": true
 }

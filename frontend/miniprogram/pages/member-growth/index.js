@@ -57,6 +57,7 @@ Page({
       }, () => { this.drawRadar(); this.drawGrowthLine(); });
     }).catch((error) => this.setData({ loading: false, ready: false, statusText: error.message || "能力数据加载失败" }));
   },
+  onGrowthTab(e) { return this.selectGrowthDimension({ currentTarget: { dataset: { code: e.detail.key } } }); },
   selectGrowthDimension(e) {
     const code = e.currentTarget.dataset.code;
     const option = this.data.growthOptions.find((item) => item.code === code);
@@ -70,10 +71,10 @@ Page({
       const ctx = wx.createCanvasContext("memberAbilityRadar", this);
       const width = rect.width, height = rect.height, cx = width / 2, cy = height / 2 + 3, radius = Math.min(width, height) * 0.31;
       const point = (index, scale) => { const angle = -Math.PI / 2 + index * Math.PI / 3; return [cx + Math.cos(angle) * radius * scale, cy + Math.sin(angle) * radius * scale]; };
-      for (let level = 1; level <= 5; level += 1) { ctx.beginPath(); for (let i = 0; i < 6; i += 1) { const p = point(i, level / 5); if (!i) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); } ctx.closePath(); ctx.setStrokeStyle("rgba(61,100,146,.18)"); ctx.stroke(); }
-      for (let i = 0; i < 6; i += 1) { const p = point(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); ctx.setStrokeStyle("rgba(61,100,146,.13)"); ctx.stroke(); }
-      ctx.beginPath(); dimensions.forEach((item, index) => { const p = point(index, item.score / 100); if (!index) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); }); ctx.closePath(); ctx.setFillStyle("rgba(22,119,255,.22)"); ctx.fill(); ctx.setLineWidth(2); ctx.setStrokeStyle("#1677ff"); ctx.stroke();
-      dimensions.forEach((item, index) => { const p = point(index, item.score / 100); ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.setFillStyle("#1677ff"); ctx.fill(); const label = point(index, 1.28); ctx.setFillStyle("#53657a"); ctx.setFontSize(11); ctx.setTextAlign(label[0] < cx - 5 ? "right" : label[0] > cx + 5 ? "left" : "center"); ctx.fillText(`${item.shortName} ${Math.round(item.score)}`, label[0], label[1] + 4); });
+      for (let level = 1; level <= 5; level += 1) { ctx.beginPath(); for (let i = 0; i < 6; i += 1) { const p = point(i, level / 5); if (!i) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); } ctx.closePath(); ctx.setStrokeStyle("rgba(79,96,120,.18)"); ctx.stroke(); }
+      for (let i = 0; i < 6; i += 1) { const p = point(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); ctx.setStrokeStyle("rgba(79,96,120,.13)"); ctx.stroke(); }
+      ctx.beginPath(); dimensions.forEach((item, index) => { const p = point(index, item.score / 100); if (!index) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); }); ctx.closePath(); ctx.setFillStyle("rgba(40,99,205,.22)"); ctx.fill(); ctx.setLineWidth(2); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
+      dimensions.forEach((item, index) => { const p = point(index, item.score / 100); ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill(); const label = point(index, 1.28); ctx.setFillStyle("#4F6078"); ctx.setFontSize(11); ctx.setTextAlign(label[0] < cx - 5 ? "right" : label[0] > cx + 5 ? "left" : "center"); ctx.fillText(`${item.shortName} ${Math.round(item.score)}`, label[0], label[1] + 4); });
       ctx.draw();
     }).exec();
   },
@@ -86,9 +87,9 @@ Page({
       const ctx = wx.createCanvasContext("memberGrowthLine", this);
       const width = rect.width, height = rect.height, left = 34, right = 12, top = 18, bottom = 28;
       const valueOf = (item) => code === "overall" ? Number(item.overall_score || 0) : Number(((item.dimension_scores || {})[code] || {}).score || 0);
-      [0, 25, 50, 75, 100].forEach((value) => { const y = top + (100 - value) / 100 * (height - top - bottom); ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.setStrokeStyle("rgba(61,100,146,.12)"); ctx.stroke(); ctx.setFillStyle("#91a0b2"); ctx.setFontSize(9); ctx.setTextAlign("right"); ctx.fillText(String(value), left - 6, y + 3); });
-      ctx.beginPath(); history.forEach((item, index) => { const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right); const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom); if (!index) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.setLineWidth(2.5); ctx.setStrokeStyle("#1677ff"); ctx.stroke();
-      history.forEach((item, index) => { const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right); const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.setFillStyle("#1677ff"); ctx.fill(); if (!index || index === history.length - 1) { ctx.setFillStyle("#728196"); ctx.setFontSize(9); ctx.setTextAlign(!index ? "left" : "right"); ctx.fillText(String(item.review_date).slice(5), x, height - 7); } });
+      [0, 25, 50, 75, 100].forEach((value) => { const y = top + (100 - value) / 100 * (height - top - bottom); ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.setStrokeStyle("rgba(79,96,120,.12)"); ctx.stroke(); ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign("right"); ctx.fillText(String(value), left - 6, y + 3); });
+      ctx.beginPath(); history.forEach((item, index) => { const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right); const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom); if (!index) ctx.moveTo(x, y); else ctx.lineTo(x, y); }); ctx.setLineWidth(2.5); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
+      history.forEach((item, index) => { const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right); const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom); ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill(); if (!index || index === history.length - 1) { ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign(!index ? "left" : "right"); ctx.fillText(String(item.review_date).slice(5), x, height - 7); } });
       ctx.draw();
     }).exec();
   },

@@ -1,7 +1,9 @@
 {
   "navigationBarTitleText": "维护商机",
   "usingComponents": {
-    "opportunity-form": "/components/opportunity-form/index"
+    "opportunity-form": "/components/opportunity-form/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true
 }

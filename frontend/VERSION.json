@@ -3,7 +3,11 @@
   "customer": "shenzhoukuntai",
   "source_version": "1.0.9",
   "source_commit": "be421b12b9dce38aa940e8b546dde1796c3bdef5",
-  "database_version": "V151",
+  "database_version": "V153",
   "customer_appid": "wx2824bdeb58528fd8",
-  "customer_version": "1.0.9-shenma.1"
+  "customer_version": "1.0.10-shenma.1",
+  "ui_release": "1.0.10",
+  "ui_business_baseline": "0d0b7b29015cdfe9e5cd5d4ffc7f02aa5889753b",
+  "ui_source_archive": "Raccoon-SalesBuddy-小程序-v1.0.8-仅配色调整-20260928.zip",
+  "ui_source_sha256": "658213b3455abbaf9341ad685700bfdd0f0b8f584338e6dba9a9673751ee9829"
 }

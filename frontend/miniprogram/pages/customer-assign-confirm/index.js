@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const businessOptions = require('../../utils/businessOptions');
 const apiClient = require("../../utils/apiClient");
 const { draftScope } = require("../../utils/draftScope");
@@ -178,7 +179,7 @@ Page({
       title: "确认建档并下发？",
       content: `将“${values.customer_name}”正式建档，并下发给${values.assigned_team}的${values.assigned_sales}。`,
       confirmText: "确认建档",
-      confirmColor: "#1677FF",
+      confirmColor: uiColors.primary,
       success: (result) => {
         if (!result.confirm) return;
         const member = this.members.find((item) => item.name === values.assigned_sales);

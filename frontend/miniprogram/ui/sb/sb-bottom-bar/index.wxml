@@ -1,0 +1,8 @@
+<view class="sb-bottombar">
+  <text wx:if="{{(disabled || inactive) && disabledReason}}" class="sb-bottombar-line sb-bottombar-reason">{{disabledReason}}</text>
+  <text wx:elif="{{note}}" class="sb-bottombar-line">{{note}}</text>
+  <view class="sb-bottombar-row">
+    <view wx:if="{{secondaryLabel}}" class="sb-bottombar-btn"><t-button variant="outline" size="large" block disabled="{{secondaryDisabled}}" bind:tap="onSecondary">{{secondaryLabel}}</t-button></view>
+    <view class="sb-bottombar-btn sb-bottombar-primary {{inactive ? 'sb-bottombar-inactive' : ''}}"><t-button theme="primary" size="large" block loading="{{loading}}" disabled="{{disabled || loading}}" bind:tap="onPrimary">{{loading ? loadingLabel : primaryLabel}}</t-button></view>
+  </view>
+</view>

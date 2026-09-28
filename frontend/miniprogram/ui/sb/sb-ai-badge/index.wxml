@@ -1,0 +1,1 @@
+<view class="sb-ai sb-ai-{{state}}" aria-role="status"><text class="sb-ai-mark" aria-hidden="true">AI</text><text>{{label}}</text></view>

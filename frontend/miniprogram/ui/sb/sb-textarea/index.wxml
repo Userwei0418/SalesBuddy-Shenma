@@ -1,0 +1,6 @@
+<view class="sb-textarea {{error ? 'is-error' : ''}} {{disabled ? 'disabled' : ''}} {{layout === 'stacked' ? 'is-stacked' : ''}} {{plain ? 'is-plain' : ''}}" aria-role="group" aria-label="{{label}}">
+  <view wx:if="{{label}}" class="sb-textarea-label"><text>{{label}}</text><text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></view>
+  <view class="sb-textarea-box"><t-textarea class="sb-textarea-control" value="{{value}}" placeholder="{{placeholder}}" maxlength="{{maxlength}}" indicator autosize="{{autosizeObj}}" disabled="{{disabled}}" cursor-spacing="{{cursorSpacing}}" fixed="{{fixed}}" focus="{{focus}}" bordered="{{false}}" bind:change="onInput" /></view>
+  <text wx:if="{{error}}" class="sb-form-tips is-error" aria-role="alert">{{error}}</text>
+  <text wx:elif="{{help}}" class="sb-form-tips">{{help}}</text>
+</view>

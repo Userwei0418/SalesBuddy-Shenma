@@ -34,7 +34,7 @@ test('商机筛选以销售基础项为准，管理角色按权限追加范围�
   assert.match(wxml, /role === 'supervisor' \? '直属成员' : '人员'/);
   assert.match(wxml, /class="stage-panel"/);
   assert.match(wxml, /class="filter-scroll" scroll-x/);
-  assert.match(wxss, /\.filter-item\{width:188rpx/);
+  assert.match(wxss, /\.filter-item\{width:104px/);
 });
 
 test('总经理团队筛选会联动人员选项，总监只追加直属成员', async () => {

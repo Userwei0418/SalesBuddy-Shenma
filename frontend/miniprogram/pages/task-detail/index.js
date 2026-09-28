@@ -1,4 +1,5 @@
 /** Task completion requires creator review, except self-assigned tasks. */
+const uiColors = require("../../utils/uiColors");
 const { taskLight } = require('../../utils/statusLight');
 const apiClient = require("../../utils/apiClient");
 const access = require("../../utils/access");
@@ -130,7 +131,7 @@ Page({
       title: rejecting ? "确认拒绝任务？" : `确认${task.responseLabel}？`,
       content: rejecting ? "拒绝原因会立即推送给任务发起人，原任务将保留记录。" : "接受后任务进入待执行状态。",
       confirmText: rejecting ? "确认拒绝" : task.responseLabel,
-      confirmColor: rejecting ? "#D7614E" : "#2B9A70",
+      confirmColor: rejecting ? uiColors.danger : uiColors.success,
       success: (result) => {
         if (!result.confirm) return;
         this.setData({ submitting: true });
@@ -159,6 +160,15 @@ Page({
     wx.navigateTo({ url: "/pages/management-task-create/index?retry=1" });
   },
 
+  onInfoTap(e){
+    const task=this.data.task;
+    if(!task||e.detail.key!=='opportunity'||!task.customer_id||!task.opportunity_id)return;
+    wx.setStorageSync("pendingOpenCustomerId",task.customer_id);
+    wx.setStorageSync("pendingOpenOpportunityId",task.opportunity_id);
+    wx.switchTab({url:"/pages/customers/index"});
+  },
+  onRejectCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'reject_completion'}}});},
+  onApproveCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'approve_completion'}}});},
   inputReviewNote(e) { this.setData({reviewNote:e.detail.value}); },
   reviewCompletion(e) {
     const task=this.data.task, event=e.currentTarget.dataset.event;
@@ -183,7 +193,7 @@ Page({
       title: task.selfAssigned ? "确认任务已完成？" : "提交完成申请？",
       content: task.selfAssigned ? "自建自领任务将直接完成。" : `提交后由 ${task.creator} 确认，验收通过才算完成。`,
       confirmText: task.selfAssigned ? "确认完成" : "提交完成",
-      confirmColor: "#2B9A70",
+      confirmColor: uiColors.success,
       success: (result) => {
         if (!result.confirm) return;
         this.setData({ submitting: true });

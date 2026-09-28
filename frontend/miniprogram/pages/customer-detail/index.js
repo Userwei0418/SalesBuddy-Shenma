@@ -2,6 +2,16 @@ const access=require('../../utils/access');
 const {DetailReadSession,customerLoaders,activeSections,detailWithPages,pageStates} = require('../../utils/detailReadSession');
 const apiClient = require("../../utils/apiClient");
 const { normalizeCustomerDetail } = require("../../utils/customerDetail");
+// 顶部摘要卡标签（仅展示用）：风险黄/红/待评估用状态标签，绿色不标；象限、等级为中性标签。
+const RISK_TONES = { yellow: "watch", red: "bad", gray: "pending" };
+function heroTags(detail) {
+  const tone = RISK_TONES[detail.signal && detail.signal.tone];
+  return [
+    ...(tone ? [{ label: detail.risk, tone }] : []),
+    { label: detail.quadrant },
+    { label: `${detail.level}级客户` },
+  ];
+}
 
 Page({
   data: {
@@ -63,7 +73,7 @@ Page({
     raw.visits=raw.visits.map(visit=>this._fullVisits[visit.id]||visit);
     const detail=normalizeCustomerDetail(raw,this.data.opportunityId);
     const stages=require('../../utils/opportunity').STAGES.slice(0,6).map(s=>s.label),current=Math.max(0,stages.indexOf(detail.opportunity.stage));
-    this.setData({detailSummary:{loading:summary.loading,loaded:summary.loaded,error:summary.error},detailPages:pageStates(this._reader.pages),customer:{...detail,initial:detail.name.substring(0,1),contacts:detail.contacts.map(item=>({...item,initial:item.name?item.name.substring(0,1):'?',strengthTone:item.strength==='首要联系人'?'strong':'attention'})),stageSteps:stages.map((label,index)=>({label,status:index<current?'done':index===current?'current':'upcoming'}))}});
+    this.setData({heroTags:heroTags(detail),detailSummary:{loading:summary.loading,loaded:summary.loaded,error:summary.error},detailPages:pageStates(this._reader.pages),customer:{...detail,initial:detail.name.substring(0,1),contacts:detail.contacts.map(item=>({...item,initial:item.name?item.name.substring(0,1):'?',strengthTone:item.strength==='首要联系人'?'strong':'attention'})),stageSteps:stages.map((label,index)=>({label,status:index<current?'done':index===current?'current':'upcoming'}))}});
   },
   loadCustomerSummary(options={}){
     if(!this._reader||!this._raw)return;
@@ -77,6 +87,7 @@ Page({
   loadSections(){if(this._reader&&this._loaders){activeSections(this.data.activeTab).forEach(key=>this._reader.load(key,this._loaders[key]));if(this.data.activeTab==='overview')this.loadCustomerSummary();}},
   moreSection(e){const key=e.currentTarget.dataset.section;return this._reader.load(key,this._loaders[key],{more:true});},
   retrySection(e){const key=e.currentTarget.dataset.section;return this._reader.load(key,this._loaders[key],{retry:true});},
+  onTabChange(e) { this.selectTab({ currentTarget: { dataset: { tab: e.detail.key } } }); },
   selectTab(e) {
     this.setData({ activeTab: e.currentTarget.dataset.tab, expandedVisitId: "" });
     this._visitSerial=(this._visitSerial||0)+1;this.loadSections();

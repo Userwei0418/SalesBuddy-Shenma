@@ -74,6 +74,7 @@ Page({
     overviewDescription: "",
     overviewEmptyTitle: "",
     sortOptions: TASK_SORT_OPTIONS,
+    taskViewOptions: [{ value: "self", label: "本人任务" }, { value: "team", label: "团队任务" }],
     sortIndex: 0,
     opportunityOnly: false,
   },
@@ -146,9 +147,12 @@ Page({
       pendingCount:summary.pending_count,completedCount:summary.completed_count,totalCount:summary.total,filteredTotal:summary.filtered_total});
   },
   loadMore(){return this.fetchTaskPage(true);},
+  // sb-segmented 发 {value}，转给原方法（原方法读 currentTarget.dataset.view，权限拦截在原方法里）
+  onTaskViewChange(e){return this.changeTaskView({currentTarget:{dataset:{view:e.detail.value}}});},
   changeTaskView(e){if(e.currentTarget.dataset.view==='team'&&!this.data.canViewTeam)return;this.setData({taskView:e.currentTarget.dataset.view,fdeTaskMemberId:''});return this.loadTasks();},
   changeSort(e){const index=Number(e.detail.value);if(!Number.isInteger(index)||!TASK_SORT_OPTIONS[index])return;this.setData({sortIndex:index});return this.loadTasks();},
   selectTab(e){if(!['pending','completed','rejected','all'].includes(e.currentTarget.dataset.key))return;this.setData({activeTab:e.currentTarget.dataset.key});return this.loadTasks();},
+  onTabChange(e){return this.selectTab({currentTarget:{dataset:{key:e.detail.key}}});},
 
   openTask(e) {
     wx.navigateTo({ url: `/pages/task-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}` });

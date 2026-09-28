@@ -1,6 +1,6 @@
 Component({
   properties: {
-    title: String, subtitle: String, label: String, options: Array, selected: Array,
+    title: String, subtitle: String, label: String, active: Boolean, options: Array, selected: Array,
     multiple: Boolean, loading: Boolean, error: String, selectionKind: {type:String,value:'member'},
   },
   data: {open:false, query:'', draft:[], groups:[], canApply:false},

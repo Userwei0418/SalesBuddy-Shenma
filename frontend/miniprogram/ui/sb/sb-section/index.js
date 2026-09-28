@@ -1,0 +1,1 @@
+Component({options:{addGlobalClass:!0,multipleSlots:!0},properties:{title:String,description:String,extraLabel:String,plain:{type:Boolean,value:!1},bordered:{type:Boolean,value:!1}},methods:{onExtra(){this.triggerEvent("extra")}}});

@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "sb-status-tag": "/ui/sb/sb-status-tag/index"
+  }
+}

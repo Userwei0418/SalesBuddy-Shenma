@@ -1,9 +1,13 @@
 {
   "navigationBarTitleText": "客户经营详情",
-  "navigationBarBackgroundColor": "#F7FAFE",
-  "backgroundColor": "#EEF5FC",
   "usingComponents": {
-    "detail-pagination": "../../components/detail-pagination/index"
+    "detail-pagination": "../../components/detail-pagination/index",
+    "sb-tabs": "/ui/sb/sb-tabs/index",
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true
 }

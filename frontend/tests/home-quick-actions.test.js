@@ -12,7 +12,7 @@ test('首页按入口数量布局，三入口拜访居中，两入口使用紧�
   assert.match(wxss, /\.composer-wrap\s*\{[\s\S]*position:\s*fixed/);
   assert.match(wxss, /\.quick-action-button\.action-visit\{[^}]*border-radius:50%/);
   assert.match(wxss, /\.quick-action-button\.action-visit\{[^}]*flex:0 0 112rpx/);
-  assert.match(wxss, /\.quick-action-button\.action-visit\{[\s\S]*linear-gradient/);
+  assert.match(wxss, /\.quick-action-button\.action-visit\{[^}]*background:var\(--ui-primary\)/);
   assert.match(wxss, /\.visit-entry-microphone\{[^}]*width:42rpx/);
   assert.match(wxss, /\.action-visit \.quick-action-label\{display:none\}/);
   assert.match(wxss, /\.three-quick-actions \.quick-action-button:first-child\{[^}]*margin-right:-56rpx[^}]*radial-gradient\(circle 62rpx at 100% 50%,transparent 60rpx/);
@@ -38,8 +38,10 @@ test('首页固定经营摘要并在卡片区域独立滚动，客户认领进�
   assert.match(wxml, /class="overview-fixed"[\s\S]*class="brief-card"[\s\S]*<scroll-view class="chat-scroll"/);
   assert.match(wxss, /\.assistant-page\s*\{[\s\S]*display:\s*flex[\s\S]*overflow:\s*hidden/);
   assert.match(wxss, /\.chat-scroll\{[^}]*flex:1[^}]*height:0/);
-  assert.match(wxss, /\.brief-card\s*\{[\s\S]*linear-gradient\(125deg,#153b61,#1b639d\)/);
-  assert.match(wxss, /\.metric-num\s*\{[\s\S]*color:\s*#fff/);
+  assert.match(wxss, /\.brief-card\s*\{[^}]*background:\s*var\(--sb-hero-bg\)/);
+  const summaryCss = fs.readFileSync(__dirname + '/../miniprogram/components/review-summary-card/index.wxss', 'utf8');
+  assert.match(summaryCss, /\.appearance-hero \.sb-summary-title,\.appearance-hero \.sb-summary-value\s*\{[^}]*color:var\(--sb-hero-ink\)/);
+  assert.match(wxml, /<sb-summary-card[^>]*appearance="hero"/);
   assert.match(js, /openCustomerClaim\(\)[\s\S]*navigateTo\(\{ url: "\/pages\/customer-claim\/index" \}\)/);
   assert.doesNotMatch(wxml, /assignment-layer|CUSTOMER CLAIM/);
   assert.match(js, /homeGreetingShownLogin/);

@@ -76,6 +76,8 @@ Component({
       this.emit();
     },
     openPartners() { if (this.properties.disabled) return; this.setData({showPartnerSearch:!this.data.showPartnerSearch}); if (this.data.showPartnerSearch) this.loadPartners(); },
+    // sb-sheet 的遮罩、关闭键只收起弹层；不复用 openPartners（disabled 时它直接 return，弹层会关不掉）
+    closePartners() { this.setData({showPartnerSearch:false}); },
     partnerSearch(e) { this.setData({partnerQuery:e.detail.value}); this.partnerSeq = (this.partnerSeq || 0) + 1; clearTimeout(this.partnerTimer); this.partnerTimer=setTimeout(() => this.loadPartners(),250); },
     async loadPartners(e) {
       const more = !!(e && e.currentTarget && e.currentTarget.dataset.more);

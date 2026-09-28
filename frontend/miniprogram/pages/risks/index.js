@@ -103,6 +103,8 @@ Page({
     this.setData({ activeTab: e.currentTarget.dataset.key }, () => this.applyFilter());
   },
 
+  onTabChange(e) { this.selectTab({ currentTarget: { dataset: { key: e.detail.key } } }); },
+
   openRisk(e) {
     wx.navigateTo({ url: `/pages/risk-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}` });
   },

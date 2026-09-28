@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const businessOptions = require('../../utils/businessOptions');
 const apiClient = require("../../utils/apiClient");
 const { draftScope } = require("../../utils/draftScope");
@@ -238,7 +239,7 @@ Page({
             title: "需要麦克风权限",
             content: "语音填写客户信息需要使用麦克风，请在设置中允许录音权限。",
             confirmText: "去设置",
-            confirmColor: "#1677FF",
+            confirmColor: uiColors.primary,
             success: (result) => {
               if (!result.confirm) { onDenied(); return; }
               wx.openSetting({ success: (openResult) => openResult.authSetting["scope.record"] ? onGranted() : onDenied(), fail: onDenied });
@@ -309,7 +310,7 @@ Page({
         ? `将创建“${values.customer_name}”，客户负责人固定为本人，不进入下发客户池。`
         : `将创建“${values.customer_name}”，并放入${values.target_team}的待分配客户池。`,
       confirmText: "确认创建",
-      confirmColor: "#1677FF",
+      confirmColor: uiColors.primary,
       success: (result) => {
         if (!result.confirm) return;
         apiClient.createCustomer({

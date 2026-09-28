@@ -1,1 +1,10 @@
-{"component":true}
+{
+  "component": true,
+  "usingComponents": {
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
+  }
+}

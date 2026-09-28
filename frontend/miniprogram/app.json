@@ -28,17 +28,17 @@
     "pages/demo-create/index"
   ],
   "window": {
-    "backgroundColor": "#F5F3F8",
+    "backgroundColor": "#E9EDF3",
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F8F7FA",
+    "navigationBarBackgroundColor": "#FFFFFF",
     "navigationBarTitleText": "Raccoon SalesBuddy",
     "navigationBarTextStyle": "black"
   },
   "permission": {},
   "tabBar": {
-    "color": "#7A8495",
-    "selectedColor": "#1677FF",
-    "backgroundColor": "#FBFAFC",
+    "color": "#56677E",
+    "selectedColor": "#2863CD",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {
@@ -74,6 +74,5 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
-  "style": "v2",
   "lazyCodeLoading": "requiredComponents"
 }

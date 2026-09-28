@@ -1,0 +1,14 @@
+<view class="sb-desc">
+  <view wx:if="{{title}}" class="sb-desc-title">{{title}}</view>
+  <view wx:if="{{layout === 'grid'}}" class="sb-desc-grid">
+    <view wx:for="{{list}}" wx:key="key" class="sb-desc-cell {{item.tappable ? 'is-tappable' : ''}}" hover-class="{{item.tappable ? 'sb-pressed' : 'none'}}" data-index="{{index}}" bind:tap="onTap">
+      <text class="sb-desc-label">{{item.label}}<text wx:if="{{item.required}}" class="sb-desc-star">*</text></text>
+      <text class="sb-desc-value {{item.cls}}">{{item.text}}</text>
+    </view>
+  </view>
+  <block wx:else>
+    <t-cell wx:for="{{list}}" wx:key="key" title="{{item.label}}" required="{{item.required}}" arrow="{{item.tappable}}" hover="{{item.tappable}}" bordered="{{index < list.length - 1}}" data-index="{{index}}" bind:click="onTap">
+      <text slot="note" class="sb-desc-value {{item.cls}}">{{item.text}}</text>
+    </t-cell>
+  </block>
+</view>

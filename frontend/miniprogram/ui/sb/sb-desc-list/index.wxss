@@ -1,0 +1,13 @@
+.sb-desc { display: block; }
+.sb-desc-title { padding: var(--ui-space-3) 0 var(--ui-space-2); font-size: var(--ui-text-section); font-weight: 600; color: var(--ui-ink); }
+.sb-desc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-3) var(--ui-space-4); }
+.sb-desc-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sb-desc-label { font-size: var(--ui-text-small); line-height: 1.5; color: var(--ui-secondary); }
+.sb-desc-star { margin-left: 2px; color: var(--ui-danger); }
+.sb-desc-value { font-size: 14px; line-height: 1.5; color: var(--ui-ink); word-break: normal; overflow-wrap: anywhere; } /* 不在「09:00」这种词中间断行，放不下再断 */
+.sb-desc-value.is-empty { color: var(--ui-muted); }
+.sb-desc-value.is-todo, .sb-desc-value.is-warning { color: var(--ui-warning); }
+.sb-desc-value.is-danger { color: var(--ui-danger); }
+.sb-desc-value.is-primary { color: var(--ui-primary); }
+.sb-pressed { opacity: .7; }
+.sb-desc-cell.is-tappable { min-height: var(--ui-touch-target); justify-content: center; } /* 可点格子点击高度 44px */

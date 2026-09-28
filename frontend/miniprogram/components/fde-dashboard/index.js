@@ -7,6 +7,7 @@ const {visitDetailUrl} = require('../../utils/visitNavigation');
 Component({
   properties: {recordsOnly:Boolean, recordContext:Object, personal: Boolean, memberId: String, compact: Boolean},
   data: {
+    scopeOptions:[{value:'team',label:'团队'},{value:'self',label:'个人'}], rhythmOptions:[{value:'day',label:'日进展'},{value:'week',label:'周进展'}], rankingPeriodOptions:[{value:'week',label:'周'},{value:'month',label:'月'},{value:'quarter',label:'季度'}],
     loading: true, error: '', ready: false, scope: 'self', scopeLabel: '本人', memberLabel: '',
     rankingPeriod:'', rankingPeriodLabel:'', rankingPeriodLoading:false, rankingPeriodError:'',
     sortKey: 'visits', sortOptions: [{key: 'visits', name: '拜访记录'}, {key: 'completed_tasks', name: '完成任务'}, {key: 'opportunities', name: '参与商机'}, {key: 'overdue_tasks', name: '逾期任务'}], sortIndex: 0,
@@ -34,6 +35,9 @@ Component({
   },
   pageLifetimes: {show() { if (!this.properties.recordsOnly && this.data.year) this.load(); }},
   methods: {
+    onScopeSegment(e){return this.scope({currentTarget:{dataset:{scope:e.detail.value}}});},
+    onRhythmSegment(e){return this.changeRhythmMode({currentTarget:{dataset:{mode:e.detail.value}}});},
+    onRankingPeriodSegment(e){return this.changeRankingPeriod({currentTarget:{dataset:{period:e.detail.value}}});},
     params() {
       if(this.properties.recordsOnly&&this.activityContext)return this.activityContext;
       const memberId=this.properties.memberId || (this.data.scope==='self'?(this.data.memberOptions[this.data.memberIndex]||{}).id:'') || '';

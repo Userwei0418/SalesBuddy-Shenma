@@ -112,6 +112,11 @@ Page({
     this.setData({ passwordVisible: !this.data.passwordVisible });
   },
 
+  // sb-input 点眼睛发 {visible}，与页面状态不一致时转给原方法；页面复位 passwordVisible 会经 showPassword 回写组件
+  onPasswordVisibility(e) {
+    if (!!(e && e.detail && e.detail.visible) !== this.data.passwordVisible) this.togglePassword();
+  },
+
   toggleAgreement() {
     this.setData({ agreed: !this.data.agreed });
   },

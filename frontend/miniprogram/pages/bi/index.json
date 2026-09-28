@@ -3,6 +3,13 @@
   "usingComponents": {
     "fde-dashboard": "../../components/fde-dashboard/index",
     "dashboard-picker": "../../components/dashboard-picker/index",
-    "dashboard-ranking": "../../components/dashboard-ranking/index"
+    "dashboard-ranking": "../../components/dashboard-ranking/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-kpi-card": "/ui/sb/sb-kpi-card/index",
+    "sb-summary-card": "/components/review-summary-card/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "t-button": "/ui/tdesign/button/button",
+    "t-icon": "/ui/tdesign/icon/icon"
   }
 }

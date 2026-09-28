@@ -2,7 +2,13 @@
   "navigationBarTitleText": "拜访记录详情",
   "enablePullDownRefresh": false,
   "usingComponents": {
-    "advice-actions": "/components/advice-actions/index"
+    "advice-actions": "/components/advice-actions/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-section": "/ui/sb/sb-section/index",
+    "sb-desc-list": "/ui/sb/sb-desc-list/index",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true
 }

@@ -1,6 +1,15 @@
 {
   "navigationBarTitleText": "核对客户建档与下发",
-  "navigationBarBackgroundColor": "#F8FBFF",
   "navigationBarTextStyle": "black",
+  "usingComponents": {
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
+  },
   "homeButton": true
 }

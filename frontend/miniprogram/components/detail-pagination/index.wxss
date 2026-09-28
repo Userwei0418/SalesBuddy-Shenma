@@ -1,1 +1,3 @@
-.detail-page-state{padding:20rpx 12rpx;text-align:center;color:#8193ab;font-size:24rpx}.detail-page-state button{margin:8rpx;color:#2579c4;background:#edf6ff;border-radius:16rpx;border:1rpx solid #d8e7f6;font-size:24rpx}.detail-page-state button::after{border:0}.error{display:flex;flex-direction:column;align-items:center;gap:10rpx;color:#aa633a}
+.detail-page-state{color:var(--ui-secondary);font-size:var(--ui-text-small)}.detail-page-note{display:block;padding:20rpx 12rpx;text-align:center}.detail-page-error{display:flex;align-items:center;justify-content:space-between;gap:16rpx;padding:16rpx 0;color:var(--ui-danger);font-size:14px;line-height:1.5}
+/* 「重新加载」看起来是 32px 的小描边按钮；点击放在外层，::after 把点按区上下扩到 44px（按钮自己不绑事件，免得冒泡触发两次） */
+.detail-page-retry{position:relative;flex:0 0 auto}.detail-page-retry::after{content:"";position:absolute;left:0;right:0;top:calc(50% - 22px);bottom:calc(50% - 22px)}.detail-page-retry-pressed{opacity:.7}

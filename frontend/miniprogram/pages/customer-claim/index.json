@@ -1,7 +1,13 @@
 {
   "navigationBarTitleText": "客户认领",
-  "navigationBarBackgroundColor": "#F8FBFF",
   "navigationBarTextStyle": "black",
   "enablePullDownRefresh": false,
+  "usingComponents": {
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-labeled-select": "/ui/sb/sb-labeled-select/index"
+  },
   "homeButton": true
 }

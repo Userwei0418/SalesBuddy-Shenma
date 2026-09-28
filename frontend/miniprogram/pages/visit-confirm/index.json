@@ -3,7 +3,21 @@
   "usingComponents": {
     "opportunity-form": "/components/opportunity-form/index",
     "fde-visit-opportunity": "../../components/fde-visit-opportunity/index",
-    "advice-actions": "/components/advice-actions/index"
+    "advice-actions": "/components/advice-actions/index",
+    "sb-result": "/ui/sb/sb-result/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-date-picker": "/ui/sb/sb-date-picker/index",
+    "t-checkbox": "/ui/tdesign/checkbox/checkbox",
+    "t-checkbox-group": "/ui/tdesign/checkbox-group/checkbox-group",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true
 }

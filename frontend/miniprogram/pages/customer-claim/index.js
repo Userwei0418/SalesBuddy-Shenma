@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const apiClient = require("../../utils/apiClient");
 const { normalizeCustomerSummary } = require("../../utils/customerDetail");
 const PAGE_SIZE = 50;
@@ -225,7 +226,7 @@ Page({
     wx.showModal({
       title: "提交认领申请？",
       content: `申请认领“${customer.name}”，运营审批通过后加入你的作战地图。记录拜访无需先认领。`,
-      confirmText: "提交申请", confirmColor: "#1677FF",
+      confirmText: "提交申请", confirmColor: uiColors.primary,
       success: result => {
         if (!result.confirm || this.data.submitting || !this.currentIdentity(request)
           || this.data.selectedCustomerId !== customer.id) return;

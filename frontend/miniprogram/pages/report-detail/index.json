@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "即时总结详情",
-  "homeButton": true
+  "homeButton": true,
+  "usingComponents": {
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index"
+  }
 }
