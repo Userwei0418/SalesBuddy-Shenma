@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "t-input": "../../tdesign/input/input",
+    "t-icon": "../../tdesign/icon/icon"
+  }
+}

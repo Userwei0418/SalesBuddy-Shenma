@@ -56,7 +56,7 @@ test('商机经营首页整合总览、筛选和商机卡片', () => {
   assert.match(js, /pages\/customer-assets\/index\?customer_id=/);
   assert.doesNotMatch(js, /getWorkbench|baseTasks|baseRisks|baseCustomers/);
   assert.match(js, /listOpportunities/);
-  assert.match(wxss, /\.workbench-filter-item\{width:188rpx/);
+  assert.match(wxss, /\.workbench-filter-item\{width:104px/);
 });
 
 test('总经理在商机列表和商机经营页均可创建商机', () => {

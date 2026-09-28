@@ -1,0 +1,13 @@
+.sb-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--ui-space-2); padding: var(--ui-space-8) var(--ui-space-4); text-align: center; color: var(--ui-secondary); min-height: 200px; }
+.sb-state-skel { padding: var(--ui-space-4); }
+.sb-state-title { font-size: var(--ui-text-section); color: var(--ui-ink); font-weight: 600; }
+.sb-state-desc { font-size: var(--ui-text-body); }
+.sb-state-note { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.sb-state-line { display: flex; align-items: center; gap: var(--ui-space-2); min-height: 44px; font-size: 14px; color: var(--ui-secondary); }
+.sb-state-line.is-error { color: var(--ui-danger); }
+.sb-state-line-text { flex: 1; min-width: 0; }
+/* 小号按钮 32px：外包一层用伪元素把点击区扩到 44px；t-button 内部 catch 了原生 tap，所以按钮本体与外层都绑同一方法，不会重复触发 */
+.sb-state-hit { position: relative; display: inline-flex; }
+.sb-state-hit::after { content: ''; position: absolute; left: 0; right: 0; top: calc(50% - 22px); bottom: calc(50% - 22px); }
+/* 加载态：转圈与文字分开排，文字占满一行居中（以前文字放在 t-loading 里横排，长提示被挤成竖排三行） */
+.sb-state-loading-text { max-width: 100%; font-size: 14px; line-height: 1.5; color: var(--ui-secondary); }

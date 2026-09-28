@@ -5,6 +5,7 @@
  * 草稿按 workspaceId:userId 存储 visitEntryV2/visitStructuredV2；真实记录仅由确认页 POST /visits 写入。
  * 文档“60 分钟/扫描件不支持”的校验须由导入后端负责，前端仅检查文件大小与可选扩展名；没有模拟转写或模拟审核。
  */
+const uiColors = require("../../utils/uiColors");
 const api = require("../../utils/apiClient");
 const access = require("../../utils/access");
 const {draftScope} = require("../../utils/draftScope");
@@ -14,6 +15,7 @@ const draftFields = ["entryMode", "transcript", "customerId", "customerName", "c
   "appliedImportId", "hasTranscription", "localFilePath", "localFileTemporary", "fileSaveErrorCode", "statusText", "errorText"];
 const copy = value => JSON.parse(JSON.stringify(value));
 Page({
+  onEntryModeChange(e) { return this.switchInputMode({ currentTarget: { dataset: { mode: e.detail.value } } }); },
   data: {
     navTop: 20, navHeight: 44, draftNotice: "", draftSaveError: "", undoAvailable: false,
     localFilePath: "", localFileTemporary: false, fileSaveErrorCode: "",
@@ -251,7 +253,7 @@ Page({
     this.backPromptOpen = true;
     wx.showModal({
       title:"是否保存本次拜访草稿？", content:"保存后，下次进入可继续编辑。放弃将清除本次未提交的内容。",
-      confirmText:"保存", cancelText:"放弃", confirmColor:"#1677e8",
+      confirmText:"保存", cancelText:"放弃", confirmColor:uiColors.primary,
       success:async result => {
         this.backPromptOpen = false;
         if (result.confirm) {

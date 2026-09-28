@@ -1,5 +1,6 @@
 /* Shared opportunity editing entry; text wraps beside a stable tap target. */
 .opportunity-card-heading,.workbench-opportunity-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}
 .workbench-opportunity-card-top>.card-view{min-width:0;flex:1}
-.opportunity-card-edit{box-sizing:border-box;flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-width:88rpx;min-height:56rpx;padding:10rpx 18rpx;border:1rpx solid #cbe2f5;border-radius:14rpx;background:#eff7ff;color:#1979bd;font-size:22rpx;font-weight:600;line-height:1.4}
-.opportunity-card-edit-active{background:#dfefff}
+/* 看起来仍是 56rpx 高的细线小按钮；外圈 16rpx 透明边框把点按区撑到 88rpx，负外边距抵掉占位（B-25） */
+.opportunity-card-edit{box-sizing:border-box;flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-width:120rpx;min-height:var(--ui-touch-target);margin:-16rpx -16rpx -16rpx -16rpx;padding:10rpx 20rpx;border:16rpx solid transparent;border-radius:calc(var(--ui-radius-control) + 16rpx);background-color:var(--ui-surface);background-clip:padding-box;box-shadow:inset 0 0 0 1px var(--ui-line);color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:600;line-height:1.4}
+.opportunity-card-edit-active{background-color:var(--ui-neutral-soft)}

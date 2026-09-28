@@ -1,0 +1,12 @@
+<view class="sb-lselect {{size === 'small' ? 'small' : ''}} {{disabled ? 'disabled' : ''}} {{selected ? 'on' : ''}}" hover-class="{{disabled ? 'none' : 'sb-pressed'}}" bind:tap="onOpen" aria-role="button" aria-label="{{label}}：{{text}}">
+  <view wx:if="{{useLabelSlot && (size !== 'small' || !showValue)}}" class="sb-lselect-label"><slot name="label"></slot></view>
+  <text wx:elif="{{size !== 'small' || !showValue}}" class="sb-lselect-label">{{label}}</text>
+  <text wx:if="{{size !== 'small' || showValue}}" class="sb-lselect-text">{{text}}</text>
+  <view wx:if="{{allOption && allowClear && selected && !disabled}}" class="sb-lselect-clear" catch:tap="onClear" aria-role="button" aria-label="清除"><t-icon name="close-circle-filled" size="32rpx" /></view>
+  <t-icon wx:else name="chevron-down" size="32rpx" class="sb-lselect-arrow" />
+</view>
+<root-portal>
+  <t-picker visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" bind:cancel="onCancel" bind:confirm="onConfirm">
+    <t-picker-item options="{{columns}}" />
+  </t-picker>
+</root-portal>

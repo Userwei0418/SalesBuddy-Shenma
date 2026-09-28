@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 /**
  * Create independent tasks for human-selected company colleagues. Customer tasks link an existing
  * opportunity that the creator can associate; recipients need no prior CRM role.
@@ -7,6 +8,7 @@ const { draftScope } = require("../../utils/draftScope");
 const { allTaskRecipients } = require("../../utils/taskRecipients");
 
 Page({
+  onPriorityChange(e) { return this.selectPriority({ currentTarget: { dataset: { value: e.detail.value } } }); },
   data: {
     role: "sales",
     roleName: "一线销售",
@@ -264,7 +266,7 @@ Page({
             title: "需要麦克风权限",
             content: "语音录入任务需要使用麦克风，请在设置中允许录音权限。",
             confirmText: "去设置",
-            confirmColor: "#1677FF",
+            confirmColor: uiColors.primary,
             success: (result) => {
               if (!result.confirm) { onDenied(); return; }
               wx.openSetting({ success: (openResult) => openResult.authSetting["scope.record"] ? onGranted() : onDenied(), fail: onDenied });
@@ -334,6 +336,11 @@ Page({
     else wx.showToast({title:'单次最多选择100人，请分次派发',icon:'none'});
   },
 
+  onDueChange(e) {
+    const [date, time] = String(e.detail.value || "").split(" ");
+    if (date && date !== this.data.customDueDate) this.changeDueDate({ detail: { value: date } });
+    if (time && time !== this.data.customDueTime) this.changeDueTime({ detail: { value: time } });
+  },
   selectPriority(e) {
     if(this.data.submitting || this.data.submissionPending)return;
     this.setData({ selectedPriority: e.currentTarget.dataset.value });
@@ -397,7 +404,7 @@ Page({
     wx.showModal({
       title: `确认创建${recipients.length}条待办？`,
       content: `负责人：${recipients.map(member=>member.name).join('、')}。每人各一条，独立接受和完成；截止${this.data.selectedDue}。`,
-      confirmText: "确认下发", confirmColor: "#1677FF",
+      confirmText: "确认下发", confirmColor: uiColors.primary,
       success: result=>{
         this._confirming=false;
         if(!result.confirm || this.isUnloading || this.data.submitting || this._submitted ||

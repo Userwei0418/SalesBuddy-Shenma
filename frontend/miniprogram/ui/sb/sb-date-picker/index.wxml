@@ -1,0 +1,17 @@
+<view class="sb-dpick {{error ? 'is-error' : ''}} {{disabled ? 'disabled' : ''}} {{layout === 'stacked' ? 'is-stacked' : ''}} {{plain ? 'is-plain' : ''}}" aria-role="group" aria-label="{{label}}">
+  <text wx:if="{{layout === 'stacked' && label}}" class="sb-dpick-label">{{label}}<text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></text>
+  <view class="sb-dpick-row" bind:tap="onOpen" aria-role="button" aria-label="{{label}}：{{text || placeholder}}">
+    <text wx:if="{{layout !== 'stacked' && label}}" class="sb-dpick-label">{{label}}<text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></text>
+    <text class="sb-dpick-value {{text ? '' : 'placeholder'}}">{{text || placeholder}}</text>
+    <view wx:if="{{clearable && text && !disabled}}" class="sb-dpick-clear" catch:tap="onClear" aria-role="button" aria-label="清除"><t-icon name="close-circle-filled" size="32rpx" /></view>
+    <t-icon wx:else name="{{layout === 'stacked' ? 'calendar' : 'chevron-right'}}" size="36rpx" class="sb-dpick-arrow" />
+  </view>
+  <text wx:if="{{error}}" class="sb-form-tips is-error" aria-role="alert">{{error}}</text>
+  <text wx:elif="{{help}}" class="sb-form-tips">{{help}}</text>
+  <view wx:if="{{chips.length && !disabled}}" class="sb-dpick-chips">
+    <view wx:for="{{chips}}" wx:key="key" class="sb-chip {{item.value === text ? 'on' : ''}}" data-value="{{item.value}}" bind:tap="onChip" aria-role="button">{{item.label}}</view>
+  </view>
+</view>
+<root-portal>
+<t-date-time-picker visible="{{open}}" mode="{{mode === 'datetime' ? 'minute' : 'date'}}" title="{{title || label}}" value="{{pickerValue}}" format="{{mode === 'datetime' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'}}" start="{{start}}" end="{{end}}" cancel-btn="取消" confirm-btn="确定" bind:confirm="onConfirm" bind:cancel="onClose" bind:close="onClose" />
+</root-portal>

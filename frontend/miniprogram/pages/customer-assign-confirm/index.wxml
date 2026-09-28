@@ -1,41 +1,35 @@
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
 <view class="confirm-page">
-  <view class="confirm-hero">
-    <view class="hero-top"><view><view class="hero-eyebrow">客户建档与下发草案</view><view class="hero-title">{{customerName}}</view></view><view class="score">{{progressPercent}}<text>%</text></view></view>
-    <view class="hero-meta"><text>{{roleName}}</text><text>创建人 {{recorderName}}</text></view>
-    <view class="progress"><view style="width: {{progressPercent}}%"></view></view>
-    <view class="progress-copy">必填已完成 {{completedCount}} / {{requiredCount}}</view>
-  </view>
+  <view class="confirm-hero"><sb-summary-card title="{{customerName}}" subtitle="客户建档与下发草案" meta="{{roleName}} · 创建人 {{recorderName}}" progress="{{progressPercent}}" progressLabel="必填已完成 {{completedCount}} / {{requiredCount}}" /></view>
 
   <view class="confirm-body">
     <view wx:if="{{draftRestored}}" class="notice blue">已恢复上次保存的客户建档草稿。</view>
     <view wx:if="{{missingCount}}" class="notice orange">还有 {{missingCount}} 个关键字段待补充，完成后才能正式建档下发。</view>
     <view wx:elif="{{saved}}" class="notice green">当前修改已经保存为草稿。</view>
-    <view class="ai-card surface"><view class="ai-head"><view class="ai-badge">AI</view><view><view>核对客户与负责销售</view><text>识别到的信息可修改，未识别内容请补充</text></view></view><view class="ai-copy">请核对客户名称、联系人角色和负责销售；确认后完成客户建档、负责人绑定和销售端提醒。</view></view>
+    <view class="ai-card surface"><view class="ai-head"><view><view>核对客户与负责销售</view><text>识别到的信息可修改，未识别内容请补充</text></view><sb-ai-badge class="ai-head-badge" state="pending" /></view><view class="ai-copy">请核对客户名称、联系人角色和负责销售；确认后完成客户建档、负责人绑定和销售端提醒。</view></view>
     <view class="section-heading"><text>客户建档与下发字段</text><label>{{fields.length}} 项</label></view>
     <view class="field-list surface">
-      <view wx:for="{{fields}}" wx:key="key" class="field-row {{item.missing ? 'missing' : ''}} {{item.system ? 'system' : ''}} {{item.edited ? 'edited' : ''}}" data-index="{{index}}" bindtap="openEditor">
+      <view wx:for="{{fields}}" wx:key="key" class="field-row {{item.missing ? 'missing' : ''}} {{item.system ? 'system' : ''}} {{item.edited ? 'edited' : ''}}" hover-class="row-pressed" data-index="{{index}}" bindtap="openEditor">
         <view class="field-label">{{item.label}}<text wx:if="{{item.required}}">*</text><label wx:if="{{item.edited}}">已修改</label><label wx:elif="{{item.system}}">系统生成</label></view>
-        <view class="field-value"><text>{{item.value || '待补充'}}</text><label>{{item.readonly ? '自动匹配' : item.missing ? '补充' : '编辑'}} ›</label></view>
+        <view class="field-value"><text>{{item.value || '待补充'}}</text><label>{{item.readonly ? '自动匹配' : item.missing ? '补充' : '编辑'}}<t-icon name="chevron-right" size="32rpx" /></label></view>
       </view>
     </view>
   </view>
 
-  <view class="bottom-bar"><button class="secondary" bindtap="saveDraft">保存草稿</button><button disabled="{{submitting}}" loading="{{submitting}}" class="primary {{missingCount ? 'disabled' : ''}}" bindtap="confirmArchive">确认建档并下发</button></view>
+  <sb-bottom-bar class="bottom-bar" secondaryLabel="保存草稿" bind:secondary="saveDraft" primaryLabel="确认建档并下发" inactive="{{missingCount > 0}}" disabledReason="还有 {{missingCount}} 个关键字段待补充" loading="{{submitting}}" loadingLabel="正在建档下发…" bind:primary="confirmArchive" />
 
-  <view wx:if="{{editorVisible}}" class="editor-layer">
-    <view class="editor-mask" bindtap="closeEditor"></view>
-    <view class="editor-sheet" catchtap="stopPropagation">
-      <view class="sheet-handle"></view>
-      <view class="editor-head"><view><view class="editor-eyebrow">编辑建档字段</view><view class="editor-title">{{editorTitle}}</view></view><view class="editor-close" bindtap="closeEditor">×</view></view>
-      <view wx:if="{{editorType === 'text'}}" class="editor-control"><input value="{{editorValue}}" placeholder="{{editorPlaceholder}}" focus bindinput="inputEditor" /></view>
-      <view wx:if="{{editorType === 'textarea'}}" class="editor-textarea"><textarea value="{{editorValue}}" placeholder="{{editorPlaceholder}}" maxlength="500" auto-height focus bindinput="inputEditor" /><view>{{editorValue.length}} / 500</view></view>
-      <view wx:if="{{editorType === 'select'}}" class="option-grid"><view wx:for="{{editorOptions}}" wx:key="label" class="option-item {{item.selected ? 'selected' : ''}}" data-index="{{index}}" bindtap="selectOption"><text>{{item.label}}</text><view>{{item.selected ? '✓' : ''}}</view></view></view>
+  <sb-sheet visible="{{editorVisible}}" title="{{editorTitle}}" confirmLabel="保存修改" bind:confirm="saveEditor" bind:close="closeEditor">
+    <view class="editor-body">
+      <sb-input wx:if="{{editorType === 'text'}}" layout="stacked" plain value="{{editorValue}}" placeholder="{{editorPlaceholder}}" maxlength="{{140}}" focus="{{editorVisible}}" bind:change="inputEditor" />
+      <sb-textarea wx:if="{{editorType === 'textarea'}}" layout="stacked" plain fixed maxRows="{{0}}" focus="{{editorVisible}}" value="{{editorValue}}" placeholder="{{editorPlaceholder}}" maxlength="{{500}}" bind:change="inputEditor" />
+      <block wx:if="{{editorType === 'select'}}">
+        <view wx:if="{{editorOptions.length <= 8}}" class="option-grid"><view wx:for="{{editorOptions}}" wx:key="label" class="option-item {{item.selected ? 'selected' : ''}}" hover-class="is-pressed" data-index="{{index}}" bindtap="selectOption" aria-role="radio" aria-checked="{{!!item.selected}}">{{item.label}}</view></view>
+        <view wx:else class="option-list"><t-cell wx:for="{{editorOptions}}" wx:key="label" title="{{item.label}}" hover data-index="{{index}}" right-icon="{{item.selected ? 'check' : ''}}" bind:click="selectOption" /></view>
+      </block>
       <view class="editor-helper">修改会先更新当前草案，点击“确认建档并下发”后才写入正式客户数据。</view>
-      <view class="editor-actions"><button class="editor-cancel" bindtap="closeEditor">取消</button><button class="editor-save" bindtap="saveEditor">保存修改</button></view>
     </view>
-  </view>
+  </sb-sheet>
 </view>
 
 </block>

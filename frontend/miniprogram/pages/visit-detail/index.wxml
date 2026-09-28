@@ -1,56 +1,65 @@
+<wxs module="view">
+var TONES = { green: 'good', yellow: 'watch', red: 'bad', gray: 'pending' };
+function tags(v) {
+  if (!v || !v.signal || !v.signal.badgeText) return [];
+  return [{ label: v.signal.badgeText, tone: TONES[v.signal.tone] || 'pending' }];
+}
+// 顶部 3px 色条：只在状态标签显示为转差、需关注时画，取值与标签一致
+function stripe(v) {
+  var t = tags(v);
+  return t.length && (t[0].tone === 'bad' || t[0].tone === 'watch') ? t[0].tone : '';
+}
+function fields(v) {
+  if (!v) return [];
+  var list = [{ key: 'customerType', label: '客户类型', value: v.customerType }];
+  if (v.customerId) list.push({ key: 'customerName', label: '客户名称', value: v.customerName });
+  list.push({ key: 'opportunityName', label: '商机名称', value: v.opportunityName });
+  list.push({ key: 'partnerName', label: '伙伴名称', value: v.partnerName });
+  list.push({ key: 'date', label: '跟进日期', value: v.date });
+  list.push({ key: 'createdAt', label: '创建时间', value: v.createdAt });
+  list.push({ key: 'contactNames', label: '对接人', value: v.contactNames });
+  if (v.originalRecorderName) list.push({ key: 'originalRecorderName', label: '原始跟进人', value: v.originalRecorderName });
+  else list.push({ key: 'owner', label: '跟进人', value: v.owner });
+  if (v.managerName) list.push({ key: 'managerName', label: '当前管理人', value: v.managerName });
+  list.push({ key: 'collaborators', label: '协同人', value: v.collaborators });
+  list.push({ key: 'sevenDaysText', label: '是否七天内', value: v.sevenDaysText });
+  list.push({ key: 'mode', label: '拜访方式', value: v.mode });
+  list.push({ key: 'duration', label: '拜访时长', value: v.duration });
+  list.push({ key: 'location', label: '拜访地点', value: v.location });
+  list.push({ key: 'firstVisitText', label: '是否首次拜访', value: v.firstVisitText });
+  return list;
+}
+module.exports = { tags: tags, stripe: stripe, fields: fields };
+</wxs>
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
 <view wx:if="{{visit && visit.fdeParticipantNames}}" class="fde-note">本次实际协助 FDE：{{visit.fdeParticipantNames}}{{visit.isParticipant?' · 本人参与':''}}</view>
 <view class="visit-page">
-  <view wx:if="{{loading}}" class="state-card">正在同步拜访记录…</view>
-  <view wx:elif="{{error}}" class="state-card error"><text>{{error}}</text><button bindtap="loadVisit">重新加载</button></view>
+  <view wx:if="{{loading}}" class="state-card"><sb-state-panel state="loading" title="正在同步拜访记录…" /></view>
+  <view wx:elif="{{error}}" class="state-card error"><sb-state-panel state="error" title="拜访记录加载失败" description="{{error}}" retry-label="重新加载" retry-note="" bind:retry="loadVisit" /></view>
   <block wx:elif="{{visit}}">
-    <view class="visit-hero">
-      <view class="hero-eyebrow">VISIT RECORD · 只读</view>
-      <view class="hero-title">{{visit.title}}</view><view class="visit-health"><text class="traffic-badge traffic-{{visit.signal.tone}}">{{visit.signal.badgeText}}</text><label>{{visit.signal.reason}}</label></view>
-      <view class="hero-meta"><text>{{visit.date}}</text><text>{{visit.mode}}</text><text>{{visit.firstVisitText === '是' ? '首次拜访' : '客户跟进'}}</text></view>
-    </view>
+    <sb-summary-card class="visit-hero" tone="{{view.stripe(visit)}}" title="{{visit.title}}" subtitle="{{visit.signal.reason}}" meta="{{visit.date}} · {{visit.mode}} · {{visit.firstVisitText === '是' ? '首次拜访' : '客户跟进'}}" tags="{{view.tags(visit)}}" />
 
-    <view class="section-card">
-      <view class="section-title">结构化信息</view>
-      <view class="field-grid">
-        <view><text>客户类型</text><label>{{visit.customerType}}</label></view>
-        <view wx:if="{{visit.customerId}}"><text>客户名称</text><label>{{visit.customerName}}</label></view>
-        <view class="wide"><text>商机名称</text><label>{{visit.opportunityName}}</label></view>
-        <view class="wide"><text>伙伴名称</text><label>{{visit.partnerName}}</label></view>
-        <view><text>跟进日期</text><label>{{visit.date}}</label></view>
-        <view><text>创建时间</text><label>{{visit.createdAt}}</label></view>
-        <view><text>对接人</text><label>{{visit.contactNames}}</label></view>
-        <view wx:if="{{visit.originalRecorderName}}"><text>原始跟进人</text><label>{{visit.originalRecorderName}}</label></view>
-        <view wx:else><text>跟进人</text><label>{{visit.owner}}</label></view>
-        <view wx:if="{{visit.managerName}}"><text>当前管理人</text><label>{{visit.managerName}}</label></view>
-        <view><text>协同人</text><label>{{visit.collaborators}}</label></view>
-        <view><text>是否七天内</text><label>{{visit.sevenDaysText}}</label></view>
-        <view><text>拜访方式</text><label>{{visit.mode}}</label></view>
-        <view><text>拜访时长</text><label>{{visit.duration}}</label></view>
-        <view><text>拜访地点</text><label>{{visit.location}}</label></view>
-        <view><text>是否首次拜访</text><label>{{visit.firstVisitText}}</label></view>
-      </view>
-      <view wx:for="{{visit.linkedOpportunities}}" wx:key="id" class="opportunity-link" hover-class="opportunity-link-active" data-id="{{item.id}}" bindtap="openOpportunity"><text>{{item.name}}</text><label>查看商机详情 ›</label></view>
-    </view>
+    <sb-section class="section-card" title="结构化信息">
+      <sb-desc-list layout="grid" items="{{view.fields(visit)}}" />
+      <view wx:for="{{visit.linkedOpportunities}}" wx:key="id" class="opportunity-link" hover-class="opportunity-link-active" data-id="{{item.id}}" bindtap="openOpportunity"><text>{{item.name}}</text><view class="opportunity-link-more"><label>查看商机详情</label><t-icon name="chevron-right" size="32rpx"/></view></view>
+    </sb-section>
 
-    <view wx:if="{{visit.isFirstVisit}}" class="section-card first-visit">
-      <view class="section-title">首次拜访信息</view>
+    <sb-section wx:if="{{visit.isFirstVisit}}" class="section-card first-visit" title="首次拜访信息">
       <view class="content-row"><text>客户主营业务</text><label>{{visit.customerMainBusiness}}</label></view>
       <view class="content-row"><text>客户需求</text><label>{{visit.customerNeeds}}</label></view>
       <view class="content-row"><text>客户预算</text><label>{{visit.customerBudget}}</label></view>
       <view class="content-row"><text>联系人角色</text><label>{{visit.contactRole}}</label></view>
-    </view>
+    </sb-section>
 
-    <view class="section-card narrative">
-      <view class="section-title">拜访内容</view>
+    <sb-section class="section-card narrative" title="拜访内容">
       <view class="content-row"><text>拜访目标</text><label>{{visit.visitGoal}}</label></view>
       <view class="content-row"><text>沟通内容</text><label>{{visit.followUpRecord}}</label></view>
       <view class="content-row"><text>达成结果</text><label>{{visit.expectation}}</label></view>
       <view class="next-action"><text>下一步计划</text><label>{{visit.nextAction}}</label></view>
-    </view>
-    <view class="section-card narrative">
-      <view class="section-title">本次拜访建议</view>
+    </sb-section>
+    <sb-section class="section-card narrative {{visitAdvice.status==='ready' ? 'advice-card' : ''}}" plain="{{visitAdvice.status==='ready'}}" title="本次拜访建议">
+      <view slot="extra"><sb-ai-badge wx:if="{{visitAdvice.status==='loading'}}" state="generating" /><sb-ai-badge wx:elif="{{visitAdvice.status==='ready'}}" state="advice" /></view>
       <view wx:if="{{visitAdvice.status==='loading'}}" class="readonly-note">正在分析这次拜访…</view>
       <view wx:elif="{{visitAdvice.status==='error'}}" class="readonly-note">{{visitAdvice.error}}</view>
       <block wx:elif="{{visitAdvice.status==='ready'}}">
@@ -59,8 +68,8 @@
           <advice-actions analysis-id="{{visitAdvice.id}}" suggestion="{{item}}" bind:changed="loadVisitAdvice" />
         </view>
       </block>
-      <view wx:if="{{visitAdvice.status!=='loading'}}" class="opportunity-link" bindtap="loadVisitAdvice">检查建议更新 ›</view>
-    </view>
+      <view wx:if="{{visitAdvice.status!=='loading'}}" class="opportunity-link advice-refresh" hover-class="opportunity-link-active" bindtap="loadVisitAdvice"><label>检查建议更新</label><t-icon name="chevron-right" size="32rpx"/></view>
+    </sb-section>
     <view class="readonly-note">已归档正文只读；建议由你确认后形成待办。</view>
   </block>
 </view>

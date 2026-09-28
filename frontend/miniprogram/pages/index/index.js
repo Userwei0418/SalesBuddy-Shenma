@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const {businessChangeLight} = require("../../utils/statusLight");
 const {REPORT_ACTIONS,buildReport} = require("../../utils/operatingReport");
 const apiClient = require("../../utils/apiClient");
@@ -307,6 +308,11 @@ Page({
   },
 
   openFdeTeamTasks(){wx.navigateTo({url:"/pages/tasks/index?scope=team"});},
+  onOverviewMetricTap(e) {
+    const item = (e && e.detail && e.detail.item) || {};
+    this.openOverviewTasks({ currentTarget: { dataset: { key: item.key } } });
+  },
+
   openOverviewTasks(e) {
     const key = e.currentTarget.dataset.key;
     if (!["today_completed", "today_pending", "all_pending"].includes(key)) return;
@@ -1031,7 +1037,7 @@ Page({
             title: "需要麦克风权限",
             content: this.data.visitRecordingMode ? "语音录入客户拜访需要使用麦克风，请在设置中允许录音权限。" : "语音问数需要使用麦克风，请在设置中允许录音权限。",
             confirmText: "去设置",
-            confirmColor: "#1677FF",
+            confirmColor: uiColors.primary,
             success: (res) => {
               if (!res.confirm) {
                 onDenied();

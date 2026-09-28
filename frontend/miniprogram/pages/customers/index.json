@@ -3,6 +3,16 @@
   "usingComponents": {
     "advice-actions": "/components/advice-actions/index",
     "detail-pagination": "../../components/detail-pagination/index",
-    "member-scope-filter": "/components/member-scope-filter/index"
+    "member-scope-filter": "/components/member-scope-filter/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-labeled-select": "/ui/sb/sb-labeled-select/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-tabs": "/ui/sb/sb-tabs/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
   }
 }

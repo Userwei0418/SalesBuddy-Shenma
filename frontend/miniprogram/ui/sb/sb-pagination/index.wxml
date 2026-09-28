@@ -1,0 +1,13 @@
+<view class="sb-pager {{plain ? 'is-plain' : ''}}" aria-role="navigation" aria-label="分页">
+  <text class="sb-pager-total">{{summary || '共 ' + total + ' 条'}}</text>
+  <block wx:if="{{mode === 'more'}}">
+    <view wx:if="{{error}}" class="sb-pager-error"><text>{{error}}</text><view class="sb-pager-hit" bind:tap="onRetry"><t-button size="small" variant="text" theme="primary" bind:tap="onRetry">重试</t-button></view></view>
+    <text wx:elif="{{end}}" class="sb-pager-end">已显示全部</text>
+    <view wx:else class="sb-pager-hit" bind:tap="onMore"><t-button size="small" variant="outline" loading="{{loading}}" disabled="{{loading}}" bind:tap="onMore">{{loading ? '加载中…' : '加载更多'}}</t-button></view>
+  </block>
+  <view wx:else class="sb-pager-ctl">
+    <view class="sb-pager-hit" bind:tap="onPrev"><t-button size="small" variant="outline" disabled="{{first}}" bind:tap="onPrev">上一页</t-button></view>
+    <text class="sb-pager-pos">第 {{current}}／{{pages}} 页</text>
+    <view class="sb-pager-hit" bind:tap="onNext"><t-button size="small" variant="outline" disabled="{{last}}" bind:tap="onNext">下一页</t-button></view>
+  </view>
+</view>

@@ -1,31 +1,32 @@
+<!-- 只有调用方写死的三句「未就绪」文案按常态处理（灰字、不给重试）：fdeCompanyRankings 的「全员榜单暂未接通」、fde-dashboard 的「当前暂无完整 Demo 排名」、bi 的「FDE暂不提供销售排名」。
+     其余一律按加载失败处理（带重试），服务端透传的报错即使含「暂不／暂未」也走这里。长期应由调用方另传「未就绪」属性 -->
+<wxs module="rk">
+var KNOWN=['全员榜单暂未接通','当前暂无完整 Demo 排名','FDE暂不提供销售排名'];
+function unavailable(msg){return KNOWN.indexOf(msg||'')>=0;}
+module.exports={unavailable:unavailable};
+</wxs>
 <view class="rank-card tone-{{tone}}">
-  <view class="rank-heading"><view class="rank-symbol">{{symbol}}</view><view class="rank-copy"><text>{{title}}</text><label>{{subtitle}}</label></view><view class="rank-details {{loading || error?'disabled':''}}" bindtap="open" role="button" aria-label="查看{{title}}完整榜单">查看详情 ›</view></view>
+  <view class="rank-heading"><view class="rank-copy"><text class="rank-title">{{title}}</text><text class="rank-subtitle">{{subtitle}}</text></view><view class="rank-details {{loading || error?'disabled':''}}" hover-class="{{loading || error ? 'none' : 'rank-details-pressed'}}" bindtap="open" aria-role="button" aria-label="查看{{title}}完整榜单">查看详情<t-icon name="chevron-right" size="32rpx" class="rank-details-icon"/></view></view>
   <view class="rank-period">{{period}}</view>
-  <view wx:if="{{loading}}" class="rank-empty">正在加载排名…</view>
-  <view wx:elif="{{error}}" class="rank-empty" bindtap="retry">{{error}} · 点击重试</view>
+  <sb-state-panel wx:if="{{loading}}" size="compact" state="loading" title="正在加载排名…"/>
+  <sb-state-panel wx:elif="{{error && rk.unavailable(error)}}" size="compact" state="empty" title="{{error}}"/>
+  <sb-state-panel wx:elif="{{error}}" size="compact" state="error" title="{{error}}" bind:retry="retry"/>
   <block wx:else>
-    <view wx:for="{{summary}}" wx:key="id" class="rank-row" data-id="{{item.id}}" bindtap="showMembers"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><text>{{item.name}}</text><label>{{item.meta}}</label><label wx:if="{{item.members}}" class="member-link">查看成员次数 ›</label><view class="rank-track"><view style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
+    <view wx:for="{{summary}}" wx:key="id" class="rank-row" data-id="{{item.id}}" bindtap="showMembers"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><text class="rank-name">{{item.name}}</text><text class="rank-meta">{{item.meta}}</text><text wx:if="{{item.members}}" class="rank-meta member-link">查看成员次数 ›</text><view class="rank-track"><view class="rank-fill" style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
     <view wx:if="{{!summary.length}}" class="rank-empty">{{rows.length ? emptySummary : '当前范围暂无排名数据'}}</view>
   </block>
 </view>
-<view wx:if="{{open}}" class="sheet-layer tone-{{tone}}">
-  <view class="sheet-mask" catchtap="close" catchtouchmove="noop"></view>
-  <view class="sheet-panel">
-    <view class="sheet-handle-area" bindtap="close" bindtouchstart="touchStart" bindtouchend="touchEnd" role="button" aria-label="收起完整榜单"><view class="sheet-handle"></view></view>
-    <block wx:if="{{memberTeam}}">
-      <view class="sheet-heading"><view class="member-back" bindtap="backToTeams" role="button">‹ 返回团队榜</view><text>{{memberTeam.name}} · 成员跟进次数</text><label>{{period}}</label><label>{{memberTeam.memberSummary}}</label><label>零次成员计入人均分母；个人次数按本团队的跟进记录统计。</label></view>
-      <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="sheet-scroll member-scroll"><view class="sheet-rows">
-        <view wx:for="{{memberTeam.members}}" wx:key="user_id" class="rank-row"><view class="rank-person"><text>{{item.name}}</text><label>{{item.account_code}}</label><label>{{item.customer_count}} 家客户 · {{item.current_member ? '计入人均分母' : '原团队贡献，不计入当前人数'}}</label></view><text class="rank-value">{{item.followup_count}} 次</text></view>
-        <view wx:if="{{!memberTeam.members.length}}" class="rank-empty">暂无有效业务成员</view>
-      </view></scroll-view>
-    </block>
-    <block wx:else>
-    <view class="sheet-heading"><text>{{title}}</text><label>{{subtitle}} · 共 {{rows.length}} 项</label><label>{{period}}</label></view>
-    <scroll-view scroll-y enhanced show-scrollbar="{{false}}" class="sheet-scroll" scroll-into-view="{{focusId}}"><view class="sheet-rows">
-      <view wx:for="{{detailRows}}" wx:key="id" id="{{item.anchorId}}" data-id="{{item.id}}" bindtap="showMembers" class="rank-row {{item.isSelected?'rank-self':''}}"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><text>{{item.name}}<text wx:if="{{item.isSelected}}" class="self-label">{{item.isSelf ? '本人' : '当前查看'}}</text></text><label>{{item.meta}}</label><label wx:if="{{item.members}}" class="member-link">查看成员次数 ›</label><view class="rank-track"><view style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
-      <view wx:if="{{!rows.length}}" class="rank-empty">当前范围暂无排名数据</view>
-    </view></scroll-view>
-    </block>
-    <view class="sheet-footer"><button bindtap="close">完成</button></view>
+<sb-sheet visible="{{open}}" title="{{memberTeam ? memberTeam.name + ' · 成员跟进次数' : title}}" bind:close="close">
+  <view slot="header" class="sheet-fixed" bindtouchstart="touchStart" bindtouchend="touchEnd">
+    <block wx:if="{{memberTeam}}"><button size="mini" class="member-back" bindtap="backToTeams">‹ 返回团队榜</button><text class="sheet-sub">{{memberTeam.memberSummary}}</text><text class="sheet-sub">零次成员计入人均分母；个人次数按本团队的跟进记录统计。</text></block>
+    <text wx:else class="sheet-sub">{{subtitle}} · 共 {{rows.length}} 项</text><text class="sheet-sub">{{period}}</text>
   </view>
-</view>
+  <scroll-view wx:if="{{!memberTeam}}" scroll-y enhanced show-scrollbar="{{false}}" class="rank-scroll" scroll-into-view="{{focusId}}"><view class="sheet-rows">
+    <view wx:for="{{detailRows}}" wx:key="id" id="{{item.anchorId}}" data-id="{{item.id}}" bindtap="showMembers" class="rank-row {{item.isSelected?'rank-self':''}}"><view class="rank-badge">{{item.rank}}</view><view class="rank-person"><view class="rank-name-line"><text class="rank-name">{{item.name}}</text><text wx:if="{{item.isSelected}}" class="self-label">{{item.isSelf ? '本人' : '当前查看'}}</text></view><text class="rank-meta">{{item.meta}}</text><text wx:if="{{item.members}}" class="rank-meta member-link">查看成员次数 ›</text><view class="rank-track"><view class="rank-fill" style="width:{{item.width}}"></view></view></view><text class="rank-value">{{item.displayValue}}</text></view>
+    <view wx:if="{{!rows.length}}" class="rank-empty">当前范围暂无排名数据</view>
+  </view></scroll-view>
+  <view wx:else class="sheet-rows">
+    <view wx:for="{{memberTeam.members}}" wx:key="user_id" class="rank-row"><view class="rank-person"><text class="rank-name">{{item.name}}</text><text class="rank-meta">{{item.account_code}}</text><text class="rank-meta">{{item.customer_count}} 家客户 · {{item.current_member ? '计入人均分母' : '原团队贡献，不计入当前人数'}}</text></view><text class="rank-value">{{item.followup_count}} 次</text></view>
+    <view wx:if="{{!memberTeam.members.length}}" class="rank-empty">暂无有效业务成员</view>
+  </view>
+</sb-sheet>

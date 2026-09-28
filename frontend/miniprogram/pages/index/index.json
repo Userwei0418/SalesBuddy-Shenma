@@ -1,5 +1,11 @@
 {
   "navigationBarTitleText": "总览",
   "navigationStyle": "default",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-summary-card": "/components/review-summary-card/index",
+    "t-icon": "/ui/tdesign/icon/icon"
+  }
 }

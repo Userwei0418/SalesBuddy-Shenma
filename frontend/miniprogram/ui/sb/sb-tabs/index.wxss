@@ -1,0 +1,19 @@
+.sb-tabs { width: 100%; white-space: nowrap; border-bottom: 1px solid var(--ui-line); }
+.sb-tabs-row { display: inline-flex; gap: var(--ui-space-6); padding: 0 var(--ui-space-1); }
+.sb-tabs-tab { display: inline-flex; align-items: baseline; gap: var(--ui-space-1); padding: 0; line-height: 42px; /* 42px + 2px 下划线 = 44px 点击高度，写 px 不随屏宽缩 */ font-size: var(--ui-text-body); color: var(--ui-ink); border-bottom: 2px solid transparent; }
+.sb-tabs-tab.on { color: var(--ui-primary); font-weight: 600; border-bottom-color: var(--ui-primary); }
+.sb-tabs-tab.disabled { color: var(--ui-muted); }
+.sb-tabs-count { font-size: var(--ui-text-small); color: var(--ui-muted); font-variant-numeric: tabular-nums; }
+.sb-tabs-tab.on .sb-tabs-count { color: var(--ui-primary); }
+.sb-tabs.is-plain { border-bottom: 0; }
+.sb-tabs.small .sb-tabs-tab { font-size: 14px; }
+.sb-tabs.is-fit .sb-tabs-row { display: flex; gap: 0; padding: 0; }
+.sb-tabs.is-fit .sb-tabs-tab { flex: 1 1 auto; justify-content: center; } /* 按文字宽度分配余量，长页签不被压扁 */
+.sb-tabs-hover { opacity: .7; }
+/* 5 个及以上页签在窄于 360px 的屏上放不下：退回横滑，最后一个露出一截作为提示 */
+@media (max-width: 359px) {
+  .sb-tabs.is-fit.is-many .sb-tabs-row { display: inline-flex; gap: var(--ui-space-6); padding: 0 var(--ui-space-8) 0 var(--ui-space-1); }
+  /* 放不下退回横滑时，右边缘渐隐，提示还能往右滑；不再显示一个被从字中间切断的页签 */
+  .sb-tabs.is-fit.is-many { -webkit-mask-image: linear-gradient(90deg, var(--ui-ink) 0, var(--ui-ink) calc(100% - 40px), transparent 100%); mask-image: linear-gradient(90deg, var(--ui-ink) 0, var(--ui-ink) calc(100% - 40px), transparent 100%); }
+  .sb-tabs.is-fit.is-many .sb-tabs-tab { flex: 0 0 auto; }
+}

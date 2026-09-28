@@ -87,6 +87,10 @@ for path in ROOT.rglob("*"):
     for label, pattern in banned_patterns.items():
         # AppIDs identify the application; they are not credentials. Historical
         # release receipts may record the same ID as project.config.json.
+        if label == "owner AppID" and path.relative_to(ROOT).as_posix() in {"VERSION.json", "README.md"}:
+            if any(value != project["appid"] for value in pattern.findall(content)):
+                fail(f"{path.name} AppID differs from the customer project")
+            continue
         if label == "owner AppID" and (path.resolve() == project_config_path.resolve()
                                       or path.relative_to(ROOT).parts[0] == "docs"):
             continue

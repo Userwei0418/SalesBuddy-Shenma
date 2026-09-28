@@ -1,0 +1,10 @@
+<view class="sb-input {{layout === 'stacked' ? 'is-stacked' : ''}} {{plain ? 'is-plain' : ''}} {{error ? 'is-error' : ''}} {{disabled ? 'disabled' : ''}}" aria-role="group" aria-label="{{label}}">
+  <text wx:if="{{label}}" class="sb-input-label">{{label}}<text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></text>
+  <view class="sb-input-box">
+    <t-input class="sb-input-control" value="{{text}}" placeholder="{{placeholder}}" type="{{type === 'password' && showPlain ? 'text' : type}}" maxlength="{{maxlength}}" clearable="{{clearable && !disabled}}" disabled="{{disabled}}" focus="{{focus}}" cursor-spacing="{{cursorSpacing}}" confirm-type="{{confirmType}}" align="{{layout === 'stacked' ? 'left' : 'right'}}" borderless bind:change="onChange" bind:clear="onClear" bind:enter="onConfirm" bind:focus="onFocus" bind:blur="onBlur" />
+    <text wx:if="{{suffix}}" class="sb-input-suffix">{{suffix}}</text>
+    <view wx:if="{{type === 'password' && passwordVisible}}" class="sb-input-eye" hover-class="sb-pressed" bind:tap="onEye" aria-role="button" aria-label="{{showPlain ? '隐藏密码' : '显示密码'}}"><t-icon name="{{showPlain ? 'browse' : 'browse-off'}}" size="40rpx" /></view>
+  </view>
+  <text wx:if="{{error}}" class="sb-input-tips is-error" aria-role="alert">{{error}}</text>
+  <text wx:elif="{{help}}" class="sb-input-tips">{{help}}</text>
+</view>

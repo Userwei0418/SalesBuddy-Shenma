@@ -83,6 +83,7 @@ function buildPlotCustomers(customers, zoom = false) {
 }
 
 Page({
+  onDetailTabChange(e) {return this.selectDetailTab({currentTarget:{dataset:{tab:e.detail.key}}});},
   data: {
     role: "sales",
     roleName: "一线销售",
@@ -91,6 +92,7 @@ Page({
     filterRole: "",
     customers: [], pendingCustomers: [], activeCustomerCount: 0, pendingAssessmentCount: 0, mapError: '', mapLoading: true,
     assetResolvedBasis: "entries", historicalAssetCount: 0, assetPeriod: "year", assetSummary: null, assetLoading: true, assetError: "",
+    assetPeriodOptions: [{ value: "year", label: "本年" }, { value: "all", label: "历年累计" }],
     recognizedText: "—", collectionText: "—", scopeCustomerCount: '—',
     planOptions: [{value:"all",label:"全部计划"},{value:"current_year",label:"当年计划成单"},{value:"long_term",label:"计划长期运作"}],
     planIndex: 0,
@@ -338,6 +340,7 @@ Page({
   },
   assetParams() { return {...this.fdeMapParams(),basis:"auto",period:this.data.assetPeriod,team_id:this.data.selectedTeam==='all'?'':this.data.selectedTeam,owner_id:this.data.selectedMember==='all'?'':this.data.selectedMember}; },
   changeAssetPeriod(e) {this.setData({assetPeriod:e.currentTarget.dataset.period},()=>this.loadAssets());},
+  onAssetPeriodSegment(e) {return this.changeAssetPeriod({currentTarget:{dataset:{period:e.detail.value}}});},
   openAssets(e) {
     const params=this.assetParams(); params.kind=e.currentTarget.dataset.kind || 'recognized'; params.basis=this.data.assetResolvedBasis;
     wx.navigateTo({url:'/pages/customer-assets/index?'+Object.keys(params).filter(k=>params[k]).map(k=>k+'='+encodeURIComponent(params[k])).join('&')});

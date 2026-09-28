@@ -1,0 +1,20 @@
+.sb-select { display: flex; align-items: center; gap: var(--ui-space-2); min-height: var(--ui-field-height); padding: var(--ui-space-2) var(--ui-page-gutter); background: var(--ui-surface); }
+.sb-select-label { flex: 0 0 auto; font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-req { color: var(--ui-danger); }
+.sb-select-value { flex: 1; text-align: right; font-size: var(--ui-text-body); color: var(--ui-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-select-value.placeholder { color: var(--ui-muted); }
+.sb-select.disabled .sb-select-value { color: var(--ui-muted); }
+.sb-select-arrow { color: var(--ui-muted); display: inline-flex; }
+.sb-select-box { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--ui-space-2); }
+/* stacked：标签在上 14px，下面控件框高 var(--ui-field-height)（小程序 44px）、一圈细线、控件圆角（和页面手写表单一致）；plain：不带白底与页边距 */
+.sb-select.is-plain { padding: var(--ui-space-2) 0; background: transparent; }
+.sb-select.is-stacked { flex-direction: column; align-items: stretch; gap: var(--ui-space-2); }
+.sb-select.is-stacked .sb-select-label { font-size: 14px; font-weight: 400; color: var(--ui-ink); } /* 飞书表单标签：常规字重、正文色、下方 8px */
+.sb-select.is-stacked .sb-select-box { min-height: var(--ui-field-height); padding: 0 var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); }
+.sb-select.is-stacked .sb-select-value { text-align: left; }
+.sb-select.is-stacked.disabled .sb-select-box { background: var(--ui-background); }
+
+.sb-select { flex-wrap: wrap; }
+.sb-form-tips { width: 100%; font-size: var(--ui-text-small); line-height: 1.5; color: var(--ui-muted); }
+.sb-form-tips.is-error { color: var(--ui-danger); }
+.sb-select.is-stacked.is-error .sb-select-box { border-color: var(--ui-danger); }

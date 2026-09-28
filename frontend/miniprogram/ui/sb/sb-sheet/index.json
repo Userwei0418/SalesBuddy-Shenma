@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "t-popup": "../../tdesign/popup/popup",
+    "t-button": "../../tdesign/button/button"
+  }
+}

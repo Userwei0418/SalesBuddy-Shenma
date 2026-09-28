@@ -1,6 +1,14 @@
 {
   "navigationBarTitleText": "创建新客户",
-  "navigationBarBackgroundColor": "#F7FAFE",
   "navigationBarTextStyle": "black",
+  "usingComponents": {
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
+  },
   "homeButton": true
 }

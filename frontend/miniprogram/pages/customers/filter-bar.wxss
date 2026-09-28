@@ -1,138 +1,159 @@
-/* 作战地图：固定展示的单行胶囊筛选。 */
+/* 作战地图：固定展示的单行筛选片（飞书筛选片：灰底无边框，选中浅蓝底主色字）。
+   象限、团队、成员、计划、金额的外观交给 sb-labeled-select size="small"；这里只管宽度和高度。 */
 .customer-page .operating-filters {
-  padding: 8rpx 10rpx;
+  padding:16rpx 16rpx;
 }
 
 .customer-page .operating-filter-line {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  min-width: 0;
+  display:flex;
+  align-items:center;
+  gap:16rpx;
+  min-width:0;
 }
 
 .customer-page .operating-filter-title {
-  flex: 0 0 auto;
-  color: #405d76;
-  font-size: 19rpx;
-  font-weight: 700;
+  flex:0 0 auto;
+  color:var(--ui-ink);
+  font-size:14px;
+  font-weight:600;
 }
 
 .customer-page .operating-picker-scroll {
-  width: 0;
-  min-width: 0;
-  flex: 1;
-  white-space: nowrap;
+  width:0;
+  min-width:0;
+  flex:1;
+  margin:-6px 0;
+  white-space:nowrap;
 }
 
+/* 筛选片高 32px（px，和 sb-labeled-select small 的 min-height:32px 一致，窄屏宽屏都不缩放）；
+   点击区用 ::after 扩到 44px。横向 scroll-view 会裁掉超出的部分，所以行上下各留 (44px - 32px) / 2 = 6px 的内边距，
+   scroll-view 再用等量负外边距抵掉，版面高度不变。片与片之间 8px（px，320 宽也够 8px） */
 .customer-page .operating-picker-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 7rpx;
-  padding-right: 6rpx;
+  display:inline-flex;
+  align-items:center;
+  gap:var(--ui-space-2);
+  padding:6px 6rpx 6px 0;
 }
 
 .customer-page .operating-picker {
-  flex: 0 0 auto;
-  overflow: hidden;
-  box-sizing: border-box;
-  height: 50rpx;
-  padding: 0 10rpx;
-  border: 1rpx solid #dfe9f2;
-  border-radius: 12rpx;
-  background: #f6f9fc;
+  position:relative;
+  flex:0 0 auto;
+  box-sizing:border-box;
+  height:32px;
+  border-radius:var(--ui-radius-control);
+}
+
+/* sb-labeled-select small 自带 ::after（上下各扩 6px）；这里只给自己画的「客户优先级」片补同样的点击区 */
+.customer-page .operating-picker.filter-level::after {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(50% - 22px);
+  bottom:calc(50% - 22px);
 }
 
 .customer-page .operating-picker-content {
-  display: flex;
-  align-items: center;
-  flex-flow: row nowrap;
-  gap: 6rpx;
-  height: 48rpx;
-  min-width: 0;
+  display:flex;
+  align-items:center;
+  flex-flow:row nowrap;
+  gap:8rpx;
+  height:32px;
+  min-width:0;
 }
 
+/* 筛选片宽度用 px：这一行本来就横滑，窄屏不该把片压窄。片内左 12px、右 8px、箭头 16px、间距 4px，
+   100px 留给标签 60px，放得下「团队成员」四个字；rpx 写法在 375 宽只有 54px、320 宽只有 40px，会截成「团队成…」 */
 .customer-page .operating-picker.filter-plan,
-.customer-page .operating-picker.filter-level,
 .customer-page .operating-picker.filter-amount,
 .customer-page .operating-picker.filter-team,
 .customer-page .operating-picker.filter-member {
-  width: 188rpx;
+  width:100px;
 }
 
-.customer-page .operating-picker.active,
+/* 客户优先级（B-06，只改样式）：触发片照 sb-labeled-select small 画；「客户优先级」五个字要 70px，片宽 116px */
+.customer-page .operating-picker.filter-level {
+  width:116px;
+  padding:0 var(--ui-space-2) 0 var(--ui-space-3);
+  background:var(--ui-neutral-soft);
+}
+
 .customer-page .operating-picker.filter-level.active {
-  border-color: #9bc9ee;
-  background: #eaf5ff;
+  background:var(--ui-selected);
 }
 
-.customer-page .map-level-panel {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10rpx;
-  margin-top: 12rpx;
-  padding-top: 13rpx;
-  border-top: 1rpx solid #e7eef5;
-}
-
-.customer-page .map-level-option {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6rpx;
-  min-width: 0;
-  height: 52rpx;
-  border: 1rpx solid #dfe9f2;
-  border-radius: 14rpx;
-  color: #526b82;
-  background: #f8fafc;
-  font-size: 17rpx;
-}
-
-.customer-page .map-level-option > text {
-  width: 15rpx;
-  color: #1778ca;
-  font-size: 15rpx;
-}
-
-.customer-page .map-level-option.selected {
-  border-color: #93c9f1;
-  color: #176fb7;
-  background: #eaf5ff;
-  font-weight: 680;
-}
-
-.customer-page .operating-picker text {
-  display: block;
-  overflow: hidden;
-  line-height: 1.35;
-  white-space: nowrap;
-}
-
-.customer-page .operating-picker .operating-picker-label {
-  flex: 0 0 auto;
-  margin: 0;
-  color: #8a99a8;
-  font-size: 15rpx;
-}
-
+.customer-page .operating-picker .operating-picker-label,
 .customer-page .operating-picker .operating-picker-value {
-  min-width: 0;
-  flex: 1;
-  color: #304e68;
-  font-size: 17rpx;
-  font-weight: 650;
-  text-overflow: ellipsis;
+  display:block;
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  color:var(--ui-ink);
+  font-size:14px;
+  line-height:1.35;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.customer-page .operating-picker.active .operating-picker-value {
+  color:var(--ui-primary);
+  font-weight:600;
 }
 
 .customer-page .operating-picker .operating-picker-caret {
-  flex: 0 0 auto;
-  color: #86a0b7;
-  font-size: 15rpx;
+  flex:0 0 auto;
+  display:inline-flex;
+  color:var(--ui-muted);
+}
+
+.customer-page .map-level-panel {
+  display:grid;
+  grid-template-columns:auto repeat(3, minmax(0, 1fr)); /* 「全部优先级」五个字按内容宽，320 宽屏也不溢出 */
+  gap:12px var(--ui-space-2);
+  margin-top:var(--ui-space-2);
+  padding-top:12px; /* 上面筛选片的点击区下扩 6px、选项的点击区上扩 6px，8px + 1px + 12px 留出 9px，320 宽也不贴在一起 */
+  border-top:1px solid var(--ui-line);
+}
+
+.customer-page .map-level-option {
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  height:32px;
+  padding:0 16rpx;
+  border-radius:var(--ui-radius-control);
+  color:var(--ui-ink);
+  background:var(--ui-neutral-soft);
+  font-size:14px;
+  white-space:nowrap;
+}
+
+/* 选项看起来 32px，点击区扩到 44px；行距 12px（44px - 32px）保证上下两行的点击区不重叠 */
+.customer-page .map-level-option::after {
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(50% - 22px);
+  bottom:calc(50% - 22px);
+}
+
+.customer-page .map-level-option.selected {
+  color:var(--ui-primary);
+  background:var(--ui-selected);
+  font-weight:600;
 }
 
 .customer-page .operating-filter-reset {
-  flex: 0 0 auto;
-  padding: 8rpx 4rpx;
-  color: #2477b9;
-  font-size: 18rpx;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  min-height:var(--ui-touch-target);
+  margin:-12rpx 0;
+  padding:0 8rpx;
+  color:var(--ui-primary);
+  font-size:14px;
 }

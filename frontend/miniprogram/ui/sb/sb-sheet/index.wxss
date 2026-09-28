@@ -1,0 +1,11 @@
+.sb-sheet { display: flex; flex-direction: column; max-height: 80vh; background: var(--ui-surface); border-radius: var(--ui-radius-panel) var(--ui-radius-panel) 0 0; }
+.sb-sheet-head { padding: var(--ui-space-4) calc(var(--ui-touch-target) + var(--ui-space-2)) var(--ui-space-2) var(--ui-page-gutter); font-size: var(--ui-text-section); font-weight: 600; color: var(--ui-ink); }
+.sb-sheet-desc { display: block; padding: 0 var(--ui-page-gutter) var(--ui-space-2); font-size: 14px; line-height: 1.5; color: var(--ui-secondary); }
+.sb-sheet-header:empty { display: none; }
+.sb-sheet-header { padding: 0 var(--ui-page-gutter) var(--ui-space-2); }
+.sb-sheet-body { flex: 1; max-height: 60vh; padding: 0 var(--ui-page-gutter); box-sizing: border-box; font-size: var(--ui-text-body); color: var(--ui-ink); }
+.sb-sheet-foot { display: flex; align-items: center; gap: var(--ui-space-3); padding: 0 var(--ui-page-gutter); padding-bottom: calc(var(--ui-space-2) + constant(safe-area-inset-bottom)); padding-bottom: calc(var(--ui-space-2) + env(safe-area-inset-bottom)); }
+/* 有按钮时上方留 12px；没有按钮也保留底部安全区，内容不压在 Home 指示条上 */
+.sb-sheet-foot.has-btn { padding-top: var(--ui-space-3); padding-bottom: calc(var(--ui-space-3) + constant(safe-area-inset-bottom)); padding-bottom: calc(var(--ui-space-3) + env(safe-area-inset-bottom)); }
+/* 取消、确定两个按钮等分（0.9.0 起；以前按内容宽度靠右） */
+.sb-sheet-btn { flex: 1; min-width: 0; }

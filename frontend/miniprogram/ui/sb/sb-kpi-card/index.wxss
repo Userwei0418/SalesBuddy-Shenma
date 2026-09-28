@@ -1,0 +1,18 @@
+.sb-kpi { display: flex; flex-direction: column; gap: var(--ui-space-1); min-width: 0; padding: var(--ui-card-padding); border: 0; border-radius: var(--ui-radius-panel); background: var(--ui-surface); }
+.sb-kpi.compact { padding: var(--ui-space-3); }
+.sb-kpi.compact .sb-kpi-label { font-size: 14px; }
+.sb-kpi.compact .sb-kpi-value { font-size: 20px; font-weight: 600; }
+.sb-kpi.compact .sb-kpi-value.missing { font-size: var(--ui-text-body); }
+.sb-kpi.compact .sb-kpi-value.is-long { font-size: var(--ui-text-body); } /* 1 亿以上金额在两列半宽卡里不截断 */
+.sb-kpi.compact .sb-kpi-unit { font-size: var(--ui-text-small); }
+.sb-kpi-hover { background: var(--ui-selected); }
+.sb-kpi-label { font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-kpi-row { display: flex; align-items: baseline; gap: var(--ui-space-1); min-width: 0; }
+.sb-kpi-value { font-size: var(--ui-text-metric); font-weight: 600; line-height: 1.2; color: var(--ui-ink); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-kpi-value.missing { font-size: var(--ui-text-page); color: var(--ui-muted); }
+.sb-kpi-value.loading { color: var(--ui-muted); }
+.sb-kpi-unit { font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-kpi-change, .sb-kpi-note { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.sb-kpi-change.tone-good { color: var(--ui-success); }
+.sb-kpi-change.tone-bad { color: var(--ui-danger); }
+.sb-kpi.is-bordered { border: 1px solid var(--ui-line); }

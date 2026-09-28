@@ -1,9 +1,18 @@
 {
   "navigationBarTitleText": "记录客户拜访",
-  "navigationBarBackgroundColor": "#F7FAFE",
+  "navigationBarBackgroundColor": "#F3F5F9",
   "navigationBarTextStyle": "black",
   "usingComponents": {
-    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index"
+    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index",
+    "sb-summary-card": "/ui/sb/sb-summary-card/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "t-checkbox": "/ui/tdesign/checkbox/checkbox",
+    "t-checkbox-group": "/ui/tdesign/checkbox-group/checkbox-group",
+    "t-button": "/ui/tdesign/button/button",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true,
   "navigationStyle": "custom"

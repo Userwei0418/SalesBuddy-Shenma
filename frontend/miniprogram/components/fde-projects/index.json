@@ -1,6 +1,14 @@
 {
   "component": true,
   "usingComponents": {
-    "member-scope-filter": "/components/member-scope-filter/index"
+    "member-scope-filter": "/components/member-scope-filter/index",
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-pagination": "/ui/sb/sb-pagination/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-labeled-select": "/ui/sb/sb-labeled-select/index",
+    "t-button": "/ui/tdesign/button/button",
+    "t-icon": "/ui/tdesign/icon/icon"
   }
 }

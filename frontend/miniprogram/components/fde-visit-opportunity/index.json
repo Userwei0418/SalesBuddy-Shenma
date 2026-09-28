@@ -1,1 +1,7 @@
-{"component":true}
+{
+  "component": true,
+  "usingComponents": {
+    "sb-search": "/ui/sb/sb-search/index",
+    "t-cell": "/ui/tdesign/cell/cell"
+  }
+}

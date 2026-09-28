@@ -1,4 +1,4 @@
-const STATES={green:{label:'健康',color:'#238c68',background:'#e4f6ee'},yellow:{label:'提醒',color:'#a77722',background:'#fff4d9'},red:{label:'告警',color:'#bc5149',background:'#ffebe8'},gray:{label:'待评估',color:'#8091a0',background:'#eef2f5'}};
+const STATES={green:{label:'健康',color:'var(--ui-success)',background:'var(--ui-success-soft)'},yellow:{label:'提醒',color:'var(--ui-warning)',background:'var(--ui-warning-soft)'},red:{label:'告警',color:'var(--ui-danger)',background:'var(--ui-danger-soft)'},gray:{label:'待评估',color:'var(--ui-neutral)',background:'var(--ui-neutral-soft)'}};
 function statusLight(tone,reason='') {const state=STATES[tone]||STATES.gray;return {...state,tone:STATES[tone]?tone:'gray',reason};}
 function scoreLight(value) {
  if(!['number','string'].includes(typeof value)||String(value).trim()===''||!Number.isFinite(Number(value)))return statusLight('gray','暂无有效评分');

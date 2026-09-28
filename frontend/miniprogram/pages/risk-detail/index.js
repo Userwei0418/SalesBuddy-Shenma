@@ -3,6 +3,7 @@
  * 页面未按处理人 ID 限制解除按钮，后端必须按登录身份裁决；无 version_no，且 /risks/:id/resolve 不在现有幂等键白名单。
  * accepted 在页面归入已处理并隐藏解除操作，但 riskLight 仍为黄色。缺失 evidence/next_action 使用解释占位，不是模型生成事实。
  */
+const uiColors = require("../../utils/uiColors");
 const { riskLight } = require('../../utils/statusLight');
 const apiClient = require("../../utils/apiClient");
 
@@ -81,7 +82,7 @@ Page({
       title: "确认解除该风险？",
       content: "解除后将保留处理人、处理时间和解除依据，经营摘要会同步更新。",
       confirmText: "确认解除",
-      confirmColor: "#2B9A70",
+      confirmColor: uiColors.success,
       success: (result) => {
         if (!result.confirm) return;
         this.setData({ submitting: true });

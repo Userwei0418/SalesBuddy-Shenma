@@ -12,7 +12,9 @@ function today() {const d=new Date();return `${d.getFullYear()}-${String(d.getMo
 function dateTime(value) {if(!value)return '未记录';const d=new Date(value);if(Number.isNaN(d.getTime()))return String(value);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 function statusText(value) {return ({open:'推进中',won:'已赢单',lost:'已丢单'})[value]||value||'未记录';}
 Page({
-  data:{demos:[],demoTotal:0,demosLoading:false,demosMore:false,demoError:'',progressEventsExpanded:false,basis:'entries',historicalCount:0,period:'year',kind:'recognized',customerId:'',customerName:'',opportunityId:'',teamId:'',ownerId:'',
+  onFdeVisitSegment(e){return this.changeFdeVisitMode({currentTarget:{dataset:{mode:e.detail.value}}});},
+  onOpportunityTabChange(e){return this.selectOpportunityTab({currentTarget:{dataset:{tab:e.detail.key}}});},
+  data:{demos:[],demoTotal:0,demosLoading:false,demosMore:false,demoError:'',progressEventsExpanded:false,basis:'entries',historicalCount:0,period:'year',kind:'recognized',kindOptions:[{value:'recognized',label:'确收'},{value:'collection',label:'回款'}],fdeVisitOptions:[{value:'self',label:'我的拜访记录'},{value:'all',label:'全部跟进'}],periodOptions:[{value:'year',label:'本年'},{value:'all',label:'历年累计'}],customerId:'',customerName:'',opportunityId:'',teamId:'',ownerId:'',
     items:[],loading:true,error:'',summary:null,totalText:'—',canManage:false,hasMore:false,asOf:today(),
     formOpen:false,saving:false,amount:'',occurredOn:today(),sourceRef:'',note:'',formOpportunity:{id:'',name:'暂不关联商机'},formSelectionRequired:false,formError:'',originCustomerId:'',originOpportunityId:'',
     quarterActualLoading:false,quarterActualError:'',quarterActualOptions:[],quarterActualIndex:0,quarterCollection:'未登记',quarterRecognized:'未登记',quarterEntryCount:0,
@@ -232,6 +234,8 @@ Page({
   retry(){this.load();},
   more(){if(!this.data.loading&&this.data.hasMore)this.load(true);},
   changePeriod(e){this.setData({period:e.currentTarget.dataset.period,items:[]},()=>this.load());},
+  onPeriodSegment(e){this.changePeriod({currentTarget:{dataset:{period:e.detail.value}}});},
+  onKindSegment(e){this.changeKind({currentTarget:{dataset:{kind:e.detail.value}}});},
   changeKind(e){this.setData({kind:e.currentTarget.dataset.kind,items:[]},()=>this.load());},
   openCustomer(e){const c=this.data.items.find(r=>r.customer_id===e.currentTarget.dataset.id);this.setData({customerId:c.customer_id,customerName:c.customer_name,opportunityId:'',items:[]},()=>{this.load();this.loadOpportunity();this.loadQuarterActuals();wx.pageScrollTo({scrollTop:0,duration:200});});},
   backToCustomers(){this.setData({customerId:'',customerName:'',opportunityId:'',items:[]},()=>{this.load();this.loadOpportunity();this.loadQuarterActuals();});},

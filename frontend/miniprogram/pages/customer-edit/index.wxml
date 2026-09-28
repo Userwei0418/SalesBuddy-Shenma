@@ -1,32 +1,35 @@
+<wxs module="opt">
+function lab(it,key,suffix){return (key ? it[key] : it) + (suffix || '');}
+function idx(list,key,suffix){var out=[];for(var i=0;i<(list||[]).length;i++){out.push({value:i,label:lab(list[i],key,suffix)});}return out;}
+function rest(list,key,suffix){var out=[];for(var i=1;i<(list||[]).length;i++){out.push({value:i,label:lab(list[i],key,suffix)});}return out;}
+function pick(i){var n=i * 1;return n>0?n:null;}
+module.exports={idx:idx,rest:rest,pick:pick};
+</wxs>
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
 <view class="edit-page">
-  <view class="hero">
-    <view class="eyebrow">CUSTOMER DATA · MANUAL</view>
-    <view class="title">维护客户信息</view>
-    <view class="subtitle">仅人工录入字段可修改；保存后 Agent 会重新评估客户画像与作战地图位置。</view>
-  </view>
-  <view wx:if="{{loading}}" class="loading">正在加载客户信息…</view>
+  <sb-summary-card class="hero" title="维护客户信息" subtitle="仅人工录入字段可修改；保存后 Agent 会重新评估客户画像与作战地图位置。" />
+  <view wx:if="{{loading}}" class="loading"><sb-state-panel state="loading" title="正在加载客户信息…" /></view>
   <block wx:else>
     <view class="agent-card">
-      <view class="agent-head"><view>AI</view><view><text>Agent 计算结果</text><label>只读，不支持人工修改</label></view><view class="lock">锁定</view></view>
+      <view class="agent-head"><view><text>Agent 计算结果</text><label>只读，不支持人工修改</label></view><view class="lock">锁定</view></view>
       <view class="agent-grid"><view><text>{{agentView.quadrant}}</text><label>作战象限</label></view><view><text>{{agentView.potential}}</text><label>客户潜力</label></view><view><text>{{agentView.relationship}}</text><label>关系深度</label></view></view>
       <view class="agent-risk">当前风险：{{agentView.risk}}</view>
     </view>
     <view class="form-card">
       <view class="section-head"><text>人工维护字段</text><label>修改后将成为 Agent 的新分析依据</label></view>
       <view class="field"><text>客户名称</text><view class="picker customer-name-readonly"><text>{{form.name}}</text><label>不可修改</label></view></view>
-      <view class="field"><text>所属行业 *</text><picker mode="selector" range="{{industryOptions}}" value="{{industryIndex}}" bindchange="changeIndustry"><view class="picker">{{form.industry}}<label>›</label></view></picker></view>
-      <view class="field"><text>客户类型 *</text><picker mode="selector" range="{{customerTypeOptions}}" value="{{customerTypeIndex}}" bindchange="changeCustomerType"><view class="picker">{{form.customer_type}}<label>›</label></view></picker></view>
-      <view class="field"><text>客户优先级 *</text><picker mode="selector" range="{{customerLevelOptions}}" value="{{customerLevelIndex}}" bindchange="changeCustomerLevel"><view class="picker">{{form.level_code || '请选择 Tier-1 / Tier-2 / Tier-3'}}<label>›</label></view></picker></view>
-      <view class="field"><text>客户 / 线索来源 *</text><picker mode="selector" range="{{sourceOptions}}" value="{{sourceIndex}}" bindchange="changeSource"><view class="picker">{{form.source}}<label>›</label></view></picker></view>
-      <view class="field"><text>合作伙伴 *</text><input value="{{form.partner_name}}" data-key="partner_name" bindinput="inputField" /></view>
+      <view class="field"><text>所属行业 *</text><sb-select layout="stacked" plain title="所属行业" options="{{opt.idx(industryOptions)}}" value="{{form.industry ? industryIndex : null}}" placeholder="请选择" bindchange="changeIndustry" /></view>
+      <view class="field"><text>客户类型 *</text><sb-select layout="stacked" plain title="客户类型" options="{{opt.idx(customerTypeOptions)}}" value="{{form.customer_type ? customerTypeIndex : null}}" placeholder="请选择" bindchange="changeCustomerType" /></view>
+      <view class="field"><text>客户优先级 *</text><sb-select layout="stacked" plain title="客户优先级" options="{{opt.idx(customerLevelOptions)}}" value="{{form.level_code ? customerLevelIndex : null}}" placeholder="请选择" bindchange="changeCustomerLevel" /></view>
+      <view class="field"><text>客户 / 线索来源 *</text><sb-select layout="stacked" plain title="客户 / 线索来源" options="{{opt.idx(sourceOptions)}}" value="{{form.source ? sourceIndex : null}}" placeholder="请选择" bindchange="changeSource" /></view>
+      <view class="field"><text>合作伙伴 *</text><sb-input layout="stacked" plain maxlength="{{140}}" value="{{form.partner_name}}" placeholder="没有合作伙伴可填写“无”" data-key="partner_name" bind:change="inputField" /></view>
       <view class="section-head contact-head"><text>首要联系人</text><label>角色仅限决策者 / 影响者 / 使用者</label></view>
-      <view class="field"><text>联系人姓名</text><input value="{{form.contact_name}}" data-key="contact_name" bindinput="inputField" /></view>
-      <view class="field"><text>联系人职位</text><input value="{{form.contact_title}}" data-key="contact_title" bindinput="inputField" /></view>
-      <view class="field"><text>联系人角色</text><picker mode="selector" range="{{contactRoleOptions}}" value="{{contactRoleIndex}}" bindchange="changeContactRole"><view class="picker">{{form.contact_role}}<label>›</label></view></picker></view>
+      <view class="field"><text>联系人姓名</text><sb-input layout="stacked" plain maxlength="{{140}}" value="{{form.contact_name}}" placeholder="请输入联系人姓名" data-key="contact_name" bind:change="inputField" /></view>
+      <view class="field"><text>联系人职位</text><sb-input layout="stacked" plain maxlength="{{140}}" value="{{form.contact_title}}" placeholder="请输入联系人职位" data-key="contact_title" bind:change="inputField" /></view>
+      <view class="field"><text>联系人角色</text><sb-select layout="stacked" plain title="联系人角色" options="{{opt.idx(contactRoleOptions)}}" value="{{form.contact_role ? contactRoleIndex : null}}" placeholder="请选择" bindchange="changeContactRole" /></view>
     </view>
-    <view class="submit-bar"><button loading="{{saving}}" disabled="{{saving}}" bindtap="submit">保存修改并触发 Agent 重评</button></view>
+    <sb-bottom-bar class="submit-bar" primaryLabel="保存修改并触发 Agent 重评" loading="{{saving}}" loadingLabel="正在保存…" bind:primary="submit" />
   </block>
 </view>
 

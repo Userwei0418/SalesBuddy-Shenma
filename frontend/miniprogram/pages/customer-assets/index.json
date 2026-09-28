@@ -3,7 +3,22 @@
   "usingComponents": {
     "advice-actions": "/components/advice-actions/index",
     "fde-picker": "../../components/fde-picker/index",
-    "detail-pagination": "../../components/detail-pagination/index"
+    "detail-pagination": "../../components/detail-pagination/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
+    "sb-amount-input": "/ui/sb/sb-amount-input/index",
+    "sb-date-picker": "/ui/sb/sb-date-picker/index",
+    "sb-input": "/ui/sb/sb-input/index",
+    "sb-labeled-select": "/ui/sb/sb-labeled-select/index",
+    "sb-pagination": "/ui/sb/sb-pagination/index",
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-segmented": "/ui/sb/sb-segmented/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-tabs": "/ui/sb/sb-tabs/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "t-button": "/ui/tdesign/button/button",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "t-icon": "/ui/tdesign/icon/icon"
   },
   "homeButton": true
 }

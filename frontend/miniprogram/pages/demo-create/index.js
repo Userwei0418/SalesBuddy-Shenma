@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const {beijingTime}=require('../../utils/fdePresentation');
 const api=require('../../utils/apiClient');
 const access=require('../../utils/access');
@@ -42,7 +43,7 @@ Page({
   canDeleteScene(){return !this.closed&&this.owner===access.identity(getApp().globalData.session)&&access.can(getApp().globalData.session,'demo_scene.delete')&&this.data.sceneDetail&&this.data.sceneDetail.can_delete===true;},
   deleteScene(){
     if(!this.editId||this.data.saving||!this.canDeleteScene())return;
-    wx.showModal({title:'删除 Demo 场景',content:'确定删除该场景？删除后无法恢复。',confirmText:'删除',confirmColor:'#d75555',success:async r=>{
+    wx.showModal({title:'删除 Demo 场景',content:'确定删除该场景？删除后无法恢复。',confirmText:'删除',confirmColor:uiColors.danger,success:async r=>{
       if(!r.confirm||this.data.saving||!this.canDeleteScene())return;
       try{this.setData({saving:true});await api.deleteDemoScene(this.editId,this.data.sceneDetail.version_no);}
       catch(error){this.setData({saving:false});wx.showToast({title:error.message||'删除失败',icon:'none'});return;}

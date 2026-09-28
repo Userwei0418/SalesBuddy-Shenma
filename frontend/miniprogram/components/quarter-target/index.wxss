@@ -1,2 +1,29 @@
-.quarter-target-bar{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin:18rpx 0 8rpx}.target-period{font-size:20rpx;color:#7b91a5}.target-edit-button.target-edit-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;height:48rpx;min-height:0;box-sizing:border-box;white-space:nowrap;margin:0;padding:0 14rpx;border:0;border-radius:12rpx;line-height:1.3;font-size:20rpx;font-weight:500;background:#eef7ff;color:#217bc3}.target-edit-button::after,.target-footer-button::after{border:0}.target-notice{padding:16rpx;margin-top:12rpx;border-radius:16rpx;background:#fff7e7;color:#946827;font-size:21rpx;line-height:1.65}.pending-row{display:flex;justify-content:space-between;gap:12rpx;font-size:20rpx}.target-load-error,.form-error{color:#b55046;font-size:22rpx;line-height:1.6;margin-top:12rpx}.sheet-mask{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1200;display:flex;align-items:flex-end;background:rgba(19,43,66,.38)}.target-sheet{display:flex;flex-direction:column;width:100%;max-height:88vh;border-radius:32rpx 32rpx 0 0;background:#f6faff;box-shadow:0 -12rpx 60rpx rgba(20,56,88,.12);padding:0 28rpx;box-sizing:border-box}.sheet-grip{flex-shrink:0;display:flex;justify-content:center;align-items:center;height:42rpx}.sheet-grip-line{width:66rpx;height:7rpx;background:#c4d3df;border-radius:10rpx}.sheet-heading{flex-shrink:0;padding:10rpx 0 22rpx}.sheet-title{display:block;font-size:32rpx;font-weight:700;color:#25445f}.sheet-subtitle{display:block;margin-top:10rpx;font-size:23rpx;color:#8195a8}.target-form{flex-shrink:1;min-height:0;height:58vh;max-height:58vh}.form-note{font-size:23rpx;line-height:1.7;color:#6e8499;background:#eaf3fb;padding:18rpx;border-radius:16rpx}.form-field{margin-top:24rpx}.field-title{font-size:25rpx;font-weight:600;color:#304f68;margin-bottom:12rpx}.field-unit{margin-left:12rpx;font-size:21rpx;font-weight:400;color:#859aad}.amount-input{background:white;border:1rpx solid #d9e6f1;border-radius:16rpx;height:84rpx;padding:0 22rpx;font-size:28rpx;color:#244861}.reason-input{width:100%;box-sizing:border-box;height:158rpx;padding:20rpx;border:1rpx solid #d9e6f1;border-radius:16rpx;background:#fff;font-size:24rpx;color:#304f68}.field-hint{margin-top:9rpx;font-size:20rpx;color:#8297aa}.sheet-footer{flex-shrink:0;display:flex;gap:16rpx;padding:24rpx 0 calc(24rpx + env(safe-area-inset-bottom))}.target-footer-button{margin:0;flex:1;border-radius:18rpx;font-size:26rpx;line-height:82rpx;font-weight:600}.target-cancel{color:#4f7598;background:#e9f1f8}.target-submit{color:#fff;background:linear-gradient(120deg,#225a88,#2189da)}
-.target-decision{padding:14rpx 18rpx;margin-top:12rpx;border-radius:14rpx;color:#507c70;background:#edf7f2;font-size:21rpx;line-height:1.7}.decision-rejected{background:#fff3ed;color:#ac735a}.decision-cancelled{background:#edf2f7;color:#7c8da0}.decision-detail{margin-left:12rpx;font-size:19rpx;color:#8b9caa}
+/* 季度目标：弹层外壳保留（root-portal 提升到页面根节点，测试断言），里面的字段用 sb-amount-input、sb-textarea 的 stacked plain 版式；
+   弹层是 position:fixed，sb-textarea 传 fixed。按钮与入口高度写 44px（px 不随屏宽缩，320 宽屏也够 44px）。只写类选择器。 */
+.quarter-target-bar{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin:8px 0 0}
+.target-period{font-size:14px;color:var(--ui-secondary)}
+.target-edit-button.target-edit-button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;height:44px;min-height:0;box-sizing:border-box;white-space:nowrap;margin:0;padding:0;border:0;border-radius:var(--ui-radius-control);line-height:1.3;font-size:14px;font-weight:400;background:transparent;color:var(--ui-primary)}
+.target-edit-icon{display:inline-flex}
+.target-edit-button::after,.target-footer-button::after{border:0}
+.target-notice{padding:16rpx 20rpx;margin-top:12rpx;border-radius:var(--ui-radius-control);background:var(--ui-warning-soft);color:var(--ui-warning);font-size:var(--ui-text-small);line-height:1.65}
+.pending-row{display:flex;justify-content:space-between;gap:12rpx;font-size:var(--ui-text-small)}
+.form-error{color:var(--ui-danger);font-size:var(--ui-text-small);line-height:1.6;margin-top:8px}
+.sheet-mask{position:fixed;top:0;right:0;bottom:0;left:0;z-index:1200;display:flex;align-items:flex-end;background:var(--ui-overlay)}
+.target-sheet{display:flex;flex-direction:column;width:100%;max-height:80vh;border-radius:var(--ui-radius-panel) var(--ui-radius-panel) 0 0;background:var(--ui-surface);box-shadow:var(--ui-shadow-popup);padding:0 32rpx;box-sizing:border-box}
+.sheet-grip{flex-shrink:0;display:flex;justify-content:center;align-items:center;height:48rpx}
+.sheet-grip-line{width:64rpx;height:8rpx;background:var(--ui-line);border-radius:999px}
+.sheet-heading{flex-shrink:0;padding:8rpx 0 16rpx}
+.sheet-title{display:block;font-size:var(--ui-text-section);font-weight:600;color:var(--ui-ink)}
+.sheet-subtitle{display:block;margin-top:4rpx;font-size:14px;color:var(--ui-secondary)}
+.target-form{flex-shrink:1;min-height:0;height:58vh;max-height:58vh}
+.form-note{font-size:14px;line-height:1.6;color:var(--ui-secondary)}
+.form-field{margin-top:8px}
+.field-hint{font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-muted)}
+.sheet-footer{flex-shrink:0;display:flex;gap:24rpx;padding:24rpx 0 calc(24rpx + constant(safe-area-inset-bottom));padding:24rpx 0 calc(24rpx + env(safe-area-inset-bottom))}
+.target-footer-button{margin:0;flex:1;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);line-height:44px;height:44px;font-weight:400}
+.target-cancel{color:var(--ui-ink);background:var(--ui-surface);border:1px solid var(--ui-line)}
+.target-submit{color:var(--ui-on-primary);background:var(--ui-primary);font-weight:600}
+.target-decision{margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.7}
+.decision-rejected{color:var(--ui-danger)}
+.decision-cancelled{color:var(--ui-secondary)}
+.decision-detail{margin-left:12rpx;font-size:var(--ui-text-small);color:var(--ui-muted)}

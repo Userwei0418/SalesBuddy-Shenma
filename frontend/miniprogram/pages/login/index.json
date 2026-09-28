@@ -1,5 +1,10 @@
 {
   "navigationStyle": "custom",
   "navigationBarTextStyle": "white",
-  "backgroundColor": "#F4F5F8"
+  "backgroundColor": "#F4F5F8",
+  "usingComponents": {
+    "sb-input": "/ui/sb/sb-input/index",
+    "t-button": "/ui/tdesign/button/button",
+    "t-checkbox": "/ui/tdesign/checkbox/checkbox"
+  }
 }

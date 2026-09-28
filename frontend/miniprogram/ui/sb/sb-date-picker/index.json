@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "t-date-time-picker": "../../tdesign/date-time-picker/date-time-picker",
+    "t-icon": "../../tdesign/icon/icon"
+  }
+}

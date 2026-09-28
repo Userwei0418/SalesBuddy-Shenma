@@ -28,7 +28,7 @@ test('旧后端缺少变更回执不能显示内容未变化或跳转成功',asy
  await context.submit();assert.match(context.data.error,/未收到完整保存回执/);assert.equal(toasts.length,0);assert.equal(navigated,false);assert.equal(context.data.busy,false);
 });
 
-test('新增商机页沿用全局卡片与渐变视觉且保留关键交互',()=>{
+test('新增商机页沿用统一主题卡片和主操作色且保留关键交互',()=>{
  const pageWxml=fs.readFileSync(__dirname+'/../miniprogram/pages/opportunity-create/index.wxml','utf8');
  const pageWxss=fs.readFileSync(__dirname+'/../miniprogram/pages/opportunity-create/index.wxss','utf8');
  const formWxss=fs.readFileSync(__dirname+'/../miniprogram/components/opportunity-form/index.wxss','utf8');
@@ -38,10 +38,10 @@ test('新增商机页沿用全局卡片与渐变视觉且保留关键交互',()=
  assert.match(pageWxml,/bindinput="inputCustomer"/);
  assert.match(pageWxml,/bindtap="selectCustomer"/);
  assert.match(pageWxml,/bindtap="submit"/);
- assert.match(pageWxss,/\.opportunity-create-hero\{[^}]*linear-gradient/);
- assert.match(pageWxss,/\.submit\{[^}]*linear-gradient/);
- assert.match(formWxss,/\.control\{[^}]*border-radius:17rpx/);
- assert.match(formWxss,/\.fold\{[^}]*border-radius:17rpx/);
+ assert.match(pageWxss,/\.opportunity-create-hero\{[^}]*background:var\(--ui-background\)/);
+ assert.match(pageWxss,/\.submit\{[^}]*background:var\(--ui-primary\)/);
+ assert.match(formWxss,/\.control\{[^}]*border-radius:var\(--ui-radius-control\)/);
+ assert.match(formWxss,/\.fold\{[^}]*border-radius:var\(--ui-radius-control\)/);
 });
 
 function validForm(stageIndex, quarters=[]) { return {...opp.formFor(null),name:'新商机',amount:'50',stageIndex,expected_close_date:'2026-12-01',quarters}; }

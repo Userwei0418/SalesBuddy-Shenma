@@ -1,1 +1,43 @@
-.member-growth-page{padding-bottom:55rpx}.member-hero{display:flex;align-items:center;gap:17rpx;padding:24rpx}.member-avatar{width:76rpx;height:76rpx;display:flex;align-items:center;justify-content:center;border-radius:24rpx;color:#fff;background:linear-gradient(145deg,#173551,#1677ff);font-size:29rpx;font-weight:800}.member-hero>view:nth-child(2){flex:1}.member-hero>view:nth-child(2)>view{color:#293d54;font-size:28rpx;font-weight:750}.member-hero>view:nth-child(2)>text{display:block;margin-top:6rpx;color:#7f8d9f;font-size:19rpx}.review-badge{padding:7rpx 11rpx;border-radius:999rpx;color:#2d7e61;background:#e5f6ee;font-size:16rpx}.section-heading{display:flex;align-items:flex-end;justify-content:space-between;margin:30rpx 3rpx 14rpx}.section-heading>view:first-child>text{display:block;color:#263a51;font-size:29rpx;font-weight:760}.section-heading>view:first-child>label{display:block;margin-top:5rpx;color:#8795a7;font-size:16rpx}.overall{display:flex;align-items:baseline;gap:6rpx}.overall>text{color:#1677ff;font-size:40rpx;font-weight:800}.overall>label{color:#8391a3;font-size:15rpx}.capability-card,.growth-card{padding:22rpx}.radar-canvas{width:100%;height:420rpx}.review-summary{padding:17rpx;border-radius:18rpx;color:#40536a;background:rgba(235,244,253,.74);font-size:20rpx;line-height:1.55}.review-meta{display:flex;justify-content:space-between;gap:12rpx;margin-top:14rpx;color:#4b88c6;font-size:16rpx}.review-meta label{color:#8896a8}.dimension-grid{display:grid;grid-template-columns:1fr 1fr;gap:11rpx;margin-top:17rpx}.dimension-item{padding:14rpx;border:1rpx solid rgba(92,125,162,.09);border-radius:17rpx;background:rgba(247,250,254,.8)}.dimension-item>view:first-child{display:flex;justify-content:space-between}.dimension-item>view text{font-size:19rpx;font-weight:680}.dimension-item>view label{color:#1677ff;font-size:20rpx;font-weight:750}.dimension-item>text{display:-webkit-box;margin-top:8rpx;overflow:hidden;color:#8693a4;font-size:15rpx;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}.score-track{height:7rpx;margin-top:9rpx;overflow:hidden;border-radius:999rpx;background:#e7edf5}.score-track view{height:100%;border-radius:inherit;background:linear-gradient(90deg,#2458a6,#2f9bff)}.growth-heading{align-items:center}.history-count{color:#8291a4;font-size:16rpx}.growth-tabs{width:100%;white-space:nowrap}.growth-tab-list{display:inline-flex;gap:9rpx}.growth-tab{padding:9rpx 16rpx;border-radius:999rpx;color:#718097;background:rgba(236,242,249,.9);font-size:18rpx}.growth-tab.selected{color:#fff;background:#1677ff}.chart-title{margin-top:19rpx;color:#34485f;font-size:21rpx;font-weight:700}.growth-canvas{width:100%;height:300rpx}.state-card,.empty-card{display:flex;align-items:center;justify-content:center;gap:12rpx;margin-top:24rpx;padding:80rpx 25rpx;color:#76859a;font-size:20rpx}.state-card>view{width:22rpx;height:22rpx;border:3rpx solid rgba(22,119,255,.2);border-top-color:#1677ff;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.empty-card{flex-direction:column}.empty-card>view{color:#34485f;font-size:24rpx;font-weight:700}.empty-card>text{margin-top:8rpx;color:#8996a7;font-size:18rpx}
+.member-growth-page{box-sizing:border-box;padding:32rpx 32rpx 64rpx}
+.member-hero{display:flex;align-items:center;gap:24rpx;padding:16px}
+.member-avatar{width:80rpx;height:80rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;color:var(--ui-primary);background:var(--ui-selected);font-size:var(--ui-text-body);font-weight:600}
+.member-hero>view:nth-child(2){flex:1;min-width:0}
+.member-hero>view:nth-child(2)>view{color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4}
+.member-hero>view:nth-child(2)>text{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px}
+.review-badge{flex-shrink:0;padding:0 8px;border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16rpx;margin:24px 0 8px}
+.section-heading>view:first-child>text{display:block;color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600}
+.section-heading>view:first-child>label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.overall{display:flex;align-items:baseline;gap:8rpx;flex-shrink:0}
+.overall>text{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.overall>label{color:var(--ui-secondary);font-size:14px}
+.capability-card,.growth-card{padding:16px}
+.growth-card{padding-top:8px}
+.radar-canvas{width:100%;height:420rpx}
+.review-summary{color:var(--ui-ink);font-size:14px;line-height:1.6}
+.review-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16rpx;row-gap:4px;margin-top:8px;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.review-meta label{color:var(--ui-muted);white-space:nowrap}
+.dimension-grid{display:grid;grid-template-columns:1fr 1fr;gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.dimension-item{min-width:0}
+.dimension-item>view:first-child{display:flex;justify-content:space-between;gap:8rpx}
+.dimension-item>view text{color:var(--ui-ink);font-size:14px;font-weight:600}
+.dimension-item>view label{color:var(--ui-ink);font-size:var(--ui-text-small);font-weight:600}
+.dimension-item>text{display:-webkit-box;margin-top:8rpx;overflow:hidden;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.score-track{height:8rpx;margin-top:8rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.score-track view{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.growth-heading{align-items:center}
+.history-count{color:var(--ui-muted);font-size:var(--ui-text-small)}
+.chart-title{margin-top:16px;color:var(--ui-ink);font-size:14px;font-weight:600}
+.growth-canvas{width:100%;height:300rpx}
+.state-card,.empty-card{margin-top:16px}
+
+/* AI 建议：卡内一段，上方一条分隔线，不再套淡蓝小卡；标识统一用 sb-ai-badge（覆盖 app.wxss 的 .ai-advice-card，公共样式由主控清理） */
+.member-growth-page .ai-advice-card{margin-top:16px;padding:16px 0 0;border:0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent}
+.ai-advice-top{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 16rpx}
+.ai-advice-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.ai-advice-note{display:block;margin-top:4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.member-growth-page .ai-advice-list{margin-top:8px}
+.member-growth-page .ai-advice-row{gap:16rpx;padding:20rpx 0;border-top:0;border-bottom:1px solid var(--ui-line)}
+.member-growth-page .ai-advice-row:last-child{border-bottom:0}
+.member-growth-page .ai-advice-index{width:36rpx;height:36rpx;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);font-weight:600}
+.member-growth-page .ai-advice-text{color:var(--ui-ink);font-size:14px;line-height:1.6}

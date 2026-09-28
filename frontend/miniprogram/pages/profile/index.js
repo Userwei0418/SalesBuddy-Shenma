@@ -1,3 +1,4 @@
+const uiColors = require("../../utils/uiColors");
 const { scoreLight } = require('../../utils/statusLight');
 const apiClient = require("../../utils/apiClient");
 const profileMetrics = require("../../utils/profileMetrics");
@@ -216,12 +217,16 @@ Page({
     wx.showModal({title:config[0], showCancel:false, confirmText:'知道了',
       content:`${info.explanation || '暂无可计算数据'}\n\n状态：80分及以上为绿色健康，60–79分为黄色提醒，低于60分为红色告警，缺失评分为灰色待评估。\n\n总分为有效指标的加权平均，满分100分，超额达成按100分计。缺失项剔除后按剩余权重折算；全部缺失时显示“--”。${info.count ? '\n已纳入 ' + info.count + '/' + info.total + ' 项指标，覆盖权重 ' + info.coverage_percent + '%。' : ''}${info.rule ? '\n公司评分规则版本：' + info.rule.version : ''}`});
   },
+  onProfileTabSegment(e){return this.selectProfileTab({currentTarget:{dataset:{tab:e.detail.value}}});},
+  onEfficiencyMetricSegment(e){return this.selectEfficiencyMetric({currentTarget:{dataset:{metric:e.detail.value}}});},
+  onEfficiencyPeriodSegment(e){return this.selectEfficiencyPeriod({currentTarget:{dataset:{period:e.detail.value}}});},
   selectProfileTab(e){
     const activeProfileTab = e.currentTarget.dataset.tab;
     this.setData({ activeProfileTab }, () => {
       if (activeProfileTab === "profile" && this.data.growthReady) wx.nextTick(() => this.drawGrowthCharts());
     });
   },
+  onGrowthTab(e){return this.selectGrowthDimension({currentTarget:{dataset:{code:e.detail.key}}});},
   selectGrowthDimension(e){
     const code = e.currentTarget.dataset.code;
     const option = this.data.growthOptions.find((item) => item.code === code);
@@ -373,20 +378,20 @@ Page({
           const p = point(i, level / 5);
           if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
         }
-        ctx.closePath(); ctx.setStrokeStyle("rgba(61,100,146,.18)"); ctx.stroke();
+        ctx.closePath(); ctx.setStrokeStyle("rgba(79,96,120,.18)"); ctx.stroke();
       }
       for (let i = 0; i < 6; i += 1) {
-        const p = point(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); ctx.setStrokeStyle("rgba(61,100,146,.13)"); ctx.stroke();
+        const p = point(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); ctx.setStrokeStyle("rgba(79,96,120,.13)"); ctx.stroke();
       }
       ctx.beginPath();
       dimensions.forEach((item, index) => {
         const p = point(index, (profileScores.numeric(item.score) || 0) / 100);
         if (index === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
       });
-      ctx.closePath(); ctx.setFillStyle("rgba(22,119,255,.22)"); ctx.fill(); ctx.setLineWidth(2); ctx.setStrokeStyle("#1677ff"); ctx.stroke();
+      ctx.closePath(); ctx.setFillStyle("rgba(40,99,205,.22)"); ctx.fill(); ctx.setLineWidth(2); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
       dimensions.forEach((item, index) => {
-        const p = point(index, (profileScores.numeric(item.score) || 0) / 100); ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.setFillStyle("#1677ff"); ctx.fill();
-        const label = point(index, 1.28); ctx.setFillStyle("#53657a"); ctx.setFontSize(11); ctx.setTextAlign(label[0] < cx - 5 ? "right" : label[0] > cx + 5 ? "left" : "center"); ctx.fillText(`${item.shortName} ${item.score}`, label[0], label[1] + 4);
+        const p = point(index, (profileScores.numeric(item.score) || 0) / 100); ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill();
+        const label = point(index, 1.28); ctx.setFillStyle("#4F6078"); ctx.setFontSize(11); ctx.setTextAlign(label[0] < cx - 5 ? "right" : label[0] > cx + 5 ? "left" : "center"); ctx.fillText(`${item.shortName} ${item.score}`, label[0], label[1] + 4);
       });
       ctx.draw();
     }).exec();
@@ -405,8 +410,8 @@ Page({
       const valueOf = (item) => code === "overall" ? Number(item.overall_score || 0) : Number(((item.dimension_scores || {})[code] || {}).score || 0);
       [0, 25, 50, 75, 100].forEach((value) => {
         const y = top + (100 - value) / 100 * (height - top - bottom);
-        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.setStrokeStyle("rgba(61,100,146,.12)"); ctx.stroke();
-        ctx.setFillStyle("#91a0b2"); ctx.setFontSize(9); ctx.setTextAlign("right"); ctx.fillText(String(value), left - 6, y + 3);
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.setStrokeStyle("rgba(79,96,120,.12)"); ctx.stroke();
+        ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign("right"); ctx.fillText(String(value), left - 6, y + 3);
       });
       ctx.beginPath();
       history.forEach((item, index) => {
@@ -414,12 +419,12 @@ Page({
         const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom);
         if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       });
-      ctx.setLineWidth(2.5); ctx.setStrokeStyle("#1677ff"); ctx.stroke();
+      ctx.setLineWidth(2.5); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
       history.forEach((item, index) => {
         const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right);
         const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom);
-        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.setFillStyle("#1677ff"); ctx.fill();
-        if (index === 0 || index === history.length - 1) { ctx.setFillStyle("#728196"); ctx.setFontSize(9); ctx.setTextAlign(index === 0 ? "left" : "right"); ctx.fillText(String(item.review_date).slice(5), x, height - 7); }
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill();
+        if (index === 0 || index === history.length - 1) { ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign(index === 0 ? "left" : "right"); ctx.fillText(String(item.review_date).slice(5), x, height - 7); }
       });
       ctx.draw();
     }).exec();
@@ -433,7 +438,7 @@ Page({
       title:"退出当前账号？",
       content:"退出后需要重新选择身份并登录。",
       confirmText:"退出登录",
-      confirmColor:"#d85d68",
+      confirmColor:uiColors.danger,
       success:(res)=>{
         if(!res.confirm) { this.setData({logoutBusy:false}); return; }
         this.finishLogout();

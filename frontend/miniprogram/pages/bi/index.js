@@ -134,6 +134,7 @@ function financialMetrics(raw,selected,opportunities) {
 }
 
 Page({
+  onViewSegment(e){return this.changeView({currentTarget:{dataset:{mode:e.detail.value}}});},
   data: {
     loading:true,loadError:'',role:'sales',viewMode:'personal',isFde:false,
     selectedMemberId:'',selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
@@ -144,6 +145,7 @@ Page({
     kpis:[],totalAcv:'—',opportunityCount:0,activeOpportunityCount:null,quarterEmpty:false,
     funnel:[],visitDays:[],weeklyVisitCount:0,timeline:[],sourceDate:'--',dataModeLabel:'实时数据',
     rankingLoading:false,rankingMessage:'',rankingCards:[],ownIds:[],ownRegionCodes:[],cohortLabel:'',
+    viewModeOptions:[{value:'team',label:'团队'},{value:'personal',label:'个人'}],
   },
   identityKey(){return access.identity(getApp().globalData.session);},
   onUnload(){this._loadId=(this._loadId||0)+1;this._rankingLoadId=(this._rankingLoadId||0)+1;this._optionsLoadId=(this._optionsLoadId||0)+1;},

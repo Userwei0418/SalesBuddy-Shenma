@@ -1,1 +1,1 @@
-{"component": true}
+{"component": true, "usingComponents": {"sb-sheet": "/ui/sb/sb-sheet/index", "sb-search": "/ui/sb/sb-search/index", "t-checkbox": "/ui/tdesign/checkbox/checkbox", "t-icon": "/ui/tdesign/icon/icon"}}

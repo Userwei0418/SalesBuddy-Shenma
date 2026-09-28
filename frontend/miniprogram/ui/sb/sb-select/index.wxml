@@ -1,0 +1,14 @@
+<view class="sb-select {{error ? 'is-error' : ''}} {{disabled ? 'disabled' : ''}} {{layout === 'stacked' ? 'is-stacked' : ''}} {{plain ? 'is-plain' : ''}}" bind:tap="onOpen" aria-role="button" aria-label="{{label}}：{{text || placeholder}}">
+  <text wx:if="{{label}}" class="sb-select-label">{{label}}<text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></text>
+  <view class="sb-select-box">
+    <text class="sb-select-value {{text ? '' : 'placeholder'}}">{{text || placeholder}}</text>
+    <t-icon name="{{layout === 'stacked' ? 'chevron-down' : 'chevron-right'}}" size="36rpx" class="sb-select-arrow" />
+  </view>
+  <text wx:if="{{error}}" class="sb-form-tips is-error" aria-role="alert">{{error}}</text>
+  <text wx:elif="{{help}}" class="sb-form-tips">{{help}}</text>
+</view>
+<root-portal>
+<t-picker visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" auto-close="{{false}}" bind:cancel="onCancel" bind:confirm="onConfirm">
+  <t-picker-item options="{{columns}}" />
+</t-picker>
+</root-portal>

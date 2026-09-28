@@ -25,8 +25,8 @@ test('作战地图使用单行胶囊筛选，并移除快捷筛选', () => {
   const filterCss = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/filter-bar.wxss', 'utf8');
   assert.match(filterCss, /\.operating-picker-row\s*\{[^}]*display:\s*inline-flex/);
   assert.match(filterCss, /\.operating-picker-content\s*\{[^}]*display:\s*flex/);
-  assert.match(filterCss, /\.operating-picker\s*\{[^}]*height:\s*50rpx/);
-  assert.match(filterCss, /filter-plan,[\s\S]*filter-level,[\s\S]*filter-amount,[\s\S]*filter-team,[\s\S]*filter-member\s*\{\s*width:\s*188rpx/);
+  assert.match(filterCss, /\.operating-picker\s*\{[^}]*height:\s*32px/);
+  assert.match(filterCss, /filter-plan,[\s\S]*filter-amount,[\s\S]*filter-team,[\s\S]*filter-member\s*\{\s*width:\s*100px/);
   assert.match(wxss, /\.asset-period\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 

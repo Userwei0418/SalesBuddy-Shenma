@@ -1,1 +1,1 @@
-page{background:#eef6fd}
+page{background:var(--ui-background)}
