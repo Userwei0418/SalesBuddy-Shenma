@@ -40,6 +40,8 @@ python3 deployment/configure-model-connection-lock.py \
 
 实际服务目录使用 `/var/lib/shenma-model-key`，不能为原 `/etc/shenma-sales` 整个配置目录开放服务写权限。SSH 固定连接中台内网主机，校验固定 host key；远端账号的公钥使用 `restrict,command=...`，sudo 仅允许无参数执行固定的 root 维护脚本。脚本同时核验 hostname、内网 IP 和实例地址，回滚快照只含加密凭据，保存在中台 root 0600 文件中。
 
+销售 API 的 systemd 服务启用了 `ProtectSystem=strict`。创建私有目录后，将 `deployment/shenma-model-key.conf` 安装到 `/etc/systemd/system/shenma-api.service.d/model-key.conf`，执行 `systemctl daemon-reload`，随版本切换重启 API。该 drop-in 只为加密凭据目录增加写权限，worker 仍只读；仅修改目录属主不能突破服务沙箱的只读限制。部署验收须实际执行轮换，确认 API 进程能写入状态与恢复文件。
+
 运维账号应有独立的 `access.console`、`ai.config_read`、`ai.config_publish` 直接授权。普通客户账号不能通过成员修改、重置密码或账号授权接管该身份。维护账号的凭据单独受限交付，普通说明不写密码。
 
 同步失败会保留原本地凭据并尝试恢复中台；如果进程中断，受限 journal 保留恢复信息，下一次运维提交先处理未完成操作。页面只展示末四位、版本及状态，从不回显 Key。验证与同步可能需要数分钟，该 API 的 Nginx 读取超时单独设置为 600 秒。
