@@ -95,13 +95,29 @@ async def main():
           (workspace_id,author_id,report_id,version_no,body_markdown,source)
           SELECT workspace_id,author_id,id,1,draft_markdown,'manual' FROM insight.weekly_report WHERE id=$1""", report_id)
         old_report = dict(await c.fetchrow("SELECT * FROM insight.weekly_report WHERE id=$1", report_id))
+        # V154 is immutable: prove V155 upgrades its existing deployment quota
+        # without recounting, replacing or disabling any existing identity.
+        with tempfile.TemporaryDirectory(prefix="shenma-v154-") as directory:
+            baseline = Path(directory)
+            shutil.copytree(ROOT / "database", baseline, dirs_exist_ok=True)
+            for migration in (baseline / "migrations").glob("V*.sql"):
+                if int(migration.name.split("__")[0][1:]) > 154:
+                    migration.unlink()
+            result += [row for row in await migrate(c, baseline) if row['status'] == 'applied']
+        quota_before = dict(await c.fetchrow("SELECT max_active_accounts,active_accounts FROM security.deployment_account_quota"))
+        assert quota_before == {"max_active_accounts": 50, "active_accounts": len(roles) * len(companies)}
         result += [row for row in await migrate(c) if row['status'] == 'applied']
+        quota_after = dict(await c.fetchrow("SELECT max_active_accounts,active_accounts FROM security.deployment_account_quota"))
+        assert quota_after == {"max_active_accounts": 60, "active_accounts": quota_before["active_accounts"]}
+        assert await c.fetchval("""SELECT pg_get_expr(d.adbin,d.adrelid) FROM pg_attrdef d
+            JOIN pg_attribute a ON a.attrelid=d.adrelid AND a.attnum=d.adnum
+            WHERE d.adrelid='security.deployment_account_quota'::regclass AND a.attname='max_active_accounts'""") == "60"
         new_report = dict(await c.fetchrow("SELECT * FROM insight.weekly_report WHERE id=$1", report_id))
         assert {key:new_report[key] for key in old_report} == old_report
         assert new_report['report_week'].isoformat() == '2025-12-29'
         assert new_report['source_cutoff_at'].isoformat() == '2026-01-01T00:00:00+00:00'
         assert await c.fetchval("SELECT body_markdown FROM insight.weekly_report_revision WHERE report_id=$1", report_id) == '保留人工正文'
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 155)]
+        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 156)]
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -133,10 +149,11 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V154", "applied": 29, "companies": 2,
+        print(json.dumps({"upgrade": "V125->V155", "applied": 30, "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
                           "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True,
-                          "v152_weekly_draft_preserved": True, "week_year_boundary": True}))
+                          "v152_weekly_draft_preserved": True, "week_year_boundary": True,
+                          "account_quota_limit": 60, "account_quota_count_preserved": True}))
     finally:
         if c:
             await c.close()

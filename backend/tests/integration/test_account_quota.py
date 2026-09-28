@@ -36,15 +36,15 @@ async def insert_user(connection, workspace, *, status="active", deleted=False, 
     return uid
 
 
-async def test_http_last_seat_replay_reactivation_and_admins_count(connection):
+async def test_http_60_account_boundary_replay_reactivation_and_admins_count(connection):
     admin = await actor(connection, "ADMIN001")
     initial = await quota(connection)
     # All six fixture accounts count, including operations and administrator.
-    assert initial == {"scope": "deployment", "limit": 50, "used": 6, "remaining": 44}
+    assert initial == {"scope": "deployment", "limit": 60, "used": 6, "remaining": 54}
     async with await client_for(connection) as client:
         await sign_in(client, "ADMIN001")
         org = (await client.get("/api/v1/console/organization")).json()
-        for _ in range(49 - initial["used"]):
+        for _ in range(59 - initial["used"]):
             await insert_user(connection, UUID(admin.workspace_id))
         body = dict(account_code="QUOTALAST", display_name="最后一个体验账号", roles=["sales"],
                     team_id=org["departments"][0]["id"], temporary_password="Quota-Only-Test-2026")
@@ -54,10 +54,10 @@ async def test_http_last_seat_replay_reactivation_and_admins_count(connection):
         replay = await client.post("/api/v1/console/accounts", json=body, headers={"Idempotency-Key": key})
         assert replay.json() == created.json()
         org = (await client.get("/api/v1/console/organization")).json()
-        assert org["account_quota"] == {"scope": "deployment", "limit": 50, "used": 50, "remaining": 0}
+        assert org["account_quota"] == {"scope": "deployment", "limit": 60, "used": 60, "remaining": 0}
         rejected = await client.post("/api/v1/console/accounts", json={**body, "account_code": "QUOTAOVER"},
                                      headers={"Idempotency-Key": str(uuid4())})
-        assert rejected.status_code == 409 and "部署上限" in rejected.text
+        assert rejected.status_code == 409 and "部署上限" in rejected.text and "60个" in rejected.text
         assert not await connection.fetchval("SELECT EXISTS(SELECT 1 FROM platform.user_ref WHERE account_code='QUOTAOVER')")
         uid = created.json()["id"]
         update = {k: v for k, v in body.items() if k != "temporary_password"}
@@ -68,12 +68,21 @@ async def test_http_last_seat_replay_reactivation_and_admins_count(connection):
         disabled = await client.put(f"/api/v1/console/accounts/{uid}", json=update, headers={"Idempotency-Key": str(uuid4())})
         assert disabled.status_code == 200, disabled.text
         assert (await quota(connection))["remaining"] == 1
-        await insert_user(connection, UUID(admin.workspace_id))
+        occupying = await insert_user(connection, UUID(admin.workspace_id))
         update.update(version_no=3, status="active")
         restored = await client.put(f"/api/v1/console/accounts/{uid}", json=update, headers={"Idempotency-Key": str(uuid4())})
-        assert restored.status_code == 409 and "部署上限" in restored.text
+        assert restored.status_code == 409 and "部署上限" in restored.text and "60个" in restored.text
         assert await connection.fetchval("SELECT status FROM platform.user_ref WHERE id=$1::uuid", uid) == "inactive"
-        assert (await quota(connection))["used"] == 50
+        assert (await quota(connection))["used"] == 60
+        # A failed reactivation consumes no seat or version. Releasing one seat
+        # lets the same inactive account be re-enabled through the normal API.
+        await connection.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1", occupying)
+        assert (await quota(connection))["remaining"] == 1
+        restored = await client.put(f"/api/v1/console/accounts/{uid}", json=update, headers={"Idempotency-Key": str(uuid4())})
+        assert restored.status_code == 200, restored.text
+        assert await connection.fetchval("SELECT status FROM platform.user_ref WHERE id=$1::uuid", uid) == "active"
+        org = (await client.get("/api/v1/console/organization")).json()
+        assert org["account_quota"] == {"scope": "deployment", "limit": 60, "used": 60, "remaining": 0}
 
 
 async def test_sql_bulk_rollback_restore_and_delete_share_the_quota(connection):
