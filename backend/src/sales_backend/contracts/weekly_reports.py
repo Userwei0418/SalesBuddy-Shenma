@@ -47,6 +47,7 @@ class WeeklyDetail(WeeklySummary):
     draft_source: Literal['agent', 'manual'] | None
     draft_references_validated: bool
     runtime_metadata: dict[str, Any]
+    feishu: dict[str, Any] | None = None
 
 
 class WeeklyList(BaseModel):

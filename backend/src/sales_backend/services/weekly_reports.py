@@ -149,6 +149,12 @@ class WeeklyReportService:
             input_sha256=row['input_sha256'], draft_version=row['draft_version'], error_code=error,
             created_at=row['created_at'], updated_at=row['updated_at'], finished_at=row['finished_at'],
             runtime_snapshot_verified=False, actual_snapshot_id=None)
+        if row.get('feishu_publish_event_id'):
+            view['feishu'] = {'status': 'published', 'event_id': str(row['feishu_publish_event_id']),
+                              'requested_at': row.get('feishu_publish_requested_at'),
+                              'draft_version': (row.get('feishu_publish_snapshot') or {}).get('draft_version')}
+        else:
+            view['feishu'] = {'status': 'not_published'}
         # Validation checks references/structure; factual prose still requires human review.
         if content:
             view.update(title=result['title'] if result else None, body_markdown=row['draft_markdown'],
@@ -156,6 +162,41 @@ class WeeklyReportService:
                 draft_references_validated=row['draft_version'] == 1 and row['result_status'] == 'ready',
                 runtime_metadata=row['runtime_metadata'])
         return view
+
+    async def publish_feishu(self, actor, ident, expected_version):
+        async with self.database.transaction(actor) as c:
+            await require_permission(c, 'weekly_report.edit')
+            row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid FOR UPDATE', ident)
+            if not row:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
+            # A report may remain visible after its source records or the
+            # author's scope changed. Re-check the frozen source immediately
+            # before creating the external event.
+            await assert_snapshot_access(c, actor, decode_snapshot(row['input_snapshot']))
+            try:
+                event_id = await c.fetchval('SELECT security.publish_weekly_report_feishu($1::uuid,$2)',
+                                            ident, expected_version)
+            except asyncpg.InsufficientPrivilegeError:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND') from None
+            except asyncpg.PostgresError as exc:
+                detail = str(exc).split('CONTEXT', 1)[0].strip()
+                if detail in {'WEEKLY_DRAFT_NOT_READY', 'WEEKLY_DRAFT_VERSION_CONFLICT', 'WEEKLY_FEISHU_NOT_READY'}:
+                    raise HTTPException(409, detail) from None
+                raise
+            row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid', ident)
+            result = self.view(row, content=True)
+            result['feishu'] = {'status': 'pending', 'event_id': str(event_id),
+                                'requested_at': row['feishu_publish_requested_at'],
+                                'draft_version': row['draft_version']}
+            return result
+
+    async def feishu_status(self, actor, ident):
+        async with self.database.transaction(actor, readonly=True) as c:
+            await require_permission(c, 'weekly_report.read')
+            value = await c.fetchval('SELECT security.weekly_feishu_status($1::uuid)', ident)
+            if value is None:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
+            return value
 
     async def list(self, actor, limit, offset, report_week=None):
         async with self.database.transaction(actor, readonly=True) as c:
@@ -174,7 +215,10 @@ class WeeklyReportService:
             if not row:
                 raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
             await assert_snapshot_access(c, actor, decode_snapshot(row['input_snapshot']))
-            return self.view(row, content=True)
+            result = self.view(row, content=True)
+            if row.get('feishu_publish_event_id'):
+                result['feishu'] = await c.fetchval('SELECT security.weekly_feishu_status($1::uuid)', ident)
+            return result
 
     async def save(self, actor, ident, expected_version, body):
         async with self.database.transaction(actor) as c:

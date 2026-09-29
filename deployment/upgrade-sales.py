@@ -72,8 +72,8 @@ def main():
         parser.add_argument("--" + name + "-sha256", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--expected-current", required=True)
-    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152", "V153", "V154", "V155"))
-    parser.add_argument("--target-schema", default="V155", choices=("V151", "V152", "V153", "V154", "V155"))
+    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152", "V153", "V154", "V155", "V156"))
+    parser.add_argument("--target-schema", default="V156", choices=("V151", "V152", "V153", "V154", "V155", "V156"))
     args = parser.parse_args()
     if int(args.target_schema[1:]) < int(args.expected_schema[1:]):
         parser.error("Schema downgrade is not supported; target must be at least the current schema")

@@ -5,7 +5,8 @@ from zoneinfo import ZoneInfo
 
 
 def notification_card(kind, values, config, record_id):
-    title = {'customer': '新增客户', 'opportunity': '新增商机', 'visit': '新增跟进记录'}.get(kind, '业务更新')
+    title = {'customer': '新增客户', 'opportunity': '新增商机', 'visit': '新增跟进记录',
+             'weekly_report': '销售周报已确认'}.get(kind, '业务更新')
     definitions = {
         'customer': [('name', '客户'), ('owner_name', '负责人'), ('department_name', '部门'),
                      ('industry', '行业'), ('needs', '客户需求'), ('next_action', '下一步计划')],
@@ -15,6 +16,8 @@ def notification_card(kind, values, config, record_id):
         'visit': [('customer_name', '客户'), ('opportunity_name', '商机'), ('partner_name', '伙伴'),
                   ('owner_name', '填写人'), ('interaction_at', '跟进日期'), ('contact_name', '对接人'),
                   ('content', '沟通内容'), ('next_action', '下一步计划')],
+        'weekly_report': [('report_week', '报告周'), ('author_name', '提交人'),
+                          ('stats_summary', '统计摘要'), ('body_markdown', '周报正文')],
     }
     elements = []
     for field, label in definitions.get(kind, []):
@@ -29,7 +32,7 @@ def notification_card(kind, values, config, record_id):
                 value = parsed.strftime('%Y-%m-%d %H:%M')
             except ValueError:
                 pass
-        limit = 1200 if field in {'content', 'needs'} else 800 if field == 'next_action' else 120
+        limit = 1600 if field in {'content', 'body_markdown'} else 1200 if field in {'needs'} else 800 if field == 'next_action' else 120
         value = str(value)
         value = value if len(value) <= limit else value[:limit] + '…（完整内容请查看详情）'
         # User text cannot become mentions, Markdown links or executable card actions.

@@ -131,6 +131,24 @@ function LiveReport({page, session}) {
     }catch(e){if(alive(n)){setError(explain(e));if(e.statusCode===409)setConflict(true);}}
     finally{if(alive(n))setBusy(false);}
   }
+  async function publishFeishu(){
+    if(!report||dirty||report.status!=='succeeded'||report.result_status!=='ready')return;
+    const n=lifetime.current,id=report.id;setBusy(true);setError('');
+    try{
+      const next=await api(`/${id}/feishu/publish`,{method:'POST',data:{expected_version:report.draft_version}});
+      if(!alive(n)||reportRef.current?.id!==id)return;
+      setReport(next);reportRef.current=next;setReports(rows=>rows.map(r=>r.id===id?next:r));
+      message.success('已提交飞书推送');
+      let tries=0;
+      const poll=async()=>{if(!alive(n)||reportRef.current?.id!==id||tries++>10)return;try{
+        const status=await api(`/${id}/feishu`);if(status.status==='sent'){message.success('周报已写入多维表格并推送群聊');return;}
+        if(['failed','unknown'].includes(status.status)){setError(status.status==='unknown'?'飞书消息结果待核对，请到群内确认':'飞书周报推送失败，请联系管理员');return;}
+        setTimeout(poll,1500);
+      }catch(e){if(alive(n))setError(explain(e));}};
+      setTimeout(poll,1000);
+    }catch(e){if(alive(n))setError(explain(e));}
+    finally{if(alive(n))setBusy(false);}
+  }
   async function cancel(){
     const n=lifetime.current,id=report.id;setBusy(true);
     try{const next=await api(`/${id}/cancel`,{method:'POST'});if(alive(n)&&reportRef.current?.id===id){setReport(next);setReports(rows=>rows.map(r=>r.id===id?next:r));}}
@@ -168,7 +186,8 @@ function LiveReport({page, session}) {
       {!!reports.length&&<Select aria-label="周报版本" value={report?.id} style={{width:'100%'}} disabled={busy||loading} options={reports.map(r=>({value:r.id,label:`${new Date(r.created_at).toLocaleString('zh-CN')} · ${STATE[r.status]}`}))} onChange={id=>discard(()=>openReport(id).catch(e=>setError(explain(e))))}/>}
       {historyMore&&<Button onClick={moreHistory} disabled={busy}>加载更早版本</Button>}
       {active(report)?<><SbStatePanel state="loading" title="正在整理周报" description="可以离开页面，稍后回来查看。"/>{allowed('weekly_report.cancel')&&<Button onClick={cancel} disabled={busy}>取消本次生成</Button>}</>:report?.status==='failed'?<Alert type="error" title="本次生成失败" description="历史周报仍然保留，可以重新生成。"/>:report?.status==='cancelled'?<SbStatePanel state="empty" title="本次生成已取消"/>:report?.result_status==='insufficient_data'?<SbStatePanel state="empty" title="素材不足，尚未生成正文"/>:report?.result_status==='invalid_input'?<Alert type="error" title="素材未通过校验，请核对后重试"/>:report?.result_status==='ready'?<div className="ds-weekly-paper"><h3>{report.title}</h3><p className="ds-muted">草稿 v{report.draft_version} · {report.draft_source==='manual'?'人工修订':'AI 生成，待核对'}</p><Input.TextArea aria-label="周报正文" id="weekly-report-body" value={text} disabled={busy||!allowed('weekly_report.edit')} onChange={e=>{const next=e.target.value;setText(next);setDirty(true);try{sessionStorage.setItem(draftKey(report.id),JSON.stringify({text:next,version:report.draft_version}));}catch{setError('本地暂存失败，请及时保存或复制正文');}}} spellCheck={false}/>
-      <Button type="primary" onClick={save} disabled={!dirty||!text.trim()||busy||conflict||!allowed('weekly_report.edit')}>保存修改</Button>
+      <div className="ds-weekly-actions"><Button type="primary" onClick={save} disabled={!dirty||!text.trim()||busy||conflict||!allowed('weekly_report.edit')}>保存修改</Button>
+      <Button onClick={publishFeishu} disabled={dirty||busy||report.feishu?.status==='pending'||report.feishu?.status==='published'||report.feishu?.status==='sent'||!allowed('weekly_report.edit')}>确认并推送飞书</Button></div>
       {conflict&&<Button onClick={reloadServer} disabled={busy}>核对服务器最新版本</Button>}</div>:<SbStatePanel state="empty" title="生成后可编辑、保存和复制" description="点击左侧生成周报，完成后在这里核对和保存。"/>}
       <footer className="ds-weekly-output-foot"><span>{dirty?'有未保存修改':report?.result_status==='ready'?'已保存到服务器':'历史版本保存在当前账号下'}</span><span>请核对事实后使用</span></footer>
     </section></div>

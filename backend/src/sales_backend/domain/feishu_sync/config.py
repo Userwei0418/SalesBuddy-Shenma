@@ -28,6 +28,7 @@ class ObjectKind(StrEnum):
     TARGET = "target"
     MEMBER = "member"
     CONTACT = "contact"
+    WEEKLY_REPORT = "weekly_report"
 
 
 # Projection field names, not DB column names. Adapters must explicitly produce these.
@@ -72,8 +73,19 @@ SOURCE_FIELDS = {
                         "primary_department_name", "department_names", "roles",
                         "organization_team_id", "organization_team_name"},
     ObjectKind.CONTACT: {"name", "title", "role", "customer_id", "is_primary"},
+    # Weekly reports are written only after the author explicitly confirms
+    # the draft through the publish endpoint.  Keeping the projection fields
+    # here lets the existing Feishu table adapter upsert them without giving
+    # the model or a draft write any remote side effects.
+    ObjectKind.WEEKLY_REPORT: {"title", "report_week", "report_week_end", "author_name",
+                               "author_account", "status", "result_status", "body_markdown",
+                               "stats_summary", "record_count", "customer_count",
+                               "opportunity_count", "source_cutoff_at", "snapshot_at",
+                               "draft_version", "generated_at", "updated_at", "published_at",
+                               "feishu_push_status", "feishu_message_id", "detail_url"},
 }
-NOTIFIABLE = frozenset({ObjectKind.CUSTOMER, ObjectKind.OPPORTUNITY, ObjectKind.VISIT})
+NOTIFIABLE = frozenset({ObjectKind.CUSTOMER, ObjectKind.OPPORTUNITY, ObjectKind.VISIT,
+                        ObjectKind.WEEKLY_REPORT})
 
 
 class TableMapping(StrictModel):
