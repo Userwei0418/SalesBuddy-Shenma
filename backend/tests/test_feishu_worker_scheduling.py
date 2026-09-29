@@ -158,3 +158,41 @@ async def test_idle_worker_does_not_schedule_remote_reconciliation():
         claim=AsyncMock(return_value=None),schedule_reconcile=AsyncMock())
     assert await worker.run_once() is False
     worker.repository.schedule_reconcile.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_worker_dispatches_weekly_report_event_and_finishes_once():
+    worker = FeishuWorker(Database())
+    event = dict(id=11, lease_token="lease", connection_id="connection",
+                 object_kind="weekly_report", object_id="report")
+    worker.repository = SimpleNamespace(
+        worker_config=AsyncMock(side_effect=lambda *args, **kwargs: (
+            None if kwargs.get("validation") else {"id": "connection", "enabled": True})),
+        schedule_reconcile=AsyncMock(), claim=AsyncMock(return_value=event),
+        try_lock=AsyncMock(return_value=True), finish=AsyncMock(), unlock=AsyncMock())
+    worker.service = SimpleNamespace(handle=AsyncMock())
+
+    assert await worker.run_once()
+    worker.service.handle.assert_awaited_once_with(None, event, {"id": "connection", "enabled": True})
+    worker.repository.finish.assert_awaited_once_with(None, event)
+    worker.repository.unlock.assert_awaited_once_with(None, "feishu:connection:weekly_report:report")
+
+
+@pytest.mark.asyncio
+async def test_worker_keeps_unknown_weekly_message_result_retryable_without_resending():
+    worker = FeishuWorker(Database())
+    event = dict(id=12, lease_token="lease", attempts=1, connection_id="connection",
+                 object_kind="weekly_report", object_id="report")
+    worker.repository = SimpleNamespace(
+        worker_config=AsyncMock(side_effect=lambda *args, **kwargs: (
+            None if kwargs.get("validation") else {"id": "connection", "enabled": True})),
+        schedule_reconcile=AsyncMock(), claim=AsyncMock(return_value=event),
+        try_lock=AsyncMock(return_value=True), finish=AsyncMock(), unlock=AsyncMock())
+    worker.service = SimpleNamespace(handle=AsyncMock(
+        side_effect=FeishuError("MESSAGE_RESULT_UNKNOWN", unknown=True)))
+
+    assert await worker.run_once()
+    worker.service.handle.assert_awaited_once()
+    worker.repository.finish.assert_awaited_once_with(
+        None, event, error="MESSAGE_RESULT_UNKNOWN", retryable=True, retry_after=0)
+    worker.repository.unlock.assert_awaited_once_with(None, "feishu:connection:weekly_report:report")

@@ -81,6 +81,13 @@ class FeishuSyncService:
                         if (not parent or not parent.enabled
                                 or parent.table_id != field.get("property", {}).get("table_id")):
                             raise ValueError("LINK_TARGET_MISMATCH")
+                # Schema visibility does not grant record retrieval. Exercise
+                # the worker's read-only deduplication query for every enabled
+                # table. System IDs are UUIDs; this stable reserved value cannot
+                # identify a business record and never creates a remote row.
+                await client.find_record(config.base_token, mapping.table_id,
+                    fields[mapping.id_field_id]["field_name"],
+                    f"__salesbuddy_validation__:{config.connection_id}")
             # Resource visibility only; does not create a record or send a message.
             if config.notification.enabled:
                 chats = {config.notification.default_chat_id}

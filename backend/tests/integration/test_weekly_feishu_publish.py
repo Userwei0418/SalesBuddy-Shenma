@@ -4,15 +4,16 @@ These tests are intentionally gated by the disposable integration harness.  They
 never use a customer database and exercise the same SECURITY DEFINER functions
 used by the API, including the frozen publication snapshot and event idempotency.
 """
-import json
-from datetime import date, datetime, timezone
-from hashlib import sha256
 from uuid import uuid4
 
 import asyncpg
 import pytest
 
+from sales_backend.db import set_request_context
+from sales_backend.repositories.identity import IdentityRepository
+from sales_backend.services.weekly_source import build_snapshot, report_dates
 from tests.integration.feishu_fixtures import seed_execute, seed_fetchrow, seed_fetchval
+from tests.integration.test_weekly_reports import seed
 
 pytestmark = pytest.mark.asyncio
 
@@ -48,15 +49,16 @@ async def _fixture(connection, actor, *, status="succeeded", version=1):
     report = uuid4()
     original = {"schema_version": "weekly.v2", "status": "ready", "title": "联调周报",
                 "statistics": {"record_count": 1, "customer_count": 1, "opportunity_count": 0}}
-    snapshot = {"context": {"as_of": "2026-09-29T10:00:00+08:00"}}
+    await seed(connection, actor, 1)
+    _snapshot, snapshot_raw, snapshot_hash = await build_snapshot(connection, actor, str(report))
+    report_week, source_cutoff_at = report_dates(await connection.fetchval('SELECT transaction_timestamp()'))
     await seed_execute(connection, """INSERT INTO insight.weekly_report
       (id,workspace_id,author_id,request_id,status,result_status,input_snapshot,input_sha256,
        binding,original_result,draft_markdown,draft_version,report_week,source_cutoff_at)
       VALUES($1,$2,$3,$4,$5,'ready',$6,$7,$8::jsonb,$9::jsonb,$10,$11,$12,$13)""",
-      report, actor.workspace_id, actor.user_id, uuid4(), status, json.dumps(snapshot),
-      sha256(json.dumps(snapshot).encode()).hexdigest(), {"contract_version": "weekly.v2"},
-      original, "## 联调周报\n人工确认正文", version, date(2026, 9, 28),
-      datetime(2026, 9, 29, 2, tzinfo=timezone.utc))
+      report, actor.workspace_id, actor.user_id, uuid4(), status, snapshot_raw,
+      snapshot_hash, {"contract_version": "weekly.v2"},
+      original, "## 联调周报\n人工确认正文", version, report_week, source_cutoff_at)
     return cid, report
 
 
@@ -85,6 +87,36 @@ async def test_publish_is_author_scoped_versioned_and_idempotent(connection, sal
     # A replay is idempotent even when the browser retries with its stale
     # version; it returns the already-created event and never enqueues another.
     assert await connection.fetchval("SELECT security.publish_weekly_report_feishu($1,0)", report) == event_id
+
+
+async def test_first_publish_requires_current_draft_version(connection, sales_actor):
+    cid, report = await _fixture(connection, sales_actor, version=2)
+    await connection.execute("SAVEPOINT weekly_publish_version_rejected")
+    try:
+        with pytest.raises(asyncpg.PostgresError, match="WEEKLY_DRAFT_VERSION_CONFLICT"):
+            await connection.fetchval("SELECT security.publish_weekly_report_feishu($1,1)", report)
+    finally:
+        await connection.execute("ROLLBACK TO SAVEPOINT weekly_publish_version_rejected")
+        await connection.execute("RELEASE SAVEPOINT weekly_publish_version_rejected")
+    assert await seed_fetchval(connection, "SELECT count(*) FROM ops.feishu_event WHERE connection_id=$1", cid) == 0
+
+
+async def test_publish_is_hidden_from_another_author(connection, sales_actor):
+    cid, report = await _fixture(connection, sales_actor)
+    other = await IdentityRepository().find_actor_by_account(
+        connection, workspace_external_id="demo-sales-workspace", account_code="XS002")
+    if other is None:
+        pytest.skip("目标库缺少第二个隔离演示账号 XS002")
+    await set_request_context(connection, other.context)
+    await connection.execute("SAVEPOINT weekly_publish_author_rejected")
+    try:
+        with pytest.raises(asyncpg.InsufficientPrivilegeError):
+            await connection.fetchval("SELECT security.publish_weekly_report_feishu($1,1)", report)
+    finally:
+        await connection.execute("ROLLBACK TO SAVEPOINT weekly_publish_author_rejected")
+        await connection.execute("RELEASE SAVEPOINT weekly_publish_author_rejected")
+        await set_request_context(connection, sales_actor)
+    assert await seed_fetchval(connection, "SELECT count(*) FROM ops.feishu_event WHERE connection_id=$1", cid) == 0
 
 
 async def test_publish_snapshot_survives_later_draft_edit(connection, sales_actor):

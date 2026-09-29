@@ -117,7 +117,7 @@ async def main():
         assert new_report['report_week'].isoformat() == '2025-12-29'
         assert new_report['source_cutoff_at'].isoformat() == '2026-01-01T00:00:00+00:00'
         assert await c.fetchval("SELECT body_markdown FROM insight.weekly_report_revision WHERE report_id=$1", report_id) == '保留人工正文'
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 156)]
+        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 158)]
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -149,7 +149,7 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V155", "applied": 30, "companies": 2,
+        print(json.dumps({"upgrade": "V125->V157", "applied": 32, "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
                           "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True,
                           "v152_weekly_draft_preserved": True, "week_year_boundary": True,

@@ -10,6 +10,7 @@ import pytest
 from sales_backend.domain.feishu_sync.config import SyncConfig
 from sales_backend.integrations.feishu import FeishuClient, FeishuError
 from sales_backend.repositories.feishu_sync import FeishuRepository
+from sales_backend.services.feishu_sync import FeishuSyncService
 from tests.test_feishu_sync_policy import payload
 
 
@@ -63,6 +64,57 @@ def test_duplicate_system_id_is_not_silently_overwritten():
         finally:
             await client.close()
     asyncio.run(run())
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('status,body,expected_error', [
+    (200, {'code': 0, 'data': {'items': []}}, None),
+    (200, {'code': 99991672, 'msg': 'base:record:retrieve permission required'}, 'FEISHU_99991672'),
+    (403, {'code': 99991672, 'msg': 'base:record:retrieve permission required'}, 'FEISHU_99991672'),
+    (403, {'message': 'access denied'}, 'HTTP_403'),
+])
+async def test_config_validation_checks_readonly_record_search_permission(status, body, expected_error):
+    config = SyncConfig.model_validate(payload())
+    calls, probes = [], []
+
+    def transport(request):
+        path = request.url.path
+        calls.append((request.method, path))
+        if path.endswith('/auth/v3/tenant_access_token/internal'):
+            return httpx.Response(200, json={'code': 0, 'tenant_access_token': 'fixture-token', 'expire': 7200})
+        if path.endswith('/fields'):
+            return httpx.Response(200, json={'code': 0, 'data': {'items': [
+                {'field_id': 'fldSystemId', 'field_name': '现用系统记录编号', 'type': 1},
+                {'field_id': 'fldName', 'field_name': '名称', 'type': 1},
+                {'field_id': 'fldStatus', 'field_name': '状态', 'type': 1}]}})
+        if path.endswith('/records/search'):
+            assert request.method == 'POST'
+            assert request.url.params['page_size'] == '2'
+            probe = json.loads(request.content)
+            assert probe == {'field_names': ['现用系统记录编号'], 'filter': {
+                'conjunction': 'and', 'conditions': [{'field_name': '现用系统记录编号',
+                    'operator': 'is', 'value': [f'__salesbuddy_validation__:{config.connection_id}']}]}}
+            probes.append(probe)
+            return httpx.Response(status, json=body)
+        if path.endswith('/im/v1/chats/oc_default'):
+            assert request.method == 'GET'
+            return httpx.Response(200, json={'code': 0, 'data': {}})
+        pytest.fail(f'Validation attempted an unexpected endpoint: {request.method} {path}')
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(transport)) as http:
+        service = FeishuSyncService(None)
+        service.client = lambda row: (config, FeishuClient('cli_test', 'fixture-secret', client=http))
+        service.repository.validation_result = AsyncMock()
+        connection, row = object(), {'id': config.connection_id}
+        # Revalidation uses the same impossible business ID and stays read-only.
+        await service.validate(connection, row)
+        await service.validate(connection, row)
+    assert len(probes) == 2 and probes[0] == probes[1]
+    assert service.repository.validation_result.await_count == 2
+    assert all(call.args == (connection, row, expected_error)
+               for call in service.repository.validation_result.await_args_list)
+    assert sum(path.endswith('/im/v1/chats/oc_default') for _, path in calls) == (
+        2 if expected_error is None else 0)
 
 
 @pytest.mark.asyncio

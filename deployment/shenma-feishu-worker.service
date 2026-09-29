@@ -1,0 +1,21 @@
+[Unit]
+Description=Shenma SalesBuddy Feishu synchronization worker
+After=network-online.target postgresql.service
+Wants=network-online.target
+[Service]
+User=shenma-sales
+Group=shenma-sales
+WorkingDirectory=/opt/shenma-sales/current/backend
+EnvironmentFile=/etc/shenma-sales/runtime.env
+EnvironmentFile=/etc/shenma-sales/feishu-sync.env
+ExecStart=/opt/shenma-sales/current/backend/.venv/bin/python -m sales_backend.feishu_worker
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sales-backend
+[Install]
+WantedBy=multi-user.target

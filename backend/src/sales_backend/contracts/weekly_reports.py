@@ -38,6 +38,7 @@ class WeeklySummary(BaseModel):
     finished_at: datetime | None
     runtime_snapshot_verified: Literal[False]
     actual_snapshot_id: None
+    feishu: dict[str, Any] | None = None
 
 
 class WeeklyDetail(WeeklySummary):
@@ -47,7 +48,6 @@ class WeeklyDetail(WeeklySummary):
     draft_source: Literal['agent', 'manual'] | None
     draft_references_validated: bool
     runtime_metadata: dict[str, Any]
-    feishu: dict[str, Any] | None = None
 
 
 class WeeklyList(BaseModel):

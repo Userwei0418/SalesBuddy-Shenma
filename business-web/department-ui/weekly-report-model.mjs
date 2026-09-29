@@ -36,3 +36,17 @@ export function composeReport(records, period, author) {
   lines.push(...(missing.length ? missing : ['请核对以上进展和行动，并补充需要团队协调的事项。']));
   return {title: `${author || '我的'}周报`, text: lines.join('\n'), sources: records.map(r => ({id: r.id, customer: r.customer_name, date: uploadDate(r)})), period};
 }
+
+// Publication is one explicit action per report; recovery is an operator action.
+export function feishuPublicationState(receipt) {
+  const status = receipt?.status || (receipt?.event_id ? 'pending' : 'not_published');
+  const states = {
+    not_published: {type:'info',label:'尚未推送飞书',description:'核对正文后点击确认，即可写入周报表并推送到大群。'},
+    pending: {type:'info',label:'飞书推送处理中',description:'已保存本次确认的正文，正在写入多维表格并推送群聊。可以离开页面，稍后查看结果。'},
+    sent: {type:'success',label:'周报已推送至飞书群聊',description:'多维表格记录本次确认的正文。后续编辑不会改动已推送内容。'},
+    unknown: {type:'warning',label:'飞书推送结果待核对',description:'请联系管理员先核对群消息，再在运维后台恢复。系统不会自动重复发送；处理后可刷新推送状态。'},
+    failed: {type:'error',label:'飞书推送未完成',description:'请联系管理员在运维后台核对并恢复本次推送；处理后可刷新推送状态，无需再次提交周报。'},
+  };
+  return {...(states[status] || states.pending),status,
+    canPublish:status==='not_published',needsPolling:!states[status]||status==='pending'};
+}

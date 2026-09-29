@@ -119,9 +119,13 @@ async def test_validation_discards_cached_client_and_reads_fresh_schema():
     row = worker_row(config)
     async with service._client(row):
         pass
-    await service.validate(Connection(), row)
+    connection = Connection()
+    await service.validate(connection, row)
     first.close.assert_awaited_once()
     fresh.fields.assert_awaited()
+    fresh.find_record.assert_awaited_once_with(config.base_token, "tblCustomers", "系统ID",
+        f"__salesbuddy_validation__:{config.connection_id}")
+    service.repository.validation_result.assert_awaited_once_with(connection, row, None)
     fresh.close.assert_awaited_once()
     assert service._cached_client is None
 

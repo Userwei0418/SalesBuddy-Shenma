@@ -324,6 +324,62 @@ async def test_reserved_direction_validation_fails_before_remote_io():
 
 
 @pytest.mark.asyncio
+async def test_validation_queries_each_enabled_table_using_its_current_system_id_field_name():
+    service, _, client = setup()
+    data = payload()
+    data["mappings"]["weekly_report"] = {
+        "enabled": True, "table_id": "tblWeekly", "id_field_id": "fldWeeklyId",
+        "fields": {"record_status": "fldStatus"}}
+    data["mappings"]["visit"] = {
+        "enabled": False, "table_id": "tblDisabled", "id_field_id": "fldVisitId"}
+    config = SyncConfig.model_validate(data)
+    service.client = lambda row: (config, client)
+    client.fields.side_effect = [client.fields.return_value, {
+        "fldWeeklyId": {"field_name": "周报系统编号已改名", "type": 1},
+        "fldStatus": {"field_name": "状态", "type": 1}}]
+    client.request = AsyncMock()
+    service.repository.validation_result = AsyncMock()
+    connection, row = Connection(), {"id": config.connection_id}
+
+    await service.validate(connection, row)
+
+    assert [call.args for call in client.fields.await_args_list] == [
+        (config.base_token, "tblCustomers"), (config.base_token, "tblWeekly")]
+    probe_id = f"__salesbuddy_validation__:{config.connection_id}"
+    assert [call.args for call in client.find_record.await_args_list] == [
+        (config.base_token, "tblCustomers", "系统ID", probe_id),
+        (config.base_token, "tblWeekly", "周报系统编号已改名", probe_id)]
+    service.repository.validation_result.assert_awaited_once_with(connection, row, None)
+    client.request.assert_awaited_once_with("GET", "/im/v1/chats/oc_default")
+    for method in (client.create_record, client.update_record, client.send_card):
+        method.assert_not_awaited()
+    client.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_validation_fails_when_later_enabled_table_cannot_retrieve_records():
+    service, _, client = setup()
+    data = payload()
+    data["mappings"]["weekly_report"] = {
+        "enabled": True, "table_id": "tblWeekly", "id_field_id": "fldSystemId",
+        "fields": {"record_status": "fldStatus"}}
+    config = SyncConfig.model_validate(data)
+    service.client = lambda row: (config, client)
+    client.find_record.side_effect = [None, FeishuError("FEISHU_99991672")]
+    client.request = AsyncMock()
+    service.repository.validation_result = AsyncMock()
+    connection, row = Connection(), {"id": config.connection_id}
+
+    await service.validate(connection, row)
+
+    assert client.find_record.await_count == 2
+    service.repository.validation_result.assert_awaited_once_with(connection, row, "FEISHU_99991672")
+    for method in (client.create_record, client.update_record, client.send_card, client.request):
+        method.assert_not_awaited()
+    client.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_soft_deleted_absent_record_is_never_recreated():
     service, event, client = setup()
     event["historical"] = True
