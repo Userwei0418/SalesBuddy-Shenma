@@ -182,6 +182,57 @@ async def test_unknown_notification_is_not_blindly_resent():
 
 
 @pytest.mark.asyncio
+async def test_confirmed_weekly_report_upserts_base_sends_group_and_refreshes_receipt():
+    from sales_backend.domain.feishu_sync.config import TableMapping
+
+    service, event, client = setup()
+    config, _ = service.client({})
+    weekly = TableMapping(enabled=True, table_id="tblWeekly", id_field_id="fldSystemId",
+        fields={"record_status": "fldStatus", "title": "fldTitle",
+                "body_markdown": "fldBody", "feishu_push_status": "fldPush",
+                "feishu_message_id": "fldMessage"})
+    config = config.model_copy(update={"mappings": {"weekly_report": weekly},
+        "notification": config.notification.model_copy(update={"on_create": frozenset({"weekly_report"})})})
+    service.client = lambda row: (config, client)
+    client.find_record.return_value = None
+    service.repository.deliveries.side_effect = [[], [{"status": "pending", "dedupe_key": "weekly",
+        "chat_id": "oc_default", "payload": {}}]]
+    client.fields.return_value.update({
+        "fldTitle": {"field_name": "标题", "type": 1},
+        "fldBody": {"field_name": "正文", "type": 1},
+        "fldPush": {"field_name": "推送状态", "type": 1},
+        "fldMessage": {"field_name": "消息ID", "type": 1},
+    })
+    event.update(object_kind="weekly_report", first_formal_create=True)
+    source = {"id": str(event["object_id"]), "title": "本周周报",
+        "body_markdown": "人工确认正文", "data_kind": "production", "status": "succeeded",
+        "result_status": "ready", "record_status": "有效", "feishu_push_status": "排队中"}
+    service.repository.source.side_effect = [source, {**source, "feishu_push_status": "已推送", "feishu_message_id": "om_test"}]
+    await service.handle(Connection(), event, {})
+    client.create_record.assert_awaited_once()
+    client.send_card.assert_awaited_once()
+    client.update_record.assert_awaited_once()
+    assert client.update_record.await_args.args[-1]["推送状态"] == "已推送"
+    assert client.update_record.await_args.args[-1]["消息ID"] == "om_test"
+
+
+@pytest.mark.asyncio
+async def test_weekly_unknown_message_result_is_never_resent():
+    service, event, client = setup()
+    from sales_backend.domain.feishu_sync.config import TableMapping
+    config, _ = service.client({})
+    config = config.model_copy(update={"mappings": {"weekly_report": TableMapping(
+        enabled=True, table_id="tblWeekly", id_field_id="fldSystemId",
+        fields={"record_status": "fldStatus"})}})
+    service.client = lambda row: (config, client)
+    event.update(object_kind="weekly_report")
+    service.repository.deliveries.return_value = [{"status": "unknown", "dedupe_key": "weekly"}]
+    with pytest.raises(FeishuError, match="MESSAGE_RESULT_UNKNOWN"):
+        await service.handle(Connection(), event, {})
+    client.send_card.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_lost_lease_stops_before_remote_io():
     service, event, client = setup()
     service.repository.guard.side_effect = RuntimeError("lease expired")
@@ -269,6 +320,62 @@ async def test_reserved_direction_validation_fails_before_remote_io():
     service.repository.validation_result.assert_awaited_once_with(connection, row, "SYNC_DIRECTION_UNSUPPORTED")
     client.fields.assert_not_awaited()
     client.send_card.assert_not_awaited()
+    client.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_validation_queries_each_enabled_table_using_its_current_system_id_field_name():
+    service, _, client = setup()
+    data = payload()
+    data["mappings"]["weekly_report"] = {
+        "enabled": True, "table_id": "tblWeekly", "id_field_id": "fldWeeklyId",
+        "fields": {"record_status": "fldStatus"}}
+    data["mappings"]["visit"] = {
+        "enabled": False, "table_id": "tblDisabled", "id_field_id": "fldVisitId"}
+    config = SyncConfig.model_validate(data)
+    service.client = lambda row: (config, client)
+    client.fields.side_effect = [client.fields.return_value, {
+        "fldWeeklyId": {"field_name": "周报系统编号已改名", "type": 1},
+        "fldStatus": {"field_name": "状态", "type": 1}}]
+    client.request = AsyncMock()
+    service.repository.validation_result = AsyncMock()
+    connection, row = Connection(), {"id": config.connection_id}
+
+    await service.validate(connection, row)
+
+    assert [call.args for call in client.fields.await_args_list] == [
+        (config.base_token, "tblCustomers"), (config.base_token, "tblWeekly")]
+    probe_id = f"__salesbuddy_validation__:{config.connection_id}"
+    assert [call.args for call in client.find_record.await_args_list] == [
+        (config.base_token, "tblCustomers", "系统ID", probe_id),
+        (config.base_token, "tblWeekly", "周报系统编号已改名", probe_id)]
+    service.repository.validation_result.assert_awaited_once_with(connection, row, None)
+    client.request.assert_awaited_once_with("GET", "/im/v1/chats/oc_default")
+    for method in (client.create_record, client.update_record, client.send_card):
+        method.assert_not_awaited()
+    client.close.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_validation_fails_when_later_enabled_table_cannot_retrieve_records():
+    service, _, client = setup()
+    data = payload()
+    data["mappings"]["weekly_report"] = {
+        "enabled": True, "table_id": "tblWeekly", "id_field_id": "fldSystemId",
+        "fields": {"record_status": "fldStatus"}}
+    config = SyncConfig.model_validate(data)
+    service.client = lambda row: (config, client)
+    client.find_record.side_effect = [None, FeishuError("FEISHU_99991672")]
+    client.request = AsyncMock()
+    service.repository.validation_result = AsyncMock()
+    connection, row = Connection(), {"id": config.connection_id}
+
+    await service.validate(connection, row)
+
+    assert client.find_record.await_count == 2
+    service.repository.validation_result.assert_awaited_once_with(connection, row, "FEISHU_99991672")
+    for method in (client.create_record, client.update_record, client.send_card, client.request):
+        method.assert_not_awaited()
     client.close.assert_awaited_once()
 
 

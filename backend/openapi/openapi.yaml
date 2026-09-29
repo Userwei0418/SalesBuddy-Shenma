@@ -2510,6 +2510,7 @@ components:
           - customer
           - opportunity
           - visit
+          - weekly_report
           items:
             $ref: '#/components/schemas/ObjectKind'
           title: On Create
@@ -2544,6 +2545,7 @@ components:
       - target
       - member
       - contact
+      - weekly_report
       title: ObjectKind
       type: string
     OperationsCustomerHistory:
@@ -3511,6 +3513,17 @@ components:
       required:
       - revision
       title: Publish
+      type: object
+    PublishFeishuRequest:
+      additionalProperties: false
+      properties:
+        expected_version:
+          minimum: 1.0
+          title: Expected Version
+          type: integer
+      required:
+      - expected_version
+      title: PublishFeishuRequest
       type: object
     QualityRequest:
       additionalProperties: false
@@ -5035,6 +5048,12 @@ components:
           - type: string
           - type: 'null'
           title: Error Code
+        feishu:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Feishu
         finished_at:
           anyOf:
           - format: date-time
@@ -5345,6 +5364,12 @@ components:
           - type: string
           - type: 'null'
           title: Error Code
+        feishu:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Feishu
         finished_at:
           anyOf:
           - format: date-time
@@ -14995,6 +15020,73 @@ paths:
       security:
       - HTTPBearer: []
       summary: Save Draft
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}/feishu:
+    get:
+      operationId: feishu_status_api_v1_web_weekly_reports__report_id__feishu_get
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Feishu Status Api V1 Web Weekly Reports  Report Id  Feishu Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Feishu Status
+      tags:
+      - Business Web weekly reports
+  /api/v1/web/weekly-reports/{report_id}/feishu/publish:
+    post:
+      description: Publish only the saved, human-confirmed version to Base and the group.
+      operationId: publish_feishu_api_v1_web_weekly_reports__report_id__feishu_publish_post
+      parameters:
+      - in: path
+        name: report_id
+        required: true
+        schema:
+          format: uuid
+          title: Report Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublishFeishuRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDetail'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Publish Feishu
       tags:
       - Business Web weekly reports
   /api/v1/web/weekly-reports/{report_id}/sources:

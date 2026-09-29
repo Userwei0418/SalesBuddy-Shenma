@@ -60,7 +60,7 @@ class WeeklyReportService:
             old = await c.fetchrow('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
                     LEFT JOIN ops.job j ON j.id=r.job_id WHERE r.request_id=$1::uuid''', request_id)
             if old:
-                return self.replay(old, report_week)
+                return await self.replay(c, old, report_week)
         binding = self.binding(actor)
         generation, job_id = str(uuid4()), str(uuid4())
         try:
@@ -84,7 +84,7 @@ class WeeklyReportService:
                     CASE WHEN $6='succeeded' THEN clock_timestamp() END,$12,$13) RETURNING *''', generation,
                     actor.workspace_id, actor.user_id, request_id, None if empty else job_id,
                     'succeeded' if empty else 'queued', 'insufficient_data' if empty else None, raw, digest, binding, result, week, cutoff)
-                return self.view(row)
+                return await self._view(c, row)
         except ValueError as exc:
             code = str(exc)
             raise HTTPException(422, code if code in {
@@ -95,14 +95,13 @@ class WeeklyReportService:
                 old = await c.fetchrow('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
                     LEFT JOIN ops.job j ON j.id=r.job_id WHERE r.request_id=$1::uuid''', request_id)
                 if old:
-                    return self.replay(old, report_week)
+                    return await self.replay(c, old, report_week)
             raise HTTPException(409, 'WEEKLY_GENERATION_IN_PROGRESS') from None
 
-    @classmethod
-    def replay(cls, row, report_week):
+    async def replay(self, connection, row, report_week):
         if report_week is not None and row['report_week'] != report_week:
             raise HTTPException(409, 'WEEKLY_REQUEST_ID_CONFLICT')
-        return cls.view(row)
+        return await self._view(connection, row)
 
     @staticmethod
     def source_page(source, week, cutoff, limit, offset):
@@ -149,6 +148,9 @@ class WeeklyReportService:
             input_sha256=row['input_sha256'], draft_version=row['draft_version'], error_code=error,
             created_at=row['created_at'], updated_at=row['updated_at'], finished_at=row['finished_at'],
             runtime_snapshot_verified=False, actual_snapshot_id=None)
+        # A publication event is not a delivery receipt. Only the DB status
+        # reader below can label an already-published report as sent/failed.
+        view['feishu'] = None if row.get('feishu_publish_event_id') else {'status': 'not_published'}
         # Validation checks references/structure; factual prose still requires human review.
         if content:
             view.update(title=result['title'] if result else None, body_markdown=row['draft_markdown'],
@@ -157,13 +159,51 @@ class WeeklyReportService:
                 runtime_metadata=row['runtime_metadata'])
         return view
 
+    async def _view(self, connection, row, *, content=False):
+        result = self.view(row, content=content)
+        if row.get('feishu_publish_event_id'):
+            result['feishu'] = await connection.fetchval(
+                'SELECT security.weekly_feishu_status($1::uuid)', row['id'])
+        return result
+
+    async def publish_feishu(self, actor, ident, expected_version):
+        async with self.database.transaction(actor) as c:
+            await require_permission(c, 'weekly_report.edit')
+            row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid FOR UPDATE', ident)
+            if not row:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
+            # A report may remain visible after its source records or the
+            # author's scope changed. Re-check the frozen source immediately
+            # before creating the external event.
+            await assert_snapshot_access(c, actor, decode_snapshot(row['input_snapshot']))
+            try:
+                await c.fetchval('SELECT security.publish_weekly_report_feishu($1::uuid,$2)',
+                                            ident, expected_version)
+            except asyncpg.InsufficientPrivilegeError:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND') from None
+            except asyncpg.PostgresError as exc:
+                detail = str(exc).split('CONTEXT', 1)[0].strip()
+                if detail in {'WEEKLY_DRAFT_NOT_READY', 'WEEKLY_DRAFT_VERSION_CONFLICT', 'WEEKLY_FEISHU_NOT_READY'}:
+                    raise HTTPException(409, detail) from None
+                raise
+            row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid', ident)
+            return await self._view(c, row, content=True)
+
+    async def feishu_status(self, actor, ident):
+        async with self.database.transaction(actor, readonly=True) as c:
+            await require_permission(c, 'weekly_report.read')
+            value = await c.fetchval('SELECT security.weekly_feishu_status($1::uuid)', ident)
+            if value is None:
+                raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
+            return value
+
     async def list(self, actor, limit, offset, report_week=None):
         async with self.database.transaction(actor, readonly=True) as c:
             await require_permission(c, 'weekly_report.read')
             rows = await c.fetch('''SELECT r.*,j.status AS queue_status FROM insight.weekly_report r
                 LEFT JOIN ops.job j ON j.id=r.job_id WHERE ($3::date IS NULL OR r.report_week=$3)
                 ORDER BY r.created_at DESC,r.id DESC LIMIT $1 OFFSET $2''', limit+1, offset, report_week)
-            return dict(items=[self.view(r) for r in rows[:limit]], has_more=len(rows)>limit,
+            return dict(items=[await self._view(c, r) for r in rows[:limit]], has_more=len(rows)>limit,
                 current_week=report_dates(await c.fetchval('SELECT transaction_timestamp()'))[0])
 
     async def read(self, actor, ident):
@@ -174,7 +214,7 @@ class WeeklyReportService:
             if not row:
                 raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
             await assert_snapshot_access(c, actor, decode_snapshot(row['input_snapshot']))
-            return self.view(row, content=True)
+            return await self._view(c, row, content=True)
 
     async def save(self, actor, ident, expected_version, body):
         async with self.database.transaction(actor) as c:
@@ -193,7 +233,7 @@ class WeeklyReportService:
                 (workspace_id,author_id,report_id,version_no,body_markdown,source)
                 VALUES($1::uuid,$2::uuid,$3::uuid,$4,$5,'manual')''', actor.workspace_id, actor.user_id, ident,
                 row['draft_version'], body)
-            return self.view(row, content=True)
+            return await self._view(c, row, content=True)
 
     async def cancel(self, actor, ident):
         async with self.database.transaction(actor) as c:
@@ -206,7 +246,7 @@ class WeeklyReportService:
             if not row:
                 raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND')
             # Logical cancellation discards late results. No claim that upstream compute stopped.
-            return self.view(row)
+            return await self._view(c, row)
 
     async def handle(self, actor, ident):
         try:

@@ -93,6 +93,7 @@ async def verify_worker_role(connection):
             AND has_schema_privilege(current_user,n.oid,'USAGE')
             AND has_function_privilege(current_user,p.oid,'EXECUTE')
             AND p.oid NOT IN ('ops.feishu_source(uuid,text,uuid)'::regprocedure,
+                              'ops.feishu_weekly_source(uuid,uuid)'::regprocedure,
                               'ops.feishu_reconcile(uuid)'::regprocedure,
                               'security.has_active_role(text)'::regprocedure))
         """)

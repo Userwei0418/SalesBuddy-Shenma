@@ -81,6 +81,13 @@ class FeishuSyncService:
                         if (not parent or not parent.enabled
                                 or parent.table_id != field.get("property", {}).get("table_id")):
                             raise ValueError("LINK_TARGET_MISMATCH")
+                # Schema visibility does not grant record retrieval. Exercise
+                # the worker's read-only deduplication query for every enabled
+                # table. System IDs are UUIDs; this stable reserved value cannot
+                # identify a business record and never creates a remote row.
+                await client.find_record(config.base_token, mapping.table_id,
+                    fields[mapping.id_field_id]["field_name"],
+                    f"__salesbuddy_validation__:{config.connection_id}")
             # Resource visibility only; does not create a record or send a message.
             if config.notification.enabled:
                 chats = {config.notification.default_chat_id}
@@ -230,7 +237,11 @@ class FeishuSyncService:
                     await self.repository.mark_planned(connection, event)
                 existing = await self.repository.deliveries(connection, event["id"])
         for delivery in existing:
-            if delivery["status"] in {"sent", "failed"}:
+            if delivery["status"] == "sent":
+                if event["object_kind"] == "weekly_report" and record_id:
+                    await self.refresh_weekly_receipt(connection, event, config, client, record_id)
+                continue
+            if delivery["status"] == "failed":
                 continue
             if delivery["status"] == "unknown":
                 raise FeishuError("MESSAGE_RESULT_UNKNOWN")
@@ -245,3 +256,27 @@ class FeishuSyncService:
                     await self.repository.delivery_state(connection, delivery["dedupe_key"], "pending", error=exc.code)
                 raise
             await self.repository.delivery_state(connection, delivery["dedupe_key"], "sent", message_id=message_id)
+            if event["object_kind"] == "weekly_report" and record_id:
+                await self.refresh_weekly_receipt(connection, event, config, client, record_id)
+
+    async def refresh_weekly_receipt(self, connection, event, config, client, record_id):
+        """Refresh delivery receipt fields after a sent card, including retries."""
+        mapping = config.mappings.get("weekly_report")
+        if not mapping or not mapping.enabled:
+            return
+        refreshed = await self.repository.source(connection, event)
+        refreshed_values = project("weekly_report", refreshed,
+                                  SOURCE_FIELDS["weekly_report"] | COMMON_FIELDS)
+        schema = await client.fields(config.base_token, mapping.table_id)
+        refreshed_fields = await self.project_fields(connection, event, config, mapping,
+                                                      refreshed_values, refreshed, schema, {})
+        await self.repository.guard(connection, event, config.revision)
+        await client.update_record(config.base_token, mapping.table_id, record_id, refreshed_fields)
+        fingerprint = sha256(json.dumps({
+            "version": 1, "app": config.app_id, "base": config.base_token,
+            "mapping": mapping.model_dump(mode="json"),
+            "values": {key: refreshed_values.get(key) for key in {"system_id", "record_status", *mapping.fields} - {"synced_at"}},
+            "links": {},
+        }, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        digest = sha256(json.dumps(refreshed_fields, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        await self.repository.remember(connection, event, mapping.table_id, record_id, digest, fingerprint)

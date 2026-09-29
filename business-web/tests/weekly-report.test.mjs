@@ -20,3 +20,16 @@ test('report uses only selected factual text, retains action meaning and flags m
   assert.equal(JSON.stringify(rows), original); assert.deepEqual(result.sources.map(r=>r.id),['1','2']);
   assert.throws(()=>composeReport([],{},''),/至少选择/);
 });
+
+test('Feishu state permits one confirmation and leaves recovery to administrators',async()=>{
+  const {feishuPublicationState}=await import('../department-ui/weekly-report-model.mjs');
+  assert.equal(feishuPublicationState().canPublish,true);
+  assert.equal(feishuPublicationState({status:'not_published'}).canPublish,true);
+  for(const status of ['pending','sent','unknown','failed','published']) {
+    const state=feishuPublicationState({status});
+    assert.equal(state.canPublish,false,status);
+    assert.equal(state.needsPolling,['pending','published'].includes(status),status);
+    if(['unknown','failed'].includes(status))assert.match(state.description,/管理员.*恢复/);
+  }
+  assert.equal(feishuPublicationState({event_id:'event'}).needsPolling,true);
+});

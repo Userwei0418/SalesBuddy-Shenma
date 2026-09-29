@@ -29,6 +29,18 @@ RELATIONS = {"customer_ids": "customer", "associated_partner_ids": "partner",
 def project(kind, raw, field_names):
     if raw.get("excluded"):
         return {"system_id": str(raw["id"]), "record_status": "已归档"}
+    if kind == "weekly_report":
+        # A report reaches this adapter only from the explicit publish event.
+        # The source function already filters out drafts, failed runs and
+        # reports from another workspace.  Keep the body as plain text so
+        # user-authored markdown cannot become executable card content.
+        if raw.get("deleted") or raw.get("excluded"):
+            return {"system_id": str(raw["id"]), "record_status": "已归档"}
+        values = {key: raw.get(key) for key in field_names}
+        values.update(system_id=str(raw["id"]), record_status="有效",
+                      source_created_at=raw.get("created_at"), source_updated_at=raw.get("updated_at"),
+                      synced_at=datetime.now(UTC).isoformat())
+        return values
     if raw.get("data_kind") not in (None, "production"):
         return None
     if kind == "visit" and not raw.get("archived_at") and not raw.get("deleted"):

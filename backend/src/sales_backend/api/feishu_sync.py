@@ -100,6 +100,7 @@ async def catalog(identity: RequestIdentity = Depends(get_management_identity)):
     labels = {"customer": "客户", "opportunity": "商机", "visit": "跟进记录", "partner": "合作伙伴",
               "task": "任务／待办", "demo_scene": "Demo／场景成果", "actual": "确收／回款实绩",
               "forecast": "商机季度预测（原始录入）", "period_actual_snapshot": "季度历史实绩（原始汇总）",
+              "weekly_report": "确认后的销售周报",
               "target": "经营目标", "member": "成员／部门", "contact": "客户联系人"}
     return {"objects": [{"key": kind, "label": labels[kind],
                          "fields": sorted((fields | COMMON_FIELDS) - {"system_id"})}

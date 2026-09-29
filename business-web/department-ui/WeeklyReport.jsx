@@ -2,13 +2,15 @@ import React, {useEffect, useRef, useState} from 'react';
 import {App, Alert, Button, Collapse, Input, Select, Tag} from 'antd';
 import {SbStatePanel} from '@shandiant/ui-react';
 import WeeklyReportDemo from './WeeklyReportDemo.jsx';
-import {uploadDate} from './weekly-report-model.mjs';
+import {uploadDate, feishuPublicationState} from './weekly-report-model.mjs';
 import './weekly-report.css';
 
 const STATE = {queued:'等待生成',running:'正在生成',succeeded:'已完成',failed:'生成失败',cancelled:'已取消'};
 const ERRORS = {
   WEEKLY_CONTEXT_TOO_LARGE:'素材较多，已停止生成。请联系管理员调整处理容量，原始记录不会被截断。',
   WEEKLY_DRAFT_VERSION_CONFLICT:'这份周报已在其他页面修改。当前编辑已保留，请核对服务器版本后再保存。',
+  WEEKLY_FEISHU_NOT_READY:'飞书周报推送尚未启用，请联系管理员核对配置。',
+  WEEKLY_DRAFT_NOT_READY:'周报正文尚未生成完成，请等待生成并核对后再推送。',
   WEEKLY_AGENT_NOT_CONFIGURED:'周报服务尚未启用，请联系管理员。',
   WEEKLY_SOURCE_SUBJECT_UNSUPPORTED:'部分记录未关联客户，暂时不能生成周报。请联系管理员核对关联，系统不会省略这些记录。',
   WEEKLY_SOURCE_ASSOCIATION_UNSUPPORTED:'部分历史记录关联多个业务对象，需要先核对周报归属；系统不会只选其中一项。',
@@ -34,11 +36,13 @@ function LiveReport({page, session}) {
   const [report,setReport]=useState(null), [text,setText]=useState(''), [dirty,setDirty]=useState(false);
   const [loading,setLoading]=useState(true), [busy,setBusy]=useState(false), [error,setError]=useState(''), [sourceError,setSourceError]=useState('');
   const [conflict,setConflict]=useState(false), [query,setQuery]=useState('');
-  const [historyMore,setHistoryMore]=useState(false);
+  const [historyMore,setHistoryMore]=useState(false), [feishuError,setFeishuError]=useState('');
+  const [checkingFeishu,setCheckingFeishu]=useState(false);
   const lifetime=useRef(0), selection=useRef(0), reportRef=useRef(null), dirtyRef=useRef(false);
   const sourceJob=useRef(0);
   reportRef.current=report; dirtyRef.current=dirty;
   const api=(path='', options={})=>page.weeklyRequest(path,options);
+  const publication=feishuPublicationState(report?.feishu);
   const week=kind==='previous' && currentWeek ? weekBefore(currentWeek) : currentWeek;
   const allowed=code=>session.permissions?.[code]===true;
   const alive=n=>lifetime.current===n && !page._destroyed;
@@ -68,7 +72,7 @@ function LiveReport({page, session}) {
     setReport(value);reportRef.current=value;setReports(rows=>rows.map(r=>r.id===id?value:r));
     const buffered=read(draftKey(id));
     setText(buffered?.text ?? value.body_markdown ?? '');setDirty(!!buffered);
-    setConflict(!!buffered&&buffered.version!==value.draft_version);
+    setConflict(!!buffered&&buffered.version!==value.draft_version);setFeishuError('');
     await sources(`/${id}/sources`,n);
   }
   async function load() {
@@ -103,6 +107,36 @@ function LiveReport({page, session}) {
     };
     timer=setTimeout(poll,1000);return()=>{stopped=true;clearTimeout(timer);};
   },[report?.id,report?.status]);
+  function applyFeishuStatus(id,status) {
+    if(reportRef.current?.id!==id)return;
+    const next={...reportRef.current,feishu:status};
+    reportRef.current=next;setReport(next);setReports(rows=>rows.map(r=>r.id===id?{...r,feishu:status}:r));
+    setFeishuError('');
+  }
+  useEffect(()=>{
+    if(!report?.id||!publication.needsPolling)return;
+    const n=lifetime.current,id=report.id;let stopped=false,timer;
+    const poll=async()=>{
+      try{
+        const status=await api(`/${id}/feishu`);
+        if(stopped||!alive(n)||reportRef.current?.id!==id)return;
+        applyFeishuStatus(id,status);
+        if(feishuPublicationState(status).needsPolling)timer=setTimeout(poll,3000);
+      }catch(e){
+        if(!stopped&&alive(n)&&reportRef.current?.id===id){
+          setFeishuError('暂时无法读取飞书推送结果，正在重新查询。');timer=setTimeout(poll,5000);
+        }
+      }
+    };
+    timer=setTimeout(poll,1000);
+    return()=>{stopped=true;clearTimeout(timer);};
+  },[report?.id,publication.needsPolling]);
+  async function refreshFeishu(){
+    const n=lifetime.current,id=report?.id;if(!id)return;setCheckingFeishu(true);
+    try{const status=await api(`/${id}/feishu`);if(alive(n))applyFeishuStatus(id,status);}
+    catch(e){if(alive(n)&&reportRef.current?.id===id)setFeishuError(explain(e));}
+    finally{if(alive(n))setCheckingFeishu(false);}
+  }
   function discard(action){
     if(!dirty)return action();
     modal.confirm({title:'当前修改尚未保存',content:'离开后仍可回到这份周报继续编辑。',okText:'暂存并切换',cancelText:'继续编辑',onOk:action});
@@ -129,6 +163,17 @@ function LiveReport({page, session}) {
       if(!alive(n)||reportRef.current?.id!==id)return;
       setReport(next);setDirty(false);setConflict(false);message.success('周报已保存');
     }catch(e){if(alive(n)){setError(explain(e));if(e.statusCode===409)setConflict(true);}}
+    finally{if(alive(n))setBusy(false);}
+  }
+  async function publishFeishu(){
+    if(!report||dirty||!publication.canPublish||report.status!=='succeeded'||report.result_status!=='ready')return;
+    const n=lifetime.current,id=report.id;setBusy(true);setError('');
+    try{
+      const next=await api(`/${id}/feishu/publish`,{method:'POST',data:{expected_version:report.draft_version}});
+      if(!alive(n)||reportRef.current?.id!==id)return;
+      setReport(next);reportRef.current=next;setReports(rows=>rows.map(r=>r.id===id?next:r));
+      setFeishuError('');
+    }catch(e){if(alive(n))setError(explain(e));}
     finally{if(alive(n))setBusy(false);}
   }
   async function cancel(){
@@ -168,7 +213,10 @@ function LiveReport({page, session}) {
       {!!reports.length&&<Select aria-label="周报版本" value={report?.id} style={{width:'100%'}} disabled={busy||loading} options={reports.map(r=>({value:r.id,label:`${new Date(r.created_at).toLocaleString('zh-CN')} · ${STATE[r.status]}`}))} onChange={id=>discard(()=>openReport(id).catch(e=>setError(explain(e))))}/>}
       {historyMore&&<Button onClick={moreHistory} disabled={busy}>加载更早版本</Button>}
       {active(report)?<><SbStatePanel state="loading" title="正在整理周报" description="可以离开页面，稍后回来查看。"/>{allowed('weekly_report.cancel')&&<Button onClick={cancel} disabled={busy}>取消本次生成</Button>}</>:report?.status==='failed'?<Alert type="error" title="本次生成失败" description="历史周报仍然保留，可以重新生成。"/>:report?.status==='cancelled'?<SbStatePanel state="empty" title="本次生成已取消"/>:report?.result_status==='insufficient_data'?<SbStatePanel state="empty" title="素材不足，尚未生成正文"/>:report?.result_status==='invalid_input'?<Alert type="error" title="素材未通过校验，请核对后重试"/>:report?.result_status==='ready'?<div className="ds-weekly-paper"><h3>{report.title}</h3><p className="ds-muted">草稿 v{report.draft_version} · {report.draft_source==='manual'?'人工修订':'AI 生成，待核对'}</p><Input.TextArea aria-label="周报正文" id="weekly-report-body" value={text} disabled={busy||!allowed('weekly_report.edit')} onChange={e=>{const next=e.target.value;setText(next);setDirty(true);try{sessionStorage.setItem(draftKey(report.id),JSON.stringify({text:next,version:report.draft_version}));}catch{setError('本地暂存失败，请及时保存或复制正文');}}} spellCheck={false}/>
-      <Button type="primary" onClick={save} disabled={!dirty||!text.trim()||busy||conflict||!allowed('weekly_report.edit')}>保存修改</Button>
+      <div className="ds-weekly-actions"><Button type="primary" onClick={save} disabled={!dirty||!text.trim()||busy||conflict||!allowed('weekly_report.edit')}>保存修改</Button>
+      <Button onClick={publishFeishu} disabled={dirty||busy||!publication.canPublish||!allowed('weekly_report.edit')}>确认并推送飞书</Button></div>
+      <Alert className="ds-weekly-feishu-status" type={publication.type} showIcon title={publication.label} description={<>{publication.description}{report.feishu?.draft_version&&<span> 本次确认：草稿 v{report.feishu.draft_version}。</span>}{feishuError&&<p role="status">{feishuError}</p>}</>}
+        action={!publication.canPublish&&<Button onClick={refreshFeishu} loading={checkingFeishu} disabled={busy}>刷新推送状态</Button>}/>
       {conflict&&<Button onClick={reloadServer} disabled={busy}>核对服务器最新版本</Button>}</div>:<SbStatePanel state="empty" title="生成后可编辑、保存和复制" description="点击左侧生成周报，完成后在这里核对和保存。"/>}
       <footer className="ds-weekly-output-foot"><span>{dirty?'有未保存修改':report?.result_status==='ready'?'已保存到服务器':'历史版本保存在当前账号下'}</span><span>请核对事实后使用</span></footer>
     </section></div>

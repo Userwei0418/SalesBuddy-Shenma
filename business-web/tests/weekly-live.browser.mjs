@@ -15,7 +15,7 @@ const period=w=>({start_date:w===week?'2026-09-11':'2026-09-07',end_date:w===wee
 const sources=w=>({report_week:w,report_week_end:w===week?'2026-09-27':'2026-09-20',period:period(w),source_cutoff_at:'2026-09-24T03:00:00Z',snapshot_at:'2026-09-24T03:00:00Z',items:[row],total:1,has_more:false,next_offset:null,statistics:{record_count:1,customer_count:1,opportunity_count:0}});
 async function fixture(run,{width=1440}={}){
  const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'}),page=await context.newPage();
- const reports=[],calls=[],errors=[],unexpected=[];let conflict=false,hold=false,loseNext=false;
+ const reports=[],calls=[],errors=[],unexpected=[];let conflict=false,hold=false,loseNext=false,feishuResponses=[];
  page.setDefaultTimeout(10000);page.on('pageerror',e=>errors.push(e.message));
  await context.route('**/*',async route=>{
   const req=route.request(),u=new URL(req.url());
@@ -32,7 +32,7 @@ async function fixture(run,{width=1440}={}){
   if(u.pathname===root){
    if(req.method()==='GET'){const w=u.searchParams.get('report_week');return route.fulfill({json:{current_week:week,items:reports.filter(r=>!w||r.report_week===w),has_more:false}});}
    const data=req.postDataJSON();let report=reports.find(r=>r.request_id===data.request_id);
-   if(!report){report={id:'report-'+(reports.length+1),request_id:data.request_id,report_week:data.report_week,period:period(data.report_week),status:'queued',result_status:null,draft_version:0,body_markdown:null,title:'合成销售周报',created_at:new Date().toISOString()};reports.unshift(report);}
+   if(!report){report={id:'report-'+(reports.length+1),request_id:data.request_id,report_week:data.report_week,period:period(data.report_week),status:'queued',result_status:null,draft_version:0,body_markdown:null,title:'合成销售周报',feishu:{status:'not_published'},created_at:new Date().toISOString()};reports.unshift(report);}
    if(loseNext){loseNext=false;return route.fulfill({status:503,json:{detail:'Synthetic response lost after commit'}});}return route.fulfill({status:202,json:report});
   }
   if(u.pathname.startsWith(root+'/')){
@@ -40,6 +40,16 @@ async function fixture(run,{width=1440}={}){
    if(!r)return route.fulfill({status:404,json:{detail:'WEEKLY_REPORT_NOT_FOUND'}});
    if(action==='sources')return route.fulfill({json:sources(r.report_week)});
    if(action==='cancel'){r.status='cancelled';return route.fulfill({json:r});}
+   if(action==='feishu'){
+    if(req.method()==='POST'){
+     assert.equal(req.postDataJSON().expected_version,r.draft_version);
+     if(!r.feishu.event_id)r.feishu={status:'pending',event_id:'synthetic-event',draft_version:r.draft_version};
+     return route.fulfill({json:r});
+    }
+    const state=feishuResponses.shift();
+    if(state)r.feishu={...r.feishu,status:state,message_id:state==='sent'?'om_synthetic':null};
+    return route.fulfill({json:r.feishu});
+   }
    if(action==='draft'){
     if(conflict){conflict=false;r.draft_version++;r.body_markdown='另一页面已保存的正文';return route.fulfill({status:409,json:{detail:'WEEKLY_DRAFT_VERSION_CONFLICT'}});}
     assert.equal(req.postDataJSON().expected_version,r.draft_version);r.body_markdown=req.postDataJSON().body_markdown;r.draft_version++;r.draft_source='manual';return route.fulfill({json:r});
@@ -56,7 +66,7 @@ async function fixture(run,{width=1440}={}){
   await page.waitForFunction(()=>SalesRuntime.current.route==='pages/index/index');
   await page.evaluate(()=>SalesRuntime.userRoute('/pages/weekly-report/index'));
   await page.getByRole('button',{name:'生成周报',exact:true}).waitFor();await page.waitForFunction(()=>!document.querySelector('.ds-weekly-generate button').disabled);
-  await run({page,reports,calls,setConflict:()=>{conflict=true;},setHold:v=>{hold=v;},loseNext:()=>{loseNext=true;}});
+  await run({page,reports,calls,setConflict:()=>{conflict=true;},setHold:v=>{hold=v;},loseNext:()=>{loseNext=true;},setFeishuResponses:values=>{feishuResponses=[...values];}});
   assert.deepEqual(errors,[]);assert.deepEqual(unexpected,[]);
   assert(calls.some(c=>c.path==='/api/v1/auth/password/login'));
   assert(!calls.some(c=>c.path.startsWith('/api/v1/web/auth')));
@@ -84,3 +94,33 @@ test('unknown response retries same generation id and cancellation retains histo
 for(const width of [1024,390])test(`live weekly fits ${width}px`,{timeout:30000},()=>fixture(async({page})=>{
  await page.getByRole('button',{name:'生成周报',exact:true}).click();await page.getByLabel('周报正文').waitFor();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
 },{width}));
+
+
+test('v1 explicit confirmation sends once and pending status resumes after reload',{timeout:30000},()=>fixture(async({page,reports,calls,setFeishuResponses})=>{
+ await page.getByRole('button',{name:'生成周报',exact:true}).click();await page.getByLabel('周报正文').waitFor();
+ assert.equal(reports[0].draft_version,1);
+ assert.equal(calls.filter(c=>c.path.endsWith('/feishu/publish')).length,0);
+ await page.getByRole('button',{name:'确认并推送飞书',exact:true}).click();
+ await page.getByText('飞书推送处理中',{exact:true}).waitFor();
+ assert(await page.getByRole('button',{name:'确认并推送飞书',exact:true}).isDisabled());
+ setFeishuResponses(['pending','sent']);await page.reload();
+ await page.getByText('周报已推送至飞书群聊',{exact:true}).waitFor();
+ assert.equal(calls.filter(c=>c.path.endsWith('/feishu/publish')).length,1);
+ assert.equal(calls.filter(c=>c.method==='PATCH').length,0);
+ assert(await page.getByRole('button',{name:'确认并推送飞书',exact:true}).isDisabled());
+ await page.getByLabel('周报正文').fill('发布后保留的本地编辑');
+ await page.getByRole('button',{name:'保存修改',exact:true}).click();
+ await page.getByText('已保存到服务器',{exact:true}).waitFor();
+ await page.getByText('周报已推送至飞书群聊',{exact:true}).waitFor();
+ assert.equal(calls.filter(c=>c.path.endsWith('/feishu/publish')).length,1);
+}));
+for(const status of ['unknown','failed'])test(`${status} cannot be resubmitted and operator recovery refreshes receipt`,{timeout:30000},()=>fixture(async({page,calls,setFeishuResponses})=>{
+ await page.getByRole('button',{name:'生成周报',exact:true}).click();await page.getByLabel('周报正文').waitFor();
+ setFeishuResponses([status]);await page.getByRole('button',{name:'确认并推送飞书',exact:true}).click();
+ await page.getByText(status==='unknown'?'飞书推送结果待核对':'飞书推送未完成',{exact:true}).waitFor();
+ assert(await page.getByRole('button',{name:'确认并推送飞书',exact:true}).isDisabled());
+ await page.getByText(/请联系管理员.*恢复/).waitFor();
+ setFeishuResponses(['sent']);await page.getByRole('button',{name:'刷新推送状态',exact:true}).click();
+ await page.getByText('周报已推送至飞书群聊',{exact:true}).waitFor();
+ assert.equal(calls.filter(c=>c.path.endsWith('/feishu/publish')).length,1);
+}));

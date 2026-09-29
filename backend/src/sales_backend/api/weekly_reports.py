@@ -25,6 +25,11 @@ class SaveDraftRequest(BaseModel):
     body_markdown: str = Field(min_length=1, max_length=200000)
 
 
+class PublishFeishuRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    expected_version: int = Field(ge=1)
+
+
 def service(response: Response, database: Database = Depends(get_database)):
     response.headers['Cache-Control'] = 'no-store'
     return WeeklyReportService(database)
@@ -71,6 +76,20 @@ async def save_draft(report_id: UUID, body: SaveDraftRequest,
                      identity: RequestIdentity = Depends(get_password_identity),
                      reports: WeeklyReportService = Depends(service)):
     return await reports.save(identity.actor, str(report_id), body.expected_version, body.body_markdown)
+
+
+@router.post('/{report_id}/feishu/publish', response_model=WeeklyDetail)
+async def publish_feishu(report_id: UUID, body: PublishFeishuRequest,
+                         identity: RequestIdentity = Depends(get_password_identity),
+                         reports: WeeklyReportService = Depends(service)):
+    """Publish only the saved, human-confirmed version to Base and the group."""
+    return await reports.publish_feishu(identity.actor, str(report_id), body.expected_version)
+
+
+@router.get('/{report_id}/feishu', response_model=dict)
+async def feishu_status(report_id: UUID, identity: RequestIdentity = Depends(get_password_identity),
+                        reports: WeeklyReportService = Depends(service)):
+    return await reports.feishu_status(identity.actor, str(report_id))
 
 
 @router.post('/{report_id}/cancel', response_model=WeeklySummary)

@@ -38,6 +38,7 @@ class WeeklySummary(BaseModel):
     finished_at: datetime | None
     runtime_snapshot_verified: Literal[False]
     actual_snapshot_id: None
+    feishu: dict[str, Any] | None = None
 
 
 class WeeklyDetail(WeeklySummary):

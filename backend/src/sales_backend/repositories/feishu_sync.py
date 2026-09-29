@@ -140,6 +140,9 @@ class FeishuRepository:
           row["id"], row["revision"], error, row["credential_updated_at"])
 
     async def source(self, connection, event):
+        if event["object_kind"] == "weekly_report":
+            return json_value(await connection.fetchval("SELECT ops.feishu_weekly_source($1,$2)",
+                              event["connection_id"], event["object_id"]))
         return json_value(await connection.fetchval("SELECT ops.feishu_source($1,$2,$3)",
                           event["connection_id"], event["object_kind"], event["object_id"]))
 
