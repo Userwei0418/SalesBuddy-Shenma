@@ -16,7 +16,7 @@ import asyncpg
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "database/scripts"), str(ROOT / "backend/src")]
-from migrate import migrate
+from migrate import discover, migrate
 from sales_backend.auth.passwords import encode_password, verify_password
 from sales_backend.db import set_request_context
 from sales_backend.repositories.identity import IdentityRepository
@@ -117,7 +117,14 @@ async def main():
         assert new_report['report_week'].isoformat() == '2025-12-29'
         assert new_report['source_cutoff_at'].isoformat() == '2026-01-01T00:00:00+00:00'
         assert await c.fetchval("SELECT body_markdown FROM insight.weekly_report_revision WHERE report_id=$1", report_id) == '保留人工正文'
-        assert [row["key"] for row in result if row["status"] == "applied"] == [f"V{i}" for i in range(126, 158)]
+        expected_versions = [migration.key for migration in discover(ROOT / "database")
+                             if int(migration.key[1:]) > 125]
+        assert expected_versions, "No migrations discovered after the V125 fixture"
+        # Discover the target while still rejecting a missing version or a
+        # skipped/reordered migration in the complete customer upgrade path.
+        assert expected_versions == [f"V{i}" for i in range(126, int(expected_versions[-1][1:]) + 1)]
+        assert [row["key"] for row in result if row["status"] == "applied"] == expected_versions
+        assert await c.fetchval("SELECT count(*) FROM security.isolated_demo_account_quota") == 0
         assert await snapshot() == before, "Upgrade changed existing identities or business records"
         assert all(row["status"] == "unchanged" for row in await migrate(c))
         # The pg_dump baseline turns RLS off for its superuser restore session.
@@ -141,6 +148,8 @@ async def main():
                     assert not await c.fetchval("SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user")
                     assert not await c.fetchval("SELECT has_table_privilege(current_user,'platform.password_credential','SELECT')")
                     assert not await c.fetchval("SELECT has_function_privilege(current_user,'security.reconcile_runtime_grants()','EXECUTE')")
+                    assert not await c.fetchval("SELECT has_table_privilege(current_user,'security.isolated_demo_account_quota','SELECT,INSERT,UPDATE,DELETE')")
+                    assert not await c.fetchval("SELECT has_function_privilege(current_user,'security.register_isolated_demo_quota(uuid,integer)','EXECUTE')")
                     assert await c.fetchval("SELECT count(*) FROM crm.customer WHERE workspace_id<>$1", workspace) == 0
                     if kind == "sales":
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 1
@@ -149,11 +158,12 @@ async def main():
                         assert await c.fetchval("SELECT count(*) FROM crm.customer") == 2
                         assert await c.fetchval("SELECT security.authorization_has('authorization.accounts_manage')")
                     checked += 1
-        print(json.dumps({"upgrade": "V125->V157", "applied": 32, "companies": 2,
+        print(json.dumps({"upgrade": "V125->" + expected_versions[-1], "applied": len(expected_versions), "companies": 2,
                           "accounts_verified": checked, "existing_rows_unchanged": True,
                           "repeat_migration_unchanged": True, "runtime_acl_and_isolation": True,
                           "v152_weekly_draft_preserved": True, "week_year_boundary": True,
-                          "account_quota_limit": 60, "account_quota_count_preserved": True}))
+                          "account_quota_limit": 60, "account_quota_count_preserved": True,
+                          "isolated_demo_enrollment_empty": True, "isolated_demo_enrollment_private": True}))
     finally:
         if c:
             await c.close()
