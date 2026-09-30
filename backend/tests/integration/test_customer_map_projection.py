@@ -11,9 +11,11 @@ from sales_backend.repositories.customer_map import CustomerMapRepository
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.opportunities import save_opportunity
+from tests.integration.feishu_fixtures import seed_execute
 from tests.integration.test_customer_assets import customer
 from tests.integration.test_fde_identity_tasks import fde_fixture
 from tests.integration.test_operations_claims_sql import actor
+from tests.integration.test_synthetic_trial_boundaries import customer as seeded_customer
 
 pytestmark = pytest.mark.asyncio
 
@@ -142,3 +144,43 @@ async def test_portfolio_keeps_inactive_opportunities_and_unknown_amounts(connec
     summary = (await repo.read(connection, customer_id=c["id"]))["summary"]
     assert summary["acv_amount"] == 0 and summary["unknown_acv_count"] == 1
     assert await connection.fetchval("SELECT amount FROM crm.opportunity WHERE id=$1::uuid", op["id"]) is None
+
+
+async def test_trial_seed_without_visits_is_visible_unassessed_but_real_and_legacy_demo_stay_inactive(connection):
+    sales = await actor(connection, 'XS001')
+    trial, _ = await seeded_customer(connection, sales)
+    real, _ = await seeded_customer(connection, sales, synthetic=False)
+    legacy, _ = await seeded_customer(connection, sales, synthetic=False)
+    await seed_execute(connection, "UPDATE crm.customer SET data_kind='demo' WHERE id=$1", legacy)
+    rows = {row['id']: row for row in await CustomerMapRepository().read(connection)}
+    assert str(trial) in rows and not {str(real), str(legacy)} & rows.keys()
+    pending = rows[str(trial)]
+    assert pending['latest_visit_at'] is None and pending['weekly_follow_up_count'] == 0
+    assert all(pending[field] is None for field in ('potential_score', 'relationship_score', 'quadrant_code'))
+    assert pending['quadrant_policy'] is None
+    assert not {'import_meta', 'attributes', 'visits'} & pending.keys()
+    assert await connection.fetchval('SELECT count(*) FROM activity.visit WHERE customer_id=$1', trial) == 0
+    assert await connection.fetchval('SELECT count(*) FROM insight.quadrant_score WHERE customer_id=$1', trial) == 0
+
+
+async def test_trial_map_candidate_keeps_owner_rls_and_excludes_deleted_customer(connection):
+    sales = await actor(connection, 'XS001')
+    trial, _ = await seeded_customer(connection, sales)
+    await actor(connection, 'XS002')
+    assert str(trial) not in {row['id'] for row in await CustomerMapRepository().read(connection)}
+    await actor(connection, 'ZJL001')
+    assert str(trial) in {row['id'] for row in await CustomerMapRepository().read(connection)}
+    await seed_execute(connection, 'UPDATE crm.customer SET deleted_at=clock_timestamp() WHERE id=$1', trial)
+    await set_request_context(connection, sales)
+    assert str(trial) not in {row['id'] for row in await CustomerMapRepository().read(connection)}
+
+
+async def test_trial_seed_with_real_recorded_activity_keeps_its_visit_facts_once(connection):
+    sales = await actor(connection, 'XS001')
+    trial, _ = await seeded_customer(connection, sales)
+    record = await formal_visit(connection, sales, str(trial), today().isoformat())
+    rows = [row for row in await CustomerMapRepository().read(connection) if row['id'] == str(trial)]
+    assert len(rows) == 1
+    assert rows[0]['latest_visit_at'] == await connection.fetchval(
+        'SELECT interaction_at FROM activity.visit WHERE id=$1::uuid', record['id'])
+    assert rows[0]['weekly_follow_up_count'] == 1
