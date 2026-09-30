@@ -45,6 +45,7 @@ class CompetencyReviewRepository:
                LEFT JOIN crm.opportunity o ON o.id=v.opportunity_id
                WHERE v.deleted_at IS NULL AND v.recorder_user_ref_id=$1::uuid
                  AND v.status IN ('confirmed','archived')
+                 AND NOT security.is_synthetic_trial_visit(v.id)
                  AND v.interaction_at >= $2::timestamptz AND v.interaction_at < $3::timestamptz
                ORDER BY v.interaction_at DESC,v.created_at DESC,v.id DESC LIMIT 80""",
             actor.user_id, start, end,

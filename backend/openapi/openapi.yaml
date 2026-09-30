@@ -2721,6 +2721,11 @@ components:
           - type: string
           - type: 'null'
           title: Source Code
+        synthetic_trial_batch_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Synthetic Trial Batch Id
         team_name:
           anyOf:
           - type: string
@@ -8280,6 +8285,28 @@ paths:
           - type: 'null'
           title: Owner
       - in: query
+        name: data_kind
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - production
+            - demo
+            - test
+            type: string
+          - type: 'null'
+          title: Data Kind
+      - in: query
+        name: trial_batch
+        required: false
+        schema:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: Trial Batch
+      - in: query
         name: limit
         required: false
         schema:
@@ -8366,6 +8393,28 @@ paths:
             type: string
           - type: 'null'
           title: Owner
+      - in: query
+        name: data_kind
+        required: false
+        schema:
+          anyOf:
+          - enum:
+            - production
+            - demo
+            - test
+            type: string
+          - type: 'null'
+          title: Data Kind
+      - in: query
+        name: trial_batch
+        required: false
+        schema:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: Trial Batch
       - in: query
         name: limit
         required: false

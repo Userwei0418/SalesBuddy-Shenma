@@ -243,6 +243,7 @@ class OperationsCustomerOverview(DetailObject):
     lifecycle_status: str
     data_source: str
     data_kind: str
+    synthetic_trial_batch_id: str | None = None
     team_name: str | None = None
     creator_name: str | None = None
     created_at: datetime

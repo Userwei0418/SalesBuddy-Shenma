@@ -2,6 +2,7 @@ import {state, api, dialog, field, options, details, date, toast, esc} from './c
 
 const roleNames = {user:'使用者', influencer:'影响者', decision_maker:'决策者'};
 const lifecycleNames = {lead:'线索', prospect:'潜在客户', active:'活跃', dormant:'休眠', won:'已成单', lost:'已流失', archived:'已归档'};
+export const customerDataUsage = row => ({production:'正式业务',demo:'试用模拟',test:'测试数据'})[row.data_kind] || '未标注';
 const values = row => ({
   name:row.name, industry:row.industry_code, customer_type:row.customer_type_code,
   level_code:row.level_code, source:row.source_code, partner_name:row.primary_partner_name,
@@ -31,6 +32,7 @@ export function customerProfileDetails(row) {
     ['客户编号',row.customer_code],['CRM 外部 ID',row.external_customer_id],['公司建档编号',row.company_reference],
     ['管理部门',row.team_name],['客户状态',lifecycleNames[row.lifecycle_status] || row.lifecycle_status],
     ['数据来源',({manual:'手工建档',import:'导入',crm:'CRM 同步'})[row.data_source] || row.data_source],
+    ['数据用途',customerDataUsage(row)],['试用数据批次',row.synthetic_trial_batch_id],
     ['建档人',row.creator_name],['创建时间',date(row.created_at)],['最近更新',date(row.updated_at)],
   ])}</div>`;
 }
@@ -57,7 +59,9 @@ export function customerProfileForm(row) {
     ${field('职位','contact_title',v.contact_title)}${choose('联系人角色','contact_role',['使用者','影响者','决策者'])}
     ${field('联系电话','contact_phone',v.contact_phone)}${field('邮箱','contact_email',v.contact_email,{type:'email'})}
     ${heading('关联编号 · 只读')}${field('客户编号','',row.customer_code,{disabled:true})}
-    ${field('CRM 外部 ID','',row.external_customer_id,{disabled:true})}${field('公司建档编号','',row.company_reference,{disabled:true})}</div>`;
+    ${field('CRM 外部 ID','',row.external_customer_id,{disabled:true})}${field('公司建档编号','',row.company_reference,{disabled:true})}
+    ${field('数据用途','',customerDataUsage(row),{disabled:true})}
+    ${field('试用数据批次','',row.synthetic_trial_batch_id,{disabled:true})}</div>`;
 }
 
 export function customerProfileChanges(formData,row) {

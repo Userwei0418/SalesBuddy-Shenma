@@ -29,6 +29,22 @@ test('profile edits send only changed whitelist fields and distinguish blank fro
   assert.deepEqual(customerProfileChanges(new Map([['name','原名称']]),row),{version_no:7});
 });
 
+test('trial provenance is visible only as escaped read-only management fields', async () => {
+  const {customerProfileDetails,customerProfileForm,customerProfileChanges,customerDataUsage} = await load();
+  const row = {name:'云川制造有限公司',version_no:2,data_kind:'demo',synthetic_trial_batch_id:'SM-TRIAL-<img>'};
+  const detail = customerProfileDetails(row), form = customerProfileForm(row);
+  assert.match(detail,/试用模拟/);
+  assert.match(detail,/SM-TRIAL-&lt;img&gt;/);
+  assert.ok(!detail.includes('<img>'));
+  assert.match(form,/value="试用模拟"[^>]*disabled/);
+  assert.match(form,/value="SM-TRIAL-&lt;img&gt;"[^>]*disabled/);
+  assert.deepEqual(customerProfileChanges(new Map([
+    ['name',row.name],['data_kind','production'],['synthetic_trial_batch_id',''],['import_meta','{}'],
+  ]),row),{version_no:2});
+  assert.equal(customerDataUsage({data_kind:'production'}),'正式业务');
+  assert.equal(customerDataUsage({data_kind:'test'}),'测试数据');
+});
+
 test('edit loads a fresh profile and discards a late response after navigation', async () => {
   const profile = await load();
   const core = await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/core.js')).href);

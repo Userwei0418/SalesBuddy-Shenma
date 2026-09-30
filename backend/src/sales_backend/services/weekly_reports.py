@@ -183,7 +183,8 @@ class WeeklyReportService:
                 raise HTTPException(404, 'WEEKLY_REPORT_NOT_FOUND') from None
             except asyncpg.PostgresError as exc:
                 detail = str(exc).split('CONTEXT', 1)[0].strip()
-                if detail in {'WEEKLY_DRAFT_NOT_READY', 'WEEKLY_DRAFT_VERSION_CONFLICT', 'WEEKLY_FEISHU_NOT_READY'}:
+                if detail in {'WEEKLY_DRAFT_NOT_READY', 'WEEKLY_DRAFT_VERSION_CONFLICT',
+                              'WEEKLY_FEISHU_NOT_READY', 'WEEKLY_SYNTHETIC_TRIAL_SOURCE'}:
                     raise HTTPException(409, detail) from None
                 raise
             row = await c.fetchrow('SELECT * FROM insight.weekly_report WHERE id=$1::uuid', ident)
