@@ -6,7 +6,9 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
+import asyncpg
 import pytest
+from fastapi import HTTPException
 
 from sales_backend.contracts.weekly_reports import WeeklyList
 from sales_backend.services import weekly_reports
@@ -70,3 +72,14 @@ async def test_unpublished_report_does_not_claim_delivery_or_query_event(monkeyp
     result=await service._view(connection,row)
     assert result['feishu']=={'status':'not_published'}
     connection.fetchval.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_publication_rejects_synthetic_source_with_actionable_conflict(monkeypatch):
+    service, connection, row, _ = fixture(monkeypatch, 'pending')
+    connection.fetchval.side_effect = asyncpg.InvalidParameterValueError('WEEKLY_SYNTHETIC_TRIAL_SOURCE')
+    actor = SimpleNamespace(workspace_id=str(uuid4()), user_id=str(uuid4()))
+    with pytest.raises(HTTPException) as error:
+        await service.publish_feishu(actor, str(row['id']), row['draft_version'])
+    assert error.value.status_code == 409
+    assert error.value.detail == 'WEEKLY_SYNTHETIC_TRIAL_SOURCE'

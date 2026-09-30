@@ -42,12 +42,21 @@ class CustomerMapRepository:
               JOIN activity.visit_opportunity vo ON vo.visit_id=v.id
               JOIN crm.opportunity o ON o.id=vo.opportunity_id AND o.deleted_at IS NULL
               WHERE v.opportunity_id IS NULL
-            ), active_customers AS MATERIALIZED (
+            ), visited_customers AS MATERIALIZED (
               SELECT customer_id,max(interaction_at) AS latest_visit_at,
                 count(*) FILTER (WHERE interaction_at >=
                   date_trunc('week',timezone('Asia/Shanghai',clock_timestamp()))
                     AT TIME ZONE 'Asia/Shanghai')::integer AS weekly_follow_up_count
               FROM visit_customers GROUP BY customer_id
+            ), active_customers AS MATERIALIZED (
+              SELECT customer_id,latest_visit_at,weekly_follow_up_count FROM visited_customers
+              UNION ALL
+              -- Explicit trial seeds need a visible, unassessed starting point.
+              -- Do not invent activity or widen the normal real-customer window.
+              SELECT c.id,NULL::timestamptz,0::integer FROM crm.customer c
+              WHERE c.deleted_at IS NULL AND c.data_kind IN ('demo','test')
+                AND c.import_meta->'synthetic_trial'->>'source'='trial_seed'
+                AND NOT EXISTS(SELECT 1 FROM visited_customers v WHERE v.customer_id=c.id)
             ), scoped_opportunities AS MATERIALIZED (
               SELECT DISTINCT o.id,o.customer_id
               FROM crm.opportunity o JOIN crm.opportunity_participant p ON p.opportunity_id=o.id

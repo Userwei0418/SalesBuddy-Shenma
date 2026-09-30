@@ -30,7 +30,7 @@ import {
 } from "./core.js";
 import {partnerFields, bindPartnerFields} from './partners.js';
 import {showCustomerDetail} from './customer-detail.js';
-import {editCustomerProfile} from './customer-profile.js';
+import {editCustomerProfile, customerDataUsage} from './customer-profile.js';
 import {capabilityLabel} from './ai-capabilities.js';
 import {agentId, modelName, providers, label, errorName} from './ai-audit-labels.js';
 const btn = (label, action, id = "", style = "") =>
@@ -227,12 +227,13 @@ export async function customers(context = {}) {
             "客户优先级",
             "认领人",
             "认领状态",
+            "数据用途 / 批次",
             "创建时间",
             "操作",
           ],
           data.items,
           (r) =>
-            `<tr><td class="title">${esc(r.name)}<small>${esc(r.industry_code || "行业未填写")}</small></td><td>${esc(r.contact_name || "—")}<small>${esc(r.contact_phone || "")}</small></td><td>${esc(r.level_code || "—")}</td><td>${esc(r.owner_name || "—")}</td><td>${badge(r.ownership_state)}</td><td>${date(r.created_at)}</td><td>${btn("客户档案", "detail", r.id, "link")}${btn("编辑资料", "edit", r.id, "link")}${r.ownership_state === "claimed" ? btn("释放", "release", r.id, "link") : r.ownership_state === "legacy_review" ? btn("核对归属", "resolve", r.id, "link") : ""}</td></tr>`,
+            `<tr><td class="title">${esc(r.name)}<small>${esc(r.industry_code || "行业未填写")}</small></td><td>${esc(r.contact_name || "—")}<small>${esc(r.contact_phone || "")}</small></td><td>${esc(r.level_code || "—")}</td><td>${esc(r.owner_name || "—")}</td><td>${badge(r.ownership_state)}</td><td>${esc(customerDataUsage(r))}<small>${esc(r.synthetic_trial_batch_id || "—")}</small></td><td>${date(r.created_at)}</td><td>${btn("客户档案", "detail", r.id, "link")}${btn("编辑资料", "edit", r.id, "link")}${r.ownership_state === "claimed" ? btn("释放", "release", r.id, "link") : r.ownership_state === "legacy_review" ? btn("核对归属", "resolve", r.id, "link") : ""}</td></tr>`,
         ) +
         pager(data.total, offset);
       },
@@ -269,6 +270,9 @@ export async function customers(context = {}) {
             ),
           ) +
           select("owner", people(state.filters.owner, "全部认领人")) +
+          select("data_kind", options([["production","正式业务"],["demo","试用模拟"],["test","测试数据"]],
+            state.filters.data_kind,"全部数据用途")) +
+          `<input name="trial_batch" placeholder="试用数据批次（完整编号）" aria-label="试用数据批次" value="${esc(state.filters.trial_batch || "")}">` +
           `<input name="industry" placeholder="行业" aria-label="行业" value="${esc(state.filters.industry || "")}">`,
       ) +
       partial.region("list") +

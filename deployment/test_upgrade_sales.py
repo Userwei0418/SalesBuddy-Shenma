@@ -32,7 +32,8 @@ def test_invalid_optional_unit_fails_before_stopping_services(monkeypatch):
 
 @pytest.mark.parametrize('optional',[False,True])
 @pytest.mark.parametrize('fail_health',[False,True])
-def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,optional,fail_health):
+@pytest.mark.parametrize('before_schema,after_schema',[('V156','V157'),('V158','V159')])
+def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,optional,fail_health,before_schema,after_schema):
     old_revision,new_revision='a'*40,'b'*40
     root=tmp_path/'sales';old=root/'releases'/old_revision;old.mkdir(parents=True)
     (old/'REVISION').write_text(old_revision+'\n')
@@ -58,17 +59,17 @@ def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,op
         (destination/'REVISION').write_text(new_revision+'\n')
         (destination/'frontend'/'project.config.json').write_text(json.dumps({'appid':'wx2824bdeb58528fd8'}))
     monkeypatch.setattr(upgrade,'unpack',unpack)
-    calls=[];schema='V156';migrations=0
+    calls=[];schema=before_schema;migrations=0
     def run(args,**kwargs):
         nonlocal schema,migrations
         calls.append(list(map(str,args)))
         if str(args[-1]).endswith('database/scripts/migrate.py'):
-            migrations+=1;schema='V157'
+            migrations+=1;schema=after_schema
             kwargs['stdout'].write(json.dumps([{'status':'applied' if migrations==1 else 'unchanged'}]))
         return SimpleNamespace(returncode=0)
     monkeypatch.setattr(upgrade,'run',run)
     def sql(database,query):
-        if 'max(version)' in query:return schema if database=='shenma_sales' else 'V156'
+        if 'max(version)' in query:return schema if database=='shenma_sales' else before_schema
         if 'FROM pg_tables' in query:return 'crm.customer'
         if 'count(*)' in query:return '1'
         return 'same-checksum'
@@ -81,7 +82,7 @@ def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,op
     monkeypatch.setattr(upgrade,'healthy',healthy)
     args=['upgrade-sales.py','--archive',str(archive),'--archive-sha256',hashlib.sha256(archive.read_bytes()).hexdigest(),
         '--wheels',str(wheels),'--wheels-sha256',hashlib.sha256(wheels.read_bytes()).hexdigest(),
-        '--revision',new_revision,'--expected-current',old_revision,'--expected-schema','V156','--target-schema','V157']
+        '--revision',new_revision,'--expected-current',old_revision,'--expected-schema',before_schema,'--target-schema',after_schema]
     monkeypatch.setattr('sys.argv',args)
     if fail_health:
         with pytest.raises(RuntimeError,match='synthetic health failure'):upgrade.main()

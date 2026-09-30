@@ -73,6 +73,25 @@ test('customer summary failure is local and can be retried without reloading suc
   assert.match(h.region('summary'), /120/); assert.equal(h.count('/customers'), 1);
 });
 
+test('management trial filters reach the list query and provenance is escaped beside unchanged customer names', async () => {
+  const h = await harness(); await h.render(); await h.finish();
+  assert.match(h.mounted.root.html,/name="data_kind"/);
+  assert.match(h.mounted.root.html,/name="trial_batch"/);
+  h.mounted.form.values = [['data_kind','demo'],['trial_batch','SM-TRIAL-20260930']];
+  h.mounted.form.onsubmit({preventDefault(){}}); await tick();
+  const request = h.pending('/customers');
+  assert.match(request.url,/data_kind=demo/);
+  assert.match(request.url,/trial_batch=SM-TRIAL-20260930/);
+  h.reply(request,{items:[{id:'c',name:'云川制造有限公司',data_kind:'demo',
+    synthetic_trial_batch_id:'SM-TRIAL-<img>',ownership_state:'claimed'}],total:1});
+  await h.finish();
+  const list = h.region('list');
+  assert.match(list,/云川制造有限公司/);
+  assert.match(list,/试用模拟/);
+  assert.match(list,/SM-TRIAL-&lt;img&gt;/);
+  assert.doesNotMatch(list,/<img>/);
+});
+
 test('AI list appears when overview is slow and rules fail; only list is requested on page changes', async () => {
   const h = await harness('ai'); await h.render();
   h.respond('/ai/calls', callRows('第一页用户')); h.respond('/ai/rules', {detail: '规则读取失败'}, 500); await tick();

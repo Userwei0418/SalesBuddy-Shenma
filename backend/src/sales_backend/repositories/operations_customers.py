@@ -32,6 +32,7 @@ class OperationsCustomerRepository:
               c.industry_code,c.customer_type_code,c.level_code,c.source_code,c.primary_partner_name,
               c.operation_type,c.cooperation_years,c.main_business,c.customer_budget,c.demand_summary,c.next_action,
               c.lifecycle_status,c.data_source,c.data_kind,c.created_at,c.updated_at,c.company_verified_at,
+              c.import_meta->'synthetic_trial'->>'batch_id' AS synthetic_trial_batch_id,
               c.version_no,t.name AS team_name,u.display_name AS creator_name,
               p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,
               p.phone AS contact_phone,p.email AS contact_email
@@ -71,11 +72,13 @@ class OperationsCustomerRepository:
         more = offset + len(result["items"]) < result["total"]
         return {**dict(result), "has_more": more, "next_offset": offset + limit if more else None}
 
-    async def list(self, connection, *, q=None, industry=None, level=None, state=None, owner=None, limit=50, offset=0):
+    async def list(self, connection, *, q=None, industry=None, level=None, state=None, owner=None,
+                   data_kind=None, trial_batch=None, limit=50, offset=0):
         rows = await connection.fetch(
             """WITH page AS MATERIALIZED (
             SELECT c.id,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
             c.lifecycle_status,c.owner_team_id,c.primary_partner_name,
+            c.data_kind,c.import_meta->'synthetic_trial'->>'batch_id' AS synthetic_trial_batch_id,
             c.created_at,c.version_no,c.company_reference,c.company_verified_at,
             o.state AS ownership_state,o.version_no AS ownership_version,o.owner_user_ref_id,
             count(*) OVER()::integer AS total_count
@@ -84,9 +87,12 @@ class OperationsCustomerRepository:
             ILIKE '%'||$1||'%')
             AND ($2::text IS NULL OR c.industry_code=$2) AND ($3::text IS NULL OR c.level_code=$3)
             AND ($4::text IS NULL OR o.state=$4) AND ($5::uuid IS NULL OR o.owner_user_ref_id=$5)
+            AND ($8::text IS NULL OR c.data_kind=$8)
+            AND ($9::text IS NULL OR c.import_meta->'synthetic_trial'->>'batch_id'=$9)
             ORDER BY c.created_at DESC,c.id LIMIT $6 OFFSET $7)
             SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
             c.lifecycle_status,c.owner_team_id::text,t.name AS team_name,c.primary_partner_name,
+            c.data_kind,c.synthetic_trial_batch_id,
             c.created_at,c.version_no,c.company_reference,c.company_verified_at,
             c.ownership_state,c.ownership_version,c.owner_user_ref_id::text,u.display_name AS owner_name,
             p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,
@@ -103,6 +109,8 @@ class OperationsCustomerRepository:
             owner,
             limit,
             offset,
+            data_kind,
+            trial_batch,
         )
         return {
             "items": [dict(row) for row in rows],

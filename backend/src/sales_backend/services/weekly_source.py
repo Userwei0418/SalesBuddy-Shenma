@@ -63,16 +63,18 @@ def iso(value):
 async def assert_snapshot_access(connection, actor, source):
     """Recheck current access before dispatch and before returning historical content."""
     await require_permission(connection, 'visit.read')
-    for table, ids in (
-        ('activity.visit', [r['id'] for r in source['records']]),
-        ('crm.customer', [r['id'] for r in source['context']['customers']]),
-        ('crm.opportunity', [r['id'] for r in source['context']['opportunities']]),
+    for table, kind, ids in (
+        ('activity.visit', 'visit', [r['id'] for r in source['records']]),
+        ('crm.customer', 'customer', [r['id'] for r in source['context']['customers']]),
+        ('crm.opportunity', 'opportunity', [r['id'] for r in source['context']['opportunities']]),
     ):
         if not ids:
             continue
         count = await connection.fetchval(
-            f'SELECT count(*) FROM {table} WHERE workspace_id=$1::uuid AND id=ANY($2::uuid[]) AND deleted_at IS NULL',
-            actor.workspace_id, ids,
+            f'''SELECT count(*) FROM {table} WHERE workspace_id=$1::uuid
+            AND id=ANY($2::uuid[]) AND deleted_at IS NULL
+            AND NOT security.is_synthetic_trial_subject($3,id)''',
+            actor.workspace_id, ids, kind,
         )
         if count != len(ids):
             raise PermissionError('WEEKLY_SOURCE_ACCESS_CHANGED')
@@ -88,6 +90,7 @@ async def build_snapshot(connection, actor, generation, report_week=None):
         created_at,interaction_at,recorded_on,follow_up_record,next_action,status,version_no
         FROM activity.visit WHERE workspace_id=$1::uuid AND recorder_user_ref_id=$2::uuid
         AND deleted_at IS NULL AND status IN ('confirmed','archived')
+        AND NOT security.is_synthetic_trial_visit(id)
         AND created_at >= $3 AND created_at < $4 AND created_at <= $5 ORDER BY created_at,id''',
         actor.workspace_id, actor.user_id, start, end, cutoff)
     total = await connection.fetchval('SELECT security.weekly_source_count($1,$2,$3)', start, end, cutoff)
