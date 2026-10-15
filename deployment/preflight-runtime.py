@@ -33,7 +33,7 @@ def main():
     assert receipt["status"] == "passed" and receipt["production_services_changed"] is False
     database = receipt["validation_database"]
     assert re.fullmatch(r"shenma_preflight_[0-9]{8}t[0-9]{6}z", database)
-    marker = subprocess.check_output(["sudo", "-u", "postgres", "psql", "-X", "-At", "-d", database,
+    marker = subprocess.check_output(["/usr/sbin/runuser", "-u", "postgres", "--", "psql", "-X", "-At", "-d", database,
         "-c", "SELECT shobj_description(oid,'pg_database') FROM pg_database WHERE datname=current_database()"], text=True).strip()
     assert marker == MARKER
     revision = receipt["revision"]

@@ -25,7 +25,7 @@ def run(args, **kwargs):
 
 
 def sql(database, query):
-    return subprocess.check_output(["sudo", "-u", "postgres", "psql", "-X", "-v", "ON_ERROR_STOP=1",
+    return subprocess.check_output(["/usr/sbin/runuser", "-u", "postgres", "--", "psql", "-X", "-v", "ON_ERROR_STOP=1",
                                     "-At", "-d", database, "-c", query], text=True).strip()
 
 
@@ -141,6 +141,9 @@ def main():
         parser.error("Schema downgrade is not supported; target must be at least the current schema")
     assert os.geteuid() == 0 and socket.gethostname() == "salesbuddy"
     assert "172.22.9.234" in subprocess.check_output(["hostname", "-I"], text=True).split()
+    # Public source/wheels/venv must be readable by the service OS user even
+    # when a private root launcher inherited umask 077. Secrets switch below.
+    os.umask(0o022)
     assert re.fullmatch("[a-f0-9]{40}", args.revision)
     root = Path("/opt/shenma-sales")
     old = (root / "current").resolve()
@@ -170,17 +173,17 @@ def main():
     python = new / "backend/.venv/bin/python"
     if not python.exists():
         run([uv, "venv", "--python", str((old / "backend/.venv/bin/python").resolve()), str(python.parent.parent)])
-    run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
+    run([uv, "--no-cache", "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
          "-r", str(new / "deployment/runtime-requirements.txt")])
-    run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
+    run([uv, "--no-cache", "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
          "--no-deps", "-e", str(new / "backend")])
     shutil.copyfile(new / "REVISION", new / "backend/REVISION")
-    run(["sudo", "-u", "shenma-sales", str(python), "-c",
+    run(["/usr/sbin/runuser", "-u", "shenma-sales", "--", str(python), "-c",
          "import sales_backend,pypinyin;from pathlib import Path;assert Path(sales_backend.__file__).resolve().is_relative_to(Path(" + repr(str(new)) + "))"], cwd=new)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup = Path("/var/backups/shenma-sales") / (stamp + "-" + args.target_schema.lower())
-    backup.mkdir(parents=True, mode=0o700)
     os.umask(0o077)
+    backup.mkdir(parents=True, mode=0o700)
     restored = "shenma_restore_" + stamp.lower()
     failed = "shenma_failed_" + stamp.lower()
     restored_created = False
@@ -192,17 +195,17 @@ def main():
         stopped = True
         run(["systemctl", "stop", *stop_services])
         with (backup / "database.dump").open("wb") as stream:
-            run(["sudo", "-u", "postgres", "pg_dump", "-Fc", "shenma_sales"], stdout=stream)
+            run(["/usr/sbin/runuser", "-u", "postgres", "--", "pg_dump", "-Fc", "shenma_sales"], stdout=stream)
         run(["tar", "-czf", str(backup / "uploads.tar.gz"), "-C", "/var/lib/sales-backend", "."])
         run(["tar", "-czf", str(backup / "runtime-secrets.tar.gz"), "-C", "/etc", "shenma-sales"])
         if Path("/var/lib/shenma-model-key").is_dir():
             run(["tar", "-czf", str(backup / "unified-model-key.tar.gz"), "-C", "/var/lib", "shenma-model-key"])
         run(["tar", "-czf", str(backup / "provision-secrets.tar.gz"), "-C", "/var/lib", "shenma-provision"])
         (backup / "previous-release.txt").write_text(str(old) + "\n")
-        run(["sudo", "-u", "postgres", "createdb", "-T", "template0", restored])
+        run(["/usr/sbin/runuser", "-u", "postgres", "--", "createdb", "-T", "template0", restored])
         restored_created = True
         with (backup / "database.dump").open("rb") as stream:
-            run(["sudo", "-u", "postgres", "pg_restore", "--exit-on-error", "-d", restored], stdin=stream)
+            run(["/usr/sbin/runuser", "-u", "postgres", "--", "pg_restore", "--exit-on-error", "-d", restored], stdin=stream)
         tables = sql("shenma_sales", "SELECT quote_ident(schemaname)||'.'||quote_ident(tablename) FROM pg_tables WHERE schemaname IN ('platform','crm','activity','workflow','insight','ops','config','security','agent') ORDER BY 1").splitlines()
         for table in tables:
             assert sql("shenma_sales", f"SELECT count(*) FROM {table}") == sql(restored, f"SELECT count(*) FROM {table}"), table
@@ -210,7 +213,7 @@ def main():
         (backup / "SHA256SUMS").write_text("".join(hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n" for p in sorted(backup.iterdir()) if p.is_file()))
         migration_started = True
         with (backup / "migration.json").open("w") as stream:
-            run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
+            run(["/usr/sbin/runuser", "-u", "postgres", "--", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == args.target_schema
         # Fingerprint only columns that existed before this upgrade, retaining
@@ -219,7 +222,7 @@ def main():
         after = preserved_snapshot("shenma_sales", before["columns"])
         assert before == after, "Existing identity, business or customer configuration rows changed"
         with (backup / "migration-repeat.json").open("w") as stream:
-            run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
+            run(["/usr/sbin/runuser", "-u", "postgres", "--", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert all(item["status"] == "unchanged" for item in json.loads((backup / "migration-repeat.json").read_text()))
         switch(root, "current", new)
@@ -254,7 +257,7 @@ def main():
         raise
     finally:
         if restored_created:
-            run(["sudo", "-u", "postgres", "dropdb", restored])
+            run(["/usr/sbin/runuser", "-u", "postgres", "--", "dropdb", restored])
 
 
 if __name__ == "__main__":

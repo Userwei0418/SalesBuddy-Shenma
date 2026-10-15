@@ -361,3 +361,20 @@
 - 上述完整固定命令实际退出码0：830 passed，2条第三方库deprecation warning，18.27秒。没有新skip。
 - 原始日志：`/tmp/shenma-whole-backend-release-critical.log`；SHA-256 `bcb32daef29d0769af178e8d51d7c74fc6150a0b3be3fae4ef2d51fbb2699233`。
 - 该830项是发布关键离线回归的明确子集，不能替代R3全量结果或服务器克隆验收。
+
+## 服务器 root 身份切换修复与实测补记
+
+- 服务器预备阶段在 `sudo -u shenma-sales` 导入校验被 sudoers 拒绝；当时尚未进行数据库备份或迁移。没有调整 sudoers，没有新增权限角色。
+- 最小修复：`prepare-whole-upgrade.py` 6处、`upgrade-sales.py` 8处、`preflight-runtime.py` 1处统一改为固定 `/usr/sbin/runuser -u <固定用户> -- <argv>`。私有 `clone_acceptance.py` 另1处做同样替换，不进仓。没有使用shell，也不改变备份、迁移、保留摘要、切换和回退顺序。
+- 单job helper没有嵌套sudo；保留临时postgres euid握手、恢复root及随后永久降权为业务OS用户的既有受限实现。
+- 根代理在销售服务器实际root执行并回读：业务用户 `service_uid=998`，PostgreSQL本机peer身份 `pg_peer_identity=postgres`，exec36218退出码0。此项是真实主机身份和peer验证；不等于数据库升级或上线已完成。
+- 本地固定回归：`python -m pytest deployment/test_upgrade_sales.py deployment/test_root_runuser.py backend/tests/test_shenma_whole_contract.py -q -p no:cacheprovider --tb=short`，54 passed，0.65秒。覆盖原升级/回退、15处固定runuser argv/分隔符、无shell/无sudo、PostgreSQL查询合同及exactjob身份边界。
+- 三个部署脚本和私有clone脚本py_compile通过；新增边界测试及私有脚本Ruff通过。候选重新冻结；没有将该定向通过冒充完整R4或正式发布结果。
+
+## 继承umask与离线依赖cache修复补记
+
+- 根代理随后真实回读（exec54534）：旧候选根、backend、.venv/bin及依赖目录均为root:0700，系统Python为0755。runuser身份切换成功后仍Permission denied，原因转为调用者继承umask077，不是sudoers问题。
+- 根代理追加回读（exec8425）：旧候选已装fastapi源码和editable/virtualenv pth文件为0600，pydantic核心扩展为0711。仅设置新mask仍可能复用先前私有权限的UV cache，所以不能沿用该缓存作为修复。
+- 两个部署main在root/主机校验后明确设置umask022用于新source/wheels/venv；备份创建前切换077。两脚本各两次安装均采用`uv --no-cache pip install`，仍只读取已校验离线wheel，不清cache、不chmod已有secret或cache整树。既有root-only wheels目录保持原样，由root安装过程读取。
+- 新增真实临时tar/目录回归：继承077运行两个脚本的候选准备阶段，实际检查新候选、backend、嵌套源码、.venv/bin及wheel目录0755，源码/wheel文件0644；UV执行边界用桩，不宣称本机已真实执行服务器依赖安装。另静态检查077先于backup.mkdir及两条安装均带全局no-cache参数。
+- 最终组合回归：`python -m pytest deployment/test_root_runuser.py deployment/test_upgrade_sales.py backend/tests/test_shenma_whole_contract.py -q -p no:cacheprovider --tb=short`，58 passed，0.59秒。新增边界测试Ruff通过。新候选仍须服务器实际runuser导入及克隆迁移验证；此补记不把该待办冒充已完成。

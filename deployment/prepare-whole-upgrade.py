@@ -33,6 +33,9 @@ def main():
     args = parser.parse_args()
     assert os.geteuid() == 0 and socket.gethostname() == "salesbuddy"
     assert "172.22.9.234" in subprocess.check_output(["hostname", "-I"], text=True).split()
+    # Public source/wheels/venv must be readable by the service OS user even
+    # when a private root launcher inherited umask 077. Secrets switch below.
+    os.umask(0o022)
     assert re.fullmatch("[a-f0-9]{40}", args.revision)
     root = Path("/opt/shenma-sales")
     old = (root / "current").resolve()
@@ -59,12 +62,12 @@ def main():
     uv = "/opt/shenma-tools/uv-x86_64-unknown-linux-gnu/uv"
     python = new / "backend/.venv/bin/python"
     upgrade.run([uv, "venv", "--python", str((old / "backend/.venv/bin/python").resolve()), str(python.parent.parent)])
-    upgrade.run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
+    upgrade.run([uv, "--no-cache", "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
                  "-r", str(new / "deployment/runtime-requirements.txt")])
-    upgrade.run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
+    upgrade.run([uv, "--no-cache", "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
                  "--no-deps", "-e", str(new / "backend")])
     shutil.copyfile(new / "REVISION", new / "backend/REVISION")
-    upgrade.run(["sudo", "-u", "shenma-sales", str(python), "-c", "import sales_backend.main,segno,pypinyin"], cwd=new)
+    upgrade.run(["/usr/sbin/runuser", "-u", "shenma-sales", "--", str(python), "-c", "import sales_backend.main,segno,pypinyin"], cwd=new)
     os.umask(0o077)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup = Path("/var/backups/shenma-sales") / ("preflight-" + stamp)
@@ -74,16 +77,16 @@ def main():
     passed = False
     try:
         with (backup / "database.dump").open("wb") as stream:
-            upgrade.run(["sudo", "-u", "postgres", "pg_dump", "-Fc", "shenma_sales"], stdout=stream)
-        upgrade.run(["sudo", "-u", "postgres", "createdb", "-T", "template0", database])
+            upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "pg_dump", "-Fc", "shenma_sales"], stdout=stream)
+        upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "createdb", "-T", "template0", database])
         created = True
         with (backup / "database.dump").open("rb") as stream:
-            upgrade.run(["sudo", "-u", "postgres", "pg_restore", "--exit-on-error", "-d", database], stdin=stream)
+            upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "pg_restore", "--exit-on-error", "-d", database], stdin=stream)
         upgrade.sql("postgres", f"COMMENT ON DATABASE {database} IS 'shenma-whole-121-validation'")
         before = upgrade.preserved_snapshot(database)
         for filename in ("migration.json", "migration-repeat.json"):
             with (backup / filename).open("w") as stream:
-                upgrade.run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///" + database + "?host=/var/run/postgresql",
+                upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "env", "DATABASE_URL=postgresql:///" + database + "?host=/var/run/postgresql",
                              str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert upgrade.sql(database, "SELECT max(version) FROM ops.schema_migration") == args.target_schema
         assert upgrade.preserved_snapshot(database, before["columns"]) == before, "Existing customer rows changed"
@@ -100,7 +103,7 @@ def main():
         print(json.dumps(receipt), flush=True)
     finally:
         if created and not (passed and args.keep_verified_clone):
-            upgrade.run(["sudo", "-u", "postgres", "dropdb", database])
+            upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "dropdb", database])
 
 
 if __name__ == "__main__":
