@@ -1,5 +1,5 @@
 {
-  "passed": 18,
+  "passed": 20,
   "checks": [
     "V159_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
     "actual_python_feishu_worker_startup_guard_passes_only_dedicated_role",
@@ -7,6 +7,7 @@
     "synthetic_customer_and_opportunity_excluded_unpublished_legacy_weekly_not_exported",
     "exact_e40_API_and_worker_policy_complete_except_strict_customer_request_mutations",
     "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories",
+    "report_point_lookup_equivalence_scope_revocation_review_guards_and_restricted_runtime_for_update",
     "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
     "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
     "V161_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
@@ -16,6 +17,7 @@
     "existing_S2_pending_request_and_S3_private_view_retained_reviewer_column_update_works",
     "exact_e40_API_and_worker_policy_complete_except_strict_customer_request_mutations",
     "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories",
+    "report_point_lookup_equivalence_scope_revocation_review_guards_and_restricted_runtime_for_update",
     "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
     "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
     "fresh_V399_exact_runtime_grants_bootstrap_secure_password_login_empty_business_and_overwrite_denial"
@@ -31,19 +33,20 @@
     "V161_to_V399": 94
   },
   "unit_tests": {
-    "passed": 9
+    "passed": 10
   },
   "lint_compile_and_shell_syntax": "passed",
   "command": "python deployment/check-whole-upgrade-ci.py --socket /tmp/shenma-acceptance-20261015 --port 55465",
   "files": {
-    "database/shenma_whole_121_manifest.json": "271f6dc744e931bb5a035684b6063275770d861d1cdd05b601055002277ae72d",
-    "database/tests/verify_shenma_whole_121_postgres.py": "ee9a17ac8cea842c8873cc62528ee8b81467ae7cd3f7ad3f93066e03457b4fde",
+    "database/shenma_whole_121_manifest.json": "798a6767706f35d6fbf9f6e6a35bfea1b0ced14eaa39e9002c9fe8f1965f62d1",
+    "database/tests/verify_shenma_whole_121_postgres.py": "a36b7dc32b8dcfb9546149f922ac40c5972c12c23d056ded3d1ae26fe1839af7",
     "database/migrations/V299__shenma_whole_121_compatibility_prelude.sql": "e3aaa402c6836030bdd976b4905b2c3e6f6248e0b08c3b407a11bf2b6d4a8318",
-    "database/migrations/V399__shenma_whole_121_delivery_guards.sql": "e17ea4bb283640eb4cceb2d8be0890f56c0c8ba6c2b2fcbf1c6c85b97b445f9e",
+    "database/migrations/V399__shenma_whole_121_delivery_guards.sql": "8574fe9a4212a05ce38acb9e43fe159fb1a7dfa2e6b6201a60120ab926a5a502",
     "database/tests/verify_shenma_runtime_repositories.py": "9c77df17801af63f583f5e4f450d14e102d51f225d39296ddfb86bbbd518f3c3",
     "database/tests/fixtures/upstream_e40_runtime_permissions.json": "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d",
-    "database/scripts/build_shenma_whole_121_bridge.py": "1c7a35d6fd82059a46bac8f821590af8373924306ac3bf7b20522b9d58c49223",
-    "database/tests/test_shenma_whole_121_manifest.py": "27af2b9160dd2cd3e4584e5c45ae23b11f5df9f1eebed221da10eb8828ce90ab"
+    "database/scripts/build_shenma_whole_121_bridge.py": "a74b1ae874cfe5b6a1cb1e5d0a5cf87815852e8dc33ce8a5d7874584de1f5aae",
+    "database/tests/test_shenma_whole_121_manifest.py": "c3d6c13512728578476cbd3cd25cc4d3330b592ac676ce8bc17dec00ea61857e",
+    "database/tests/verify_report_source_point_access.py": "d21b0870fdbd0211d1d7eec6aeeb228b77bfb708e5b0d98a3df2bac3f4f597e9"
   },
   "not_performed": [
     "production database mutation",
@@ -91,5 +94,45 @@
     "_require_overview_schema accepts V384",
     "_meeting_schema_applied_at equals actual V383.applied_at",
     "deferred constraints forced before test rollback"
-  ]
+  ],
+  "report_source_point_lookup": {
+    "change": "Only restore V386 opportunity and meeting_customer primary-key scalar lookups over complete V393 body; no predicate or permission changes",
+    "local_cases": [
+      {
+        "equivalence_cases": 23,
+        "restricted_role": "NOSUPERUSER NOBYPASSRLS",
+        "opportunity_rows_added": 96,
+        "manifest_opportunities": 4,
+        "same_run_for_update_ms": {
+          "before": {
+            "force_custom_plan_ms": 52.584,
+            "force_generic_plan_ms": 49.39
+          },
+          "after": {
+            "force_custom_plan_ms": 19.205,
+            "force_generic_plan_ms": 19.156
+          }
+        },
+        "qualification": "Local synthetic timings, not clone or production latency proof"
+      },
+      {
+        "equivalence_cases": 23,
+        "restricted_role": "NOSUPERUSER NOBYPASSRLS",
+        "opportunity_rows_added": 96,
+        "manifest_opportunities": 4,
+        "same_run_for_update_ms": {
+          "before": {
+            "force_custom_plan_ms": 51.698,
+            "force_generic_plan_ms": 51.347
+          },
+          "after": {
+            "force_custom_plan_ms": 20.804,
+            "force_generic_plan_ms": 25.123
+          }
+        },
+        "qualification": "Local synthetic timings, not clone or production latency proof"
+      }
+    ],
+    "clone_timeout_status": "Local fixtures do not reproduce server 30-second stall; separate server-clone diagnosis remains required"
+  }
 }

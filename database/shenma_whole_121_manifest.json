@@ -533,7 +533,7 @@
     },
     {
       "path": "migrations/V399__shenma_whole_121_delivery_guards.sql",
-      "sha256": "e17ea4bb283640eb4cceb2d8be0890f56c0c8ba6c2b2fcbf1c6c85b97b445f9e"
+      "sha256": "8574fe9a4212a05ce38acb9e43fe159fb1a7dfa2e6b6201a60120ab926a5a502"
     }
   ],
   "migrations": [

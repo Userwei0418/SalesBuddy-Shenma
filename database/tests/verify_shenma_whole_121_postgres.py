@@ -771,6 +771,16 @@ async def run_case(admin, cfg, pre_s2, results):
         results.append(
             "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories"
         )
+        from verify_report_source_point_access import verify as verify_point_access
+
+        point_evidence = await verify_point_access(conn, role, f, context)
+        print(
+            json.dumps({"point_lookup_evidence": point_evidence}, ensure_ascii=False),
+            flush=True,
+        )
+        results.append(
+            "report_point_lookup_equivalence_scope_revocation_review_guards_and_restricted_runtime_for_update"
+        )
         await report_checks(conn, role, f, results)
         await quotas_and_capture(conn, f, results)
         print(

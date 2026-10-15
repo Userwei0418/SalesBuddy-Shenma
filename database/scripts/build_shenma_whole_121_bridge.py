@@ -17,6 +17,49 @@ ROOT = Path(__file__).resolve().parents[1]
 POLICY_SHA256 = "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d"
 MANIFEST = ROOT / "shenma_whole_121_manifest.json"
 SERVICE_POLICY = ROOT / "tests/fixtures/upstream_e40_runtime_permissions.json"
+SOURCE_ACCESS_SIGNATURE = "CREATE OR REPLACE FUNCTION security.work_report_source_access(p_manifest jsonb,p_selected jsonb) RETURNS boolean"
+
+
+def source_access_definition(text):
+    start = text.index(SOURCE_ACCESS_SIGNATURE)
+    return text[start : text.index("$$;", start) + 3]
+
+
+def restored_source_access():
+    """Retain V393 review guards; restore only V386's two unique-ID lookups."""
+    original = source_access_definition(
+        (ROOT / "migrations/V393__internal_work_report_review_freeze.sql").read_text()
+    )
+    replacements = (
+        (
+            (
+                "AND EXISTS(SELECT 1 FROM crm.opportunity v WHERE v.id=(s->>'record_id')::uuid\n"
+                "       AND v.workspace_id=common.current_workspace_id() AND v.deleted_at IS NULL)"
+            ),
+            (
+                "AND COALESCE((SELECT true FROM crm.opportunity v WHERE v.id=(s->>'record_id')::uuid\n"
+                "       AND v.workspace_id=common.current_workspace_id() AND v.deleted_at IS NULL),false)"
+            ),
+        ),
+        (
+            (
+                "WHEN 'meeting_customer' THEN EXISTS(SELECT 1 FROM crm.customer c\n"
+                "     WHERE c.id=(s->>'record_id')::uuid AND c.workspace_id=common.current_workspace_id()\n"
+                "       AND c.deleted_at IS NULL AND security.authorization_customer('customer.read',c.id)\n"
+                "       AND security.authorization_customer('work_report.read',c.id))"
+            ),
+            (
+                "WHEN 'meeting_customer' THEN COALESCE((SELECT true FROM crm.customer c\n"
+                "     WHERE c.id=(s->>'record_id')::uuid AND c.workspace_id=common.current_workspace_id()\n"
+                "       AND c.deleted_at IS NULL AND security.authorization_customer('customer.read',c.id)\n"
+                "       AND security.authorization_customer('work_report.read',c.id)),false)"
+            ),
+        ),
+    )
+    for before, after in replacements:
+        assert original.count(before) == 1, "Upstream source-access shape changed"
+        original = original.replace(before, after, 1)
+    return original
 
 
 def digest(value):
@@ -92,6 +135,12 @@ def main():
     parser.add_argument("--upstream-database", type=Path)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    assert (
+        source_access_definition(
+            (ROOT / "migrations/V399__shenma_whole_121_delivery_guards.sql").read_text()
+        )
+        == restored_source_access()
+    ), "Unreviewed report source-access predicate change"
     assert digest(SERVICE_POLICY.read_bytes()) == POLICY_SHA256, (
         "Pinned e40 policy changed"
     )

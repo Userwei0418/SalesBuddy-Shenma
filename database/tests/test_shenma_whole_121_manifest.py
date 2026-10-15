@@ -1,6 +1,7 @@
 """The bridge is a pinned, derived release; old customer SQL stays immutable."""
 
 import hashlib
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -64,3 +65,37 @@ def test_reviewed_service_policy_is_fixed_upstream_and_strict_request_exception(
         == policy["sha256"]
     )
     assert set(policy["intentional_exceptions"]) == {"crm.customer_creation_request"}
+
+
+def test_final_report_source_access_restores_only_reviewed_point_lookups():
+    spec = importlib.util.spec_from_file_location(
+        "bridge_source_access", ROOT / "scripts/build_shenma_whole_121_bridge.py"
+    )
+    bridge = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bridge)
+    final = bridge.source_access_definition(
+        (ROOT / "migrations/V399__shenma_whole_121_delivery_guards.sql").read_text()
+    )
+    assert final == bridge.restored_source_access()
+    before = bridge.source_access_definition(
+        (ROOT / "migrations/V393__internal_work_report_review_freeze.sql").read_text()
+    )
+    # Review provenance, explicit permissions and unknown-kind denial must not
+    # change when restoring a point lookup covered by a unique primary key.
+    assert (
+        final[final.index("   WHEN 'review_subject'") :]
+        == before[before.index("   WHEN 'review_subject'") :]
+    )
+    assert "LANGUAGE sql STABLE SET search_path=pg_catalog" in final
+    assert "SECURITY DEFINER" not in final
+    original_point = bridge.source_access_definition(
+        (
+            ROOT / "migrations/V386__internal_work_report_point_snapshot_access.sql"
+        ).read_text()
+    )
+    for start, end in (("opportunity", "task"), ("meeting_customer", "meeting_state")):
+        marker, stop = f"   WHEN '{start}'", f"   WHEN '{end}'"
+        assert (
+            final[final.index(marker) : final.index(stop)]
+            == original_point[original_point.index(marker) : original_point.index(stop)]
+        )
