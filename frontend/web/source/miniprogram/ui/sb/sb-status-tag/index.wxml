@@ -1,0 +1,1 @@
+<view class="sb-tag sb-tag-{{tone}}" aria-role="text"><text wx:if="{{tone !== 'unset'}}">● </text>{{text}}<text wx:if="{{showReason && reason}}" class="sb-tag-reason"> · {{reason}}</text></view>

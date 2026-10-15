@@ -1,0 +1,76 @@
+{
+  "date": "2026-09-12",
+  "baseline": "744f41a",
+  "branch": "codex/fix-chatbi-visible-entry",
+  "actual_project": "salegent-v1/frontend",
+  "decision": "User explicitly deferred proactive ChatBI UI to phase two; preserve implementation, hide entry and restore descending feed; record in docs.",
+  "defaults": {
+    "HOME_CHATBI_ENABLED": false,
+    "HOME_MESSAGE_ORDER": "desc"
+  },
+  "retained": [
+    "ascending conversation option",
+    "question logic and original API",
+    "60 second wait",
+    "duplicate prevention",
+    "identity and disposed page guards",
+    "three business shortcuts",
+    "existing business recording"
+  ],
+  "tests": {
+    "command": "node --test",
+    "passed": 144,
+    "failed": 0,
+    "skipped": 0,
+    "coverage": [
+      "phase-one no query, transcription or recording permission from ChatBI",
+      "descending latest-first and top focus",
+      "business recording permission flow preserved",
+      "explicit phase-two chronological interaction regressions",
+      "independent entry and sort options"
+    ]
+  },
+  "static": {
+    "command": "python3 scripts/verify_frontend.py",
+    "status": "passed",
+    "registered_pages": 24,
+    "json_files": 32,
+    "files": 199,
+    "node_syntax_check": "enabled"
+  },
+  "native": {
+    "application": "WeChat DevTools Stable 2.02.2608060",
+    "base_library": "3.17.2",
+    "fresh_project_reopen": true,
+    "observed": [
+      "proactive question input absent",
+      "latest dated business cards at top",
+      "three quick actions visible",
+      "five native tab icons visible",
+      "existing manager login preserved",
+      "fresh load errors zero"
+    ],
+    "evidence": "CUA screenshot and accessibility inspection in current task; no business screenshot copied into repository",
+    "new_model_query_sent": false,
+    "new_voice_recording_started": false,
+    "transient_before_reopen": "Two tasks/notifications 401 entries appeared during hot reload; after reopening current project, fresh errors remained zero. No credentials or auth settings modified; underlying transient cause not established.",
+    "physical_device": "not verified this round"
+  },
+  "routing": {
+    "recent_mini_program_queries": "direct original SenseAudio API",
+    "model": "senseaudio-s2-lite",
+    "fallback_triggered_by_fde_failure": false,
+    "production_fde_enabled": false,
+    "platform_log_permission_error": "observed in user screenshot, not diagnosed or fixed",
+    "independent_fde_test_connected_agents": 1,
+    "current_business_fde_enabled_agents": 0
+  },
+  "sha256": {
+    "miniprogram/config.js": "d393c7920a01f57a3194216740508b053b31ef1519c9210f504a4ba66b72ad50",
+    "miniprogram/pages/index/index.js": "98f3b931b4d6c3be80047f28c3b8fbb402f1589fc875241981637a42e28a9645",
+    "miniprogram/pages/index/index.wxml": "03c0830c871e25dc1397f99fd3cd747d1280007ec3705ff294b7bcc7b700e66b",
+    "miniprogram/pages/index/index.wxss": "9af4b1fd7c19077956d8d9177088576758212edfd5f0ee04682e7d614927f86c",
+    "tests/chatbi-entry.test.js": "bd53f95a963d920536e3e8a2bc0c2a2f61bea40b669fb291bc8756f6b36088bc",
+    "tests/opportunity-notifications.test.js": "e133275e80a3c2fd36f3a91cb4dccc3d9e46bd909a1bdcd4c5ee726cad9cfdef"
+  }
+}

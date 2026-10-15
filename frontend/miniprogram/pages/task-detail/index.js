@@ -1,10 +1,12 @@
-/** Task completion requires creator review, except self-assigned tasks. */
 const uiColors = require("../../utils/uiColors");
+/** Task completion requires creator review, except self-assigned tasks. */
 const { taskLight } = require('../../utils/statusLight');
 const apiClient = require("../../utils/apiClient");
 const access = require("../../utils/access");
 const { draftScope } = require("../../utils/draftScope");
-const { allTaskRecipients } = require("../../utils/taskRecipients");
+const { allTaskReassignmentDirectory } = require("../../utils/taskRecipients");
+const { canCancelTask, cancellationIdentity } = require("../../utils/taskCancellation");
+const { taskTransferSummary, taskStageLabel } = require("../../utils/taskPresentation");
 
 function formatDate(value, fallback) {
   if (!value) return fallback || "—";
@@ -32,6 +34,7 @@ function normalizeTask(item, session) {
     ownerUserId: ownerPerson.user_id || "",
     creator,
     status,
+    stageLabel: taskStageLabel(item),
     wasCancelled,
     cancellationNote: wasCancelled ? item.last_event_note || "未补充取消原因" : "",
     statusLabel: item.handover_required ? "待交接" : wasCancelled ? "已取消" : item.target_position && status==='pending_confirm' ? '待岗位领取' : ({ pending_confirm: "待接受", pending_execution: "已接受", in_progress: item.last_event_type === "reject_completion" ? "执行中 · 已驳回" : "执行中", pending_review: item.creator_user_ref_id === session.userId ? "待我确认" : "等待发起人确认", completed: "已完成", cancelled: "已拒绝", deferred: "已接受" })[status] || "待处理",
@@ -50,13 +53,15 @@ function normalizeTask(item, session) {
     relatedText: relatedNames.length ? relatedNames.join("、") : "无其他相关方",
     responseLabel: item.target_position ? '领取任务' : '接受任务',
     canRespond:canAccept||canDecline,canAccept,canDecline,
-    can_coordinate:item.can_coordinate===true&&permitted('task.coordinate'),canCancel:!['completed','cancelled','pending_review'].includes(status)&&permitted('task.cancel'),
+    can_coordinate:item.can_coordinate===true&&['pending_confirm','pending_execution','in_progress','deferred'].includes(status)&&permitted('task.coordinate'),canCancel:canCancelTask(item,session),
     canComplete: !item.handover_required && permitted("task.complete") && ["pending_execution", "in_progress"].includes(status) && Boolean(session.userId) && ownerPerson.user_id === session.userId,
     canReview: permitted("task.review") && status === "pending_review" && Boolean(session.userId) && item.creator_user_ref_id === session.userId,
     selfAssigned: ownerPerson.user_id === item.creator_user_ref_id,
     reviewRejected: status === "in_progress" && item.last_event_type === "reject_completion",
     reviewNote: item.completion_review_note || "",
-    history: (item.events || []).filter(e => ["submit_completion", "approve_completion", "reject_completion", "complete"].includes(e.event_type)).map(e => ({...e, label: ({submit_completion:"提交完成",approve_completion:"确认完成",reject_completion:"驳回",complete:"完成"})[e.event_type], time:formatDate(e.occurred_at)})),
+    history: (item.events || []).filter(e => ["submit_completion", "approve_completion", "reject_completion", "complete", "cancel", "reassign"].includes(e.event_type)).map(e => ({...e,
+      actor_name: typeof (e.payload || {}).actor_name === 'string' && e.payload.actor_name.trim() ? e.payload.actor_name.trim() : e.actor_name,
+      label: ({submit_completion:"提交完成",approve_completion:"确认完成",reject_completion:"驳回",complete:"完成",cancel:"取消任务",reassign:"转交任务"})[e.event_type], time:formatDate(e.occurred_at), transferSummary: e.event_type === 'reassign' ? taskTransferSummary(e.payload || {}) : ''})),
     canRetry: status === "cancelled" && !wasCancelled && access.can(session,"task.create") && Boolean(session.userId) && item.creator_user_ref_id === session.userId,
     rejectionComment: (item.last_event_type === "reject" ? item.last_event_note : "") || ((item.attributes || {}).rejection_comment) || ((item.events || []).slice().reverse().find((event) => event.event_type === "reject") || {}).note || "",
     remote: Boolean(item.due_at || item.creator_user_ref_id),
@@ -64,7 +69,13 @@ function normalizeTask(item, session) {
 }
 
 Page({
-  data: { taskId: "", task: null, completionNote: "", responseComment: "", submitting: false, loading: false },
+  onInfoTap(e){const task=this.data.task;if(!task||e.detail.key!=='opportunity'||!task.customer_id||!task.opportunity_id)return;wx.setStorageSync('pendingOpenCustomerId',task.customer_id);wx.setStorageSync('pendingOpenOpportunityId',task.opportunity_id);wx.switchTab({url:'/pages/customers/index'});},
+  onRejectCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'reject_completion'}}});},
+  onApproveCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'approve_completion'}}});},
+
+  data: { taskId: "", task: null, completionNote: "", responseComment: "", submitting: false, loading: false, cancelOpen:false,
+    coordinateOpen:false,coordinateMembers:[],coordinateTeams:[],coordinateDefaultTeamId:'',coordinateSelectedIds:[],coordinateSelectedId:'',coordinateSelectedName:'',
+    coordinatePickerOpen:false,coordinateLoading:false,coordinateDirectoryError:'',coordinateError:'',coordinateNote:'' },
 
   onLoad(options) {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'task-detail', options)) return;
@@ -74,42 +85,145 @@ Page({
   onShow() {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'task-detail')) return;
     if (!getApp().ensureLogin()) return;
+    this.taskPageVisible=true;
     this.loadTask();
   },
 
   loadTask() {
     const session = getApp().globalData.session;
     if (!/^[0-9a-f-]{36}$/i.test(this.data.taskId)) { this.showMissing(); return; }
-    const identity=access.identity(session),serial=this.loadSerial=(this.loadSerial||0)+1;
-    const current=()=>serial===this.loadSerial&&identity===access.identity(getApp().globalData.session);
-    this.setData({ loading: true,task:null,coordinateOpen:false });
-    return apiClient.getTask(this.data.taskId).then(task=>{if(current())this.setData({task:normalizeTask(task,session)});}).catch(()=>{
+    const identity=access.identity(session),taskId=this.data.taskId,serial=this.loadSerial=(this.loadSerial||0)+1;
+    const current=()=>serial===this.loadSerial&&taskId===this.data.taskId&&identity===access.identity(getApp().globalData.session);
+    this.coordinateGeneration=(this.coordinateGeneration||0)+1;
+    this.actionConfirmation=null;this.taskMutation=null;this.coordinateMutation=null;
+    this.setData({ loading: true,task:null,submitting:this.hasPendingTaskWrites(taskId,identity),coordinateOpen:false,coordinatePickerOpen:false,cancelOpen:false });
+    return apiClient.getTask(taskId).then(task=>{if(current()){this.taskIdentity=cancellationIdentity(session);this.taskSessionIdentity=identity;this.setData({task:normalizeTask(task,session)});}}).catch(()=>{
       if(current())this.showMissing();
     }).finally(()=>{if(current())this.setData({loading:false});});
   },
 
-  onHide(){this.loadSerial=(this.loadSerial||0)+1;this.setData({coordinateOpen:false});},
-  onUnload(){this.onHide();},
+  onHide(){this.taskPageVisible=false;this.loadSerial=(this.loadSerial||0)+1;this.coordinateGeneration=(this.coordinateGeneration||0)+1;this.actionConfirmation=null;this.taskMutation=null;this.coordinateMutation=null;this.setData({submitting:false,coordinateOpen:false,coordinatePickerOpen:false,cancelOpen:false});},
+  onUnload(){this.isUnloading=true;this.onHide();},
+  hasPendingTaskWrites(taskId,identity){
+    return (this.pendingTaskWrites || []).some(write=>write.taskId===taskId && write.identity===identity);
+  },
+  beginTaskWrite(taskId,identity){
+    const write={taskId,identity};
+    this.pendingTaskWrites=(this.pendingTaskWrites || []).concat(write);
+    return write;
+  },
+  finishTaskWrite(write,applied){
+    if(!write)return;
+    this.pendingTaskWrites=(this.pendingTaskWrites || []).filter(pending=>pending!==write);
+    const samePage=!this.isUnloading && this.taskPageVisible!==false && this.data.taskId===write.taskId &&
+      (!this.data.task || this.data.task.id===write.taskId) && write.identity===access.identity(getApp().globalData.session);
+    if(!samePage)return;
+    if(!applied)this.taskWriteRefresh=write;
+    if(this.hasPendingTaskWrites(write.taskId,write.identity))return;
+    const refresh=this.taskWriteRefresh;
+    this.taskWriteRefresh=null;
+    // A write can commit after onShow has already read the old version. Its old
+    // receipt must not overwrite the page, but one new GET must reconcile it.
+    if(refresh && refresh.taskId===write.taskId && refresh.identity===write.identity){this.loadTask();return;}
+    if(!this.taskMutation && !this.coordinateMutation)this.setData({submitting:false});
+  },
   showMissing() {
     wx.showToast({ title: "任务不存在或已不可见", icon: "none" });
     setTimeout(() => wx.navigateBack(), 700);
   },
 
-  async openCoordination(){
-    const task=this.data.task;if(!task||!(task.can_coordinate||task.canCancel))return;
-    this.setData({coordinateOpen:true,coordinateMembers:[],coordinateIndex:-1,coordinateNote:'',coordinateError:'',coordinateLoading:task.can_coordinate});
-    if(!task.can_coordinate)return;
-    try{const identity=draftScope(getApp().globalData.session);const current=()=>this.data.coordinateOpen&&identity===draftScope(getApp().globalData.session);const rows=await allTaskRecipients(apiClient,current);if(current())this.setData({coordinateMembers:rows||[],coordinateLoading:false});}catch(e){this.setData({coordinateLoading:false,coordinateError:e.message||'可交接人员加载失败'});}
+  openCancellation(){
+    const task=this.data.task,session=getApp().globalData.session;
+    if(!task || this.data.submitting || this.data.loading || !canCancelTask(task,session) || this.taskIdentity!==cancellationIdentity(session))return;
+    this.cancelIdentity=cancellationIdentity(session);this.cancelVersion=task.version_no;
+    this.coordinateGeneration=(this.coordinateGeneration||0)+1;
+    this.setData({cancelOpen:true,coordinateOpen:false,coordinatePickerOpen:false});
   },
-  closeCoordination(){if(!this.data.submitting)this.setData({coordinateOpen:false});},
-  coordinateMember(e){this.setData({coordinateIndex:Number(e.detail.value)});},
+  closeCancellation(){this.setData({cancelOpen:false});},
+  taskCancelled(event){
+    const updated=event.detail,task=this.data.task,session=getApp().globalData.session;
+    if(!this.data.cancelOpen || !task || !updated || updated.id!==task.id ||
+      this.cancelIdentity!==cancellationIdentity(session) || this.cancelVersion!==task.version_no)return;
+    this.loadSerial=(this.loadSerial||0)+1;
+    this.setData({task:normalizeTask(updated,session),cancelOpen:false});
+    wx.showToast({title:'任务已取消，记录已保留',icon:'success'});
+  },
+  taskCancellationRefreshed(event){
+    const updated=event.detail,task=this.data.task,session=getApp().globalData.session;
+    if(!this.data.cancelOpen || !task || !updated || updated.id!==task.id ||
+      this.cancelIdentity!==cancellationIdentity(session) || this.cancelVersion!==task.version_no)return;
+    this.loadSerial=(this.loadSerial||0)+1;
+    this.setData({task:normalizeTask(updated,session),cancelOpen:false});
+    wx.showToast({title:updated.status==='cancelled' && updated.last_event_type==='cancel' ? '该任务已取消，记录已保留' : '任务状态已更新',icon:'none'});
+  },
+
+  openCoordination(){
+    const task=this.data.task;if(!task||!task.can_coordinate||this.data.submitting)return;
+    this.setData({coordinateOpen:true,coordinateMembers:[],coordinateTeams:[],coordinateSelectedId:'',coordinateSelectedName:'',coordinateSelectedIds:[],
+      coordinateDefaultTeamId:'',coordinatePickerOpen:false,coordinateNote:'',coordinateError:'',coordinateDirectoryError:'',coordinateLoading:false});
+    if(task.can_coordinate)return this.loadCoordinationOptions();
+  },
+  async loadCoordinationOptions(){
+    const task=this.data.task;if(!this.data.coordinateOpen || !task || !task.can_coordinate || this.data.submitting)return;
+    const generation=this.coordinateGeneration=(this.coordinateGeneration||0)+1,identity=access.identity(getApp().globalData.session),taskId=task.id,version=task.version_no;
+    const current=()=>this.data.coordinateOpen && generation===this.coordinateGeneration && identity===access.identity(getApp().globalData.session) &&
+      this.data.task && this.data.task.id===taskId && this.data.task.version_no===version;
+    this.setData({coordinateLoading:true,coordinateDirectoryError:'',coordinateMembers:[],coordinateTeams:[],coordinateDefaultTeamId:''});
+    try{
+      const directory=await allTaskReassignmentDirectory(apiClient,taskId,current);if(!current() || !directory)return;
+      const selected=directory.items.find(member=>member.id===this.data.coordinateSelectedId);
+      const members=directory.items.map(member=>({...member,teamLabel:member.team_ids.map(id=>directory.teams.find(team=>team.id===id).name).join('、')}));
+      this.coordinateIdentity=identity;
+      this.setData({coordinateMembers:members,coordinateTeams:directory.teams,coordinateDefaultTeamId:directory.defaults.team_id,
+        coordinateSelectedId:selected?selected.id:'',coordinateSelectedIds:selected?[selected.id]:[],coordinateSelectedName:selected?selected.name:''});
+    }catch(error){if(current())this.setData({coordinateDirectoryError:error.message||'可交接人员加载失败'});}
+    finally{if(current())this.setData({coordinateLoading:false});}
+  },
+  closeCoordination(){
+    if(this.data.submitting)return;
+    this.coordinateGeneration=(this.coordinateGeneration||0)+1;this.setData({coordinateOpen:false,coordinatePickerOpen:false});
+  },
+  openCoordinatePicker(){if(this.data.coordinateOpen && this.data.task && this.data.task.can_coordinate && !this.data.submitting)this.setData({coordinatePickerOpen:true});},
+  closeCoordinatePicker(){this.setData({coordinatePickerOpen:false});},
+  confirmCoordinateMember(e){
+    if(!this.data.coordinateOpen || this.data.submitting || this.data.coordinateLoading || this.data.coordinateDirectoryError ||
+        this.coordinateIdentity!==access.identity(getApp().globalData.session))return;
+    const ids=e.detail && e.detail.ids;
+    const member=Array.isArray(ids) && ids.length===1 && this.data.coordinateMembers.find(item=>item.id===ids[0]);
+    if(!member){this.setData({coordinateError:'请选择当前任务允许的接手人员'});return;}
+    this.setData({coordinateSelectedId:member.id,coordinateSelectedIds:[member.id],coordinateSelectedName:member.name,coordinatePickerOpen:false,coordinateError:''});
+  },
   coordinateNote(e){this.setData({coordinateNote:e.detail.value});},
   coordinate(e){
-    const task=this.data.task;if(!task||this.data.submitting)return;
-    const event=e.currentTarget.dataset.event;if(!(['cancel','reassign'].includes(event))||(event==='cancel'?!task.canCancel:!task.can_coordinate))return;const note=(this.data.coordinateNote||'').trim(),member=(this.data.coordinateMembers||[])[this.data.coordinateIndex];
+    const task=this.data.task;if(!task||!this.data.coordinateOpen||this.data.submitting||this.coordinateConfirming||this.actionConfirmation)return;
+    const event=e.currentTarget.dataset.event;
+    if(event!=='reassign'||!task.can_coordinate)return;
+    const note=(this.data.coordinateNote||'').trim(),member=this.data.coordinateMembers.find(item=>item.id===this.data.coordinateSelectedId);
     if(!note){this.setData({coordinateError:'请填写协调原因，保留交接依据'});return;}
-    if(event==='reassign'&&!member){this.setData({coordinateError:'请选择接手人员'});return;}
-    wx.showModal({title:event==='reassign'?'确认转交任务？':'确认取消任务？',content:event==='reassign'?`转交给 ${member.name}；原负责人和协调记录会保留。`:'任务会保留取消记录，不会标记为完成。',success:async result=>{if(!result.confirm)return;this.setData({submitting:true,coordinateError:''});try{const updated=await apiClient.coordinateTask(task.id,{event_type:event,note,version_no:task.version_no,...(event==='reassign'?{assignee_account_code:member.account_code}:{})});this.setData({task:normalizeTask(updated,getApp().globalData.session),coordinateOpen:false});wx.showToast({title:event==='reassign'?'已转交':'已取消'});}catch(error){this.setData({coordinateError:error.message||'协调失败，请刷新后重试'});}finally{this.setData({submitting:false});}}});
+    const identity=access.identity(getApp().globalData.session),generation=this.coordinateGeneration,taskId=task.id,version=task.version_no;
+    if(event==='reassign' && (this.data.coordinateLoading||this.data.coordinateDirectoryError||!member||this.coordinateIdentity!==identity)){
+      this.setData({coordinateError:this.data.coordinateDirectoryError||'请选择当前任务允许的接手人员'});return;
+    }
+    const current=()=>this.data.coordinateOpen && generation===this.coordinateGeneration && identity===access.identity(getApp().globalData.session) &&
+      this.data.task && this.data.task.id===taskId && this.data.task.version_no===version &&
+      this.data.task.can_coordinate && access.can(getApp().globalData.session,'task.coordinate');
+    this.coordinateConfirming=true;
+    wx.showModal({title:event==='reassign'?'确认转交任务？':'确认取消任务？',content:event==='reassign'?`转交给 ${member.name}；原负责人和协调记录会保留。`:'任务会保留取消记录，不会标记为完成。',success:async result=>{
+      this.coordinateConfirming=false;
+      if(!result.confirm||!current()||this.data.submitting)return;
+      if(event==='reassign' && !this.data.coordinateMembers.some(item=>item.id===member.id && item.account_code===member.account_code))return;
+      const mutation={};this.coordinateMutation=mutation;this.setData({submitting:true,coordinateError:''});
+      const write=this.beginTaskWrite(taskId,identity);let applied=false;
+      try{
+        const updated=await apiClient.coordinateTask(taskId,{event_type:event,note,version_no:version,...(event==='reassign'?{assignee_account_code:member.account_code}:{})});
+        if(!current()||this.coordinateMutation!==mutation)return;
+        if(!updated || updated.id!==taskId)throw Error('任务回执不匹配，请刷新后重试');
+        this.setData({task:normalizeTask(updated,getApp().globalData.session),coordinateOpen:false,coordinatePickerOpen:false});
+        applied=true;
+        wx.showToast({title:event==='reassign'?'已转交':'已取消'});
+      }catch(error){if(current())this.setData({coordinateError:error.message||'协调失败，请刷新后重试'});}
+      finally{if(this.coordinateMutation===mutation){this.coordinateMutation=null;if(!this.isUnloading)this.setData({submitting:false});}this.finishTaskWrite(write,applied);}
+    },fail:()=>{this.coordinateConfirming=false;}});
   },
   inputCompletionNote(e) {
     this.setData({ completionNote: e.detail.value });
@@ -123,27 +237,52 @@ Page({
     }
     this.respondTask("reject");
   },
+  confirmTaskMutation({ capability, permission, modal, submit, onSuccess, errorMessage }) {
+    const task=this.data.task,session=getApp().globalData.session;
+    if(!task || this.data.loading || this.data.submitting || this.actionConfirmation || this.coordinateConfirming)return;
+    const identity=access.identity(session),taskId=task.id,version=task.version_no,serial=this.loadSerial;
+    const samePage=()=>!this.isUnloading && serial===this.loadSerial && identity===access.identity(getApp().globalData.session) &&
+      this.data.taskId===taskId && this.data.task && this.data.task.id===taskId;
+    const current=()=>samePage() && !this.data.loading && this.data.task.version_no===version &&
+      this.taskSessionIdentity===identity && access.can(getApp().globalData.session,permission) &&
+      normalizeTask(this.data.task,getApp().globalData.session)[capability]===true;
+    if(!current())return;
+    const confirmation={};this.actionConfirmation=confirmation;
+    wx.showModal({...modal,success:result=>{
+      if(this.actionConfirmation!==confirmation)return;
+      this.actionConfirmation=null;
+      if(!result.confirm || !current() || this.data.submitting)return;
+      const mutation={};this.taskMutation=mutation;this.setData({submitting:true});
+      let write=null,applied=false;
+      Promise.resolve().then(()=>{
+        if(!current() || this.taskMutation!==mutation)return null;
+        write=this.beginTaskWrite(taskId,identity);return submit();
+      }).then(updated=>{
+        if(!current() || this.taskMutation!==mutation)return;
+        if(!updated || updated.id!==taskId)throw Error('任务回执不匹配，请刷新后重试');
+        this.setData({task:normalizeTask(updated,getApp().globalData.session)});
+        applied=true;
+        onSuccess(updated,()=>samePage() && this.data.task.version_no===updated.version_no);
+      }).catch(error=>{
+        if(current() && this.taskMutation===mutation)wx.showToast({title:error.message || errorMessage,icon:'none'});
+      }).finally(()=>{
+        if(this.taskMutation===mutation){this.taskMutation=null;if(!this.isUnloading)this.setData({submitting:false});}
+        this.finishTaskWrite(write,applied);
+      });
+    },fail:()=>{if(this.actionConfirmation===confirmation)this.actionConfirmation=null;}});
+  },
   respondTask(eventType) {
     const task = this.data.task;
     if (!task || !(eventType==="accept"?task.canAccept:task.canDecline) || this.data.submitting) return;
     const rejecting = eventType === "reject";
-    wx.showModal({
-      title: rejecting ? "确认拒绝任务？" : `确认${task.responseLabel}？`,
-      content: rejecting ? "拒绝原因会立即推送给任务发起人，原任务将保留记录。" : "接受后任务进入待执行状态。",
-      confirmText: rejecting ? "确认拒绝" : task.responseLabel,
-      confirmColor: rejecting ? uiColors.danger : uiColors.success,
-      success: (result) => {
-        if (!result.confirm) return;
-        this.setData({ submitting: true });
-        apiClient.respondTask(task.id, eventType, this.data.responseComment,task.version_no).then((updated) => {
-          const session = getApp().globalData.session;
-          this.setData({ task: normalizeTask(updated, session), submitting: false });
-          wx.showToast({ title: rejecting ? "已拒绝并通知发起人" : "任务已接受", icon: "success" });
-        }).catch((error) => {
-          this.setData({ submitting: false });
-          wx.showToast({ title: error.message || "任务响应失败", icon: "none" });
-        });
-      },
+    const taskId=task.id,version=task.version_no,note=this.data.responseComment;
+    this.confirmTaskMutation({
+      capability:rejecting?'canDecline':'canAccept',permission:rejecting?'task.decline':'task.accept',
+      modal:{title: rejecting ? "确认拒绝任务？" : `确认${task.responseLabel}？`,
+        content: rejecting ? "拒绝原因会立即推送给任务发起人，原任务将保留记录。" : "接受后任务进入待执行状态。",
+        confirmText: rejecting ? "确认拒绝" : task.responseLabel,confirmColor: rejecting ? uiColors.danger : uiColors.success},
+      submit:()=>apiClient.respondTask(taskId,eventType,note,version),
+      onSuccess:()=>wx.showToast({title:rejecting?'已拒绝并通知发起人':'任务已接受',icon:'success'}),errorMessage:'任务响应失败',
     });
   },
 
@@ -160,58 +299,34 @@ Page({
     wx.navigateTo({ url: "/pages/management-task-create/index?retry=1" });
   },
 
-  onInfoTap(e){
-    const task=this.data.task;
-    if(!task||e.detail.key!=='opportunity'||!task.customer_id||!task.opportunity_id)return;
-    wx.setStorageSync("pendingOpenCustomerId",task.customer_id);
-    wx.setStorageSync("pendingOpenOpportunityId",task.opportunity_id);
-    wx.switchTab({url:"/pages/customers/index"});
-  },
-  onRejectCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'reject_completion'}}});},
-  onApproveCompletion(){return this.reviewCompletion({currentTarget:{dataset:{event:'approve_completion'}}});},
   inputReviewNote(e) { this.setData({reviewNote:e.detail.value}); },
   reviewCompletion(e) {
     const task=this.data.task, event=e.currentTarget.dataset.event;
     if(!task || !task.canReview || this.data.submitting || !["approve_completion","reject_completion"].includes(event))return;
     const note=String(this.data.reviewNote || "").trim(), approved=event === "approve_completion";
     if(!approved && !note){wx.showToast({title:"请填写驳回原因",icon:"none"});return;}
-    wx.showModal({title:approved?"确认任务完成？":"驳回完成申请？",content:approved?"确认后任务闭环，并通知接收方。":"接收方将收到原因，继续处理后可再次提交。",success:result=>{
-      if(!result.confirm)return;
-      this.setData({submitting:true});
-      apiClient.respondTask(task.id,event,note,task.version_no).then(updated=>{
-        this.setData({task:normalizeTask(updated,getApp().globalData.session),reviewNote:"",submitting:false});
-        wx.showToast({title:approved?"已确认完成":"已驳回并通知",icon:"success"});
-      }).catch(error=>{this.setData({submitting:false});wx.showToast({title:error.message || "操作失败，请刷新重试",icon:"none"});});
-    }});
+    const taskId=task.id,version=task.version_no;
+    this.confirmTaskMutation({capability:'canReview',permission:'task.review',
+      modal:{title:approved?"确认任务完成？":"驳回完成申请？",content:approved?"确认后任务闭环，并通知接收方。":"接收方将收到原因，继续处理后可再次提交。"},
+      submit:()=>apiClient.respondTask(taskId,event,note,version),
+      onSuccess:()=>{this.setData({reviewNote:''});wx.showToast({title:approved?'已确认完成':'已驳回并通知',icon:'success'});},
+      errorMessage:'操作失败，请刷新重试'});
   },
   markCompleted() {
     const task = this.data.task;
-    const session = getApp().globalData.session;
     if (!task || !task.canComplete || this.data.submitting) return;
     if(!String(this.data.completionNote || "").trim()){wx.showToast({title:"请填写完成说明",icon:"none"});return;}
-    wx.showModal({
-      title: task.selfAssigned ? "确认任务已完成？" : "提交完成申请？",
-      content: task.selfAssigned ? "自建自领任务将直接完成。" : `提交后由 ${task.creator} 确认，验收通过才算完成。`,
-      confirmText: task.selfAssigned ? "确认完成" : "提交完成",
-      confirmColor: uiColors.success,
-      success: (result) => {
-        if (!result.confirm) return;
-        this.setData({ submitting: true });
-        const note = String(this.data.completionNote || "").trim();
-        apiClient.completeTask(task.id, note,task.version_no).then((completed) => {
-          this.setData({ task: normalizeTask(completed, session), submitting: false });
-          if(completed.status === "completed") wx.setStorageSync("lastCompletedTaskId", task.id);
-          wx.showToast({
-            title: completed.status === "completed" ? "任务已完成" : "已提交，等待确认",
-            icon: "success",
-          });
-          wx.vibrateShort({ type: "light" });
-          setTimeout(() => wx.navigateBack(), 700);
-        }).catch((error) => {
-          this.setData({ submitting: false });
-          wx.showToast({ title: error.message || "更新失败，请稍后重试", icon: "none" });
-        });
-      },
-    });
+    const taskId=task.id,version=task.version_no,note=String(this.data.completionNote || '').trim();
+    this.confirmTaskMutation({capability:'canComplete',permission:'task.complete',
+      modal:{title:task.selfAssigned?'确认任务已完成？':'提交完成申请？',
+        content:task.selfAssigned?'自建自领任务将直接完成。':`提交后由 ${task.creator} 确认，验收通过才算完成。`,
+        confirmText:task.selfAssigned?'确认完成':'提交完成',confirmColor: uiColors.success},
+      submit:()=>apiClient.completeTask(taskId,note,version),
+      onSuccess:(completed,current)=>{
+        if(completed.status==='completed')wx.setStorageSync('lastCompletedTaskId',taskId);
+        wx.showToast({title:completed.status==='completed'?'任务已完成':'已提交，等待确认',icon:'success'});
+        wx.vibrateShort({type:'light'});
+        setTimeout(()=>{if(current())wx.navigateBack();},700);
+      },errorMessage:'更新失败，请稍后重试'});
   },
 });

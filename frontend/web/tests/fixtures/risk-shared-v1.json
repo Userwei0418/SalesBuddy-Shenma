@@ -1,0 +1,385 @@
+{
+  "synthetic_example": true,
+  "not_runtime_evidence": true,
+  "backend_contract": "b66b3cd3b2dec79edc87b58702d7e732f0b08080",
+  "input": {
+    "session": {
+      "workspaceId": "synthetic-workspace",
+      "userId": "00000000-0000-4000-8000-000000000007",
+      "role": "sales",
+      "capabilities": {
+        "risk.read": true,
+        "risk.decide": true,
+        "risk.resolve": false
+      }
+    },
+    "query": {
+      "status": "open",
+      "scope": "person",
+      "member_id": "00000000-0000-4000-8000-000000000007",
+      "opportunity_only": true,
+      "page_size": 1,
+      "offset": 0
+    },
+    "list": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "status": "accepted",
+          "title": "示例：预算待确认",
+          "severity_code": "high",
+          "customer_id": "00000000-0000-4000-8000-000000000002",
+          "opportunity_id": "00000000-0000-4000-8000-000000000003",
+          "customer_name": "合成示例客户",
+          "opportunity_name": "合成示例商机",
+          "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+          "owner_team_id": "00000000-0000-4000-8000-000000000008",
+          "owner_name": "示例负责人",
+          "team_name": "示例部门",
+          "suggested_action": "与客户财务确认预算安排",
+          "next_action": "与客户财务确认预算安排",
+          "version_no": 4,
+          "evidence": [
+            {
+              "type": "visit",
+              "detail": "合成示例：预算待审批"
+            }
+          ],
+          "events": [],
+          "can_resolve": false,
+          "can_decide": true,
+          "current_decision": null
+        }
+      ],
+      "next_cursor": null,
+      "total": 107,
+      "summary": {
+        "total": 111,
+        "open_count": 107,
+        "resolved_count": 4,
+        "overdue_count": 6
+      },
+      "offset": 0,
+      "page_size": 1,
+      "has_more": true,
+      "next_offset": 1
+    },
+    "detail": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "status": "accepted",
+      "title": "示例：预算待确认",
+      "severity_code": "high",
+      "customer_id": "00000000-0000-4000-8000-000000000002",
+      "opportunity_id": "00000000-0000-4000-8000-000000000003",
+      "customer_name": "合成示例客户",
+      "opportunity_name": "合成示例商机",
+      "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+      "owner_team_id": "00000000-0000-4000-8000-000000000008",
+      "owner_name": "示例负责人",
+      "team_name": "示例部门",
+      "suggested_action": "与客户财务确认预算安排",
+      "next_action": "与客户财务确认预算安排",
+      "version_no": 4,
+      "evidence": [
+        {
+          "type": "visit",
+          "detail": "合成示例：预算待审批"
+        }
+      ],
+      "events": [],
+      "can_resolve": false,
+      "can_decide": true,
+      "current_decision": null
+    },
+    "decision": {
+      "risk": {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "status": "accepted",
+        "title": "示例：预算待确认",
+        "severity_code": "high",
+        "customer_id": "00000000-0000-4000-8000-000000000002",
+        "opportunity_id": "00000000-0000-4000-8000-000000000003",
+        "customer_name": "合成示例客户",
+        "opportunity_name": "合成示例商机",
+        "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+        "owner_team_id": "00000000-0000-4000-8000-000000000008",
+        "owner_name": "示例负责人",
+        "team_name": "示例部门",
+        "suggested_action": "与客户财务确认预算安排",
+        "next_action": "与客户财务确认预算安排",
+        "version_no": 5,
+        "evidence": [
+          {
+            "type": "visit",
+            "detail": "合成示例：预算待审批"
+          }
+        ],
+        "events": [
+          {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "event_type": "suggestion_decided",
+            "from_status": "accepted",
+            "to_status": "accepted",
+            "actor_name": "示例负责人",
+            "actor_user_ref_id": "00000000-0000-4000-8000-000000000007",
+            "occurred_at": "2026-10-10T09:00:00+08:00",
+            "payload": {
+              "request_id": "00000000-0000-4000-8000-000000000004",
+              "request": {
+                "decision": "adopt",
+                "note": "本周先联系客户财务确认预算",
+                "version_no": 4,
+                "request_id": "00000000-0000-4000-8000-000000000004"
+              },
+              "decision": "adopt",
+              "note": "本周先联系客户财务确认预算",
+              "risk_version_before": 4,
+              "risk_version_after": 5,
+              "suggested_action": "与客户财务确认预算安排",
+              "evidence": [
+                {
+                  "type": "visit",
+                  "detail": "合成示例：预算待审批"
+                }
+              ]
+            }
+          }
+        ],
+        "can_resolve": false,
+        "can_decide": true,
+        "current_decision": {
+          "event_id": "00000000-0000-4000-8000-000000000005",
+          "decision": "adopt",
+          "note": "本周先联系客户财务确认预算",
+          "actor_name": "示例负责人",
+          "occurred_at": "2026-10-10T09:00:00+08:00",
+          "risk_version": 5,
+          "is_current": true
+        }
+      },
+      "decision_event_id": "00000000-0000-4000-8000-000000000005",
+      "idempotent_replay": false
+    }
+  },
+  "data": {
+    "list": {
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "status": "accepted",
+          "title": "示例：预算待确认",
+          "severity_code": "high",
+          "customer_id": "00000000-0000-4000-8000-000000000002",
+          "opportunity_id": "00000000-0000-4000-8000-000000000003",
+          "customer_name": "合成示例客户",
+          "opportunity_name": "合成示例商机",
+          "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+          "owner_team_id": "00000000-0000-4000-8000-000000000008",
+          "owner_name": "示例负责人",
+          "team_name": "示例部门",
+          "suggested_action": "与客户财务确认预算安排",
+          "next_action": "与客户财务确认预算安排",
+          "version_no": 4,
+          "evidence": [
+            "合成示例：预算待审批"
+          ],
+          "events": [],
+          "can_resolve": false,
+          "can_decide": true,
+          "current_decision": null,
+          "statusGroup": "open",
+          "signal": {
+            "label": "提醒",
+            "color": "var(--ui-warning)",
+            "background": "var(--ui-warning-soft)",
+            "tone": "yellow",
+            "reason": "风险已接受，仍需关注"
+          },
+          "severity": "高",
+          "severityClass": "high",
+          "statusLabel": "风险已接受，仍未关闭",
+          "customerName": "合成示例客户",
+          "owner": "示例负责人",
+          "team": "示例部门",
+          "customerId": "00000000-0000-4000-8000-000000000002",
+          "opportunityId": "00000000-0000-4000-8000-000000000003",
+          "opportunityName": "合成示例商机",
+          "openedLabel": "—",
+          "resolvedLabel": "—",
+          "resolvedBy": "负责人",
+          "resolutionNote": "未填写解除依据",
+          "nextAction": "与客户财务确认预算安排",
+          "canDecide": true,
+          "canResolve": false,
+          "decisionLabel": "",
+          "decisionStale": false,
+          "decisionTime": "",
+          "historyRows": []
+        }
+      ],
+      "next_cursor": null,
+      "total": 107,
+      "summary": {
+        "total": 111,
+        "open_count": 107,
+        "resolved_count": 4,
+        "overdue_count": 6
+      },
+      "offset": 0,
+      "page_size": 1,
+      "has_more": true,
+      "next_offset": 1
+    },
+    "detail": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "status": "accepted",
+      "title": "示例：预算待确认",
+      "severity_code": "high",
+      "customer_id": "00000000-0000-4000-8000-000000000002",
+      "opportunity_id": "00000000-0000-4000-8000-000000000003",
+      "customer_name": "合成示例客户",
+      "opportunity_name": "合成示例商机",
+      "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+      "owner_team_id": "00000000-0000-4000-8000-000000000008",
+      "owner_name": "示例负责人",
+      "team_name": "示例部门",
+      "suggested_action": "与客户财务确认预算安排",
+      "next_action": "与客户财务确认预算安排",
+      "version_no": 4,
+      "evidence": [
+        "合成示例：预算待审批"
+      ],
+      "events": [],
+      "can_resolve": false,
+      "can_decide": true,
+      "current_decision": null,
+      "statusGroup": "open",
+      "signal": {
+        "label": "提醒",
+        "color": "var(--ui-warning)",
+        "background": "var(--ui-warning-soft)",
+        "tone": "yellow",
+        "reason": "风险已接受，仍需关注"
+      },
+      "severity": "高",
+      "severityClass": "high",
+      "statusLabel": "风险已接受，仍未关闭",
+      "customerName": "合成示例客户",
+      "owner": "示例负责人",
+      "team": "示例部门",
+      "customerId": "00000000-0000-4000-8000-000000000002",
+      "opportunityId": "00000000-0000-4000-8000-000000000003",
+      "opportunityName": "合成示例商机",
+      "openedLabel": "—",
+      "resolvedLabel": "—",
+      "resolvedBy": "负责人",
+      "resolutionNote": "未填写解除依据",
+      "nextAction": "与客户财务确认预算安排",
+      "canDecide": true,
+      "canResolve": false,
+      "decisionLabel": "",
+      "decisionStale": false,
+      "decisionTime": "",
+      "historyRows": []
+    },
+    "afterDecision": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "status": "accepted",
+      "title": "示例：预算待确认",
+      "severity_code": "high",
+      "customer_id": "00000000-0000-4000-8000-000000000002",
+      "opportunity_id": "00000000-0000-4000-8000-000000000003",
+      "customer_name": "合成示例客户",
+      "opportunity_name": "合成示例商机",
+      "owner_user_ref_id": "00000000-0000-4000-8000-000000000007",
+      "owner_team_id": "00000000-0000-4000-8000-000000000008",
+      "owner_name": "示例负责人",
+      "team_name": "示例部门",
+      "suggested_action": "与客户财务确认预算安排",
+      "next_action": "与客户财务确认预算安排",
+      "version_no": 5,
+      "evidence": [
+        "合成示例：预算待审批"
+      ],
+      "events": [
+        {
+          "id": "00000000-0000-4000-8000-000000000005",
+          "event_type": "suggestion_decided",
+          "from_status": "accepted",
+          "to_status": "accepted",
+          "actor_name": "示例负责人",
+          "actor_user_ref_id": "00000000-0000-4000-8000-000000000007",
+          "occurred_at": "2026-10-10T09:00:00+08:00",
+          "payload": {
+            "request_id": "00000000-0000-4000-8000-000000000004",
+            "request": {
+              "decision": "adopt",
+              "note": "本周先联系客户财务确认预算",
+              "version_no": 4,
+              "request_id": "00000000-0000-4000-8000-000000000004"
+            },
+            "decision": "adopt",
+            "note": "本周先联系客户财务确认预算",
+            "risk_version_before": 4,
+            "risk_version_after": 5,
+            "suggested_action": "与客户财务确认预算安排",
+            "evidence": [
+              {
+                "type": "visit",
+                "detail": "合成示例：预算待审批"
+              }
+            ]
+          }
+        }
+      ],
+      "can_resolve": false,
+      "can_decide": true,
+      "current_decision": {
+        "event_id": "00000000-0000-4000-8000-000000000005",
+        "decision": "adopt",
+        "note": "本周先联系客户财务确认预算",
+        "actor_name": "示例负责人",
+        "occurred_at": "2026-10-10T09:00:00+08:00",
+        "risk_version": 5,
+        "is_current": true
+      },
+      "statusGroup": "open",
+      "signal": {
+        "label": "提醒",
+        "color": "var(--ui-warning)",
+        "background": "var(--ui-warning-soft)",
+        "tone": "yellow",
+        "reason": "风险已接受，仍需关注"
+      },
+      "severity": "高",
+      "severityClass": "high",
+      "statusLabel": "风险已接受，仍未关闭",
+      "customerName": "合成示例客户",
+      "owner": "示例负责人",
+      "team": "示例部门",
+      "customerId": "00000000-0000-4000-8000-000000000002",
+      "opportunityId": "00000000-0000-4000-8000-000000000003",
+      "opportunityName": "合成示例商机",
+      "openedLabel": "—",
+      "resolvedLabel": "—",
+      "resolvedBy": "负责人",
+      "resolutionNote": "未填写解除依据",
+      "nextAction": "与客户财务确认预算安排",
+      "canDecide": true,
+      "canResolve": false,
+      "decisionLabel": "已采纳建议",
+      "decisionStale": false,
+      "decisionTime": "2026年10月10日 09:00",
+      "historyRows": [
+        {
+          "id": "00000000-0000-4000-8000-000000000005",
+          "label": "建议确认",
+          "actor": "示例负责人",
+          "time": "2026年10月10日 09:00",
+          "note": "本周先联系客户财务确认预算",
+          "decision": "已采纳"
+        }
+      ]
+    }
+  }
+}

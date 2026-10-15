@@ -1,0 +1,195 @@
+{
+  "scenario": "normal-manager",
+  "account": "ZJL001",
+  "checks": [
+    {
+      "name": "RLS enforced",
+      "passed": true
+    },
+    {
+      "name": "exact approved identity",
+      "passed": true
+    },
+    {
+      "name": "facts use actual role and scope",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "session belongs to ZJL001",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "session belongs to XS002",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 POST /conversations: 201",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 POST /conversations/669e3ab8-4719-47b1-b555-288ea664c6b5/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 POST /conversations/669e3ab8-4719-47b1-b555-288ea664c6b5/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "same message replays same run",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 POST /conversations/669e3ab8-4719-47b1-b555-288ea664c6b5/messages: 409",
+      "passed": true
+    },
+    {
+      "name": "report completed",
+      "passed": true
+    },
+    {
+      "name": "same role card contract",
+      "passed": true
+    },
+    {
+      "name": "no model operations or provider fields in public card",
+      "passed": true
+    },
+    {
+      "name": "formal business and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "one answer and no draft artifact",
+      "passed": true
+    },
+    {
+      "name": "one worker job and receipt",
+      "passed": true
+    },
+    {
+      "name": "real provider final HTTP success in one operation",
+      "passed": true
+    },
+    {
+      "name": "actual platform dispatch and valid final result",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/352451db-f8a8-4261-b0d3-a362ede2f7a2: 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/669e3ab8-4719-47b1-b555-288ea664c6b5/messages: 200",
+      "passed": true
+    },
+    {
+      "name": "private conversation unreadable",
+      "passed": true
+    },
+    {
+      "name": "private report RLS unreadable",
+      "passed": true
+    },
+    {
+      "name": "ZJL001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "669e3ab8-4719-47b1-b555-288ea664c6b5",
+    "run_id": "352451db-f8a8-4261-b0d3-a362ede2f7a2"
+  },
+  "preflight_only": false,
+  "started_at": "2026-09-12T08:19:08.886027+00:00",
+  "facts": {
+    "counts": {
+      "tasks": 49,
+      "visits": 110,
+      "risks": 35,
+      "opportunities": 117
+    },
+    "sha256": "d91584de2785183dd14d873a702a9afe344af0e98a1e784afcced883e39a2d3e",
+    "json_bytes": 242889,
+    "scope_label": "销售部门"
+  },
+  "protected_before": {
+    "crm.customer": "bb26f6bc90924db813ddda92878ef992ea861fd6eaf88efe4b61200dded0c629",
+    "crm.opportunity": "cdb2395d993fe1895b96418521de439e18cfba4b97e1558cc430560c08a3200e",
+    "activity.visit": "a0d1f96413a91eb5cdb8f45c105ba5c66400721934c6ab9017156deed07502ea",
+    "workflow.task": "106581748b12d5643181f58d69929bf851e6f36cc07fe6beddcd0254a3be2d46",
+    "workflow.task_assignee": "c9c1f5a51cf108e5d707002fc533807cd46f6758277edf877270f6c9913a4550",
+    "insight.risk": "5cbdde51080945d2491e45843ff2ad011fb26016ac0cdfd02d577f1e8e7e0dd1",
+    "workflow.notification": "056d0a550803c3964557d6d380578235cd769da2310d2deab9e80edb2eb9a17b"
+  },
+  "status": "succeeded",
+  "elapsed_ms": 27205,
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 26670,
+    "operation_id": "7e6c6f64-1e26-4fd9-a38d-814a0a60f0f6",
+    "platform_run": {
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "transport": {
+        "http_status": null,
+        "first_text_ms": null,
+        "first_body_byte_ms": null,
+        "request_started_ms": 0,
+        "first_data_event_ms": null,
+        "headers_received_ms": null,
+        "stream_completed_ms": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "TimeoutError"
+  },
+  "business_error_code": null,
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "cancelled",
+      "http_status": null,
+      "error_code": "CancelledError",
+      "operation_id": "7e6c6f64-1e26-4fd9-a38d-814a0a60f0f6",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "7e6c6f64-1e26-4fd9-a38d-814a0a60f0f6",
+      "dispatch_suppressed": null
+    }
+  ],
+  "passed": true,
+  "real_business_verified": true,
+  "platform_accepted": false,
+  "new_report_cards": 1,
+  "formal_business_writes": 0,
+  "finished_at": "2026-09-12T08:19:36.520700+00:00"
+}

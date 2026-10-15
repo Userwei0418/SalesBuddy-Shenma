@@ -2,6 +2,8 @@ require('./helpers/business-options');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
 
 test('商机页的查看入口直接打开只读商机详情', () => {
   const js = fs.readFileSync(__dirname + '/../miniprogram/pages/opportunities/index.js', 'utf8');
@@ -37,7 +39,7 @@ test('商机经营首页整合总览、筛选和商机卡片', () => {
   assert.doesNotMatch(wxml, /截至\{\{sourceDate\}\}/);
   assert.doesNotMatch(wxml, /class="workbench-create-row"/);
   assert.match(js, /canCreateOpportunity:\s*can\(session,'opportunity.create'\)/);
-  assert.equal((opportunityCard.match(/class="workbench-filter-item filter-/g) || []).length, 5);
+  assert.equal((opportunityCard.match(/class="workbench-filter-item filter-/g) || []).length, 7);
   assert.match(opportunityCard, /wx:if="\{\{canViewTeam\}\}" class="workbench-filter-item filter-team"/);
   assert.match(opportunityCard, /bindchange="changeExecutionTeam"/);
   assert.match(opportunityCard, /wx:if="\{\{canViewTeam\}\}" class="workbench-filter-item filter-owner"/);
@@ -76,11 +78,27 @@ test('商机经营页移除总监和总经理的客户下发入口与弹层', ()
 test('商机待办和商机风险列表可返回对应商机卡片', () => {
   for (const page of ['tasks', 'risks']) {
     const wxml = fs.readFileSync(`${__dirname}/../miniprogram/pages/${page}/index.wxml`, 'utf8');
-    const js = fs.readFileSync(`${__dirname}/../miniprogram/pages/${page}/index.js`, 'utf8');
+    const filename = path.resolve(__dirname, `../miniprogram/pages/${page}/index.js`);
+    const js = fs.readFileSync(filename, 'utf8');
     assert.match(wxml, /data-opportunity-id="\{\{item\.opportunityId\}\}"/);
     assert.match(wxml, /catchtap="openOpportunity"/);
-    assert.match(js, /pendingOpenCustomerId/);
-    assert.match(js, /pendingOpenOpportunityId/);
-    assert.match(js, /switchTab\(\{ url: "\/pages\/customers\/index" \}\)/);
+    let definition;
+    const actions = [];
+    vm.runInNewContext(js, {
+      Page: value => { definition = value; },
+      require: name => name.endsWith('/apiClient') ? {} : require(path.resolve(path.dirname(filename), name)),
+      wx: {
+        setStorageSync: (key, value) => actions.push(['storage', key, value]),
+        switchTab: ({url}) => actions.push(['switchTab', url]),
+      },
+    });
+    for (const dataset of [{}, {customerId:'c1'}, {opportunityId:'o1'}]) definition.openOpportunity({currentTarget:{dataset}});
+    assert.deepEqual(actions, [], `${page}: incomplete targets do not navigate`);
+    definition.openOpportunity({currentTarget:{dataset:{customerId:'c1',opportunityId:'o1'}}});
+    assert.deepEqual(actions, [
+      ['storage', 'pendingOpenCustomerId', 'c1'],
+      ['storage', 'pendingOpenOpportunityId', 'o1'],
+      ['switchTab', '/pages/customers/index'],
+    ], page);
   }
 });

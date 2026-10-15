@@ -95,13 +95,26 @@ test('商机名单未载入时不清空已有关系；明确空数组才请求�
  form.fde_member_ids=['u1','u1','u2'];assert.deepEqual(opportunity.payload(form,row).fde_member_ids,['u1','u2']);
 });
 
-test('FDE录入只能选择本人参与的商机，切换关联不会进入销售编辑表单',()=>{
- const page=make('pages/visit-confirm/index.js',{app:appFor(fde),wx:{setStorageSync(){}}});page.refresh=()=>{};page.persist=()=>{};
- page.setData({canEditOpportunity:false});
- page.fdeOpportunityChanged({detail:{opportunity:{id:'o1',name:'项目一'},verified:true}});
- assert.equal(page.data.opportunityId,'o1');assert.equal(page.data.fdeOpportunityVerified,true);assert.equal(page.data.opportunityEditing,false);
- page.fdeOpportunityChanged({detail:{cleared:true,verified:false}});
- assert.equal(page.data.opportunityId,'');assert.equal(page.data.fdeOpportunityVerified,false);
+test('FDE使用共享选择器关联服务端授权商机，确认或清空均不进入销售编辑表单',async()=>{
+ for(const role of ['fde','fde_lead']){
+  const calls=[],selected={id:'o1',name:'项目一',customer_id:'c1'};
+  const page=make('pages/visit-confirm/index.js',{app:appFor({...fde,role}),api:{listOpportunities:async query=>{calls.push(query);return {items:[selected],has_more:false,next_offset:1};}},wx:{setStorageSync(){}}});
+  page.refresh=()=>{};page.persist=()=>{};
+  page.setData({isFde:true,canEditOpportunity:false,customerId:'c1',customerConfirmed:true});
+  await page.loadOpportunities();assert.equal(page.data.opportunityError,'');assert.equal(calls.length,1);assert.equal(calls[0].customerId,'c1');
+  assert.deepEqual(Array.from(page.data.opportunityOptions,item=>item.id),['','o1']);
+  page.toggleOpportunityPicker();page.chooseOpportunity({currentTarget:{dataset:{id:'o1'}}});
+  assert.equal(page.data.opportunityId,'');assert.equal(page.data.opportunityPendingId,'o1');
+  page.confirmOpportunityPicker();assert.equal(page.data.opportunityId,'o1');assert.equal(page.data.selectedOpportunity.id,'o1');assert.equal(page.data.opportunityEditing,false);assert.equal(page.data.opportunityPickerOpen,false);
+  // Even a stale injected option must not grant sales edit/create access to FDE.
+  page.data.opportunityOptions.push({id:'__new__',name:'新商机'},{id:'hidden',name:'待核对商机',unverified:true});
+  for(const id of ['__new__','hidden']){
+   page.selectOpportunity({detail:{value:page.data.opportunityOptions.findIndex(item=>item.id===id)}});
+   assert.equal(page.data.opportunityId,'o1');assert.equal(page.data.opportunityEditing,false);
+  }
+  page.toggleOpportunityPicker();page.chooseOpportunity({currentTarget:{dataset:{id:''}}});page.confirmOpportunityPicker();
+  assert.equal(page.data.opportunityId,'');assert.equal(page.data.selectedOpportunity,null);assert.equal(page.data.opportunityEditing,false);
+ }
 });
 
 test('FDE加入/移出是协作通知，不生成待接受任务卡片',()=>{
@@ -136,7 +149,7 @@ test('FDE看板和我的可读取伙伴历史，空客户ID不被拼为null或un
 
 test('协作接口失败与合法零数据区分，团队汇总使用服务端去重结果',async()=>{
  const app=appFor({...fde,role:'fde_lead'});const page=make('components/fde-dashboard/index.js',{kind:'Component',app,api:{getFdeDashboard:async()=>({data_source:'database',summary:{open_acv:1000000,period_visits:1,period_visit_people:2,recognized_amount:null,collection_amount:0},ranking:[{user_id:'u1',open_acv:1000000},{user_id:'u2',open_acv:1000000}],recent_visits:[],members:[]})}});
- page.properties={};page.data.year=2026;await page.load();assert.equal(page.data.summary.openAcvText,'100');assert.equal(page.data.summary.period_visits,1);assert.equal(page.data.summary.period_visit_people,2);assert.equal(page.data.summary.recognizedText,'未登记');assert.equal(page.data.summary.collectionText,'0');
+ page.properties={};page.data.year=2026;await page.load();assert.equal(page.data.summary.openAcvText,'100');assert.equal(page.data.summary.period_visits,1);assert.equal(page.data.summary.period_visit_people,2);assert.equal(page.data.summary.recognizedText,'未登记');assert.equal(page.data.summary.collectionText,'0元');
  const failed=make('components/fde-dashboard/index.js',{kind:'Component',app,api:{getFdeDashboard:async()=>{throw Error('offline');}}});failed.properties={};await failed.load();assert.equal(failed.data.ready,false);assert.equal(failed.data.summary,null);assert.match(failed.data.error,/offline/);
 });
 
@@ -178,13 +191,15 @@ test('FDE接口使用重复季度参数，地图与资产保留scope/member_id�
  for(const req of requests){const url=new URL(req.url);assert.deepEqual(url.searchParams.getAll('quarters'),['1','3']);assert.equal(url.searchParams.get('scope'),'team');assert.equal(url.searchParams.get('member_id'),'person-id');}
  await api.getCustomerMap({scope:'self',member_id:'u'});await api.getCustomerAssets({scope:'self',member_id:'u'});for(const req of requests.slice(2)){const url=new URL(req.url);assert.equal(url.searchParams.get('scope'),'self');assert.equal(url.searchParams.get('member_id'),'u');}
  await api.updateFdeMembers('op1',['u'],7);assert.equal(requests[4].method,'PUT');assert.deepEqual(requests[4].data,{member_ids:['u'],version_no:7});assert.ok(requests[4].header['Idempotency-Key']);
+ await api.refreshCustomerMap({scope:'team',member_ids:['u','v']});const refresh=requests.at(-1),refreshUrl=new URL(refresh.url);
+ assert.equal(refresh.method,'POST');assert.equal(refreshUrl.pathname,'/api/v1/customer-assets/map/refresh');assert.equal(refreshUrl.searchParams.get('scope'),'team');assert.deepEqual(refreshUrl.searchParams.getAll('member_ids'),['u','v']);assert.ok(refresh.header['Idempotency-Key']);
  delete global.wx;
 });
 
 test('负责人钻取其他成员的商机固定成员上下文，主列表通过人员筛选收窄',async()=>{
  const queries=[];
  const app=appFor({...fde,role:'fde_lead',capabilities:{...fde.capabilities,'team.view':true}});
- const page=make('components/fde-projects/index.js',{kind:'Component',app,api:{listOpportunities:async params=>{queries.push(params);return require('./helpers/opportunity-pages')([],params);},getDirectoryMembers:async()=>({items:[{id:'u2',name:'成员乙',role:'fde'}]})}});
+ const page=make('components/fde-projects/index.js',{kind:'Component',app,api:{listOpportunities:async params=>{queries.push(params);return require('./helpers/opportunity-pages')([],params);},getDirectoryMembers:async()=>({teams:[],defaults:{team_id:null},items:[{id:'u2',name:'成员乙',role:'fde',team_ids:[]}]})}});
  page.properties={memberId:'u2',customerId:'',initialScope:'self'};page.setData({scope:'self',year:2026});
  await page.load();assert.equal(queries.length,1);assert.equal(queries[0].scope,'team');assert.equal(queries[0].memberId,'u2');assert.equal(page.data.memberContextLabel,'成员乙');
  assert.equal(typeof page.scope,'undefined');assert.equal(page.data.scope,'team');

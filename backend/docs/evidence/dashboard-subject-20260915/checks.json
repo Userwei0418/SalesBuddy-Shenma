@@ -1,0 +1,46 @@
+{
+  "source_commit": "4bcabf1dad65a56892b52bcabe41e10c0334fa0d",
+  "frontend_tests": {
+    "passed": 30,
+    "failed": 0
+  },
+  "isolated_postgresql": {
+    "passed": 35,
+    "deselected_baseline_failures": 2,
+    "ephemeral_database_and_role_removed": true,
+    "server_stopped": true
+  },
+  "openapi_and_layer_boundary_tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "frontend_static": {
+    "status": "passed",
+    "registered_pages": 26,
+    "json_files": 45,
+    "js_syntax": true
+  },
+  "database_review": {
+    "reviewer": "database_rank_review",
+    "status": "passed_after_fix",
+    "fixed_issue": "FDE team followups now aggregate immutable recording_team_id_snapshot; transfer, multi-team, departure and inactivity regression scenarios passed."
+  },
+  "existing_failures": {
+    "baseline": "29a62fe",
+    "integration": [
+      "test_real_archive_receipt_replay_and_supplement_are_rejected_after_project_exit",
+      "test_history_sql_paging_period_member_and_former_member_summary"
+    ],
+    "fde_profile_suite": 6,
+    "baseline_reproduced": true,
+    "included_in_pass_count": false
+  },
+  "native_visual_acceptance": "pending_user_recompile",
+  "source_hashes": {
+    "database/migrations/V090__dashboard_subject_rankings.sql": "5120a377c6b623b75d85ed336c2344859a4bdb380d539978e182596b336bb7e0",
+    "backend/src/sales_backend/services/dashboard_rankings.py": "7c95bb9a4e667f1b90a9af9a67c067ef194fa560134e90d96a296c36fc0aa2b3",
+    "frontend/miniprogram/pages/bi/index.js": "0fb61f9a31c75db13c9e7e207da1c055d810b6461086cec01d0b99c5d05606bc",
+    "frontend/miniprogram/components/fde-dashboard/index.js": "24b3010121da98fe6659c15f93ae8aa2ef0e87803366ba912dbce32aab2db23a",
+    "frontend/miniprogram/components/dashboard-ranking/index.wxss": "010c9dd0661d16277feae4b1c236285d4560b81c45bab2680ef02798b3f5a2d9"
+  }
+}

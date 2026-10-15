@@ -1,0 +1,221 @@
+{
+  "capability": "chatbi",
+  "case": "blocked",
+  "started_at": "2026-09-12T09:22:12.962130+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "adcbd580462ab5b9d98c72a6ea05a0fa340ef76a3ba5fc20fc84c977c99748bf",
+    "bytes": 485,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 3
+      },
+      "summary": {
+        "type": "dict",
+        "count": 8
+      },
+      "members": {
+        "type": "list",
+        "count": 1
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "545f0723-f916-493d-8931-2040f9578ab8",
+    "provider": "senseaudio",
+    "fallback_reason": "ControlledPlatformBlock",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 1822,
+    "platform_run": {
+      "execution_mode": "filtered_facts",
+      "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+      "actual_snapshot_id": null,
+      "runtime_snapshot_verified": false,
+      "tool_authority_issued": false,
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "test_fault_injected": true,
+      "network_dispatch_suppressed": true,
+      "transport": {
+        "http_status": null,
+        "request_started_ms": null,
+        "headers_received_ms": null,
+        "first_body_byte_ms": null,
+        "first_data_event_ms": null,
+        "first_text_ms": null,
+        "stream_completed_ms": null
+      }
+    }
+  },
+  "result": {
+    "sha256": "21340903e4200cb3e6f1de1441f1a6002cde5a1b4e1bb3815dc040175e63d4f5",
+    "bytes": 382,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "metrics": {
+        "type": "list",
+        "count": 3
+      },
+      "rows": {
+        "type": "list",
+        "count": 0
+      },
+      "scope": {
+        "type": "str"
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 1823,
+  "validation": [
+    {
+      "input": {
+        "sha256": "9c9e19b5b57a14578c25a011772f8e1f0b116dcee140cf8778fe077a4b612220",
+        "bytes": 490,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "metrics": {
+            "type": "list",
+            "count": 3
+          },
+          "rows": {
+            "type": "list",
+            "count": 0
+          },
+          "scope": {
+            "type": "dict",
+            "count": 3
+          },
+          "data_as_of": {
+            "type": "str"
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "21340903e4200cb3e6f1de1441f1a6002cde5a1b4e1bb3815dc040175e63d4f5",
+        "bytes": 382,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "metrics": {
+            "type": "list",
+            "count": 3
+          },
+          "rows": {
+            "type": "list",
+            "count": 0
+          },
+          "scope": {
+            "type": "str"
+          },
+          "data_as_of": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "df394fbf-01aa-4c40-869f-d491f763f4f2",
+      "provider": "agent_platform",
+      "operation_id": "545f0723-f916-493d-8931-2040f9578ab8",
+      "model": "agent:01a09022-c5ff-7562-bd7d-f8d6c74f5486",
+      "attempt": 1,
+      "status": "failed",
+      "started_at": "2026-09-12T09:22:12.976097+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09022-c5ff-7562-bd7d-f8d6c74f5486",
+        "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 684,
+        "input_sha256": "03289fd2a75581ce8debe0a312c1a66f0c6022778067e85c99e6b248ccdc0d86",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": true,
+        "network_dispatch_suppressed": true
+      },
+      "error_type": "ControlledPlatformBlock",
+      "http_status": null,
+      "finished_at": "2026-09-12T09:22:12.976142+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": null,
+          "request_started_ms": null,
+          "headers_received_ms": null,
+          "first_body_byte_ms": null,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "796233cf-311c-4169-9e32-2613a7c04361",
+      "provider": "senseaudio",
+      "operation_id": "545f0723-f916-493d-8931-2040f9578ab8",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:22:12.989407+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:22:14.784147+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": true,
+    "network_dispatch_suppressed": true,
+    "transport": {
+      "http_status": null,
+      "request_started_ms": null,
+      "headers_received_ms": null,
+      "first_body_byte_ms": null,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

@@ -15,7 +15,3 @@
 .handled{font-size:var(--ui-text-small);line-height:1.6;color:var(--ui-secondary)}
 .adopt[disabled],.dismiss[disabled]{border:1px solid var(--ui-line);background:var(--ui-background);color:var(--ui-muted)}
 .actions>.handled{width:100%}
-
-/* Each accepted recipient retains an independent task link. */
-.adopted-tasks{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center}
-.adopted-tasks .done{white-space:normal;text-align:left;overflow-wrap:anywhere}

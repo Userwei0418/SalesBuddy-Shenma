@@ -17,13 +17,17 @@ module.exports={idx:idx,rest:rest,pick:pick};
     <view wx:if="{{archiveWarning}}" class="notice error">{{archiveWarning}}</view>
     <view class="success-actions">
     <button class="v-button primary" bindtap="openVisit"><text>查看本次跟进详情</text><t-icon name="chevron-right" size="36rpx"/></button>
-    <button wx:if="{{!isFde && (advice || adviceBusy || adviceError)}}" class="v-button secondary" bindtap="openAdvice">查看本次待办建议</button>
+    <button wx:if="{{!isFde && archived && canReadVisitAdvice}}" class="v-button secondary" bindtap="openAdvice">查看本次待办建议</button>
     <button class="v-button secondary {{busy ? 'is-disabled' : ''}}" bindtap="openCustomer"><text>查看客户档案</text><t-icon name="chevron-right" size="36rpx"/></button>
     </view>
     </view>
     </sb-result>
   </view>
   <block wx:else>
+    <view wx:if="{{draftNotice}}" class="notice">{{draftNotice}}</view>
+    <view wx:if="{{draftSaveError}}" class="notice error">{{draftSaveError}}</view>
+    <view wx:elif="{{draftSavedAt}}" class="muted">草稿已自动保存在本机</view>
+    <button wx:if="{{editing && (draftNotice || draftSavedAt)}}" class="v-button secondary" disabled="{{busy}}" bindtap="discardSavedDraft">放弃本地草稿</button>
     <sb-summary-card class="hero" title="{{editing ? '补充跟进信息' : flowStep === 'edit' ? '核对拜访记录' : flowStep === 'analyzing' ? 'AI 正在分析' : '查看质检结果'}}" subtitle="{{editing ? customerName : '核对内容 · AI 质检 · 确认保存'}}" />
     <view wx:if="{{errorText}}" class="notice error">{{errorText}}</view>
     <view wx:if="{{!editing}}" class="flow-steps"><view class="flow-step {{flowStep==='edit'?'active':'done'}}"><text>1</text>核对内容</view><view class="step-line"></view><view class="flow-step {{flowStep!=='edit'?'active':''}}"><text>2</text>AI 质检</view><view class="step-line"></view><view class="flow-step"><text>3</text>确认保存</view></view>
@@ -48,12 +52,18 @@ module.exports={idx:idx,rest:rest,pick:pick};
       <view class="optional-field"><view class="field-label">客户类型</view><picker mode="selector" range="{{customerTypeOptions}}" value="{{customerTypeIndex}}" bindchange="selectCustomerType" disabled="{{busy || editing}}"><view class="picker-row {{busy || editing ? 'is-disabled' : ''}}" hover-class="{{busy || editing ? 'none' : 'picker-row-pressed'}}"><text>{{customerTypeLabel}}</text><t-icon wx:if="{{!(busy || editing)}}" name="chevron-down" size="36rpx" class="picker-arrow"/></view></picker></view>
       <view class="optional-field"><view class="field-label">客户名称</view>
         <view wx:if="{{customerConfirmed}}" class="chosen"><view class="chosen-details"><view class="strong">{{customerName}}</view><view class="muted">已在上一页确认关联</view></view></view>
-        <block wx:else><view class="search-box"><sb-search plain value="{{customerQuery}}" placeholder="搜索客户名称" maxlength="{{100}}" disabled="{{busy}}" loading="{{searching}}" bind:change="inputCustomer" bind:clear="inputCustomer"/></view><view wx:if="{{!searching}}" class="muted match-hint">点击匹配结果，确认本次跟进的客户</view><scroll-view scroll-y class="customer-results" wx:if="{{customers.length}}"><view wx:for="{{customers}}" wx:key="id" class="customer-row" hover-class="row-pressed" data-id="{{item.id}}" bindtap="chooseCustomer"><text class="customer-name">{{item.name}}</text><text class="link">确认</text><t-icon name="chevron-right" size="32rpx" class="row-arrow"/></view></scroll-view><view wx:if="{{!searching && !customers.length}}" class="muted">没有找到匹配客户</view></block>
+        <block wx:else>
+          <view class="search-box"><sb-search plain value="{{customerQuery}}" placeholder="搜索客户名称" maxlength="{{100}}" disabled="{{busy}}" loading="{{searching}}" bind:change="inputCustomer" bind:clear="inputCustomer" bind:search="retryCustomerSearch"/></view>
+          <view wx:if="{{!searching && !customerSearchError && customers.length}}" class="muted match-hint">点击匹配结果，确认本次跟进的客户</view>
+          <view wx:if="{{searching}}" class="muted">正在搜索客户…</view>
+          <view wx:elif="{{customerSearchError}}" class="opportunity-error customer-search-error"><text>{{customerSearchError}}</text><t-button variant="outline" bindtap="retryCustomerSearch">重新搜索</t-button></view>
+          <scroll-view scroll-y class="customer-results" wx:elif="{{customers.length}}"><view wx:for="{{customers}}" wx:key="id" class="customer-row" hover-class="row-pressed" data-id="{{item.id}}" bindtap="chooseCustomer"><text class="customer-name">{{item.name}}</text><text class="link">确认</text><t-icon name="chevron-right" size="32rpx" class="row-arrow"/></view></scroll-view>
+          <view wx:elif="{{customerSearchDone}}" class="muted">没有找到匹配客户</view>
+        </block>
       </view>
-      <fde-visit-opportunity wx:if="{{isFde && customerConfirmed && !editing}}" id="fdeVisitOpportunity" customer-id="{{customerId}}" selected-id="{{opportunityId}}" disabled="{{busy}}" bind:change="fdeOpportunityChanged"/>
-      <view wx:if="{{customerConfirmed && (!isFde || editing)}}" class="optional-field"><view class="field-label">商机名称 <text class="optional-tag">选填</text><sb-ai-badge wx:if="{{opportunityAIRecognized}}" class="ai-recognized-tag" state="pending" text="AI 已识别" /></view><view wx:if="{{opportunityAIHint}}" class="ai-opportunity-hint">{{opportunityAIHint}}</view><block wx:if="{{!editing}}"><view class="picker-row" hover-class="picker-row-pressed" bindtap="toggleOpportunityPicker"><text class="picker-value">{{opportunityOptions[opportunityIndex].name}}</text><t-icon name="chevron-down" size="36rpx" class="picker-arrow"/></view>
+      <view wx:if="{{customerConfirmed}}" class="optional-field"><view class="field-label">商机名称 <text class="optional-tag">选填</text><sb-ai-badge wx:if="{{opportunityAIRecognized}}" class="ai-recognized-tag" state="pending" text="AI 已识别" /></view><view wx:if="{{opportunityAIHint}}" class="ai-opportunity-hint">{{opportunityAIHint}}</view><block wx:if="{{!editing}}"><view class="picker-row" hover-class="picker-row-pressed" bindtap="toggleOpportunityPicker"><text class="picker-value">{{opportunityOptions[opportunityIndex].name}}</text><t-icon name="chevron-down" size="36rpx" class="picker-arrow"/></view>
         <view wx:if="{{opportunityLoading && !opportunityPickerOpen}}" class="muted match-hint">正在读取商机…</view><view wx:if="{{opportunityError && !opportunityPickerOpen}}" class="opportunity-error">{{opportunityError}}<text class="link inline-link" hover-class="link-pressed" bindtap="retryOpportunities">重新加载</text></view></block><view wx:else class="readonly-field">{{values.opportunity_name || '未关联商机'}}</view></view>
-      <view wx:if="{{(canCreateOpportunity || canUpdateOpportunity) && !editing && customerConfirmed && opportunityEditing}}" class="inline-opportunity"><opportunity-form visit-context="{{true}}" id="visitOpportunityForm" customer-id="{{customerId}}" existing="{{selectedOpportunity}}" saved-draft="{{opportunityDraft}}" disabled="{{busy}}" bind:change="changeOpportunityForm"/></view>
+      <view wx:if="{{!isFde && (canCreateOpportunity || canUpdateOpportunity) && !editing && customerConfirmed && opportunityEditing}}" class="inline-opportunity"><opportunity-form visit-context="{{true}}" id="visitOpportunityForm" customer-id="{{customerId}}" existing="{{selectedOpportunity}}" saved-draft="{{opportunityDraft}}" disabled="{{busy}}" bind:change="changeOpportunityForm"/></view>
       <view wx:if="{{editing || !opportunityId}}" class="optional-field"><view class="field-label">伙伴名称 <text class="optional-tag">选填</text></view><sb-input class="field-control" layout="stacked" plain value="{{values.partner_name}}" maxlength="{{300}}" placeholder="未涉及伙伴可留空" disabled="{{busy}}" data-key="partner_name" bind:change="inputField"/></view>
       <view wx:elif="{{!opportunityEditing || !(canCreateOpportunity || canUpdateOpportunity)}}" class="optional-field"><view class="field-label">所属伙伴</view><view class="readonly-field">{{linkedPartnerName || '未记录伙伴'}}</view><view class="muted">随关联商机，无需重复填写</view></view>
       <view class="optional-field"><sb-date-picker class="field-control" layout="stacked" plain label="跟进日期" value="{{visitDate}}" placeholder="选择跟进日期" shortcuts="{{['today']}}" disabled="{{busy}}" bind:change="selectVisitDate"/><view wx:if="{{visitDate}}" class="date-clear" hover-class="link-pressed" bindtap="clearVisitDate">清除日期</view></view>
@@ -75,7 +85,7 @@ module.exports={idx:idx,rest:rest,pick:pick};
       <block wx:if="{{canManageAttendance && showColleagues}}"><view class="search-box"><sb-search plain value="{{colleagueQuery}}" placeholder="搜索同事姓名或账号" maxlength="{{100}}" bind:change="inputColleagueQuery" bind:clear="inputColleagueQuery"/></view><t-checkbox-group class="colleague-group" value="{{collaboratorIds}}" disabled="{{busy}}" bind:change="selectColleagues"><scroll-view class="colleagues" scroll-y><t-checkbox icon="rectangle" wx:for="{{colleagues}}" wx:key="id" value="{{item.id}}" label="{{item.name}}"/><view wx:if="{{!colleagues.length}}" class="muted colleague-empty">没有匹配的同事</view></scroll-view></t-checkbox-group></block>
     </view>
     <block wx:if="{{flowStep!=='analyzing'}}">
-      <sb-bottom-bar wx:if="{{editing}}" primary-label="保存补充信息" loading="{{busy}}" bind:primary="saveSupplement" />
+      <sb-bottom-bar wx:if="{{editing}}" primary-label="保存补充信息" disabled="{{draftConflict}}" disabled-reason="请先核对已更新的跟进记录" loading="{{busy}}" bind:primary="saveSupplement" />
       <sb-bottom-bar wx:elif="{{flowStep==='edit'}}" primary-label="{{pendingReviewId ? '继续查看质检' : '下一步 · AI 质检'}}" loading="{{busy}}" secondary-label="保存草稿" secondary-disabled="{{busy}}" bind:primary="review" bind:secondary="saveDraft" />
       <sb-bottom-bar wx:else primary-label="下一步 · 确认保存" disabled="{{!canSubmit}}" disabled-reason="{{blockReason}}" loading="{{busy}}" secondary-label="返回完善" secondary-disabled="{{busy}}" bind:primary="archive" bind:secondary="backToEdit" />
     </block>
@@ -84,7 +94,7 @@ module.exports={idx:idx,rest:rest,pick:pick};
 
 </block>
 
-<sb-sheet visible="{{opportunityPickerOpen && !isFde && !editing && !archived && !accessBlocked}}" title="选择关联商机" description="{{customerName}}" confirmLabel="确定" confirmDisabled="{{busy || !opportunityPendingOption || opportunityPendingOption.unverified}}" bind:confirm="confirmOpportunityPicker" bind:close="closeOpportunityPicker">
+<sb-sheet visible="{{opportunityPickerOpen && !editing && !archived && !accessBlocked}}" title="选择关联商机" description="{{customerName}}" confirmLabel="确定" confirmDisabled="{{busy || !opportunityPendingOption || opportunityPendingOption.unverified}}" bind:confirm="confirmOpportunityPicker" bind:close="closeOpportunityPicker">
   <view slot="header"><sb-search plain value="{{opportunityQuery}}" maxlength="{{100}}" placeholder="搜索该客户下的商机" disabled="{{busy}}" bind:change="searchOpportunities" bind:clear="searchOpportunities"/></view>
   <view class="opportunity-results">
     <t-cell wx:for="{{opportunityOptions}}" wx:key="id" title="{{item.name}}" description="{{item.unverified ? '待核对，暂不可选' : ''}}" hover="{{!item.unverified}}" data-id="{{item.id}}" right-icon="{{opportunityPendingOption && opportunityPendingOption.id === item.id ? 'check' : ''}}" bind:click="chooseOpportunity"/>
@@ -97,5 +107,12 @@ module.exports={idx:idx,rest:rest,pick:pick};
 
 <sb-sheet visible="{{!isFde && archived && showAdvice}}" title="本次拜访待办建议" confirmLabel="完成，稍后再看" cancelLabel="" bind:confirm="closeAdvice" bind:close="closeAdvice">
   <view slot="header" class="advice-header" catchtouchstart="startAdviceDrag" catchtouchmove="stopAdviceTap" catchtouchend="endAdviceDrag" catchtouchcancel="cancelAdviceDrag"><view class="muted">拜访已保存，是否创建待办由你决定</view><sb-ai-badge state="advice"/></view>
-  <view wx:if="{{adviceBusy}}" class="sheet-status">正在根据本次拜访整理建议…</view><view wx:elif="{{adviceError}}" class="sheet-status">{{adviceError}}<button class="v-button secondary" bindtap="loadAdvice">重新获取建议</button></view><block wx:elif="{{advice}}"><view class="advice-summary">{{advice.summary}}</view><view wx:if="{{!advice.suggestions.length}}" class="sheet-status">本次没有需要补充的待办建议</view><view wx:for="{{advice.suggestions}}" wx:key="id" class="advice-item"><view class="field-label advice-title">{{index+1}}. {{item.title}}</view><view class="muted">{{item.evidence}}</view><view class="advice-action">{{item.action}}</view><advice-actions analysis-id="{{advice.id}}" suggestion="{{item}}" bind:changed="reloadAdvice"/></view></block>
+  <view wx:if="{{adviceBusy}}" class="sheet-status">正在读取或提交本次建议…</view>
+  <view wx:elif="{{adviceError}}" class="sheet-status">{{adviceError}}</view>
+  <view wx:elif="{{adviceStatus==='queued' || adviceStatus==='running'}}" class="sheet-status">建议正在后台分析，可稍后刷新；也可从拜访详情的「待办建议」查看。</view>
+  <view wx:elif="{{adviceStatus==='stale'}}" class="sheet-status">资料或分析配置已变化，请重新生成建议。</view>
+  <block wx:elif="{{advice && adviceStatus==='ready'}}"><view class="advice-summary">{{advice.summary}}</view><view wx:if="{{!advice.suggestions.length}}" class="sheet-status">本次没有需要补充的待办建议</view><view wx:for="{{advice.suggestions}}" wx:key="id" class="advice-item"><view class="field-label advice-title">{{index+1}}. {{item.title}}</view><view class="muted">{{item.evidence}}</view><view class="advice-action">{{item.action}}</view><advice-actions analysis-id="{{advice.id}}" suggestion="{{item}}" bind:changed="reloadAdvice"/></view></block>
+  <view wx:else class="sheet-status">尚未生成本次待办建议</view>
+  <button wx:if="{{!adviceBusy && canReadVisitAdvice}}" class="v-button secondary" bindtap="reloadAdvice">刷新状态</button>
+  <button wx:if="{{!adviceBusy && canReadVisitAdvice && canSuggestVisitTasks && adviceStatus!=='queued' && adviceStatus!=='running'}}" class="v-button secondary" bindtap="loadAdvice">{{adviceStatus==='ready' || adviceStatus==='stale' ? '重新生成建议' : '生成建议'}}</button>
 </sb-sheet>

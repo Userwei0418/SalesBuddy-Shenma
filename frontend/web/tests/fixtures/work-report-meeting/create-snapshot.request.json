@@ -1,0 +1,12 @@
+{
+  "facts_contract": "work_report.meeting_facts.v1",
+  "period": {
+    "kind": "week",
+    "anchor_date": "2026-10-10",
+    "timezone": "Asia/Shanghai"
+  },
+  "scope": {
+    "kind": "managed_team",
+    "team_id": "00000000-0000-0000-0000-000000000010"
+  }
+}

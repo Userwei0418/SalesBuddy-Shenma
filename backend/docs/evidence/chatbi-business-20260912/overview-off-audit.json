@@ -1,0 +1,49 @@
+{
+  "checked_at": "2026-09-11T17:54:29.302606+00:00",
+  "run_id": "603f715b-c095-48a7-b78a-b9425a249b89",
+  "scenario": "off",
+  "checks": [
+    {
+      "name": "restricted role, no RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "successful run",
+      "passed": true
+    },
+    {
+      "name": "one persisted assistant",
+      "passed": true
+    },
+    {
+      "name": "one queued business job",
+      "passed": true
+    },
+    {
+      "name": "original code path retained",
+      "passed": true
+    },
+    {
+      "name": "one real original HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "answer matches current actor-scoped open task aggregate",
+      "passed": true
+    }
+  ],
+  "route": null,
+  "attempts": [
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "603f715b-c095-48a7-b78a-b9425a249b89",
+      "fault_injected": null,
+      "dispatch_suppressed": null
+    }
+  ],
+  "facts_verification": "same restricted actor aggregate at audit time; values redacted",
+  "passed": true
+}

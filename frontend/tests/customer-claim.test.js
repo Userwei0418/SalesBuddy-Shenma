@@ -48,7 +48,7 @@ function pageFor(api) {
   const wx = { showToast: x => toasts.push(x.title), showModal: x => x.success({ confirm: true }),
     setStorageSync: (k, v) => store.set(k, v) };
   vm.runInNewContext(fs.readFileSync(__dirname + '/../miniprogram/pages/customer-claim/index.js', 'utf8'), {
-    require: name => name.includes('apiClient') ? api : { normalizeCustomerSummary: x => x },
+    require: name => name.includes('apiClient') ? api : name.includes('customerIdentity') ? require('../miniprogram/utils/customerIdentity') : { normalizeCustomerSummary: x => x },
     Page: x => definition = x, wx, getApp: () => app,
     setTimeout: callback => { timers.set(++timerId, callback); return timerId; },
     clearTimeout: id => timers.delete(id),
@@ -59,6 +59,32 @@ function pageFor(api) {
     const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(callback => callback());
   } };
 }
+
+test('导航搜索词只预填已解码查询，命中客户也不自动选择或申请', async () => {
+  const calls = []; let claims = 0;
+  const { page } = pageFor({ listCustomerClaimPool: async options => {
+    calls.push({ ...options }); return directory([customer('existing')]);
+  }, claimCustomer: async () => { claims++; } });
+  await page.onLoad({ q: '  客户 %26 & +  ', id: 'existing', claim: 'true' });
+  page.onShow();
+  assert.deepEqual(calls, [{ q: '客户 %26 & +', pageSize: 50, offset: 0 }]);
+  assert.equal(page.data.query, '客户 %26 & +');
+  assert.equal(page.data.selectedCustomerId, ''); assert.equal(page.selectedCustomer, null);
+  assert.equal(page.data.submitting, false); assert.equal(claims, 0);
+});
+
+test('导航搜索忽略非字符串并限制100个字符；拒绝访问和换号不继承预填词', async () => {
+  const calls = [];
+  const { page, app } = pageFor({ listCustomerClaimPool: async options => {
+    calls.push(options.q); return directory([]);
+  } });
+  await page.onLoad({ q: ['不能作为查询'] }); assert.equal(calls.at(-1), '');
+  await page.onLoad({ q: '客😀'.repeat(60) });
+  assert.equal([...calls.at(-1)].length, 100); assert.equal(calls.at(-1), '客😀'.repeat(50));
+  app.globalData.session.userId = 'other'; await page.onShow(); assert.equal(calls.at(-1), '');
+  app.guardPage = () => false;
+  const count = calls.length; await page.onLoad({ q: '不可见查询' }); assert.equal(calls.length, count);
+});
 
 test('首次加载与onShow不重复请求；同账号返回保留搜索、刷新审批状态并清除选择', async () => {
   const calls = []; let approved = false;
@@ -312,4 +338,47 @@ test('行业被移除后刷新同时移除旧筛选，不能显示全部行业�
   removed = true; await page.refreshCustomers();
   assert.equal(page.data.industry, ''); assert.equal(page.data.industryIndex, 0);
   assert.equal(page.data.hasFilters, false); assert.equal(calls.at(-1).industry, undefined);
+});
+
+test('认领写入跨隐藏恢复仍保持锁，旧名单先返回后必须在写入完成时回读',async()=>{
+ for(const outcome of ['success','unknown']){
+  const pending=deferred();let committed=false,reads=0,posts=0;
+  const h=pageFor({listCustomerClaimPool:async()=>{reads++;return directory([{...customer('race'),claim_status:committed?'pending':null,can_claim:!committed}]);},
+   claimCustomer:()=>{posts++;return pending.promise;}});
+  await h.page.loadCustomers();h.page.selectCustomer({currentTarget:{dataset:{id:'race'}}});h.page.confirmClaim();
+  h.page.onHide();await h.page.onShow();
+  assert.equal(h.page.data.submitting,true);assert.equal(h.page.data.customers[0].claimEligible,true);
+  h.page.selectCustomer({currentTarget:{dataset:{id:'race'}}});h.page.confirmClaim();assert.equal(posts,1);
+  committed=true;
+  if(outcome==='success')pending.resolve({status:'pending'});else pending.reject(Error('网络结果未知'));
+  await tick();
+  assert.equal(reads,3);assert.equal(posts,1);assert.equal(h.page.data.submitting,false);
+  assert.equal(h.page.data.customers[0].claimEligible,false);assert.equal(h.page.data.customers[0].claimLabel,'申请待审批');
+  assert.equal(h.toasts.length,0);
+ }
+});
+
+test('认领确认框重复回调不重复提交，隐藏后的未提交确认作废',async()=>{
+ const pending=deferred(),dialogs=[];let posts=0;
+ const h=pageFor({listCustomerClaimPool:async()=>directory([customer('c')]),claimCustomer:()=>{posts++;return pending.promise;}});
+ h.wx.showModal=options=>dialogs.push(options);
+ await h.page.loadCustomers();h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});h.page.confirmClaim();h.page.confirmClaim();assert.equal(dialogs.length,1);
+ h.page.onHide();dialogs[0].success({confirm:true});assert.equal(posts,0);
+ await h.page.onShow();h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});h.page.confirmClaim();
+ dialogs[1].success({confirm:true});dialogs[1].success({confirm:true});assert.equal(posts,1);
+ h.app.globalData.session.userId='other';pending.resolve({status:'pending'});await tick();assert.equal(h.toasts.length,0);
+});
+
+ test('企业身份筛选在服务端分页前生效，翻页保留条件且重置回全部',async()=>{
+  const calls=[];const h=pageFor({listCustomerClaimPool:async q=>{calls.push(q);return directory(Array.from({length:50},(_,i)=>({...customer(i+q.offset),business_identities:['partner']})),100,q.offset);}});
+  await h.page.onLoad();await h.page.changeBusinessIdentity({detail:{value:2}});assert.equal(calls.at(-1).businessIdentity,'partner');assert.equal(calls.at(-1).offset,0);
+  await h.page.loadMore();assert.equal(calls.at(-1).businessIdentity,'partner');assert.equal(calls.at(-1).offset,50);assert.equal(h.page.data.total,100);
+  await h.page.clearFilters();assert.equal(calls.at(-1).businessIdentity,undefined);assert.equal(h.page.data.businessIdentity,'all');
+ });
+test('企业目录逐条可读标志控制打开档案，不借目录权限打开受限详情',()=>{
+ const h=pageFor({}),urls=[];h.wx.navigateTo=o=>urls.push(o.url);h.page.setData({customers:[{id:'allowed',can_read_customer:true},{id:'denied',can_read_customer:false},{id:'unknown'}]});
+ h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.equal(urls.length,0);h.page.setData({canReadCustomer:true});
+ for(const id of ['denied','unknown','missing'])h.page.openCustomerDetail({currentTarget:{dataset:{id}}});assert.equal(urls.length,0);
+ h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.deepEqual(urls,['/pages/customer-detail/index?id=allowed']);
+ h.page.setData({canReadCustomer:false});h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.equal(urls.length,1);
 });

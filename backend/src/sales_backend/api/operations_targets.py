@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sales_backend.api.dependencies import RequestIdentity, get_database
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_management_identity
+from sales_backend.contracts.management_options import TargetManagementOptions
 from sales_backend.contracts.targets import (
     TargetBatchSave,
     TargetDecision,
@@ -24,6 +25,15 @@ from sales_backend.services.targets import read_targets, save_target, save_targe
 
 router = APIRouter(prefix="/api/v1/console", tags=["Operations targets"])
 repository = TargetRepository()
+
+
+@router.get("/targets/options", response_model=TargetManagementOptions)
+async def options(
+    identity: RequestIdentity = Depends(get_management_identity), database: Database = Depends(get_database),
+) -> dict:
+    """Target subjects within both the management and target-read scopes."""
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await repository.management_options(connection, identity.actor)
 
 
 @router.get("/targets")

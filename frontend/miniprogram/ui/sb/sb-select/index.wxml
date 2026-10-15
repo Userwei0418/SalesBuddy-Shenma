@@ -8,7 +8,7 @@
   <text wx:elif="{{help}}" class="sb-form-tips">{{help}}</text>
 </view>
 <root-portal>
-<t-picker visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" auto-close="{{false}}" bind:cancel="onCancel" bind:confirm="onConfirm">
+<t-picker wx:if="{{open}}" data-picker-epoch="{{pickerEpoch}}" visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" auto-close="{{false}}" bind:cancel="onCancel" bind:confirm="onConfirm" bind:close="onClose">
   <t-picker-item options="{{columns}}" />
 </t-picker>
 </root-portal>

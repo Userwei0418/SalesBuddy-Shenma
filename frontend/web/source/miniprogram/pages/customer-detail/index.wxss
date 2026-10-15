@@ -1,0 +1,125 @@
+@import "../../styles/customer-identity.wxss";
+@import "../../styles/opportunity-edit-entry.wxss";
+@import "../../styles/detail-summary.wxss";
+page{background:var(--ui-background)}
+/* 按下态：行与卡片压灰底，文字链接降透明度 */
+.row-pressed{background:var(--ui-neutral-soft)!important}
+.is-pressed{opacity:.7}
+.detail-page{min-height:100vh;padding:24rpx 32rpx calc(200rpx + constant(safe-area-inset-bottom));padding:24rpx 32rpx calc(200rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:var(--ui-background);color:var(--ui-ink)}
+
+.detail-context-links{display:flex;gap:var(--ui-space-2);margin:24rpx 0}
+.detail-context-link{flex:1;height:var(--ui-touch-target);display:flex;align-items:center;justify-content:center;gap:4rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink);font-size:14px}
+
+/* 象限判断依据 */
+.score-card{padding:32rpx}
+.card-heading,.opportunity-top,.opportunity-meta,.section-heading{display:flex;align-items:center;justify-content:space-between}
+.card-eyebrow{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.card-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.score-status{height:20px;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.quadrant-copy{margin-top:16rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}
+.score-row{margin-top:32rpx}
+.score-label{display:flex;align-items:center;justify-content:space-between;color:var(--ui-ink);font-size:14px}
+.score-label label{color:var(--ui-ink);font-size:14px;font-weight:600}
+.score-track{height:12rpx;margin-top:12rpx;overflow:hidden;border-radius:999px;background:var(--ui-neutral-soft)}
+.score-track view,.relation .score-track view{height:100%;border-radius:999px;background:var(--ui-primary)}
+.evidence-list{display:flex;gap:12rpx;flex-wrap:wrap;margin-top:16rpx}
+.evidence-list>text{height:20px;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.rule-note{margin-top:32rpx;padding-top:24rpx;border-top:1px solid var(--ui-line);color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.6}
+
+/* 切换 */
+.detail-tabs{margin-top:32rpx}
+.tab-content{margin-top:24rpx}
+
+/* 经营概览 */
+.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:32rpx 8rpx}
+.metric-grid>view{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--ui-line)}
+.metric-grid>view:last-child{border-right:0}
+.metric-grid text{max-width:100%;overflow:hidden;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;white-space:nowrap;text-overflow:ellipsis}
+.metric-grid text.pending{color:var(--ui-muted);font-size:14px;font-weight:400}
+.metric-grid label{margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+
+.ai-card{margin-top:24rpx;padding:32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.ai-card.is-advice{box-shadow:inset 0 3px 0 var(--ui-primary)} /* 顶部 3px 主色条：只在显示「AI 建议，仅供参考」时画；FDE 看到的是已记录的下一步行动，不画 */
+.ai-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8rpx 16rpx} /* 320 宽放不下标题加 AI 标识时，标识整体换到下一行，副标题不再被挤出一个字的尾巴 */
+.ai-head>view:first-child view{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.ai-head>view:first-child text{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.ai-action-title{margin-top:16rpx;color:var(--ui-ink);font-size:14px;line-height:1.6}
+.ai-link{display:flex;align-items:center;justify-content:space-between;min-height:var(--ui-touch-target);margin-top:16rpx;border-top:1px solid var(--ui-line);color:var(--ui-primary);font-size:14px}
+
+.section-heading{margin:48rpx 0 16rpx}
+.section-heading>text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.section-heading label{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.opportunity-card{padding:32rpx}
+.opportunity-top{align-items:flex-start;gap:16rpx}
+.opportunity-name{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.opportunity-stage{display:inline-flex;height:20px;margin-top:8rpx;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.opportunity-amount{flex:0 0 auto;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.opportunity-progress{height:12rpx;margin-top:24rpx;overflow:hidden;border-radius:999px;background:var(--ui-neutral-soft)}
+.opportunity-progress view{height:100%;border-radius:999px;background:var(--ui-primary)}
+.opportunity-meta{margin-top:12rpx;gap:16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.opportunity-list-card+.opportunity-list-card{margin-top:16rpx}
+.opportunity-empty{color:var(--ui-secondary);font-size:14px;text-align:center}
+
+.contact-list{padding:0 32rpx}
+.contact-row{display:flex;align-items:center;gap:20rpx;padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.contact-row:last-child{border-bottom:0}
+.contact-avatar{width:64rpx;height:64rpx;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:var(--ui-radius-control);color:var(--ui-primary);background:var(--ui-selected);font-size:14px;font-weight:600}
+.contact-main{flex:1;min-width:0}
+.contact-main>view{color:var(--ui-ink);font-size:14px;font-weight:600}
+.contact-main>view text{margin-left:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);font-weight:400}
+.contact-main label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.strength{flex:0 0 auto;height:20px;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.strength-attention{color:var(--ui-warning);background:var(--ui-warning-soft)}
+.strength-missing{color:var(--ui-danger);background:var(--ui-danger-soft)}
+
+/* 拜访记录 */
+.timeline{padding:0 32rpx}
+.timeline-item{display:flex;gap:20rpx}
+.timeline-rail{position:relative;width:20rpx;display:flex;flex-direction:column;align-items:center;flex:0 0 auto}
+.timeline-rail view{z-index:1;width:16rpx;height:16rpx;margin-top:34rpx;border-radius:50%;background:var(--ui-primary)}
+.timeline-rail text{position:absolute;top:50rpx;bottom:-34rpx;width:1px;background:var(--ui-line)}
+.timeline-item:last-child .timeline-rail text{display:none}
+.timeline-main{flex:1;min-width:0;padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.timeline-item:last-child .timeline-main{border-bottom:0}
+.timeline-date{display:flex;align-items:center;justify-content:space-between;gap:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.timeline-date>text{color:var(--ui-primary);font-size:var(--ui-text-small)}
+.timeline-title{margin-top:8rpx;color:var(--ui-ink);font-size:14px;font-weight:600}
+.timeline-meta{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:12rpx}
+.timeline-meta>text{height:20px;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.timeline-meta label{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.timeline-expanded{margin-top:16rpx;border-top:1px solid var(--ui-line)}
+.timeline-expanded>view{padding:16rpx 0;border-bottom:1px solid var(--ui-line);color:var(--ui-secondary);font-size:14px}
+.timeline-expanded>view:last-child{border-bottom:0}
+.timeline-expanded text,.timeline-expanded label{display:block}
+.timeline-expanded text{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.timeline-expanded label{margin-top:4rpx;color:var(--ui-ink);font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.timeline-expanded .next label{font-weight:600}
+.supplement-button{display:flex;align-items:center;justify-content:center;height:var(--ui-touch-target);margin:24rpx 0 0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-primary);font-size:14px;font-weight:600;line-height:1.4}
+.supplement-button::after{border:0}
+
+/* 商机进展 */
+.opportunity-edit-entry{display:flex;align-items:center;justify-content:space-between;min-height:96rpx;margin-bottom:16rpx;padding:0 32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface);color:var(--ui-primary);font-size:14px;font-weight:600}
+.opportunity-detail{padding:32rpx}
+.opportunity-detail-name{margin-top:8rpx;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.stage-pipeline{display:flex;justify-content:space-between;margin-top:32rpx}
+.stage-pipeline>view{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.stage-pipeline>view::after{content:"";position:absolute;z-index:0;left:50%;right:-50%;top:10rpx;height:1px;background:var(--ui-line)}
+.stage-pipeline>view:last-child::after{display:none}
+.stage-pipeline text{z-index:1;width:20rpx;height:20rpx;box-sizing:border-box;border:1px solid var(--ui-line);border-radius:50%;background:var(--ui-surface)}
+.stage-pipeline label{margin-top:12rpx;text-align:center} /* 窄屏阶段名折行时居中，和作战地图详情浮层一致 */
+.stage-pipeline .done text,.stage-pipeline .current text{border-color:var(--ui-primary);background:var(--ui-primary)}
+.stage-pipeline .done::after{background:var(--ui-primary)}
+.stage-pipeline .current label{color:var(--ui-primary);font-weight:600}
+.detail-rows{margin-top:32rpx;border-top:1px solid var(--ui-line)}
+.detail-rows view{display:flex;justify-content:space-between;gap:24rpx;padding:20rpx 0;border-bottom:1px solid var(--ui-line);font-size:14px}
+.detail-rows view:last-child{border-bottom:0}
+.detail-rows text{flex-shrink:0;color:var(--ui-secondary)}
+.detail-rows label{color:var(--ui-ink);text-align:right;overflow-wrap:anywhere}
+.historical-period-records{margin-top:32rpx}
+.historical-period-note{margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}
+.historical-period-records .detail-rows{margin-top:16rpx}
+.historical-period-records label{text-align:right;overflow-wrap:anywhere}
+.risk-card{margin-top:24rpx;padding:32rpx}
+.risk-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.risk-head>text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.risk-card>view>text{display:block;margin-top:12rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}

@@ -12,7 +12,7 @@ import httpx
 import pytest
 from fastapi import FastAPI
 
-from sales_backend.api import visit_imports
+from sales_backend.api import upload_admission, visit_imports
 from sales_backend.api.dependencies import get_database, get_identity
 from sales_backend.services import visit_upload
 from sales_backend.services.visit_upload import LocalVisitImportStorage, UploadRejected, VisitUploadService
@@ -56,18 +56,40 @@ class MemoryDatabase:
                 raise self.after_commit
 
 
+class MemoryQuota:
+    def __init__(self, database):
+        self.events = []
+
+    async def reserve(self, actor, upload, location):
+        self.events.append('reserve')
+        upload.quota_commit_may_have_started = upload.quota_reserved = True
+
+    async def mark_external(self, actor, upload):
+        self.events.append('external')
+
+    async def fence(self, actor, upload):
+        self.events.append('fence')
+        return True
+
+    async def release(self, actor, upload):
+        assert not upload.path.exists()  # Original removal must precede release.
+        self.events.append('release')
+        return True
+
+
 @pytest.fixture
 def harness(monkeypatch, tmp_path):
     async def allowed(*args):
         pass
 
-    async def register(connection, actor, import_id, filename, path, size):
+    async def register(connection, actor, import_id, filename, path, size, location=None):
         assert path.read_bytes() and path.stat().st_size == size
         assert not list(tmp_path.glob("*.part"))
         connection.rows.append(dict(id=import_id, filename=filename, path=path, size=size))
 
     monkeypatch.setattr(visit_upload, "require_capability", allowed)
     monkeypatch.setattr(visit_upload, "create_import", register)
+    monkeypatch.setattr(visit_upload, "TenantStorageQuota", MemoryQuota)
     database = MemoryDatabase()
     service = VisitUploadService(database, LocalVisitImportStorage(tmp_path))
     return service, database
@@ -221,6 +243,15 @@ async def test_http_upload_keeps_202_and_validation_contract(harness, tmp_path, 
     _, database = harness
     monkeypatch.setattr(visit_imports, "IMPORT_ROOT", tmp_path)
     monkeypatch.setattr(visit_imports, "MaterialStorage", lambda: None)
+    # This test isolates the upload service; admission/auth is covered separately.
+    async def admitted(request):
+        return SimpleNamespace(actor=SimpleNamespace(workspace_id="synthetic"))
+
+    async def revalidated(request, identity):
+        pass
+
+    monkeypatch.setattr(upload_admission, "_authorize_upload", admitted)
+    monkeypatch.setattr(upload_admission, "_revalidate_upload", revalidated)
     app = FastAPI()
     app.include_router(visit_imports.router)
     app.dependency_overrides[get_identity] = lambda: SimpleNamespace(actor=None)
@@ -264,3 +295,64 @@ async def test_cancel_during_publish_waits_for_file_io_then_cleans_its_file(harn
         if not task.done():
             task.cancel()
             await asyncio.gather(task, return_exceptions=True)
+
+
+async def test_quota_rejection_cleans_before_any_external_put(harness, tmp_path):
+    from unittest.mock import AsyncMock
+    service, database = harness
+    service.registry = SimpleNamespace(describe=AsyncMock(return_value={'driver':'s3'}), prepare=AsyncMock())
+    service.quota.reserve = AsyncMock(side_effect=visit_upload.StorageQuotaExceeded('额度不足'))
+    with pytest.raises(UploadRejected) as error:
+        await service.upload(None, source=Source(), filename='x.txt')
+    assert error.value.status_code == 409
+    service.registry.prepare.assert_not_awaited()
+    assert not database.rows and not list(tmp_path.iterdir())
+
+
+async def test_unknown_quota_commit_preserves_original_and_never_releases(harness, tmp_path):
+    service, database = harness
+    async def reserve(actor, upload, location):
+        upload.quota_commit_may_have_started = True
+        raise ConnectionError('quota commit unknown')
+    service.quota.reserve = reserve
+    with pytest.raises(ConnectionError):
+        await service.upload(None, source=Source(), filename='x.txt')
+    assert len(list(tmp_path.glob('*.txt'))) == 1
+    assert not database.rows and 'release' not in service.quota.events
+
+
+@pytest.mark.parametrize('stage', ['marker', 'put', 'register'])
+async def test_external_uncertainty_keeps_original_and_capacity(harness, tmp_path, stage):
+    from unittest.mock import AsyncMock
+    service, database = harness
+    async def prepare(*args, **kwargs):
+        assert service.quota.events == ['reserve', 'external']
+        if stage == 'put':
+            raise TimeoutError('PUT unknown')
+    service.registry = SimpleNamespace(describe=AsyncMock(return_value={'driver':'s3'}), prepare=prepare,
+        register=AsyncMock(side_effect=RuntimeError('register failed')))
+    if stage == 'marker':
+        service.quota.mark_external = AsyncMock(side_effect=ConnectionError('marker commit unknown'))
+    with pytest.raises((ConnectionError, TimeoutError, RuntimeError)):
+        await service.upload(None, source=Source(), filename='x.txt')
+    assert not database.rows and len(list(tmp_path.glob('*.txt'))) == 1
+    assert 'release' not in service.quota.events
+
+
+async def test_known_rollback_removes_file_before_releasing_capacity(harness, tmp_path, monkeypatch):
+    from unittest.mock import AsyncMock
+    service, _ = harness
+    monkeypatch.setattr(visit_upload, 'create_import', AsyncMock(side_effect=ValueError('failed')))
+    with pytest.raises(ValueError):
+        await service.upload(None, source=Source(), filename='x.txt')
+    assert service.quota.events == ['reserve', 'fence', 'release'] and not list(tmp_path.iterdir())
+
+
+async def test_recovered_original_is_not_removed_by_original_uploader(harness, tmp_path, monkeypatch):
+    from unittest.mock import AsyncMock
+    service, _=harness
+    # Another transaction recovered and registered this same original.
+    service.quota.fence=AsyncMock(return_value=False)
+    monkeypatch.setattr(visit_upload,'create_import',AsyncMock(side_effect=ValueError('already recovered')))
+    with pytest.raises(ValueError): await service.upload(None,source=Source(),filename='x.txt')
+    assert len(list(tmp_path.glob('*.txt')))==1 and 'release' not in service.quota.events

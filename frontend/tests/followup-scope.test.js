@@ -21,7 +21,7 @@ const opportunities = [
   { id: 'oa', owner_id: 'a', owner_name: '销售甲', team_id: 'north-id', team_name: '北区', amount: 10000 },
   { id: 'ob', owner_id: 'b', owner_name: '销售乙', team_id: 'east-id', team_name: '东区', amount: 20000 },
 ].map(item => ({ ...item, expected_close_date: closeDate, status: 'open', probability: 30, partner_name: null }));
-const data = (scope, items = visits, deals = opportunities) => ({ data_source: 'database', scope, selection:{member_id:scope==='self'?'a':null,team_groups:scope==='self'?[]:['north_east','south_hkmo']}, opportunities: deals, recent_visits: items, quarter_forecasts: [], quarter_actuals: [] });
+const data = (scope, items = visits, deals = opportunities) => ({ contract_version:4,forecast_basis:'latest_sales_input',data_source: 'database', scope, selection:{member_id:scope==='self'?'a':null,team_groups:scope==='self'?[]:['north_east','south_hkmo']}, opportunities: deals, recent_visits: items, quarter_forecasts: [], quarter_actuals: [] });
 const event = index => ({ currentTarget: { dataset: { index } }, detail: { value: index } });
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
@@ -35,8 +35,8 @@ function pageWith(role = 'supervisor', overrides = {}) {
       dashboardCalls.push(personal);
       return personal ? data('self', state.visits.filter(item => item.recorder_id === 'a'), state.opportunities.filter(item => item.owner_id === 'a')) : data('workspace', state.visits, state.opportunities);
     },
-    getDashboardRankings:async q=>({data_source:'database',contract_version:2,scope:q.personal?'peer':'company_teams',selection:{personal:q.personal,member_id:q.member_id||'a',team_groups:q.team_groups||[]},opportunity_acv:{rows:[],groups:[]},followup:{calculation:q.personal?'personal':'team_followup_per_capita_v1',rows:[],groups:[]},region:{rows:[],groups:[]},active_opportunities:{rows:[],groups:[]}}),
-    getDashboardOptions:async()=>({members:state.members,team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
+    getDashboardRankings:async q=>({data_source:'database',contract_version:2,year:q.year,quarters:Array.from(q.quarters),scope:q.personal?'peer':'company_teams',selection:{personal:q.personal,member_id:q.member_id||'a',team_groups:q.team_groups||[]},opportunity_acv:{rows:[],groups:[]},followup:{calculation:q.personal?'personal':'team_followup_per_capita_v1',rows:[],groups:[]},region:{rows:[],groups:[]},active_opportunities:{rows:[{user_id:q.member_id||'a',value:0}],groups:(q.team_groups||[]).map(code=>({code,value:0}))}}),
+    getDashboardOptions:async()=>({members:state.members.map(row=>({...row,team_ids:[row.team_id]})),teams:state.members.map(row=>({id:row.team_id,name:row.team})),defaults:{team_id:'north-id'},team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
     getDirectoryMembers: async () => { directoryCalls += 1; return { items: state.members }; },
     ...overrides,
   };

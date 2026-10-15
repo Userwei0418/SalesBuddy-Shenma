@@ -1,0 +1,7 @@
+.sb-tag { display: inline-flex; align-items: center; padding: 0 var(--ui-space-2); border-radius: 4px; /* 飞书标签圆角 small 4px */ font-size: var(--ui-text-small); line-height: 20px; white-space: nowrap; font-weight: 400; }
+.sb-tag-good { background: var(--ui-success-soft); color: var(--ui-success); }
+.sb-tag-watch { background: var(--ui-warning-soft); color: var(--ui-warning); }
+.sb-tag-bad { background: var(--ui-danger-soft); color: var(--ui-danger); }
+.sb-tag-pending, .sb-tag-unset { background: var(--ui-neutral-soft); color: var(--ui-neutral); }
+.sb-tag-unset { border: 1px dashed var(--ui-line); }
+.sb-tag-reason { color: var(--ui-muted); font-weight: 400; }

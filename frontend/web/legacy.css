@@ -1,0 +1,29 @@
+/* 旧展示层的补丁：按部门设计规范收口。页名看面包屑，不再放页头；不用渐变；控件圆角统一。 */
+body:not(.web-login) #page-root :is(.hero-eyebrow, h1.claim-title, .actual-heading, .actual-breadcrumb) { display: none; }
+/* 页名型的 hero-title 才藏；任务详情、风险详情的 hero-title 是对象名，保留 */
+body:not(.web-login):is([data-route=customer-create], [data-route=visit-entry], [data-route=risks], [data-route=customer-assign-confirm], [data-route=opportunity-create]) #page-root .hero-title { display: none; }
+body:not(.web-login)[data-route=opportunities] #page-root .web-insights-titlebar .hero { display: none; }
+body:not(.web-login)[data-route=visit-confirm] #page-root .web-review-record > .hero { display: none; }
+body:not(.web-login) #page-root .version { display: none; }
+/* 我的：头像与页签 */
+body:not(.web-login) #page-root .profile-card { background: var(--ui-surface); }
+body:not(.web-login) #page-root .avatar { background: var(--ui-selected); color: var(--ui-primary); box-shadow: none; }
+body:not(.web-login) #page-root .profile-insight-tabs { background: transparent; border: 0; border-bottom: 1px solid var(--ui-line); border-radius: 0; padding: 0; gap: var(--ui-space-6); }
+body:not(.web-login) #page-root .profile-insight-tabs > view { flex: none; padding: var(--ui-space-2) 0 var(--ui-space-3); border-radius: 0; background: transparent; color: var(--ui-secondary); font-size: var(--ui-text-body); font-weight: 500; box-shadow: none; border-bottom: 2px solid transparent; }
+body:not(.web-login) #page-root .profile-insight-tabs > view.active { background: transparent; color: var(--ui-primary); border-bottom-color: var(--ui-primary); }
+body:not(.web-login) #page-root .performance-metric { background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+body:not(.web-login) #page-root .logout-button { border-radius: var(--ui-radius-control); }
+/* 客户资产明细：大卡不用深色渐变 */
+body:not(.web-login) #page-root .actual-summary { background: var(--ui-surface); color: var(--ui-ink); border: 1px solid var(--ui-line); box-shadow: none; }
+body:not(.web-login) #page-root .actual-summary :is(view, text) { color: inherit; }
+body:not(.web-login) #page-root .actual-summary .actual-total { color: var(--ui-primary); }
+body:not(.web-login) #page-root .actual-customer-mark { background: var(--ui-selected); color: var(--ui-primary); }
+/* 风险中心：去掉暖色底 */
+body:not(.web-login)[data-route=risks] #page-root, body:not(.web-login)[data-route=risks] #page-root .risk-page { background: transparent; }
+/* 通用：按钮与标签圆角、卡片不带投影 */
+body:not(.web-login) #page-root button.wx-interactive { border-radius: var(--ui-radius-control); }
+body:not(.web-login) #page-root :is(.surface, .card, .kpi-card, .chart-card) { box-shadow: none; border-radius: var(--ui-radius-panel); }
+/* 商机看板：去掉页头后标题栏不再占位 */
+body:not(.web-login)[data-route=opportunities] #page-root .web-insights-titlebar { padding: 0; border: 0; background: transparent; box-shadow: none; }
+body:not(.web-login)[data-route=opportunities] #page-root .create-row { margin: 0 0 var(--ui-space-3); }
+body:not(.web-login) #page-root .risk-page { background: transparent; }

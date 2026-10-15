@@ -2,21 +2,21 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 const row=(id,value,rank=1)=>({user_id:id,account_code:id,name:id,team:'南区',value,rank,population:3,record_count:value?2:0,customer_count:value?1:0});
-function ranking(role='sales',value=100,query={personal:true}){
+function ranking(role,value,query){
  const groups=[{code:'north_east',name:'北区＋东区',value:200,rank:1,record_count:1,customer_count:1},{code:'south_hkmo',name:'南区＋港澳',value,rank:2,record_count:2,customer_count:1}];
- return {contract_version:2,data_source:'database',scope:query.personal?'peer':'company_teams',selection:{personal:query.personal,member_id:query.personal?query.member_id||'a':null,cohort_role:query.member_id?'sales':role,team_groups:query.personal?[query.member_id==='b'?'north_east':'south_hkmo']:(query.team_groups&&query.team_groups.length?query.team_groups:['south_hkmo'])},own_region_codes:['south_hkmo'],
+ return {contract_version:2,data_source:'database',year:query.year,quarters:Array.from(query.quarters),scope:query.personal?'peer':'company_teams',selection:{personal:query.personal,member_id:query.personal?query.member_id||'a':null,cohort_role:query.member_id?'sales':role,team_groups:query.personal?[query.member_id==='b'?'north_east':'south_hkmo']:(query.team_groups&&query.team_groups.length?query.team_groups:['south_hkmo'])},own_region_codes:['south_hkmo'],
    opportunity_acv:{rows:query.personal?[row('b',200),row('a',value,2),row('z',0,3)]:groups,groups},
    region:{rows:groups,groups:[]},followup:{calculation:query.personal?'personal':'team_followup_per_capita_v1',rows:query.personal?[row('b',3),row('a',2,2),row('z',0,3)]:groups.map(g=>({...g,member_count:1,average:g.value,members:[]})),groups:[]},
    active_opportunities:{rows:[row('a',1),row('b',2)],groups:[{code:'north_east',value:2},{code:'south_hkmo',value:1}]}};
 }
 function pageWith(role='sales',overrides={}){
  let page;const calls=[],facts=[];const year=new Date().getFullYear();
- const response=(personal,options={})=>({data_source:'database',scope:personal?(options.member_id?'member':'self'):((options.team_groups||[]).length===1||(options.team_groups||[]).some(code=>code.startsWith('team:')))?'team':'workspace',
+ const response=(personal,options={})=>({contract_version:4,forecast_basis:'latest_sales_input',data_source:'database',scope:personal?(options.member_id?'member':'self'):((options.team_groups||[]).length===1||(options.team_groups||[]).some(code=>code.startsWith('team:')))?'team':'workspace',
    selection:{personal,member_id:personal?options.member_id||'a':null,team_groups:options.team_groups||[]},
    opportunities:[{id:'o',owner_id:options.member_id||'a',amount:options.member_id==='b'?200:100,status:'open',probability:10,expected_close_date:`${year}-01-01`}],quarter_forecasts:[],quarter_actuals:[],recent_visits:[]});
  const api={getDashboard:async(personal,options)=>{facts.push({personal,...options});return response(personal,options);},
    getDashboardRankings:async query=>{calls.push(query);return ranking(role,100,query);},
-   getDashboardOptions:async()=>({members:[{id:'a',name:'本人',team:'南区'},{id:'b',name:'另一成员',team:'北区'}],team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
+   getDashboardOptions:async()=>({members:[{id:'a',name:'本人',team:'南区',team_ids:[]},{id:'b',name:'另一成员',team:'北区',team_ids:[]}],teams:[],defaults:{team_id:null},team_groups:[{code:'north_east',name:'北区＋东区'},{code:'south_hkmo',name:'南区＋港澳'}]}),
    getDirectoryMembers:()=>{throw Error('不应为排名查询目录');},...overrides};
  const app={globalData:{role,session:{role,userId:'a',userName:'本人',workspaceId:'w',capabilities:{'team.view':['supervisor','manager'].includes(role)}}},ensureLogin:()=>true};
  const filename=path.resolve(__dirname,'../miniprogram/pages/bi/index.js');
@@ -50,19 +50,25 @@ test('总经理团队单选、全部团队和个人切换均可用，团队筛�
  assert.equal(page.data.loadError,'');assert.equal(facts.at(-1).member_id,'b');assert.equal(page.data.totalAcv,'¥200');
 });
 test('排名失败独立重试，不能清除已取得的经营数据',async()=>{
- let fail=true;const {page}=pageWith('sales',{getDashboardRankings:async()=>{if(fail)throw Error('排名暂不可用');return ranking();}});
+ let fail=true;const {page}=pageWith('sales',{getDashboardRankings:async query=>{if(fail)throw Error('排名暂不可用');return ranking('sales',100,query);}});
  await page.onShow();assert.equal(page.data.totalAcv,'¥100');assert.match(page.data.rankingMessage,/暂不可用/);
  fail=false;await page.reloadRankings();assert.equal(page.data.rankingMessage,'');assert.equal(page.data.rankingCards[0].rows.length,3);
 });
 test('拒绝旧本人榜、错误部门范围或缺失统计，避免误报完整榜',async()=>{
- for(const payload of [{data_source:'database',scope:'peer'},{...ranking(),scope:'self'},{...ranking(),scope:'workspace'}]){
-  const {page}=pageWith('sales',{getDashboardRankings:async()=>payload});await page.onShow();assert.ok(page.data.rankingMessage);assert.equal(page.data.rankingCards[0].rows.length,0);
+ for(const response of [()=>({data_source:'database',scope:'peer'}),query=>({...ranking('sales',100,query),scope:'self'}),query=>({...ranking('sales',100,query),scope:'workspace'})]){
+  const {page}=pageWith('sales',{getDashboardRankings:async query=>response(query)});await page.onShow();assert.match(page.data.rankingMessage,/范围/);assert.equal(page.data.rankingCards[0].rows.length,0);
+ }
+});
+test('缺失或错误的排名期间不能冒充当前选择，失败不影响经营金额',async()=>{
+ for(const wrongPeriod of [()=>({year:undefined,quarters:undefined}),query=>({year:query.year-1}),()=>({quarters:[]})]){
+  const {page}=pageWith('sales',{getDashboardRankings:async query=>({...ranking('sales',100,query),...wrongPeriod(query)})});
+  await page.onShow();assert.match(page.data.rankingMessage,/期间/);assert.equal(page.data.rankingCards[0].rows.length,0);assert.equal(page.data.totalAcv,'¥100');
  }
 });
 test('旧季度排名、旧成员响应和卸载后的响应不能覆盖当前结果',async()=>{
- let old,requests=0;const {page}=pageWith('sales',{getDashboardRankings:()=>++requests===1?new Promise(r=>old=r):Promise.resolve(ranking('sales',222))});
+ let old,requests=0;const {page}=pageWith('sales',{getDashboardRankings:query=>++requests===1?new Promise(r=>old=()=>r(ranking('sales',111,query))):Promise.resolve(ranking('sales',222,query))});
  page.onShow();await tick();page.changeQuarter({detail:{value:page.data.quarterOptions.findIndex(q=>q.quarter===4&&q.year===new Date().getFullYear())}});await tick();
- old(ranking('sales',111));await tick();assert.equal(page.data.rankingCards[0].rows.find(r=>r.id==='a').value,222);
+ old();await tick();assert.equal(page.data.rankingCards[0].rows.find(r=>r.id==='a').value,222);
  let late;const next=pageWith('supervisor');await next.page.onShow();
  let memberReply;next.api.getDashboard=(personal,options)=>options.member_id==='b'?new Promise(r=>memberReply=r):Promise.resolve(next.response(personal,options));
  next.page.selectMember({detail:{ids:['b']}});await next.page.selectMember({detail:{ids:['a']}});
@@ -71,12 +77,14 @@ test('旧季度排名、旧成员响应和卸载后的响应不能覆盖当前�
  const closed=pageWith('supervisor',{getDashboard:()=>new Promise(r=>late=r)});closed.page.onShow();await tick();closed.page.onUnload();late(closed.response(true));await tick();assert.equal(closed.page._raw,null);
 });
 test('成员回执不匹配时不展示错误金额',async()=>{
- const {page}=pageWith('supervisor',{getDashboard:async()=>({data_source:'database',scope:'member',selection:{member_id:'wrong'},opportunities:[],quarter_forecasts:[],quarter_actuals:[]})});
+ const {page}=pageWith('supervisor',{getDashboard:async()=>({contract_version:4,forecast_basis:'latest_sales_input',data_source:'database',scope:'member',selection:{member_id:'wrong'},opportunities:[],quarter_forecasts:[],quarter_actuals:[]})});
  await page.onShow();await page.selectMember({detail:{ids:['b']}});assert.match(page.data.loadError,/不一致/);assert.equal(page.data.totalAcv,'—');
 });
-test('真实空榜使用空状态',async()=>{
- const empty={rows:[],groups:[]};const {page}=pageWith('sales',{getDashboardRankings:async()=>({...ranking(),opportunity_acv:empty,region:empty,followup:empty,active_opportunities:empty})});
- await page.onShow();assert.equal(page.data.rankingMessage,'');assert.equal(page.data.rankingCards[0].rows.length,0);assert.equal(page.data.activeOpportunityCount,0);
+test('真实空榜使用空状态，明确零活跃与缺失统计分别显示',async()=>{
+ for(const complete of [true,false]){
+  const empty={rows:[],groups:[]};const {page}=pageWith('sales',{getDashboardRankings:async query=>({...ranking('sales',100,query),opportunity_acv:empty,region:empty,followup:empty,active_opportunities:complete?{rows:[{user_id:query.member_id||'a',value:0}],groups:[]}:empty})});
+  await page.onShow();assert.equal(page.data.rankingMessage,'');assert.equal(page.data.rankingCards[0].rows.length,0);assert.equal(page.data.activeOpportunityCount,complete?0:null);
+ }
 });
 test('快速切换成员时旧排名回执不得覆盖新对象',async()=>{
  const {page,api}=pageWith('supervisor');await page.onShow();let reply;
@@ -86,7 +94,7 @@ test('快速切换成员时旧排名回执不得覆盖新对象',async()=>{
  assert.equal(page.data.rankingCards[0].rows.find(r=>r.id==='a').value,100);
 });
 test('排名成员或团队回执错误不能展示其他对象名次',async()=>{
- const {page,api}=pageWith('supervisor');await page.onShow();api.getDashboardRankings=async()=>ranking('supervisor');
+ const {page,api}=pageWith('supervisor');await page.onShow();api.getDashboardRankings=async query=>ranking('supervisor',100,{...query,member_id:'a'});
  await page.selectMember({detail:{ids:['b']}});assert.match(page.data.rankingMessage,/成员/);assert.equal(page.data.rankingCards[0].rows.length,0);
  const m=pageWith('manager');await m.page.onShow();m.api.getDashboardRankings=async query=>ranking('manager',100,{...query,team_groups:['south_hkmo']});
  await m.page.selectTeams({detail:{ids:['north_east']}});assert.match(m.page.data.rankingMessage,/团队/);
@@ -94,7 +102,7 @@ test('排名成员或团队回执错误不能展示其他对象名次',async()=>
 
 test('总经理首次加载先确定三个动态团队，再发送事实与排名，不丢弃迟到数据',async()=>{
  let directoryReply,factsReply,ranksReply;const queries=[];
- const options={members:[{id:'a',name:'本人',role:'manager'}],team_groups:[{code:'team:east',name:'东区'},{code:'team:north',name:'北区'},{code:'team:south',name:'南区'}]};
+ const options={members:[{id:'a',name:'本人',role:'manager',team_ids:[]}],teams:[],defaults:{team_id:null},team_groups:[{code:'team:east',name:'东区'},{code:'team:north',name:'北区'},{code:'team:south',name:'南区'}]};
  const {page,response}=pageWith('manager',{
   getDashboardOptions:()=>new Promise(resolve=>directoryReply=resolve),
   getDashboard:(personal,query)=>{queries.push({personal,...query});return new Promise(resolve=>factsReply=()=>resolve(response(personal,query)));},
@@ -110,7 +118,7 @@ test('总经理首次加载先确定三个动态团队，再发送事实与排�
 });
 
 test('动态部门多选接受真实team范围，回传所选部门不一致仍拒绝事实',async()=>{
- const options={members:[],team_groups:[{code:'team:east',name:'东区'},{code:'team:north',name:'北区'}]};
+ const options={members:[],teams:[],defaults:{team_id:null},team_groups:[{code:'team:east',name:'东区'},{code:'team:north',name:'北区'}]};
  for(const mismatched of [false,true]){
   const {page,response}=pageWith('manager',{
    getDashboardOptions:async()=>options,
@@ -124,7 +132,7 @@ test('动态部门多选接受真实team范围，回传所选部门不一致仍�
 
 test('目录首次失败后重试自动加载有效团队；部门失效后清理选择并等待新数据',async()=>{
  let failed=true;let groups=[{code:'team:east',name:'东区'},{code:'team:north',name:'北区'},{code:'team:south',name:'南区'}];
- const {page,calls,facts}=pageWith('manager',{getDashboardOptions:async()=>{if(failed)throw Error('目录不可用');return {members:[],team_groups:groups};}});
+ const {page,calls,facts}=pageWith('manager',{getDashboardOptions:async()=>{if(failed)throw Error('目录不可用');return {members:[],teams:[],defaults:{team_id:null},team_groups:groups};}});
  await page.onShow();assert.equal(page.data.optionsError,'目录不可用');assert.equal(facts.length,1);
  failed=false;await page.loadOptions();assert.equal(page.data.optionsError,'');assert.equal(facts.length,2);assert.equal(calls.length,2);
  assert.deepEqual(Array.from(facts.at(-1).team_groups),['team:east','team:north','team:south']);
@@ -135,13 +143,13 @@ test('目录首次失败后重试自动加载有效团队；部门失效后清�
 
 test('离开看板后迟到目录不会再请求事实或排名',async()=>{
  let reply;const {page,calls,facts}=pageWith('manager',{getDashboardOptions:()=>new Promise(resolve=>reply=resolve)});
- const loading=page.onShow();page.onUnload();reply({members:[],team_groups:[{code:'team:east',name:'东区'}]});await loading;
+ const loading=page.onShow();page.onUnload();reply({members:[],teams:[],defaults:{team_id:null},team_groups:[{code:'team:east',name:'东区'}]});await loading;
  assert.equal(calls.length,0);assert.equal(facts.length,0);
 });
 
 test('总经理选择FDE不请求销售排名，前一销售排名迟到失败不能覆盖提示',async()=>{
  for(const role of ['fde','fde_lead']){
-  const {page,api,calls}=pageWith('manager',{getDashboardOptions:async()=>({members:[{id:'a',name:'本人',role:'manager'},{id:'b',name:'销售乙',role:'sales'},{id:'f',name:'FDE成员',role}],team_groups:[]})});
+  const {page,api,calls}=pageWith('manager',{getDashboardOptions:async()=>({members:[{id:'a',name:'本人',role:'manager',team_ids:[]},{id:'b',name:'销售乙',role:'sales',team_ids:[]},{id:'f',name:'FDE成员',role,team_ids:[]}],teams:[],defaults:{team_id:null},team_groups:[]})});
   await page.onShow();await page.changeView({currentTarget:{dataset:{mode:'personal'}}});
   let reject;api.getDashboardRankings=()=>{calls.push('old sales');return new Promise((resolve,no)=>reject=no);};
   const previous=page.selectMember({detail:{ids:['b']}});await tick();const before=calls.length;
@@ -152,15 +160,16 @@ test('总经理选择FDE不请求销售排名，前一销售排名迟到失败�
 });
 
 test('具体团队与全部团队的活跃商机分别计算',async()=>{
- const {page}=pageWith('manager');await page.onShow();
- page.data.teamOptions=[{id:'team:east',name:'东区'},{id:'team:north',name:'北区'},{id:'team:south',name:'南区'}];
- page._nativeRankings.active_opportunities={rows:[{value:99}],groups:[{code:'team:east',value:2},{code:'team:north',value:3},{code:'team:south',value:7}]};
- page.data.selectedTeamChoice='team:east';page.data.selectedTeamGroups=['team:east'];page.updateActiveCount();assert.equal(page.data.activeOpportunityCount,2);
- page.updateSelectionLabels();assert.equal(page.data.teamLabel,'东区');
- page.data.selectedTeamChoice='team:south';page.data.selectedTeamGroups=['team:south'];page.updateActiveCount();assert.equal(page.data.activeOpportunityCount,7);
- page.updateSelectionLabels();assert.equal(page.data.teamLabel,'南区');
- page.data.selectedTeamChoice='all';page.data.selectedTeamGroups=['team:east','team:north','team:south'];page.updateActiveCount();assert.equal(page.data.activeOpportunityCount,12);
- page.updateSelectionLabels();assert.equal(page.data.teamLabel,'部门合计 · 全部团队');
+ const groups=[{code:'team:east',name:'东区',value:2},{code:'team:north',name:'北区',value:3},{code:'team:south',name:'南区',value:7}];
+ const {page}=pageWith('manager',{
+  getDashboardOptions:async()=>({members:[],teams:[],defaults:{team_id:null},team_groups:groups}),
+  getDashboardRankings:async query=>({...ranking('manager',100,query),active_opportunities:{rows:[{value:99}],groups}}),
+ });await page.onShow();
+ await page.selectTeams({detail:{ids:['team:east']}});assert.equal(page.data.activeOpportunityCount,2);assert.equal(page.data.teamLabel,'东区');
+ // A previous selection's cached statistics cannot be reused for another team.
+ page.data.selectedTeamGroups=['team:south'];page.updateActiveCount();assert.equal(page.data.activeOpportunityCount,null);
+ await page.selectTeams({detail:{ids:['team:south']}});assert.equal(page.data.activeOpportunityCount,7);assert.equal(page.data.teamLabel,'南区');
+ await page.selectTeams({detail:{ids:['all']}});assert.equal(page.data.activeOpportunityCount,12);assert.equal(page.data.teamLabel,'部门合计 · 全部团队');
 });
 
 test('团队跟进显示人均、总数和人数，个人次数与ACV辅助商机数保持原口径',async()=>{

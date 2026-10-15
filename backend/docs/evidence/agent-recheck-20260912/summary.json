@@ -1,0 +1,152 @@
+{
+  "matrix_rows": 21,
+  "accepted_results": 19,
+  "normal_platform_accepted": 0,
+  "normal_platform_requests": 7,
+  "diagnostic_requests": 7,
+  "diagnostic_accepted": 4,
+  "same_input_hashes_match": true,
+  "controls_verified": true,
+  "no_business_persistence": true,
+  "rows": [
+    {
+      "capability": "battle_map_review",
+      "normal_accepted": true,
+      "normal_ms": 14583,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 2132,
+      "blocked_accepted": true,
+      "blocked_ms": 2373,
+      "diagnostic_accepted": true,
+      "diagnostic_ms": 13291,
+      "diagnostic_ids": {
+        "task_id": "8c207dcf-d520-4fe5-8ce2-0a19acfb12e8",
+        "message_id": "b70f21b3-17cb-44f1-a2d3-e672fc2d473c",
+        "conversation_id": "7dc3b481-44d9-4b95-8495-695ef8f7d1e1"
+      },
+      "facts_bytes": 2088
+    },
+    {
+      "capability": "opportunity_draft",
+      "normal_accepted": true,
+      "normal_ms": 13208,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 1194,
+      "blocked_accepted": true,
+      "blocked_ms": 1381,
+      "diagnostic_accepted": false,
+      "diagnostic_ms": 60018,
+      "diagnostic_ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "facts_bytes": 1079
+    },
+    {
+      "capability": "personal_risks",
+      "normal_accepted": true,
+      "normal_ms": 19018,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 5946,
+      "blocked_accepted": true,
+      "blocked_ms": 5451,
+      "diagnostic_accepted": false,
+      "diagnostic_ms": 60015,
+      "diagnostic_ids": {
+        "task_id": "af6626ef-8560-4f10-8497-7f7631345149",
+        "message_id": "07a1f25a-2bca-4280-857c-35203e2bbc8f",
+        "conversation_id": "ca13c8f7-87a5-4a44-bdc2-e32b3a644c6f"
+      },
+      "facts_bytes": 40867
+    },
+    {
+      "capability": "visit_entry",
+      "normal_accepted": true,
+      "normal_ms": 14490,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 2521,
+      "blocked_accepted": true,
+      "blocked_ms": 2538,
+      "diagnostic_accepted": true,
+      "diagnostic_ms": 27486,
+      "diagnostic_ids": {
+        "task_id": "9ccaa155-c093-4bb2-8c23-1ee523c6c3c0",
+        "message_id": "8501273e-0c8f-4498-9bac-dbc6bd50156f",
+        "conversation_id": "b8ba7264-8da6-4f74-aa7b-6b0a29364216"
+      },
+      "facts_bytes": 49
+    },
+    {
+      "capability": "today_tasks",
+      "normal_accepted": true,
+      "normal_ms": 25943,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 16843,
+      "blocked_accepted": true,
+      "blocked_ms": 19711,
+      "diagnostic_accepted": false,
+      "diagnostic_ms": 60023,
+      "diagnostic_ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "facts_bytes": 27499
+    },
+    {
+      "capability": "operating_report",
+      "normal_accepted": false,
+      "normal_ms": 20189,
+      "normal_platform_accepted": false,
+      "off_accepted": false,
+      "off_ms": 16055,
+      "blocked_accepted": true,
+      "blocked_ms": 4909,
+      "diagnostic_accepted": true,
+      "diagnostic_ms": 21936,
+      "diagnostic_ids": {
+        "task_id": "d3210756-466a-4785-aa72-c557ecfd24d2",
+        "message_id": "72aa58d4-8c43-4ded-8464-7460f9df13de",
+        "conversation_id": "5977819b-61a7-4ba2-a18d-444cc48f83be"
+      },
+      "facts_bytes": 102442
+    },
+    {
+      "capability": "chatbi",
+      "normal_accepted": true,
+      "normal_ms": 13438,
+      "normal_platform_accepted": false,
+      "off_accepted": true,
+      "off_ms": 1337,
+      "blocked_accepted": true,
+      "blocked_ms": 1823,
+      "diagnostic_accepted": true,
+      "diagnostic_ms": 56767,
+      "diagnostic_ids": {
+        "task_id": "dd451969-8e48-4e46-8736-de99c98f741b",
+        "message_id": "d7210629-9c4f-4a91-b32a-e9d8f86eea3a",
+        "conversation_id": "6dbd1403-0330-4df8-9719-5d6fc0840222"
+      },
+      "facts_bytes": 485
+    }
+  ],
+  "history_answer_hashes_match": true,
+  "history_nonempty_complete_answers": 4,
+  "additional_original_report_tests": [
+    {
+      "accepted": true,
+      "elapsed_ms": 7603
+    },
+    {
+      "accepted": true,
+      "elapsed_ms": 20948
+    }
+  ],
+  "all_test_results_do_not_imply_full_acceptance": true
+}

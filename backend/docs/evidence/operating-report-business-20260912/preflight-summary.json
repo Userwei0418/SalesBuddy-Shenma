@@ -1,0 +1,86 @@
+{
+  "source_commit": "7b2c6b9",
+  "cases": [
+    {
+      "scenario": "blocked",
+      "account": "XS001",
+      "counts": {
+        "tasks": 40,
+        "visits": 41,
+        "risks": 24,
+        "opportunities": 46
+      },
+      "sha256": "9c729246aebf5e911365382bc1508dc8fbce1d30b2b6a943074286880a802b09",
+      "json_bytes": 106393,
+      "scope_label": "个人"
+    },
+    {
+      "scenario": "normal-manager",
+      "account": "ZJL001",
+      "counts": {
+        "tasks": 49,
+        "visits": 110,
+        "risks": 35,
+        "opportunities": 117
+      },
+      "sha256": "0d1f59a816a3342deb1259bc52f51c984ef180a560fb053500b77083a10b3217",
+      "json_bytes": 242889,
+      "scope_label": "销售部门"
+    },
+    {
+      "scenario": "normal-sales",
+      "account": "XS001",
+      "counts": {
+        "tasks": 40,
+        "visits": 41,
+        "risks": 24,
+        "opportunities": 46
+      },
+      "sha256": "0b2f8722e74bd12be619b6bb3994823073f1734d7ac72c094f79fa1ace90f157",
+      "json_bytes": 106393,
+      "scope_label": "个人"
+    },
+    {
+      "scenario": "normal-supervisor",
+      "account": "ZJ001",
+      "counts": {
+        "tasks": 32,
+        "visits": 78,
+        "risks": 31,
+        "opportunities": 85
+      },
+      "sha256": "0ceb2af33b65228cc6497716014826398683a67ec6e9108190d561e01397d407",
+      "json_bytes": 173866,
+      "scope_label": "直属团队"
+    },
+    {
+      "scenario": "off",
+      "account": "XS001",
+      "counts": {
+        "tasks": 40,
+        "visits": 41,
+        "risks": 24,
+        "opportunities": 46
+      },
+      "sha256": "d49d2e43688f709ca2f004ad6819ea7d9ed8f4a54c10a287e1fc06aebe124dd9",
+      "json_bytes": 106393,
+      "scope_label": "个人"
+    },
+    {
+      "scenario": "production",
+      "account": "XS001",
+      "counts": {
+        "tasks": 40,
+        "visits": 41,
+        "risks": 24,
+        "opportunities": 46
+      },
+      "sha256": "43c2ae4e053c34ed66671a2ff932ade994bcd0ea27588329e9fdb766f863da2f",
+      "json_bytes": 106393,
+      "scope_label": "个人"
+    }
+  ],
+  "model_calls": 0,
+  "application_sessions": 0,
+  "formal_writes": 0
+}

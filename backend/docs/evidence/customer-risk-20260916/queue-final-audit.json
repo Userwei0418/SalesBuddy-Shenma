@@ -1,0 +1,87 @@
+[
+  {
+    "id": "b451aa41-7244-4d3a-b939-ab0c203259d6",
+    "status": "failed",
+    "error_code": "AgentUnavailable",
+    "events": [
+      {
+        "phase": "route_started",
+        "provider": "agent_platform",
+        "budget_ms": 12000,
+        "elapsed_ms": 2
+      },
+      {
+        "phase": "route_failed",
+        "provider": "agent_platform",
+        "elapsed_ms": 12003,
+        "error_code": "TimeoutError"
+      },
+      {
+        "phase": "fallback_requested",
+        "reason": "TimeoutError",
+        "provider": "agent_platform",
+        "elapsed_ms": 12003
+      },
+      {
+        "phase": "route_started",
+        "provider": "senseaudio",
+        "budget_ms": 32998,
+        "elapsed_ms": 12003
+      },
+      {
+        "phase": "route_failed",
+        "provider": "senseaudio",
+        "elapsed_ms": 45002,
+        "error_code": "TimeoutError"
+      }
+    ],
+    "input_summary": {
+      "data_as_of": "2026-09-16T02:12:39.167126+00:00",
+      "facts_bytes": 10427,
+      "facts_sha256": "ea6090ce8752c1e223d6617ce7d155ce4c1d78b428307e42841e2d2a11772bfa",
+      "record_counts": {
+        "visits": 9,
+        "contacts": 1,
+        "opportunities": 2
+      }
+    },
+    "trace": {
+      "elapsed_ms": 45001,
+      "operation_id": "b451aa41-7244-4d3a-b939-ab0c203259d6",
+      "platform_run": {
+        "ids": {
+          "task_id": null,
+          "message_id": null,
+          "conversation_id": null
+        },
+        "transport": {
+          "http_status": 200,
+          "first_text_ms": null,
+          "first_body_byte_ms": 829,
+          "request_started_ms": 0,
+          "first_data_event_ms": 829,
+          "headers_received_ms": 829,
+          "stream_completed_ms": null
+        },
+        "error_code": null,
+        "stop_state": "not_requested",
+        "execution_mode": "filtered_facts",
+        "actual_snapshot_id": null,
+        "test_fault_injected": false,
+        "expected_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+        "tool_authority_issued": false,
+        "runtime_snapshot_verified": false,
+        "network_dispatch_suppressed": false
+      }
+    }
+  },
+  {
+    "id": "aae03fa1-7b09-474e-b374-4e4f8a79c1f9",
+    "status": "failed",
+    "outcome": "unknown",
+    "error_code": "SenseAudioError",
+    "job_status": "dead_letter",
+    "last_error_code": "SenseAudioError",
+    "attempts": 1
+  }
+]

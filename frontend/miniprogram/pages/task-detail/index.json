@@ -10,6 +10,8 @@
     "sb-desc-list": "/ui/sb/sb-desc-list/index",
     "sb-select": "/ui/sb/sb-select/index",
     "sb-textarea": "/ui/sb/sb-textarea/index",
-    "t-cell": "/ui/tdesign/cell/cell"
+    "t-cell": "/ui/tdesign/cell/cell",
+    "person-picker": "/components/person-picker/index",
+    "task-cancel-dialog": "/components/task-cancel-dialog/index"
   }
 }

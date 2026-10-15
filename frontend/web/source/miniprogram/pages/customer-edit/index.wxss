@@ -1,0 +1,34 @@
+@import "../../styles/customer-identity.wxss";
+page{background:var(--ui-background)}
+.edit-page{min-height:100vh;box-sizing:border-box;padding:24rpx 32rpx calc(200rpx + constant(safe-area-inset-bottom));padding:24rpx 32rpx calc(200rpx + env(safe-area-inset-bottom));background:var(--ui-background);color:var(--ui-ink)}
+
+.loading{margin-top:24rpx;padding:48rpx 0}
+
+.agent-card,.form-card{margin-top:24rpx;padding:32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.agent-head{display:flex;align-items:flex-start;gap:16rpx}
+.agent-head>view:first-child{flex:1;min-width:0}
+.agent-head text,.agent-head label{display:block}
+.agent-head text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.agent-head label{margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.lock{flex:0 0 auto;height:20px;padding:0 var(--ui-space-2);border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.agent-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:32rpx}
+.agent-grid>view{display:flex;min-width:0;flex-direction:column;align-items:center;padding:0 8rpx;border-right:1px solid var(--ui-line)}
+.agent-grid>view:last-child{border-right:0}
+.agent-grid text{max-width:100%;overflow:hidden;color:var(--ui-ink);font-size:20px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
+.agent-grid label{margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.agent-risk{margin-top:32rpx;padding-top:24rpx;border-top:1px solid var(--ui-line);color:var(--ui-secondary);font-size:14px}
+
+.form-card{padding-top:16rpx}
+.section-head{padding:16rpx 0 8rpx}
+.section-head text,.section-head label{display:block}
+.section-head text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.section-head label{margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.contact-head{margin-top:32rpx;padding-top:32rpx;border-top:1px solid var(--ui-line)}
+/* 飞书表单：标签在上 14px 常规字重正文色，下方 8px 是 --ui-field-height（44px）高的细线框（sb-select、sb-input stacked plain；客户名称只读框同高） */
+.field{padding:16rpx 0 0}
+.field>text{display:block;color:var(--ui-ink);font-size:14px;font-weight:400}
+.field>.picker{margin:16rpx 0}
+.picker{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:var(--ui-field-height);box-sizing:border-box;padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink);font-size:var(--ui-text-body)}
+.customer-name-readonly{gap:16rpx;background:var(--ui-background)}
+.customer-name-readonly>text{min-width:0;flex:1;overflow-wrap:anywhere}
+.customer-name-readonly>label{flex-shrink:0;color:var(--ui-secondary);font-size:var(--ui-text-small)}

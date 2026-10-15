@@ -69,9 +69,9 @@ async def read_targets(
     result = await repo.list(
         connection, actor, period=period, scope=selected, kind=kind, limit=limit, offset=offset, q=q
     )
-    pending = await repo.requests(connection, actor, period=period, scope=selected, status="pending", limit=100)
-    batches = await repo.batches(connection, actor, period=period, scope=selected, status="pending", limit=100)
-    recent = await repo.batches(connection, actor, period=period, scope=selected, limit=10)
+    pending = await repo.requests(connection, actor, period=period, scope=selected, status="pending", limit=100, legacy_only=True)
+    batches = await repo.batches(connection, actor, period=period, scope=selected, status="pending", limit=100, legacy_only=True)
+    recent = await repo.batches(connection, actor, period=period, scope=selected, limit=10, legacy_only=True)
     editable = await repo.allowed(connection, selected, write=True) if selected else management
     if not management:
         current = await connection.fetchval("SELECT timezone('Asia/Shanghai',clock_timestamp())::date")

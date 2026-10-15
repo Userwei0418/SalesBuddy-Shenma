@@ -29,11 +29,10 @@ async def enqueue_change_review(connection, actor, *, event_id, opportunity_id, 
             "follow_up_record", "next_action", "interaction_at", "contact_name", "visit_goal"
         )}
         refs.append("current_visit")
-    actuals = await connection.fetchrow(
-        "SELECT sum(amount) FILTER(WHERE kind='recognized') AS recognized_amount,"
-        "sum(amount) FILTER(WHERE kind='collection') AS collection_amount FROM crm.customer_actual "
-        "WHERE opportunity_id=$1::uuid AND voided_at IS NULL", opportunity_id,
-    )
+    from sales_backend.domain.finance_totals import actual_totals
+    actual_rows = [dict(r) for r in await connection.fetch('SELECT * FROM crm.effective_actual WHERE opportunity_id=$1::uuid',opportunity_id)]
+    actuals = actual_totals(actual_rows)
+    records['effective_actuals'] = actual_rows
     refs.append("actuals")
     # Whitelist business fields; never persist arbitrary request/auth/internal fields.
     keys = ("name", "status", "probability", "amount", "expected_close_date", "partner_name",

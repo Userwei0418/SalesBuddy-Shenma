@@ -20,7 +20,7 @@ module.exports = { tagTone: tagTone, zh: zh };
     </view>
   </view>
 
-  <view wx:if="{{isFdeLead && fdeTeamSummary}}" class="fde-team-summary" hover-class="home-pressed" bindtap="openFdeTeamTasks"><text>团队待办：{{fdeTeamSummary.overdue}} 逾期 · {{fdeTeamSummary.claim}} 待领取 · {{fdeTeamSummary.handover}} 待交接</text><t-icon name="chevron-right" size="32rpx" /></view>
+  <view wx:if="{{isFdeLead && fdeTeamSummary}}" class="fde-team-summary" hover-class="home-pressed" bindtap="openFdeTeamTasks"><view><view>待办汇总 · {{fdeTeamSummaryScope}}</view><view>{{fdeTeamSummary.overdue}} 逾期 · {{fdeTeamSummary.claim}} 待领取 · {{fdeTeamSummary.handover}} 待交接</view><view>统计不随本页部门/成员筛选变化</view></view><t-icon name="chevron-right" size="32rpx" /></view>
   <scroll-view class="chat-scroll" scroll-y enhanced show-scrollbar="false" scroll-into-view="{{chatScrollTarget}}">
    <view class="chat-stream">
     <view id="chat-newest" class="chat-tail"></view>
@@ -84,7 +84,7 @@ module.exports = { tagTone: tagTone, zh: zh };
       <view class="agent-avatar"><text>✦</text></view>
       <view class="message-stack">
         <view class="message-meta">{{todayLabel}}</view>
-        <view class="thinking-bubble"><view></view><view></view><view></view><text>{{visitRecordingMode ? '正在转写语音并整理拜访内容' : managementTaskMode && role !== 'sales' ? '正在提取客户建档与下发字段' : role === 'sales' ? '正在查询仅与你本人相关的业务数据' : '正在理解问题并查询权限范围内的业务数据'}}</text></view>
+        <view class="thinking-bubble"><view></view><view></view><view></view><text>{{visitRecordingMode ? '正在转写语音并整理拜访内容' : managementTaskMode && role !== 'sales' ? '正在提取客户建档与下发字段' : '正在理解问题并查询当前授权范围内的业务数据'}}</text></view>
       </view>
     </view>
     <view wx:if="{{showManagementResult && role !== 'sales'}}" class="message-row agent">
@@ -118,12 +118,12 @@ module.exports = { tagTone: tagTone, zh: zh };
       </view>
       <view wx:if="{{isStarting || isStopping || isProcessing || isRecording}}" class="voice-composer-copy voice-composer-hit" hover-class="home-pressed" bindtap="tapRecordingState">
         <view>{{isStarting ? '正在启动录音' : isStopping ? '正在结束录音' : isProcessing ? (visitRecordingMode ? '正在解析拜访内容' : managementTaskMode && role !== 'sales' ? '正在生成客户建档草案' : '正在分析经营数据') : (visitRecordingMode ? '正在录入客户拜访' : managementTaskMode && role !== 'sales' ? '正在录入客户建档任务' : role === 'sales' ? '正在聆听个人经营问题' : '正在聆听经营问题')}}</view>
-        <text>{{isStarting ? '正在获取麦克风权限' : isProcessing ? (visitRecordingMode ? '请稍候，正在生成可核对的拜访字段' : managementTaskMode && role !== 'sales' ? '请稍候，正在识别客户和下发对象' : role === 'sales' ? '正在查询仅与你本人相关的业务数据' : '正在查询你权限范围内的业务数据') : isRecording ? '再次点击即可停止录音' : visitRecordingMode ? '描述本次拜访，再次点击停止并整理' : '说出问题，再次点击停止并查询'}}</text>
+        <text>{{isStarting ? '正在获取麦克风权限' : isProcessing ? (visitRecordingMode ? '请稍候，正在生成可核对的拜访字段' : managementTaskMode && role !== 'sales' ? '请稍候，正在识别客户和下发对象' : '正在查询当前授权范围内的业务数据') : isRecording ? '再次点击即可停止录音' : visitRecordingMode ? '描述本次拜访，再次点击停止并整理' : '说出问题，再次点击停止并查询'}}</text>
       </view>
       <view wx:elif="{{managementTaskMode}}" class="voice-composer-copy"><view>录入客户建档与下发任务</view><text>点击语音按钮，描述客户信息、商机和负责销售</text></view>
       <view wx:else class="composer-input-wrap">
         <input class="composer-input" value="{{textInput}}" maxlength="500" confirm-type="send" cursor-spacing="24" placeholder="{{role === 'sales' ? '询问我的客户、待办、商机或风险' : '输入经营问题，或点击语音提问'}}" bindinput="inputText" bindconfirm="sendText" />
-        <text>{{role === 'sales' ? '文字或语音问数 · 仅查询本人数据' : '文字输入 · 语音问数 · 按权限查询'}}</text>
+        <text>文字或语音问数 · 按授权范围查询</text>
       </view>
       <view wx:if="{{textInput && !isStarting && !isStopping && !isProcessing && !isRecording}}" class="send-button" hover-class="home-pressed" bindtap="sendText">↑</view>
       <view wx:else class="voice-toggle {{!managementTaskMode ? 'chatbi-voice' : ''}}" hover-class="home-pressed" bindtap="startRecord">

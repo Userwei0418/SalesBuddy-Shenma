@@ -75,8 +75,10 @@ test('late success/error cannot write after customer change, hide, or permission
   const d=wait(),h=make({listOpportunities:()=>d.promise});const loaded=h.page.loadOpportunities();change(h);reject?d.reject(Error('late')):d.resolve(pageOf([row('late')]));await loaded;assert.equal(h.page.data.opportunityItems.length,0);assert.equal(h.page.data.opportunityError,'');
  }
 });
-test('FDE remains on its dedicated eligibility picker without fetching sales opportunities',async()=>{
- let reads=0;const h=make({listOpportunities:async()=>{reads++;return pageOf([]);}});h.page.data.isFde=true;await h.page.loadOpportunities();assert.equal(reads,0);assert.equal(h.page.data.fdeOpportunityVerified,false);
+test('FDE uses the same optional readable candidates without gaining opportunity editing',async()=>{
+ let calls=0;const h=make({listOpportunities:async()=>{calls++;return pageOf([row('o1')]);}});h.page.data.isFde=true;
+ await h.page.loadOpportunities();assert.equal(calls,1);assert.equal(h.page.data.opportunityOptions[0].id,'');assert.equal(h.page.data.opportunityOptions.some(o=>o.id==='__new__'),false);
+ h.page.chooseOpportunity({currentTarget:{dataset:{id:'o1'}}});assert.equal(h.page.data.opportunityId,'o1');assert.equal(h.page.data.opportunityEditing,false);
 });
 
 const choose=(page,id)=>page.chooseOpportunity({currentTarget:{dataset:{id}}});

@@ -1,0 +1,89 @@
+{
+  "business_cases": 6,
+  "passed_cases": 6,
+  "business_submissions": 6,
+  "business_failures": 0,
+  "actual_platform_requests": 4,
+  "platform_answers_accepted": 0,
+  "natural_timeout_fallbacks": 4,
+  "original_only_cases": 1,
+  "controlled_block_fallbacks": 1,
+  "new_private_report_cards": 6,
+  "formal_business_writes": 0,
+  "actual_snapshot_verified": false,
+  "frontend_changed": false,
+  "cases": [
+    {
+      "scenario": "normal-sales",
+      "account": "XS001",
+      "run_id": "0211cdfc-3bab-49ac-b970-11d694db6c75",
+      "conversation_id": "14c183e7-f68e-40b5-b3f7-e37f7871b5c8",
+      "elapsed_ms": 21170,
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "platform_conversation_id": null,
+      "stop_state": "not_requested",
+      "checks_passed": true
+    },
+    {
+      "scenario": "normal-supervisor",
+      "account": "ZJ001",
+      "run_id": "13e00057-64b6-4830-82a4-ec3f7c811c58",
+      "conversation_id": "5040eabb-539d-4bc5-b51f-a078e55d427e",
+      "elapsed_ms": 24177,
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "platform_conversation_id": null,
+      "stop_state": "not_requested",
+      "checks_passed": true
+    },
+    {
+      "scenario": "normal-manager",
+      "account": "ZJL001",
+      "run_id": "352451db-f8a8-4261-b0d3-a362ede2f7a2",
+      "conversation_id": "669e3ab8-4719-47b1-b555-288ea664c6b5",
+      "elapsed_ms": 27205,
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "platform_conversation_id": null,
+      "stop_state": "not_requested",
+      "checks_passed": true
+    },
+    {
+      "scenario": "off",
+      "account": "XS001",
+      "run_id": "3335af18-b86b-497c-8ae7-9eef85222761",
+      "conversation_id": "af335ac8-251b-4fc0-b505-20c8bd84cd44",
+      "elapsed_ms": 8080,
+      "provider": "senseaudio",
+      "fallback_reason": null,
+      "platform_conversation_id": null,
+      "stop_state": null,
+      "checks_passed": true
+    },
+    {
+      "scenario": "blocked",
+      "account": "XS001",
+      "run_id": "69baebc9-9792-4906-999c-ec63ce7902e4",
+      "conversation_id": "8193b2b2-3455-47c1-b2f1-d16de4f0b7f7",
+      "elapsed_ms": 8076,
+      "provider": "senseaudio",
+      "fallback_reason": "ControlledPlatformBlock",
+      "platform_conversation_id": null,
+      "stop_state": "not_requested",
+      "checks_passed": true
+    },
+    {
+      "scenario": "production",
+      "account": "XS001",
+      "run_id": "e84ba47b-bd84-4d80-96cf-e627c768d771",
+      "conversation_id": "01241aff-4afd-4119-b852-f278c6bb348a",
+      "elapsed_ms": 22166,
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "platform_conversation_id": "9be9e357-cc49-44e1-b073-77a54f95e149",
+      "stop_state": "unconfirmed",
+      "checks_passed": true
+    }
+  ]
+}

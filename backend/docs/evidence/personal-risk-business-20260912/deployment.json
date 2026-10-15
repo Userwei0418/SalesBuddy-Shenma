@@ -1,0 +1,52 @@
+{
+  "release": "/www/wwwroot/salegent/releases/agent-risk-20260912-47956c7-r2",
+  "commit": "47956c7f44c674c7cbddf0374e0609ae6f42f0f0",
+  "files": 342,
+  "mismatches": [],
+  "runtime_files_equal_to_tested_086b5aa": 134,
+  "rollout": {
+    "00000000-0000-0000-0000-000000000001": {
+      "capabilities": {
+        "battle_map_review": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "opportunity_draft": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "personal_risks": {
+          "enabled": true,
+          "rollout": "production"
+        }
+      }
+    }
+  },
+  "non_database_tests": 483,
+  "isolated_postgres_tests": 83,
+  "tests_provider_http": "synthetic tests; five real business cases; direct platform answer not verified; two normal timeouts plus off/blocked and production",
+  "services": {
+    "sales-api.service": {
+      "active": true,
+      "cwd_matches_release": true
+    },
+    "sales-worker.service": {
+      "active": true,
+      "cwd_matches_release": true
+    }
+  },
+  "health_ready": true,
+  "database_version": "V054",
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "backup_bytes": 2599045,
+  "backup_archive_list_verified": true,
+  "backup_timer_active": true,
+  "backup_last_result": "success",
+  "dedicated_credential_mode": "0600 root",
+  "rollback_release": "/www/wwwroot/salegent/releases/agent-opportunity-20260912-82b5db5",
+  "frontend_changed": false,
+  "platform_direct_answer_verified": false,
+  "production_acceptance_rule": "Real timeout fallback is acceptable per user; no change to runtime validation or time budgets",
+  "checked_at": "2026-09-11T20:19:25.237422+00:00"
+}

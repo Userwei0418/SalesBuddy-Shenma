@@ -7,12 +7,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, HttpUrl
 
 from sales_backend.api.dependencies import RequestIdentity, get_database
-from sales_backend.api.idempotency import MutationKey
+from sales_backend.api.idempotency import MutationKey, require_material_key
 from sales_backend.api.management_dependencies import get_management_identity
 from sales_backend.api.exports import csv_response
 from sales_backend.contracts.models import OpportunityCreate
 from sales_backend.db import Database
 from sales_backend.repositories.operations_opportunities import OperationsOpportunityRepository
+from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.services.operations import management_write
 from sales_backend.services.opportunities import save_opportunity
 
@@ -82,6 +83,15 @@ async def opportunities(
     return result
 
 
+@router.get("/amount-policy", description="当前公司的商机大额确认阈值；商机创建或编辑任一权限可读取。")
+async def amount_policy(
+    identity: RequestIdentity = Depends(get_management_identity),
+    database: Database = Depends(get_database),
+):
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await CompanyRulesRepository().active(connection, "opportunity_amount")
+
+
 @router.get("/{opportunity_id}")
 async def detail(
     opportunity_id: UUID,
@@ -104,13 +114,19 @@ async def save(
 ):
     if body.action == "update" and body.version_no is None:
         raise HTTPException(422, "请刷新商机后再修改")
+    data = body.model_dump()
+    require_material_key(data, idempotency_key)
+    # Omission means current actor, as in the shared business creation flow.
+    # Preserve explicit null so older clients still receive a validation error.
+    if "owner_user_ref_id" not in body.model_fields_set:
+        data.pop("owner_user_ref_id")
     return await management_write(
         database,
         identity.actor,
         idempotency_key,
         f"opportunity.save:{body.customer_id}",
-        body.model_dump(),
-        lambda c: save_opportunity(c, identity.actor, customer_id=str(body.customer_id), data=body.model_dump()),
+        data,
+        lambda c: save_opportunity(c, identity.actor, customer_id=str(body.customer_id), data=data),
     )
 
 

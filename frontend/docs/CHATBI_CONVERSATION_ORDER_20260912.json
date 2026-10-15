@@ -1,0 +1,132 @@
+{
+  "verified_at": "2026-09-12T00:50:20+08:00",
+  "baseline": "327ae28",
+  "branch": "codex/fix-chatbi-visible-entry",
+  "actual_project": "salegent-v1/frontend",
+  "requirement": {
+    "source": "direct user correction in current task",
+    "direction": "oldest_top_newest_bottom",
+    "legacy_sort_commit": "371b815083e9f8fc6ab75bce2232187714c9e125",
+    "explicit_prior_chat_descending_requirement_found": false
+  },
+  "checks": {
+    "node_tests": {
+      "passed": 140,
+      "failed": 0,
+      "skipped": 0
+    },
+    "static": {
+      "registered_pages": 24,
+      "json_files": 30,
+      "node_syntax_check": "enabled",
+      "result": "passed"
+    },
+    "git_diff_check": "passed"
+  },
+  "native": {
+    "application": "WeChat DevTools",
+    "version": "Stable 2.02.2608060",
+    "base_library": "3.17.2",
+    "fresh_project_reopen": true,
+    "original_session_preserved": true,
+    "starting_view": "September 3 historical cards",
+    "query_sent_at": "2026-09-12T00:49:48.365+08:00",
+    "query_type": "marked read-only authorized pending-task aggregate",
+    "manual_scroll_after_send": false,
+    "observed": [
+      "automatic bottom focus",
+      "question above processing indicator",
+      "question above final result card",
+      "input ready after response",
+      "five tab icons and three quick actions visible"
+    ],
+    "evidence": "native CUA screenshots observed in current task; no business screenshot copied into repository"
+  },
+  "final_run_metadata": {
+    "source_thread": "01a085e3-2e1f-7cd1-bff4-98512bdfe929",
+    "method": "bounded read-only metadata audit",
+    "scope": {
+      "workspace": "demo-sales-workspace",
+      "account": "ZJL001",
+      "from": "2026-09-12T00:49:40+08:00",
+      "to": "2026-09-12T00:50:20+08:00"
+    },
+    "persisted_bi_query_count": 1,
+    "run_id": "9efa4b0f-55a3-4136-a489-535b7df086e1",
+    "conversation_id": "90695021-df91-4bf5-bb31-bc8571a85fac",
+    "status": "succeeded",
+    "created_at": "2026-09-12T00:49:49.275583+08:00",
+    "started_at": "2026-09-12T00:49:49.662960+08:00",
+    "completed_at": "2026-09-12T00:49:50.912594+08:00",
+    "assistant_messages_matching_source_run_id": 1,
+    "provider_attempts": 1,
+    "model": {
+      "invocation_id": "d6e2c80c-0139-4847-a39c-b0ba83161039",
+      "record_kind": "provider_attempt",
+      "provider": "senseaudio",
+      "model": "senseaudio-s2-lite",
+      "status": "succeeded",
+      "http_status": 200,
+      "attempt": 1,
+      "started_at": "2026-09-12T00:49:49.826503+08:00",
+      "completed_at": "2026-09-12T00:49:50.910692+08:00"
+    },
+    "limits": "metadata confirms persistence and provider status; not total HTTP request count, answer-content audit or FDE execution"
+  },
+  "original_issue_audit": {
+    "source_thread": "01a085e3-2e1f-7cd1-bff4-98512bdfe929",
+    "window": "2026-09-12 00:27:00–00:34:00 +08:00",
+    "workspace": "demo-sales-workspace",
+    "account": "ZJL001",
+    "runs": [
+      "90275827-bfe1-4a99-aaf1-9d1654024402",
+      "24f83dbe-c29a-4318-8e14-a546874c3fb0",
+      "1bf5ddf8-55eb-4ba2-825d-6c3bae3786ff",
+      "75bb6bf2-9dd6-43f1-8359-a8d2f833651e"
+    ],
+    "each": {
+      "run_status": "succeeded",
+      "assistant_messages": 1,
+      "provider_attempts": 1,
+      "model": "senseaudio-s2-lite",
+      "http_status": 200
+    },
+    "native_corroboration": "00:32 and 00:33 answers became visible by scrolling upward before final fix"
+  },
+  "intermediate_verification": {
+    "run_id": "22eaeafc-ecbd-46e0-bfc8-444f74cae9a7",
+    "created_at": "2026-09-12T00:40:26.613824+08:00",
+    "status": "succeeded",
+    "assistant_messages": 1,
+    "provider_attempts": 1,
+    "model": "senseaudio-s2-lite",
+    "http_status": 200,
+    "ui_direction": "newest top with focus",
+    "superseded_by_user_direction": true,
+    "counts_as_final_chronological_acceptance": false,
+    "native_processing_indicator_verified": false
+  },
+  "boundaries": {
+    "backend_modified": false,
+    "formal_business_write": false,
+    "frontend_text_e2e": "verified on current simulator and original AI",
+    "physical_device_keyboard": "unverified",
+    "microphone": "unverified this round",
+    "production_fde_enabled": false,
+    "same_run_live_fde_to_original_fallback": "unverified",
+    "integrated_agents": 1,
+    "created_agents": 7,
+    "published_agents": 1,
+    "autonomous_mcp_phase": 2
+  },
+  "sha256": {
+    "frontend/miniprogram/pages/index/index.js": "917e1c4189b2d75c549a441a37253d2c9bcaba9a5a606ebbdc1bb416f34fcefd",
+    "frontend/miniprogram/pages/index/index.wxml": "aaa9d1b5197243dc65d50639edbcbf50990144bf75f7ff00fd4b107592b64f14",
+    "frontend/miniprogram/pages/index/index.wxss": "50d73e63c3f2e6716bf03d2124f97a132550752d8efb84a3465e15efb25e2389",
+    "frontend/tests/chatbi-entry.test.js": "d26c1df943acdb73591c2d38a9ce672b510919ab0c7750faa59962c29aa0f846",
+    "frontend/tests/home-quick-actions.test.js": "ac9062612c72654bc38bf2331c828bdd5762a5dd39ba85b17e35df6958d96155",
+    "frontend/tests/opportunity-notifications.test.js": "b63f5e51fd11c68baa67d4cb2d49982f2d5ab89e246db3a607bb408e50ec240b"
+  },
+  "superseded_by": "CHATBI_PHASE2_DEFERRAL_20260912.md",
+  "historical_evidence_note": "Original native and test observations are retained; current phase-one defaults hide proactive ChatBI and show newest first. Static verification in that round preceded addition of this JSON; the absolute developer path introduced here has now been replaced with a portable project path and full static verification rerun."
+}

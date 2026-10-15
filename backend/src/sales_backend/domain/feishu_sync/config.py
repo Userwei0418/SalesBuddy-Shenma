@@ -1,4 +1,6 @@
 """Secret-free, tenant-bound configuration. No SQL or expressions in mappings."""
+
+from sales_backend.domain.opportunity_finance import quarter_field
 from enum import StrEnum
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
@@ -16,6 +18,7 @@ class StrictModel(BaseModel):
 
 
 class ObjectKind(StrEnum):
+    WEEKLY_REPORT = "weekly_report"
     CUSTOMER = "customer"
     OPPORTUNITY = "opportunity"
     VISIT = "visit"
@@ -28,13 +31,18 @@ class ObjectKind(StrEnum):
     TARGET = "target"
     MEMBER = "member"
     CONTACT = "contact"
-    WEEKLY_REPORT = "weekly_report"
 
 
 # Projection field names, not DB column names. Adapters must explicitly produce these.
 COMMON_FIELDS = frozenset({"system_id", "source_created_at", "source_updated_at", "record_status",
                            "company_name", "source_version", "synced_at"})
 SOURCE_FIELDS = {
+    ObjectKind.WEEKLY_REPORT: {"title", "report_week", "report_week_end", "author_name",
+                               "author_account", "status", "result_status", "body_markdown",
+                               "stats_summary", "record_count", "customer_count",
+                               "opportunity_count", "source_cutoff_at", "snapshot_at",
+                               "draft_version", "generated_at", "updated_at", "published_at",
+                               "feishu_push_status", "feishu_message_id", "detail_url"},
     ObjectKind.CUSTOMER: {"name", "industry", "customer_type", "priority", "main_business", "needs",
                           "budget", "next_action", "owner_id", "department_id", "owner_name",
                           "owner_account", "department_name", "lifecycle_status", "fde_members", "sales_members",
@@ -45,7 +53,10 @@ SOURCE_FIELDS = {
                              "associated_partner_ids", "associated_partner_names",
                              "original_owner_name", "ownership_resolution", "status", "product_line",
                              "sales_channel", "partner_id", "customer_name", "owner_name", "owner_account",
-                             "department_name", "fde_members", "grade", "follow_up_plan", "partner_name"},
+                             "department_name", "fde_members", "grade", "follow_up_plan", "partner_name",
+                             "actual_recognized_total", "actual_collection_total",
+                             "actual_recognized_confirmed_subtotal", "actual_collection_confirmed_subtotal",
+                             "finance_conflict_period_count", "finance_quality"},
     ObjectKind.VISIT: {"customer_id", "opportunity_id", "content", "next_action", "interaction_at",
                        "archived_at", "recorder_id", "contact_name", "contact_title", "interaction_mode",
                        "name", "customer_name", "opportunity_name", "owner_name", "owner_account",
@@ -57,7 +68,12 @@ SOURCE_FIELDS = {
                          "original_channel_manager_name", "priority", "progress", "grade", "signed_on",
                          "partner_type", "region", "province", "note"},
     ObjectKind.TASK: {"title", "description", "status", "due_at", "creator_id", "owner_id",
-                      "customer_id", "opportunity_id", "completion_note", "review_note"},
+                      "customer_id", "opportunity_id", "completion_note", "review_note",
+                      "batch_id", "batch_name", "meeting_date", "dispatched_at", "source_code",
+                      "association_kind", "accepted_at", "completion_submitted_at", "completed_at",
+                      "verification_status", "original_owner_id", "original_owner_name",
+                      "original_dispatcher_id", "original_dispatcher_name", "owner_name", "owner_account",
+                      "active_count", "completed_count", "pending_review_count", "ontime_completed_count"},
     ObjectKind.DEMO_SCENE: {"name", "description", "opportunity_id", "creator_id"},
     ObjectKind.FORECAST: {"customer_id", "customer_name", "opportunity_id", "opportunity_name",
                           "year", "quarter", "recognized_amount", "collection_amount",
@@ -66,26 +82,16 @@ SOURCE_FIELDS = {
                           "year", "quarter", "kind", "source_field", "raw_amount", "source_unit", "tax_basis",
                           "source_system", "source_base_id", "source_table_id", "source_external_record_id"},
     ObjectKind.ACTUAL: {"kind", "amount", "occurred_on", "customer_id", "opportunity_id",
-                        "source_ref", "note", "confirmed_by", "voided_at", "void_reason"},
+                        "source_ref", "note", "confirmed_by", "voided_at", "void_reason", "tax_basis"},
     ObjectKind.TARGET: {"period_type", "period_start", "period_end", "scope_type", "user_id",
                         "team_id", "team_name", "department_code", "kind", "amount"},
     ObjectKind.MEMBER: {"name", "account", "status", "primary_department_id", "department_ids",
                         "primary_department_name", "department_names", "roles",
                         "organization_team_id", "organization_team_name"},
     ObjectKind.CONTACT: {"name", "title", "role", "customer_id", "is_primary"},
-    # Weekly reports are written only after the author explicitly confirms
-    # the draft through the publish endpoint.  Keeping the projection fields
-    # here lets the existing Feishu table adapter upsert them without giving
-    # the model or a draft write any remote side effects.
-    ObjectKind.WEEKLY_REPORT: {"title", "report_week", "report_week_end", "author_name",
-                               "author_account", "status", "result_status", "body_markdown",
-                               "stats_summary", "record_count", "customer_count",
-                               "opportunity_count", "source_cutoff_at", "snapshot_at",
-                               "draft_version", "generated_at", "updated_at", "published_at",
-                               "feishu_push_status", "feishu_message_id", "detail_url"},
 }
-NOTIFIABLE = frozenset({ObjectKind.CUSTOMER, ObjectKind.OPPORTUNITY, ObjectKind.VISIT,
-                        ObjectKind.WEEKLY_REPORT})
+DEFAULT_CREATE_NOTIFICATIONS = frozenset({ObjectKind.CUSTOMER, ObjectKind.OPPORTUNITY, ObjectKind.VISIT})
+NOTIFIABLE = DEFAULT_CREATE_NOTIFICATIONS | {ObjectKind.TASK, ObjectKind.WEEKLY_REPORT}
 
 
 class TableMapping(StrictModel):
@@ -114,13 +120,18 @@ class NotificationConfig(StrictModel):
     enabled: bool = False
     routing_mode: Literal["single_group", "department_routes"] = "single_group"
     default_chat_id: ChatId | None = None
-    on_create: frozenset[ObjectKind] = NOTIFIABLE
+    # Adding a supported business kind must not opt existing companies into
+    # new external messages. Task notifications require an explicit selection.
+    on_create: frozenset[ObjectKind] = DEFAULT_CREATE_NOTIFICATIONS
+    on_update: frozenset[ObjectKind] = frozenset({ObjectKind.OPPORTUNITY})
     routes: tuple[DepartmentRoute, ...] = ()
 
     @model_validator(mode="after")
     def validate_routes(self):
         if self.on_create - NOTIFIABLE:
-            raise ValueError("当前只允许客户、商机、归档跟进的新增通知")
+            raise ValueError("当前只允许客户、商机、归档跟进、正式任务的新增通知")
+        if self.on_update - {ObjectKind.OPPORTUNITY}:
+            raise ValueError("当前只允许商机的更新通知")
         if self.enabled and not self.default_chat_id:
             raise ValueError("启用通知需要配置默认群")
         departments = [route.department_id for route in self.routes]
@@ -157,6 +168,8 @@ class SyncConfig(StrictModel):
         tables = []
         for kind, mapping in self.mappings.items():
             unknown = set(mapping.fields) - SOURCE_FIELDS[kind] - COMMON_FIELDS
+            if kind == ObjectKind.OPPORTUNITY:
+                unknown = {key for key in unknown if not quarter_field(key)}
             if unknown:
                 raise ValueError(f"{kind}: 未支持的源字段 {', '.join(sorted(unknown))}")
             tables.append(mapping.table_id)

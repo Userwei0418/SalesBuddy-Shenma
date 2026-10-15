@@ -10,7 +10,7 @@ from sales_backend.domain.customer_search import matching_names, phonetic_query
 
 class CustomerMemberRepository:
     async def claim_pool_page(self, connection, *, query=None, limit=50, offset=0,
-                              industry=None, claim_status=None):
+                              industry=None, claim_status=None, business_identity="all"):
         query = query.strip() if query else None
         phonetic = phonetic_query(query)
         names = []
@@ -20,8 +20,8 @@ class CustomerMemberRepository:
             )
             names = await asyncio.to_thread(matching_names, [row["name"] for row in rows], phonetic)
         return json_value(await connection.fetchval(
-            "SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[])",
-            query, limit, offset, industry, claim_status, names,
+            "SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[],$7)",
+            query, limit, offset, industry, claim_status, names, business_identity,
         ))
 
     async def claim_pool_options(self, connection):

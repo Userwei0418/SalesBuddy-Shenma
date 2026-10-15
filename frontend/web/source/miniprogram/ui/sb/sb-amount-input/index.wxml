@@ -1,0 +1,7 @@
+<view class="sb-amount {{disabled ? 'disabled' : ''}} {{layout === 'stacked' ? 'is-stacked' : ''}} {{plain ? 'is-plain' : ''}}" aria-role="group" aria-label="{{label}}">
+  <text wx:if="{{label}}" class="sb-amount-label">{{label}}<text wx:if="{{required}}" class="sb-req" aria-label="必填"> *</text></text>
+  <view class="sb-amount-control">
+    <t-input class="sb-amount-input" type="digit" maxlength="{{maxlength}}" value="{{text}}" placeholder="{{placeholder}}" disabled="{{disabled}}" align="{{layout === 'stacked' ? 'left' : 'right'}}" borderless bind:focus="onFocus" bind:blur="onBlur" bind:change="onInput" />
+    <text class="sb-amount-unit">{{unit}}</text>
+  </view>
+</view>

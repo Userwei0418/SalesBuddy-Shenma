@@ -7,7 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 TargetPeriod = Literal["week", "month", "quarter", "year"]
 TargetScope = Literal["self", "person", "team", "department"]
-TargetKind = Literal["collection", "recognized", "acv", "opportunity_count", "visit_count", "demo_count"]
+# Separate target for the >=30% PPL reserve; it is not weighted or merged into collection.
+TargetKind = Literal["collection", "collection_ppl", "recognized", "acv", "opportunity_count", "visit_count", "demo_count"]
 TargetDepartment = Literal["sales", "fde"]
 
 

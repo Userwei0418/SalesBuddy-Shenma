@@ -1,0 +1,73 @@
+/* 部门产品设计变量 1.5.0-draft.1 · 2026-09-26
+ * 由 build-tokens.mjs 从 tokens.json 生成，请勿手工修改；改 tokens.json 后重新生成。
+ * 目标：微信小程序 WXSS（page 为页面根节点；值为 px 逻辑像素，不是 rpx）。状态：草案：基础与语义层的值来自已确认的 SalesBuddy Web V1.0（design-tokens.css）；主色 #2863CD 已于 2026-09-19 决定沿用；标注「建议」的条目与端侧映射尚未登记采用；原生 App 暂不在范围
+ */
+page {
+  --ui-background: #F5F6F7;
+  --ui-surface: #FFFFFF;
+  --ui-sidebar: #142F54;
+  --ui-ink: #1F2329;
+  --ui-secondary: #646A73;
+  --ui-muted: #646A73;
+  --ui-primary: #2863CD;
+  --ui-primary-hover: #2055B5;
+  --ui-line: #DEE0E3;
+  --ui-selected: #EDF3FF;
+  --ui-focus: #5786DC;
+  --ui-danger: #AC2F28;
+  --ui-danger-soft: #FDE2E2;
+  --ui-danger-accent: #F54A45;
+  --ui-warning: #8F4F04;
+  --ui-warning-soft: #FEEAD2;
+  --ui-warning-accent: #FF8800;
+  --ui-success: #237B19;
+  --ui-success-soft: #D9F5D6;
+  --ui-neutral: #646A73;
+  --ui-neutral-soft: #F2F3F5;
+  --ui-font: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --ui-text-small: 12px;
+  --ui-text-body: 16px;
+  --ui-text-section: 16px;
+  --ui-text-page: 20px;
+  --ui-text-metric: 32px;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-space-4: 16px;
+  --ui-space-6: 24px;
+  --ui-space-8: 32px;
+  --ui-radius-control: 6px;
+  --ui-radius-panel: 8px;
+  --ui-control-height: 36px;
+  --ui-field-height: 44px;
+  --ui-icon-sm: 16px;
+  --ui-icon-md: 20px;
+  --ui-icon-lg: 24px;
+  --ui-shadow-popup: 0 0 1px #0000004d, 0 4px 14px #0000001a;
+  --ui-page-gutter: 16px;
+  --ui-card-padding: 16px;
+  --ui-block-gap: 24px;
+  --ui-touch-target: 44px;
+  --ui-nav-width: 220px;
+  --ui-nav-rail-width: 56px;
+  --ui-list-width: 360px;
+  --ui-tabbar-height: 56px;
+  --ui-on-primary: #FFFFFF;
+  --ui-sidebar-ink: #E7EFFA;
+  --ui-sidebar-nav: #C2D1E6;
+  --ui-sidebar-muted: #B4C7E1;
+  --ui-sidebar-hover: #23466F;
+  --ui-sidebar-active: #2A568B;
+  --ui-sidebar-accent: #91BAFF;
+  --ui-sidebar-focus: #B9D2FF;
+  --ui-overlay: #16161A99;
+  --ui-quadrant-asset: #F4F7FD;
+  --ui-quadrant-attack: #F4F7FD;
+  --ui-quadrant-resource: #FFFFFF;
+  --ui-quadrant-spot: #FFFFFF;
+  --ui-chart-1: #2863CD;
+  --ui-chart-2: #0E8A8A;
+  --ui-chart-3: #6B4FBB;
+  --ui-chart-4: #C7741B;
+  --ui-chart-5: #7A8A9E;
+}

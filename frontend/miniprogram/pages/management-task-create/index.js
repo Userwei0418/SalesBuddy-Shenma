@@ -5,10 +5,14 @@ const uiColors = require("../../utils/uiColors");
  */
 const apiClient = require("../../utils/apiClient");
 const { draftScope } = require("../../utils/draftScope");
-const { allTaskRecipients } = require("../../utils/taskRecipients");
+const { allTaskRecipientDirectory } = require("../../utils/taskRecipients");
+const access = require("../../utils/access");
+const writes=require("../../utils/pageWriteContext").createPageWriteContext(()=>getApp().globalData.session);
 
 Page({
   onPriorityChange(e) { return this.selectPriority({ currentTarget: { dataset: { value: e.detail.value } } }); },
+  onDueChange(e) { const [date,time]=String(e.detail.value||'').split(' '); if(date&&date!==this.data.customDueDate)this.changeDueDate({detail:{value:date}});if(time&&time!==this.data.customDueTime)this.changeDueTime({detail:{value:time}}); },
+
   data: {
     role: "sales",
     roleName: "一线销售",
@@ -17,7 +21,7 @@ Page({
     description: "",
     descriptionCount: 0,
     members: [], recipientLoading:false, recipientError:"",
-    selectedMembers: [], selectedNames: "",
+    selectedMembers: [], selectedNames: "", selectedRecipientIds: [], recipientTeams: [], recipientDefaultTeamId: "",
     recipientOpen: false, recipientQuery: "", recipientRows: [],
     submissionPending: false,
     priorities: ["普通", "中", "高"],
@@ -44,23 +48,27 @@ Page({
   },
 
   onLoad(options = {}) {
+    if(!this.initialFormData)this.initialFormData=JSON.parse(JSON.stringify(this.data));
+    this.pageOptions={...options};
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'management-task-create', options)) return;
     if (!getApp().ensureLogin()) return;
     const app = getApp();
     const session = app.globalData.session;
-    const ownerScope = draftScope(session);
+    this.writeIdentity=access.identity(session);this.loadGeneration=(this.loadGeneration||0)+1;
+    const load=writes.capture(this,()=>this.loadGeneration);
+    const current=()=>!this.isUnloading && load.current();
     if(options && options.adviceId && options.suggestionId){
       this.setData({adviceLoading:true});
       apiClient.getBusinessAdvice(options.adviceId).then(advice=>{
-        if(this.isUnloading || draftScope(app.globalData.session)!==ownerScope)return;
+        if(!current())return;
         const suggestion=(advice.suggestions||[]).find(s=>s.id===options.suggestionId);
         if(advice.status!=='succeeded' || advice.stale || !suggestion || suggestion.decision!=='pending')throw Error('建议已变化或已处理，请返回查看最新建议');
         const dailyVisit=!['fde','fde_lead'].includes(session.role) && advice.subject_kind==='visit' && !advice.opportunity_id;
         this.setData({adviceSource:{dailyVisit,id:suggestion.id,version:suggestion.version_no,title:suggestion.title,opportunityFixed:Boolean(advice.opportunity_id)},description:suggestion.action,
           descriptionCount:suggestion.action.length,taskType:dailyVisit?"daily":"customer",customerId:dailyVisit?'':advice.customer_id,opportunityId:advice.opportunity_id||''});
         this.adviceOpportunityId=advice.opportunity_id||'';if(!dailyVisit)this.hydrateTaskLink();
-      }).catch(error=>{if(!this.isUnloading)this.setData({adviceError:error.message||'建议加载失败'});})
-        .finally(()=>{if(!this.isUnloading)this.setData({adviceLoading:false});});
+      }).catch(error=>{if(current())this.setData({adviceError:error.message||'建议加载失败'});})
+        .finally(()=>{if(current())this.setData({adviceLoading:false});});
     }
     const members = [];
     const voiceExample = "请描述任务交付物、完成标准和截止要求";
@@ -73,7 +81,7 @@ Page({
     const customDueDateLabel = this.formatDateLabel(defaultDueDate);
     this.setData({
       role: session.role,
-      roleName: app.globalData.roles[session.role].name,
+      roleName: session.roleName || app.globalData.roles[session.role].name,
       scope: app.globalData.roles[session.role].scope,
       creatorName: session.userName,
       members,
@@ -93,32 +101,37 @@ Page({
     this.loadRecipients(retryDraft);
     if(this.data.taskType==='customer' && !options.adviceId)this.hydrateTaskLink(retryDraft);
   },
-  loadRecipients(retryDraft=null) {
-    const generation=this.recipientGeneration=(this.recipientGeneration||0)+1,identity=draftScope(getApp().globalData.session);
-    const current=()=>!this.isUnloading&&generation===this.recipientGeneration&&identity===draftScope(getApp().globalData.session);
-    this.setData({recipientLoading:true,recipientError:'',members:[],selectedMembers:[],selectedNames:'',recipientRows:[]});
-    allTaskRecipients(apiClient,current).then((rows) => {
-      if(!current())return;
-      const members = (rows || []).map((item) => {
-        const roleLabel = ({ fde:"FDE",fde_lead:"FDE主管",sales: "一线销售", supervisor: "销售主管", manager: "销售总经理",operations:"运营",administrator:"系统管理员" })[item.role] || item.role;
-        return { ...item, account: item.account_code, initial: item.name.substring(0, 1), roleLabel, pickerLabel: `${item.name} · ${roleLabel} · ${item.team || item.team_name || "未填写部门"}` };
+  loadRecipients(retryDraft=null, reset=false) {
+    if(this.data.submitting || this.data.submissionPending)return;
+    const generation=this.recipientGeneration=(this.recipientGeneration||0)+1,identity=access.identity(getApp().globalData.session);
+    const current=()=>!this.isUnloading&&generation===this.recipientGeneration&&identity===access.identity(getApp().globalData.session);
+    const selectedIds=retryDraft ? [retryDraft.assigneeId] : reset ? [] : this.data.selectedMembers.map(member=>member.id);
+    this.setData({recipientLoading:true,recipientError:'',members:[],recipientTeams:[],recipientDefaultTeamId:'',recipientRows:[],
+      ...(reset?{selectedMembers:[],selectedNames:'',selectedRecipientIds:[]}:{})});
+    return allTaskRecipientDirectory(apiClient,current).then((directory) => {
+      if(!current() || !directory)return;
+      const members = directory.items.map((item) => {
+        const roleLabel = item.role_name || ({ fde:"FDE",fde_lead:"FDE主管",sales: "一线销售", supervisor: "销售主管", manager: "销售总经理",operations:"运营",administrator:"系统管理员" })[item.role] || item.role;
+        const teamLabel = item.team_ids.map(id=>directory.teams.find(team=>team.id===id).name).join('、');
+        return { ...item, account: item.account_code, initial: item.name.substring(0, 1), roleLabel, teamLabel };
       });
-      this.setData({recipientLoading:false,members});
-      this.setSelectedRecipients(retryDraft ? [retryDraft.assigneeId] : []);
+      this.recipientIdentity=identity;
+      this.setData({recipientLoading:false,members,recipientTeams:directory.teams,recipientDefaultTeamId:directory.defaults.team_id});
+      this.setSelectedRecipients(selectedIds);
     }).catch((error) => {if(current())this.setData({recipientLoading:false,recipientError:error.message || "负责人列表加载失败"});});
   },
-  retryRecipients(){this.loadRecipients();},
+  retryRecipients(){return this.loadRecipients();},
   changeTaskType(e){
     if(this.data.submitting||this.data.submissionPending||this.data.adviceSource||this.data.adviceLoading)return;
     const type=e.currentTarget.dataset.type;if(!['daily','customer'].includes(type)||type===this.data.taskType)return;
     this.linkGeneration=(this.linkGeneration||0)+1;this.selectorGeneration=(this.selectorGeneration||0)+1;
-    this.setData({taskType:type,customerId:'',customerName:'',opportunityId:'',opportunityName:'',linkVerified:false,linkLoading:false,linkError:'',selectorOpen:false});this.loadRecipients();
+    this.setData({taskType:type,customerId:'',customerName:'',opportunityId:'',opportunityName:'',linkVerified:false,linkLoading:false,linkError:'',selectorOpen:false});this.loadRecipients(null,true);
   },
   async hydrateTaskLink(retryDraft=null){
-    const generation=this.linkGeneration=(this.linkGeneration||0)+1,identity=draftScope(getApp().globalData.session);
+    const generation=this.linkGeneration=(this.linkGeneration||0)+1,identity=access.identity(getApp().globalData.session);
     const customerId=this.data.customerId,opportunityId=this.data.opportunityId;
     if(!customerId)return;
-    const current=()=>!this.isUnloading&&generation===this.linkGeneration&&identity===draftScope(getApp().globalData.session);
+    const current=()=>!this.isUnloading&&generation===this.linkGeneration&&identity===access.identity(getApp().globalData.session);
     this.setData({linkLoading:true,linkVerified:false,linkError:''});
     try{
       const customer=await apiClient.getCustomerReference(customerId);if(!current())return;
@@ -146,8 +159,8 @@ Page({
   searchTaskChoices(e){this.selectorGeneration=(this.selectorGeneration||0)+1;clearTimeout(this.selectorTimer);this.setData({selectorQuery:e.detail.value,selectorRows:[],selectorMore:false,selectorLoading:true});this.selectorTimer=setTimeout(()=>this.loadTaskChoices(),250);},
   async loadTaskChoices(more=false){
     const append=more===true,offset=append?this.data.selectorOffset:0;
-    const generation=this.selectorGeneration=(this.selectorGeneration||0)+1,identity=draftScope(getApp().globalData.session);
-    const current=()=>!this.isUnloading&&this.data.selectorOpen&&generation===this.selectorGeneration&&identity===draftScope(getApp().globalData.session);
+    const generation=this.selectorGeneration=(this.selectorGeneration||0)+1,identity=access.identity(getApp().globalData.session);
+    const current=()=>!this.isUnloading&&this.data.selectorOpen&&generation===this.selectorGeneration&&identity===access.identity(getApp().globalData.session);
     this.setData({selectorLoading:true,selectorError:''});
     try{
       const result=this.data.selectorKind==='customer'
@@ -167,15 +180,35 @@ Page({
     this.closeTaskSelector();
   },
 
+  onShow() {
+    this.writeHidden=false;
+    if(this.writeIdentity!==undefined && this.writeIdentity!==access.identity(getApp().globalData.session)){
+      this._confirmation=null;this._confirming=false;this._submitted=false;this.pendingSubmission=null;this.completedSubmission=null;
+      this.clearRecordTimer();
+      if(this.recordingInFlight && this.recorderManager)this.recorderManager.stop();
+      this.setData(JSON.parse(JSON.stringify(this.initialFormData || {})));
+      return this.onLoad(this.pageOptions || {});
+    }
+    this.returnAfterSubmission();
+  },
+  returnAfterSubmission(){
+    if(!this.completedSubmission || !this.completedSubmission.visible())return;
+    this.completedSubmission=null;
+    wx.navigateBack();
+  },
+  onHide() {
+    this.writeHidden=true;this._confirmation=null;this._confirming=false;
+    clearTimeout(this.returnTimer);this.closeTaskSelector();this.closeRecipients();
+  },
   onReady() {
     this.initTaskRecorder();
   },
 
   onUnload() {
-    this.isUnloading = true;
+    this.isUnloading = true;this.unloaded=true;this.onHide();
     clearTimeout(this.selectorTimer);
     this.clearRecordTimer();
-    if (this.data.isRecording && this.recorderManager) this.recorderManager.stop();
+    if (this.recordingInFlight && this.recorderManager) this.recorderManager.stop();
   },
 
   formatDateValue(date) {
@@ -206,33 +239,36 @@ Page({
     if (this.recorderManager || !wx.getRecorderManager) return;
     this.recorderManager = wx.getRecorderManager();
     this.recorderManager.onStart(() => {
-      if (this.isUnloading) return;
+      if (this.isUnloading || !this.recordingInFlight || !this.recordingInFlight.current()) return;
       this.setData({ isRecording: true, isStarting: false, isStopping: false, isParsing: false, recordingSeconds: 0, recordingTime: "00:00" });
       this.startRecordTimer();
       wx.vibrateShort({ type: "light" });
     });
     this.recorderManager.onStop((result) => {
+      const voice=this.recordingInFlight;this.recordingInFlight=null;
+      if(this.isUnloading || !voice || !voice.current())return;
       this.clearRecordTimer();
-      if (this.isUnloading) return;
       const duration = result.duration || this.data.recordingSeconds * 1000;
       this.setData({ isRecording: false, isStarting: false, isStopping: false });
       if (duration < 800) {
-        wx.showToast({ title: "录音时间太短，请重新录入", icon: "none" });
+        if(voice.visible())wx.showToast({ title: "录音时间太短，请重新录入", icon: "none" });
         return;
       }
       this.setData({ isParsing: true });
       apiClient.transcribeAudio(result.tempFilePath, "management_task")
-        .then((transcription) => this.applyVoiceDescription(transcription.text))
+        .then((transcription) => {if(voice.current() && voice===this.voiceContext)this.applyVoiceDescription(transcription.text);})
         .catch((error) => {
+          if(!voice.current() || voice!==this.voiceContext)return;
           this.setData({ isParsing: false });
-          wx.showToast({ title: error.message || "语音识别失败", icon: "none" });
+          if(voice.visible())wx.showToast({ title: error.message || "语音识别失败", icon: "none" });
         });
     });
     this.recorderManager.onError((error) => {
+      const voice=this.recordingInFlight;this.recordingInFlight=null;
       this.clearRecordTimer();
-      if (this.isUnloading) return;
+      if (this.isUnloading || !voice || !voice.current()) return;
       this.setData({ isRecording: false, isStarting: false, isStopping: false, isParsing: false });
-      wx.showToast({ title: error.errMsg || "录音失败，请重试", icon: "none" });
+      if(voice.visible())wx.showToast({ title: error.errMsg || "录音失败，请重试", icon: "none" });
     });
   },
 
@@ -244,21 +280,29 @@ Page({
       this.recorderManager.stop();
       return;
     }
+    if(this.recordingInFlight)return;
+    const voice=this.voiceContext=writes.capture(this);
     this.setData({ isStarting: true });
     this.requestRecordPermission(() => {
+      if(!voice.current() || voice!==this.voiceContext)return;
+      if(!voice.visible()){this.setData({isStarting:false});return;}
       this.initTaskRecorder();
       if (!this.recorderManager) {
         this.setData({ isStarting: false });
         wx.showToast({ title: "当前微信版本不支持录音", icon: "none" });
         return;
       }
+      this.recordingInFlight=voice;
       this.recorderManager.start({ duration: 600000, sampleRate: 16000, numberOfChannels: 1, encodeBitRate: 48000, format: "mp3" });
-    }, () => this.setData({ isStarting: false }));
+    }, () => {if(voice.current() && voice===this.voiceContext)this.setData({ isStarting: false });});
   },
 
   requestRecordPermission(onGranted, onDenied) {
+    const context=this.voiceContext || writes.capture(this);
     wx.getSetting({
       success: (setting) => {
+        if(!context.current())return;
+        if(!context.visible()){onDenied();return;}
         const permission = setting.authSetting["scope.record"];
         if (permission === true) { onGranted(); return; }
         if (permission === false) {
@@ -268,15 +312,17 @@ Page({
             confirmText: "去设置",
             confirmColor: uiColors.primary,
             success: (result) => {
+              if(!context.current())return;
+              if(!context.visible()){onDenied();return;}
               if (!result.confirm) { onDenied(); return; }
               wx.openSetting({ success: (openResult) => openResult.authSetting["scope.record"] ? onGranted() : onDenied(), fail: onDenied });
             },
           });
           return;
         }
-        wx.authorize({ scope: "scope.record", success: onGranted, fail: () => { onDenied(); wx.showToast({ title: "未获得麦克风权限", icon: "none" }); } });
+        wx.authorize({ scope: "scope.record", success: onGranted, fail: () => { onDenied(); if(context.visible())wx.showToast({ title: "未获得麦克风权限", icon: "none" }); } });
       },
-      fail: () => { onDenied(); wx.showToast({ title: "无法读取录音权限", icon: "none" }); },
+      fail: () => { onDenied(); if(context.visible())wx.showToast({ title: "无法读取录音权限", icon: "none" }); },
     });
   },
 
@@ -303,13 +349,13 @@ Page({
     const description = (currentDescription ? `${currentDescription}\n${recognizedText}` : recognizedText).slice(0, 500);
     this.setData({ description, descriptionCount: description.length, isParsing: false, voiceFilled: true });
     wx.vibrateShort({ type: "light" });
-    wx.showToast({ title: "语音内容已填入", icon: "success" });
+    if(!this.writeHidden)wx.showToast({ title: "语音内容已填入", icon: "success" });
   },
 
   setSelectedRecipients(ids) {
     const selected = new Set(ids);
     const selectedMembers = this.data.members.filter(member => selected.has(member.id));
-    this.setData({selectedMembers, selectedNames:selectedMembers.map(member=>member.name).join('、')});
+    this.setData({selectedMembers, selectedRecipientIds:selectedMembers.map(member=>member.id), selectedNames:selectedMembers.map(member=>member.name).join('、')});
     this.filterRecipients();
   },
   filterRecipients() {
@@ -321,10 +367,20 @@ Page({
     this.setData({recipientRows});
   },
   openRecipients() {
-    if(this.data.submitting || this.data.submissionPending || this.data.recipientLoading)return;
+    if(this.data.submitting || this.data.submissionPending)return;
     this.setData({recipientOpen:true,recipientQuery:''});this.filterRecipients();
   },
   closeRecipients(){this.setData({recipientOpen:false});},
+  confirmRecipients(e){
+    if(this.data.submitting || this.data.submissionPending || this.data.recipientLoading || this.data.recipientError)return;
+    if(this.recipientIdentity!==access.identity(getApp().globalData.session))return;
+    const ids=e.detail && e.detail.ids;
+    if(!Array.isArray(ids) || ids.length>100 || new Set(ids).size!==ids.length ||
+        ids.some(id=>!this.data.members.some(member=>member.id===id))){
+      this.setData({recipientError:'所选人员已变化，请重新加载'});return;
+    }
+    this.setSelectedRecipients(ids);this.closeRecipients();
+  },
   searchRecipients(e){this.setData({recipientQuery:e.detail.value});this.filterRecipients();},
   toggleRecipient(e) {
     if(this.data.submitting || this.data.submissionPending)return;
@@ -336,11 +392,6 @@ Page({
     else wx.showToast({title:'单次最多选择100人，请分次派发',icon:'none'});
   },
 
-  onDueChange(e) {
-    const [date, time] = String(e.detail.value || "").split(" ");
-    if (date && date !== this.data.customDueDate) this.changeDueDate({ detail: { value: date } });
-    if (time && time !== this.data.customDueTime) this.changeDueTime({ detail: { value: time } });
-  },
   selectPriority(e) {
     if(this.data.submitting || this.data.submissionPending)return;
     this.setData({ selectedPriority: e.currentTarget.dataset.value });
@@ -379,10 +430,16 @@ Page({
       return;
     }
     const description = String(this.data.description || "").trim();
-    if (description.length < 5) {
+    if ([...description].length < 5) {
       wx.showToast({ title: "请填写清晰的任务描述", icon: "none" });
       return;
     }
+    if ([...description].length > 500) {
+      wx.showToast({ title: '任务描述最多填写 500 字，请修改后提交', icon: 'none' });
+      return;
+    }
+    if(this.data.recipientLoading || this.data.recipientError){wx.showToast({title:this.data.recipientError || '请等待人员目录加载',icon:'none'});return;}
+    if(this.recipientIdentity && this.recipientIdentity!==access.identity(getApp().globalData.session)){wx.showToast({title:'当前身份已变化，请重新加载人员目录',icon:'none'});return;}
     const recipients=this.data.selectedMembers.slice();
     if (!recipients.length) {
       wx.showToast({ title: "请选择任务负责人", icon: "none" });
@@ -394,7 +451,9 @@ Page({
       return;
     }
     const session=getApp().globalData.session;
-    const ownerScope=draftScope(session);
+    const ownerScope=draftScope(session),identity=access.identity(session);
+    const confirmation=this._confirmation=writes.capture(this);
+    const signature=this.submissionSignature();
     const source=this.data.adviceSource;
     const inputs=recipients.map(recipient=>({description,associationKind:this.data.taskType,
       assigneeAccount:recipient.account,targetPosition:null,dueAt,priority:this.data.selectedPriority,
@@ -406,20 +465,26 @@ Page({
       content: `负责人：${recipients.map(member=>member.name).join('、')}。每人各一条，独立接受和完成；截止${this.data.selectedDue}。`,
       confirmText: "确认下发", confirmColor: uiColors.primary,
       success: result=>{
-        this._confirming=false;
-        if(!result.confirm || this.isUnloading || this.data.submitting || this._submitted ||
-            ownerScope!==draftScope(getApp().globalData.session))return;
-        this.pendingSubmission={inputs,source,ownerScope,session};
+        if(this._confirmation!==confirmation)return;
+        this._confirmation=null;this._confirming=false;
+        if(!result.confirm || !confirmation.visible() || this.isUnloading || this.data.submitting || this._submitted ||
+            signature!==this.submissionSignature())return;
+        this.pendingSubmission={inputs,source,ownerScope,identity,session:{...session}};
         this.sendSubmission();
       },
-      fail:()=>{this._confirming=false;},
+      fail:()=>{if(this._confirmation===confirmation){this._confirmation=null;this._confirming=false;}},
     });
+  },
+  submissionSignature(){
+    return JSON.stringify([this.data.description,this.data.selectedPriority,this.data.taskType,this.data.customerId,this.data.opportunityId,
+      this.data.selectedMembers.map(member=>[member.id,member.account]),this.data.customDueDate,this.data.customDueTime,this.data.adviceSource]);
   },
   async sendSubmission() {
     const pending=this.pendingSubmission;
     if(!pending || this.isUnloading || this.data.submitting || this._submitted ||
-        pending.ownerScope!==draftScope(getApp().globalData.session))return;
-    const current=()=>!this.isUnloading && pending.ownerScope===draftScope(getApp().globalData.session);
+        pending.identity!==access.identity(getApp().globalData.session) || this.writeHidden)return;
+    const write=writes.begin(this,'submission');if(!write)return;
+    const current=()=>write.current() && this.pendingSubmission===pending;
     this.setData({submitting:true,submissionPending:true});
     const {inputs,source,session}=pending;
     try {
@@ -436,17 +501,17 @@ Page({
       else {tasks=(await apiClient.createTasks(inputs)).items;}
       if(!current())return;
       // Receipt-cache failure must never turn a confirmed success into another business submission.
-      this._submitted=true;this.pendingSubmission=null;
+      this._submitted=true;this.pendingSubmission=null;this.completedSubmission=writes.capture(this);
       try {wx.setStorageSync("lastManagementTaskCreated", {id:tasks[0].id,ids:tasks.map(task=>task.id),
         ownerUserId:session.userId,workspaceId:session.workspaceId});} catch (_) { /* list refresh reads server */ }
-      wx.showToast({title:`已发送${tasks.length}条待办`,icon:'success'});
-      setTimeout(()=>{if(current())wx.navigateBack();},850);
+      if(write.visible())wx.showToast({title:`已发送${tasks.length}条待办`,icon:'success'});
+      this.returnTimer=setTimeout(()=>{if(write.settledVisible())this.returnAfterSubmission();},850);
     }catch(error){
       if(!current())return;
       const rejected=[400,403,404,409,422].includes(error.statusCode);
       if(rejected)this.pendingSubmission=null;
       this.setData({submitting:false,submissionPending:!rejected});
-      wx.showToast({title:error.message || '发送结果未确认，请重试',icon:'none'});
-    }
+      if(write.visible())wx.showToast({title:error.message || '发送结果未确认，请重试',icon:'none'});
+    }finally{write.finish('submitting');}
   },
 });

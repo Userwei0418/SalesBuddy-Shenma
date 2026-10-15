@@ -1,0 +1,1 @@
+{"format":"salesbuddy-instance-upgrade-v1","instance_format":"salesbuddy-instance-v2","database":"transactional-postgresql-16","automatic_database_rollback":false}

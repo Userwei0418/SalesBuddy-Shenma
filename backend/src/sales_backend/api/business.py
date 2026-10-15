@@ -1,42 +1,63 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
-from sales_backend.api.idempotency import MutationKey
+from sales_backend.api.idempotency import MutationKey, require_material_key
 from sales_backend.api.models import VisitCreate
 from sales_backend.contracts.team_directory import TeamDirectory
 from sales_backend.contracts.types import UUIDString
+from sales_backend.contracts.visit_management import VisitManagementPage
 from sales_backend.db import Database
+from sales_backend.domain.activity_window import activity_window_bounds
+from sales_backend.domain.business_read import ReadPermission
+from sales_backend.domain.team_directory import TeamDirectoryPermission
 from sales_backend.domain.concurrency import VersionConflict
 from sales_backend.repositories.dashboard import DashboardRepository
-from sales_backend.repositories.dashboard_scope import dashboard_members, dashboard_team_groups
+from sales_backend.repositories.dashboard_scope import dashboard_members
 from sales_backend.repositories.directory import DirectoryRepository
 from sales_backend.repositories.opportunities import NAME_CONFLICT_MESSAGE, OpportunityRepository
 from sales_backend.repositories.opportunity_overview import opportunity_overview
 from sales_backend.repositories.task_targets import TaskTargetRepository
-from sales_backend.repositories.team_directory import TeamPurpose, attach_member_teams, selectable_teams
+from sales_backend.repositories.team_directory import (
+    TeamPurpose,
+    attach_member_teams,
+    default_team_id,
+    selectable_teams,
+)
+from sales_backend.repositories.visit_management import VisitManagementRepository
 from sales_backend.repositories.visits import VisitRepository
 from sales_backend.repositories.workbench import WorkbenchRepository
 from sales_backend.services.capabilities import require_capability
 from sales_backend.services.dashboard_rankings import dashboard_rankings
 from sales_backend.services.idempotency import execute_mutation
-from sales_backend.services.visit_access import require_visit_recording_scope, require_visit_supplement_scope
+from sales_backend.services.visit_access import (
+    require_visit_recording_scope, require_visit_supplement_scope,
+    validate_visit_attendance, validate_visit_optional_actions,
+)
 from sales_backend.services.visit_archive import archive_visit
 
 router = APIRouter(prefix="/api/v1", tags=["Business"])
 
 
 @router.get('/opportunities/create-options')
-async def opportunity_create_options(identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database)) -> dict:
-    from sales_backend.repositories.authorization_checks import opportunity_creation_options
+async def opportunity_create_options(
+    include_owners: bool = Query(False, description="补充当前授权内的商机负责人选项，不授予组织管理权限"),
+    identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
+) -> dict:
+    from sales_backend.repositories.authorization_checks import (
+        opportunity_creation_form_options,
+        opportunity_creation_options,
+    )
     async with database.transaction(identity.actor, readonly=True) as connection:
-        return await opportunity_creation_options(connection, identity.actor)
+        load = opportunity_creation_form_options if include_owners else opportunity_creation_options
+        return await load(connection, identity.actor)
 
 
 @router.get("/metadata/business-options")
@@ -49,26 +70,36 @@ async def business_options(identity: RequestIdentity = Depends(get_identity)) ->
 @router.get("/directory/teams", response_model=TeamDirectory)
 async def directory_teams(
     purpose: TeamPurpose = 'browse',
+    permission: TeamDirectoryPermission | None = None,
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
     try:
         async with database.transaction(identity.actor, readonly=True) as connection:
-            return {'data_source': 'database', 'teams': await selectable_teams(connection, identity.actor, purpose)}
+            return {'data_source': 'database', 'teams': await selectable_teams(connection, identity.actor, purpose, permission=permission)}
     except PermissionError as exc:
         raise HTTPException(403, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
 
 
-@router.get("/directory/members")
+@router.get("/directory/members", description="授权成员目录；items 包含稳定 id、account_code、全部有效 team_ids；teams 保留空团队；defaults.team_id 为当前人可选的有效主团队或 null。")
 async def directory_members(
+    permission: ReadPermission = "directory.read",
+    include_stats: bool = True,
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
-    async with database.transaction(identity.actor, readonly=True) as connection:
-        items = await DirectoryRepository().members(connection, identity.actor)
-        teams = await selectable_teams(connection, identity.actor)
-        items = await attach_member_teams(connection, identity.actor, items, teams)
-    return {"items": items, "teams": teams, "data_source": "database"}
+    try:
+        async with database.transaction(identity.actor, readonly=True) as connection:
+            items = await DirectoryRepository().members(connection, identity.actor,
+                permission=permission, include_stats=include_stats)
+            teams = await selectable_teams(connection, identity.actor, permission=permission)
+            items = await attach_member_teams(connection, identity.actor, items, teams)
+            primary = await default_team_id(connection, identity.actor, teams)
+        return {"items": items, "teams": teams, "defaults": {"team_id": primary}, "data_source": "database"}
+    except PermissionError as exc:
+        raise HTTPException(403, str(exc)) from exc
 
 
 @router.get("/directory/task-assignees")
@@ -135,15 +166,19 @@ async def dashboard_ranking_view(
             raise HTTPException(422, str(exc)) from exc
 
 
-@router.get("/dashboard/options")
+@router.get("/dashboard/options", description="看板授权目录；members 包含稳定 id、account_code、全部有效 team_ids，teams 为可选团队，defaults.team_id 为当前人可选的有效主团队或 null；保留旧 team_groups。")
 async def dashboard_options(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        groups = await dashboard_team_groups(connection, identity.actor)
-        return {"members": await dashboard_members(connection, identity.actor),
-                "team_groups": groups}
+        teams = await selectable_teams(connection, identity.actor, 'dashboard')
+        members = await dashboard_members(connection, identity.actor)
+        members = await attach_member_teams(connection, identity.actor, members, teams)
+        return {"members": members, "teams": teams,
+                "team_groups": [{"code": "team:" + team["id"], "name": team["name"],
+                                 "team_id": team["id"], "kind": ""} for team in teams],
+                "defaults": {"team_id": await default_team_id(connection, identity.actor, teams)}}
 
 
 @router.get("/dashboard")
@@ -174,18 +209,27 @@ async def opportunities_overview(
     scope: str | None = Query(None, pattern="^(self|team)$"),
     member_id: UUID | None = None,
     member_ids: list[UUID] = Query([], max_length=100),
+    team_id: UUID | None = None,
+    owner_id: UUID | None = None,
     year: int = Query(ge=2000, le=2100),
     quarters: list[int] = Query(default=[], max_length=4),
+    activity_window: Literal["all", "today", "day", "3d", "week", "month", "year"] = Query("all"),
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict:
     if any(quarter < 1 or quarter > 4 for quarter in quarters):
         raise HTTPException(422, "季度只能是1至4")
+    if activity_window != "all":
+        try:
+            activity_window_bounds(datetime.now(ZoneInfo("Asia/Shanghai")).date(), activity_window)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
     try:
         async with database.transaction(identity.actor, readonly=True) as connection:
             return await opportunity_overview(
                 connection, identity.actor, year=year, quarters=quarters,
-                scope=scope, member_id=member_id, member_ids=member_ids,
+                scope=scope, member_id=member_id, member_ids=member_ids, team_id=team_id, owner_id=owner_id,
+                activity_window=activity_window,
             )
     except PermissionError as exc:
         raise HTTPException(403, str(exc)) from exc
@@ -204,10 +248,26 @@ async def opportunity_detail(
     return result
 
 
-@router.get("/opportunities")
+@router.get("/opportunities", description=(
+    "purpose 默认为 list：未传 customer_id 时按商机直接业务范围读取，传入时按该客户全景普通读取范围查询。"
+    "purpose=upstream 使用普通读取范围，强制 trade_relation=distributor，必须传 exclude_customer_id，"
+    "可选 exclude_opportunity_id；不得同时传 customer_id 或其他 trade_relation，冲突返回 422。"
+    "普通贸易关系与排除筛选不推断查询用途；读取范围不授予修改、录入或实际登记权限。"
+    "owner_id 精确筛选稳定成员ID，优先于兼容参数 owner。"
+    "owner_options 为授权的当前成员目录（id/name/account_code/team_ids），不从商机记录推导；"
+    "team_options 保留空团队，defaults.team_id 为当前人可选的有效主团队或 null。"
+    "include_overview=true 时额外返回 overview，统计与 summary.total 相同的完整筛选结果，不受分页影响；"
+    "overview_year 必填，overview_quarters 为空表示跨年，1至4全选表示该年全年。"
+    "原 year/quarters/close_period 仍按预计关单时间筛选商机；overview 的 won 按实际成单日、"
+    "active 按正式跟进日去重且排除输单、newCount 按真实业务建单日统计。"
+    "各指标可能重叠，不能相加；日期按上海业务日，缺失历史日期不补造。"
+    "overview.definition_version=opportunity_filtered_overview_v1；未启用 include_overview 时响应结构不增加 overview。"
+))
 async def opportunities(
+    purpose: Literal["list", "upstream"] = Query("list", description="项目/客户全景列表，或显式的上游总代候选"),
     customer_id: UUID | None = Query(default=None),
     owner: str | None = Query(default=None, max_length=100),
+    owner_id: UUID | None = Query(None, description="稳定负责人ID；提供时优先于旧姓名参数 owner"),
     q: str | None = Query(None, max_length=100),
     stages: list[Literal["identified", "qualified", "solution", "proposal", "negotiation", "won", "lost"]] = Query(
         [], max_length=7
@@ -215,10 +275,15 @@ async def opportunities(
     team: str | None = Query(None, max_length=100),
     team_id: UUID | None = None,
     grade: Literal["A", "B", "C", "D"] | None = None,
-    product_line: str | None = Query(None, max_length=100),
+    product_line: str | None = Query(None, max_length=200),
+    product_line_id: UUID | None = Query(None, description="统一目录产品线ID，匹配物料派生或无物料意向集合"),
     year: int | None = Query(None, ge=2000, le=2100),
     quarters: list[int] = Query([], max_length=4),
     close_period: Literal["all", "month", "quarter", "year"] = "all",
+    include_overview: bool = False,
+    overview_year: int | None = Query(None, ge=2000, le=2100),
+    overview_quarters: list[int] = Query([], max_length=4),
+    activity_window: Literal["all", "today", "day", "3d", "week", "month", "year"] = Query("all"),
     order: Literal["close_date", "quarter_stage"] = "close_date",
     probability: int | None = Query(default=None),
     stage: str | None = Query(default=None, max_length=50),
@@ -227,6 +292,9 @@ async def opportunities(
     page_size: int = Query(default=100, ge=1, le=300),
     offset: int = Query(default=0, ge=0),
     include_closed: bool = False,
+    trade_relation: Literal['direct','distributor','downstream'] | None = None,
+    exclude_customer_id: UUID | None = None,
+    exclude_opportunity_id: UUID | None = None,
     scope: str | None = Query(None, pattern="^(self|team)$"),
     member_id: UUID | None = None,
     member_ids: list[UUID] = Query([], max_length=100),
@@ -235,6 +303,14 @@ async def opportunities(
 ) -> dict:
     if any(quarter not in {1, 2, 3, 4} for quarter in quarters) or (quarters and year is None):
         raise HTTPException(422, "请选择有效年份和季度")
+    if (any(quarter not in {1, 2, 3, 4} for quarter in overview_quarters)
+            or (include_overview and overview_year is None)):
+        raise HTTPException(422, "请选择有效的统计年份和季度")
+    if activity_window != "all":
+        try:
+            activity_window_bounds(datetime.now(ZoneInfo("Asia/Shanghai")).date(), activity_window)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
     if probability is not None and probability not in {10, 30, 50, 70, 90, 100}:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "INVALID_PROBABILITY")
     try:
@@ -242,6 +318,7 @@ async def opportunities(
             result = await OpportunityRepository().page(
                 connection,
                 identity.actor,
+                purpose=purpose,
                 customer_id=customer_id,
                 query=q.strip() if q else None,
                 stages=stages,
@@ -249,11 +326,16 @@ async def opportunities(
                 team_id=team_id,
                 grade=grade,
                 product_line=product_line,
+                product_line_id=product_line_id,
                 year=year,
                 quarters=quarters,
                 close_period=close_period,
+                include_overview=include_overview,
+                overview_year=overview_year,
+                overview_quarters=overview_quarters,
                 order=order,
                 owner_name=owner,
+                owner_id=owner_id,
                 probability=probability,
                 stage_code=stage,
                 close_from=close_from,
@@ -261,9 +343,13 @@ async def opportunities(
                 limit=page_size,
                 offset=offset,
                 include_closed=include_closed,
+                trade_relation=trade_relation,
+                exclude_customer_id=exclude_customer_id,
+                exclude_opportunity_id=exclude_opportunity_id,
                 scope=scope,
                 member_id=member_id,
                 member_ids=member_ids,
+                activity_window=activity_window,
             )
     except PermissionError as exc:
         raise HTTPException(403, str(exc)) from exc
@@ -289,12 +375,21 @@ async def create_visit(
     database: Database = Depends(get_database),
     idempotency_key: MutationKey = None,
 ) -> dict:
+    require_material_key(body.fields.get("_opportunity_mutation") or {}, idempotency_key)
     try:
         async with database.transaction(identity.actor) as connection:
             await require_capability(connection, identity.actor, "visit.create")
             await require_visit_recording_scope(
                 connection, identity.actor, body.customer_id, body.fields.get("opportunity_id")
             )
+            await validate_visit_optional_actions(
+                connection, identity.actor, body.customer_id, body.fields.get("opportunity_id"),
+                mutation=body.fields.get("_opportunity_mutation"),
+                collaborators=body.fields.get("collaborator_ids", []),
+                first_visit=body.fields.get("is_first_visit", False),
+            )
+            await validate_visit_attendance(connection, identity.actor, body.fde_participant_ids,
+                                            body.fields.get("opportunity_id"), body.fields.get("_opportunity_mutation"))
             return await execute_mutation(
                 connection,
                 identity.actor,
@@ -308,6 +403,8 @@ async def create_visit(
                     fields={**body.fields, "_fde_participant_ids": [str(x) for x in body.fde_participant_ids]},
                 ),
             )
+    except asyncpg.DeadlockDetectedError as exc:
+        raise HTTPException(409, "同时有其他修改正在保存，本次归档未完成，请刷新后重试") from exc
     except (FileExistsError, VersionConflict, asyncpg.SerializationError) as exc:
         raise HTTPException(409, str(exc)) from exc
     except asyncpg.UniqueViolationError as exc:
@@ -322,9 +419,56 @@ async def create_visit(
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
 
 
+@router.get("/visits/range", response_model=VisitManagementPage, description=(
+    "PC Web 跟进记录范围读取。保留逐客户 GET /visits 的历史契约；本接口按当前账号 visit.read "
+    "授权范围一次读取多个客户，支持日期、跟进人、团队和关键词筛选，始终只读正式记录。"
+))
+async def visit_range(
+    scope: Literal["all", "mine"] = Query("all"),
+    q: str = Query("", max_length=100),
+    recorder_ids: list[UUID] = Query(default=[], max_length=100),
+    team_id: UUID | None = None,
+    customer_id: UUID | None = None,
+    opportunity_id: UUID | None = None,
+    date_basis: Literal["interaction", "created"] = "interaction",
+    date_from: date | None = None,
+    date_to: date | None = None,
+    page_size: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0, le=100000),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    """Cross-customer read for the Web follow-up/report pages.
+
+    This uses the same RLS-protected projection as the management read model.
+    The optional scope filters narrow the result after authorization; passing an
+    arbitrary team/member ID can only reduce the result and never expands it.
+    """
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(422, "开始日期不能晚于结束日期")
+    if date_to == date.max:
+        raise HTTPException(422, "结束日期超出支持范围")
+    async with database.transaction(identity.actor, readonly=True, isolation="repeatable_read") as connection:
+        return await VisitManagementRepository().page(
+            connection,
+            scope=scope,
+            q=q.strip(),
+            recorder_ids=[str(value) for value in recorder_ids],
+            team_id=str(team_id) if team_id else None,
+            customer_id=str(customer_id) if customer_id else None,
+            opportunity_id=str(opportunity_id) if opportunity_id else None,
+            date_basis=date_basis,
+            date_from=date_from,
+            date_to=date_to,
+            limit=page_size,
+            offset=offset,
+        )
+
+
 @router.get("/visits/{visit_id}", description="按权限读取正式跟进；历史记录可含伙伴主体 partner_id/partner_name，"
             "原跟进人 original_recorder_name、当前管理人 manager_name 及多条 linked_opportunities。"
-            "customer_id 可为空，原跟进次数不转给管理人。")
+            "customer_id 可为空，原跟进次数不转给管理人。返回全文与recording_role_code_snapshot、"
+            "recording_team_id_snapshot、record_source；历史缺失保留null/unknown，不按当前目录回填。")
 async def get_visit(
     visit_id: UUIDString, identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database)
 ) -> dict:

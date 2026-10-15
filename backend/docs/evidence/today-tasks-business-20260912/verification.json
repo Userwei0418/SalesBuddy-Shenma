@@ -1,0 +1,31 @@
+{
+  "source_commit": "e40ba1a",
+  "runtime_source_commit": "fed7895",
+  "non_database_tests": {
+    "passed": 534,
+    "skipped_database_tests": 105,
+    "duration_seconds": 3.58
+  },
+  "isolated_postgres_tests": {
+    "passed": 105,
+    "duration_seconds": 6.62,
+    "role_bypasses_rls": false,
+    "production_database_used": false,
+    "provider_http": "synthetic"
+  },
+  "stage": "/var/tmp/salegent-today-verify-e40ba1a",
+  "archive_sha256": "9c4e8eebe5ed99419f85486d124a58961702617195f0c48a03411731447b1198",
+  "verified_files": 378,
+  "hash_mismatches": [],
+  "temporary_databases_after": 0,
+  "temporary_roles_after": 0,
+  "ruff": "passed",
+  "openapi": "unchanged",
+  "live_release_unchanged": "agent-visit-20260912-bf5bd29",
+  "sixth_published": false,
+  "sixth_live_business_tested": false,
+  "notes": [
+    "First PG attempt:104 passed; timeout fixture failed because a single rollback connection was lent concurrently. Fixed exclusive leasing to match actual asyncpg pool semantics; no runtime changes for that fixture fix.",
+    "No task, app session, model call or production configuration mutation during preflight."
+  ]
+}

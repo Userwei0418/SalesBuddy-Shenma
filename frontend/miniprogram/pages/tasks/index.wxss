@@ -43,3 +43,6 @@ page{background:var(--ui-background)}
 
 
 /* Palette only: original geometry is preserved. */
+
+/* New business controls; existing layout and palette preserved. */
+.upgrade-cancel-action{display:flex;justify-content:flex-end;margin-top:16rpx}.upgrade-cancel-action button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);color:var(--ui-danger);background:var(--ui-surface);font-size:14px;line-height:var(--ui-touch-target)}

@@ -1,0 +1,2124 @@
+{
+  "capability": "operating_report",
+  "case": "off",
+  "started_at": "2026-09-12T09:24:59.475646+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "40ab925104f7b37c2bad3091ce5d95e553cdfa442e672c4b8f4a5322a184ae15",
+    "bytes": 102442,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 5
+      },
+      "windows": {
+        "type": "dict",
+        "count": 3
+      },
+      "visits": {
+        "type": "list",
+        "count": 41
+      },
+      "tasks": {
+        "type": "list",
+        "count": 40
+      },
+      "risks": {
+        "type": "list",
+        "count": 24
+      },
+      "opportunities": {
+        "type": "list",
+        "count": 46
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "a753cfbb-e8be-4481-ae08-91b41d4bd8f2",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 20945
+  },
+  "result": {
+    "sha256": "ff2225b7cea27d51fd0e0addcbae2f89c3c47e7f08b25ea1ede26350a4623c19",
+    "bytes": 15454,
+    "fields": {
+      "safe_customers": {
+        "type": "list",
+        "count": 2,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "attention_customers": {
+        "type": "list",
+        "count": 29,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "action_plan": {
+        "type": "list",
+        "count": 28,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "title": {
+        "type": "str"
+      },
+      "period": {
+        "type": "str"
+      },
+      "scope": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 20948,
+  "validation": [
+    {
+      "input": {
+        "sha256": "ba9aca7697317b56150d37521aa5aca4c9877c644c0591bb00f4013d6166a5d4",
+        "bytes": 15455,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "safe_customers": {
+            "type": "list",
+            "count": 2,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 29,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 28,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "ff2225b7cea27d51fd0e0addcbae2f89c3c47e7f08b25ea1ede26350a4623c19",
+        "bytes": 15454,
+        "fields": {
+          "safe_customers": {
+            "type": "list",
+            "count": 2,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 29,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 28,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "e0a0473f-6999-49e5-b4e5-7e34f1f873ec",
+      "provider": "senseaudio",
+      "operation_id": "a753cfbb-e8be-4481-ae08-91b41d4bd8f2",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:24:59.501489+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:25:20.421738+00:00"
+    }
+  ]
+}

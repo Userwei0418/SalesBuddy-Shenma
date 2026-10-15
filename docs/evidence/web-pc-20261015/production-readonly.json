@@ -1,0 +1,39 @@
+{
+  "checked_at": "2026-10-15T08:37:55.900569+00:00",
+  "base_url": "https://salesbuddy.shenzhoukuntai.com:28899",
+  "method": "GET",
+  "mutations": 0,
+  "checks": {
+    "/api/v1/health/version": {
+      "status": 200,
+      "body": {
+        "mode": "release",
+        "revision": "094841a60c446d88febfdc199be5d0877424193a",
+        "release": "094841a60c446d88febfdc199be5d0877424193a",
+        "expected_schema": "V159"
+      }
+    },
+    "/api/v1/health/ready": {
+      "error": "<urlopen error timed out>"
+    },
+    "/api/v1/health/live": {
+      "status": 200,
+      "body": {
+        "status": "ok"
+      }
+    }
+  },
+  "ready_retry": {
+    "checked_at": "2026-10-15T08:39:09.054335+00:00",
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "checks": {
+        "database": true,
+        "model_gateway_configured": true,
+        "auth_configured": true
+      }
+    },
+    "elapsed_seconds": 0.3
+  }
+}

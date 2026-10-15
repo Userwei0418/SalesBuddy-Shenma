@@ -22,7 +22,7 @@ from web_review_pages_layout import adapt as web_review_pages_layout
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / 'source' / 'miniprogram'
 DIST = ROOT / 'dist'
-WEB_BRAND = '商汤销售小浣熊'
+WEB_BRAND = '神码 SalesBuddy'
 
 def brand_template(text):
     # Only static first-party UI labels; customer and API content is never rewritten.
@@ -50,6 +50,7 @@ def web_api_module(text):
     text = text.replace(identity_check, '    assertCurrentSession(session);\n' + identity_check, 1)
     return text + '''\n// Customer business Web only; uses the existing shared login and refresh path.
 module.exports.weeklyRequest = (path='', options={}) => request({...options, path:'/web/weekly-reports'+path});
+module.exports.listVisitRange = (options={}) => { const parts=[]; for(const [key,value] of Object.entries(options)) { for(const entry of (Array.isArray(value)?value:[value])) { if(entry !== undefined && entry !== null && entry !== '') parts.push(encodeURIComponent(key)+'='+encodeURIComponent(entry)); } } return request({path:'/visits/range?'+parts.join('&')}); };
 '''
 
 
@@ -336,7 +337,7 @@ def build():
             if rel == 'utils/apiClient.js':
                 module = web_api_module(module)
             if rel == 'pages/index/index.js':
-                module = module.replace('我是销售智助，今天可以帮你查看客户、商机和待办。', '我是商汤销售小浣熊，今天可以帮你查看客户、商机和待办。')
+                module = module.replace('我是销售智助，今天可以帮你查看客户、商机和待办。', '我是神码 SalesBuddy，今天可以帮你查看客户、商机和待办。')
             data['modules'][rel[:-3]] = module
         elif path.suffix == '.wxml' and not rel.startswith('templates/'):
             tree, templates = template_record(path)
@@ -389,6 +390,10 @@ def build():
     data['config']['pages'].append(weekly_route)
     data['modules'][weekly_route] = (ROOT / 'web-pages' / 'weekly-report.js').read_text()
     data['pages'][weekly_route] = {'tree': [], 'templates': {}, 'config': {'navigationBarTitleText': '周报'}, 'css': ''}
+    records_route = 'pages/visit-records/index'
+    data['config']['pages'].append(records_route)
+    data['modules'][records_route] = (ROOT / 'web-pages' / 'visit-records.js').read_text()
+    data['pages'][records_route] = {'tree': [], 'templates': {}, 'config': {'navigationBarTitleText': '跟进记录'}, 'css': ''}
     with tempfile.TemporaryDirectory(prefix='.build-', dir=ROOT) as temp:
         stage = Path(temp)
         (stage / 'bundle.js').write_text('window.SALES_BUNDLE=' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n')

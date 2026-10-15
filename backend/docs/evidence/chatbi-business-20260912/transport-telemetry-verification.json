@@ -1,0 +1,24 @@
+{
+  "source_commit": "bd4ebaded9c5bb7e1dbd64cde680340d1f9c80ed",
+  "files_verified": 298,
+  "stage_matches_commit": true,
+  "non_database_tests": {
+    "passed": 423,
+    "skipped_database": 64
+  },
+  "isolated_postgresql_tests": {
+    "passed": 64,
+    "seconds": 3.31
+  },
+  "openapi": "unchanged and synchronized",
+  "ruff": "target files passed",
+  "production_deployed": false,
+  "live_release": "agent-chatbi-20260912-571026f",
+  "pilot_enabled": false,
+  "known_initial_validation_setup_error": "First runner command used absent /var/run/postgresql socket; no database created. Corrected to observed /tmp socket.",
+  "cleanup": {
+    "remaining_integration_databases": 0,
+    "remaining_integration_roles": 0,
+    "verified": true
+  }
+}

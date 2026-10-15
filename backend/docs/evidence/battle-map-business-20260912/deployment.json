@@ -1,0 +1,40 @@
+{
+  "release": "/www/wwwroot/salegent/releases/agent-map-20260912-75d7e36",
+  "commit": "75d7e3683dbb861327d64d01e02de31bcc6e1e1e",
+  "files": 306,
+  "mismatches": [],
+  "rollout": {
+    "00000000-0000-0000-0000-000000000001": {
+      "capabilities": {
+        "battle_map_review": {
+          "enabled": true,
+          "rollout": "production"
+        }
+      }
+    }
+  },
+  "non_database_tests": 448,
+  "isolated_postgres_tests": 69,
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "backup_bytes": 2539508,
+  "backup_archive_list_verified": true,
+  "rollback_release": "agent-chatbi-20260912-571026f",
+  "checked_at": "2026-09-11T19:10:07.372211+00:00",
+  "database_version": "V054",
+  "api_active": true,
+  "worker_active": true,
+  "api_and_worker_cwd_match_release": true,
+  "health_ready": true,
+  "backup_timer": "sales-db-backup.timer",
+  "backup_timer_active": true,
+  "backup_last_result": "success",
+  "dedicated_credential_mode": "0600 root",
+  "frontend_changed": false,
+  "first_candidate_rejection": {
+    "release": "ecb136d",
+    "http_status": 422,
+    "reason": "acceptance header did not contain required UUID",
+    "customer_version_after": 5
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+  "app_id": "bc829ce8-a376-4d87-b00e-0b191940b8df",
+  "name": "销售智助-拜访记录质检",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": null,
+  "snapshot_id": null,
+  "url": "https://123.207.235.181/agents/01a09eff-d317-7725-8941-7b8e37f4a641/configure",
+  "previous_snapshot_id": "01a11665-b3f7-77e3-982b-575461f6d32a",
+  "previous_binding_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "ae7f96c4e0c84acb9de077b5c000e3c27a8b4a9e18321d872ca02ca178c2ec3e",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "synthetic_acceptance": {
+    "status": "pending",
+    "scope": "New v3.16 prompt has publication/readback evidence only; no model call in this publication window. Earlier 13-case evidence is historical_publication_metadata.synthetic_acceptance."
+  },
+  "previous_repository_snapshot_id": "01a11665-b3f7-77e3-982b-575461f6d32a",
+  "metadata_verified_at": "2026-10-15",
+  "metadata_verified_account": "zhouwei5@sensetime.com",
+  "tool_counts": {
+    "dify_tools": 0,
+    "cli_tools": 0
+  },
+  "fallback_model": "glm-5.3-flash",
+  "model_priority_change_authorized": true,
+  "reasoning_effort": "low",
+  "thinking": {
+    "type": "enabled"
+  },
+  "runtime_reasoning_effort_verified": false,
+  "non_prompt_configuration_unchanged": true,
+  "historical_publication_metadata": {
+    "revision": "f185c80b741a9c1b0f98b90ced4acdd30696a5d0439083c9b149f5c68fd8f9b0",
+    "snapshot_id": "01a11665-b3f7-77e3-982b-575461f6d32a",
+    "previous_snapshot_id": "01a0f012-24a7-730b-9391-1dbcfed4642d",
+    "previous_repository_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+    "previous_binding_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+    "metadata_verified_at": "2026-10-07",
+    "prompt_sha256": "8b6b198cf405d805532d362d2fce32f3f52d56f82ae90e2b2197a68f93c71577",
+    "synthetic_acceptance": {
+      "status": "passed",
+      "scope": "13 disposable PostgreSQL/RLS/API live-provider contract, semantic and archive cases; production queue/login excluded",
+      "receipt": "backend/docs/evidence/agent-company-20260924/isolated-live-glmiso.json",
+      "cases": 13,
+      "passed": 13
+    }
+  },
+  "previous_revision": "f185c80b741a9c1b0f98b90ced4acdd30696a5d0439083c9b149f5c68fd8f9b0",
+  "prompt_version": "visit-quality-v3.16-time-scope-20261015",
+  "rendered_prompt_whitespace_removed_sha256": "e9ea486d457accd494044a6198d3692f5a7f365e2ba654d35d33c4a3afb2d8b3",
+  "publication_readback": {
+    "method": "normal authenticated browser UI",
+    "visible_version_label": "版本 37",
+    "visible_version_number": 37,
+    "published_at_display": "2026-10-15 17:45:09",
+    "display_timezone": "Asia/Shanghai",
+    "requested_note": "v3.16 shared-date scope 20261015",
+    "requested_note_applied": false,
+    "note_limitation": "Publish Update submitted immediately without a note dialog; the visible version history and read-only version detail expose no note edit control. No second publish was attempted.",
+    "snapshot_revision_verified": false,
+    "snapshot_revision_limitation": "Not exposed in visible configure/history UI; history attribution UUID is not claimed as snapshot or revision.",
+    "receipt": "backend/docs/evidence/visit-quality-v316-20261015/platform-publication.json",
+    "receipt_sha256": "d4e28fc11edf9bc7e67bad08bb5259d01dc7daadf418eb0c6aff7ef1661761e2",
+    "visible_configuration_unchanged": true,
+    "configuration_verification_scope": "Visible model/parameter controls and resource/env fields before and after prompt edit; current published view confirms model labels and empty resources. Hidden or unexposed settings are not claimed verified."
+  },
+  "metadata_binding_update_ready": false,
+  "db_binding_changed": false
+}

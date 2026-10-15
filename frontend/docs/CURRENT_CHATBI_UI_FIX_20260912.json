@@ -1,0 +1,60 @@
+{
+  "recorded_date": "2026-09-12",
+  "base_commit": "bd9eac3138addc4bc16d8d4b93077f9e7ec9d592",
+  "branch": "codex/fix-chatbi-visible-entry",
+  "loaded_project": "salegent-v1/frontend",
+  "source_patches": [
+    "a5bd47f (apiClient and wait test only)",
+    "a36dc81 (index page and entry test only)"
+  ],
+  "source_sha256": {
+    "miniprogram/pages/index/index.js": "88b8a70ffc09eb63578dc11ff2e6d8134b4e8fe3d8936dc4d38c880d1efdcf8d",
+    "miniprogram/pages/index/index.wxml": "8df95eb4378e113f2d4b50c49e74b09dbebb751e049a1a47cc78e50b69ddb7b4",
+    "miniprogram/utils/apiClient.js": "bb70c320300bc201eebd857ee00c152dcda295b9d02f95ea24423aa412129a55",
+    "tests/chatbi-entry.test.js": "035ec0d8bf0e0b282c0c146a4ed0422ffb468572da52647596db431d93fcdbaa",
+    "tests/chatbi-wait.test.js": "0a5f9fb76a98c1b4082fa68707e5048b03ce1ae9f7e6e128782a9b888c846427"
+  },
+  "tests": {
+    "node_passed": 136,
+    "node_failed": 0,
+    "registered_pages": 24,
+    "static_verifier": "passed",
+    "node_syntax_check": "enabled"
+  },
+  "native": {
+    "tool": "WeChat DevTools Stable 2.02.2608060",
+    "base_library": "3.17.2",
+    "role": "sales general manager",
+    "five_tab_icons_visible": true,
+    "question_input_visible": true,
+    "placeholder": "输入经营问题，或点击语音提问",
+    "placement": "Below the three shortcut buttons and above the native bottom navigation",
+    "three_shortcuts_retained": true,
+    "last_observed_at": "2026-09-12T00:28:00+08:00",
+    "timestamp_precision": "minute",
+    "icons_and_input_visible_together": true,
+    "native_screenshots_exported": false,
+    "new_model_call_initiated_by_agent": false,
+    "microphone_test_initiated_by_agent": false
+  },
+  "icon_diagnosis": {
+    "ten_png_files_present": true,
+    "ten_png_crc_valid": true,
+    "representative_png_visually_valid": true,
+    "tab_config_and_icon_files_unchanged": true,
+    "ordinary_recompile_restored_icons": false,
+    "official_project_close_and_reopen_restored_icons": true,
+    "conclusion": "DevTools resource loading state issue; exact internal cause unproven. No icon asset or tab configuration change needed.",
+    "storage_cleared": false,
+    "auth_changed": false,
+    "other_projects_closed": false
+  },
+  "scope": {
+    "frontend_only": true,
+    "backend_changed": false,
+    "database_changed": false,
+    "production_fde_enabled": false,
+    "additional_agents_integrated": 0,
+    "real_fallback_revalidated": false
+  }
+}

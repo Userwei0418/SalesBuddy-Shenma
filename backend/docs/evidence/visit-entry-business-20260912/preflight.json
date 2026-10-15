@@ -1,0 +1,26 @@
+{
+  "scenario": "normal",
+  "case": "regular",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "scoped sales identity",
+      "passed": true
+    },
+    {
+      "name": "scoped synthetic customer",
+      "passed": true
+    }
+  ],
+  "ids": {},
+  "preflight_only": true,
+  "started_at": "2026-09-12T03:51:56.270090+00:00",
+  "formal_before_fingerprint": "857628dcaf4a6b7e91ceb101c67914e1ab44ecbf6145d8aa7874aa91f43113d2",
+  "input_fingerprint": "4dfc1031f957ac463442c9fe5f1b5e77ac94973843fdd461729781fd53ddbd9f",
+  "preflight_passed": true,
+  "real_business_verified": false,
+  "finished_at": "2026-09-12T03:51:56.302465+00:00"
+}

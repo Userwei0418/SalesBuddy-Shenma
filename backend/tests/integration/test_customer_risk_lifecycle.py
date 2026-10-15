@@ -1,7 +1,6 @@
 """Customer risk lifecycle on PostgreSQL/RLS; only inference and runtime are synthetic."""
 
 import json
-from contextlib import asynccontextmanager
 from copy import deepcopy
 from dataclasses import replace
 from datetime import date
@@ -26,6 +25,7 @@ from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services import customer_risk as business
 from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.runtime_config import RuntimeConfiguration
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.integration.provision import create_owned_customer
 from tests.integration.test_operations_claims_sql import actor
 
@@ -63,12 +63,7 @@ def deterministic_handler(connection, monkeypatch, *, outcome="no_risk_identifie
     settings = replace(get_settings(), database_url="", senseaudio_api_key="", agent_fde_pilot_json="{}",
                        agent_fde_pilot_path="", agent_platform_bindings_json="{}", agent_execution_policy={})
 
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
-
-    handler = business.CustomerRiskReviewHandler(Database(settings, pool=Pool()), settings)
+    handler = business.CustomerRiskReviewHandler(Database(settings, pool=FixtureConnectionPool(connection)), settings)
     provider = SimpleNamespace(calls=[], outcome=outcome, error=None, during_inference=None,
                                runtime=RuntimeConfiguration(settings, {}))
 
@@ -433,7 +428,7 @@ async def test_failed_assessment_links_only_its_current_inference_receipt(
             60 if audit_case == "older_attempt" else 0,
         )
         await connection.execute(
-            "UPDATE agent.inference_operation SET status='failed',error_code='synthetic_failure' WHERE id=$1::uuid",
+            "SELECT security.finish_inference_operation($1::uuid,'failed','{}'::jsonb,'[]'::jsonb,'synthetic_failure')",
             operation_id,
         )
 
@@ -471,7 +466,7 @@ async def test_retried_assessment_links_new_failed_operation_and_preserves_previ
             operation_id, sales_actor.workspace_id, sales_actor.user_id, sales_actor.role.value, job_id,
         )
         await connection.execute(
-            "UPDATE agent.inference_operation SET status='failed',error_code='synthetic_failure' WHERE id=$1::uuid",
+            "SELECT security.finish_inference_operation($1::uuid,'failed','{}'::jsonb,'[]'::jsonb,'synthetic_failure')",
             operation_id,
         )
 

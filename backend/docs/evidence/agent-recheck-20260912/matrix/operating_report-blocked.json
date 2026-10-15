@@ -1,0 +1,244 @@
+{
+  "capability": "operating_report",
+  "case": "blocked",
+  "started_at": "2026-09-12T09:21:31.194639+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "5cecd23fa298bdbced7f2300eb0e4757d0c0a23b8d992fd0df24988cfd935c73",
+    "bytes": 102442,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 5
+      },
+      "windows": {
+        "type": "dict",
+        "count": 3
+      },
+      "visits": {
+        "type": "list",
+        "count": 41
+      },
+      "tasks": {
+        "type": "list",
+        "count": 40
+      },
+      "risks": {
+        "type": "list",
+        "count": 24
+      },
+      "opportunities": {
+        "type": "list",
+        "count": 46
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "91454cce-bcf5-4ad1-8dab-e6a424e5242e",
+    "provider": "senseaudio",
+    "fallback_reason": "ControlledPlatformBlock",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 4906,
+    "platform_run": {
+      "execution_mode": "filtered_facts",
+      "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+      "actual_snapshot_id": null,
+      "runtime_snapshot_verified": false,
+      "tool_authority_issued": false,
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "test_fault_injected": true,
+      "network_dispatch_suppressed": true,
+      "transport": {
+        "http_status": null,
+        "request_started_ms": null,
+        "headers_received_ms": null,
+        "first_body_byte_ms": null,
+        "first_data_event_ms": null,
+        "first_text_ms": null,
+        "stream_completed_ms": null
+      }
+    }
+  },
+  "result": {
+    "sha256": "6fcaccf181552c48246bfd7b14ec6dae11e6ddfa7185d4eb6a10d9bff93fcb11",
+    "bytes": 3463,
+    "fields": {
+      "safe_customers": {
+        "type": "list",
+        "count": 2
+      },
+      "attention_customers": {
+        "type": "list",
+        "count": 5
+      },
+      "action_plan": {
+        "type": "list",
+        "count": 5
+      },
+      "title": {
+        "type": "str"
+      },
+      "period": {
+        "type": "str"
+      },
+      "scope": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 4909,
+  "validation": [
+    {
+      "input": {
+        "sha256": "dbf868873a3c40309bfb8c4b2da0e10937c64545f4a4b77111d0ccf7f0a2e980",
+        "bytes": 3479,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "safe_customers": {
+            "type": "list",
+            "count": 2
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 5
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 5
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "6fcaccf181552c48246bfd7b14ec6dae11e6ddfa7185d4eb6a10d9bff93fcb11",
+        "bytes": 3463,
+        "fields": {
+          "safe_customers": {
+            "type": "list",
+            "count": 2
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 5
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 5
+          },
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "5a4798e5-9519-496c-b4f2-10923ae29171",
+      "provider": "agent_platform",
+      "operation_id": "91454cce-bcf5-4ad1-8dab-e6a424e5242e",
+      "model": "agent:01a09022-d0ec-7703-b59f-0699150d63a7",
+      "attempt": 1,
+      "status": "failed",
+      "started_at": "2026-09-12T09:21:31.211147+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09022-d0ec-7703-b59f-0699150d63a7",
+        "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 102663,
+        "input_sha256": "a54a6558906d43107138fb8506d034757982ae29acfe3ed9ed07073b72927192",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": true,
+        "network_dispatch_suppressed": true
+      },
+      "error_type": "ControlledPlatformBlock",
+      "http_status": null,
+      "finished_at": "2026-09-12T09:21:31.211205+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": null,
+          "request_started_ms": null,
+          "headers_received_ms": null,
+          "first_body_byte_ms": null,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "c3f79a5e-0040-47dc-a39d-8b90f2269b45",
+      "provider": "senseaudio",
+      "operation_id": "91454cce-bcf5-4ad1-8dab-e6a424e5242e",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:21:31.224616+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:21:36.102265+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": true,
+    "network_dispatch_suppressed": true,
+    "transport": {
+      "http_status": null,
+      "request_started_ms": null,
+      "headers_received_ms": null,
+      "first_body_byte_ms": null,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

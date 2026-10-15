@@ -1,0 +1,30 @@
+{
+  "id": "01a09022-bb1a-7dab-8481-917e0472c528",
+  "app_id": "211eace9-c1d3-43a2-b7f0-d0fa27f05e7b",
+  "name": "销售智助-个人客户风险识别-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "ab578998c233d285f864c12275aa2f24bbc71c92964e7f9bb2356513d4f91582",
+  "snapshot_id": "01a0ae35-e58b-792a-b6a2-0e1e4ab4206f",
+  "url": "https://123.207.235.181/agents/01a09022-bb1a-7dab-8481-917e0472c528/configure",
+  "previous_snapshot_id": "01a0a05e-05e2-79b6-8290-4f0e6292980a",
+  "previous_binding_snapshot_id": "01a09217-97c0-7043-adb9-3f46d0bc3c10",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "7dac4679ccad70a616906eeaf221776295aeff3634475464924b7f164b87a8fc",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "synthetic_acceptance": {
+    "status": "passed",
+    "scope": "isolated adapter plus production contract validation; not production business end-to-end",
+    "receipt": "backend/docs/evidence/agent-company-20260924/synthetic-platform.json",
+    "cases": 1,
+    "passed": 1
+  },
+  "previous_repository_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+  "metadata_verified_at": "2026-09-24",
+  "metadata_verified_account": "zhouwei5@sensetime.com",
+  "tool_counts": {
+    "dify_tools": 0,
+    "cli_tools": 0
+  }
+}

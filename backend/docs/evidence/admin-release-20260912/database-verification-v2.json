@@ -1,0 +1,1 @@
+{"role": "sales_runtime", "checks": [{"account": "OPSADMIN", "business_policies": 4, "technical_policies": 7, "audit_cases": 157}, {"account": "XS001", "business_policies": 4, "technical_policies": 7, "audit_cases": 0}], "receipt_write_rollback": true, "completed_receipt_immutable": true}

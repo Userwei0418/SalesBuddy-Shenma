@@ -1,0 +1,521 @@
+{
+  "release": "profile-20260915-8c9e243",
+  "revision": "8c9e2435a546c4eaa6ae69611f0dcf0604b9a651",
+  "verified_at": "2026-09-15T06:05:38.371545+00:00",
+  "services": {
+    "sales-api": {
+      "active": true,
+      "release_cwd_verified": true
+    },
+    "sales-worker": {
+      "active": true,
+      "release_cwd_verified": true
+    }
+  },
+  "health": {
+    "live": "ok",
+    "ready": "ok"
+  },
+  "backup_verified_bytes": 9307386,
+  "source_verification": {
+    "commit": "8c9e2435a546c4eaa6ae69611f0dcf0604b9a651",
+    "verified_source_files": 1314
+  },
+  "database_before": {
+    "source_schema": "V090",
+    "target_schema": "V092",
+    "pending": [
+      "V091",
+      "V092"
+    ],
+    "verified_checksums": 58,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "database_after": {
+    "source_schema": "V092",
+    "target_schema": "V092",
+    "pending": [],
+    "verified_checksums": 60,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "migration_first": [
+    {
+      "key": "S001",
+      "status": "unchanged"
+    },
+    {
+      "key": "V035",
+      "status": "unchanged"
+    },
+    {
+      "key": "V036",
+      "status": "unchanged"
+    },
+    {
+      "key": "V037",
+      "status": "unchanged"
+    },
+    {
+      "key": "V038",
+      "status": "unchanged"
+    },
+    {
+      "key": "V039",
+      "status": "unchanged"
+    },
+    {
+      "key": "V040",
+      "status": "unchanged"
+    },
+    {
+      "key": "V041",
+      "status": "unchanged"
+    },
+    {
+      "key": "V042",
+      "status": "unchanged"
+    },
+    {
+      "key": "V043",
+      "status": "unchanged"
+    },
+    {
+      "key": "V044",
+      "status": "unchanged"
+    },
+    {
+      "key": "V045",
+      "status": "unchanged"
+    },
+    {
+      "key": "V046",
+      "status": "unchanged"
+    },
+    {
+      "key": "V047",
+      "status": "unchanged"
+    },
+    {
+      "key": "V048",
+      "status": "unchanged"
+    },
+    {
+      "key": "V049",
+      "status": "unchanged"
+    },
+    {
+      "key": "V050",
+      "status": "unchanged"
+    },
+    {
+      "key": "V051",
+      "status": "unchanged"
+    },
+    {
+      "key": "V052",
+      "status": "unchanged"
+    },
+    {
+      "key": "V053",
+      "status": "unchanged"
+    },
+    {
+      "key": "V054",
+      "status": "unchanged"
+    },
+    {
+      "key": "V055",
+      "status": "unchanged"
+    },
+    {
+      "key": "V056",
+      "status": "unchanged"
+    },
+    {
+      "key": "V057",
+      "status": "unchanged"
+    },
+    {
+      "key": "V058",
+      "status": "unchanged"
+    },
+    {
+      "key": "V059",
+      "status": "unchanged"
+    },
+    {
+      "key": "V060",
+      "status": "unchanged"
+    },
+    {
+      "key": "V061",
+      "status": "unchanged"
+    },
+    {
+      "key": "V062",
+      "status": "unchanged"
+    },
+    {
+      "key": "V063",
+      "status": "unchanged"
+    },
+    {
+      "key": "V064",
+      "status": "unchanged"
+    },
+    {
+      "key": "V065",
+      "status": "unchanged"
+    },
+    {
+      "key": "V066",
+      "status": "unchanged"
+    },
+    {
+      "key": "V067",
+      "status": "unchanged"
+    },
+    {
+      "key": "V068",
+      "status": "unchanged"
+    },
+    {
+      "key": "V069",
+      "status": "unchanged"
+    },
+    {
+      "key": "V070",
+      "status": "unchanged"
+    },
+    {
+      "key": "V071",
+      "status": "unchanged"
+    },
+    {
+      "key": "V072",
+      "status": "unchanged"
+    },
+    {
+      "key": "V073",
+      "status": "unchanged"
+    },
+    {
+      "key": "V074",
+      "status": "unchanged"
+    },
+    {
+      "key": "V075",
+      "status": "unchanged"
+    },
+    {
+      "key": "V076",
+      "status": "unchanged"
+    },
+    {
+      "key": "V077",
+      "status": "unchanged"
+    },
+    {
+      "key": "V078",
+      "status": "unchanged"
+    },
+    {
+      "key": "V079",
+      "status": "unchanged"
+    },
+    {
+      "key": "V080",
+      "status": "unchanged"
+    },
+    {
+      "key": "V081",
+      "status": "unchanged"
+    },
+    {
+      "key": "V082",
+      "status": "unchanged"
+    },
+    {
+      "key": "V083",
+      "status": "unchanged"
+    },
+    {
+      "key": "V084",
+      "status": "unchanged"
+    },
+    {
+      "key": "V085",
+      "status": "unchanged"
+    },
+    {
+      "key": "V086",
+      "status": "unchanged"
+    },
+    {
+      "key": "V087",
+      "status": "unchanged"
+    },
+    {
+      "key": "V088",
+      "status": "unchanged"
+    },
+    {
+      "key": "V089",
+      "status": "unchanged"
+    },
+    {
+      "key": "V090",
+      "status": "unchanged"
+    },
+    {
+      "key": "V091",
+      "status": "applied"
+    },
+    {
+      "key": "V092",
+      "status": "applied"
+    }
+  ],
+  "migration_second": [
+    {
+      "key": "S001",
+      "status": "unchanged"
+    },
+    {
+      "key": "V035",
+      "status": "unchanged"
+    },
+    {
+      "key": "V036",
+      "status": "unchanged"
+    },
+    {
+      "key": "V037",
+      "status": "unchanged"
+    },
+    {
+      "key": "V038",
+      "status": "unchanged"
+    },
+    {
+      "key": "V039",
+      "status": "unchanged"
+    },
+    {
+      "key": "V040",
+      "status": "unchanged"
+    },
+    {
+      "key": "V041",
+      "status": "unchanged"
+    },
+    {
+      "key": "V042",
+      "status": "unchanged"
+    },
+    {
+      "key": "V043",
+      "status": "unchanged"
+    },
+    {
+      "key": "V044",
+      "status": "unchanged"
+    },
+    {
+      "key": "V045",
+      "status": "unchanged"
+    },
+    {
+      "key": "V046",
+      "status": "unchanged"
+    },
+    {
+      "key": "V047",
+      "status": "unchanged"
+    },
+    {
+      "key": "V048",
+      "status": "unchanged"
+    },
+    {
+      "key": "V049",
+      "status": "unchanged"
+    },
+    {
+      "key": "V050",
+      "status": "unchanged"
+    },
+    {
+      "key": "V051",
+      "status": "unchanged"
+    },
+    {
+      "key": "V052",
+      "status": "unchanged"
+    },
+    {
+      "key": "V053",
+      "status": "unchanged"
+    },
+    {
+      "key": "V054",
+      "status": "unchanged"
+    },
+    {
+      "key": "V055",
+      "status": "unchanged"
+    },
+    {
+      "key": "V056",
+      "status": "unchanged"
+    },
+    {
+      "key": "V057",
+      "status": "unchanged"
+    },
+    {
+      "key": "V058",
+      "status": "unchanged"
+    },
+    {
+      "key": "V059",
+      "status": "unchanged"
+    },
+    {
+      "key": "V060",
+      "status": "unchanged"
+    },
+    {
+      "key": "V061",
+      "status": "unchanged"
+    },
+    {
+      "key": "V062",
+      "status": "unchanged"
+    },
+    {
+      "key": "V063",
+      "status": "unchanged"
+    },
+    {
+      "key": "V064",
+      "status": "unchanged"
+    },
+    {
+      "key": "V065",
+      "status": "unchanged"
+    },
+    {
+      "key": "V066",
+      "status": "unchanged"
+    },
+    {
+      "key": "V067",
+      "status": "unchanged"
+    },
+    {
+      "key": "V068",
+      "status": "unchanged"
+    },
+    {
+      "key": "V069",
+      "status": "unchanged"
+    },
+    {
+      "key": "V070",
+      "status": "unchanged"
+    },
+    {
+      "key": "V071",
+      "status": "unchanged"
+    },
+    {
+      "key": "V072",
+      "status": "unchanged"
+    },
+    {
+      "key": "V073",
+      "status": "unchanged"
+    },
+    {
+      "key": "V074",
+      "status": "unchanged"
+    },
+    {
+      "key": "V075",
+      "status": "unchanged"
+    },
+    {
+      "key": "V076",
+      "status": "unchanged"
+    },
+    {
+      "key": "V077",
+      "status": "unchanged"
+    },
+    {
+      "key": "V078",
+      "status": "unchanged"
+    },
+    {
+      "key": "V079",
+      "status": "unchanged"
+    },
+    {
+      "key": "V080",
+      "status": "unchanged"
+    },
+    {
+      "key": "V081",
+      "status": "unchanged"
+    },
+    {
+      "key": "V082",
+      "status": "unchanged"
+    },
+    {
+      "key": "V083",
+      "status": "unchanged"
+    },
+    {
+      "key": "V084",
+      "status": "unchanged"
+    },
+    {
+      "key": "V085",
+      "status": "unchanged"
+    },
+    {
+      "key": "V086",
+      "status": "unchanged"
+    },
+    {
+      "key": "V087",
+      "status": "unchanged"
+    },
+    {
+      "key": "V088",
+      "status": "unchanged"
+    },
+    {
+      "key": "V089",
+      "status": "unchanged"
+    },
+    {
+      "key": "V090",
+      "status": "unchanged"
+    },
+    {
+      "key": "V091",
+      "status": "unchanged"
+    },
+    {
+      "key": "V092",
+      "status": "unchanged"
+    }
+  ],
+  "agent_configuration_unchanged": true,
+  "environment_files_unchanged": true
+}

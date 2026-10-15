@@ -2,7 +2,7 @@
 (function (global) {
   'use strict';
   const textFields = new Map([
-    ['customer_name', '请输入客户全称'], ['partner_name', '选填，可留空'],
+    ['customer_name', '请输入客户全称'], ['company_reference', '请输入公司客户编号或审批单号'], ['partner_name', '选填，可留空'],
     ['contact_name', '请输入首要联系人姓名'], ['contact_title', '请输入联系人职位'],
   ]);
   const live = page => !page._destroyed && global.SalesRuntime?.current === page && !page.data.accessBlocked;

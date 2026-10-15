@@ -1,0 +1,76 @@
+{
+  "capability": "battle_map_review",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:15:05.163290+00:00",
+  "same_input_sha256": "5f42026c0f60f815cd9976add731c16a06b0d3ca9eae3afe10bcf12d45ef40bb",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "raw_result": {
+    "sha256": "8e9a5c2d12ff0085bb8f25fb008794c4138904c6998767b6a48bc438e8fd047d",
+    "bytes": 1749,
+    "fields": {
+      "potential_score": {
+        "type": "int"
+      },
+      "relationship_score": {
+        "type": "int"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "rationale": {
+        "type": "dict",
+        "count": 2
+      },
+      "evidence": {
+        "type": "list",
+        "count": 3
+      }
+    }
+  },
+  "accepted": true,
+  "result": {
+    "sha256": "e2c1fb57f39321542704c5793a8bdd3c709b45476cf4cf89cfb22af9ce88de70",
+    "bytes": 1779,
+    "fields": {
+      "potential_score": {
+        "type": "float"
+      },
+      "relationship_score": {
+        "type": "float"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "rationale": {
+        "type": "dict",
+        "count": 2
+      },
+      "evidence": {
+        "type": "list",
+        "count": 3
+      },
+      "evaluation_mode": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 13291,
+  "ids": {
+    "task_id": "8c207dcf-d520-4fe5-8ce2-0a19acfb12e8",
+    "message_id": "b70f21b3-17cb-44f1-a2d3-e672fc2d473c",
+    "conversation_id": "7dc3b481-44d9-4b95-8495-695ef8f7d1e1"
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 8961,
+    "first_body_byte_ms": 8961,
+    "first_data_event_ms": 8961,
+    "first_text_ms": 8961,
+    "stream_completed_ms": 13277
+  },
+  "error_code": null,
+  "answer_chars": 911
+}

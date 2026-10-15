@@ -1,0 +1,51 @@
+/* Object context at left, working tab at right. Only wide opportunity details
+   activate this frame; asset-only pages retain their existing presentation. */
+#page-root :is(.web-op-detail-frame,.web-op-identity,.web-op-workarea){display:contents}
+/* Flattening the wrappers must retain the previous flex sizing for asset pages. */
+@media(min-width:601px){
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-op-identity>:is(.actual-heading,.fde-quick-actions,.web-op-summary){flex:none;margin:0}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-op-workarea>.op-detail-tabs{flex:none;margin:0}
+}
+@media(min-width:1180px){
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-detail-frame{display:grid;grid-template-columns:268px minmax(0,1fr);gap:16px;flex:1 1 0;min-width:0;min-height:0;overflow:hidden;align-items:stretch}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-identity{display:flex;flex-direction:column;gap:16px;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:16px;box-sizing:border-box;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-heading{display:flex;flex-direction:column;align-items:flex-start;gap:14px;margin:0}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-heading>view{min-width:0;max-width:100%}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-title{font-size:18px;line-height:26px;overflow-wrap:anywhere}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-eyebrow{font-size:12px;line-height:20px;margin:0 0 4px;color:var(--ui-muted)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-subtitle{font-size:12px;line-height:20px;margin-top:6px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-opportunity-actions{gap:8px;flex-wrap:wrap}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .actual-info{width:32px;height:32px;font-size:14px;box-sizing:border-box}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .fde-quick-actions{display:flex;flex-direction:column;gap:8px;min-width:0;margin:0}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .fde-quick-action{width:100%;max-width:none;margin:0;padding:6px 10px;box-sizing:border-box}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-summary{display:flex;flex-direction:column;gap:0;padding:0;margin:0;border:0;border-radius:0;background:transparent}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-summary>view{min-width:0;padding:12px 0;margin:0;border:0;border-top:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-summary label{margin:0 0 4px;font-size:12px;line-height:18px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-summary text{font-size:13px;line-height:21px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-summary strong{font-size:22px;line-height:28px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea{display:block;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:thin;position:relative;padding:0 12px 12px;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);box-sizing:border-box}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea>.op-detail-tabs{position:sticky;top:0;z-index:6;display:flex;flex-wrap:wrap;gap:0 20px;min-height:44px;margin:0 -12px 12px;padding:0 12px;background:var(--ui-surface);border-bottom:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .op-detail-tab{font-size:13px;line-height:20px;padding:12px 0 10px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-columns{display:contents;overflow:visible}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace :is(.web-op-main,.web-op-aside){min-width:0;min-height:0;overflow:visible;scrollbar-gutter:auto;padding:0;height:auto}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-overview{display:block}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view{margin:0 0 12px;padding:0;border:0;border-radius:0}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view-head{padding:2px 0 10px;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view-head>view>text{font-size:14px;line-height:22px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px;margin:4px 0 12px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view-grid>view{padding:8px 0;gap:3px;border-bottom:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .opportunity-view-grid>view>label{font-size:13px;line-height:21px}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .op-advice{margin:12px 0 0;padding:12px;background:var(--ui-surface-subtle);border:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace :is(.op-advice-summary,.op-advice-message,.op-advice-row>label){font-size:13px;line-height:22px;overflow-wrap:anywhere}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace :is(.op-advice-head,.op-advice-row>text){font-size:13px;line-height:22px;overflow-wrap:anywhere}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .op-advice-head{gap:8px;flex-wrap:wrap}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .op-advice-scope{overflow-wrap:anywhere}
+}
+@media(min-width:1700px){
+ /* A third column is useful only when the native advice panel actually exists. */
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea:has(.op-advice){display:grid;grid-template-columns:minmax(0,1fr) 260px;column-gap:16px;align-content:start;align-items:start}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea:has(.op-advice)>.op-detail-tabs{grid-column:1/-1}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea:has(.op-advice) .web-op-main{grid-column:1;grid-row:2}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .web-op-workarea:has(.op-advice) .web-op-aside{grid-column:2;grid-row:2}
+ body:not(.web-login)[data-route=customer-assets] #page-root .web-opportunity-workspace .op-advice{margin:0}
+}

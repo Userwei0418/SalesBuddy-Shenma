@@ -48,17 +48,36 @@ def plan_counters(node, depth=0):
     ]
 
 
+PLAN_FIELD_NAMES = dict(enumerate((
+    "depth", "Node Type", "Relation Name", "Index Name", "Actual Rows", "Actual Loops",
+    "Shared Hit Blocks", "Shared Read Blocks", "Temp Read Blocks", "Temp Written Blocks",
+    "Plan Rows", "Rows Removed by Filter", "Rows Removed by Join Filter",
+    "Sort Method", "Sort Space Used", "Sort Space Type",
+)))
+PLAN_FIELD_KEYS = {name: str(index) for index, name in PLAN_FIELD_NAMES.items()}
+
+
+def encode_plan_evidence(value):
+    """Lossless fixed-key encoding keeps all plan nodes inside the CI byte cap."""
+    if "history_plan" not in value:
+        return value
+    return {**value, "plan_field_names": PLAN_FIELD_NAMES,
+            "history_plan": [{PLAN_FIELD_KEYS[name]: metric for name, metric in node.items()}
+                             for node in value["history_plan"]]}
+
+
 def emit_plan(value):
     """Optional CI evidence contains only fixture scale, sizes and plan counters."""
-    line = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
     output = os.environ.get("DETAIL_QUERY_EVIDENCE_PATH")
     if output:
+        line = json.dumps(encode_plan_evidence(value), ensure_ascii=False, separators=(",", ":"))
         path = Path(output)
         current_size = path.stat().st_size if path.exists() else 0
         assert current_size + len((line + "\n").encode("utf-8")) < 65536
         with path.open("a", encoding="utf-8") as stream:
             stream.write(line + "\n")
-    print(line)
+    # The job log remains directly readable; only the bounded artifact is encoded.
+    print(json.dumps(value, ensure_ascii=False, separators=(",", ":")))
 
 
 async def test_plan_evidence_retains_nodes_and_counters_without_expanded_predicates():
@@ -88,6 +107,28 @@ async def test_plan_evidence_checks_utf8_budget_before_appending(monkeypatch, tm
     with pytest.raises(AssertionError):
         emit_plan({"diagnostic": "中" * 22000})
     assert output.read_bytes() == previous
+
+
+async def test_plan_artifact_round_trip_preserves_every_node_field_and_counter(monkeypatch, tmp_path):
+    output = tmp_path / "plans.jsonl"
+    monkeypatch.setenv("DETAIL_QUERY_EVIDENCE_PATH", str(output))
+    evidence = {"detail_scale": 1000, "role": "fde_lead", "history_ms": 500.25, "history_plan": [
+        {"depth": 0, "Node Type": "Sort", "Actual Rows": 21, "Actual Loops": 1,
+         "Sort Method": "external merge", "Sort Space Used": 512, "Sort Space Type": "Disk",
+         "Temp Read Blocks": 12, "Temp Written Blocks": 14},
+        {"depth": 1, "Node Type": "Index Scan", "Relation Name": "visit", "Index Name": "history",
+         "Actual Rows": 21, "Actual Loops": 2, "Shared Hit Blocks": 6000, "Shared Read Blocks": 0,
+         "Plan Rows": 3, "Rows Removed by Filter": 1000, "Rows Removed by Join Filter": 9},
+        {"depth": 2, "Node Type": "Result", "Actual Loops": 0},
+    ]}
+    original = json.dumps(evidence, sort_keys=True)
+    emit_plan(evidence)
+    encoded = json.loads(output.read_text())
+    names = encoded.pop("plan_field_names")
+    encoded["history_plan"] = [{names[key]: value for key, value in node.items()}
+                               for node in encoded["history_plan"]]
+    assert encoded == evidence and json.dumps(evidence, sort_keys=True) == original
+    assert len(encoded["history_plan"]) == 3
 
 
 async def histories(connection, person, project, count):

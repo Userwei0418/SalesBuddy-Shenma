@@ -1,0 +1,30 @@
+{
+  "commit": "45efe4460eea529333c799f6dd7e1f205f1d16ca",
+  "release": "/www/wwwroot/salegent/releases/sales-home-20260915-45efe44",
+  "database_before": {
+    "source_schema": "V093",
+    "target_schema": "V094",
+    "pending": [
+      "V094"
+    ],
+    "verified_checksums": 61,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "database_after": {
+    "source_schema": "V094",
+    "target_schema": "V094",
+    "pending": [],
+    "verified_checksums": 62,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "backup_bytes": 9502308,
+  "service_environment_unchanged": true,
+  "agent_bindings_unchanged": true,
+  "applied_migrations": [
+    "V094"
+  ],
+  "migration_replay_unchanged": true,
+  "api_worker_current_release_and_public_health": "passed_by_deploy_forward_release"
+}

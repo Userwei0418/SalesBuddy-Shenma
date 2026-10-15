@@ -13,6 +13,7 @@ import {
   roleOptions,
   people,
   api,
+  readForDialog,
   toast,
   field,
   dialog,
@@ -27,14 +28,21 @@ import {
   bindCommon,
   details,
   jsonBlock,
+  hasPermission,
+  requirePermission,
 } from "./core.js";
 import {partnerFields, bindPartnerFields} from './partners.js';
+import {yuanFromWan, wanFromYuan, bindAmountPreview, confirmOpportunityAmount} from './opportunity-amount.js';
 import {showCustomerDetail} from './customer-detail.js';
-import {editCustomerProfile, customerDataUsage} from './customer-profile.js';
+import {showOpportunityFinance, yuan} from './opportunity-finance.js';
+import {actualHistoryBody, savedHistoryDetails} from './actual-history.js';
+import {editOpportunityMaterials} from './opportunity-materials.js';
+import {productLineFields,productLinePayload} from './opportunity-product-lines.js';
+import {editCustomerProfile} from './customer-profile.js';
 import {capabilityLabel} from './ai-capabilities.js';
 import {agentId, modelName, providers, label, errorName} from './ai-audit-labels.js';
 const btn = (label, action, id = "", style = "") =>
-  `<button class="${style}" data-action="${action}" data-id="${esc(id)}">${esc(label)}</button>`;
+  `<button type="button" class="${style}" data-action="${action}" data-id="${esc(id)}">${esc(label)}</button>`;
 const select = (name, opts) =>
   `<select name="${name}" aria-label="${name}">${opts}</select>`;
 const section = (title) => `<div class="section-title">${esc(title)}</div>`;
@@ -57,9 +65,6 @@ const history = (rows) =>
   rows.length
     ? `<div class="history">${rows.map((x) => `<article><strong>${esc(x.title)}</strong><p>${esc(x.text)}</p><small>${esc(x.meta)}</small></article>`).join("")}</div>`
     : '<p class="help">暂无历史记录</p>';
-async function ensureOrg() {
-  state.org = await api("/organization");
-}
 
 // Only the currently mounted customer / AI page can reuse its auxiliary reads
 // while paging. Querying, navigation, explicit refresh and the dialog's write-
@@ -159,16 +164,21 @@ function pageSections(page, context, definitions) {
     },
   };
 }
-function customerForm(row = {}) {
+export async function customerForm(row = {}) {
   const existing = !!row.id;
-  const body = `<div class="notice">客户资料以公司系统为准。${existing ? "修改后自动保存变更记录。" : "请核实公司已完成建档，再在此录入；创建后进入待认领客户池。"}</div><div class="form-grid">${field("客户名称", "name", row.name, { required: true, full: true })}${!existing ? field("公司客户编号 / 已通过审批单号", "company_reference", "", { required: true, full: true }) : ""}${field("所属行业", "industry", row.industry_code)}${field("客户类型", "customer_type", "", { required: true, select: options(["潜在客户", "商机客户", "已成单客户"], row.customer_type_code || "潜在客户", null) })}${field("客户优先级", "level_code", "", { required: true, select: options(["Tier-1", "Tier-2", "Tier-3"], row.level_code || "Tier-2", null) })}${field("客户来源", "source", "", { required: true, select: options(["销售自拓", "客户转介绍", "市场活动", "销售线索", "合作伙伴", "其他"], row.source_code || "销售线索", null) })}${
+  requirePermission(existing ? 'customer.update' : 'customer.create');
+  const identity=JSON.stringify(state.actor), page=state.page;
+  const directory=existing ? {teams:[]} : await readForDialog('/customers/create-options');
+  if(!directory)return;
+  if(identity!==JSON.stringify(state.actor)||page!==state.page)return;
+  if(!Array.isArray(directory.teams))throw Error('客户创建选项未完整返回，请刷新后重试');
+  if(!existing&&!directory.teams.length)throw Error('当前没有可建档的有效业务团队，请联系本公司管理员配置客户创建范围');
+  const body = `<div class="notice">请核对客户名称与资料。${existing ? "修改后自动保存变更记录。" : "请先确认无同名客户；创建后进入待认领客户池。"}</div><div class="form-grid">${field("客户名称", "name", row.name, { required: true, full: true })}${!existing ? field("外部编号（选填）", "company_reference", "", { full: true }) : ""}${field("所属行业", "industry", row.industry_code)}${field("客户类型", "customer_type", "", { required: true, select: options(["潜在客户", "商机客户", "已成单客户"], row.customer_type_code || "潜在客户", null) })}${field("客户优先级", "level_code", "", { required: true, select: options(["Tier-1", "Tier-2", "Tier-3"], row.level_code || "Tier-2", null) })}${field("客户来源", "source", "", { required: true, select: options(["销售自拓", "客户转介绍", "市场活动", "销售线索", "合作伙伴", "其他"], row.source_code || "销售线索", null) })}${
     !existing
-      ? field("管理部门", "target_team", "", {
+      ? field("管理部门", "target_team_id", "", {
           required: true,
           select: options(
-            state.org.departments
-              .filter((t) => t.status === "active")
-              .map((t) => [t.name, t.name]),
+            directory.teams.map((t) => [t.id, t.name]),
             "",
             "请选择部门",
           ),
@@ -178,7 +188,13 @@ function customerForm(row = {}) {
   dialog(existing ? "编辑客户资料" : "创建客户档案", body, {
     submit: existing ? "保存修改" : "确认建档",
     onSubmit: async (fd, key) => {
+      requirePermission(existing ? 'customer.update' : 'customer.create');
       const data = Object.fromEntries(fd);
+      if(!existing) {
+        const team=directory.teams.find(t=>t.id===data.target_team_id);
+        if(!team)throw Error('请选择当前有效的管理团队');
+        data.target_team=team.name;
+      }
       if (existing) {
         data.version_no = row.version_no;
         for (const k of ["industry", "partner_name"])
@@ -194,14 +210,15 @@ function customerForm(row = {}) {
   });
 }
 async function customerDetail(id) {
-  return showCustomerDetail(id, customerId => {
+  requirePermission('customer.read');
+  return showCustomerDetail(id, hasPermission('opportunity.read') ? customerId => {
     state.page = "opportunities";
     state.filters = {customer: customerId};
     state.offset = 0;
     document.querySelector("[data-nav=opportunities]").click();
     state.filters = {customer: customerId};
     state.refresh();
-  }, editCustomerProfile);
+  } : null, hasPermission('customer.update') ? editCustomerProfile : null);
 }
 export async function customers(context = {}) {
   let data = {items: []};
@@ -227,13 +244,12 @@ export async function customers(context = {}) {
             "客户优先级",
             "认领人",
             "认领状态",
-            "数据用途 / 批次",
             "创建时间",
             "操作",
           ],
           data.items,
           (r) =>
-            `<tr><td class="title">${esc(r.name)}<small>${esc(r.industry_code || "行业未填写")}</small></td><td>${esc(r.contact_name || "—")}<small>${esc(r.contact_phone || "")}</small></td><td>${esc(r.level_code || "—")}</td><td>${esc(r.owner_name || "—")}</td><td>${badge(r.ownership_state)}</td><td>${esc(customerDataUsage(r))}<small>${esc(r.synthetic_trial_batch_id || "—")}</small></td><td>${date(r.created_at)}</td><td>${btn("客户档案", "detail", r.id, "link")}${btn("编辑资料", "edit", r.id, "link")}${r.ownership_state === "claimed" ? btn("释放", "release", r.id, "link") : r.ownership_state === "legacy_review" ? btn("核对归属", "resolve", r.id, "link") : ""}</td></tr>`,
+            `<tr><td class="title">${esc(r.name)}<small>${esc(r.industry_code || "行业未填写")}</small></td><td>${esc(r.contact_name || "—")}<small>${esc(r.contact_phone || "")}</small></td><td>${esc(r.level_code || "—")}</td><td>${esc(r.owner_name || "—")}</td><td>${badge(r.ownership_state)}</td><td>${date(r.created_at)}</td><td>${btn("客户档案", "detail", r.id, "link")}${hasPermission('customer.update') && r.can_update ? btn("编辑资料", "edit", r.id, "link") : ''}${r.ownership_state === "claimed" && hasPermission('customer.release') && r.can_release ? btn("释放", "release", r.id, "link") : r.ownership_state === "legacy_review" && hasPermission('customer.resolve_owner') && r.can_resolve_owner ? btn("核对归属", "resolve", r.id, "link") : ""}</td></tr>`,
         ) +
         pager(data.total, offset);
       },
@@ -244,7 +260,7 @@ export async function customers(context = {}) {
       head(
         "客户管理",
         "核实公司建档结果，维护客户资料与认领归属。",
-        btn("刷新", "refresh") + btn("导出客户", "export") + btn("＋ 创建客户", "create", "", "primary"),
+        btn("刷新", "refresh") + (hasPermission('customer.export') ? btn("导出客户", "export") : '') + (hasPermission('customer.create') ? btn("＋ 创建客户", "create", "", "primary") : ''),
       ) +
       partial.region("summary") +
       `<div class="card">` +
@@ -270,9 +286,6 @@ export async function customers(context = {}) {
             ),
           ) +
           select("owner", people(state.filters.owner, "全部认领人")) +
-          select("data_kind", options([["production","正式业务"],["demo","试用模拟"],["test","测试数据"]],
-            state.filters.data_kind,"全部数据用途")) +
-          `<input name="trial_batch" placeholder="试用数据批次（完整编号）" aria-label="试用数据批次" value="${esc(state.filters.trial_batch || "")}">` +
           `<input name="industry" placeholder="行业" aria-label="行业" value="${esc(state.filters.industry || "")}">`,
       ) +
       partial.region("list") +
@@ -282,9 +295,11 @@ export async function customers(context = {}) {
         create: () => customerForm(),
         edit: editCustomerProfile,
         detail: customerDetail,
-        export: () => download("/customers/export" + query(), "客户列表"),
+        export: () => {requirePermission('customer.export');return download("/customers/export" + query(), "客户列表");},
         release: (id) => {
+          requirePermission('customer.release');
           const r = data.items.find((r) => r.id === id);
+          if(!r?.can_release)throw Error('此客户不在释放认领的授权范围');
           dialog(
             "释放客户认领",
             `<div class="notice amber">${esc(r.name)} 将回到待认领客户池。现有商机、任务和历史记录保留，交接由运营另行处理。</div>` +
@@ -296,6 +311,7 @@ export async function customers(context = {}) {
             {
               submit: "确认释放",
               onSubmit: async (fd, key) => {
+                requirePermission('customer.release');
                 await api(`/customers/${id}/release`, {
                   method: "POST",
                   key,
@@ -310,7 +326,10 @@ export async function customers(context = {}) {
           );
         },
         resolve: async (id) => {
-          const c = await api("/customers/" + id);
+          requirePermission('customer.resolve_owner');
+          if(!data.items.find(r=>r.id===id)?.can_resolve_owner)throw Error('此客户不在核对归属的授权范围');
+          const c = await readForDialog("/customers/" + id);
+          if(!c)return;
           dialog(
             "核对历史认领归属",
             '<div class="notice amber">此客户曾由多人认领。请核实后确定唯一认领人，或释放回客户池。</div>' +
@@ -321,7 +340,7 @@ export async function customers(context = {}) {
                     u.name,
                   ]),
                   "",
-                  "释放回待认领池",
+                  hasPermission('customer.release') && data.items.find(r=>r.id===id)?.can_release ? "释放回待认领池" : "请选择认领人",
                 ),
               }) +
               field("核对说明", "reason", "", {
@@ -332,6 +351,8 @@ export async function customers(context = {}) {
               submit: "确认处理",
               onSubmit: async (fd, key) => {
                 const owner = fd.get("owner");
+                requirePermission(owner ? 'customer.resolve_owner' : 'customer.release');
+                if(!owner&&!data.items.find(r=>r.id===id)?.can_release)throw Error('此客户不在释放认领的授权范围');
                 await api(
                   `/customers/${id}/${owner ? "resolve-owner" : "release"}`,
                   {
@@ -379,7 +400,7 @@ export async function claims() {
         ["申请客户", "申请人", "申请时间", "状态", "审核人 / 意见", "操作"],
         data.items,
         (r) =>
-          `<tr><td class="title">${esc(r.customer_name)}</td><td>${esc(r.applicant_name)}<small>${esc(r.account_code)}</small></td><td>${date(r.requested_at)}</td><td>${badge(r.status)}</td><td>${esc(r.reviewer_name || "—")}<small>${esc(r.decision_reason || "")}</small></td><td>${btn("客户资料", "detail", r.customer_id, "link")}${r.status === "pending" ? btn("审核", "review", r.id, "link") : ""}</td></tr>`,
+          `<tr><td class="title">${esc(r.customer_name || '客户资料未授权')}</td><td>${esc(r.applicant_name)}<small>${esc(r.account_code)}</small></td><td>${date(r.requested_at)}</td><td>${badge(r.status)}</td><td>${esc(r.reviewer_name || "—")}<small>${esc(r.decision_reason || "")}</small></td><td>${hasPermission('customer.read') && r.can_read_customer ? btn("客户资料", "detail", r.customer_id, "link") : ''}${r.status === "pending" && hasPermission('customer.claim_review') && r.can_review ? btn("审核", "review", r.id, "link") : ""}</td></tr>`,
       ) +
       pager(data.total) +
       `</div>`,
@@ -387,11 +408,13 @@ export async function claims() {
       bindCommon(root, {
         detail: customerDetail,
         review: (id) => {
+          requirePermission('customer.claim_review');
           const r = data.items.find((x) => x.id === id);
+          if(!r?.can_review)throw Error('此客户不在认领审批的授权范围');
           dialog(
             "审核客户认领",
             details([
-              ["客户", r.customer_name],
+              ["客户", r.customer_name || '客户资料未授权'],
               ["申请人", r.applicant_name],
             ]) +
               field("审核结果", "decision", "", {
@@ -411,6 +434,7 @@ export async function claims() {
             {
               submit: "确认审核",
               onSubmit: async (fd, key) => {
+                requirePermission('customer.claim_review');
                 if (
                   fd.get("decision") === "rejected" &&
                   !fd.get("reason").trim()
@@ -439,9 +463,27 @@ const stages = [
   [100, "赢单 Won · 100%"],
   ["lost", "丢单 Lost"],
 ];
-async function opportunityForm(row = {}) {
+const canOpportunity = hasPermission;
+const requireOpportunity = requirePermission;
+export function opportunityCustomerDirectory(query='') {
+  if(canOpportunity('customer.claim_directory'))return '/api/v1/customers/claim-pool?page_size=100&q='+encodeURIComponent(query);
+  if(canOpportunity('customer.read'))return '/customers?limit=100&q='+encodeURIComponent(query);
+  throw Error('当前账号没有可用的客户选择目录，请联系管理员配置客户认领目录或客户查看权限。');
+}
+export async function opportunityForm(row = {}) {
   const editing = !!row.id;
-  const initial = editing ? null : await api("/customers?limit=100");
+  requireOpportunity(editing?'opportunity.update':'opportunity.create');
+  if(editing && row.can_edit!==true)throw Error('此商机不在可编辑的授权范围');
+  const loaded = await readForDialog(() => Promise.all([
+    editing?null:api(opportunityCustomerDirectory()),editing?null:api('/api/v1/opportunities/create-options?include_owners=true'),api('/material-product-lines?status=active'),
+  ]));
+  if(!loaded)return;
+  const [initial, creation, productLineDirectory] = loaded;
+  if(!editing && !Array.isArray(creation.owners))throw Error('创建选项未完整返回，请刷新后重试。');
+  if(!editing && !creation.owners.length)throw Error('当前账号没有可创建商机的负责人和团队范围，请联系管理员。');
+  const owners=editing?[{id:row.owner_user_ref_id,name:row.owner_name || '原负责人'}]:creation.owners;
+  const defaultOwner=editing?row.owner_user_ref_id:(creation.default_owner_id || '');
+  const initialOwner=owners.find(u=>u.id===defaultOwner);
   const quarterRows = (row.quarterly_forecasts || [])
     .map(
       (r, i) =>
@@ -470,7 +512,7 @@ async function opportunityForm(row = {}) {
               ),
             },
           )}`
-    }${field("商机名称", "name", row.name, { required: true, full: true })}${field("商机阶段", "stage", "", { required: true, select: options(stages, row.status === "lost" ? "lost" : row.probability || 10, null) })}${field("ACV（万元）", "amount_wan", editing ? Number(row.amount) / 10000 : "", { type: "number", min: "0.0001", step: "0.0001", required: true })}${field("预计关单日期", "expected_close_date", row.expected_close_date, { type: "date", required: true })}${field(
+    }${field("商机名称", "name", row.name, { required: true, full: true })}${field("商机阶段", "stage", "", { required: true, select: options(stages, row.status === "lost" ? "lost" : row.probability || 10, null) })}${field("ACV（万元）", "amount_wan", editing ? wanFromYuan(row.amount) : "", { type: "number", min: "0.000001", step: "0.000001", required: true, placeholder: "例如 10 = 10 万元" })}<p class="help field full" data-amount-preview aria-live="polite"></p>${field("预计关单日期", "expected_close_date", row.expected_close_date, { type: "date", required: true })}${field(
       "负责人",
       "owner_user_ref_id",
       "",
@@ -478,14 +520,12 @@ async function opportunityForm(row = {}) {
         required: !editing,
         disabled: editing,
         select: options(
-          state.org.accounts
-            .filter((u) => u.status === "active" && u.roles.includes("sales"))
-            .map((u) => [u.id, `${u.display_name} · ${u.account_code}`]),
-          row.owner_user_ref_id,
+          owners.map(u => [u.id, u.name+(u.account_code?' · '+u.account_code:'')]),
+          defaultOwner,
           "请选择负责人",
         ),
       },
-    )}${field("产品线", "product_line", row.product_line)}${partnerFields(row)}${field("跟进计划", "follow_up_plan", row.follow_up_plan, { type: "textarea", full: true })}<label class="check field full"><input type="checkbox" name="closure">若涉及赢单、丢单或重新打开，我已核实并确认此状态</label></div><details open><summary class="section-title">季度回款与确收计划</summary><p class="help">30% 及以上阶段须至少填写一个完整季度；按年份与季度分别保存。留空表示未填写，0 表示明确为零；预测不作为实际收入。</p>${quarterRows}<div class="form-grid">${field("新增预测年份", "forecast_year", new Date().getFullYear(), { type: "number", min: 2000, max: 2100 })}${field(
+    )}${editing?'':field('所属团队','owner_team_id','',{required:true,select:options((initialOwner?.teams||[]).map(t=>[t.id,t.name]),initialOwner?.default_team_id || '','请选择团队')})}${productLineFields(row,productLineDirectory)}${partnerFields(row)}${field("跟进计划", "follow_up_plan", row.follow_up_plan, { type: "textarea", full: true })}<label class="check field full"><input type="checkbox" name="closure">若涉及赢单、丢单或重新打开，我已核实并确认此状态</label></div><details open><summary class="section-title">季度回款与确收计划</summary><p class="help">30% 及以上阶段须至少填写一个完整季度；按年份与季度分别保存。留空表示未填写，0 表示明确为零；预测不作为实际收入。</p>${quarterRows}<div class="form-grid">${field("新增预测年份", "forecast_year", new Date().getFullYear(), { type: "number", min: 2000, max: 2100 })}${field(
       "新增预测季度",
       "forecast_quarter",
       "",
@@ -506,9 +546,7 @@ async function opportunityForm(row = {}) {
           action: editing ? "update" : "create",
           customer_id: row.customer_id || fd.get("customer_id"),
           name: fd.get("name"),
-          amount: String(
-            Math.round(Number(fd.get("amount_wan")) * 1000000) / 100,
-          ),
+          amount: yuanFromWan(fd.get("amount_wan")),
           probability: stage === "lost" ? row.probability || 10 : Number(stage),
           status: stage === "lost" ? "lost" : stage === "100" ? "won" : "open",
           closure_confirmed: closed,
@@ -516,11 +554,17 @@ async function opportunityForm(row = {}) {
           expected_close_date: fd.get("expected_close_date"),
           sales_channel: fd.get("sales_channel"),
           partner_id: fd.get("sales_channel") === 'partner' ? fd.get("partner_id") : null,
-          product_line: fd.get("product_line"),
+          ...productLinePayload(fd,row),
           follow_up_plan: fd.get("follow_up_plan"),
           owner_user_ref_id:
             row.owner_user_ref_id || fd.get("owner_user_ref_id"),
         };
+        if(!editing){
+          if(!body.owner_user_ref_id)throw Error('请选择商机负责人');
+          if(body.owner_user_ref_id===state.actor.user_id)delete body.owner_user_ref_id;
+          body.owner_team_id=fd.get('owner_team_id');
+          if(!body.owner_team_id)throw Error('请选择商机所属团队');
+        }
         if (editing) {
           body.opportunity_id = row.id;
           body.version_no = row.version_no;
@@ -543,6 +587,18 @@ async function opportunityForm(row = {}) {
         else if (fd.get("forecast_recognized") || fd.get("forecast_collection"))
           throw Error("请为新增预测选择季度");
         if (forecasts.length) body.quarterly_forecasts = forecasts;
+        const page = state.page;
+        const requireCurrentForm = () => {
+          if ($('#dialog-form') !== form || $('#dialog').open === false || state.page !== page) {
+            throw Error('编辑窗口已变化，请重新打开商机核对后保存。');
+          }
+        };
+        await confirmOpportunityAmount(body, row, async () => {
+          const policy = await api('/opportunities/amount-policy');
+          requireCurrentForm();
+          return policy;
+        }, message => window.confirm(message));
+        requireCurrentForm();
         const result = await api("/opportunities", {
           method: "POST",
           key,
@@ -552,6 +608,13 @@ async function opportunityForm(row = {}) {
       },
       afterRender: (d) => {
         bindPartnerFields(d, row);
+        bindAmountPreview(d);
+        if(!editing){
+          $('[name=owner_user_ref_id]',d).onchange=event=>{
+            const selected=owners.find(u=>u.id===event.target.value);
+            $('[name=owner_team_id]',d).innerHTML=options((selected?.teams||[]).map(t=>[t.id,t.name]),selected?.default_team_id || '','请选择团队');
+          };
+        }
         let timer,
           version = 0;
         const input = $("#op-customer-search", d);
@@ -562,9 +625,7 @@ async function opportunityForm(row = {}) {
             timer = setTimeout(async () => {
               try {
                 const result = await api(
-                  "/customers?q=" +
-                    encodeURIComponent(input.value) +
-                    "&limit=100",
+                  opportunityCustomerDirectory(input.value),
                 );
                 if (seq === version)
                   $("[name=customer_id]", d).innerHTML = options(
@@ -581,8 +642,53 @@ async function opportunityForm(row = {}) {
     },
   );
 }
+function opportunityHistoryValue(field, value) {
+  if (field === 'trade_relation') {
+    const relation = value && typeof value === 'object' ? value.relation : value;
+    const names = {direct:'直接销售', distributor:'总代交易', downstream:'下游交易'};
+    const name = relation == null || relation === '' ? '未填写'
+      : Object.hasOwn(names, relation) ? names[relation] : `未登记交易关系（${String(relation)}）`;
+    return value?.upstream ? `${name}（上游商机 ID：${value.upstream}）` : name;
+  }
+  if (field === 'material_lines' && Array.isArray(value)) {
+    if (!value.length) return '无物料';
+    return value.map((row, index) => {
+      if (!row || typeof row !== 'object') return `第 ${index + 1} 项：记录格式待核对`;
+      const snapshot = row.catalog_snapshot || {};
+      // Use only the saved historical snapshot, never today's catalog name.
+      const name = snapshot.name || `物料（当时未记录名称${row.material_id ? '，ID：' + row.material_id : ''}）`;
+      const parts = [name + (snapshot.code ? ` · ${snapshot.code}` : '') + (row.is_active === false ? ' · 已移除' : ''),
+        `数量 ${row.quantity ?? '未填'}${snapshot.unit ? ' ' + snapshot.unit : ''}`,
+        `成交单价 ${yuan(row.unit_price)}`,
+        `用途 ${row.usage === 'self_use' ? '自用' : row.usage === 'resale' ? '转售' : '未填'}`];
+      for (const [key, label, suffix] of [
+        ['expected_delivery_on', '预计交付日', ''], ['expected_start_on', '预计开始日', ''],
+        ['expected_oa_on', '预计 OA 日', ''], ['service_months', '服务月数', ' 个月'],
+        ['expected_account_count', '预计开通账号数', ''], ['expected_consumption_year', '预计消耗年份', ''],
+        ['expected_consumption_quarter', '预计消耗季度', ''], ['note', '说明', ''],
+      ]) {
+        if (row[key] != null && row[key] !== '') parts.push(`${label} ${row[key]}${suffix}`);
+      }
+      if (row.expected_consumption_amount != null) parts.push(`预计消耗金额 ${yuan(row.expected_consumption_amount)}`);
+      return `第 ${index + 1} 项：${parts.join('，')}`;
+    }).join('；');
+  }
+  if (value !== null && typeof value === "object") return '结构化记录（展开完整记录查看）';
+  return String(value); // Preserve the existing scalar/date/amount history text.
+}
+
+function opportunityChangesBody(changes) {
+  if (!changes.length) return '<p class="help">暂无历史记录</p>';
+  return `<div class="history">${changes.map(c =>
+    `<article><strong>${esc(c.operator || '操作人')}</strong>` +
+    (c.changes || []).map(x => x.field === 'operational_actual' ? actualHistoryBody(x)
+      : `<p>${esc(x.label)}：${esc(opportunityHistoryValue(x.field, x.before))} → ${esc(opportunityHistoryValue(x.field, x.after))}</p>`).join('') +
+    `<small>${esc(date(c.created_at))}</small>${savedHistoryDetails(c)}</article>`).join('')}</div>`;
+}
+
 async function opportunityDetail(id) {
-  const r = await api("/opportunities/" + id);
+  const r = await readForDialog("/opportunities/" + id);
+  if(!r)return;
   dialog(
     r.name,
     details([
@@ -602,15 +708,7 @@ async function opportunityDetail(id) {
       ["跟进计划", r.follow_up_plan || "未填写"],
     ]) +
       `<h3>历史修改记录</h3>` +
-      history(
-        r.changes.map((c) => ({
-          title: c.operator || "操作人",
-          text: (c.changes || [])
-            .map((x) => `${x.label}：${x.before} → ${x.after}`)
-            .join("；"),
-          meta: date(c.created_at),
-        })),
-      ) +
+      opportunityChangesBody(r.changes) +
       `<h3>关联拜访记录</h3>` +
       history(
         r.visits.map((v) => ({
@@ -630,13 +728,23 @@ async function opportunityDetail(id) {
     {
       wide: true,
       footer:
-        btn("关联报价", "quote", id) + btn("编辑商机", "edit", id, "primary"),
+        (hasPermission('actual.read')?btn("财务核对", "finance", id):'') +
+        (canOpportunity('opportunity.update') && r.can_edit?btn("交易物料", "materials", id):'') +
+        (canOpportunity('opportunity.quote_create') && r.can_quote?btn("关联报价", "quote", id):'') +
+        (canOpportunity('opportunity.update') && r.can_edit?btn("编辑商机", "edit", id, "primary"):''),
       afterRender: (d) => {
-        d.querySelector("[data-action=edit]").onclick = () => {
+        const finance=d.querySelector('[data-action=finance]');
+        if(finance)finance.onclick=()=>showOpportunityFinance(id).catch(error=>toast(error.message));
+        const materials=d.querySelector('[data-action=materials]');
+        if(materials)materials.onclick=()=>editOpportunityMaterials(id).catch(error=>toast(error.message));
+        const edit=d.querySelector("[data-action=edit]");
+        if(edit)edit.onclick = () => {
           d.close();
           opportunityForm(r);
         };
-        d.querySelector("[data-action=quote]").onclick = () => {
+        const quote=d.querySelector("[data-action=quote]");
+        if(quote)quote.onclick = () => {
+          requireOpportunity('opportunity.quote_create');
           d.close();
           dialog(
             "关联外部报价",
@@ -669,7 +777,8 @@ export async function opportunities() {
       head(
         "商机管理",
         "统一维护商机进展，变化自动通知负责人。",
-        btn("导出商机", "export") + btn("＋ 新增商机", "create", "", "primary"),
+        (canOpportunity('opportunity.export')?btn("导出商机", "export"):'') +
+        (canOpportunity('opportunity.create')?btn("＋ 新增商机", "create", "", "primary"):''),
       ) +
       stats([
         ["商机总数", num(data.total), "当前筛选范围"],
@@ -723,20 +832,21 @@ export async function opportunities() {
         ["商机 / 客户", "阶段", "ACV", "负责人", "预计关单日期", "操作"],
         data.items,
         (r) =>
-          `<tr><td class="title">${esc(r.name)}<small>${esc(r.customer_name)}</small></td><td>${badge(r.status)} ${r.probability ?? "—"}%<div class="progress"><i style="width:${Math.max(0, Math.min(100, Number(r.probability) || 0))}%"></i></div></td><td>${money(r.amount)}</td><td>${esc(r.owner_name || "—")}</td><td>${esc(r.expected_close_date)}</td><td>${btn("详情", "detail", r.id, "link")}${btn("编辑", "edit", r.id, "link")}</td></tr>`,
+          `<tr><td class="title">${esc(r.name)}<small>${esc(r.customer_name)}</small></td><td>${badge(r.status)} ${r.probability ?? "—"}%<div class="progress"><i style="width:${Math.max(0, Math.min(100, Number(r.probability) || 0))}%"></i></div></td><td>${money(r.amount)}</td><td>${esc(r.owner_name || "—")}</td><td>${esc(r.expected_close_date)}</td><td>${btn("详情", "detail", r.id, "link")}${canOpportunity('opportunity.update') && r.can_edit?btn("编辑", "edit", r.id, "link"):''}</td></tr>`,
       ) +
       pager(data.total) +
       `</div><div class="card card-pad"><h2>阶段分布</h2><div class="actions">${data.stages.map((s) => `<span class="pill">${esc(stages.find((x) => String(x[0]) === String(s.status === "lost" ? "lost" : s.probability))?.[1] || s.stage_code)} · ${s.count} 个 · ${money(s.amount)}</span>`).join("") || '<span class="help">当前筛选范围没有商机</span>'}</div></div>`,
     bind: (root) =>
       bindCommon(root, {
         create: () => opportunityForm(),
-        edit: async (id) => opportunityForm(await api("/opportunities/" + id)),
+        edit: async (id) => { const row=await readForDialog("/opportunities/" + id);if(row)return opportunityForm(row); },
         detail: opportunityDetail,
-        export: () => download("/opportunities/export" + query(), "商机列表"),
+        export: () => {requireOpportunity('opportunity.export');return download("/opportunities/export" + query(), "商机列表");},
       }),
   };
 }
 function ruleForm(row = {}) {
+  requirePermission('ai.usage_rules_manage');
   dialog(
     row.id ? "编辑用量提醒" : "新增用量提醒",
     `<div class="notice">达到阈值后提醒运营与系统管理员，不阻断业务调用。未上报的 Token 不计作零。</div><div class="form-grid">${field("规则名称", "name", row.name, { required: true, full: true })}${field("角色范围", "role_code", "", { select: roleOptions(row.role_code) })}${field(
@@ -758,6 +868,7 @@ function ruleForm(row = {}) {
     {
       onSubmit: async (fd, key) => {
         const data = Object.fromEntries(fd);
+        requirePermission('ai.usage_rules_manage');
         data.role_code ||= null;
         data.calls_limit = data.calls_limit ? Number(data.calls_limit) : null;
         data.tokens_limit = data.tokens_limit
@@ -837,11 +948,11 @@ export async function aiUsage(context = {}) {
       label: "用量提醒", path: "/ai/rules", reusable: true,
       render: (result) => {
         rules = result;
-        return `<div class="card"><div class="card-head"><h2>用量提醒</h2>${btn("新增提醒", "rule")}</div>` + table(
+        return `<div class="card"><div class="card-head"><h2>用量提醒</h2>${hasPermission('ai.usage_rules_manage') ? btn("新增提醒", "rule") : ''}</div>` + table(
           ["规则", "角色", "周期", "阈值", "状态", "操作"],
           rules.items,
           (r) =>
-            `<tr><td>${esc(r.name)}</td><td>${esc(roles[r.role_code] || "全部角色")}</td><td>${{ day: "每日", week: "每周", month: "每月" }[r.period]}</td><td>${r.calls_limit ? num(r.calls_limit) + " 次" : ""} ${r.tokens_limit ? num(r.tokens_limit) + " Token" : ""}</td><td>${badge(r.enabled ? "active" : "inactive")}</td><td>${btn("编辑", "edit-rule", r.id, "link")}</td></tr>`,
+            `<tr><td>${esc(r.name)}</td><td>${esc(roles[r.role_code] || "全部角色")}</td><td>${{ day: "每日", week: "每周", month: "每月" }[r.period]}</td><td>${r.calls_limit ? num(r.calls_limit) + " 次" : ""} ${r.tokens_limit ? num(r.tokens_limit) + " Token" : ""}</td><td>${badge(r.enabled ? "active" : "inactive")}</td><td>${hasPermission('ai.usage_rules_manage') ? btn("编辑", "edit-rule", r.id, "link") : ''}</td></tr>`,
         ) +
         `</div><div class="card card-pad"><h2>最近用量告警</h2>` +
         history(
@@ -859,7 +970,7 @@ export async function aiUsage(context = {}) {
       head(
         "AI 调用管理",
         "查看真实调用与角色用量，及时发现异常和用量变化。",
-        `<a class="button" href="#modelApis">接口配置</a>` + btn("刷新", "refresh") + btn("导出角色用量", "export-roles") + btn("导出调用明细", "export"),
+        (hasPermission('ai.config_read') ? `<a class="button" href="#modelApis">接口配置</a>` : '') + btn("刷新", "refresh") + (hasPermission('ai.usage_export') ? btn("导出角色用量", "export-roles") + btn("导出调用明细", "export") : ''),
       ) +
       `<div class="card">` +
       filters(
@@ -873,9 +984,8 @@ export async function aiUsage(context = {}) {
       partial.region("list") + `</div>` + partial.region("rules"),
     bind: (root) =>
       partial.bind(root, {
-        export: () => download("/ai/calls/export" + query(), "AI调用明细"),
-        "export-roles": () =>
-          download("/ai/roles/export" + query(), "AI角色用量"),
+        export: () => {requirePermission('ai.usage_export');return download("/ai/calls/export" + query(), "AI调用明细");},
+        "export-roles": () => {requirePermission('ai.usage_export');return download("/ai/roles/export" + query(), "AI角色用量");},
         rule: () => ruleForm(),
         "edit-rule": (id) => ruleForm(rules.items.find((r) => r.id === id)),
         call: (id) => {
@@ -887,9 +997,11 @@ export async function aiUsage(context = {}) {
               ["操作人", c.actor_name],
               ["当时角色", roles[c.actor_role_code]],
               ["业务能力", capabilityLabel(c.operation_code || c.endpoint_code)],
-              ["业务标识", capabilityLabel(c.operation_code)],
+              ["业务标识", c.operation_code],
+              ["业务操作编号（operation_id）", c.operation_id],
               ["接口", c.provider_code === "agent_platform" ? "中台智能体对话接口" : "原模型调用接口"],
               ["实际调用", modelName(c.model_id)],
+              ["模型标识", c.model_id],
               ["智能体编号", agentId(c.model_id)],
               ["提供方", c.request_summary?.connection_provider || label(providers,c.provider_code,"未记录提供方")],
               ["接口配置版本", c.request_summary?.connection_version ? "第 " + c.request_summary.connection_version + " 版" : "现有默认接口"],
@@ -897,6 +1009,7 @@ export async function aiUsage(context = {}) {
               ["尝试序号", c.attempt_no],
               ["网络状态码", c.http_status],
               ["异常原因", errorName(c.error_code)],
+              ["异常代码", c.error_code],
               ["请求标识", c.request_id],
               ["音频秒数", c.audio_seconds],
             ]) +
@@ -913,7 +1026,7 @@ export async function audit() {
       head(
         "技术审计日志",
         "查询接口请求和底层数据变更，辅助技术核查与问题追溯。",
-        btn("导出审计日志", "export"),
+        hasPermission('audit.export') ? btn("导出审计日志", "export") : '',
       ) +
       `<div class="notice">业务变更在同一数据库事务内留痕。审计记录只读，应用内不可修改或删除。</div><div class="card">` +
       filters(
@@ -941,7 +1054,7 @@ export async function audit() {
       `</div>`,
     bind: (root) =>
       bindCommon(root, {
-        export: () => download("/audit/export" + query(), "技术审计日志"),
+        export: () => {requirePermission('audit.export');return download("/audit/export" + query(), "技术审计日志");},
         detail: (id) => {
           const r = data.items.find((x) => String(x.id) === id);
           dialog(
@@ -970,7 +1083,7 @@ export async function systemLogs() {
       head(
         "系统运行日志",
         "查询服务运行事件、接口异常和权限校验失败，辅助运维排查。",
-        btn("导出系统日志", "export"),
+        hasPermission('audit.events_export') ? btn("导出系统日志", "export") : '',
       ) +
       `<div class="notice">系统日志在线保留 90 天，支持导出存档；业务审计独立永久保留。系统管理员可查看公共服务事件。</div><div class="card">` +
       filters(
@@ -992,8 +1105,7 @@ export async function systemLogs() {
       `</div>`,
     bind: (root) =>
       bindCommon(root, {
-        export: () =>
-          download("/system-events/export" + query(), "系统状态日志"),
+        export: () => {requirePermission('audit.events_export');return download("/system-events/export" + query(), "系统状态日志");},
         detail: (id) => {
           const r = data.items.find((x) => x.id === id);
           dialog(

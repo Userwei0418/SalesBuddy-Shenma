@@ -1,0 +1,399 @@
+{
+  "scope": "isolated synthetic adapter and production contract validation; no production business writes; not production end-to-end receipt",
+  "results": [
+    {
+      "case": "Q01-patched-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "b7fe9a80-8ed3-4fed-8ae6-8d563e1d0524",
+        "message_id": "f8688f00-cb0d-4bf1-8b2a-d557499ea625",
+        "conversation_id": "48a1dd12-435f-4458-a966-ced66c44e6f1"
+      },
+      "input_tokens": 4684,
+      "output_tokens": 252,
+      "elapsed_ms": 3706,
+      "answer_sha256": "fa9840dd794485ad2dfa35fbbbb8f5b3142c75a55cdefd6f456b6b5cbe758fbd",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q05-patched-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "0b45eecf-84dd-41b7-8d09-0d5d58f00fb7",
+        "message_id": "c16e2163-61a7-4291-bb27-1f1d6ca1070e",
+        "conversation_id": "f5a5c471-cdb6-4e05-8c4e-105c854c8266"
+      },
+      "input_tokens": 4670,
+      "output_tokens": 319,
+      "elapsed_ms": 5570,
+      "answer_sha256": "a6e82dd7a7feff265b43cd89b6ff2d4d935f05df615ba414d8d2b545cccc82a9",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 55,
+        "suggestions": [
+          "下一步“近期推进”缺少有效有界时间，请改为具体日期、截止日或可执行时间范围。",
+          "下一步“推进”为泛化动作，请明确具体行动，例如补齐2个样本的缺失资料并重新送测。"
+        ],
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "goal_or_plan_found": false,
+          "suggestions": [
+            "“近期”属于模糊时间，不是有效有界时间，请补充明确日期或时间范围。",
+            "“推进”是泛化动作，请写明具体行动或目标。"
+          ]
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q10-patched-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "aa8399c4-b646-4b39-9c56-07741c30f069",
+        "message_id": "2a3be51a-0fa5-47fc-8979-794e83f74059",
+        "conversation_id": "d8518021-6a09-428c-88b1-fc85402d2897"
+      },
+      "input_tokens": 4684,
+      "output_tokens": 321,
+      "elapsed_ms": 5751,
+      "answer_sha256": "4d896328235297a1d3e24ba6c0217c0642b5202bf6d6654f35a9f06e3c4b1d6d",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 55,
+        "suggestions": [
+          "下一步仅有“近期推进”这类泛化表述，缺少有效有界时间，请补充明确日期、截止时间或可执行时间范围。",
+          "下一步缺少具体行动或目标，请写明要执行的具体事项（如补齐资料后安排复测）。"
+        ],
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "goal_or_plan_found": false,
+          "suggestions": [
+            "“近期”不属于有效有界时间，请改为明确日期或可执行时间范围。",
+            "“推进”是泛化动作，请补充具体行动或目标。"
+          ]
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q12-patched-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "f5af6703-d7f3-486c-8b9c-b63d4369ef21",
+        "message_id": "a941ef2c-9638-4596-9c54-dc28ae176873",
+        "conversation_id": "f5ebc04c-fe1f-4640-896d-55a942aa115b"
+      },
+      "input_tokens": 4691,
+      "output_tokens": 320,
+      "elapsed_ms": 5871,
+      "answer_sha256": "81aa2a939643761b9a8dc6f2da562572adcf243c33e645826c63f79edada0f5c",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q12-patched-2-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "5933fcf3-06bd-4bc5-9655-ae0937cd61c0",
+        "message_id": "2c3073a1-373a-4e2a-b18f-6f45015cbe0e",
+        "conversation_id": "efebbe23-0239-46a9-8a85-22cf0fff1e7c"
+      },
+      "input_tokens": 4691,
+      "output_tokens": 238,
+      "elapsed_ms": 3807,
+      "answer_sha256": "2621c8ed189026d6eb457a462ee4048a3c701376073e91fb8fe1411e73163783",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q12-patched-3-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "8adec829-e970-4c89-97b0-5c03dd7949bd",
+        "message_id": "e66d2e8a-58e3-44fe-b6f9-1162ae3be7f3",
+        "conversation_id": "f28c7d11-a566-4588-83a7-9244cfb1d877"
+      },
+      "input_tokens": 4691,
+      "output_tokens": 238,
+      "elapsed_ms": 3982,
+      "answer_sha256": "2621c8ed189026d6eb457a462ee4048a3c701376073e91fb8fe1411e73163783",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "Q06_expired-patched-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "e21b954e-cbb1-4033-82e3-ef98b7c11923",
+        "message_id": "c9026d48-be37-4395-a0b9-8af05c4497ee",
+        "conversation_id": "08300d28-6461-4279-ac23-06b993ec6021"
+      },
+      "input_tokens": 4679,
+      "output_tokens": 300,
+      "elapsed_ms": 4407,
+      "answer_sha256": "bff34586f3d5065fdc3d639363353de3f94e23113f5125bd0a9f521f41049e08",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 55,
+        "suggestions": [
+          "下一步时间窗已于2020年1月1日整体过期，请更新为当前有效的截止时间或时间范围。"
+        ],
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "goal_or_plan_found": true,
+          "suggestions": [
+            "时间窗（2020年1月1日前）已整体过期，请改为尚未过期的有效有界时间，并与提交方案行动对应。"
+          ]
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "cross_day_expired-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "042ca5e5-2553-4884-a997-6fd3a0ac5346",
+        "message_id": "2e4fa5c0-f696-4029-bcaa-6979bbb835e4",
+        "conversation_id": "7391f17f-4ba1-4f32-9bdb-29cb42fe9915"
+      },
+      "input_tokens": 4664,
+      "output_tokens": 264,
+      "elapsed_ms": 4280,
+      "answer_sha256": "d14f54c003aec823aa7f69852c7bd2551bb42c81086afe13fd422b6c36d016c8",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 55,
+        "suggestions": [
+          "下一步时间已整体过期，请更新为当前有效的有界时间并保持与复盘归档行动对应。"
+        ],
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "goal_or_plan_found": true,
+          "suggestions": [
+            "“下周”所指的时间窗已整体过期，需改为仍有效的有界时间。"
+          ]
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "cross_day_valid-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "9a9cc0f6-5d84-40a9-8b11-e95fbd86d9b4",
+        "message_id": "9e1b609e-8bc2-4327-a006-0421eb4b2fc0",
+        "conversation_id": "62691229-f254-4b08-87e2-9d0db392e3e4"
+      },
+      "input_tokens": 4664,
+      "output_tokens": 222,
+      "elapsed_ms": 3512,
+      "answer_sha256": "ed3c740394969eb511bffc97a6cdc2ab910721e69de9440b222ba344012d1b33",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "cross_day_valid_repeat-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "a3a2e4aa-0010-4692-9b09-0b7cbd793857",
+        "message_id": "62bf2495-0494-4ba5-9bee-515b9c7ce09d",
+        "conversation_id": "5a5c8646-0012-45ef-a068-e1450ab8a7e0"
+      },
+      "input_tokens": 4664,
+      "output_tokens": 223,
+      "elapsed_ms": 3348,
+      "answer_sha256": "ed3c740394969eb511bffc97a6cdc2ab910721e69de9440b222ba344012d1b33",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    },
+    {
+      "case": "cross_year_valid-glmfinal",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d27f-1ef6-7fde-b608-e41973b953b3",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "73a17f9d-7d39-49e4-9938-8749b56203f4",
+        "message_id": "3e1a8751-05c9-42b2-8ae4-6b15c36ba535",
+        "conversation_id": "19fc8a48-6efe-42ec-aa6b-59f4d9f35a2f"
+      },
+      "input_tokens": 4664,
+      "output_tokens": 240,
+      "elapsed_ms": 3382,
+      "answer_sha256": "ed3c740394969eb511bffc97a6cdc2ab910721e69de9440b222ba344012d1b33",
+      "bare_json": true,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "semantic_tgp_matches": true,
+      "contract_status": "passed"
+    }
+  ]
+}

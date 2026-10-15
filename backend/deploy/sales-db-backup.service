@@ -1,0 +1,16 @@
+[Unit]
+Description=Salegent verified PostgreSQL backup and bounded retention
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/sales-db-backup --config /etc/server-retention.conf
+UMask=0027
+# PostgreSQL may use /tmp for its Unix socket; do not enable PrivateTmp.
+TimeoutStartSec=1h
+# Let the parent catch SIGTERM and remove its partial file before cgroup SIGKILL.
+KillMode=mixed
+TimeoutStopSec=15s
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

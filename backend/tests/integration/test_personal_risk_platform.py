@@ -1,7 +1,6 @@
 """RLS facts, real risk persistence and human resolution; synthetic HTTP only."""
 
 import json
-from contextlib import asynccontextmanager
 from copy import deepcopy
 from dataclasses import replace
 from datetime import date
@@ -21,6 +20,7 @@ from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
 from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.agent_run import handler as business
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.test_fde_facts_runtime import Chunks, frame
 from tests.test_personal_risk_platform import ANSWER, configured
 
@@ -63,12 +63,7 @@ async def test_risk_business_keeps_owner_pending_and_human_resolution_boundaries
                      senseaudio_api_key="synthetic-original-key", senseaudio_base_url="https://original.invalid",
                      agent_inference_platform_seconds=2, agent_inference_total_seconds=5)
 
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
-
-    database = Database(config, pool=Pool())
+    database = Database(config, pool=FixtureConnectionPool(connection))
     answer = deepcopy(ANSWER)
     answer["risks"][0]["source_visit_id"] = visit["id"]
     payload = deepcopy(answer)

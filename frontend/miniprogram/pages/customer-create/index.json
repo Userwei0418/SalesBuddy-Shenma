@@ -8,7 +8,10 @@
     "sb-summary-card": "/ui/sb/sb-summary-card/index",
     "sb-textarea": "/ui/sb/sb-textarea/index",
     "t-cell": "/ui/tdesign/cell/cell",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "t-checkbox-group": "/ui/tdesign/checkbox-group/checkbox-group",
+    "t-checkbox": "/ui/tdesign/checkbox/checkbox",
+    "sb-search": "/ui/sb/sb-search/index"
   },
   "homeButton": true
 }

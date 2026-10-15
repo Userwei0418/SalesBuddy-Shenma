@@ -10,6 +10,7 @@
     "sb-summary-card": "/components/review-summary-card/index",
     "sb-select": "/ui/sb/sb-select/index",
     "t-button": "/ui/tdesign/button/button",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "../../components/person-picker/index"
   }
 }

@@ -1,0 +1,201 @@
+{
+  "capability": "opportunity_draft",
+  "case": "off",
+  "started_at": "2026-09-12T09:15:31.666392+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "ae04f5f541969b23b7d02bb0ed1d9e1117a3d6d795719c5e1b1e99408e8b3d02",
+    "bytes": 1079,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 2
+      },
+      "customer": {
+        "type": "dict",
+        "count": 4
+      },
+      "current_opportunities": {
+        "type": "list",
+        "count": 3
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "b6b5860f-15c1-47eb-9011-827b83bb07e2",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 1193
+  },
+  "result": {
+    "sha256": "0c72cc4a54a04e24b83a0af209ec0b2a16656823dc66d0bb0f0239367d6a7005",
+    "bytes": 579,
+    "fields": {
+      "action": {
+        "type": "str"
+      },
+      "opportunity_id": {
+        "type": "str"
+      },
+      "name": {
+        "type": "str"
+      },
+      "probability": {
+        "type": "NoneType"
+      },
+      "status": {
+        "type": "str"
+      },
+      "expected_close_date": {
+        "type": "NoneType"
+      },
+      "amount": {
+        "type": "float"
+      },
+      "partner_name": {
+        "type": "str"
+      },
+      "product_line": {
+        "type": "str"
+      },
+      "rationale": {
+        "type": "str"
+      },
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "missing_fields": {
+        "type": "list",
+        "count": 2
+      },
+      "prompt_version": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 1194,
+  "validation": [
+    {
+      "input": {
+        "sha256": "24017b6c5aecbd70cb047323c9ef17f971af55095a4e778e01450809e1aed3b3",
+        "bytes": 524,
+        "fields": {
+          "action": {
+            "type": "str"
+          },
+          "opportunity_id": {
+            "type": "str"
+          },
+          "name": {
+            "type": "str"
+          },
+          "probability": {
+            "type": "NoneType"
+          },
+          "status": {
+            "type": "str"
+          },
+          "expected_close_date": {
+            "type": "NoneType"
+          },
+          "amount": {
+            "type": "int"
+          },
+          "partner_name": {
+            "type": "str"
+          },
+          "product_line": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "str"
+          },
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 2
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "0c72cc4a54a04e24b83a0af209ec0b2a16656823dc66d0bb0f0239367d6a7005",
+        "bytes": 579,
+        "fields": {
+          "action": {
+            "type": "str"
+          },
+          "opportunity_id": {
+            "type": "str"
+          },
+          "name": {
+            "type": "str"
+          },
+          "probability": {
+            "type": "NoneType"
+          },
+          "status": {
+            "type": "str"
+          },
+          "expected_close_date": {
+            "type": "NoneType"
+          },
+          "amount": {
+            "type": "float"
+          },
+          "partner_name": {
+            "type": "str"
+          },
+          "product_line": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "str"
+          },
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 2
+          },
+          "prompt_version": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "f1ac1c93-cc67-4359-b9fa-a1484f45af1e",
+      "provider": "senseaudio",
+      "operation_id": "b6b5860f-15c1-47eb-9011-827b83bb07e2",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:15:31.680355+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:15:32.859144+00:00"
+    }
+  ]
+}

@@ -4,6 +4,13 @@ from sales_backend.db import json_value
 
 
 class OperationsAccountRepository:
+    async def requires_business_phone(self, connection):
+        # Platform-created demo companies and the original demo keep dedicated
+        # accounts; a phone, when supplied, is still globally unique.
+        return await connection.fetchval("""SELECT NOT (
+            external_workspace_id='demo-sales-workspace' OR COALESCE(attributes->>'purpose','')='demo'
+          ) FROM platform.workspace WHERE id=common.current_workspace_id()""")
+
     async def password_policy(self, connection):
         return json_value(await connection.fetchval("SELECT security.get_password_policy()"))
 
@@ -42,13 +49,19 @@ class OperationsAccountRepository:
           WHERE m.workspace_id=common.current_workspace_id() AND clock_timestamp()>=m.valid_from AND clock_timestamp()<m.valid_to AND t.deleted_at IS NULL
           GROUP BY m.user_ref_id,m.team_id,t.name,t.attributes ORDER BY t.name,m.team_id""")
         accounts = [dict(r) for r in users]
+        # Expose role labels through a narrow organization-read projection, not
+        # the permission configuration tables (which require authorization.read).
+        additional = json_value(await connection.fetchval("SELECT security.organization_permission_roles()"))
         for account in accounts:
             account["memberships"] = [dict(m) for m in appointments if m["user_ref_id"] == account["id"]]
-        quota = json_value(await connection.fetchval("SELECT security.deployment_account_quota_status()"))
-        return {"departments": [dict(r) for r in teams], "accounts": accounts, "account_quota": quota}
+            account["permission_roles"] = [r for r in additional["assignments"] if r["user_ref_id"] == account["id"]]
+        return {"departments": [dict(r) for r in teams], "accounts": accounts,
+                "permission_roles": additional["roles"],
+                "account_quota": json_value(await connection.fetchval("SELECT security.deployment_account_quota_status()")),
+                "management": json_value(await connection.fetchval("SELECT security.organization_management()"))}
 
     async def lock_workspace(self, connection, workspace_id):
-        # Match the database guard's global-before-company lock order.
+        # Same global-before-company order as the deployment quota trigger.
         await connection.execute("SELECT security.lock_deployment_account_quota()")
         await connection.execute(
             "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", f"account-management:{workspace_id}"
@@ -56,7 +69,9 @@ class OperationsAccountRepository:
 
     async def member(self, connection, user_id):
         row = await connection.fetchrow(
-            "SELECT id::text,display_name,status,version_no,COALESCE((attributes->>'platform_managed')::boolean,false) AS platform_managed FROM platform.user_ref WHERE id=$1::uuid AND deleted_at IS NULL FOR UPDATE",
+            """SELECT id::text,display_name,status,phone_number,version_no,
+            COALESCE((attributes->>'platform_managed')::boolean,false) AS platform_managed
+            FROM platform.user_ref WHERE id=$1::uuid AND deleted_at IS NULL FOR UPDATE""",
             user_id,
         )
         if not row:
@@ -110,17 +125,31 @@ class OperationsAccountRepository:
         if memberships is None:
             memberships = [{"team_id": team, "roles": roles}] if team else []
         instant = await connection.fetchval("SELECT clock_timestamp()")
+        # Keep unchanged company management bindings live. Expiring an admin's
+        # own binding before recreating it makes the database identity guards
+        # reject the remaining writes in this same transaction.
+        retained = await connection.fetch(
+            """SELECT id,role_code FROM platform.role_binding
+            WHERE user_ref_id=$1::uuid AND team_id IS NULL
+              AND role_code=ANY($3::text[]) AND data_scope_code='workspace'
+              AND $2>=valid_from AND $2<valid_to""",
+            uid, instant, sorted(set(company_roles or [])),
+        )
+        retained_roles = {row["role_code"] for row in retained}
         await connection.execute(
-            "UPDATE platform.role_binding SET valid_to=$2 WHERE user_ref_id=$1::uuid AND $2>=valid_from AND $2<valid_to",
+            """UPDATE platform.role_binding SET valid_to=$2
+            WHERE user_ref_id=$1::uuid AND $2>=valid_from AND $2<valid_to
+              AND NOT (id=ANY($3::uuid[]))""",
             uid,
             instant,
+            [row["id"] for row in retained],
         )
         await connection.execute(
             "UPDATE platform.team_membership SET valid_to=$2 WHERE user_ref_id=$1::uuid AND $2>=valid_from AND $2<valid_to",
             uid,
             instant,
         )
-        for role in sorted(set(company_roles or [])):
+        for role in sorted(set(company_roles or []) - retained_roles):
             await connection.execute(
                 """INSERT INTO platform.role_binding(workspace_id,user_ref_id,role_code,data_scope_code,valid_from)
                 VALUES($1::uuid,$2::uuid,$3,'workspace',$4)""", actor.workspace_id, uid, role, instant,
@@ -172,7 +201,15 @@ class OperationsAccountRepository:
             "organization_team_id" in data,
             {"organization_team_id": str(data["organization_team_id"])} if data.get("organization_team_id") else {},
         )
-        await self.roles_and_team(connection, actor, uid, data["roles"], data.get("team_id"), data.get("memberships"), data.get("company_roles"))
+        previous = await self.assignments(connection, uid)
+        before = {(m["team_id"], tuple(sorted(m["roles"])), m["is_primary"], m.get("acting", False)) for m in previous}
+        memberships = data.get("memberships")
+        if memberships is None:
+            memberships = [{"team_id": data["team_id"], "roles": data["roles"]}] if data.get("team_id") else []
+        after = {(str(m["team_id"]), tuple(sorted(m["roles"])), str(m["team_id"]) == str(data.get("team_id")), m.get("acting", False)) for m in memberships}
+        current_roles = await connection.fetch("SELECT role_code FROM platform.role_binding WHERE user_ref_id=$1::uuid AND team_id IS NULL AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to", uid)
+        if before != after or {r["role_code"] for r in current_roles} != set(data.get("company_roles") or []):
+            await self.roles_and_team(connection, actor, uid, data["roles"], data.get("team_id"), data.get("memberships"), data.get("company_roles"))
         return {"id": str(uid), "version_no": data["version_no"] + 1, "status": data["status"]}
 
     async def revoke_sessions(self, connection, uid):

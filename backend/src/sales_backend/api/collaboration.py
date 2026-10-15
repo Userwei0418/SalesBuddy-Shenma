@@ -58,6 +58,8 @@ async def update_members(
                     connection, identity.actor, str(opportunity_id), body.member_ids, body.version_no
                 ),
             )
+    except asyncpg.DeadlockDetectedError as exc:
+        raise HTTPException(409, "同时有其他修改正在保存，本次修改未完成，请刷新后重试") from exc
     except (VersionConflict, asyncpg.SerializationError) as exc:
         raise HTTPException(409, "协助人员已更新，请刷新后重试") from exc
     except (PermissionError, asyncpg.InsufficientPrivilegeError) as exc:
@@ -68,7 +70,10 @@ async def update_members(
         raise HTTPException(422, str(exc)) from exc
 
 
-@router.get("/fde/scope-options")
+@router.get("/fde/scope-options", description=(
+    "FDE 画像授权目录；成员保留稳定 id 并提供 account_code；team_ids 仅含本接口可选团队中的有效 FDE/FDE主管归属。"
+    "defaults.team_id 为当前人可选的有效主团队或 null，不用首个团队代替。"
+))
 async def profile_scope_options(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),

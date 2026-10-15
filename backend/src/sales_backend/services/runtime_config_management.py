@@ -4,6 +4,7 @@ from __future__ import annotations
 from sales_backend.repositories.admin import AgentRuntimeConfigRepository
 from sales_backend.security.runtime_credentials import FORMAT, CredentialCipher, decrypt_credential
 from sales_backend.services.idempotency import execute_mutation
+from sales_backend.services.ai_service_policy import shared_allowed
 
 AGENT_LABELS = {
     "chatbi": "经营问数",
@@ -14,6 +15,7 @@ AGENT_LABELS = {
     "operating_report": "即时总结",
     "customer_create": "客户建档",
     "management_task": "管理任务",
+    "task_import": "周会任务整理",
     "competency_review": "销售六维能力复盘",
     "customer_advice": "客户经营建议",
     "opportunity_advice": "商机经营建议",
@@ -37,14 +39,16 @@ class RuntimeConfigService:
     async def get(self, connection, actor):
         row = await self.repository.current(connection, actor, include_ciphertext=False) or {}
         defaults = self.settings
+        allowed = await shared_allowed(connection)
         has_key = row.get("has_api_key", False)
         tail = row.get("api_key_tail")
         return {
             "revision_no": row.get("revision_no", 0),
             "provider_base_url": row.get("provider_base_url", defaults.senseaudio_base_url),
             "api_key_masked": (f"••••••••{tail}" if tail else "已配置（历史凭据）") if has_key
-                else ("环境变量已配置" if defaults.senseaudio_api_key else "未配置"),
-            "credential_source": "database" if has_key else "environment",
+                else ("平台共享服务已配置" if allowed and defaults.senseaudio_api_key else "未配置本公司密钥"),
+            "credential_source": "database" if has_key else "environment" if allowed else "unconfigured",
+            "shared_ai_enabled": allowed,
             "cipher_format": row.get("cipher_format"), "encryption_key_id": row.get("encryption_key_id"),
             "encryption_revision": row.get("encryption_revision", 0),
             "llm_model": row.get("llm_model", defaults.llm_model),

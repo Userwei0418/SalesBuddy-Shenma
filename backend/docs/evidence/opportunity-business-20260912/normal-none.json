@@ -1,0 +1,204 @@
+{
+  "scenario": "normal",
+  "intent": "none",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /customers/1b127c42-c436-470f-a6dc-876de6586d53 expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "explicit synthetic customer matches",
+      "passed": true
+    },
+    {
+      "name": "test actor owns selected customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9c11e718-e0b3-4d6c-bbff-68e039a7cb93/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9c11e718-e0b3-4d6c-bbff-68e039a7cb93/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9c11e718-e0b3-4d6c-bbff-68e039a7cb93/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "candidate waits for human confirmation",
+      "passed": true
+    },
+    {
+      "name": "candidate action matches business intent",
+      "passed": true
+    },
+    {
+      "name": "no association clears candidate business fields",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays out of public candidate",
+      "passed": true
+    },
+    {
+      "name": "candidate did not mutate formal opportunities or change cards",
+      "passed": true
+    },
+    {
+      "name": "one completed Worker job without whole-job replay",
+      "passed": true
+    },
+    {
+      "name": "one completion receipt",
+      "passed": true
+    },
+    {
+      "name": "one pending candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "one assistant result",
+      "passed": true
+    },
+    {
+      "name": "attempts share one inference operation",
+      "passed": true
+    },
+    {
+      "name": "final real provider completed",
+      "passed": true
+    },
+    {
+      "name": "artifact model reference matches selected provider",
+      "passed": true
+    },
+    {
+      "name": "real platform dispatched",
+      "passed": true
+    },
+    {
+      "name": "platform accepted or validated automatic fallback",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/ca785130-126e-48f2-b100-fae49acc24f3 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/9c11e718-e0b3-4d6c-bbff-68e039a7cb93/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "customer_id": "1b127c42-c436-470f-a6dc-876de6586d53",
+    "conversation_id": "9c11e718-e0b3-4d6c-bbff-68e039a7cb93",
+    "run_id": "ca785130-126e-48f2-b100-fae49acc24f3",
+    "job_id": "6710da1f-65f5-4d88-a154-bf81b415db7b",
+    "artifact_id": "7d54f627-6701-404b-b4de-b8ab879521c5"
+  },
+  "started_at": "2026-09-11T19:42:06.277348+00:00",
+  "preflight_only": false,
+  "crm_before_fingerprint": "53c635a837d2751399de8f2d45091a2e527d12a3c68243394c0dfbd8c76cb4db",
+  "submitted_at": "2026-09-11T19:42:06.374385+00:00",
+  "elapsed_ms": 5050,
+  "status": "waiting_human",
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 3681,
+    "operation_id": "65847d6c-97c9-4bbf-a3f2-5603143a29eb",
+    "platform_run": {
+      "ids": {
+        "task_id": "f15d79eb-308d-456a-9c5f-d58dac8406ee",
+        "message_id": "c7e95835-577a-441c-9793-4a4d8c335120",
+        "conversation_id": "e983542b-0c51-485c-bd74-b62d10535648"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 1887,
+        "first_body_byte_ms": 1887,
+        "request_started_ms": 0,
+        "first_data_event_ms": 1887,
+        "headers_received_ms": 1887,
+        "stream_completed_ms": 2493
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "InvalidAgentResult"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "65847d6c-97c9-4bbf-a3f2-5603143a29eb",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "65847d6c-97c9-4bbf-a3f2-5603143a29eb",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": false,
+  "passed": true,
+  "finished_at": "2026-09-11T19:42:11.460495+00:00"
+}

@@ -15,7 +15,8 @@ module.exports={tabs:tabs};
         <view class="project-performance-board">
           <view wx:for="{{performanceBoard}}" wx:key="kind" class="project-performance-metric">
             <view class="records-head"><text class="project-metric-title">{{item.name}}</text><text class="project-rate">{{item.rateText}}</text></view>
-            <text class="project-value-label">当季度已登记</text><view class="project-completed">{{item.completedText}}</view>
+            <text class="project-value-label">当季度已登记{{item.kind === 'recognized' ? '（不含税）' : ''}}</text><view class="project-completed">{{item.completedText}}</view>
+            <view wx:for="{{item.financialHints}}" wx:for-item="hint" wx:key="*this" class="fde-target-notice">{{hint}}</view>
             <view class="project-target"><view class="project-target-copy"><text class="project-value-label">{{item.targetLabel}}</text><text class="project-target-value">{{item.targetText}}</text></view></view>
             <view class="project-progress-track"><view class="project-progress-fill" style="width:{{item.progress}}%"></view></view>
           </view>
@@ -33,19 +34,19 @@ module.exports={tabs:tabs};
   <view wx:if="{{activeTab === 'profile' && loading}}" class="state-line surface"><sb-state-panel size="compact" state="loading" title="正在更新个人画像…"/></view>
   <view wx:elif="{{activeTab === 'profile' && error}}" class="state-line surface"><sb-state-panel size="compact" state="error" title="{{error}}" bind:retry="load"/></view>
   <block wx:if="{{activeTab==='profile' && ready}}">
-    <view class="capability-card surface sales-layout-portrait"><view class="capability-top"><view><text class="capability-title">六维能力画像</text></view><view class="sample-badge"><text class="sample-count">{{portraitScore}}<text class="portrait-score-unit"> 分</text></text><text class="sample-label">{{portraitScoreLabel}}</text></view></view>
-      <canvas wx:if="{{!chartsHidden}}" canvas-id="fdeAbilityRadar" class="radar-canvas" aria-label="六维能力画像，缺少样本的维度显示未评估"></canvas><view wx:else class="radar-canvas"/>
+    <view class="capability-card surface sales-layout-portrait"><view class="capability-top"><view><text class="capability-title">六项业务事实指标</text></view><view class="sample-badge"><text class="sample-label">记录质量均值与五项事实比例</text></view></view>
+      <canvas wx:if="{{!chartsHidden}}" canvas-id="fdeAbilityRadar" class="radar-canvas" aria-label="六项业务事实指标，缺少样本的维度显示未评估"></canvas><view wx:else class="radar-canvas"/>
       <view wx:if="{{!sampleCount}}" class="sample-note">暂无可评估的归档记录，缺少样本的维度显示未评估</view>
-      <view class="review-summary">{{summary}}</view><view class="review-meta"><text>所选人员近期记录与任务</text><text>{{updatedText}} · 北京时间</text></view>
-      <view class="dimension-grid"><view wx:for="{{dimensions}}" wx:key="code" class="dimension-item"><view class="dimension-top"><text class="dimension-name">{{item.name}}</text><text class="dimension-score {{item.score===null?'unassessed':''}}">{{item.scoreText}}</text></view><view class="score-track"><view class="score-progress" style="width:{{item.width}}%"></view></view><text class="dimension-assessment">{{item.assessment}}</text></view></view>
-  <view wx:if="{{ready}}" class="ai-advice-card portrait-coaching"><view class="ai-advice-head"><view class="ai-heading"><view class="advice-title-line"><text class="advice-title">{{activeTab==='profile'?'FDE 专业成长建议':activeTab==='maturity'?'项目推进改进建议':activeTab==='efficiency'?'协作效率改进建议':activeTab==='tasks'?'任务执行改进建议':'客户跟进改进建议'}}</text><sb-ai-badge state="advice"/></view><text class="advice-subtitle">基于所选人员近期记录与任务 · 专业复盘</text></view></view><view class="advice-status">{{reviewMessage}}</view>
+      <view class="growth-note">{{coverageText}}</view><view class="growth-note">{{basisText}}</view><button wx:if="{{latestReviewId}}" class="growth-action" data-id="{{latestReviewId}}" bindtap="openGrowthEvidence">查看本次建议依据</button><view class="review-summary">{{summary}}</view><view class="review-meta"><text>所选人员近期记录与任务</text><text>{{updatedText}} · 北京时间</text></view>
+      <view class="dimension-grid"><view wx:for="{{dimensions}}" wx:key="code" class="dimension-item"><view class="dimension-top"><text class="dimension-name">{{item.name}}</text><text class="dimension-score {{item.score===null?'unassessed':''}}">{{item.scoreText}}{{item.score === null ? '' : item.unit}}</text></view><view class="score-track"><view class="score-progress" style="width:{{item.width}}%"></view></view><text class="dimension-assessment">{{item.assessment}}</text><text wx:if="{{item.denominator != null}}" class="growth-note">分子 {{item.numerator}} / 分母 {{item.denominator}}</text></view></view>
+  <view wx:if="{{ready}}" class="ai-advice-card portrait-coaching"><view class="ai-advice-head"><view class="ai-heading"><view class="advice-title-line"><text class="advice-title">{{activeTab==='profile'?'FDE 专业成长建议':activeTab==='maturity'?'项目推进改进建议':activeTab==='efficiency'?'协作效率改进建议':activeTab==='tasks'?'任务执行改进建议':'客户跟进改进建议'}}</text><sb-ai-badge state="advice"/></view><text class="advice-subtitle">基于所选人员近期记录与任务 · 专业复盘</text></view></view><view class="advice-status">{{reviewMessage}}</view><view class="growth-note">{{coachingCoverageText}}</view>
     <button wx:if="{{canReview}}" class="text-link" bindtap="generateAdvice" disabled="{{reviewBusy || reviewStatus==='empty'}}">{{reviewBusy?'正在生成…':'检查建议更新'}}</button><view wx:if="{{reviewError}}" class="review-error">{{reviewError}}</view>
     <view wx:if="{{reviewStatus==='succeeded' && (((activeTab==='tasks' || activeTab==='efficiency') && !taskAdvice.length) || (activeTab==='records' && !recordAdvice.length))}}" class="records-note">本次复盘暂无此主题的专项建议。</view><view class="ai-advice-list"><view wx:for="{{(activeTab==='tasks' || activeTab==='efficiency')?taskAdvice:activeTab==='records'?recordAdvice:advice}}" wx:key="index" class="advice-item"><text class="advice-number">{{index+1}}</text><view class="advice-copy"><text class="advice-item-title">{{item.title}}</text><text class="advice-content">{{item.content}}</text></view></view></view>
     <text class="advice-footnote">AI 建议供本人参考，结合实际情况决定下一步行动。</text>
   </view>
     </view>
     <view class="growth-heading"><text class="capability-title">成长曲线</text><text class="growth-period">近30天 · 已保存记录</text></view>
-    <view class="portrait-growth surface"><sb-tabs wx:if="{{dimensions.length}}" size="small" items="{{growth.tabs(dimensions)}}" activeKey="{{historyCode}}" bind:change="onHistoryTab"/><block wx:if="{{historyPoints.length}}"><canvas wx:if="{{!chartsHidden}}" canvas-id="fdeHistory" class="history-canvas"/><view wx:else class="history-canvas"/></block><view wx:else class="portrait-growth-empty">暂无已保存的历史画像</view></view>
+    <view class="portrait-growth surface"><sb-tabs wx:if="{{dimensions.length}}" size="small" items="{{growth.tabs(dimensions)}}" activeKey="{{historyCode}}" bind:change="onHistoryTab"/><block wx:if="{{historyPoints.length}}"><canvas wx:if="{{!chartsHidden}}" canvas-id="fdeHistory" class="history-canvas"/><view wx:else class="history-canvas"/></block><view wx:else class="portrait-growth-empty">暂无已保存的历史画像</view><view class="growth-note">按实际日期显示；缺失或规则不同处不连线。</view><button wx:for="{{historyPoints}}" wx:key="run_id" wx:if="{{item.run_id}}" class="growth-history-row" data-id="{{item.run_id}}" bindtap="openGrowthEvidence">{{item.date}} · {{item.basisLabel}} · 查看依据</button></view>
   </block>
   <view wx:if="{{activeTab==='tasks'}}" class="records-card surface">
     <view class="records-head"><text class="capability-title">我的任务执行</text><button class="text-link" bindtap="openTasks">全部任务 ›</button></view>
@@ -53,16 +54,16 @@ module.exports={tabs:tabs};
     <view wx:if="{{taskSummary}}" class="task-metrics"><view class="task-metric"><text class="task-metric-value">{{taskSummary.total}}</text><label class="task-metric-label">全部任务</label></view><view class="task-metric"><text class="task-metric-value">{{taskSummary.pending_count}}</text><label class="task-metric-label">待处理</label></view><view class="task-metric"><text class="task-metric-value">{{taskSummary.completed_count}}</text><label class="task-metric-label">已完成</label></view></view>
   </view>
   <view wx:if="{{activeTab==='records'}}" class="records-card surface"><view class="records-head"><text class="capability-title">我的跟进记录</text><text class="records-count">{{recordsReady?recordsTotal+' 条':'加载中'}}</text></view><text class="records-note">本人填写并确认归档的拜访记录 · 全部历史</text></view>
-  <view wx:if="{{ready && activeTab!=='profile' && activeTab!=='maturity'}}" class="ai-advice-card surface"><view class="ai-advice-head"><view class="ai-heading"><view class="advice-title-line"><text class="advice-title">{{activeTab==='profile'?'FDE 专业成长建议':activeTab==='maturity'?'项目推进改进建议':activeTab==='efficiency'?'协作效率改进建议':activeTab==='tasks'?'任务执行改进建议':'客户跟进改进建议'}}</text><sb-ai-badge state="advice"/></view><text class="advice-subtitle">基于所选人员近期记录与任务 · 专业复盘</text></view></view><view class="advice-status">{{reviewMessage}}</view>
+  <view wx:if="{{ready && activeTab!=='profile' && activeTab!=='maturity'}}" class="ai-advice-card surface"><view class="ai-advice-head"><view class="ai-heading"><view class="advice-title-line"><text class="advice-title">{{activeTab==='profile'?'FDE 专业成长建议':activeTab==='maturity'?'项目推进改进建议':activeTab==='efficiency'?'协作效率改进建议':activeTab==='tasks'?'任务执行改进建议':'客户跟进改进建议'}}</text><sb-ai-badge state="advice"/></view><text class="advice-subtitle">基于所选人员近期记录与任务 · 专业复盘</text></view></view><view class="advice-status">{{reviewMessage}}</view><view class="growth-note">{{coachingCoverageText}}</view>
     <button wx:if="{{canReview}}" class="text-link" bindtap="generateAdvice" disabled="{{reviewBusy || reviewStatus==='empty'}}">{{reviewBusy?'正在生成…':'检查建议更新'}}</button><view wx:if="{{reviewError}}" class="review-error">{{reviewError}}</view>
     <view wx:if="{{reviewStatus==='succeeded' && (((activeTab==='tasks' || activeTab==='efficiency') && !taskAdvice.length) || (activeTab==='records' && !recordAdvice.length))}}" class="records-note">本次复盘暂无此主题的专项建议。</view><view class="ai-advice-list"><view wx:for="{{(activeTab==='tasks' || activeTab==='efficiency')?taskAdvice:activeTab==='records'?recordAdvice:advice}}" wx:key="index" class="advice-item"><text class="advice-number">{{index+1}}</text><view class="advice-copy"><text class="advice-item-title">{{item.title}}</text><text class="advice-content">{{item.content}}</text></view></view></view>
     <text class="advice-footnote">AI 建议供本人参考，结合实际情况决定下一步行动。</text>
   </view>
   <view wx:if="{{embedded && activeTab==='efficiency' && !metricsLoading && !metricsError}}" class="records-card surface">
     <view class="records-head"><text class="capability-title">跟进节奏</text><view class="rhythm-controls"><button class="rhythm-option {{rhythmMode==='day'?'chosen':''}}" data-mode="day" bindtap="changeRhythm">日进展</button><button class="rhythm-option {{rhythmMode==='week'?'chosen':''}}" data-mode="week" bindtap="changeRhythm">周进展</button></view></view>
-    <text class="records-note">{{rhythmMode==='week'?'最近 12 周 · 周一至周日':'最近 7 天归档记录'}}</text>
+    <text class="records-note">仅统计 {{metricYear}} Q{{metricQuarter}} 内归档记录 · {{rhythmMode==='week'?'按最近 12 周展示（周一至周日）':'按最近 7 天展示'}}</text>
     <scroll-view scroll-x><view class="fde-rhythm"><view wx:for="{{rhythm}}" wx:key="date" class="fde-rhythm-item"><text class="records-count">{{item.visits===null?'—':item.visits}}</text><view class="fde-bar-track"><view class="fde-bar" style="height:{{item.height}}%"></view></view><text class="fde-date">{{item.dateLabel}}</text></view></view></scroll-view>
-    <view wx:if="{{!rhythm.length}}" class="state">本年暂无归档跟进记录</view>
+    <view wx:if="{{!rhythm.length}}" class="state">本季度暂无归档跟进记录</view>
   </view>
   <view wx:if="{{activeTab==='tasks'}}" class="records-card surface">
     <text class="capability-title">待处理任务</text>
@@ -77,4 +78,16 @@ module.exports={tabs:tabs};
   </view>
   <view wx:if="{{!embedded}}" class="account-card surface"><view class="account-row"><text class="account-label">当前账号</text><text class="account-value">{{account}}</text></view><view class="account-row"><text class="account-label">所属部门</text><text class="account-value">{{team}}</text></view></view>
   <button wx:if="{{!embedded}}" class="logout-button" bindtap="logout" disabled="{{logoutBusy}}" loading="{{logoutNavigating}}">{{logoutNavigating?'正在退出…':'退出登录 / 切换账号'}}</button><view wx:if="{{!embedded}}" class="version">销售智助</view>
+</view>
+
+<view wx:if="{{growthEvidence.visible}}" class="growth-evidence surface">
+  <view class="growth-evidence-head"><text>评估依据</text><button class="growth-action" bindtap="closeGrowthEvidence">收起</button></view>
+  <view wx:if="{{growthEvidence.loading}}" class="growth-note">正在读取当前可见的依据…</view>
+  <view wx:elif="{{growthEvidence.error}}" class="growth-error">{{growthEvidence.error}}</view>
+  <block wx:elif="{{growthEvidence.result}}">
+    <view class="growth-note">{{growthEvidence.result.basisLabel}}</view><view class="growth-note">{{growthEvidence.result.coverageText}}</view>
+    <view class="growth-note">保存引用 {{growthEvidence.result.summary.total}} 条 · 当前可读 {{growthEvidence.result.summary.readable}} 条 · 不可查看 {{growthEvidence.result.summary.unavailable}} 条</view>
+    <view wx:for="{{growthEvidence.result.items}}" wx:key="key" class="growth-evidence-row"><view>{{item.detail || '该引用未保存补充说明'}}</view><view wx:if="{{item.readable}}" class="growth-note">引用时版本：{{item.version === null ? '历史版本未保存' : item.version}}</view><button wx:if="{{item.readable && item.id}}" class="growth-action" data-key="{{item.key}}" bindtap="openGrowthSource">查看{{item.type === 'task' ? '任务' : '跟进记录'}}</button></view>
+    <view wx:if="{{!growthEvidence.result.items.length}}" class="growth-note">本次结果未保存可展示的来源引用。</view>
+  </block>
 </view>

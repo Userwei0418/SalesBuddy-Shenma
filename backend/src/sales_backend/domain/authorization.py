@@ -5,8 +5,8 @@ evaluator preserves each action/scope pair instead of multiplying all actions by
 the widest scope of any role. It never modifies organization appointments.
 """
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from sales_backend.domain.permission_catalog import CATALOG
 
@@ -20,7 +20,7 @@ class Grant:
 
     def __post_init__(self):
         definition = CATALOG.get(self.permission)
-        if definition is None or self.scope not in definition.scopes:
+        if definition is None or self.scope not in {"self", "assigned", "teams", "workspace"} or self.scope not in definition.scopes:
             raise ValueError("未知权限或不支持的数据范围")
         if (self.scope == "teams") != bool(self.team_ids):
             raise ValueError("指定团队范围必须有团队，其他范围不能附带团队")

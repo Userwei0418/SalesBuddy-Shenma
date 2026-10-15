@@ -30,7 +30,7 @@ def policy(capability="chatbi", *, version=2, guidance="按客户反馈的具体
 
 @pytest.mark.parametrize("capability", TECHNICAL_CAPABILITIES)
 def test_every_integrated_capability_has_independent_typed_business_rule(capability):
-    assert len(BUSINESS_RULES) == 12
+    assert BUSINESS_RULES == {"agent_business." + item for item in TECHNICAL_CAPABILITIES}
     assert validate_policy("agent_business." + capability, {}) == {
         "schema_version": 1,
         "guidance": "",

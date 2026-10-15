@@ -9,6 +9,7 @@ from sales_backend.db import set_request_context
 from sales_backend.repositories.customer_assets import CustomerAssetRepository
 from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
+from tests.integration.feishu_fixtures import seed_execute
 from tests.integration.test_business_rankings import opportunity
 from tests.integration.test_customer_assets import customer
 from tests.integration.test_fde_identity_tasks import fde_fixture
@@ -82,7 +83,6 @@ async def test_portfolio_ids_and_claimants_equal_original_rls_for_each_role(conn
     removed = await create_customer(connection)
     _, fde_project, people, _ = await fde_fixture(connection)
     admin = await actor(connection, "ADMIN001")
-    from tests.integration.feishu_fixtures import seed_execute
     await seed_execute(connection,"UPDATE crm.customer SET deleted_at=clock_timestamp() WHERE id=$1::uuid", removed["id"])
     other_workspace, other_customer = await foreign_customer(connection, admin)
     code = people["first" if account == "fde" else "lead"]["code"] if account.startswith("fde") else account
@@ -112,7 +112,7 @@ async def test_portfolio_matches_original_after_account_disable_and_role_revocat
     context = await actor(connection, code)
     assert await assert_original_scope(connection, context)
     admin = await actor(connection, "ADMIN001")
-    await connection.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1::uuid", context.user_id)
+    await seed_execute(connection,"UPDATE platform.user_ref SET status='inactive' WHERE id=$1::uuid", context.user_id)
     # Account-state validation belongs to identity refresh. Assert that path too;
     # stale SQL contexts must still match the pre-optimization RLS exactly.
     assert await IdentityRepository().find_actor_by_id(
@@ -120,7 +120,7 @@ async def test_portfolio_matches_original_after_account_disable_and_role_revocat
     ) is None
     await assert_original_scope(connection, context)
     await set_request_context(connection, admin)
-    await connection.execute(
+    await seed_execute(connection,
         "UPDATE platform.role_binding SET valid_to=clock_timestamp() "
         "WHERE user_ref_id=$1::uuid AND valid_to='infinity'",
         context.user_id,

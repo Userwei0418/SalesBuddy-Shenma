@@ -15,7 +15,7 @@ from sales_backend.domain.capabilities import FDE_ROLES
 from sales_backend.repositories.collaboration import archive_fde_collaboration, member_ids
 from sales_backend.repositories.customer_risk import enqueue_customer_risk_review
 from sales_backend.repositories.jobs import enqueue_battle_map_review
-from sales_backend.repositories.profile import ProfileRepository
+from sales_backend.repositories.profile import ProfileRepository  # compatibility seam for archive recovery tests
 from sales_backend.repositories.visit_reviews import VisitReviewRepository
 from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.capabilities import require_capability
@@ -47,6 +47,13 @@ async def archive_visit(
         # Keep the real recording identity; extra permissions never create a sales appointment.
         participants = sorted(set(participants) | {actor.user_id})
     mutation_data = OpportunityCreate.model_validate(mutation).model_dump() if mutation else None
+    await validate_visit_attendance(
+        connection, actor, fields.get("_fde_participant_ids", []), fields.get("opportunity_id"), mutation_data
+    )
+    # Even a visit without opportunity edits can add an attending FDE later.
+    # Its INSERT already takes a parent KEY SHARE through the opportunity FK;
+    # acquire the workspace finance lock before that or any review/row lock.
+    await connection.execute("SELECT security.finance_write_lock()")
     mutation_hash = (
         hashlib.sha256(json.dumps(mutation, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         if mutation
@@ -70,9 +77,6 @@ async def archive_visit(
             "replayed": True,
             **await VisitRepository().archived_counts(connection, detail),
         }
-    await validate_visit_attendance(
-        connection, actor, fields.get("_fde_participant_ids", []), fields.get("opportunity_id"), mutation_data
-    )
     fields, artifact_id = await consume_review(connection, actor, customer_id, fields)
     fields["_fde_participant_ids"] = participants
     if mutation_data:
@@ -82,7 +86,11 @@ async def archive_visit(
         fields["opportunity_id"] = opportunity["id"]
         fields.pop("_opportunity_mutation", None)
     visit = await VisitRepository().create(connection, actor, customer_id=customer_id, fields=fields)
-    await archive_fde_collaboration(connection, actor, visit, participants)
+    # A schema2 explicit roster is the reviewed final aggregate. Attendance
+    # cannot silently re-add an explicitly removed long-term member.
+    explicit_roster = bool(mutation_data and mutation_data.get("fields_schema_version") == 2
+                           and mutation_data.get("fde_member_ids") is not None)
+    await archive_fde_collaboration(connection, actor, visit, participants, update_membership=not explicit_roster)
     await VisitReviewRepository().bind_archive(connection, visit["id"], artifact_id, mutation_hash)
     await enqueue_battle_map_review(
         connection,
@@ -98,9 +106,9 @@ async def archive_visit(
         trigger_type="visit.archived",
         trigger_id=visit["id"],
     )
-    if actor.role.value in COMPETENCY_SUBJECT_ROLES:
-        await ProfileRepository().ensure_daily_competency_review(connection, actor, force=True)
     # Binding the review advances the visit version. Preserve the creation
     # receipt fields/counts, but return the final row for immediate supplements.
     detail = await VisitRepository().detail(connection, visit["id"])
+    if actor.role.value in COMPETENCY_SUBJECT_ROLES:
+        await ProfileRepository().ensure_daily_competency_review(connection, actor)
     return {**visit, **detail}

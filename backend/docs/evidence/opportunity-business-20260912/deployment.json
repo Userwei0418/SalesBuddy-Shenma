@@ -1,0 +1,57 @@
+{
+  "release": "/www/wwwroot/salegent/releases/agent-opportunity-20260912-82b5db5",
+  "commit": "82b5db584485e60b0585d4c281ee1f69e5509e76",
+  "files": 324,
+  "mismatches": [],
+  "runtime_files_equal_to_tested_d71a7cc": 134,
+  "rollout": {
+    "00000000-0000-0000-0000-000000000001": {
+      "capabilities": {
+        "battle_map_review": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "opportunity_draft": {
+          "enabled": true,
+          "rollout": "production"
+        }
+      }
+    }
+  },
+  "non_database_tests": 464,
+  "isolated_postgres_tests": 75,
+  "tests_provider_http": "synthetic; seven separate real business cases recorded",
+  "services": {
+    "sales-api.service": {
+      "active": true,
+      "cwd_matches_release": true
+    },
+    "sales-worker.service": {
+      "active": true,
+      "cwd_matches_release": true
+    }
+  },
+  "health_ready": true,
+  "database_version": "V054",
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "backup_bytes": 2560365,
+  "backup_archive_list_verified": true,
+  "backup_timer_active": true,
+  "backup_last_result": "success",
+  "dedicated_credential_mode": "0600 root",
+  "rollback_release": "/www/wwwroot/salegent/releases/agent-map-20260912-75d7e36",
+  "frontend_changed": false,
+  "checked_at": "2026-09-11T19:43:14.337602+00:00",
+  "first_candidate_failure": "7e862fb acceptance omitted InvalidAgentResult fallback; correct candidate persisted; automatic rollback; original evidence retained",
+  "real_business_case_files": [
+    "normal-create.json",
+    "normal-update.json",
+    "normal-none.json",
+    "off-create.json",
+    "blocked-update.json",
+    "production-none.json",
+    "production-create.json"
+  ],
+  "platform_log_rows_observed": 8
+}

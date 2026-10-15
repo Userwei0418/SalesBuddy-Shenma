@@ -1,0 +1,15 @@
+{
+  "id": "01a09022-c06d-7ac3-b863-8a1345b069ae",
+  "name": "销售智助-拜访记录结构化与质检-BETA",
+  "app_id": "c59389fa-3dc7-42f6-88d5-84c723eb32fc",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": false,
+  "revision": "ee0468aab0974bd93b4f305c8c374fd568def33c317b1e8cb00c00099793bb74",
+  "snapshot_id": "01a09022-c06f-75b6-bd03-21edf1c89a61",
+  "url": "https://123.207.235.181/agents/01a09022-c06d-7ac3-b863-8a1345b069ae/configure",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "c44c19fe0259043262f8aac8f09e91ad735a4b498286c4292efe394fc992e0f2",
+  "current_code_prompt_contained": true,
+  "publish_dry_run_valid": true,
+  "rechecked_at": "2026-09-12T03:54:54.777350+00:00"
+}

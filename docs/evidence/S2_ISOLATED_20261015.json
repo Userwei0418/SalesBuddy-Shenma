@@ -1,0 +1,80 @@
+{
+  "batch": "S2 customer creation requests and operations approval",
+  "verified_at": "2026-10-15T15:32:00+08:00",
+  "source_base_revision": "3021fcb3a94c6568836afdf7ecdd5229d8fca496",
+  "environment": "local disposable databases with synthetic records; no external writes",
+  "migration": "V160",
+  "checks": [
+    {
+      "kind": "native-source-node",
+      "passed": 869,
+      "failed": 0,
+      "command": "node --test frontend/tests/*.test.js"
+    },
+    {
+      "kind": "web-build-and-node",
+      "passed": 142,
+      "failed": 0,
+      "command": "npm run verify",
+      "note": "Identical source/lockfile built with fresh dependencies in /tmp due to Documents dependency read stalls"
+    },
+    {
+      "kind": "web-business-browser",
+      "passed": 3,
+      "failed": 0,
+      "file": "business-web/tests/customer-creation-s2.browser.mjs",
+      "note": "Local mocked API; sales 1440/390 and operations direct creation 1440; external traffic blocked"
+    },
+    {
+      "kind": "console-browser",
+      "passed": 5,
+      "failed": 0,
+      "file": "business-web/tests/customer-creation-console.browser.mjs",
+      "note": "Local mocked API; approve/reject/error retry/XSS/no privilege; external traffic blocked"
+    },
+    {
+      "kind": "http-postgres-rls",
+      "passed": 60,
+      "failed": 0,
+      "file": "backend/tests/system/verify_customer_creation_requests_api.py",
+      "note": "4 new S2 tests plus 56 existing regression tests; real routers, auth, repository and non-bypass RLS"
+    },
+    {
+      "kind": "postgres-s2-system",
+      "passed_groups": 13,
+      "file": "backend/tests/system/verify_customer_creation_requests_postgres.py"
+    },
+    {
+      "kind": "postgres-v159-upgrade",
+      "passed_groups": 6,
+      "unchanged_existing_tables": 103,
+      "file": "backend/tests/system/verify_customer_creation_requests_upgrade.py"
+    },
+    {
+      "kind": "contracts-permission-openapi",
+      "passed": 21,
+      "failed": 0,
+      "files": [
+        "test_customer_creation_request_contract.py",
+        "test_route_permissions.py",
+        "test_authorization_contracts.py",
+        "test_openapi_contract.py"
+      ]
+    }
+  ],
+  "production_read_only": {
+    "revision": "094841a60c446d88febfdc199be5d0877424193a",
+    "expected_schema": "V159",
+    "ready": "ok",
+    "database": true,
+    "model_gateway_configured": true,
+    "auth_configured": true,
+    "writes": 0
+  },
+  "not_performed": [
+    "production migration or deployment",
+    "WeChat upload/review/release",
+    "native device acceptance",
+    "customer business acceptance"
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "scenario": "off",
+  "intent": "create",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /customers/1b127c42-c436-470f-a6dc-876de6586d53 expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "explicit synthetic customer matches",
+      "passed": true
+    },
+    {
+      "name": "test actor owns selected customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/07c87da7-83f7-4c83-859a-502d44f8953b/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/07c87da7-83f7-4c83-859a-502d44f8953b/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/07c87da7-83f7-4c83-859a-502d44f8953b/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "candidate waits for human confirmation",
+      "passed": true
+    },
+    {
+      "name": "candidate action matches business intent",
+      "passed": true
+    },
+    {
+      "name": "new candidate preserves explicit values",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays out of public candidate",
+      "passed": true
+    },
+    {
+      "name": "candidate did not mutate formal opportunities or change cards",
+      "passed": true
+    },
+    {
+      "name": "one completed Worker job without whole-job replay",
+      "passed": true
+    },
+    {
+      "name": "one completion receipt",
+      "passed": true
+    },
+    {
+      "name": "one pending candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "one assistant result",
+      "passed": true
+    },
+    {
+      "name": "attempts share one inference operation",
+      "passed": true
+    },
+    {
+      "name": "final real provider completed",
+      "passed": true
+    },
+    {
+      "name": "disabled route keeps original API",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/231a70ae-1226-4922-8447-c60d4508f954 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/07c87da7-83f7-4c83-859a-502d44f8953b/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "customer_id": "1b127c42-c436-470f-a6dc-876de6586d53",
+    "conversation_id": "07c87da7-83f7-4c83-859a-502d44f8953b",
+    "run_id": "231a70ae-1226-4922-8447-c60d4508f954",
+    "job_id": "629a63ae-ec1a-4491-bfe2-6f0c712e7207",
+    "artifact_id": "bee68bdb-f71d-4398-8224-566925d9e8a3"
+  },
+  "started_at": "2026-09-11T19:42:11.661162+00:00",
+  "preflight_only": false,
+  "crm_before_fingerprint": "53c635a837d2751399de8f2d45091a2e527d12a3c68243394c0dfbd8c76cb4db",
+  "submitted_at": "2026-09-11T19:42:11.757738+00:00",
+  "elapsed_ms": 3037,
+  "status": "waiting_human",
+  "inference_route": null,
+  "attempts": [
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "231a70ae-1226-4922-8447-c60d4508f954",
+      "dispatch_suppressed": null
+    }
+  ],
+  "passed": true,
+  "finished_at": "2026-09-11T19:42:14.824788+00:00"
+}

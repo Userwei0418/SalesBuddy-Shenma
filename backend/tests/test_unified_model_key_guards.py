@@ -36,6 +36,12 @@ def managed(tmp_path):
     return settings
 
 
+@pytest.fixture(autouse=True)
+def shared_policy(monkeypatch):
+    # New service policy is independent of managed credential selection.
+    monkeypatch.setattr("sales_backend.services.runtime_config.shared_allowed", AsyncMock(return_value=True))
+
+
 class Database:
     @asynccontextmanager
     async def transaction(self, *args, **kwargs):
@@ -48,9 +54,10 @@ async def test_managed_runtime_does_not_decrypt_superseded_workspace_key(managed
     snapshot = {"mode": kind, "provider_name": "fixture", "endpoint_url": "https://api.senseaudio.cn/v1/chat/completions",
                 "timeout_seconds": 20, "max_retries": 0, "model": "company-model"}
     binding = None if kind == "legacy" else {"config_snapshot": snapshot, "version_no": 4}
-    row = {"enabled": True, "api_key_ciphertext": b"unreadable-old-key", "provider_base_url": managed.senseaudio_base_url,
+    row = {"enabled": True, "api_key_ciphertext": b"unreadable-old-key",
+           "provider_base_url": managed.senseaudio_base_url,
            "llm_model": "company-model", "asr_model": "company-asr", "tts_model": "company-tts",
-           "prompt_overrides": {"instruction": "Keep approved company prompt"}}
+           "revision_no": 4, "prompt_overrides": {"instruction": "Keep approved company prompt"}}
     monkeypatch.setattr(ModelApiRepository, "current", AsyncMock(return_value=binding))
     monkeypatch.setattr(AgentRuntimeConfigRepository, "current", AsyncMock(return_value=row))
     old_key = AsyncMock(side_effect=RuntimeCredentialUnavailable())
@@ -67,7 +74,7 @@ async def test_managed_runtime_does_not_decrypt_superseded_workspace_key(managed
 @pytest.mark.asyncio
 async def test_unmanaged_runtime_still_uses_company_credential(managed, monkeypatch):
     row = {"enabled": True, "provider_base_url": "https://company-provider.example/v1", "llm_model": "custom",
-           "asr_model": "asr", "tts_model": "tts", "prompt_overrides": {}}
+           "asr_model": "asr", "tts_model": "tts", "revision_no": 2, "prompt_overrides": {}}
     monkeypatch.setattr(ModelApiRepository, "current", AsyncMock(return_value=None))
     monkeypatch.setattr(AgentRuntimeConfigRepository, "current", AsyncMock(return_value=row))
     old_key = AsyncMock(return_value="company-key")
@@ -113,7 +120,8 @@ def test_account_permission_api_cannot_deny_or_replace_maintenance_authorization
     monkeypatch.setattr(authorization, "management_write", write)
     app = FastAPI()
     app.include_router(authorization.router)
-    app.dependency_overrides[authorization.manage_accounts] = lambda: SimpleNamespace(actor=SimpleNamespace(user_id=OTHER))
+    app.dependency_overrides[authorization.manage_accounts] = (
+        lambda: SimpleNamespace(actor=SimpleNamespace(user_id=OTHER)))
     app.dependency_overrides[authorization.get_database] = lambda: Database()
     client = TestClient(app)
     body = {"roles": [], "overrides": [{"permission": "access.console", "effect": "deny"}],
@@ -125,3 +133,13 @@ def test_account_permission_api_cannot_deny_or_replace_maintenance_authorization
     response = client.put(f"/api/v1/console/permissions/accounts/{OTHER}", json=body)
     assert response.status_code == 200
     write.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_managed_credential_never_bypasses_shared_service_denial(managed, monkeypatch):
+    monkeypatch.setattr("sales_backend.services.runtime_config.shared_allowed", AsyncMock(return_value=False))
+    monkeypatch.setattr(ModelApiRepository, "current", AsyncMock(return_value=None))
+    monkeypatch.setattr(AgentRuntimeConfigRepository, "current", AsyncMock(return_value=None))
+    from sales_backend.services.ai_service_policy import AIServiceUnavailable
+    with pytest.raises(AIServiceUnavailable):
+        await _load_provider_configuration(Database(), SimpleNamespace(workspace_id="fixture"), managed)

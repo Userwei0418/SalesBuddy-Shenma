@@ -1,0 +1,9 @@
+.sb-pager { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3) var(--ui-page-gutter); font-size: var(--ui-text-small); color: var(--ui-secondary); background: var(--ui-surface); }
+.sb-pager.is-plain { padding: var(--ui-space-3) 0; background: transparent; }
+.sb-pager-ctl { display: flex; align-items: center; gap: var(--ui-space-2); }
+.sb-pager-pos { color: var(--ui-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sb-pager-end { color: var(--ui-muted); }
+.sb-pager-error { display: flex; align-items: center; gap: var(--ui-space-1); color: var(--ui-danger); }
+/* 小号按钮 32px：外包一层用伪元素把点击区扩到 44px；t-button 内部 catch 了原生 tap，按钮本体与外层绑同一方法，不会重复触发；方法里已判断首页、末页、加载中与到底 */
+.sb-pager-hit { position: relative; display: inline-flex; flex: none; }
+.sb-pager-hit::after { content: ''; position: absolute; left: 0; right: 0; top: calc(50% - 22px); bottom: calc(50% - 22px); }

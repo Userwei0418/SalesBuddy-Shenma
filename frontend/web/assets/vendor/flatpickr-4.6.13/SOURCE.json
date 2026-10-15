@@ -1,0 +1,13 @@
+{
+  "package": "flatpickr",
+  "version": "4.6.13",
+  "url": "https://registry.npmjs.org/flatpickr/-/flatpickr-4.6.13.tgz",
+  "integrity": "sha512-97PMG/aywoYpB4IvbvUJi0RQi8vearvU0oov1WW3k0WZPBMrTQVqekSX5CjSG/M4Q3i6A/0FKXC7RyAoAUUSPw==",
+  "license": "MIT",
+  "files": {
+    "flatpickr.min.js": "1eeab1cb779471a0b0aaa93dd91c2eb1aa537d696f01ab05ea9dabc55e8525a1",
+    "flatpickr.min.css": "1b34a42552c96f10e4dfaaa4a367276b03868aacff63c1ac42ffe331352bc754",
+    "zh.js": "8629568c4e6c9536864189e9434195416ab5b2d63c9793a3779f12a5b34d9955",
+    "LICENSE.md": "5fd57afc3905651175947ae44818e91ffcf5b605e4c88fac42d9700243bd9095"
+  }
+}

@@ -1,9 +1,11 @@
 const uiColors = require("../../utils/uiColors");
 const {businessChangeLight} = require("../../utils/statusLight");
-const {REPORT_ACTIONS,buildReport} = require("../../utils/operatingReport");
+const {REPORT_ACTIONS,reportPrompt,buildReport} = require("../../utils/operatingReport");
 const apiClient = require("../../utils/apiClient");
+const access = require("../../utils/access");
 const { mergeVisitReceipts } = require("../../utils/visitCards");
 const { buildOverviewMetrics } = require("../../utils/taskOverview");
+const { taskTransferSummary } = require("../../utils/taskPresentation");
 const homeConfig = require("../../config");
 const homeChatBIEnabled = homeConfig.HOME_CHATBI_ENABLED === true;
 const homeMessageOrder = homeConfig.HOME_MESSAGE_ORDER === "asc" ? "asc" : "desc";
@@ -79,6 +81,8 @@ function formatAmount(value) {
 }
 
 Page({
+  onOverviewMetricTap(e) { const item=(e && e.detail && e.detail.item)||{}; return this.openOverviewTasks({currentTarget:{dataset:{key:item.key}}}); },
+
   data: {
     role: "sales",
     roleName: "一线销售",
@@ -246,7 +250,7 @@ Page({
       role,
       isFde:["fde","fde_lead"].includes(role),
       homeChatBIEnabled,
-      roleName: roleInfo.name,
+      roleName: session.roleName || roleInfo.name,
       scope: roleInfo.scope,
       userName: session.userName,
       greeting,
@@ -273,7 +277,8 @@ Page({
       const requestedOrder = policy && policy.definition && policy.definition.message_order;
       this.homeOrder = requestedOrder === "asc" || requestedOrder === "desc" ? requestedOrder : homeMessageOrder;
       this.homeDisplayPolicy = policy || null;
-      this.setData({ fdeTeamSummary: role === 'fde_lead' ? (home.team_summary || null) : null });
+      this.setData({ fdeTeamSummary: role === 'fde_lead' ? (home.team_summary || null) : null,
+        fdeTeamSummaryScope: session.permissions ? access.scopeLabel(session,'task.read') : '当前授权范围' });
       const firstCustomer = (page.items || [])[0] || null;
       const initialMessages = shouldShowLoginGreeting ? [{
         id: `${role}_greeting_card`,
@@ -308,11 +313,6 @@ Page({
   },
 
   openFdeTeamTasks(){wx.navigateTo({url:"/pages/tasks/index?scope=team"});},
-  onOverviewMetricTap(e) {
-    const item = (e && e.detail && e.detail.item) || {};
-    this.openOverviewTasks({ currentTarget: { dataset: { key: item.key } } });
-  },
-
   openOverviewTasks(e) {
     const key = e.currentTarget.dataset.key;
     if (!["today_completed", "today_pending", "all_pending"].includes(key)) return;
@@ -346,7 +346,7 @@ Page({
     }
     if (REPORT_ACTIONS[action]) {
       if (this.data.isThinking || this.data.isProcessing) return;
-      this.runOperatingReport(action);
+      this.runOperatingReport(action, {scope:e.currentTarget.dataset.scope});
       return;
     }
     if (this.data.isThinking) return;
@@ -661,7 +661,10 @@ Page({
           action:{label:'查看当前项目权限',code:'open_fde_membership',opportunityId:p.membership_opportunity_id||p.opportunity_id||(!removed?notification.object_id:'')}}};
     }
     if(['task_reassigned','task_cancelled'].includes(notification.template_code)) {
-      return {id:`remote_${notification.id}`,from:'agent',kind:'data-card',time:formatTime(notification.created_at,''),sortAt:new Date(notification.created_at||0).getTime()||0,card:{tone:'orange',eyebrow:'任务协调',title:notification.title,subtitle:notification.body,metrics:[],rows:[],action:{label:'查看任务',code:'open_task_detail',taskId:notification.object_id||(notification.payload||{}).task_id}}};
+      const payload=notification.payload || {},transfer=notification.template_code==='task_reassigned'?taskTransferSummary(payload):'';
+      return {id:`remote_${notification.id}`,from:'agent',kind:'data-card',time:formatTime(notification.created_at,''),sortAt:new Date(notification.created_at||0).getTime()||0,card:{tone:'orange',eyebrow:'任务协调',title:notification.title,subtitle:notification.body,metrics:[],
+        rows:transfer?[{title:'负责人变更',meta:transfer,tag:''}]:[],footer:payload.actor_name?`${payload.actor_name}操作`:'',
+        action:{label:'查看任务',code:'open_task_detail',taskId:notification.object_id||payload.task_id}}};
     }
     if(notification.template_code === 'business_changed') {
       const p=notification.payload || {};
@@ -1255,12 +1258,12 @@ Page({
     }).finally(() => this.setData({ isThinking: false, isProcessing: false }));
   },
 
-  runOperatingReport(action) {
+  runOperatingReport(action, options = {}) {
     const config = REPORT_ACTIONS[action];
     if (!config) return;
     this.setData({ isThinking: true, isProcessing: false, showResult: false });
-    this.appendMessage({ id: `operating_report_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: config.label });
-    apiClient.queryOperatingReport(this.data.isFde ? "根据我的FDE协作身份和当前授权范围，总结协助项目变化、本人填写并确认归档的拜访记录及任务进展；不进行销售绩效评分。" : config.prompt).then((run) => {
+    this.appendMessage({ id: `operating_report_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: options.scope === 'self' ? `${config.label} · 本人` : config.label });
+    return apiClient.queryOperatingReport(reportPrompt(action, options)).then((run) => {
       const result = run.result || {};
       const rendered = buildReport(run, action);
       const sections = rendered.sections;
@@ -1269,11 +1272,10 @@ Page({
         value: String(section.rows.length),
         label: section.title,
       }));
-      const reportScope = action.indexOf("personal") >= 0 ? "SALES" : action.indexOf("team") >= 0 ? "DIRECTOR" : "GM";
       const reportPeriod = "INSTANT";
       const card = {
         tone: "cyan",
-        eyebrow: `${reportScope} ${reportPeriod} REVIEW · LIVE DATA`,
+        eyebrow: `OPERATING ${reportPeriod} REVIEW · LIVE DATA`,
         title: result.title || config.label,
         subtitle: result.summary || `${result.scope || "当前权限范围"} · ${result.period || "最新业务周期"}`,
         metrics,

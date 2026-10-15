@@ -1,7 +1,6 @@
 """Real PostgreSQL, RLS and business persistence; both provider HTTPs are synthetic."""
 
 import json
-from contextlib import asynccontextmanager
 from dataclasses import replace
 from uuid import uuid4
 
@@ -16,6 +15,7 @@ from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.services import battle_map_reviews as business
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
 from sales_backend.services.agent_platform.inference import InferenceService
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.test_battle_map_platform import ANSWER, map_settings
 from tests.test_fde_facts_runtime import Chunks, frame
 
@@ -49,12 +49,7 @@ async def test_customer_review_uses_existing_facts_and_persists_one_private_scop
     # global baseline is sufficient for this routing/business persistence test.
     assert await connection.fetchval("SELECT security.active_company_rule('customer_quadrant')")
 
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
-
-    database = Database(config, pool=Pool())
+    database = Database(config, pool=FixtureConnectionPool(connection))
     calls = []
     answer = {**ANSWER, "evidence": []}
 
@@ -135,12 +130,8 @@ async def test_customer_review_uses_existing_facts_and_persists_one_private_scop
 
 
 async def test_missing_customer_cannot_create_score_after_inference(connection, sales_actor):
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
 
-    handler = business.BattleMapReviewHandler(Database(map_settings(), pool=Pool()), map_settings())
+    handler = business.BattleMapReviewHandler(Database(map_settings(), pool=FixtureConnectionPool(connection)), map_settings())
     with pytest.raises(LookupError, match="persistence"):
         await handler._persist(str(uuid4()), sales_actor, {
             "data_as_of": "2026-09-12T00:00:00Z", "visits": [], "contacts": [], "opportunities": [],

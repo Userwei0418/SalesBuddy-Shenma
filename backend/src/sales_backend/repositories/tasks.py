@@ -6,6 +6,12 @@ from typing import Any
 import asyncpg
 
 from sales_backend.repositories.attribute_overlay import overlay_task_attributes
+from sales_backend.repositories.task_alignment import TASK_ALIGNMENT_READ_SQL
+
+# Match coordinate_task's existing permission and live-state checks for both projections.
+TASK_CAN_CANCEL_SQL = """(t.status NOT IN ('completed','cancelled','pending_review')
+                 AND security.authorization_task('task.cancel',t.id)
+                 AND security.fde_can_coordinate_task(t.id))"""
 
 TASK_HANDOVER_REQUIRED_SQL = """(t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review') AND (
                  EXISTS(SELECT 1 FROM workflow.task_assignee ha WHERE ha.task_id=t.id AND ha.responsibility='owner'
@@ -20,6 +26,7 @@ TASK_HANDOVER_REQUIRED_SQL = """(t.status IN ('pending_confirm','pending_executi
 class TaskRepository:
     _SELECT = """
         SELECT t.id::text, t.task_type, t.association_kind, t.title, t.description,
+               """ + TASK_ALIGNMENT_READ_SQL + """ AS alignment,
                t.customer_id::text,
                COALESCE(c.name,security.customer_reference(t.customer_id)->>'name',
                  security.task_link_context(t.id)->>'customer_name') AS customer_name,
@@ -30,6 +37,7 @@ class TaskRepository:
                security.has_opportunity_read_access(t.opportunity_id) AS can_open_opportunity,
                t.target_position,t.source_suggestion_id::text,
                security.fde_can_coordinate_task(t.id) AS can_coordinate,
+               """ + TASK_CAN_CANCEL_SQL + """ AS can_cancel,
                jsonb_build_object(
                  'task.accept',security.authorization_task('task.accept',t.id),
                  'task.decline',security.authorization_task('task.decline',t.id),
@@ -123,17 +131,38 @@ class TaskRepository:
         predicates, args = self._filters(status=status, customer_id=customer_id,
             opportunity_id=opportunity_id, fde_view=fde_view, inbox=inbox)
         args.extend((limit, offset))
+        # Navigation hints are a snapshot for this statement, once per distinct
+        # parent in the RLS-filtered page. Parent detail requests still authorize
+        # independently; these flags are neither grants nor a cross-request cache.
         page = (
-            "WITH task_page AS MATERIALIZED (SELECT t.id FROM workflow.task t WHERE "
+            "WITH task_page AS MATERIALIZED (SELECT t.id,t.customer_id,t.opportunity_id FROM workflow.task t WHERE "
             + " AND ".join(predicates)
             + " ORDER BY (t.status='completed'),t.due_at,t.created_at DESC,t.id"
-            + f" LIMIT ${len(args)-1} OFFSET ${len(args)}) "
+            + f" LIMIT ${len(args)-1} OFFSET ${len(args)}), "
+            + """task_customer_access AS MATERIALIZED (
+                SELECT parent.customer_id,security.has_customer_access(parent.customer_id) AS can_open
+                FROM (SELECT DISTINCT customer_id FROM task_page WHERE customer_id IS NOT NULL) parent
+            ), task_opportunity_access AS MATERIALIZED (
+                SELECT parent.opportunity_id,security.has_opportunity_read_access(parent.opportunity_id) AS can_open
+                FROM (SELECT DISTINCT opportunity_id FROM task_page WHERE opportunity_id IS NOT NULL) parent
+            ) """
         )
         selected = self._SELECT.replace(
-            "FROM workflow.task t", "FROM task_page page JOIN workflow.task t ON t.id=page.id")
+            "FROM workflow.task t", """FROM task_page page JOIN workflow.task t ON t.id=page.id
+            LEFT JOIN task_customer_access customer_access ON customer_access.customer_id=t.customer_id
+            LEFT JOIN task_opportunity_access opportunity_access
+              ON opportunity_access.opportunity_id=t.opportunity_id""")
+        selected = selected.replace(
+            "security.has_customer_access(t.customer_id) AS can_open_customer",
+            "COALESCE(customer_access.can_open,false) AS can_open_customer",
+        ).replace(
+            "security.has_opportunity_read_access(t.opportunity_id) AS can_open_opportunity",
+            "COALESCE(opportunity_access.can_open,false) AS can_open_opportunity",
+        )
         rows = await connection.fetch(
             page + selected + """
-             GROUP BY t.id, c.name, creator.display_name, creator_team.name
+             GROUP BY t.id, c.name, creator.display_name, creator_team.name,
+                      customer_access.can_open, opportunity_access.can_open
              ORDER BY (t.status = 'completed'), t.due_at, t.created_at DESC,t.id
             """,
             *args,
@@ -155,8 +184,7 @@ class TaskRepository:
         if task_ids:
             rows = await connection.fetch("""
                 SELECT t.id::text,t.status,t.completion_note,
-                  jsonb_build_object('rejection_comment',COALESCE(NULLIF(t.rejection_comment,''),
-                    t.import_meta->>'rejection_comment',t.attributes->>'rejection_comment')) AS attributes,
+                  jsonb_build_object('rejection_comment',NULLIF(t.rejection_comment,'')) AS attributes,
                   """ + TASK_HANDOVER_REQUIRED_SQL + """ AS handover_required,
                   e.event_type AS last_event_type,e.note AS last_event_note
                 FROM workflow.task t LEFT JOIN LATERAL (

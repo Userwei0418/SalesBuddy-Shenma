@@ -1,0 +1,55 @@
+{
+  "workspace": "demo-sales-workspace",
+  "bindings": [
+    {
+      "purpose": "text",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-s2-lite",
+      "has_key": true
+    },
+    {
+      "purpose": "asr",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-asr-lite-1.5-260319",
+      "has_key": true
+    },
+    {
+      "purpose": "tts",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-tts-1.5-260319",
+      "has_key": true
+    }
+  ],
+  "tests": [
+    {
+      "id": "3f04d117-ed62-4474-9cc2-b4018ed634b5",
+      "purpose": "text",
+      "expected_version": 0,
+      "status": "failed",
+      "result": {
+        "message": "服务商返回错误（状态码 500），请核对协议和地址",
+        "elapsed_ms": 323,
+        "network_sent": true,
+        "business_acceptance": false
+      },
+      "expires_at": "2026-09-16 03:48:33.494687+00:00"
+    },
+    {
+      "id": "7538f231-cd88-4c27-a36f-d1e6a5d74e1e",
+      "purpose": "asr",
+      "expected_version": 0,
+      "status": "passed",
+      "result": {
+        "message": "接口连通且固定样本返回合格；未执行真实业务",
+        "elapsed_ms": 1152,
+        "network_sent": true,
+        "business_acceptance": false
+      },
+      "expires_at": "2026-09-16 03:48:33.823423+00:00"
+    }
+  ],
+  "bindings_unchanged": true
+}

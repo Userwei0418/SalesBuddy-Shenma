@@ -57,3 +57,13 @@ test('目标编辑服从当前功能和服务端具体范围，不再由FDE身�
  app.globalData.session.permissions['target.submit']=true;
  page.buildTargetBoard({},2026,{items:[],editable:false});assert.equal(page.data.canEditOwnTargets,false);
 });
+test('客户新增两种实际提交入口均在点击时复核当前创建权限',()=>{
+ const file=path.resolve(__dirname,'../miniprogram/utils/access.js'),module={exports:{}};let notices=0,calls=0;
+ vm.runInNewContext(fs.readFileSync(file,'utf8'),{module,exports:module.exports,wx:{showToast:()=>notices++}});
+ const permissions={'customer.create':true},app={can:code=>permissions[code]===true};
+ for(const [route,method] of [['customer-create','submitCustomer'],['customer-assign-confirm','confirmArchive']]){
+  const page={[method](){calls++;}};module.exports.protectActions(app,page,route);
+  permissions['customer.create']=true;page[method]();permissions['customer.create']=false;page[method]();
+ }
+ assert.equal(calls,2);assert.equal(notices,2);
+});

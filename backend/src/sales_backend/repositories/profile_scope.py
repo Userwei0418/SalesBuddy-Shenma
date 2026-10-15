@@ -1,6 +1,6 @@
 """Stable, authorized profile subjects; selecting a member never changes the actor."""
 
-from sales_backend.repositories.team_directory import selectable_teams
+from sales_backend.repositories.team_directory import attach_member_teams, default_team_id, selectable_teams
 
 SALES_ROLES = ('sales', 'supervisor', 'manager')
 
@@ -9,13 +9,7 @@ async def scope_options(connection, actor, *, permission='profile.sales_read'):
     teams = await selectable_teams(connection, actor, 'profile', permission=permission)
     members = [dict(row) for row in await connection.fetch(
         """SELECT u.id::text,u.id::text AS user_id,u.account_code,u.display_name,
-          active_role.role_code AS role,
-          COALESCE((SELECT array_agg(DISTINCT tm.team_id::text ORDER BY tm.team_id::text)
-            FROM platform.team_membership tm JOIN platform.team t ON t.id=tm.team_id
-            WHERE tm.workspace_id=u.workspace_id AND tm.user_ref_id=u.id
-              AND t.status='active' AND t.deleted_at IS NULL
-              AND clock_timestamp()>=t.valid_from AND clock_timestamp()<t.valid_to
-              AND clock_timestamp()>=tm.valid_from AND clock_timestamp()<tm.valid_to),ARRAY[]::text[]) AS team_ids
+          active_role.role_code AS role
         FROM platform.user_ref u JOIN LATERAL (
           SELECT b.role_code FROM platform.role_binding b WHERE b.workspace_id=u.workspace_id
             AND b.user_ref_id=u.id AND b.role_code IN ('sales','supervisor','manager')
@@ -25,6 +19,7 @@ async def scope_options(connection, actor, *, permission='profile.sales_read'):
         WHERE u.workspace_id=$1::uuid AND u.status='active' AND u.deleted_at IS NULL
           AND security.authorization_subject($2,'person',u.id,NULL)
         ORDER BY u.display_name,u.id""", actor.workspace_id, permission)]
+    members = await attach_member_teams(connection, actor, members, teams)
     department = await connection.fetchval("SELECT security.authorization_subject($1,'department',NULL,NULL)", permission)
     own = any(member['id'] == actor.user_id for member in members)
     return {
@@ -32,7 +27,7 @@ async def scope_options(connection, actor, *, permission='profile.sales_read'):
         'allowed_scopes': (['self'] if own else []) + (['person'] if members else [])
             + (['team'] if teams else []) + (['department'] if department else []),
         'defaults': {'scope': 'department' if department else 'team' if teams else 'self',
-                     'member_id': actor.user_id, 'team_id': teams[0]['id'] if teams else None},
+                     'member_id': actor.user_id, 'team_id': await default_team_id(connection, actor, teams)},
     }
 
 

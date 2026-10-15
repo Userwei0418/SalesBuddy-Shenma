@@ -117,11 +117,18 @@
 .profile-card .name { color:var(--sb-hero-ink); }
 .profile-card .meta,.profile-card .status { color:var(--sb-hero-muted); }
 .profile-card .avatar { color:var(--sb-hero-ink); background:rgba(255,255,255,.12); }
-
-/* Capability-driven sales/FDE view switch. */
-.permission-perspectives{display:flex;gap:16rpx;padding:16rpx 32rpx}
-.permission-perspectives button{display:flex;align-items:center;justify-content:center;flex:1;min-height:var(--ui-touch-target);line-height:1.5;padding:8rpx 16rpx;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-neutral-soft);color:var(--ui-ink)}
-.permission-perspectives button::after{border:0}
-.permission-perspectives .selected{background:var(--ui-primary);color:var(--ui-on-primary)}
 /* Score magnitude uses the same blue as opportunity progress; status text keeps its signal color. */
 .profile-page .dimension-grid .score-track view { background:var(--ui-primary)!important; }
+
+/* New business controls; existing layout and palette preserved. */
+.permission-perspectives{display:flex;flex-wrap:wrap;gap:16rpx;margin:24rpx 28rpx}.permission-perspectives button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px;line-height:var(--ui-touch-target)}.permission-perspectives button.selected{border-color:var(--ui-primary);color:var(--ui-primary);background:var(--ui-selected)}
+
+.growth-controls,.growth-evidence-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12rpx}
+.growth-action{margin:8rpx 0;padding:12rpx 20rpx;min-height:44px;font-size:14px;line-height:1.5;color:var(--ui-primary);background:var(--ui-surface);white-space:normal}
+.growth-note{padding:10rpx 0;color:var(--ui-secondary);font-size:13px;line-height:1.6;overflow-wrap:anywhere;word-break:break-word}
+.growth-error{padding:12rpx 0;color:var(--ui-danger);font-size:14px;line-height:1.6}
+.growth-assessment{display:block;margin-top:12rpx;white-space:pre-wrap}
+.growth-history-row{margin:12rpx 0;padding:16rpx 20rpx;text-align:left;font-size:13px;line-height:1.7;white-space:normal;overflow-wrap:anywhere;color:var(--ui-primary);background:var(--ui-surface)}
+.growth-evidence{margin:24rpx;padding:24rpx;min-width:0}
+.growth-evidence-head{font-weight:600}
+.growth-evidence-row{padding:20rpx 0;border-bottom:1px solid var(--ui-line);font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}

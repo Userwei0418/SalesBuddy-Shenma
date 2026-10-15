@@ -1,0 +1,96 @@
+{
+  "business_writes": 0,
+  "checks": [
+    {
+      "cohort": "sales",
+      "peer_count": 3,
+      "role": "sales",
+      "view": "self"
+    },
+    {
+      "cohort": "supervisor",
+      "peer_count": 2,
+      "role": "supervisor",
+      "view": "self"
+    },
+    {
+      "role": "supervisor",
+      "same_rank_as_self": true,
+      "view": "selected_member"
+    },
+    {
+      "company_team_count": 2,
+      "complete_company_cohort": true,
+      "nonranking_group_count": 1,
+      "role": "supervisor",
+      "selected_groups": [
+        "south_hkmo"
+      ],
+      "view": "team"
+    },
+    {
+      "cohort": "manager",
+      "peer_count": 1,
+      "role": "manager",
+      "view": "self"
+    },
+    {
+      "role": "manager",
+      "same_rank_as_self": true,
+      "view": "selected_member"
+    },
+    {
+      "company_team_count": 2,
+      "complete_company_cohort": true,
+      "nonranking_group_count": 1,
+      "role": "manager",
+      "selected_groups": [
+        "north_east"
+      ],
+      "view": "team"
+    },
+    {
+      "company_team_count": 2,
+      "complete_company_cohort": true,
+      "nonranking_group_count": 1,
+      "role": "manager",
+      "selected_groups": [
+        "south_hkmo"
+      ],
+      "view": "team"
+    },
+    {
+      "company_team_count": 2,
+      "complete_company_cohort": true,
+      "nonranking_group_count": 1,
+      "role": "manager",
+      "selected_groups": [
+        "north_east",
+        "south_hkmo"
+      ],
+      "view": "team"
+    },
+    {
+      "peer_count": 3,
+      "role": "fde",
+      "scope": "all_fde",
+      "view": "self"
+    },
+    {
+      "peer_count": 1,
+      "role": "fde_lead",
+      "scope": "all_fde_leads",
+      "view": "self"
+    },
+    {
+      "company_team_count": 1,
+      "role": "fde_lead",
+      "same_rank_as_self": true,
+      "view": "team_and_member"
+    }
+  ],
+  "model_calls": 0,
+  "readonly": true,
+  "runtime_enforces_rls": true,
+  "probe_sha256": "5936eb8faca520b94153f0ad1612d3bd344692278fd8a239c9df0610482a91cc"
+}

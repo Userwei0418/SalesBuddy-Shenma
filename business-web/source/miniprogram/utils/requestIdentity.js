@@ -64,9 +64,11 @@ function finish(identity) {
   delete pending[identity.fingerprint];wx.setStorageSync(STORAGE_KEY,pending);
 }
 function supports(options) {
+  if(['POST','PUT','DELETE'].includes(options.method) && /^\/opportunity-views(?:\/[^/?]+)?$/.test(options.path)) return true;
   if(options.method==='DELETE' && /^\/demo-scenes\/[^/?]+$/.test(options.path)) return true;
   if(options.method==='PUT' && /^\/opportunities\/[^/?]+\/fde-members$/.test(options.path)) return true;
   return ['POST','PATCH'].includes(options.method) && (
+    /^\/customers\/creation-requests(?:\/[^/?]+\/withdraw)?$/.test(options.path) ||
     /^\/customers(?:\/[^/?]+(?:\/(?:assignments|claims|opportunities))?)?$/.test(options.path) ||
     /^\/tasks(?:\/batch|\/[^/?]+\/events)?$/.test(options.path) ||
     /^\/advice\/suggestions\/[^/?]+\/decision$/.test(options.path) ||

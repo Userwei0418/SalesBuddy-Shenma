@@ -20,3 +20,11 @@ if web.exists():
  for name in ['index.html','department-ui/Frame.jsx']:
   assert 'www.ericepc.com' not in (web/name).read_text(),name
  print('Business Web customer endpoint isolated; shared login retained')
+
+new_web=root/'frontend/web'
+if new_web.exists():
+ connection=json.loads((new_web/'connection.config.json').read_text())
+ assert connection['apiTarget']=='https://salesbuddy.shenzhoukuntai.com:28899/api/v1'
+ assert connection.get('adminUrl') in {'/admin','https://salesbuddy.shenzhoukuntai.com:28899/admin'}
+ assert 'www.ericepc.com' not in (new_web/'connection.config.json').read_text()
+ print('Complete 1.2.1 Web customer endpoint isolated; existing workspace entry retained')

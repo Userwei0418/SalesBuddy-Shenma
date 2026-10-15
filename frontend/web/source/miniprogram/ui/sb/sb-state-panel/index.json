@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "usingComponents": {
+    "t-loading": "../../tdesign/loading/loading",
+    "t-skeleton": "../../tdesign/skeleton/skeleton",
+    "t-button": "../../tdesign/button/button"
+  }
+}

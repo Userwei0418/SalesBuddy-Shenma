@@ -23,8 +23,11 @@ from sales_backend.security.runtime_credentials import decrypt_credential
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
 from sales_backend.services.agent_platform.fde_invocation import FdeJsonInvocation
 from sales_backend.services.agent_platform.inference import binding_for
+from sales_backend.services.ai_service_policy import AIServiceUnavailable, shared_allowed, legacy_owned, purpose_owned, source_settings
+from sales_backend.repositories.admin import AgentRuntimeConfigRepository
 from sales_backend.services.model_api import ModelApiError, ModelApiService, connection_settings, safe_test_error
 from sales_backend.services.model_calls import DatabaseModelObserver
+from sales_backend.integrations.model_observer import prepare_observed, finish_observed
 from sales_backend.services.runtime_config import apply_execution_policy
 
 
@@ -127,6 +130,7 @@ class ConnectivityService:
         service = ModelApiService(self.database, self.settings)
         async with self.database.transaction(actor, readonly=True) as conn:
             await require_permission(conn, "ai.config_test")
+            allowed = await shared_allowed(conn)
             row = await ModelApiRepository().current(conn, actor, purpose)
             config = row["config_snapshot"] if row else {"mode": "inherit"}
             version = row["version_no"] if row else 0
@@ -135,7 +139,14 @@ class ConnectivityService:
                 return
             if config["mode"] == "inherit":
                 config, key = await service._legacy(conn, actor, purpose)
+                legacy = await AgentRuntimeConfigRepository().current(conn, actor)
+                source = "tenant_legacy" if legacy_owned(legacy, purpose) else "platform"
+                source_version = legacy["revision_no"] if legacy else 0
             else:
+                source = "tenant_purpose" if purpose_owned(row) else "platform"
+                if source == "platform" and not allowed:
+                    raise AIServiceUnavailable()
+                source_version = version
                 key = await decrypt_credential(conn, row, self.settings)
         result.update(
             version=version,
@@ -151,6 +162,7 @@ class ConnectivityService:
             result.update(status="unavailable", message="此接口尚未配置密钥")
             return
         effective = connection_settings(self.settings, actor, purpose, {**config, "mode": "custom"}, key, version)
+        effective = source_settings(effective, allowed=allowed, source=source, purpose=purpose, version=source_version)
         effective = replace(
             effective,
             model_api_metadata={**effective.model_api_metadata, "connectivity_test": True, "synthetic_input": True},
@@ -176,6 +188,8 @@ class ConnectivityService:
     async def agent(self, actor, capability, result):
         async with self.database.transaction(actor, readonly=True) as conn:
             await require_permission(conn, "ai.config_test")
+            if not await shared_allowed(conn):
+                raise AIServiceUnavailable()
             policy = await CompanyRulesRepository().active(conn, "agent_execution." + capability)
         settings = apply_execution_policy(self.settings, policy)
         binding = binding_for(settings.agent_platform_bindings_json, actor.workspace_id, capability)
@@ -202,6 +216,9 @@ class ConnectivityService:
         invocation = None
         try:
             async with asyncio.timeout(min(seconds, 5)):
+                async with self.database.transaction(actor, readonly=True) as conn:
+                    if not await shared_allowed(conn):
+                        raise AIServiceUnavailable()
                 parameters = await client.parameters()
             result["connection_status"] = "passed"
             required = any(
@@ -246,8 +263,11 @@ class ConnectivityService:
                 1,
             )
             error = None
+            network_sent = False
             try:
                 async with asyncio.timeout(seconds):
+                    await prepare_observed(observer, invocation_id)
+                    network_sent = True
                     await invocation()
                 result.update(
                     status="passed",
@@ -266,10 +286,12 @@ class ConnectivityService:
             finally:
                 status = invocation.http_status
                 result.update(http_status=status, ids=asdict(invocation.ids))
-                await observer.finish(
+                await finish_observed(
+                    observer,
                     invocation_id,
                     httpx.Response(status) if status else None,
                     error,
+                    network_sent=network_sent,
                     response_metadata={"transport": asdict(invocation.transport), "connectivity_test": True},
                 )
         except (FdeError, httpx.HTTPError, TimeoutError) as exc:

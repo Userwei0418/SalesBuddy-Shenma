@@ -1,0 +1,62 @@
+/* Reviewed task order, direct customer entry and informative opportunity setup. */
+body:not(.web-login) #page-root .review-required{display:inline;margin-left:var(--ui-space-2);font-size:var(--ui-text-small);font-weight:400;color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .section-head .review-required{display:inline;color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .web-task-content{display:block;grid-column:1;grid-row:1;overflow:visible;scrollbar-gutter:auto;padding:var(--ui-space-6)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .web-task-settings{grid-column:2;grid-row:1}
+body:not(.web-login) #page-root .web-workflow.review-task-create .choice-row{display:flex;gap:var(--ui-space-2);justify-content:flex-start}
+body:not(.web-login) #page-root .web-workflow.review-task-create .choice{flex:0 1 88px;max-width:88px;margin:0;font-family:var(--ui-font)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .choice::after{border:0}
+body:not(.web-login) #page-root .web-workflow.review-task-create .task-type-check{display:block;border:1px solid var(--ui-line);border-radius:50%;box-sizing:border-box;background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .task-type-option.selected .task-type-check{border:4px solid var(--ui-primary);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-workflow.review-task-create .bottom-bar{flex-direction:row;justify-content:flex-end}
+body:not(.web-login) #page-root .web-workflow.review-task-create .description-tip{display:none}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .hero-copy{padding-right:0}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-create-completion{color:var(--ui-secondary);white-space:nowrap}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-list{gap:var(--ui-space-4) var(--ui-space-6);padding:var(--ui-space-6);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-row{padding:0;cursor:default;background:var(--ui-surface);box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-row.missing{background:var(--ui-surface);box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-row.missing .field-label{border-left:2px solid var(--ui-warning);padding-left:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-label{margin-bottom:var(--ui-space-2);min-height:20px}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-label>text{font-size:var(--ui-text-body);font-weight:500;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-label>label{background:transparent;color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create :is(.review-customer-input,.review-customer-choice){display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;width:100%;min-width:0;height:var(--ui-field-height);margin:0;padding:0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font:var(--ui-text-body)/1.65 var(--ui-font);color:var(--ui-ink);background:var(--ui-surface);text-align:left;box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-choice::after{border:0}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-choice>text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-choice>span{flex:none;color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-choice:hover:not(:disabled){border-color:var(--ui-focus);background:var(--ui-hover)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create :is(.review-customer-input,.review-customer-choice):focus-visible{outline:2px solid var(--ui-focus);outline-offset:2px}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-input[aria-invalid=true]{border-color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-customer-choice:disabled{background:var(--ui-surface-subtle);color:var(--ui-muted);cursor:not-allowed}
+body:not(.web-login) #page-root .web-extended-form.review-customer-create .review-field-error{display:block;margin-top:var(--ui-space-1);font-size:var(--ui-text-small);color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview{display:block;min-height:0;width:100%;box-sizing:border-box;padding:var(--ui-space-6);border:1px solid var(--ui-line);text-align:left}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-heading{width:100%;text-align:left;padding-bottom:var(--ui-space-4);margin-bottom:var(--ui-space-4);border-bottom:1px solid var(--ui-line)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-heading>text{display:block;font-size:var(--ui-text-section);font-weight:600;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-heading>label{display:block;margin-top:var(--ui-space-1);font-size:var(--ui-text-small);color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-4)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid>view{min-width:0}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid>view:nth-child(-n+2){grid-column:1/-1}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid label{display:block;margin-bottom:var(--ui-space-2);font-size:var(--ui-text-body);color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid label>text:not(.review-required){font-size:var(--ui-text-small);color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid :is(input,button){display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;width:100%;height:var(--ui-field-height);padding:0 var(--ui-space-3);margin:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-subtle);font:var(--ui-text-body)/1.65 var(--ui-font);color:var(--ui-muted);text-align:left;cursor:not-allowed;opacity:1}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-note{display:block;max-width:none;font-size:var(--ui-text-small);color:var(--ui-muted);margin-top:var(--ui-space-4)}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-customer-state{font-size:var(--ui-text-small);color:var(--ui-muted);margin-top:var(--ui-space-3);line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-customer-retry{margin:var(--ui-space-2) 0 0;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-primary);font-size:var(--ui-text-small)}
+@media(min-width:901px){
+ body:not(.web-login) #page-root .web-workflow.review-task-create .web-workflow-scroll{flex:0 1 auto;}
+ body:not(.web-login) #page-root .web-workflow.review-task-create .web-task-columns{grid-template-columns:minmax(0,1fr) 340px;align-items:start;gap:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.review-task-create .web-workflow-panel{padding:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.review-task-create .task-type-options{margin-bottom:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.review-task-create .assignee-select{margin-bottom:var(--ui-space-4)}
+}
+@media(min-width:901px) and (max-width:1200px){
+ body:not(.web-login) #page-root .web-workflow.review-task-create .web-task-columns{grid-template-columns:minmax(0,1fr) 300px}
+}
+@media(max-width:900px){
+ body:not(.web-login) #page-root .web-workflow.review-task-create .web-task-content{display:block;padding:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview{display:block;padding:var(--ui-space-4)}
+}
+@media(max-width:600px){
+ body:not(.web-login) #page-root .web-extended-form.review-customer-create .field-list{padding:var(--ui-space-4);gap:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-extended-form.review-customer-create .hero-meta{flex-wrap:wrap;gap:var(--ui-space-1) var(--ui-space-3)}
+ body:not(.web-login) #page-root .web-workflow.review-opportunity-create .review-op-preview-grid{grid-template-columns:minmax(0,1fr)}
+}

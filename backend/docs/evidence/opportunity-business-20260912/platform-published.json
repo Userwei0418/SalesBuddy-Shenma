@@ -1,0 +1,12 @@
+{
+  "id": "01a09022-b58f-7214-85eb-29d035ea6f2c",
+  "app_id": "ed592015-f3a7-4df2-9588-9ac93e862c4b",
+  "name": "销售智助-商机新建更新判断-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "51ae0a53b88f54c12595802f5656f429ea2849192489cb17b6ba0b4d3d889950",
+  "snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+  "url": "https://123.207.235.181/agents/01a09022-b58f-7214-85eb-29d035ea6f2c/configure",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "1fac31cac9513d7f073f074ed273113277ca5d3b14f92ab34747e84148fde2cb"
+}

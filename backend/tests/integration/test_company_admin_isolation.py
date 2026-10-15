@@ -144,7 +144,6 @@ async def test_transition_revokes_existing_session_delegation_and_preserves_busi
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     admin, manifest, wid, runtime_role = await provision_fixture(connection)
-    repo = OperationsAccountRepository()
     async with await client_for(connection) as old_client:
         await sign_in(old_client, "ADMIN001")
         old_client.headers["X-Company-ID"] = wid

@@ -73,6 +73,39 @@ test('三类销售按服务端能力保留三个可用入口，FDE两类只保�
 const result = { result: { title: '合成问数结果', summary: '本人有1个商机',
   metrics: [{ label: '商机', value: '1个' }], rows: [{ title: '合成客户', detail: '待跟进' }] } };
 
+test('通用经营报告默认使用实际授权，旧action仅保留分区结构，显式本人才能收窄',async()=>{
+  const {REPORT_ACTIONS,reportPrompt,buildReport}=require('../miniprogram/utils/operatingReport');
+  const keys={report_personal_daily:['safe_customers','attention_customers'],report_team_daily:['personal_safe_customers','personal_attention_customers','team_safe_customers','team_attention_customers'],report_department_daily:['safe_customers','attention_customers','team_comparison']};
+  for(const [action,sections] of Object.entries(keys)){
+    assert.deepEqual(REPORT_ACTIONS[action].sections.map(row=>row[0]),sections);
+    assert.doesNotMatch(reportPrompt(action),/范围仅本人|直属团队|整个销售部门/);
+    assert.match(reportPrompt(action),/当前业务授权范围/);assert.match(reportPrompt(action,{scope:'self'}),/范围仅本人/);
+    const rendered=buildReport({id:'run',result:{scope:'服务端业务授权范围',[sections[0]]:[{title:'授权客户'}]}},action);
+    assert.equal(Object.values(rendered.details)[0].scope,'服务端业务授权范围');
+  }
+  for(const isFde of [false,true]){
+    const calls=[],messages=[];
+    const {page}=loadPage({queryOperatingReport:async prompt=>{calls.push(prompt);return{id:'run',result:{scope:'服务端范围',safe_customers:[],attention_customers:[]}};}});
+    page.data.isFde=isFde;page.appendMessage=message=>messages.push(message);
+    await page.runOperatingReport('report_personal_daily');
+    assert.equal(calls[0],reportPrompt('report_personal_daily'));
+    assert.equal(messages[1].card.eyebrow,'OPERATING INSTANT REVIEW · LIVE DATA');
+    await page.runOperatingReport('report_personal_daily',{scope:'self'});assert.match(calls[1],/范围仅本人/);
+    assert.match(messages[2].text,/本人/);
+  }
+});
+
+test('报告快捷事件仅传递显式scope，今日待办和个人风险入口仍独立',()=>{
+  const {page,navigations}=loadPage();const calls=[];
+  page.runOperatingReport=(action,options)=>calls.push({action,scope:options.scope});
+  page.tapQuickAction({currentTarget:{dataset:{action:'report_personal_daily'}}});
+  page.tapQuickAction({currentTarget:{dataset:{action:'report_personal_daily',scope:'self'}}});
+  assert.deepEqual(calls,[{action:'report_personal_daily',scope:undefined},{action:'report_personal_daily',scope:'self'}]);
+  let personalRisks=0;page.runPersonalRiskAgent=()=>personalRisks++;
+  page.tapQuickAction({currentTarget:{dataset:{action:'查看个人风险'}}});assert.equal(personalRisks,1);
+  page.tapQuickAction({currentTarget:{dataset:{action:'查看今日待办'}}});assert.deepEqual(navigations,['/pages/tasks/index?overview=today_pending']);
+});
+
 test('显式启用二期文字问数后提交一次，等待期间不重复发送，结果沿用原卡片', async () => {
   const pending = deferred(), calls = [];
   const { page } = loadPage({ queryChatBI: question => { calls.push(question); return pending.promise; } });

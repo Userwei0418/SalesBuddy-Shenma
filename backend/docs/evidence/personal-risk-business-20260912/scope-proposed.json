@@ -1,0 +1,22 @@
+{
+  "account": "XS001",
+  "actor_id": "02000000-0000-0000-0000-000000000004",
+  "safe_visit_ids": [
+    "7496eecf-7f52-4340-9209-5052cf68f2fc",
+    "48c1db7c-b90b-41d9-9ae3-f4b0e9167633",
+    "44bcff05-e8bc-4567-8873-2c0e4e1c8180",
+    "f692792f-d9e6-4fc5-82a6-b119befa0a06",
+    "7646d181-dfa2-4a80-9065-5f6269282777",
+    "cd3656a3-2873-4669-bb70-1d3f5ab869c9",
+    "11c4b155-1b76-4608-aa9f-16cc314527f6",
+    "3ba31fbf-ad5b-402f-814e-f45ad0b9c1b2",
+    "d5416962-91e5-40b4-a872-91ce2168e3e0",
+    "27eef200-966b-4195-ac1a-b2d73a1aeeb6",
+    "88fedf99-28f0-40eb-a545-54a9fc1e8de4",
+    "cf83f2f7-e267-43bd-a830-cf82aa262b72"
+  ],
+  "reads_existing_visible_risks": true,
+  "approval_status": "approved",
+  "authorization_source": "用户确认规则并授权本项发布、验证及启用",
+  "approved_at": "2026-09-11T20:12:44.010190+00:00"
+}

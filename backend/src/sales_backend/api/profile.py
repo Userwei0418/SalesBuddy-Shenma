@@ -3,11 +3,14 @@ from __future__ import annotations
 from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, ConfigDict
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Header, Body, status
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.contracts.models import SalesTargetUpdate
+from sales_backend.contracts.growth import GrowthReviewDetail, GrowthReviewReceipt
 from sales_backend.db import Database
 from sales_backend.repositories.profile import ProfileRepository
 from sales_backend.repositories.profile_scope import scope_options
@@ -22,7 +25,7 @@ from sales_backend.services.profile_scores import competency_score
 router = APIRouter(prefix="/api/v1/profile", tags=["Profile"])
 
 
-@router.get("/scope-options")
+@router.get("/scope-options", description="销售画像授权目录保留成员 id、account_code 和有效 team_ids；defaults.team_id 为当前人可选的有效主团队或 null，不用首个团队代替。")
 async def profile_scope_options(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
@@ -75,15 +78,46 @@ async def _require_competency_subject(connection, identity):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "当前账号没有销售评估任职")
 
 
-@router.post("/sales-growth/review", status_code=202)
+class GrowthReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+@router.post("/sales-growth/review", status_code=202, response_model=GrowthReviewReceipt)
 async def ensure_sales_growth_review(
+    idempotency_key: UUID = Header(..., alias="Idempotency-Key"),
+    body: GrowthReviewRequest | None = Body(default=None),
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> dict[str, object]:
-    async with database.transaction(identity.actor) as connection:
-        await _require_competency_subject(connection, identity)
-        review = await ProfileRepository().ensure_daily_competency_review(connection, identity.actor)
-    return {"review_id": review["id"], "status": review["status"]}
+    from sales_backend.repositories.competency_lifecycle import request_review, assert_review_access
+
+    async def authorize(connection):
+        await assert_review_access(connection, identity.actor)
+
+    async def create(connection):
+        result = await request_review(connection, identity.actor)
+        return {key: result[key] for key in ("review_id", "status", "generation_no", "input_fingerprint",
+                                              "reused", "trigger_type")}
+
+    return await management_write(database, identity.actor, idempotency_key, "profile.sales_review", {},
+                                  create, authorize=authorize)
+
+
+@router.get("/sales-growth/reviews/{review_id}", response_model=GrowthReviewDetail)
+async def sales_growth_review_detail(
+    review_id: UUID,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    from sales_backend.services.growth_details import review_detail
+
+    try:
+        async with database.transaction(identity.actor, readonly=True, isolation="repeatable_read") as connection:
+            return await review_detail(connection, identity.actor, review_id)
+    except PermissionError as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @router.get("/sales-growth")

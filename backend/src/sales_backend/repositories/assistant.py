@@ -19,15 +19,16 @@ class AssistantRepository:
         """Recent receipts are projections of committed visits, scoped to their recorder.
 
         A stable visit ID makes reloads/retries idempotent without a second notification
-        write. Older history remains available in the customer archive.
+        write. These receipts open a customer archive, so partner-only imported
+        history stays in visit details rather than this customer-linked projection.
         """
         rows = await connection.fetch(
             """SELECT v.id::text,v.customer_id::text,
             COALESCE(v.archived_fields->>'customer_name',
-                     security.customer_reference(v.customer_id)->>'name') AS customer_name,
+                     security.customer_reference(v.customer_id)->>'name','') AS customer_name,
             v.customer_type_code_snapshot AS customer_type,o.name AS opportunity_name,
             v.interaction_at,v.interaction_mode_code AS interaction_mode,v.archived_at,
-            v.visit_goal,v.follow_up_record,v.next_action,v.visit_location,
+            v.visit_goal,v.follow_up_record,COALESCE(v.next_action,'') AS next_action,v.visit_location,
             v.contact_name_snapshot AS contact_name,v.contact_title_snapshot AS contact_title,
             v.partner_name_snapshot AS partner_name,v.follow_up_score AS score,v.quality_review,v.archived_fields,
             ARRAY(SELECT fd.field_key FROM config.form_version_field vf
@@ -37,6 +38,7 @@ class AssistantRepository:
             LEFT JOIN crm.opportunity o ON o.id=v.opportunity_id AND o.deleted_at IS NULL
             WHERE v.workspace_id=$1::uuid AND v.recorder_user_ref_id=$2::uuid
               AND v.status='archived' AND v.deleted_at IS NULL AND v.archived_at IS NOT NULL
+              AND v.customer_id IS NOT NULL
               AND ($3::text NOT IN ('fde','fde_lead') OR
                    (v.created_by_user_ref_id=$2::uuid AND v.confirmed_by_user_ref_id=$2::uuid
                     AND v.recording_role_code_snapshot IN ('fde','fde_lead')))
@@ -97,7 +99,7 @@ class AssistantRepository:
                 WHERE deleted_at IS NULL AND status = 'open') AS open_opportunities,
               (SELECT count(*) FROM insight.risk
                 WHERE deleted_at IS NULL
-                  AND status IN ('new', 'pending', 'in_progress', 'escalated')) AS open_risks,
+                  AND status <> 'resolved') AS open_risks,
               (SELECT count(*) FROM workflow.task t
                 WHERE t.deleted_at IS NULL
                   AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review')) AS my_tasks
@@ -151,7 +153,7 @@ class AssistantRepository:
                 FROM insight.risk r
                 LEFT JOIN crm.customer c ON c.id = r.customer_id
                WHERE r.deleted_at IS NULL
-                 AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+                 AND r.status <> 'resolved'
                  AND r.severity_code IN ('medium', 'high', 'critical')
             ) alerts
             ORDER BY sort_group, sort_time

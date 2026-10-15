@@ -28,6 +28,7 @@ from sales_backend.services.agent_run.persist import AgentRunStore
 from sales_backend.services.agent_run.prompts import AgentPromptBuilder
 from sales_backend.services.agent_run.today_scope import load_today_scope
 from sales_backend.services.runtime_config import load_runtime_configuration
+from sales_backend.services.visit_prompts import model_user_text
 
 
 class AgentRunHandler:
@@ -91,7 +92,7 @@ class AgentRunHandler:
                 mode=run.capability if run.mode == "visit_entry" else run.mode,
                 facts=facts,
                 messages=messages,
-                user_text=run.text,
+                user_text=model_user_text(run),
                 run_id=run.run_id,
                 surface=run.surface,
                 validate=lambda result: validate_run_result(run, result, facts),

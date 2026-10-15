@@ -5,7 +5,13 @@ const path=require('node:path');
 const vm=require('node:vm');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 function deferred(){let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
+const pageResponse=require('./helpers/opportunity-pages');
 const response={items:[{id:'p1',name:'授权项目',customer_name:'客户',amount:10000,status:'open',probability:10,fde_members:[]}],summary:{total:1,open_amount:10000},facets:{product_lines:[]},has_more:false,next_offset:null};
+// FDE project list now consumes the server-joined filtered overview. Keep this
+// fixture generated from the request so its year/quarter contract is checked
+// by the same validator as production instead of bypassing it with a legacy
+// page-only response.
+const responseFor=(params,items=response.items)=>pageResponse(items,{...params,includeOverview:true,overviewYear:Number(params.overviewYear||2026),overviewQuarters:params.overviewQuarters||[]});
 
 // Run the working-tree app capability refresh and actual page/component lifecycle;
 // only the remote API and native host are replaced by deterministic test doubles.
@@ -41,7 +47,7 @@ for(const outcome of ['resolve','reject'])test(`隐藏页权限更新后旧请�
   h.pages.pop();h.page.onShow();const latest=h.show();
   assert.equal(h.requests.length,2,'loading不能阻止新权限代际重载');
   h.show();assert.equal(h.requests.length,2);
-  h.requests[1].resolve(response);await latest;await tick();
+  h.requests[1].resolve(responseFor(h.requests[1].params));await latest;await tick();
   assert.equal(h.component.data.loading,false);assert.equal(h.component.data.error,'');
   assert.equal(h.component.data.filtered[0].id,'p1');assert.equal(h.component.data.count,1);
 });
@@ -51,7 +57,7 @@ test('返回后旧代际最后才完成也不能覆盖新项目或loading',async
   h.pages.push(h.page,{data:{},onShow(){},setData(){},selectComponent(){return null;}});
   await h.app.refreshCapabilities(true);h.pages.pop();
   const latest=h.show();assert.equal(h.requests.length,2);
-  h.requests[1].resolve({...response,items:[{...response.items[0],id:'new-project'}]});await latest;
-  h.requests[0].resolve(response);await old;
+  h.requests[1].resolve(responseFor(h.requests[1].params,[{...response.items[0],id:'new-project'}]));await latest;
+  h.requests[0].resolve(responseFor(h.requests[0].params));await old;
   assert.equal(h.component.data.loading,false);assert.equal(h.component.data.filtered[0].id,'new-project');
 });

@@ -57,7 +57,8 @@ test("task page preserves server-selected raw statuses when rendering cards and 
   let navigationTitle;
   const source = fs.readFileSync(path.join(__dirname, "../miniprogram/pages/tasks/index.js"), "utf8");
   vm.runInNewContext(source, {
-    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : {},
+    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : name.endsWith("taskCancellation") ? require("../miniprogram/utils/taskCancellation") : {},
+    getApp: () => ({globalData:{session:{userId:"test-reader",permissions:{"task.read":true,"task.cancel":false}}}}),
     Page: (page) => { definition = page; },
     wx: { setNavigationBarTitle: ({ title }) => { navigationTitle = title; } },
   });

@@ -1,0 +1,10 @@
+/* 经营数据区的标题、范围切换（sb-segmented）与成员／团队选择；与公共排名分开。 */
+.metrics-section{margin-top:48rpx}
+.metrics-heading{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.metrics-title{flex-shrink:0;color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600;line-height:1.4}
+.metrics-controls{display:flex;flex:0 1 auto;align-items:center;justify-content:flex-end;gap:16rpx;min-width:0}
+.metrics-picker{flex:0 1 auto;min-width:0} /* 成员／团队触发片显示所选值，宽度随内容（176～280rpx），窄屏可收缩 */
+.metrics-meta{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:8px}
+.metrics-context{display:block;min-width:0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;word-break:break-all}
+.metrics-meta .freshness{flex-shrink:0}
+.public-rankings-heading{margin-top:48rpx;padding:0}

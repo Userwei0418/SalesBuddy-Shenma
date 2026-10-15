@@ -1,0 +1,98 @@
+{
+  "contract_version": "work_report.meeting_facts.v1",
+  "available_scope_kinds": [
+    "self",
+    "managed_team"
+  ],
+  "teams": [
+    {
+      "team_id": "00000000-0000-0000-0000-000000000010",
+      "name": "示例团队",
+      "member_ids": [
+        "00000000-0000-0000-0000-000000000011",
+        "00000000-0000-0000-0000-000000000012"
+      ]
+    }
+  ],
+  "default_schemes": [
+    {
+      "builtin_id": "meeting.day.v1",
+      "version": 1,
+      "period_kind": "day",
+      "name": "示例day会议看板",
+      "section_ids": [
+        "overview",
+        "changes",
+        "customers",
+        "opportunities",
+        "followups",
+        "next_steps"
+      ],
+      "preserves_existing_weekly_generation": true
+    },
+    {
+      "builtin_id": "meeting.week.v1",
+      "version": 1,
+      "period_kind": "week",
+      "name": "示例week会议看板",
+      "section_ids": [
+        "overview",
+        "changes",
+        "customers",
+        "opportunities",
+        "followups",
+        "next_steps"
+      ],
+      "preserves_existing_weekly_generation": true
+    },
+    {
+      "builtin_id": "meeting.two_weeks.v1",
+      "version": 1,
+      "period_kind": "two_weeks",
+      "name": "示例two_weeks会议看板",
+      "section_ids": [
+        "overview",
+        "changes",
+        "customers",
+        "opportunities",
+        "followups",
+        "next_steps"
+      ],
+      "preserves_existing_weekly_generation": true
+    },
+    {
+      "builtin_id": "meeting.month.v1",
+      "version": 1,
+      "period_kind": "month",
+      "name": "示例month会议看板",
+      "section_ids": [
+        "overview",
+        "changes",
+        "customers",
+        "opportunities",
+        "followups",
+        "next_steps"
+      ],
+      "preserves_existing_weekly_generation": true
+    },
+    {
+      "builtin_id": "meeting.quarter.v1",
+      "version": 1,
+      "period_kind": "quarter",
+      "name": "示例quarter会议看板",
+      "section_ids": [
+        "overview",
+        "changes",
+        "customers",
+        "opportunities",
+        "followups",
+        "next_steps"
+      ],
+      "preserves_existing_weekly_generation": true
+    }
+  ],
+  "default_period": "day",
+  "can_prepare": true,
+  "can_save_draft": true,
+  "can_share": true
+}

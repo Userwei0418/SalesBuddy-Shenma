@@ -22,3 +22,14 @@ page{background:var(--ui-background)}
 
 /* Palette only: original geometry is preserved. */
 .status-open .summary-text { color:var(--sb-alert-ink); }
+
+.risk-load-state{margin:32rpx;padding:32rpx;background:var(--ui-surface);font-size:28rpx;line-height:1.6}
+.decision-options{display:flex;gap:16rpx;margin:24rpx 0}
+.decision-options button{flex:1;min-width:0;margin:0;padding:0 12rpx;font-size:28rpx}
+.decision-options .selected{color:var(--ui-primary);background:var(--ui-primary-soft)}
+.decision-notice{margin:16rpx 0;color:var(--ui-secondary);font-size:26rpx;line-height:1.6;word-break:break-all}
+.decision-submit{margin-top:24rpx;color:var(--ui-primary);font-size:28rpx}
+.risk-history{margin-top:20rpx;padding-top:20rpx;border-top:1px solid var(--ui-line);font-size:26rpx;line-height:1.6;word-break:break-all}
+.risk-history text,.risk-history label{display:block;margin-top:8rpx}
+.risk-history label{color:var(--ui-secondary);font-size:24rpx}
+.summary-text,.action-text,.resolved-note,.evidence-row>text{min-width:0;word-break:break-all;white-space:pre-wrap}

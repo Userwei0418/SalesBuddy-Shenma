@@ -29,13 +29,13 @@ class OperationsCustomerRepository:
     async def profile(self, connection, customer_id):
         row = await connection.fetchrow(
             """SELECT c.id::text,c.name,c.customer_code,c.external_customer_id,c.company_reference,
-              c.industry_code,c.customer_type_code,c.level_code,c.source_code,c.primary_partner_name,
+              c.industry_code,c.customer_type_code,c.business_identities,c.partner_profile_id,c.primary_partner_id,c.level_code,c.source_code,c.primary_partner_name,
               c.operation_type,c.cooperation_years,c.main_business,c.customer_budget,c.demand_summary,c.next_action,
               c.lifecycle_status,c.data_source,c.data_kind,c.created_at,c.updated_at,c.company_verified_at,
-              c.import_meta->'synthetic_trial'->>'batch_id' AS synthetic_trial_batch_id,
               c.version_no,t.name AS team_name,u.display_name AS creator_name,
               p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,
-              p.phone AS contact_phone,p.email AS contact_email
+              p.phone AS contact_phone,p.email AS contact_email,
+              security.authorization_customer('customer.update',c.id) AS can_update
               FROM crm.customer c LEFT JOIN platform.team t ON t.id=c.owner_team_id
               LEFT JOIN platform.user_ref u ON u.id=c.created_by_user_ref_id
               LEFT JOIN LATERAL (SELECT name,title,relationship_role_code,phone,email FROM crm.contact
@@ -72,32 +72,31 @@ class OperationsCustomerRepository:
         more = offset + len(result["items"]) < result["total"]
         return {**dict(result), "has_more": more, "next_offset": offset + limit if more else None}
 
-    async def list(self, connection, *, q=None, industry=None, level=None, state=None, owner=None,
-                   data_kind=None, trial_batch=None, limit=50, offset=0):
+    async def list(self, connection, *, q=None, industry=None, level=None, state=None, owner=None, limit=50, offset=0,
+                   include_actions=True, business_identity="all"):
         rows = await connection.fetch(
-            """WITH page AS MATERIALIZED (
-            SELECT c.id,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
+            """WITH matched AS MATERIALIZED (
+            SELECT c.id,c.name,c.industry_code,c.customer_type_code,c.business_identities,c.partner_profile_id,c.primary_partner_id,c.source_code,c.level_code,
             c.lifecycle_status,c.owner_team_id,c.primary_partner_name,
-            c.data_kind,c.import_meta->'synthetic_trial'->>'batch_id' AS synthetic_trial_batch_id,
             c.created_at,c.version_no,c.company_reference,c.company_verified_at,
-            o.state AS ownership_state,o.version_no AS ownership_version,o.owner_user_ref_id,
-            count(*) OVER()::integer AS total_count
+            o.state AS ownership_state,o.version_no AS ownership_version,o.owner_user_ref_id
             FROM crm.customer c JOIN crm.customer_ownership o ON o.customer_id=c.id
-            WHERE c.deleted_at IS NULL AND ($1::text IS NULL OR c.name ILIKE '%'||$1||'%' OR c.company_reference
+            WHERE c.deleted_at IS NULL AND ($9::text='all' OR $9=ANY(c.business_identities)) AND ($1::text IS NULL OR c.name ILIKE '%'||$1||'%' OR c.company_reference
             ILIKE '%'||$1||'%')
             AND ($2::text IS NULL OR c.industry_code=$2) AND ($3::text IS NULL OR c.level_code=$3)
-            AND ($4::text IS NULL OR o.state=$4) AND ($5::uuid IS NULL OR o.owner_user_ref_id=$5)
-            AND ($8::text IS NULL OR c.data_kind=$8)
-            AND ($9::text IS NULL OR c.import_meta->'synthetic_trial'->>'batch_id'=$9)
-            ORDER BY c.created_at DESC,c.id LIMIT $6 OFFSET $7)
-            SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.source_code,c.level_code,
+            AND ($4::text IS NULL OR o.state=$4) AND ($5::uuid IS NULL OR o.owner_user_ref_id=$5)),
+            page AS MATERIALIZED (SELECT * FROM matched ORDER BY created_at DESC,id LIMIT $6 OFFSET $7),
+            total AS (SELECT count(*)::integer AS total_count FROM matched)
+            SELECT c.id::text,c.name,c.industry_code,c.customer_type_code,c.business_identities,c.partner_profile_id,c.primary_partner_id,c.source_code,c.level_code,
             c.lifecycle_status,c.owner_team_id::text,t.name AS team_name,c.primary_partner_name,
-            c.data_kind,c.synthetic_trial_batch_id,
             c.created_at,c.version_no,c.company_reference,c.company_verified_at,
             c.ownership_state,c.ownership_version,c.owner_user_ref_id::text,u.display_name AS owner_name,
             p.name AS contact_name,p.title AS contact_title,p.relationship_role_code AS contact_role,
-            p.phone AS contact_phone,p.email AS contact_email,c.total_count
-            FROM page c LEFT JOIN platform.user_ref u ON u.id=c.owner_user_ref_id
+            p.phone AS contact_phone,p.email AS contact_email,total.total_count,
+            CASE WHEN $8::boolean THEN security.authorization_customer('customer.update',c.id) ELSE false END AS can_update,
+            CASE WHEN $8::boolean THEN security.authorization_customer('customer.release',c.id) ELSE false END AS can_release,
+            CASE WHEN $8::boolean THEN security.authorization_customer('customer.resolve_owner',c.id) ELSE false END AS can_resolve_owner
+            FROM total LEFT JOIN page c ON true LEFT JOIN platform.user_ref u ON u.id=c.owner_user_ref_id
             LEFT JOIN platform.team t ON t.id=c.owner_team_id
             LEFT JOIN LATERAL(SELECT * FROM crm.contact WHERE customer_id=c.id AND deleted_at IS NULL
             ORDER BY is_primary DESC,created_at LIMIT 1) p ON true
@@ -109,11 +108,11 @@ class OperationsCustomerRepository:
             owner,
             limit,
             offset,
-            data_kind,
-            trial_batch,
+            include_actions,
+            business_identity,
         )
         return {
-            "items": [dict(row) for row in rows],
+            "items": [dict(row) for row in rows if row["id"] is not None],
             "total": rows[0]["total_count"] if rows else 0,
             "offset": offset,
             "limit": limit,
@@ -133,23 +132,41 @@ class OperationsCustomerRepository:
         return dict(row) if row else None
 
     async def claims(self, connection, *, status=None, customer_id=None, q=None, limit=50, offset=0):
-        rows = await connection.fetch(
-            """SELECT r.id::text,r.customer_id::text,c.name AS customer_name,r.applicant_user_ref_id::text,
-            a.display_name AS applicant_name,a.account_code,r.status,r.requested_at,r.reviewed_at,r.decision_reason,
-            r.source,reviewer.display_name AS reviewer_name,count(*) OVER()::integer AS total_count
-            FROM crm.customer_claim_request r JOIN crm.customer c ON c.id=r.customer_id
-            JOIN platform.user_ref a ON a.id=r.applicant_user_ref_id
+        row = await connection.fetchrow(
+            """WITH records AS MATERIALIZED (
+            SELECT r.id::text,r.customer_id::text,
+            COALESCE(c.name,security.customer_reference(r.customer_id)->>'name') AS customer_name,
+            r.applicant_user_ref_id::text,a.display_name AS applicant_name,a.account_code,r.status,
+            r.requested_at,r.reviewed_at,r.decision_reason,r.source,reviewer.display_name AS reviewer_name,
+            security.authorization_customer('customer.read',r.customer_id) AS can_read_customer,
+            security.authorization_customer('customer.claim_review',r.customer_id) AS can_review
+            FROM crm.customer_claim_request r
+            LEFT JOIN crm.customer c ON c.id=r.customer_id AND c.workspace_id=r.workspace_id
+            JOIN platform.user_ref a ON a.id=r.applicant_user_ref_id AND a.workspace_id=r.workspace_id
             LEFT JOIN platform.user_ref reviewer ON reviewer.id=r.reviewer_user_ref_id
-            WHERE ($1::text IS NULL OR r.status=$1) AND ($2::uuid IS NULL OR r.customer_id=$2)
-            AND ($3::text IS NULL OR c.name ILIKE '%'||$3||'%' OR a.display_name ILIKE '%'||$3||'%')
-            ORDER BY r.requested_at DESC,r.id LIMIT $4 OFFSET $5""",
-            status,
-            customer_id,
-            q,
-            limit,
-            offset,
+              AND reviewer.workspace_id=r.workspace_id
+            WHERE r.workspace_id=common.current_workspace_id()
+            AND ($2::uuid IS NULL OR r.customer_id=$2)
+            AND ($3::text IS NULL OR COALESCE(c.name,security.customer_reference(r.customer_id)->>'name')
+              ILIKE '%'||$3||'%' OR a.display_name ILIKE '%'||$3||'%')),
+            filtered AS MATERIALIZED (SELECT * FROM records WHERE $1::text IS NULL OR status=$1),
+            summary AS (SELECT count(*)::integer total,
+              count(*) FILTER(WHERE status='pending')::integer pending,
+              count(*) FILTER(WHERE status='approved')::integer approved,
+              count(*) FILTER(WHERE status='rejected')::integer rejected,
+              count(*) FILTER(WHERE status='cancelled')::integer cancelled FROM records)
+            SELECT (SELECT count(*)::integer FROM filtered) total,
+              (SELECT to_jsonb(summary) FROM summary) summary,
+              (SELECT COALESCE(jsonb_agg(p),'[]'::jsonb) FROM (
+                SELECT *, (SELECT count(*)::integer FROM filtered) total_count FROM filtered
+                ORDER BY requested_at DESC,id LIMIT $4 OFFSET $5) p) items""",
+            None if status == "all" else status, customer_id, (q or "").strip() or None, limit, offset,
         )
-        return {"items": [dict(row) for row in rows], "total": rows[0]["total_count"] if rows else 0}
+        items = json_value(row["items"])
+        more = offset + len(items) < row["total"]
+        return {"items": items, "total": row["total"], "summary": json_value(row["summary"]),
+                "offset": offset, "limit": limit, "has_more": more,
+                "next_offset": offset + len(items) if more else None}
 
     async def events(self, connection, customer_id):
         return [

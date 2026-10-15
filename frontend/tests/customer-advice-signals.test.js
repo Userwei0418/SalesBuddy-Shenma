@@ -54,11 +54,11 @@ function pageWith(api){let page;const filename=path.resolve(__dirname,'../minipr
 }
 test('每个标签独立分析并缓存，刷新失败可重试，切换账号后旧结果失效',async()=>{
  const calls=[];let reject=false;
- const {page,session}=pageWith({queryBusinessAdvice:async(kind,id,tab)=>{calls.push(id);assert.equal(kind,'customer');if(reject)throw Error('offline');return {id:'a1',status:'succeeded',summary:tab==='tasks'?'待办建议':'客户建议',suggestions:[]}}});
+ const {page,session}=pageWith({getLatestBusinessAdvice:async(kind,id,tab)=>{calls.push(id);assert.equal(kind,'customer');if(reject)throw Error('offline');return {id:'a1',subject_kind:kind,subject_id:id,customer_id:id,section:tab,status:'succeeded',summary:tab==='tasks'?'待办建议':'客户建议',suggestions:[]}}});
  await page.loadCustomerAdvice();assert.equal(page.data.detailAdvice.overview.status,'ready');await page.loadCustomerAdvice();assert.equal(calls.length,1);
  page.data.detailTab='tasks';await page.loadCustomerAdvice();assert.equal(page.data.detailAdvice.tasks.summary,'待办建议');assert.equal(page.data.detailAdvice.overview.summary,'客户建议');
  reject=true;await page.loadCustomerAdvice({currentTarget:{}});assert.equal(page.data.detailAdvice.tasks.status,'error');assert.equal(page.data.detailAdvice.tasks.summary,undefined);
- let finish;const late=pageWith({queryBusinessAdvice:()=>new Promise(resolve=>{finish=resolve})});const pending=late.page.loadCustomerAdvice();late.session.userId='u2';finish({id:'a2',status:'succeeded',summary:'旧账号数据',suggestions:[]});await pending;assert.notEqual(late.page.data.detailAdvice.overview.summary,'旧账号数据');
+ let finish;const late=pageWith({getLatestBusinessAdvice:()=>new Promise(resolve=>{finish=resolve})});const pending=late.page.loadCustomerAdvice();late.session.userId='u2';finish({id:'a2',status:'succeeded',summary:'旧账号数据',suggestions:[]});await pending;assert.notEqual(late.page.data.detailAdvice.overview.summary,'旧账号数据');
 });
 
 test('临近预计关单按真实阶段提醒，不把早期商机当成签约',()=>{

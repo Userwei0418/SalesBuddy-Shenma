@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 
 from sales_backend.repositories.task_browse import TaskBrowseRepository, selection
-from sales_backend.repositories.tasks import TASK_HANDOVER_REQUIRED_SQL, TaskRepository
+from sales_backend.repositories.tasks import TASK_CAN_CANCEL_SQL, TASK_HANDOVER_REQUIRED_SQL, TaskRepository
 
 
 def test_filters_keep_fde_scope_and_use_bound_owner_period_values():
@@ -63,6 +63,7 @@ async def test_page_builds_summary_before_bounded_light_cards():
     assert args[-2:] == (21, 20) and "WITH page AS MATERIALIZED" in sql
     assert "left(t.description,600)" in sql and "t.source_follow_up_record" not in sql and "t.import_meta" not in sql
     assert TASK_HANDOVER_REQUIRED_SQL in sql and TASK_HANDOVER_REQUIRED_SQL in TaskRepository._SELECT
+    assert TASK_CAN_CANCEL_SQL in sql and TASK_CAN_CANCEL_SQL in TaskRepository._SELECT
 
 
 @pytest.mark.asyncio

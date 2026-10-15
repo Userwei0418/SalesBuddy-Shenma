@@ -1,0 +1,75 @@
+{
+  "checked_at": "2026-09-11T17:54:26.567197+00:00",
+  "run_id": "e831cb7d-c720-4ef7-a980-70b80e7dd26e",
+  "scenario": "normal",
+  "checks": [
+    {
+      "name": "restricted role, no RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "successful run",
+      "passed": true
+    },
+    {
+      "name": "one persisted assistant",
+      "passed": true
+    },
+    {
+      "name": "one queued business job",
+      "passed": true
+    },
+    {
+      "name": "real platform result accepted",
+      "passed": true
+    },
+    {
+      "name": "one real platform HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "platform runtime IDs recorded",
+      "passed": true
+    },
+    {
+      "name": "answer matches current actor-scoped open task aggregate",
+      "passed": true
+    }
+  ],
+  "route": {
+    "provider": "agent_platform",
+    "model_ref": "agent-platform:01a09022-c5ff-7562-bd7d-f8d6c74f5486",
+    "elapsed_ms": 2079,
+    "operation_id": "a8415858-fa15-48da-b85b-7d52d089562f",
+    "platform_run": {
+      "ids": {
+        "task_id": "9661820a-53f3-46aa-b090-7a75177b107e",
+        "message_id": "8124cdf2-9ae1-4b77-a739-3d003232d8a9",
+        "conversation_id": "ce368b36-4695-4140-8497-f9519c274d3f"
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": null
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "a8415858-fa15-48da-b85b-7d52d089562f",
+      "fault_injected": "false",
+      "dispatch_suppressed": "false"
+    }
+  ],
+  "facts_verification": "same restricted actor aggregate at audit time; values redacted",
+  "passed": true
+}

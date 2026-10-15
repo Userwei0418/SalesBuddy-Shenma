@@ -6,7 +6,7 @@ from sales_backend.api.models import RunAccepted
 from sales_backend.contracts.visit_flow import QualityRequest, StructureRequest
 from sales_backend.db import Database
 from sales_backend.services.idempotency import execute_mutation
-from sales_backend.services.visit_flow import prepare_visit_run
+from sales_backend.services.visit_flow import prepare_visit_run, require_visit_run_scope
 
 router = APIRouter(prefix="/api/v1/visit-flow", tags=["Visit flow"])
 
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/api/v1/visit-flow", tags=["Visit flow"])
 async def enqueue(body, stage, identity, database, key):
     try:
         async with database.transaction(identity.actor) as connection:
+            await require_visit_run_scope(connection, identity.actor, body, stage)
 
             async def create():
                 return await prepare_visit_run(connection, identity.actor, body, stage)

@@ -17,7 +17,7 @@ from sales_backend.services.agent_run.handler import AgentRunHandler
 from sales_backend.services.agent_run.persist import AgentRunStore
 from sales_backend.services.opportunities import save_opportunity
 from sales_backend.services.visit_flow import prepare_visit_run
-from tests.integration.test_visit_entry_platform import TransactionDatabase, existing_actor
+from tests.integration.test_visit_entry_platform import TransactionDatabase
 
 
 async def review_attendance(connection, actor, customer_id, opportunity_id, participants, mutation=None):

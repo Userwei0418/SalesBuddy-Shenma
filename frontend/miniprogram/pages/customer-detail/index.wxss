@@ -1,3 +1,4 @@
+@import "../../styles/customer-identity.wxss";
 @import "../../styles/opportunity-edit-entry.wxss";
 @import "../../styles/detail-summary.wxss";
 page{background:var(--ui-background)}

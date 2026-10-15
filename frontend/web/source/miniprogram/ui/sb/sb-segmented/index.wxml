@@ -1,0 +1,3 @@
+<view class="sb-seg {{size === 'small' ? 'small' : ''}} {{block ? 'block' : ''}} {{disabled ? 'is-disabled' : ''}}" aria-role="radiogroup">
+  <view wx:for="{{options}}" wx:key="value" class="sb-seg-item {{item.value === value ? 'on' : ''}} {{item.disabled ? 'disabled' : ''}}" hover-class="{{item.value === value || item.disabled || disabled ? 'none' : 'sb-seg-hover'}}" data-value="{{item.value}}" data-disabled="{{item.disabled}}" bind:tap="onTap" aria-role="radio" aria-checked="{{item.value === value}}" aria-disabled="{{item.disabled}}">{{item.label}}</view>
+</view>

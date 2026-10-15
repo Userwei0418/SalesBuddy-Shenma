@@ -1,0 +1,30 @@
+{
+  "application_commit": "ee9bd61b42e33b4a2c37411c4013082fc2a9b312",
+  "release_id": "customer-risk-20260916-ee9bd61",
+  "schema": "V098",
+  "verified_checksums": 66,
+  "pending_migrations": [],
+  "runtime_bypass_rls": false,
+  "api_worker_live_ready_and_release_directory_verified": true,
+  "service_environment_files_unchanged": true,
+  "agent_runtime_and_credentials_unchanged": true,
+  "frontend_source_changes": false,
+  "release_archive_directories": [
+    "backend",
+    "database"
+  ],
+  "migration_release": {
+    "application_commit": "ee4e14eca48b2337b40a684a0420aa3217dd8071",
+    "from_schema": "V097",
+    "to_schema": "V098",
+    "backup_bytes": 11097539,
+    "migration_replay_unchanged": true
+  },
+  "final_forward_release": {
+    "from_schema": "V098",
+    "to_schema": "V098",
+    "backup_bytes": 11497979
+  },
+  "full_successful_assessment_verified": false,
+  "verified_at_utc": "2026-09-16T02:17:45.439945+00:00"
+}

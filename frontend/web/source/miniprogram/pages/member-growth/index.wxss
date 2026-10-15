@@ -1,0 +1,43 @@
+.member-growth-page{box-sizing:border-box;padding:32rpx 32rpx 64rpx}
+.member-hero{display:flex;align-items:center;gap:24rpx;padding:16px}
+.member-avatar{width:80rpx;height:80rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;color:var(--ui-primary);background:var(--ui-selected);font-size:var(--ui-text-body);font-weight:600}
+.member-hero>view:nth-child(2){flex:1;min-width:0}
+.member-hero>view:nth-child(2)>view{color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4}
+.member-hero>view:nth-child(2)>text{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px}
+.review-badge{flex-shrink:0;padding:0 8px;border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:16rpx;margin:24px 0 8px}
+.section-heading>view:first-child>text{display:block;color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600}
+.section-heading>view:first-child>label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.overall{display:flex;align-items:baseline;gap:8rpx;flex-shrink:0}
+.overall>text{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.overall>label{color:var(--ui-secondary);font-size:14px}
+.capability-card,.growth-card{padding:16px}
+.growth-card{padding-top:8px}
+.radar-canvas{width:100%;height:420rpx}
+.review-summary{color:var(--ui-ink);font-size:14px;line-height:1.6}
+.review-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16rpx;row-gap:4px;margin-top:8px;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.review-meta label{color:var(--ui-muted);white-space:nowrap}
+.dimension-grid{display:grid;grid-template-columns:1fr 1fr;gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.dimension-item{min-width:0}
+.dimension-item>view:first-child{display:flex;justify-content:space-between;gap:8rpx}
+.dimension-item>view text{color:var(--ui-ink);font-size:14px;font-weight:600}
+.dimension-item>view label{color:var(--ui-ink);font-size:var(--ui-text-small);font-weight:600}
+.dimension-item>text{display:-webkit-box;margin-top:8rpx;overflow:hidden;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.score-track{height:8rpx;margin-top:8rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.score-track view{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.growth-heading{align-items:center}
+.history-count{color:var(--ui-muted);font-size:var(--ui-text-small)}
+.chart-title{margin-top:16px;color:var(--ui-ink);font-size:14px;font-weight:600}
+.growth-canvas{width:100%;height:300rpx}
+.state-card,.empty-card{margin-top:16px}
+
+/* AI 建议：卡内一段，上方一条分隔线，不再套淡蓝小卡；标识统一用 sb-ai-badge（覆盖 app.wxss 的 .ai-advice-card，公共样式由主控清理） */
+.member-growth-page .ai-advice-card{margin-top:16px;padding:16px 0 0;border:0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent}
+.ai-advice-top{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 16rpx}
+.ai-advice-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.ai-advice-note{display:block;margin-top:4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.member-growth-page .ai-advice-list{margin-top:8px}
+.member-growth-page .ai-advice-row{gap:16rpx;padding:20rpx 0;border-top:0;border-bottom:1px solid var(--ui-line)}
+.member-growth-page .ai-advice-row:last-child{border-bottom:0}
+.member-growth-page .ai-advice-index{width:36rpx;height:36rpx;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);font-weight:600}
+.member-growth-page .ai-advice-text{color:var(--ui-ink);font-size:14px;line-height:1.6}

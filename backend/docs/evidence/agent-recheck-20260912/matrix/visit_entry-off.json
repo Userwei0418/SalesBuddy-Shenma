@@ -1,0 +1,110 @@
+{
+  "capability": "visit_entry",
+  "case": "off",
+  "started_at": "2026-09-12T09:18:19.778078+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "2abe010ab311eda2a63634c42ac548e31cb50557ce5f59309957777a64ab150d",
+    "bytes": 49,
+    "fields": {
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "8aa7b5f1-bfe4-4aaa-a9c8-e0aec2e64188",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 2519
+  },
+  "result": {
+    "sha256": "784c46694b3ad3bf688286e4d64d5090f1e4729396c2640a6a64a1f43f6d9e5d",
+    "bytes": 1516,
+    "fields": {
+      "fields": {
+        "type": "dict",
+        "count": 18
+      },
+      "summary": {
+        "type": "str"
+      },
+      "quality_review": {
+        "type": "dict",
+        "count": 4
+      },
+      "prompt_version": {
+        "type": "str"
+      },
+      "missing_fields": {
+        "type": "list",
+        "count": 0
+      }
+    }
+  },
+  "elapsed_ms": 2521,
+  "validation": [
+    {
+      "input": {
+        "sha256": "a633c7aa60b3060dfd5b035cb70d86ae9485480d45a2ef465b838303d1b7a675",
+        "bytes": 1440,
+        "fields": {
+          "fields": {
+            "type": "dict",
+            "count": 18
+          },
+          "summary": {
+            "type": "str"
+          },
+          "quality_review": {
+            "type": "dict",
+            "count": 3
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "784c46694b3ad3bf688286e4d64d5090f1e4729396c2640a6a64a1f43f6d9e5d",
+        "bytes": 1516,
+        "fields": {
+          "fields": {
+            "type": "dict",
+            "count": 18
+          },
+          "summary": {
+            "type": "str"
+          },
+          "quality_review": {
+            "type": "dict",
+            "count": 4
+          },
+          "prompt_version": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 0
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "c81103f6-8da6-4d0a-b991-e3bf08b2b386",
+      "provider": "senseaudio",
+      "operation_id": "8aa7b5f1-bfe4-4aaa-a9c8-e0aec2e64188",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:18:19.792074+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:18:22.297641+00:00"
+    }
+  ]
+}

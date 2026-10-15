@@ -1,0 +1,7 @@
+* text=auto eol=lf
+# Shared source and supplied assets are verified byte-for-byte by build.py.
+/source/** -text
+/assets/** -text
+*.png binary
+*.jpg binary
+*.woff2 binary

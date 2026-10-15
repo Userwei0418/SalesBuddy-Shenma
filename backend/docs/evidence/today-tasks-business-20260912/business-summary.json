@@ -1,0 +1,145 @@
+{
+  "cases": [
+    {
+      "case": "normal",
+      "elapsed_ms": 24186,
+      "conversation_id": "930af564-2aa0-414f-9f29-764400793571",
+      "run_id": "a62f53cb-adae-42fe-af7e-dc6dd19f7a42",
+      "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+      "platform_diagnostics": {
+        "ids": {
+          "task_id": "649b61ec-2a7d-449c-ae9d-c70045aa74be",
+          "message_id": "e60335b6-5e62-4606-9574-22b34e2d241e",
+          "conversation_id": "ed68d375-e2ec-45f8-b56b-47b371deb2c8"
+        },
+        "transport": {
+          "http_status": 200,
+          "first_text_ms": 3044,
+          "first_body_byte_ms": 3044,
+          "request_started_ms": 0,
+          "first_data_event_ms": 3044,
+          "headers_received_ms": 3044,
+          "stream_completed_ms": null
+        },
+        "error_code": null,
+        "stop_state": "unconfirmed",
+        "execution_mode": "filtered_facts",
+        "actual_snapshot_id": null,
+        "test_fault_injected": false,
+        "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+        "tool_authority_issued": false,
+        "runtime_snapshot_verified": false,
+        "network_dispatch_suppressed": false
+      }
+    },
+    {
+      "case": "off",
+      "elapsed_ms": 7068,
+      "conversation_id": "4a556428-1d52-4adc-be09-be80fb5f3670",
+      "run_id": "2d57680d-fdc2-4586-bda5-fd673bc3e668",
+      "task_id": "a8b3eeb4-6b1b-4ee8-b908-1550c4bfb81d",
+      "provider": "senseaudio",
+      "fallback_reason": null,
+      "operation_id": "2d57680d-fdc2-4586-bda5-fd673bc3e668",
+      "platform_diagnostics": {}
+    },
+    {
+      "case": "blocked",
+      "elapsed_ms": 13115,
+      "conversation_id": "12fa8250-d610-4b01-9a53-77667bb5d9f7",
+      "run_id": "659461ba-8f7a-48b3-91e4-bd6393543328",
+      "task_id": "155ea69d-80f4-474e-9129-5945031d3c2b",
+      "provider": "senseaudio",
+      "fallback_reason": "ControlledPlatformBlock",
+      "operation_id": "6da41a0b-5948-4a40-8b77-c2f00047a4dd",
+      "platform_diagnostics": {
+        "ids": {
+          "task_id": null,
+          "message_id": null,
+          "conversation_id": null
+        },
+        "transport": {
+          "http_status": null,
+          "first_text_ms": null,
+          "first_body_byte_ms": null,
+          "request_started_ms": null,
+          "first_data_event_ms": null,
+          "headers_received_ms": null,
+          "stream_completed_ms": null
+        },
+        "error_code": null,
+        "stop_state": "not_requested",
+        "execution_mode": "filtered_facts",
+        "actual_snapshot_id": null,
+        "test_fault_injected": true,
+        "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+        "tool_authority_issued": false,
+        "runtime_snapshot_verified": false,
+        "network_dispatch_suppressed": true
+      }
+    },
+    {
+      "case": "production",
+      "elapsed_ms": 18139,
+      "conversation_id": "262602e9-8ee4-47af-ac71-bd22be844955",
+      "run_id": "77a93333-6207-404b-9392-3e671ea7fdc4",
+      "task_id": "f5318956-e5a9-4606-87a4-3d74dd243a27",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "operation_id": "c202bc35-48fe-4a62-948e-0ee843ccff44",
+      "platform_diagnostics": {
+        "ids": {
+          "task_id": "ee65bfd3-8bc7-4018-a0b7-42afb0a48382",
+          "message_id": "d697f07d-df2d-4d1e-a1f1-d0a11dadba66",
+          "conversation_id": "4c1bef9f-99da-4919-b552-d518730800e3"
+        },
+        "transport": {
+          "http_status": 200,
+          "first_text_ms": 10172,
+          "first_body_byte_ms": 10172,
+          "request_started_ms": 0,
+          "first_data_event_ms": 10172,
+          "headers_received_ms": 10172,
+          "stream_completed_ms": null
+        },
+        "error_code": null,
+        "stop_state": "unconfirmed",
+        "execution_mode": "filtered_facts",
+        "actual_snapshot_id": null,
+        "test_fault_injected": false,
+        "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+        "tool_authority_issued": false,
+        "runtime_snapshot_verified": false,
+        "network_dispatch_suppressed": false
+      }
+    }
+  ],
+  "passed_scenarios": 4,
+  "total_business_submissions": 5,
+  "failed_submissions": 1,
+  "new_tasks": 4,
+  "platform_direct_answers_accepted": 0,
+  "natural_timeout_fallbacks": 2,
+  "off_original_success": true,
+  "blocked_fallback_success_after_one_failed_attempt": true,
+  "first_blocked_failure": {
+    "run_id": "a1d18f55-bcad-4e70-b56a-f107e5e074a6",
+    "operation_id": "56df431e-3916-4953-a241-917e19142e78",
+    "platform": "controlled_suppressed",
+    "original_http_status": 200,
+    "validation_error": "今日待办引用了本次事实以外的对象",
+    "business_status": "failed",
+    "tasks_created": 0,
+    "elapsed_ms": 17136,
+    "rollback_verified": true
+  },
+  "original_tasks_assignees_crm_visits_unchanged": true,
+  "existing_notifications_unchanged": true,
+  "new_own_in_app_reminders": 1,
+  "external_notification_delivery_attempts": 0,
+  "provider_variability": "One original-model invalid output remains a real failure. Repeat passed without changing runtime or relaxing validation.",
+  "runtime_snapshot_verified": false
+}

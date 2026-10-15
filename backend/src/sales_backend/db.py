@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any
 from time import perf_counter
+import math
 
 import asyncpg
 
@@ -14,6 +15,22 @@ from sales_backend.job_context import JobLeaseLost, current_job_lease
 from sales_backend.request_metadata import request_metadata
 from sales_backend.performance import record_pool_wait, record_query
 from sales_backend.permission_context import current_feature
+
+
+class TenantInactive(PermissionError):
+    """A suspended/closed tenant cannot execute an authenticated transaction."""
+
+
+class DatabaseBusy(RuntimeError):
+    """No connection was acquired within the configured wait budget.
+
+    This describes this acquisition only, not the outcome of any earlier
+    transaction in the request. Callers must not blindly retry business writes.
+    """
+
+
+class JobLeaseLockBusy(RuntimeError):
+    """The lease fence could not take its row lock without waiting."""
 
 
 async def _initialize_connection(connection: asyncpg.Connection) -> None:
@@ -41,6 +58,11 @@ class Database:
     settings: Settings
     pool: asyncpg.Pool | None = None
 
+    def __post_init__(self) -> None:
+        wait = self.settings.database_pool_wait_seconds
+        if not math.isfinite(wait) or not 0 < wait <= 30:
+            raise ValueError("DATABASE_POOL_WAIT_SECONDS must be finite and between 0 (exclusive) and 30")
+
     async def connect(self) -> None:
         if self.pool is not None:
             return
@@ -67,13 +89,30 @@ class Database:
 
     @asynccontextmanager
     async def connection(self) -> AsyncIterator[asyncpg.Connection]:
+        pool = self.require_pool()
         start = perf_counter()
-        async with self.require_pool().acquire() as connection:
+        try:
+            connection = await pool.acquire(timeout=self.settings.database_pool_wait_seconds)
+        except TimeoutError as exc:
+            raise DatabaseBusy("Database connection wait budget exhausted") from exc
+        finally:
             record_pool_wait(perf_counter() - start)
+        try:
             yield connection
+        finally:
+            # asyncpg shields release from cancellation. Give reset its own
+            # bounded budget: a short acquisition policy must not kill healthy
+            # connections while rolling back/resetting them. Query and release
+            # timeouts are deliberately outside the acquisition error mapping.
+            await pool.release(connection, timeout=5)
 
     @asynccontextmanager
-    async def transaction(self, actor: ActorContext, *, readonly: bool = False, isolation: str | None = None) -> AsyncIterator[asyncpg.Connection]:
+    async def transaction(
+        self, actor: ActorContext, *, readonly: bool = False,
+        isolation: str = "read_committed", lease_lock_nowait: bool = False,
+    ) -> AsyncIterator[asyncpg.Connection]:
+        if readonly and lease_lock_nowait:
+            raise ValueError("a readonly transaction does not lock the worker lease")
         async with self.connection() as connection:
             async with connection.transaction(readonly=readonly, isolation=isolation):
                 await set_request_context(connection, actor)
@@ -84,19 +123,26 @@ class Database:
                     query = (
                         (
                             "SELECT 1 FROM ops.job WHERE id=$1::uuid AND lease_token=$2::uuid "
-                            "AND status='running' AND locked_until>clock_timestamp()"
+                            "AND status='running' AND locked_until>clock_timestamp() "
+                            "AND security.workspace_job_enabled(workspace_id,job_type)"
                         )
                         if readonly
                         else (
                             "SELECT 1 FROM ops.job WHERE id=$1::uuid AND lease_token=$2::uuid "
-                            "AND status='running' AND locked_until>clock_timestamp() FOR UPDATE"
+                            "AND status='running' AND locked_until>clock_timestamp() "
+                            "AND security.workspace_job_enabled(workspace_id,job_type) FOR UPDATE"
                         )
                     )
-                    valid = await connection.fetchval(
-                        query,
-                        lease.job_id,
-                        lease.token,
-                    )
+                    if lease_lock_nowait:
+                        query += " NOWAIT"
+                    try:
+                        valid = await connection.fetchval(query, lease.job_id, lease.token)
+                    except asyncpg.LockNotAvailableError as exc:
+                        if not lease_lock_nowait:
+                            raise
+                        # Only contention at this exact fence is deferrable.
+                        # The transaction must roll back before a readonly check.
+                        raise JobLeaseLockBusy("worker lease row is locked") from exc
                     if not valid:
                         raise JobLeaseLost("worker lease expired or superseded")
                 yield connection
@@ -131,7 +177,12 @@ async def set_request_context(connection: asyncpg.Connection, actor: ActorContex
 
     # Resolve from current database assignments once per transaction. Row policies
     # consume only this server-established context, never frontend capability flags.
-    await connection.execute("SELECT security.authorization_refresh()")
+    try:
+        await connection.execute("SELECT security.authorization_refresh()")
+    except asyncpg.PostgresError as exc:
+        if exc.sqlstate == 'P7403':
+            raise TenantInactive('公司当前已暂停或关闭，请联系平台管理员') from None
+        raise
 
 
 def json_value(value: Any) -> Any:

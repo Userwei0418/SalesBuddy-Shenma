@@ -1,0 +1,114 @@
+/* PC 视觉 2.0 · 外框：浅色侧栏（带子菜单）与紧凑顶栏。只用 --ui-* 变量。 */
+body.pc-frame:not(.web-login) { --web-header: 52px; }
+@media (min-width: 901px) { body.pc-frame:not(.web-login) { --web-notice: 0px; } }
+body.pc-frame .web-sidebar, body.pc-frame.department-design .web-sidebar {
+  padding: 0; display: block; overflow: hidden;
+  background: var(--ui-sidebar) !important; border-right: 1px solid var(--ui-line) !important; color: var(--ui-sidebar-ink);
+  /* Main content and menu text switch immediately. Keep the same width in that
+     frame instead of briefly wrapping expanded labels into a 64px sidebar. */
+  transition: none;
+}
+/* 演示身份并入顶栏，原来单独一行的提示条在 PC 宽度下不再占位 */
+@media (min-width: 901px) { body.pc-frame #preview-notice { display: none !important; } }
+
+.pc-nav { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.pc-nav-brand { display: flex; align-items: center; height: 56px; padding: 0 var(--ui-space-4); flex: none; }
+.pc-nav-brand img { height: 30px; width: auto; display: block; }
+.pc-nav-brand { gap: 8px; color: var(--ui-ink); text-decoration: none; }
+.pc-nav-brand-name { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.pc-nav.is-collapsed .pc-nav-brand { justify-content: center; padding: 0; }
+.pc-nav.is-collapsed .pc-nav-brand img { height: 30px; width: 30px; }
+
+.pc-nav-workspace { margin: 0 var(--ui-space-3) var(--ui-space-2); padding: 6px var(--ui-space-2); display: flex; align-items: center; gap: var(--ui-space-2);
+  border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-ink); text-align: left; cursor: pointer; flex: none; min-width: 0; }
+.pc-nav-workspace:hover { border-color: var(--ui-focus); }
+.pc-nav-workspace-icon { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: var(--ui-radius-control); background: var(--ui-selected-strong); color: var(--ui-primary); flex: none; }
+.pc-nav-workspace-text { flex: 1; min-width: 0; }
+.pc-nav-workspace-text b, .pc-nav-workspace-text small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-nav-workspace-text b { font-size: var(--ui-text-caption); font-weight: 600; line-height: 18px; }
+.pc-nav-workspace-text small { font-size: var(--ui-text-small); color: var(--ui-muted); line-height: 16px; }
+.pc-nav-chevron { color: var(--ui-muted); display: inline-flex; }
+.pc-nav.is-collapsed .pc-nav-workspace { margin-inline: auto; width: 40px; justify-content: center; padding: 6px 0; }
+
+.pc-nav-menu { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: var(--ui-space-1) 0 var(--ui-space-3); scrollbar-width: thin; }
+.pc-nav-menu .ant-menu { background: transparent; border-inline-end: 0 !important; font-size: var(--ui-text-body); }
+.pc-nav-menu > .ant-menu { width: 100%; transition: none !important; }
+.pc-nav-menu .ant-menu-title-content { transition: none !important; }
+.pc-nav-menu .ant-menu-submenu-title, .pc-nav-menu .ant-menu-item { color: var(--ui-sidebar-nav); }
+.pc-nav-menu .ant-menu-submenu-selected > .ant-menu-submenu-title { color: var(--ui-primary); font-weight: 600; }
+.pc-nav-menu .ant-menu-sub.ant-menu-inline { background: transparent; }
+.pc-nav-menu .ant-menu-sub .ant-menu-item { height: 34px; line-height: 34px; color: var(--ui-secondary); }
+.pc-nav-menu .ant-menu-sub .ant-menu-item.ant-menu-item-selected { color: var(--ui-primary); font-weight: 600; }
+.pc-nav-menu .ant-menu-item-selected { background: var(--ui-sidebar-active); }
+.pc-nav-menu .ant-menu-inline .ant-menu-item:not(.ant-menu-item-selected):hover,
+.pc-nav-menu .ant-menu-inline .ant-menu-submenu-title:hover { background: var(--ui-sidebar-hover); }
+.pc-nav-menu .pc-icon { width: 17px; height: 17px; }
+
+/* 一级模块有边界和底色，二级条目缩进；当前页同时用色块和左侧标记定位。 */
+.pc-nav:not(.is-collapsed) .pc-nav-menu > .ant-menu > .ant-menu-submenu { margin: 6px 8px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); overflow: hidden; background: var(--ui-surface); }
+.pc-nav:not(.is-collapsed) .pc-nav-menu > .ant-menu > .ant-menu-submenu > .ant-menu-submenu-title { width: 100%; margin: 0; border-radius: 0; font-weight: 600; background: var(--ui-surface-sunken); }
+.pc-nav:not(.is-collapsed) .pc-nav-menu .ant-menu-sub { padding: 4px 0; }
+.pc-nav:not(.is-collapsed) .pc-nav-menu .ant-menu-sub .ant-menu-item { width: calc(100% - 12px); margin-inline: 6px; padding-left: 36px !important; border-radius: var(--ui-radius-control); }
+.pc-nav-menu .ant-menu-item-selected::before { content: ''; position: absolute; inset: 8px auto 8px 0; width: 3px; border-radius: var(--ui-radius-control); background: var(--ui-primary); }
+.pc-nav-menu .ant-menu-submenu-selected > .ant-menu-submenu-title { box-shadow: inset 0 -1px var(--ui-line); }
+.pc-crumb-link { border: 0; padding: 0; background: transparent; color: var(--ui-secondary); cursor: pointer; font: inherit; }
+.pc-crumb-link:hover { color: var(--ui-primary); text-decoration: underline; text-underline-offset: 3px; }
+.pc-crumb-link:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 3px; border-radius: var(--ui-radius-control); }
+.pc-topbar-back.ant-btn { border: 1px solid var(--ui-line); flex: none; }
+
+.pc-nav-bottom { flex: none; border-top: 1px solid var(--ui-line); padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2); display: flex; flex-direction: column; gap: var(--ui-space-1); }
+.pc-nav-admin { font-size: var(--ui-text-small); color: var(--ui-muted); text-decoration: none; padding: 2px var(--ui-space-2); }
+.pc-nav-admin:hover { color: var(--ui-primary); }
+.pc-nav-account { display: flex; align-items: center; gap: var(--ui-space-2); width: 100%; padding: 6px var(--ui-space-2); border: 0; border-radius: var(--ui-radius-control); background: transparent; color: var(--ui-ink); text-align: left; cursor: pointer; min-width: 0; }
+.pc-nav-account:hover, .pc-nav-account.is-active { background: var(--ui-sidebar-hover); }
+.pc-nav-avatar.ant-avatar { background: var(--ui-primary); color: var(--ui-on-primary); font-size: var(--ui-text-small); flex: none; }
+.pc-nav-account-text { flex: 1; min-width: 0; }
+.pc-nav-account-text b, .pc-nav-account-text small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-nav-account-text b { font-size: var(--ui-text-caption); font-weight: 600; line-height: 18px; }
+.pc-nav-account-text small { font-size: var(--ui-text-small); color: var(--ui-muted); line-height: 16px; }
+.pc-nav-toggle { display: flex; align-items: center; gap: var(--ui-space-2); border: 0; background: transparent; color: var(--ui-muted); font-size: var(--ui-text-small); padding: 4px var(--ui-space-2); border-radius: var(--ui-radius-control); cursor: pointer; }
+.pc-nav-toggle:hover { color: var(--ui-primary); background: var(--ui-sidebar-hover); }
+.pc-nav.is-collapsed .pc-nav-bottom { align-items: center; padding-inline: 0; }
+.pc-nav.is-collapsed .pc-nav-account { width: 40px; justify-content: center; padding: 6px 0; }
+
+/* 顶栏 */
+body.pc-frame #frame-topbar, body.pc-frame:not(.web-login) #frame-topbar { padding: 0; display: block; background: var(--ui-surface); border-bottom: 1px solid var(--ui-line); backdrop-filter: none; }
+.pc-topbar { height: var(--web-header); display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-4); padding: 0 var(--ui-page-gutter); }
+.pc-topbar-left { display: flex; align-items: center; gap: var(--ui-space-2); min-width: 0; }
+.pc-topbar-left .ant-breadcrumb { font-size: var(--ui-text-body); white-space: nowrap; }
+.pc-topbar-left .ant-breadcrumb strong { font-weight: 600; color: var(--ui-ink); }
+.pc-topbar-back.ant-btn { color: var(--ui-secondary); }
+.pc-topbar-right { display: flex; align-items: center; gap: var(--ui-space-3); flex: none; }
+.pc-topbar-role { display: inline-flex; align-items: center; gap: 2px; padding-left: var(--ui-space-2); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface-subtle); font-size: var(--ui-text-small); color: var(--ui-secondary); }
+.pc-topbar-role .ant-select { min-width: 96px; }
+.pc-topbar-env { font-size: var(--ui-text-small); color: var(--ui-secondary); padding: 2px var(--ui-space-2); border-radius: var(--ui-radius-control); background: var(--ui-neutral-soft); white-space: nowrap; }
+.pc-topbar-status { display: inline-flex; align-items: center; gap: 6px; font-size: var(--ui-text-small); color: var(--ui-secondary); white-space: nowrap; }
+.pc-topbar-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--ui-muted); }
+.pc-topbar-status.is-ready i { background: var(--ui-success); }
+.pc-topbar-status.is-preview i { background: var(--ui-warning); }
+.pc-topbar-status.is-unavailable i { background: var(--ui-danger); }
+.pc-topbar-date { font-size: var(--ui-text-small); color: var(--ui-muted); white-space: nowrap; }
+.pc-topbar-icon.ant-btn { color: var(--ui-secondary); }
+.pc-topbar-account.ant-btn, body.pc-frame #mobile-account-button { display: none; }
+.pc-icon { display: inline-flex; width: 16px; height: 16px; flex: none; }
+.pc-icon > svg { width: 100%; height: 100%; }
+.pc-topbar-create .pc-icon { width: 14px; height: 14px; }
+@media (max-width: 1180px) { .pc-topbar-date, .pc-topbar-status { display: none; } }
+@media (max-width: 900px) { .pc-topbar { padding: 0 var(--ui-space-3); } .pc-topbar-role { display: none; } }
+@media (max-width: 600px) {
+  .pc-topbar { gap: var(--ui-space-2); }
+  .pc-topbar-left .ant-breadcrumb { min-width: 0; overflow: auto; scrollbar-width: none; }
+  .pc-topbar-left .ant-breadcrumb ol { flex-wrap: nowrap; }
+  .pc-topbar-left .ant-breadcrumb li { flex: none; }
+  .pc-topbar-left:has(.pc-topbar-back) .ant-breadcrumb li:not(:last-child) { display: none; }
+}
+
+/* Shenma retains its existing mobile login and bottom navigation. */
+@media (max-width:900px) {
+  body.pc-frame .web-sidebar, body.pc-frame.department-design .web-sidebar { display:none; }
+  body.pc-frame.department-design { --web-sidebar:0px!important; }
+  .pc-topbar-left .ant-breadcrumb li:not(:last-child) { display:none; }
+  .pc-topbar-env { display:none; }
+  .pc-topbar-account.ant-btn { display:inline-flex; }
+  .pc-topbar-help.ant-btn, body.pc-frame #mobile-account-button { display:none!important; }
+}

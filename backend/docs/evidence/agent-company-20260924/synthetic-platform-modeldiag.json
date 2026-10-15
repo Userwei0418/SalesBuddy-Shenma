@@ -1,0 +1,39 @@
+{
+  "scope": "isolated synthetic adapter and production contract validation; no production business writes; not production end-to-end receipt",
+  "results": [
+    {
+      "case": "Q01-model-diagnostic45",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d26a-11f8-7c77-8965-bf4b36f1890b",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "received",
+      "ids": {
+        "task_id": "66e77c72-84d0-49e0-bde2-d6c907729d87",
+        "message_id": "8dc00010-4b39-4d29-93f5-6c5f8e5c8d0f",
+        "conversation_id": "51ea428e-f752-4314-8b88-6e46fc59cfce"
+      },
+      "input_tokens": 11137,
+      "output_tokens": 1980,
+      "elapsed_ms": 34563,
+      "answer_sha256": "1c68ce541efdebf75c03315c0e2cca438b825e81fa116b650ac3eb7ccbba2ad2",
+      "bare_json": false,
+      "field_values_unchanged": true,
+      "field_order_matches": true,
+      "quality_review": {
+        "follow_up_score": 85,
+        "suggestions": [],
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "goal_or_plan_found": true,
+          "suggestions": []
+        }
+      },
+      "contract_status": "failed",
+      "validation_error": "AssertionError: "
+    }
+  ]
+}

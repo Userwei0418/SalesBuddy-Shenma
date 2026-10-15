@@ -54,12 +54,17 @@ def relative_time_context(anchor, current_time):
     }
 
 
-async def prepare_visit_run(connection, actor, body, stage):
+async def require_visit_run_scope(connection, actor, body, stage):
+    """The same live target gate runs before receipt replay and before enqueue."""
     await require_capability(connection, actor, "visit.create")
     await require_agent_access(connection, actor, "visit_entry", body.customer_id, opportunity_id=body.opportunity_id)
     await require_visit_recording_scope(connection, actor, body.customer_id, body.opportunity_id)
     await require_visit_recording_scope(connection, actor, body.customer_id, body.opportunity_id,
         permission="visit.quality_review" if stage == "quality" else "visit.structure")
+
+
+async def prepare_visit_run(connection, actor, body, stage):
+    await require_visit_run_scope(connection, actor, body, stage)
     customer = json_value(await connection.fetchval("SELECT security.customer_reference($1::uuid)", body.customer_id))
     if not customer:
         raise PermissionError("客户不存在或不可用于录入")

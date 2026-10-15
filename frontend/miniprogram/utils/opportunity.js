@@ -1,4 +1,7 @@
 const {stages:STAGES,grades:OPPORTUNITY_GRADES} = require('./businessOptions');
+const materials = require('./opportunityMaterials');
+const extraFields = require('./opportunityExtraFields');
+const productLines = require('./opportunityProductLines');
 function gradeOfAmount(value) {
   if (value === null || value === undefined || String(value).trim() === '') return null;
   const number = Number(value);
@@ -9,17 +12,27 @@ function stageOf(row = {}) {
   return STAGES.find(s => (row.status === 'lost' || row.status === 'won') ? s.status === row.status : s.probability === Number(row.probability)) || STAGES.find(s => s.code === row.stage_code) || {code:row.stage_code||'',label:'阶段待确认',text:'阶段待确认',probability:null,status:row.status||'open'};
 }
 function quarterNow() { const d = new Date(Date.now() + 8 * 3600000); return { year: d.getUTCFullYear(), quarter: Math.floor(d.getUTCMonth() / 3) + 1 }; }
-function wan(value) { return value === null || value === undefined ? '' : String(Number(value) / 10000); }
+function wan(value) {
+  if (value === null || value === undefined) return '';
+  const match = String(value).trim().match(/^(\d+)(?:\.(\d+))?$/);
+  if (!match) return '';
+  const whole = match[1].replace(/^0+(?=\d)/, '').padStart(5, '0');
+  return `${whole.slice(0, -4)}.${whole.slice(-4)}${match[2] || ''}`.replace(/\.?0+$/, '');
+}
 function amount(value, required = false) {
   if (value === null || value === undefined || String(value).trim() === '') { if (required) throw new Error('请填写 ACV'); return null; }
-  if (!/^\d+(\.\d{1,4})?$/.test(String(value).trim())) throw new Error('金额请输入非负数字，最多四位小数');
-  const n = Math.round(Number(value) * 10000 * 100) / 100;
+  if (!/^\d+(\.\d{1,6})?$/.test(String(value).trim())) throw new Error('金额请输入非负数字，万元最多六位小数（精确到分）');
+  const [whole, fraction = ''] = String(value).trim().split('.');
+  const cents = (whole + fraction.padEnd(6, '0')).replace(/^0+(?=\d)/, '').padStart(3, '0');
+  const exact = `${cents.slice(0, -2)}.${cents.slice(-2)}`.replace(/\.?0+$/, '');
+  const n = Number(exact);
+  if (n > Number.MAX_SAFE_INTEGER || String(n) !== exact) throw new Error('金额数值过大，无法精确保存，请核对金额单位或联系管理员');
   if (!Number.isFinite(n) || n >= 1e16 || (required && n <= 0)) throw new Error('请输入有效金额');
   return n;
 }
 function formFor(row) {
   const stage = row ? stageOf(row) : null;
-  return { fde_members: (row && row.fde_members || []).map(p=>({...p})), fde_member_ids: !row || Array.isArray(row.fde_members) ? (row && row.fde_members || []).map(p=>p.id) : undefined, name: row ? row.name : '', amount: row ? wan(row.amount) : '',
+  return { ...materials.formFields(row), ...productLines.formFields(row), ...extraFields.formFields(row), fde_members: (row && row.fde_members || []).map(p=>({...p})), fde_member_ids: !row || Array.isArray(row.fde_members) ? (row && row.fde_members || []).map(p=>p.id) : undefined, name: row ? row.name : '', amount: row ? wan(row.amount) : '',
     expected_close_date: row ? row.expected_close_date || '' : '', stageIndex: stage ? STAGES.indexOf(stage) : -1,
     partner_mode: row ? row.sales_channel || (row.partner_name === '直销' ? 'direct' : row.partner_name ? 'partner' : 'unknown') : 'direct',
     partner_id: row ? row.partner_id || null : null,
@@ -39,17 +52,9 @@ function forecastRequired(stageIndex) {
   const stage = STAGES[stageIndex];
   return !!stage && stage.probability >= 30;
 }
-// BACKEND-CONTRACT 输入单位万元；只读预测=输入金额×阶段概率，内部按元四舍五入到分。
-// 预测派生值不进入当前 POST payload；quarterly_forecasts 存原始计划值，不能把派生值再次加权。
-// 渠道和伙伴身份通过 sales_channel / partner_id 保存；显示名称由服务端目录解析。
-function weightedQuarterAmount(value, stageIndex) {
-  const stage = STAGES[stageIndex];
-  if (!stage || stage.probability === null || value === null || value === undefined || String(value).trim() === '') return '—';
-  try {
-    const yuan = amount(value);
-    const weightedYuan = Math.round(yuan * stage.probability) / 100;
-    return (weightedYuan / 10000).toLocaleString('en-US', { maximumFractionDigits: 6 });
-  } catch (_) { return '—'; }
+// Sales forecast is the latest entered amount, independent of stage and operations actuals.
+function forecastAmount(value) {
+  try { const yuan=amount(value);return yuan===null?'—':wan(yuan); } catch (_) { return '—'; }
 }
 function validateForecasts(form) {
   if (!forecastRequired(form.stageIndex)) return;
@@ -74,13 +79,13 @@ function payload(form, row) {
   if (form.partner_mode === 'partner' && !form.partner_id) throw new Error('请选择已有合作伙伴，目录中没有时请联系运营');
   return { action: row ? 'update' : 'create', opportunity_id: row ? row.id : null,
     ...(!row&&form.owner_team_id?{owner_team_id:form.owner_team_id}:{}),
-    ...(Array.isArray(form.fde_member_ids)?{fde_member_ids:[...new Set(form.fde_member_ids)]}:{}),
+    ...(Array.isArray(form.fde_member_ids)&&(row?(!Array.isArray(row.fde_members)||JSON.stringify([...new Set(form.fde_member_ids)].sort())!==JSON.stringify(row.fde_members.map(p=>p.id).sort())):form.fde_member_ids.length>0)?{fde_member_ids:[...new Set(form.fde_member_ids)]}:{}),
     name: form.name.trim(), amount: amount(form.amount, true), expected_close_date: form.expected_close_date,
     probability: s.probability, status: s.status, version_no: row ? row.version_no : undefined,
     sales_channel: form.partner_mode, partner_id: form.partner_mode === 'partner' ? form.partner_id : null,
-    product_line: form.product_line.trim(),
+    ...productLines.payload(form,row), ...materials.payload(form), ...extraFields.payload(form),
     quarterly_forecasts: form.quarters.map(q => ({ year: q.year, quarter: q.quarter,
-      recognized_amount: amount(q.recognized), collection_amount: amount(q.collection) })) };
+      recognized_amount: amount(q.recognized), collection_amount: amount(q.collection), collection_confidence:['high','low'].includes(q.collection_confidence)?q.collection_confidence:null })) };
 }
 function needsConfirmation(p, row) { return p.status !== 'open' && (!row || row.status !== p.status) ? 'close' : row && row.status !== 'open' && p.status === 'open' ? 'reopen' : ''; }
 function metricNumber(value) {
@@ -114,7 +119,7 @@ function customerRetention(rows, now = new Date()) {
   const year = now.getFullYear(); const lastYear = year - 1; const byCustomer = new Map();
   (rows || []).forEach(row => {
     const customerId = String(row.customer_id || '');
-    const rowYear = Number(String(row.occurred_on || row.occurredAt || '').slice(0, 4));
+    const rowYear = Number(row.year || String(row.occurred_on || row.occurredAt || '').slice(0, 4));
     const value = metricNumber(row.recognized_amount !== undefined ? row.recognized_amount : row.amount);
     if (!customerId || ![year, lastYear].includes(rowYear) || value === null) return;
     if (!byCustomer.has(customerId)) byCustomer.set(customerId, { current: 0, previous: 0 });
@@ -142,5 +147,5 @@ function opportunityABShare(opportunities) {
   if (!rows.length) return null;
   return rows.filter(item => { const grade = gradeOfAmount(item.amount); return grade && ['A', 'B'].includes(grade.code); }).length / rows.length * 100;
 }
-module.exports = { STAGES, OPPORTUNITY_GRADES, gradeOfAmount, stageOf, quarterNow, wan, amount, formFor, formForVisit, forecastRequired, weightedQuarterAmount, payload, needsConfirmation,
+module.exports = { STAGES, OPPORTUNITY_GRADES, gradeOfAmount, stageOf, quarterNow, wan, amount, formFor, formForVisit, forecastRequired, forecastAmount, payload, needsConfirmation,
   averageCustomerScore, averageVisitScore, customerRetention, money: metricMoney, opportunityABShare, performanceMetric };

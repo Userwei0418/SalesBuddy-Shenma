@@ -1,0 +1,105 @@
+{
+  "capability": "today_tasks",
+  "case": "off",
+  "started_at": "2026-09-12T09:19:18.303323+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "4022b47dae96bc81e93e99806d791a3f70fa0628e7bfe8a600af5ae1012fe5d0",
+    "bytes": 27499,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 2
+      },
+      "active_tasks": {
+        "type": "list",
+        "count": 33
+      },
+      "follow_up_candidates": {
+        "type": "list",
+        "count": 14
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "23ffcb45-81c1-4dd8-ab9b-cb779acae01c",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 16841
+  },
+  "result": {
+    "sha256": "a67aec285b5d5a45a568fa452926a105e03901bca078451cda0a772afee9d511",
+    "bytes": 6884,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "ordered_items": {
+        "type": "list",
+        "count": 30
+      }
+    }
+  },
+  "elapsed_ms": 16843,
+  "validation": [
+    {
+      "input": {
+        "sha256": "7a566e0d5b52e50f2eacde4382bb060d5c792338c24291b139b015c593456311",
+        "bytes": 6884,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "ordered_items": {
+            "type": "list",
+            "count": 30
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "a67aec285b5d5a45a568fa452926a105e03901bca078451cda0a772afee9d511",
+        "bytes": 6884,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "ordered_items": {
+            "type": "list",
+            "count": 30
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "b45c332e-7f9c-4bf8-8f1a-47ad3967f885",
+      "provider": "senseaudio",
+      "operation_id": "23ffcb45-81c1-4dd8-ab9b-cb779acae01c",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:19:18.317670+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:19:35.144896+00:00"
+    }
+  ]
+}

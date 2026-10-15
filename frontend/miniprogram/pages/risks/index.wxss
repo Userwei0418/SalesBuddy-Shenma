@@ -27,3 +27,13 @@ page{background:var(--ui-background)}
 
 /* Palette only: original geometry is preserved. */
 .risk-card.status-open .risk-description { color:var(--sb-alert-ink); }
+
+.risk-filters{margin:24rpx 32rpx;padding:24rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.risk-scope-options{display:flex;flex-wrap:wrap;gap:12rpx}
+.risk-scope{flex:1;min-width:104rpx;margin:0;padding:0 8rpx;font-size:24rpx;line-height:72rpx;color:var(--ui-secondary);background:var(--ui-neutral-soft)}
+.risk-scope.selected{color:var(--ui-primary);background:var(--ui-primary-soft)}
+.risk-filter-select{display:flex;align-items:center;justify-content:space-between;margin-top:20rpx;padding:16rpx 20rpx;font-size:28rpx;color:var(--ui-ink);background:var(--ui-background)}
+.risk-filter-error{margin-top:16rpx;color:var(--ui-secondary);font-size:24rpx;line-height:1.6}
+.risk-pagination{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin:0 32rpx;font-size:24rpx}
+.risk-pagination button{margin:0;padding:0 20rpx;font-size:24rpx}
+.risk-top .risk-state{flex:1;min-width:0}

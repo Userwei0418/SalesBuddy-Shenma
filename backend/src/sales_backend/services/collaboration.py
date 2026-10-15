@@ -14,14 +14,17 @@ from sales_backend.repositories.collaboration import (
 async def set_opportunity_members(connection, actor, opportunity_id, ids, version):
     current_version = await manageable_version(connection, opportunity_id)
     require_version(current_version, version)
-    desired = {r["id"] for r in await validated_fde(connection, ids)}
     before = await effective_ids(connection, opportunity_id)
+    desired = {r["id"] for r in await validated_fde(connection, ids, existing=before)}
     changed = before != desired
     if changed:
         new_version = await bump_membership_version(connection, opportunity_id, version)
         if new_version is None:
             # Same error contract as all other optimistic aggregate writes.
             require_version(-1, version)
+        primary = await connection.fetchval("SELECT primary_fde_id::text FROM crm.opportunity WHERE id=$1::uuid", opportunity_id)
+        if primary and primary not in desired:
+            raise ValueError("主责FDE须保留在长期名单中，请用人员面板一并更换或清空")
         await write_members(connection, actor, opportunity_id, desired)
     else:
         new_version = current_version

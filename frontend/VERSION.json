@@ -1,15 +1,28 @@
 {
+  "schema_version": 3,
   "artifact_kind": "source_tree",
-  "customer": "shenzhoukuntai",
-  "source_version": "1.0.9",
-  "source_commit": "be421b12b9dce38aa940e8b546dde1796c3bdef5",
-  "database_version": "V153",
-  "customer_appid": "wx2824bdeb58528fd8",
-  "customer_version": "1.0.11-shenma.1",
-  "ui_release": "1.0.11",
-  "ui_business_baseline": "0d0b7b29015cdfe9e5cd5d4ffc7f02aa5889753b",
-  "ui_source_archive": "Raccoon-SalesBuddy-小程序-v1.0.8-仅配色调整-20260928(1).zip",
-  "ui_source_sha256": "ed63eefe9fff5b24020770e1cc71d558569af550c1db493cc2e66d8ded61ea0b",
-  "ui_source_review": "1.0.8-review9.20260928",
-  "ui_previous_frontend_commit": "27b5673d9c40e4ec686bd2d2f35759402f29f504"
+  "source_package_name": "小浣熊-SalesBuddy.zip",
+  "source_package_date": "2026-09-14",
+  "source_package_sha256": "b65c95947c95e21f8ff29de2e02773ceb79a7596c4b46330e5267b33b6d3bc92",
+  "version_policy": "Release metadata is generated from committed HEAD by scripts/package_frontend.py; this source file does not identify the running backend or prove deployment.",
+  "api_base_url": "https://salesbuddy.shenzhoukuntai.com:28899/api/v1",
+  "auth_method": "password",
+  "registered_pages": 26,
+  "integration_document": "../docs/SALESBUDDY_FDE_INTEGRATION_20260914.md",
+  "verification_document": "../docs/CURRENT_STATUS.md",
+  "development_handoff": {
+    "artifact_version": "1.0.2-local.20260917.e216f39",
+    "source_baseline": "5a2c6351100b8652ddff8ed64b1c3328bd9575a1",
+    "package_sha256": "45313bb7b5f62315fa5f2d1535862551f6b7e72855de5984dd6ccd562071e521",
+    "imported_at": "2026-09-17",
+    "runtime_changed_files": 5,
+    "uploaded": false
+  },
+  "customer_derivation": {
+    "customer": "shenma",
+    "mini_source_revision": "084199244e3ab09cdf3e057a7751220e5f0b2ae7",
+    "web_source_revision": "d576194b34d382ab4cfab9a9afde3b36cefa3416",
+    "integration_source_revision": "f79b3743e5f1ec428ab0068a705317780d330001",
+    "deployed": false
+  }
 }

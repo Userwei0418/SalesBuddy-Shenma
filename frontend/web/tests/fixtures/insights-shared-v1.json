@@ -1,0 +1,480 @@
+{
+  "fixture_kind": "synthetic_page_projection_not_runtime",
+  "input": {
+    "contract_version": 4,
+    "forecast_basis": "latest_sales_input",
+    "data_source": "database",
+    "scope": "self",
+    "summary": {
+      "source_date": "2026-10-10T00:00:00+08:00"
+    },
+    "opportunities": [
+      {
+        "id": "synthetic-opportunity",
+        "name": "合成在推商机",
+        "amount": "10000",
+        "probability": 70,
+        "status": "open",
+        "expected_close_date": "2026-11-01"
+      }
+    ],
+    "quarter_forecasts": [
+      {
+        "id": "synthetic-forecast",
+        "opportunity_id": "synthetic-opportunity",
+        "year": 2026,
+        "quarter": 4,
+        "recognized_amount": "0",
+        "collection_amount": null
+      }
+    ],
+    "quarter_actuals": [
+      {
+        "year": 2026,
+        "quarter": 4,
+        "recognized_amount": null,
+        "recognized_confirmed_subtotal": "20",
+        "recognized_complete": false,
+        "recognized_count": 0,
+        "recognized_incomplete_period_count": 1,
+        "collection_amount": "0",
+        "collection_complete": true,
+        "collection_count": 0
+      }
+    ],
+    "recent_visits": []
+  },
+  "data": {
+    "kpis": [
+      {
+        "kind": "value",
+        "label": "实际不含税确收（已登记小计）",
+        "value": "¥20",
+        "tone": "blue",
+        "sub": "仅显示已登记小计，实际尚未完整",
+        "key": "actual_recognized_exclusive"
+      },
+      {
+        "kind": "value",
+        "label": "已登记回款",
+        "value": "¥0",
+        "tone": "mint",
+        "sub": "当前采用的期间实际",
+        "key": "actual_collection"
+      },
+      {
+        "kind": "value",
+        "label": "预测含税确收",
+        "value": "¥0",
+        "sub": "1 条已填预测 · 非实际发生",
+        "tone": "orange",
+        "compact": false,
+        "key": "forecast_recognized_inclusive"
+      },
+      {
+        "kind": "value",
+        "label": "预测回款",
+        "value": "未填写",
+        "sub": "在商机季度预测中填写",
+        "tone": "mint",
+        "compact": false,
+        "key": "forecast_collection"
+      },
+      {
+        "kind": "value",
+        "label": "总商机 ACV",
+        "value": "¥10,000",
+        "sub": "1 个预计关单的在推商机",
+        "tone": "blue",
+        "compact": false,
+        "key": "opportunity_acv"
+      },
+      {
+        "kind": "value",
+        "label": "加权预测 ACV",
+        "value": "¥7,000",
+        "sub": "在推商机金额 × 阶段概率（含10%）",
+        "tone": "violet",
+        "compact": false,
+        "key": "weighted_opportunity_acv"
+      },
+      {
+        "kind": "value",
+        "label": "高概率 ACV",
+        "value": "¥10,000",
+        "sub": "70% 及以上商机",
+        "tone": "amber",
+        "compact": false,
+        "key": "high_probability_acv"
+      },
+      {
+        "kind": "value",
+        "label": "预计关单数",
+        "value": "1",
+        "sub": "2026 Q4 预计成交",
+        "tone": "mint",
+        "compact": false,
+        "key": "expected_close_count"
+      }
+    ],
+    "metricDetails": {
+      "actual_recognized_exclusive": {
+        "title": "实际不含税确收（已登记小计）",
+        "definition": "采用的实际不含税确收，按确认期间汇总；部分登记仅展示已知小计，不将未知金额补为零。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "period_aggregate",
+        "columns": [
+          {
+            "key": "period",
+            "label": "确认期间",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "采用金额",
+            "kind": "text"
+          },
+          {
+            "key": "quality",
+            "label": "登记情况",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "period:2026-Q4",
+            "period": "2026 Q4",
+            "amount": "已登记小计 20元",
+            "quality": "仅显示已登记小计，实际尚未完整",
+            "can_open": false
+          }
+        ],
+        "summary": "¥20 · 仅显示已登记小计，实际尚未完整",
+        "emptyText": "所选期间没有已登记的实际汇总",
+        "note": "本明细按季度汇总展示，不代表逐笔实际记录。"
+      },
+      "actual_collection": {
+        "title": "已登记回款",
+        "definition": "采用的正式回款，按确认期间汇总；已登记零与未登记分别展示。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "period_aggregate",
+        "columns": [
+          {
+            "key": "period",
+            "label": "确认期间",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "采用金额",
+            "kind": "text"
+          },
+          {
+            "key": "quality",
+            "label": "登记情况",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "period:2026-Q4",
+            "period": "2026 Q4",
+            "amount": "0元",
+            "quality": "已确认",
+            "can_open": false
+          }
+        ],
+        "summary": "¥0 · 当前采用的期间实际",
+        "emptyText": "所选期间没有已登记的实际汇总",
+        "note": "本明细按季度汇总展示，不代表逐笔实际记录。"
+      },
+      "forecast_recognized_inclusive": {
+        "title": "预测含税确收",
+        "definition": "销售最后保存的季度含税确收预测，不乘阶段概率；赢单、丢单后的已填计划仍保留。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "forecast",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "period",
+            "label": "预测期间",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "销售填写值",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-forecast",
+            "name": "合成在推商机",
+            "period": "2026 Q4",
+            "amount": "0元",
+            "can_open": false
+          }
+        ],
+        "summary": "¥0 · 1 条已填预测 · 非实际发生",
+        "emptyText": "所选期间没有保存的预测",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      },
+      "forecast_collection": {
+        "title": "预测回款",
+        "definition": "销售最后保存的季度回款预测，不乘阶段概率；它与实际回款分别记录。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "forecast",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "period",
+            "label": "预测期间",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "销售填写值",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-forecast",
+            "name": "合成在推商机",
+            "period": "2026 Q4",
+            "amount": "未填写",
+            "can_open": false
+          }
+        ],
+        "summary": "未填写 · 在商机季度预测中填写",
+        "emptyText": "所选期间没有保存的预测",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      },
+      "opportunity_acv": {
+        "title": "总商机 ACV",
+        "definition": "预计关单日在所选季度的在推商机金额合计，不含已成单和已丢单。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "opportunity",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "商机金额",
+            "kind": "text"
+          },
+          {
+            "key": "probability",
+            "label": "阶段概率",
+            "kind": "text"
+          },
+          {
+            "key": "expectedClose",
+            "label": "预计关单",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-opportunity",
+            "name": "合成在推商机",
+            "amount": "10,000元",
+            "probability": "70%",
+            "expectedClose": "2026-11-01",
+            "can_open": false
+          }
+        ],
+        "summary": "¥10,000 · 1 个预计关单的在推商机",
+        "emptyText": "所选期间没有符合口径的在推商机",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      },
+      "weighted_opportunity_acv": {
+        "title": "加权预测 ACV",
+        "definition": "同范围在推商机金额乘阶段概率后合计，包含10%阶段；不代替销售填写的季度预测。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "opportunity",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "商机金额",
+            "kind": "text"
+          },
+          {
+            "key": "probability",
+            "label": "阶段概率",
+            "kind": "text"
+          },
+          {
+            "key": "expectedClose",
+            "label": "预计关单",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-opportunity",
+            "name": "合成在推商机",
+            "amount": "10,000元",
+            "probability": "70%",
+            "expectedClose": "2026-11-01",
+            "can_open": false
+          }
+        ],
+        "summary": "¥7,000 · 在推商机金额 × 阶段概率（含10%）",
+        "emptyText": "所选期间没有符合口径的在推商机",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      },
+      "high_probability_acv": {
+        "title": "高概率 ACV",
+        "definition": "同范围在推商机中，阶段概率至少70%的商机金额合计。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "人民币，明细金额以元列示，保留到分",
+        "granularity": "opportunity",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "商机金额",
+            "kind": "text"
+          },
+          {
+            "key": "probability",
+            "label": "阶段概率",
+            "kind": "text"
+          },
+          {
+            "key": "expectedClose",
+            "label": "预计关单",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-opportunity",
+            "name": "合成在推商机",
+            "amount": "10,000元",
+            "probability": "70%",
+            "expectedClose": "2026-11-01",
+            "can_open": false
+          }
+        ],
+        "summary": "¥10,000 · 70% 及以上商机",
+        "emptyText": "所选期间没有符合口径的在推商机",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      },
+      "expected_close_count": {
+        "title": "预计关单数",
+        "definition": "预计关单日在所选季度的在推商机数量，不代表已成交数量。",
+        "periodLabel": "2026 Q4",
+        "scopeLabel": "合成成员",
+        "unit": "个",
+        "granularity": "opportunity",
+        "columns": [
+          {
+            "key": "name",
+            "label": "商机",
+            "kind": "text"
+          },
+          {
+            "key": "amount",
+            "label": "商机金额",
+            "kind": "text"
+          },
+          {
+            "key": "probability",
+            "label": "阶段概率",
+            "kind": "text"
+          },
+          {
+            "key": "expectedClose",
+            "label": "预计关单",
+            "kind": "text"
+          }
+        ],
+        "rows": [
+          {
+            "id": "synthetic-opportunity",
+            "name": "合成在推商机",
+            "amount": "10,000元",
+            "probability": "70%",
+            "expectedClose": "2026-11-01",
+            "can_open": false
+          }
+        ],
+        "summary": "1 · 2026 Q4 预计成交",
+        "emptyText": "所选期间没有符合口径的在推商机",
+        "note": "依据当前授权范围内的看板事实展示；本明细不扩展记录查看权限。"
+      }
+    },
+    "metricDefinitions": [
+      {
+        "title": "实际不含税确收（已登记小计）",
+        "definition": "采用的实际不含税确收，按确认期间汇总；部分登记仅展示已知小计，不将未知金额补为零。"
+      },
+      {
+        "title": "已登记回款",
+        "definition": "采用的正式回款，按确认期间汇总；已登记零与未登记分别展示。"
+      },
+      {
+        "title": "预测含税确收",
+        "definition": "销售最后保存的季度含税确收预测，不乘阶段概率；赢单、丢单后的已填计划仍保留。"
+      },
+      {
+        "title": "预测回款",
+        "definition": "销售最后保存的季度回款预测，不乘阶段概率；它与实际回款分别记录。"
+      },
+      {
+        "title": "总商机 ACV",
+        "definition": "预计关单日在所选季度的在推商机金额合计，不含已成单和已丢单。"
+      },
+      {
+        "title": "加权预测 ACV",
+        "definition": "同范围在推商机金额乘阶段概率后合计，包含10%阶段；不代替销售填写的季度预测。"
+      },
+      {
+        "title": "高概率 ACV",
+        "definition": "同范围在推商机中，阶段概率至少70%的商机金额合计。"
+      },
+      {
+        "title": "预计关单数",
+        "definition": "预计关单日在所选季度的在推商机数量，不代表已成交数量。"
+      }
+    ],
+    "periodNote": "财务与商机按所选季度；跟进节奏及跟进排名固定为北京时间近7天（含今天）。",
+    "activeOpportunityCount": null,
+    "activeOpportunityNote": "所选季度有已确认跟进的商机去重，含仍有跟进的已成单商机，排除已丢单；无完整统计时显示未统计。"
+  }
+}

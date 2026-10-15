@@ -1,0 +1,20 @@
+{
+  "id": "01a11ff5-f67c-7bad-8e73-d1416b94f2cd",
+  "app_id": "24437e39-488d-4314-ae4b-9d820c2d696c",
+  "name": "Raccoon SalesBuddy-财务计算助手-V1",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "bd5e22b9dd28049fe6babe537df95b896b76d5ea30c4e2f5983d6750fae743bf",
+  "snapshot_id": "01a12011-376e-76d3-97ec-c6ec935fbc1b",
+  "url": "https://123.207.235.181/agents/01a11ff5-f67c-7bad-8e73-d1416b94f2cd/configure",
+  "observed_at": "2026-10-09T09:49:22.097100+00:00",
+  "previous_snapshot_id": "01a11fff-7140-79c2-96f3-97768c4de02e",
+  "previous_revision": "fd075a111efda092463796eeb844202f09740a2454a380e8fa78994e13339e27",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "d0c246d6a9fdcbe6df4f23f1f2931791bb8ae8c7d24836e0760bd0ab54263944",
+  "config_sha256": "76c9e4b07ede27a21f06feefd05b29f087fbe6061bda7a033999a90de5d5d2a0",
+  "record_type": "platform_publication_and_get_verification",
+  "runtime_snapshot_verified": false,
+  "tool_connected": false,
+  "application_bound": false
+}

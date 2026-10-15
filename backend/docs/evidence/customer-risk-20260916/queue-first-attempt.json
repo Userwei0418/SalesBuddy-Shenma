@@ -1,0 +1,44 @@
+{
+  "source": "existing_demo_customer",
+  "customer_business_text_saved": false,
+  "assessment_id": "7d26fc3e-05ba-4f2f-9628-d963d7dd431d",
+  "job_id": "c6424e99-0f50-4487-9dfb-7702106aff15",
+  "operation_id": "897974ad-6323-43d0-b9bf-d516efd62800",
+  "runtime_commit": "ee4e14eca48b2337b40a684a0420aa3217dd8071",
+  "assessment_status": "failed",
+  "outcome": "unknown",
+  "job_status": "dead_letter",
+  "attempts": 1,
+  "coverage_input_counts": {
+    "visits": 9,
+    "contacts": 1,
+    "opportunities": 2
+  },
+  "platform": {
+    "http_status": 200,
+    "error_code": "stream_error",
+    "elapsed_ms": 8029,
+    "runtime_snapshot_verified": false
+  },
+  "original_api": {
+    "output_received": true,
+    "risk_count": 9,
+    "error_code": "InvalidAgentResult",
+    "risk_limit": 8
+  },
+  "operation_elapsed_ms": 21194,
+  "business_result_saved": false,
+  "followup_readonly_probes": [
+    {
+      "prompt": "original",
+      "result": "TimeoutError",
+      "budget_seconds": 33
+    },
+    {
+      "prompt": "output_checklist_candidate",
+      "result": "TimeoutError",
+      "budget_seconds": 33
+    }
+  ],
+  "conclusion": "失败回执和拒绝写入已真实验证；此记录不是成功业务验收。"
+}

@@ -730,7 +730,7 @@
     const config = bundle.pages[current.route].config || {}, session = app && app.globalData && app.globalData.session;
     const tabs = (bundle.config.tabBar && bundle.config.tabBar.list || []).map(tab => ({...tab, active: tab.pagePath === current.route,
       icon: bundle.images[tab.pagePath === current.route ? tab.selectedIconPath : tab.iconPath]}));
-    const title = titleOverride || config.navigationBarTitleText || bundle.config.window && bundle.config.window.navigationBarTitleText || '商汤销售小浣熊';
+    const title = titleOverride || config.navigationBarTitleText || bundle.config.window && bundle.config.window.navigationBarTitleText || '神码 SalesBuddy';
     window.dispatchEvent(new CustomEvent('sales:navigation', {detail: {path: current.route, title, tab: tabs.some(tab => tab.active), hidden: hiddenTabs, session, tabs}}));
   }
   function route(path, options = {}) {
@@ -964,6 +964,7 @@
   }
   window.SalesRuntime = {boot, route, replacePageQuery, userRoute(path, options) { return userNavigation(() => route(path, options)); }, back(delta) { return userNavigation(() => back(delta)); }, signOut() { app.logout(); return route('/pages/login/index', {reset: true}); }, refresh() { const path = current?._url; return path && userNavigation(() => route(path, {replace: true})); },
     businessOptions() { return requireModule('utils/businessOptions'); },
+    require(name) { if (!['utils/apiClient','utils/access','utils/personPicker','utils/businessOptions'].includes(name)) throw Error('PC模块不可用'); return requireModule(name); },
     get app() { return app; }, get current() { return current; }, get wx() { return wx; }, get errors() { return errors.slice(); }};
   window.addEventListener('resize', () => { resize(); const {windowWidth, windowHeight} = wx.getSystemInfoSync(); lifecycle(current, 'onResize', {size: {windowWidth, windowHeight}}); });
   if (window.ResizeObserver) new ResizeObserver(resize).observe(root);

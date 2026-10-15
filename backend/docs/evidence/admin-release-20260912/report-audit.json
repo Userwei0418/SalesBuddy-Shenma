@@ -1,0 +1,91 @@
+{
+  "started_at": "2026-09-12T14:03:12.510101+00:00",
+  "account": "XS001",
+  "checks": [
+    "home_consumes_desc_policy",
+    "sales_cannot_access_management_audit"
+  ],
+  "conversation_id": "76b4655e-d195-499e-8423-bc48977fce6a",
+  "run_id": "349c375f-eec6-4e6b-a5ad-baad7c4c0115",
+  "business_status": "succeeded",
+  "elapsed_ms": 22158,
+  "receipts": [
+    {
+      "operation_id": "18081aaf-3927-4e54-9664-6cb30da2dfff",
+      "status": "accepted",
+      "capability": "operating_report",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "configuration": {
+        "agent_id": "01a09022-d0ec-7703-b59f-0699150d63a7",
+        "direct_model": "senseaudio-s2-lite",
+        "total_seconds": 45.0,
+        "execution_mode": "filtered_facts",
+        "execution_policy": {
+          "id": "8eff68b7-8fbc-4d49-8b4c-56777ce02263",
+          "code": "agent_execution.operating_report",
+          "source": "baseline",
+          "version": 1,
+          "definition": {
+            "strategy": "inherit",
+            "total_seconds": 45,
+            "schema_version": 1,
+            "override_budget": false,
+            "platform_seconds": 12
+          }
+        },
+        "platform_enabled": true,
+        "platform_seconds": 12.0,
+        "adapter_configured": true,
+        "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379"
+      },
+      "phases": [
+        {
+          "phase": "route_started",
+          "provider": "agent_platform",
+          "elapsed_ms": 2,
+          "error_code": null
+        },
+        {
+          "phase": "route_failed",
+          "provider": "agent_platform",
+          "elapsed_ms": 12002,
+          "error_code": "TimeoutError"
+        },
+        {
+          "phase": "fallback_requested",
+          "provider": "agent_platform",
+          "elapsed_ms": 12002,
+          "error_code": null
+        },
+        {
+          "phase": "route_started",
+          "provider": "senseaudio",
+          "elapsed_ms": 12403,
+          "error_code": null
+        },
+        {
+          "phase": "output_received",
+          "provider": "senseaudio",
+          "elapsed_ms": 21152,
+          "error_code": null
+        },
+        {
+          "phase": "contract_accepted",
+          "provider": "senseaudio",
+          "elapsed_ms": 21152,
+          "error_code": null
+        }
+      ]
+    }
+  ],
+  "assistant_results": 1,
+  "job": [
+    {
+      "status": "succeeded",
+      "attempts": 1
+    }
+  ],
+  "passed": true,
+  "own_session_revoked": true
+}

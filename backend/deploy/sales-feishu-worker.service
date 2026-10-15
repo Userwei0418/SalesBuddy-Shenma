@@ -1,0 +1,29 @@
+[Unit]
+Description=Salegent Feishu One-way Synchronization
+After=network-online.target postgresql.service sales-api.service
+Wants=network-online.target
+PartOf=sales-worker.service
+
+[Service]
+Type=simple
+User=sales-backend
+Group=sales-backend
+# This file contains only the dedicated least-privilege database DSN.
+EnvironmentFile=/etc/sales-feishu-sync.env
+# Reuse the existing encrypted credential keyring configuration, not Agent tokens.
+EnvironmentFile=/etc/sales-runtime-credentials.env
+WorkingDirectory=/www/wwwroot/salegent/current
+ExecStart=/www/wwwroot/salegent/current/.venv/bin/python -m sales_backend.feishu_worker
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/lib/sales-backend
+
+[Install]
+# Stopping/restarting the existing worker also stops/restarts this process.
+# Starting it again pulls in this enabled dependency after a release switch.
+WantedBy=sales-worker.service

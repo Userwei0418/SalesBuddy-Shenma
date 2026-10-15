@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light"><title>SalesBuddy · Web 设计规范</title>
+  <link rel="icon" href="../assets/brand/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../design-tokens.css">
+  <link rel="stylesheet" href="../assets/vendor/tom-select-2.6.2/tom-select.default.min.css">
+  <link rel="stylesheet" href="../select-components.css">
+  <link rel="stylesheet" href="../assets/vendor/flatpickr-4.6.13/flatpickr.min.css">
+  <link rel="stylesheet" href="../date-picker.css"><link rel="stylesheet" href="../theme.css">
+  <link rel="stylesheet" href="catalog.css">
+  <script defer src="../assets/vendor/tom-select-2.6.2/tom-select.complete.min.js"></script>
+  <script defer src="../select-components.js"></script>
+  <script defer src="../assets/vendor/flatpickr-4.6.13/flatpickr.min.js"></script>
+  <script defer src="../assets/vendor/flatpickr-4.6.13/zh.js"></script>
+  <script defer src="../date-picker.js"></script>
+  <script defer src="../assets/vendor/echarts-6.1.0/echarts.min.js"></script>
+  <script defer src="catalog.js"></script>
+</head>
+<body>
+  <a class="skip" href="#catalog-main">跳到示例内容</a>
+  <aside class="catalog-nav">
+    <a class="catalog-brand" href="#foundations"><img src="../assets/brand/raccoon-salesbuddy-horizontal-white-sidebar.svg" alt="商汤销售小浣熊 Raccoon SalesBuddy"></a>
+    <div class="nav-edition">WEB DESIGN SYSTEM <span>V1.0</span></div>
+    <nav aria-label="设计规范导航">
+      <a href="#foundations" data-view="foundations"><span>01</span>视觉基础</a>
+      <a href="#components" data-view="components"><span>02</span>组件与状态</a>
+      <a href="#template-home" data-view="templates"><span>03</span>页面模板</a>
+    </nav>
+    <div class="nav-note"><b>让信息有秩序<br>让行动更清晰</b><p>用同一套规则连接<br>产品、设计与开发。</p><small>2026.09 · 销售 Web 优先</small></div>
+  </aside>
+  <div class="catalog-body">
+    <header class="catalog-topbar"><span>产品设计 / <b id="section-name">视觉基础</b></span><span class="edition"><i></i>规范 V1.0 · 本地示例</span></header>
+    <main id="catalog-main" tabindex="-1">
+      <header class="intro"><div><div class="eyebrow">SALESBUDDY / DESIGN GUIDELINES</div><h1>清晰，让销售更专注</h1><p>深蓝导航 · 浅色工作区 · 重点有层次 · 操作有反馈</p></div><span class="version">V1.0<small>2026 / 09 / 17</small></span></header>
+      <p class="sample-notice">示例册全部使用合成数据，交互仅在本页生效。组件与产品共用；页面模板作为设计参考，现有页面的偏差见验收清单。</p>
+
+      <section id="foundations" data-panel="foundations" aria-labelledby="foundations-title">
+        <div class="section-heading"><div><span class="eyebrow">01 / FOUNDATIONS</span><h2 id="foundations-title">用层级建立秩序</h2></div><span class="rule">P-01 · V-01</span></div>
+        <div class="principles"><article><span class="number">01</span><h3>重点先被看见</h3><p>先呈现需要行动的事项，再查看背景与完整记录。</p></article><article><span class="number">02</span><h3>区域各司其职</h3><p>总览、操作与列表分区，筛选紧邻自己的结果。</p></article><article><span class="number">03</span><h3>操作保持连续</h3><p>保留填写内容与筛选状态，过程和结果都有反馈。</p></article></div>
+        <article class="panel"><div class="panel-heading"><div><h3>颜色有职责</h3><p>深色建立导航边界，浅色承载阅读，状态色表达业务含义。</p></div><span class="rule">V-01 · B-01</span></div><div id="palette" class="palette"></div>
+          <div class="status-line"><span class="badge red">● 转差</span><span class="badge yellow">● 需关注</span><span class="badge green">● 向好</span><span class="badge gray">● 待评估</span><small>业务变化的四种判断，依据在详情中展开；不依靠颜色单独传意。</small></div>
+        </article>
+        <div class="two-col"><article class="panel"><div class="panel-heading"><h3>文字只承担一个层级</h3><span class="rule">V-02</span></div><div class="type-row"><span style="font-size:var(--ui-text-page);font-weight:650">客户经营详情</span><code>24 / 页面标题</code></div><div class="type-row"><b style="font-size:var(--ui-text-section)">最新跟进记录</b><code>16 / 分区标题</code></div><div class="type-row"><span>核对试点范围与下一步计划</span><code>14 / 正文</code></div><div class="type-row"><small>今天 10:30 更新</small><code>12 / 辅助信息</code></div></article>
+          <article class="panel"><div class="panel-heading"><h3>间距体现归属</h3><span class="rule">V-03</span></div><div id="spacing" class="spacing"></div><p class="muted">4 / 图标与文字　8 / 同组控件　12 / 行内区域<br>16 / 内容块　24 / 面板内边距　32 / 大分区</p></article></div>
+        <article class="panel"><div class="panel-heading"><h3>规则要能对照，而不只描述感觉</h3><span class="rule">C-04</span></div><div class="two-col comparison"><div class="good-example"><b>✓ 推荐：筛选与结果同一区域</b><p>商机列表 <small>仅筛选下方 6 条商机</small></p><span class="chip">阶段：方案沟通 ×</span><p>已选条件可见 · 可清除 · 数量即时反馈</p></div><div class="bad-example"><b>反例：作用范围不明确</b><p>一个无标题下拉框，放在统计数字与列表之间。</p><p>用户无法判断它会改变哪一部分。</p></div></div></article>
+      </section>
+
+      <section id="components" data-panel="components" hidden aria-labelledby="components-title">
+        <div class="section-heading"><div><span class="eyebrow">02 / COMPONENTS</span><h2 id="components-title">同一操作，同一反馈</h2></div><span class="rule">C-01—C-07</span></div>
+        <article class="panel"><div class="panel-heading"><div><h3>按钮与交互状态</h3><p>一个操作区突出一个主要动作。用鼠标悬停或 Tab 键查看状态。</p></div><span class="rule">C-01</span></div><div class="actions"><button class="btn primary" id="demo-primary">记录客户拜访</button><button class="btn" data-feedback="已触发次要操作示例">查看详情</button><button class="btn text" data-feedback="已取消本次示例操作">取消</button><button class="btn" disabled aria-describedby="disabled-help">提交审核</button><button class="btn primary" disabled aria-busy="true"><span class="spinner"></span>保存中</button></div><p id="disabled-help" class="hint">“提交审核”不可用：请先补齐必填项。聚焦时显示轮廓；处理中防止重复点击。</p></article>
+        <div class="two-col"><article class="panel"><div class="panel-heading"><div><h3>搜索、多选与清除</h3><p>复用 SalesSelect / Tom Select</p></div><span class="rule">C-03</span></div><label class="field-label" id="member-label">协作成员</label><button class="btn field-trigger" id="member-picker" aria-labelledby="member-label member-value" aria-haspopup="dialog"><span id="member-value">选择成员</span><span>⌄</span></button><p class="hint">支持中文搜索、多选、清空；点击“应用”后生效，Esc 取消。</p><p id="member-result" class="feedback" role="status">尚未选择成员</p></article>
+          <article class="panel"><div class="panel-heading"><div><h3>日期选择与输入</h3><p>复用 SalesDatePicker / Flatpickr</p></div><span class="rule">C-03</span></div><label class="field-label" for="date-demo">计划跟进日期</label><button id="date-demo" class="btn field-trigger" aria-haspopup="dialog" aria-expanded="false" value="2026-09-21">2026-09-21 <span>▦</span></button><p class="hint">选择日期即时回填；手动输入需校验。取消保留原值。</p><p class="feedback" id="date-result" role="status">已选：2026-09-21</p></article></div>
+        <article class="panel"><div class="panel-heading"><div><h3>结果状态切换</h3><p>零、未填写、加载中和错误分别表达。</p></div><span class="rule">C-06 · B-03</span></div><div class="segmented" role="group" aria-label="结果状态"><button class="active" data-result-state="normal" aria-pressed="true">正常</button><button data-result-state="loading" aria-pressed="false">加载中</button><button data-result-state="empty" aria-pressed="false">空数据</button><button data-result-state="error" aria-pressed="false">异常</button></div><div id="result-demo" class="result-demo" role="status"></div></article>
+        <div class="two-col"><article class="panel"><div class="panel-heading"><h3>输入错误就地提示</h3><span class="rule">C-02</span></div><form id="validation-form" novalidate><label class="field-label" for="validation-title">任务标题 <span class="required">*</span></label><input id="validation-title" class="field" placeholder="例如：核对试点验收清单" required aria-describedby="validation-error"><p id="validation-error" class="field-error" role="alert" hidden>请填写任务标题。</p><label class="field-label" for="validation-note">补充说明</label><textarea id="validation-note" class="field" rows="3" placeholder="校验失败后，这段内容仍保留"></textarea><button class="btn primary" type="submit">校验输入</button><p id="validation-result" role="status" class="feedback"></p></form></article>
+          <article class="panel"><div class="panel-heading"><h3>任务状态与业务判断分开</h3><span class="rule">B-01 · B-02</span></div><div class="status-stack"><p><span class="badge yellow">待接受</span> 接收方尚未确认</p><p><span class="badge blue">已接受</span> 已确认接手，仍需执行</p><p><span class="badge green">已完成</span> 已提交完成结果</p><p><span class="badge gray">已结束</span> 已终止或关闭，查看原因</p></div><button class="btn" id="open-dialog">查看弹窗示例</button><p class="hint">弹窗支持 Esc 关闭、Tab 焦点循环，关闭后回到触发按钮。</p></article></div>
+        <article class="panel"><div class="panel-heading"><div><h3>AI 处理有过程，失败可恢复</h3><p>人工核对 → AI 质检 → 人工确认 → 归档。下面仅演示界面状态。</p></div><span class="rule">B-04</span></div><div class="segmented" role="group" aria-label="AI 流程状态"><button class="active" data-ai="editing" aria-pressed="true">核对内容</button><button data-ai="analyzing" aria-pressed="false">分析中</button><button data-ai="failed" aria-pressed="false">分析失败</button><button data-ai="review" aria-pressed="false">待人工确认</button></div><label class="field-label" for="ai-draft">待核对内容</label><textarea id="ai-draft" class="field" rows="2">合成示例：客户提出补充试点验收指标。</textarea><p id="ai-status" role="status" class="feedback"></p><div class="actions"><button class="btn" id="ai-edit" hidden>返回修改</button><button class="btn primary" id="ai-retry" hidden>重试分析</button></div></article>
+      </section>
+
+      <section id="templates" data-panel="templates" hidden aria-labelledby="templates-title">
+        <div class="section-heading"><div><span class="eyebrow">03 / PAGE PATTERNS</span><h2 id="templates-title">从页面模板开始</h2></div><span class="rule">T-01—T-05</span></div>
+        <nav class="template-tabs" aria-label="页面模板"><a href="#template-home">首页工作台</a><a href="#template-list">业务列表</a><a href="#template-detail">经营详情</a><a href="#template-visit">拜访录入</a><a href="#template-analytics">经营分析</a></nav>
+        <p class="pattern-caption" id="pattern-caption"></p>
+        <div data-template="home" class="template-panel">
+          <div class="home-top"><article class="panel"><div class="panel-heading"><h3>先处理待办</h3><span class="scope">示例本人</span></div><div class="metrics"><div><span>今日待办</span><b>3</b><small>今天截止</small></div><div><span>全部待办</span><b>7</b><small>含逾期与未来</small></div><div><span>今日已完成</span><b>2</b><small>已有完成结果</small></div></div></article><article class="panel shortcut-panel"><h3>常用操作</h3><a class="btn primary" href="#template-visit">记录客户拜访</a><button class="btn" data-feedback="示例：进入客户认领">客户认领</button><button class="btn" data-feedback="示例：进入创建任务">创建任务</button></article></div>
+          <article class="panel feed-panel"><div class="panel-heading"><div><h3>业务动态</h3><p>对象、变化、状态和下一步分层呈现</p></div><span class="scope">最近更新在前</span></div><div class="segmented" role="group" aria-label="动态范围"><button data-feed="all" aria-pressed="true" class="active">全部 5</button><button data-feed="attention" aria-pressed="false">需关注 2</button></div><div id="feed"></div></article>
+        </div>
+        <div data-template="list" class="template-panel" hidden>
+          <article class="panel"><div class="panel-heading"><div><h3>商机总览</h3><p id="overview-period">统计时间：2026 全年 · 仅影响本区数字</p></div><button id="overview-picker" class="btn" aria-haspopup="dialog">统计季度：全年 ⌄</button></div><div class="metrics"><div><span>商机数量</span><b id="overview-count">6</b><small>按预计关单日期统计</small></div><div><span>商机金额 ACV</span><b id="overview-acv">¥ 960,000</b><small>不等同于确收或回款</small></div></div></article>
+          <article class="panel list-panel"><div class="panel-heading"><div><h3>商机列表</h3><p>下方条件仅筛选本列表</p></div><span class="scope" id="list-count" role="status">共 6 条</span></div><div class="filter-tools"><label class="search-label"><span class="sr-only">搜索商机</span><input class="field" id="list-search" type="search" placeholder="搜索客户、商机或负责人"></label><button id="stage-picker" class="btn" aria-haspopup="dialog">商机阶段：全部 ⌄</button><button id="list-clear" class="btn text">清除筛选</button></div><div id="list-conditions" class="conditions" aria-label="已选筛选条件"></div><div class="table-scroll" tabindex="0" role="region" aria-label="商机结果表格"><table><thead><tr><th>商机 / 客户</th><th>阶段</th><th>负责人</th><th>预计关单</th><th class="numeric">ACV</th><th>操作</th></tr></thead><tbody id="opportunity-rows"></tbody></table></div><p id="list-empty" class="empty-state" hidden>没有匹配的商机。可清除筛选后查看全部。</p></article>
+        </div>
+        <div data-template="detail" class="template-panel" hidden>
+          <div class="segmented" role="group" aria-label="经营对象"><button data-object="customer" class="active" aria-pressed="true">客户经营详情</button><button data-object="opportunity" aria-pressed="false">商机经营详情</button></div>
+          <article class="panel detail-header"><div class="panel-heading"><div><span class="eyebrow" id="detail-kind">CUSTOMER / 客户</span><h3 id="detail-title">星河制造</h3><p>负责人：示例销售甲 · 数据范围：示例本人</p></div><button class="btn primary" id="detail-action">记录客户拜访</button></div><div id="detail-metrics" class="metrics"></div></article>
+          <div class="detail-layout"><article class="panel"><div class="segmented" role="tablist" aria-label="详情内容"><button id="tab-summary" data-detail-tab="summary" role="tab" aria-selected="true" aria-controls="detail-content" class="active">经营摘要</button><button id="tab-followups" data-detail-tab="followups" role="tab" aria-selected="false" aria-controls="detail-content" tabindex="-1">拜访与跟进</button><button id="tab-tasks" data-detail-tab="tasks" role="tab" aria-selected="false" aria-controls="detail-content" tabindex="-1">关联任务</button></div><div id="detail-content" role="tabpanel" aria-labelledby="tab-summary" tabindex="0"></div></article><aside class="panel"><h3>本次关注</h3><span class="badge yellow">● 需关注</span><p>试点验收范围尚未确认。</p><details><summary>查看判断依据</summary><p>合成示例：9 月 16 日跟进记录中，客户提出需补充验收指标。本判断不代表客户整体评级。</p></details><h4>下一步</h4><p>9 月 21 日由示例销售甲核对验收清单。</p><small>下一步计划需明确创建任务后，才进入任务列表。</small></aside></div>
+        </div>
+        <div data-template="visit" class="template-panel" hidden>
+          <article class="panel visit-panel"><div class="panel-heading"><div><h3>记录客户拜访</h3><p>关联对象在左，填写与确认在右</p></div><span class="rule">T-04 · C-02</span></div><div class="visit-workspace"><aside><h4>本次拜访对象</h4><b>星河制造</b><p>客户负责人：示例销售甲</p><span class="badge blue">关联商机</span><p>智能质检试点</p><hr><h4>填写提示</h4><p>记录沟通事实、客户反馈、下一步负责人和时间。</p><p class="hint">AI 建议需要人工核对；未归档内容不能显示为已保存。</p></aside><form id="visit-form" novalidate><div class="visit-fields"><label class="field-label">拜访日期</label><button type="button" id="visit-date" class="btn field-trigger" aria-label="拜访日期" aria-haspopup="dialog" aria-expanded="false" value="2026-09-17">2026-09-17 <span>▦</span></button><label class="field-label" for="visit-note">沟通内容 <span class="required">*</span></label><textarea class="field" id="visit-note" required aria-describedby="visit-error" placeholder="本次沟通了什么？客户有什么反馈？"></textarea><p class="field-error" id="visit-error" role="alert" hidden>请补充沟通内容，已输入的下一步计划会保留。</p><label class="field-label" for="visit-next">下一步计划</label><textarea id="visit-next" class="field" placeholder="谁，在什么时间，完成什么"></textarea></div><footer class="visit-footer"><span id="visit-result" role="status">内容仅用于交互示例</span><button type="submit" class="btn primary">核对内容</button></footer></form></div></article>
+        </div>
+        <div data-template="analytics" class="template-panel" hidden>
+          <article class="panel"><div class="panel-heading"><div><h3>经营分析</h3><p id="analytics-scope">示例本人 · 2026 年 Q1 + Q2 + Q3</p></div><button class="btn" id="analytics-period" aria-haspopup="dialog">统计季度 ⌄</button></div><div class="notice">数据口径：跟进数按发生日期汇总；缺失的确收与回款保持未登记。</div><div class="metrics"><div><span>跟进次数</span><b id="analytics-total">26</b><small>所选季度合计</small></div><div><span>已登记确收</span><b class="text-metric">未登记</b><small>缺少记录，不能按零计算</small></div><div><span>已登记回款</span><b class="text-metric">未登记</b><small>与 ACV 分别统计</small></div></div></article><article class="panel"><div class="panel-heading"><h3>季度跟进节奏</h3><span class="scope">单位：次</span></div><div id="analytics-chart" role="img" aria-label="季度跟进次数，详细数字见下方表格"></div><details><summary>查看图表数据与口径</summary><table><thead><tr><th>季度</th><th>跟进次数</th></tr></thead><tbody id="chart-data"></tbody></table><p>全部为合成数据；仅统计已选季度的拜访与跟进记录。</p></details></article>
+        </div>
+      </section>
+      <footer class="catalog-footer"><span>规范 → 示例 → 验收，同步维护。</span><span>业务 API 与权限规则沿用现有契约。</span></footer>
+    </main>
+  </div>
+  <div id="toast" role="status" class="toast" hidden></div>
+  <dialog id="catalog-dialog" class="catalog-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description"><form method="dialog"><header><h2 id="dialog-title">查看交互示例</h2><button class="btn icon" aria-label="关闭弹窗" value="cancel">×</button></header><p id="dialog-description">关闭后保留原页面内容与筛选状态。</p><div id="dialog-content"></div><footer><button class="btn" value="cancel">关闭</button><button class="btn primary" value="confirm">知道了</button></footer></form></dialog>
+</body>
+</html>

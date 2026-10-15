@@ -1,0 +1,108 @@
+{
+  "scenario": "off",
+  "ids": {
+    "conversation_id": "4a556428-1d52-4adc-be09-be80fb5f3670",
+    "run_id": "2d57680d-fdc2-4586-bda5-fd673bc3e668",
+    "task_id": "a8b3eeb4-6b1b-4ee8-b908-1550c4bfb81d"
+  },
+  "status": "succeeded",
+  "elapsed_ms": 7068,
+  "inference_route": null,
+  "attempts": [
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "2d57680d-fdc2-4586-bda5-fd673bc3e668",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": null,
+  "prior_evidence_sha256": "1a23d49f1047de066828b7654909701309d7f04499d4fb95dbe12d1f8283e972",
+  "original_failed_checks": [
+    {
+      "name": "XS002 GET /tasks/a8b3eeb4-6b1b-4ee8-b908-1550c4bfb81d: 200",
+      "passed": false
+    }
+  ],
+  "original_evidence_path": "/var/tmp/salegent-today-business-8ab83a3/off.json",
+  "checks": [
+    {
+      "name": "same authorized task remains pending with same sole source",
+      "passed": true
+    },
+    {
+      "name": "only original owner assigned",
+      "passed": true
+    },
+    {
+      "name": "all original task facts still unchanged",
+      "passed": true
+    },
+    {
+      "name": "existing notifications unchanged; only exact own-task monitor reminders added",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM crm.customer ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM crm.opportunity ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM activity.visit ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "one task for source",
+      "passed": true
+    },
+    {
+      "name": "existing run succeeded and card names this task",
+      "passed": true
+    },
+    {
+      "name": "task read follows existing customer and opportunity policy",
+      "passed": true
+    },
+    {
+      "name": "task RLS agrees with existing policy",
+      "passed": true
+    },
+    {
+      "name": "another user cannot read private run",
+      "passed": true
+    },
+    {
+      "name": "another user cannot read conversation",
+      "passed": true
+    },
+    {
+      "name": "shared read does not assign this task or feed another users own planning",
+      "passed": true
+    }
+  ],
+  "new_model_calls_in_resume": 0,
+  "new_tasks_in_resume": 0,
+  "new_tasks": 1,
+  "existing_monitor_reminders": [
+    {
+      "id": "b2f3ea95-9883-4792-b153-a272574c5bb9",
+      "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd",
+      "channel": "in_app",
+      "template": "priority_task_due",
+      "recipient_user_id": "02000000-0000-0000-0000-000000000004",
+      "created_at": "2026-09-12T06:34:10.936288+00:00"
+    }
+  ],
+  "new_notifications": 0,
+  "notification_scope_correction": "Original immediate zero-notification check did not cover the later existing priority monitor. Own in-app task reminders are recorded; existing rows and external delivery are protected.",
+  "XS002_expected_task_read_status": 200,
+  "passed": true,
+  "real_business_verified": true,
+  "resume_audited_at": "2026-09-12T06:56:19.075764+00:00",
+  "resume_sessions_revoked": true
+}

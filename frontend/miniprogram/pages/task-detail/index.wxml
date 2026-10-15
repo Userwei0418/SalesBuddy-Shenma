@@ -6,21 +6,22 @@ module.exports = { members: members };
 <block wx:else>
 <view wx:if="{{task}}" class="detail-page status-{{task.status}} traffic-{{task.signal.tone}}">
   <view class="detail-hero">
-    <sb-summary-card appearance="soft" tone="{{task.signal.tone === 'red' ? 'bad' : ''}}" title="{{task.title}}" subtitle="{{task.customer}} · {{task.team}}" tags="{{[{label:task.signal.label + ' · ' + task.statusLabel,tone:task.signal.tone === 'red' ? 'bad' : task.signal.tone === 'yellow' ? 'watch' : task.signal.tone === 'green' ? 'good' : 'pending'},{label:task.priority + '优先级'}]}}" progress="{{task.status === 'completed' ? 100 : task.status === 'pending_confirm' ? 16 : task.status === 'cancelled' ? 100 : 42}}" progressLabel="{{task.status === 'completed' ? '任务已完成，结果已同步' : task.status === 'pending_confirm' ? '等待接收方接受或拒绝' : task.status === 'pending_review' ? '完成说明已提交，等待发起人验收' : task.status === 'cancelled' ? (task.wasCancelled ? '任务已取消，原因和协调记录已保留' : '接收方已拒绝，等待发起人决定是否重新发起') : '任务执行中 · 等待完成反馈'}}" />
+    <sb-summary-card appearance="soft" tone="{{task.signal.tone === 'red' ? 'bad' : ''}}" title="{{task.title}}" subtitle="{{task.customer}} · {{task.team}}" tags="{{[{label:task.signal.label + ' · ' + task.statusLabel,tone:task.signal.tone === 'red' ? 'bad' : task.signal.tone === 'yellow' ? 'watch' : task.signal.tone === 'green' ? 'good' : 'pending'},{label:task.priority + '优先级'}]}}" progress="{{task.status === 'completed' ? 100 : task.status === 'pending_confirm' ? 16 : task.status === 'cancelled' ? 100 : 42}}" progressLabel="{{task.stageLabel}}" />
   </view>
 
   <view class="detail-body">
     <view wx:if="{{task.handover_required}}" class="fde-note">原接收人账号或岗位资格已变化，任务待交接；不自动完成或删除。</view>
-    <view wx:if="{{(task.can_coordinate || task.canCancel) && task.status !== 'pending_review' && !coordinateOpen}}" class="coordination-entry">
-      <t-cell title="协调任务" description="转交负责人或取消任务" arrow hover bordered="{{false}}" bind:click="openCoordination" />
+    <view wx:if="{{task.canCancel}}" class="coordination-entry"><t-cell title="取消任务" description="误建或无需继续时取消，原因和记录会保留" arrow hover bind:click="openCancellation"/></view>
+    <view wx:if="{{task.can_coordinate && task.status !== 'pending_review' && !coordinateOpen}}" class="coordination-entry">
+      <t-cell title="转交任务" description="选择接手人员并说明转交原因" arrow hover bordered="{{false}}" bind:click="openCoordination" />
     </view>
     <view wx:if="{{coordinateOpen}}" class="section-card fde-coordinate">
-      <view class="section-title">任务协调</view>
-      <sb-select wx:if="{{task.can_coordinate}}" layout="stacked" plain label="接手人员" required placeholder="选择接手人员" options="{{coord.members(coordinateMembers)}}" value="{{coordinateIndex >= 0 ? coordinateIndex : null}}" disabled="{{coordinateLoading || !coordinateMembers.length}}" bindchange="coordinateMember" />
-      <view wx:if="{{task.can_coordinate && coordinateLoading}}" class="coordinate-hint">正在读取可接手人员…</view><view wx:elif="{{task.can_coordinate && !coordinateMembers.length}}" class="coordinate-hint">当前没有可接手人员，可联系运营或说明原因后取消。</view>
-      <sb-textarea layout="stacked" plain label="协调原因" required maxlength="{{500}}" placeholder="请说明转交或取消原因" value="{{coordinateNote}}" bind:change="coordinateNote" />
+      <view class="section-title">转交任务</view>
+      <t-cell title="接手人员" note="{{coordinateSelectedName || '先选团队，再搜索接手人员'}}" arrow hover bind:click="openCoordinatePicker"/>
+      <view wx:if="{{coordinateLoading}}" class="coordinate-hint">正在读取可接手人员…</view><view wx:elif="{{coordinateDirectoryError}}" class="coordinate-hint" bindtap="loadCoordinationOptions">{{coordinateDirectoryError}} · 点击重试</view><view wx:elif="{{!coordinateMembers.length}}" class="coordinate-hint">当前没有可接手人员，请联系运营确认人员权限。</view>
+      <sb-textarea layout="stacked" plain label="转交原因" required maxlength="{{500}}" placeholder="请说明转交原因" value="{{coordinateNote}}" bind:change="coordinateNote" />
       <text wx:if="{{coordinateError}}" class="coordinate-error">{{coordinateError}}</text>
-      <view class="fde-coordinate-actions"><button class="coordinate-back" disabled="{{submitting}}" bindtap="closeCoordination">返回</button><button wx:if="{{task.canCancel}}" class="coordinate-cancel" disabled="{{submitting}}" data-event="cancel" bindtap="coordinate">取消任务</button><button wx:if="{{task.can_coordinate}}" class="coordinate-submit" disabled="{{submitting || !coordinateMembers.length}}" data-event="reassign" bindtap="coordinate">确认转交</button></view>
+      <view class="fde-coordinate-actions"><button class="coordinate-back" disabled="{{submitting}}" bindtap="closeCoordination">返回</button><button class="coordinate-submit" disabled="{{submitting || coordinateLoading || coordinateDirectoryError || !coordinateSelectedId}}" data-event="reassign" bindtap="coordinate">确认转交</button></view>
     </view>
     <view class="section-card description-card">
       <view class="section-title">任务要求</view>
@@ -38,7 +39,7 @@ module.exports = { members: members };
     <view wx:elif="{{task.status === 'cancelled'}}" class="section-card closed-card">
       <view class="rejected-copy">
         <view class="rejected-head"><sb-status-tag tone="watch" label="{{task.wasCancelled ? '已取消' : '已拒绝'}}" /><text class="rejected-title">{{task.wasCancelled ? '任务已取消' : '任务已被拒绝'}}</text></view>
-        <label class="rejected-kicker">{{task.wasCancelled ? '协调人说明' : '接收方说明'}}</label>
+        <label class="rejected-kicker">{{task.wasCancelled ? '取消原因' : '接收方说明'}}</label>
         <view class="rejected-comment">{{task.wasCancelled ? task.cancellationNote : (task.rejectionComment || '暂未填写拒绝原因')}}</view>
       </view>
     </view>
@@ -61,13 +62,16 @@ module.exports = { members: members };
     </view>
 
     <view wx:else class="readonly-tip"><text>该任务由 {{task.owner}} 负责完成，你可以查看最新状态。</text></view>
-    <view wx:if="{{task.history.length}}" class="section-card review-history"><view class="section-title">提交与验收记录</view><view wx:for="{{task.history}}" wx:key="id" class="review-history-row"><view>{{item.label}} · {{item.actor_name}}</view><text class="completion-help">{{item.time}}</text><view class="description review-evidence">{{item.note}}</view></view></view>
+    <view wx:if="{{task.history.length}}" class="section-card review-history"><view class="section-title">任务记录</view><view wx:for="{{task.history}}" wx:key="id" class="review-history-row"><view>{{item.label}} · {{item.actor_name}}</view><text class="completion-help">{{item.time}}</text><view wx:if="{{item.transferSummary}}" class="description review-evidence">{{item.transferSummary}}</view><view class="description review-evidence">{{item.note}}</view></view></view>
   </view>
 
-  <view wx:if="{{task.canRespond}}" class="bottom-bar response-actions"><button wx:if="{{task.canDecline}}" class="reject-button {{submitting ? 'disabled' : ''}}" disabled="{{submitting}}" bindtap="rejectTask">拒绝</button><button wx:if="{{task.canAccept}}" class="accept-button {{submitting ? 'disabled' : ''}}" disabled="{{submitting}}" bindtap="acceptTask">{{submitting ? '正在同步' : task.responseLabel}}</button><view>拒绝原因将立即推送给 {{task.creator}}</view></view>
+  <sb-bottom-bar wx:if="{{task.canRespond}}" class="bottom-bar response-actions" secondaryLabel="{{task.canDecline ? '拒绝' : ''}}" secondaryDisabled="{{submitting}}" bind:secondary="rejectTask" primaryLabel="{{task.responseLabel}}" disabled="{{!task.canAccept}}" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="acceptTask" note="拒绝原因将立即推送给 {{task.creator}}" />
   <sb-bottom-bar wx:elif="{{task.canRetry}}" class="bottom-bar retry-bar" primaryLabel="重新发起新任务" bind:primary="retryTask" note="原任务和拒绝说明会被保留，新任务可重新修改" />
   <sb-bottom-bar wx:elif="{{task.canReview}}" class="bottom-bar response-actions" secondaryLabel="驳回" secondaryDisabled="{{submitting}}" bind:secondary="onRejectCompletion" primaryLabel="确认完成" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="onApproveCompletion" note="验收结果将通知 {{task.owner}}" />
   <sb-bottom-bar wx:elif="{{task.canComplete}}" class="bottom-bar" primaryLabel="{{task.selfAssigned ? '确认完成' : '提交完成'}}" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="markCompleted" note="{{task.selfAssigned ? '填写说明后直接完成' : '提交后由 ' + task.creator + ' 验收'}}" />
 </view>
 
 </block>
+
+  <person-picker id="personPicker" open="{{coordinatePickerOpen}}" members="{{coordinateMembers}}" teams="{{coordinateTeams}}" default-team-id="{{coordinateDefaultTeamId}}" selected="{{coordinateSelectedIds}}" multiple="{{false}}" allow-all="{{false}}" max-selected="{{1}}" title="选择接手人员" loading="{{coordinateLoading}}" error="{{coordinateDirectoryError}}" bind:confirm="confirmCoordinateMember" bind:close="closeCoordinatePicker" bind:retry="loadCoordinationOptions" />
+  <task-cancel-dialog open="{{cancelOpen}}" task-id="{{taskId}}" task-version="{{task.version_no || 0}}" bind:close="closeCancellation" bind:cancelled="taskCancelled" bind:refreshed="taskCancellationRefreshed" />

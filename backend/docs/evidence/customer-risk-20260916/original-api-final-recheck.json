@@ -1,0 +1,158 @@
+[
+  {
+    "case": "budget-risk",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T02:14:53.026395+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户财务负责人明确表示本季度项目预算尚未获批，采购审批因此暂停。",
+          "next_action": "销售将在2026年9月18日与客户财务负责人核实预算审批进展。"
+        },
+        {
+          "id": "SYN-FDE-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "FDE与客户技术负责人完成全部约定测试，技术指标全部通过，没有未处理的技术问题。",
+          "next_action": "FDE将在2026年9月18日向销售提供测试结果。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "contract_passed": false,
+    "error_type": "TimeoutError",
+    "http_status": null,
+    "elapsed_ms": 33004,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "failed",
+        "http_status": null,
+        "error_type": "SenseAudioError"
+      },
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 2,
+        "status": "cancelled",
+        "http_status": null,
+        "error_type": "CancelledError"
+      }
+    ]
+  },
+  {
+    "case": "explicit-healthy",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T02:14:53.026395+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户决策者、财务负责人和采购负责人共同确认：预算已批准，合同已签署，款项已收齐，全部商务审批已完成，进度按期；没有竞争变更、关系异议或未解决的经营风险。",
+          "next_action": "销售将在2026年9月18日向客户发送本次确认纪要。"
+        },
+        {
+          "id": "SYN-FDE-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户技术负责人已签字确认全部技术指标、验收标准与交付成果通过，双方预期一致，没有待处理问题、延期或技术障碍。",
+          "next_action": "FDE将在2026年9月18日归档验收记录。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "contract_passed": false,
+    "error_type": "TimeoutError",
+    "http_status": null,
+    "elapsed_ms": 33003,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "failed",
+        "http_status": null,
+        "error_type": "SenseAudioError"
+      },
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 2,
+        "status": "cancelled",
+        "http_status": null,
+        "error_type": "CancelledError"
+      }
+    ]
+  }
+]

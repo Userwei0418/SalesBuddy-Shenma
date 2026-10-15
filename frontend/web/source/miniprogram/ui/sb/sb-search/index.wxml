@@ -1,0 +1,5 @@
+<view class="sb-search {{disabled ? 'off' : ''}} {{plain ? 'is-plain' : ''}}" aria-role="search">
+  <t-search t-class="sb-search-inner" value="{{value}}" placeholder="{{placeholder}}" clearable="{{clearable}}" maxlength="{{maxlength}}" disabled="{{disabled}}" bind:change="onChange" bind:submit="onSubmit" bind:clear="onClear">
+    <t-loading wx:if="{{loading}}" slot="action" class="sb-search-loading" theme="circular" size="20px" text="搜索中" aria-role="status" />
+  </t-search>
+</view>

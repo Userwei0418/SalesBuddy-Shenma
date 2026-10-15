@@ -86,7 +86,5 @@ button::after{border:0}
 .task-selector-more{display:flex;align-items:center;justify-content:center;min-height:var(--ui-touch-target);padding:0;color:var(--ui-primary)}
 
 
-/* Multi-recipient task state retained from the current customer version. */
-.selected-recipients{display:flex;flex-wrap:wrap;gap:12rpx;margin-top:14rpx}
-.selected-recipients>view{display:flex;align-items:center;min-height:var(--ui-touch-target);box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;padding:12rpx 16rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-primary);font-size:var(--ui-text-small)}
-.submission-notice{margin:0 27rpx 32rpx;padding:20rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-ink);font-size:var(--ui-text-body);line-height:1.6}
+/* New business controls; existing layout and palette preserved. */
+.upgrade-selected-recipients{display:flex;flex-wrap:wrap;gap:8rpx;margin-top:16rpx}.upgrade-selected-recipients>view{display:flex;align-items:center;gap:8rpx;min-height:var(--ui-touch-target);padding:0 16rpx;color:var(--ui-primary);background:var(--ui-selected);border-radius:var(--ui-radius-control);font-size:14px}.upgrade-submission-notice{margin:24rpx 28rpx;color:var(--ui-warning);font-size:14px;line-height:1.5}

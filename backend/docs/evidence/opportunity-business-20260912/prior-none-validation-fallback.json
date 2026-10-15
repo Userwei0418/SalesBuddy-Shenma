@@ -1,0 +1,189 @@
+{
+  "scenario": "normal",
+  "intent": "none",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /customers/1b127c42-c436-470f-a6dc-876de6586d53 expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "explicit synthetic customer matches",
+      "passed": true
+    },
+    {
+      "name": "test actor owns selected customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/b9f2ed1b-4561-4fea-bcc5-8a411f1cece0/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/b9f2ed1b-4561-4fea-bcc5-8a411f1cece0/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/b9f2ed1b-4561-4fea-bcc5-8a411f1cece0/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "candidate waits for human confirmation",
+      "passed": true
+    },
+    {
+      "name": "candidate action matches business intent",
+      "passed": true
+    },
+    {
+      "name": "no association clears candidate business fields",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays out of public candidate",
+      "passed": true
+    },
+    {
+      "name": "candidate did not mutate formal opportunities or change cards",
+      "passed": true
+    },
+    {
+      "name": "one completed Worker job without whole-job replay",
+      "passed": true
+    },
+    {
+      "name": "one completion receipt",
+      "passed": true
+    },
+    {
+      "name": "one pending candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "one assistant result",
+      "passed": true
+    },
+    {
+      "name": "attempts share one inference operation",
+      "passed": true
+    },
+    {
+      "name": "final real provider completed",
+      "passed": true
+    },
+    {
+      "name": "artifact model reference matches selected provider",
+      "passed": true
+    },
+    {
+      "name": "real platform dispatched",
+      "passed": true
+    },
+    {
+      "name": "platform accepted or bounded timeout fallback",
+      "passed": false
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "customer_id": "1b127c42-c436-470f-a6dc-876de6586d53",
+    "conversation_id": "b9f2ed1b-4561-4fea-bcc5-8a411f1cece0",
+    "run_id": "7a52c193-f228-4af7-9b7f-ea4db823b1a5",
+    "job_id": "a3e8277d-abb5-4960-9dbd-fe3d80db4f5c",
+    "artifact_id": "faf5adc0-e461-4fcf-a522-82119334f504"
+  },
+  "started_at": "2026-09-11T19:39:57.896383+00:00",
+  "preflight_only": false,
+  "crm_before_fingerprint": "53c635a837d2751399de8f2d45091a2e527d12a3c68243394c0dfbd8c76cb4db",
+  "submitted_at": "2026-09-11T19:39:57.991612+00:00",
+  "elapsed_ms": 4044,
+  "status": "waiting_human",
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 3127,
+    "operation_id": "ed55b8dd-6b96-49aa-a5c7-8e550d507d1d",
+    "platform_run": {
+      "ids": {
+        "task_id": "edf1c376-5beb-4854-8972-d50d53f399cb",
+        "message_id": "82cb124b-0bd2-4bde-9154-f49bbf575c9a",
+        "conversation_id": "167c0431-45ee-48d5-93e3-4a4284ff6f09"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 1575,
+        "first_body_byte_ms": 1575,
+        "request_started_ms": 0,
+        "first_data_event_ms": 1575,
+        "headers_received_ms": 1574,
+        "stream_completed_ms": 1931
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "InvalidAgentResult"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "ed55b8dd-6b96-49aa-a5c7-8e550d507d1d",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "ed55b8dd-6b96-49aa-a5c7-8e550d507d1d",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": false,
+  "passed": false,
+  "error_type": "AssertionError",
+  "finished_at": "2026-09-11T19:40:02.057080+00:00"
+}

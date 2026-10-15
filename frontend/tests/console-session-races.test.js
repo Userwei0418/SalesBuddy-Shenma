@@ -237,3 +237,17 @@ test('auth and company-directory requests do not borrow the selected company ide
   const pending=api.api(path);assert.equal(calls.at(-1).options.headers['X-Company-ID'],undefined);respond(calls.at(-1),200,{});await pending;
  }
 });
+
+for(const action of ['logout','company'])test(`binary export discards completed bytes after ${action}`,async()=>{
+ const {api,calls,login}=await setup();await login('A');let finish;
+ const pending=api.download('/company-data/export','package',{method:'POST',body:{sections:['customers'],reason:'test export'},throwOnError:true},'zip');
+ const rejected=assert.rejects(pending,e=>e.code===(action==='logout'?'SESSION_CHANGED':'COMPANY_CHANGED'));
+ calls.at(-1).resolve({status:200,ok:true,blob:()=>new Promise(r=>finish=r)});await tick();
+ if(action==='logout')api.clearSession();else api.setCompany({id:'different'});
+ finish(new Blob(['sensitive data']));await rejected;
+});
+test('binary export failures stay errors so the form can retain the selection',async()=>{
+ const {api,calls,respond,login}=await setup();await login('A');
+ const pending=api.download('/company-data/export','package',{method:'POST',body:{sections:['visits']},throwOnError:true},'zip');
+ const rejected=assert.rejects(pending,/原件损坏/);respond(calls.at(-1),409,{detail:'原件损坏'});await rejected;
+});

@@ -32,7 +32,8 @@ def coaching_inputs(visits, tasks):
                 "communication": communication,
                 "next_action": next_action,
                 "truncated": len(str(row.get("communication") or "").strip()) > TEXT_LIMIT
-                or len(str(row.get("next_action") or "").strip()) > PLAN_LIMIT,
+                or len(str(row.get("next_action") or "").strip()) > PLAN_LIMIT
+                or len(str(row.get("project_name") or "").strip()) > NAME_LIMIT,
             }
         )
     for row in [task for task in tasks if task["can_execute"]][:TASK_LIMIT]:
@@ -45,6 +46,8 @@ def coaching_inputs(visits, tasks):
                 "status": row["status"],
                 "due_at": row["due_at"].isoformat() if row["due_at"] else None,
                 "can_execute": row["can_execute"],
+                "truncated": len(str(row.get("title") or "").strip()) > NAME_LIMIT
+                or len(str(row.get("project_name") or "").strip()) > NAME_LIMIT,
             }
         )
     return {"contract_version": COACHING_CONTRACT_VERSION, "sources": sources}

@@ -1,0 +1,66 @@
+{
+  "backend_unit_tests": {
+    "passed": 1603
+  },
+  "postgres_integration": {
+    "passed": 467,
+    "skipped": 1,
+    "skip_reason": "existing optional 10000-row capacity test"
+  },
+  "database_contract_groups": 9,
+  "migration_static_tests": 5,
+  "openapi_unchanged": true,
+  "mini_program_source_changes": false,
+  "live_original_api_synthetic": {
+    "passed": 2,
+    "scope": "early prompt synthetic cases; before final output-checklist patch; not a successful production queue receipt"
+  },
+  "live_platform_synthetic": {
+    "passed": 0,
+    "failed": 2,
+    "reason": "stream_error; no accepted result"
+  },
+  "production_deployment": {
+    "status": "deployed",
+    "commit": "ee9bd61b42e33b4a2c37411c4013082fc2a9b312",
+    "release": "customer-risk-20260916-ee9bd61",
+    "schema_version": "V098",
+    "migration_checksums": 66,
+    "ordinary_rls_runtime": true,
+    "api_healthy": true,
+    "worker_healthy": true,
+    "deployment_configuration_unchanged": true
+  },
+  "production_customer_risk_queue": {
+    "successful_full_lifecycle": false,
+    "business_acceptance": "not_passed",
+    "initial_attempt": {
+      "commit": "ee4e14e",
+      "platform_result": "stream_error",
+      "original_api_result": "rejected: 9 risks exceed maximum of 8",
+      "risk_writes": 0
+    },
+    "final_attempt": {
+      "commit": "ee9bd61",
+      "platform_result": "timeout",
+      "platform_budget_seconds": 12,
+      "original_api_result": "timeout",
+      "original_api_remaining_budget_seconds": 33,
+      "total_budget_seconds": 45,
+      "assessment_status": "failed",
+      "assessment_outcome": "unknown",
+      "job_status": "dead_letter",
+      "job_attempts": 1,
+      "risk_writes": 0
+    },
+    "failed_inference_link_live_readback": "passed",
+    "idempotent_cli_replay": "same assessment and job; no new model task"
+  },
+  "final_prompt_synthetic_recheck": {
+    "status": "failed",
+    "passed": 0,
+    "failed": 2,
+    "reason": "Both small synthetic cases timed out within 33-second original-provider budget",
+    "evidence": "original-api-final-recheck.json"
+  }
+}

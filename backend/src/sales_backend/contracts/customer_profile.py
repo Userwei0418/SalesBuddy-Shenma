@@ -1,6 +1,8 @@
 """Operations-only customer master edits; identity/import links stay read-only."""
 
 from decimal import Decimal
+from uuid import UUID
+from sales_backend.domain.customer_identity import BusinessIdentities
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -8,6 +10,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class CustomerProfileUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    business_identities: BusinessIdentities | None = None
+    partner_profile_id: UUID | None = None
+    partner_id: UUID | None = None
 
     version_no: int = Field(ge=1)
     name: str | None = Field(default=None, min_length=1, max_length=200)
@@ -30,7 +36,7 @@ class CustomerProfileUpdate(BaseModel):
 
     @model_validator(mode="after")
     def explicit_values(self):
-        for field in self.model_fields_set - {"cooperation_years"}:
+        for field in self.model_fields_set - {"cooperation_years", "customer_type", "partner_profile_id", "partner_id"}:
             if getattr(self, field) is None:
                 raise ValueError(f"{field} 不接受 null；清空可选文本请传空字符串")
         if self.model_fields_set == {"version_no"}:

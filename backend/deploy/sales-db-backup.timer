@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Salegent PostgreSQL backup with count and age retention
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=5m
+Unit=sales-db-backup.service
+
+[Install]
+WantedBy=timers.target

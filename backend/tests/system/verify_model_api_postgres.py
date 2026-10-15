@@ -140,6 +140,14 @@ async def main():
                 runtime.settings.llm_model == "fixture-model"
                 and runtime.settings.senseaudio_api_key == "fixture-api-key"
             )
+            # Business readers must resolve ownership without access to admin test receipts.
+            assert runtime.settings.model_api_metadata['ai_service_source'] == 'tenant_purpose'
+            await conn.execute('UPDATE control.tenant_ai_service SET shared_enabled=false WHERE workspace_id=$1::uuid', first['sales'].workspace_id)
+            owned_runtime = await load_runtime_configuration(db, first['sales'], settings)
+            assert owned_runtime.settings.senseaudio_api_key == 'fixture-api-key'
+            assert owned_runtime.settings.agent_execution_policy['definition']['strategy'] == 'direct_only'
+            checks.append('sales_owned_model_without_admin_receipt_access_or_shared_service')
+            await conn.execute('UPDATE control.tenant_ai_service SET shared_enabled=true WHERE workspace_id=$1::uuid', first['sales'].workspace_id)
             asr = await load_runtime_configuration(db, first["sales"], settings, purpose="asr")
             assert asr.settings.asr_model == settings.asr_model and not asr.settings.model_api_endpoint
             assert not (await load_runtime_configuration(db, second["sales"], settings)).settings.model_api_endpoint

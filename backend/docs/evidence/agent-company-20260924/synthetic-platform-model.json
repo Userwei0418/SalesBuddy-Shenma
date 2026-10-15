@@ -1,0 +1,61 @@
+{
+  "scope": "isolated synthetic adapter and production contract validation; no production business writes; not production end-to-end receipt",
+  "results": [
+    {
+      "case": "Q01-patched-model",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d26a-11f8-7c77-8965-bf4b36f1890b",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "failed",
+      "error_type": "TimeoutError",
+      "elapsed_ms": 12001,
+      "contract_status": "failed",
+      "validation_error": "AssertionError: "
+    },
+    {
+      "case": "Q05-patched-model",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d26a-11f8-7c77-8965-bf4b36f1890b",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "failed",
+      "error_type": "TimeoutError",
+      "elapsed_ms": 12001,
+      "contract_status": "failed",
+      "validation_error": "AssertionError: "
+    },
+    {
+      "case": "Q10-patched-model",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d26a-11f8-7c77-8965-bf4b36f1890b",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "failed",
+      "error_type": "TimeoutError",
+      "elapsed_ms": 12002,
+      "contract_status": "failed",
+      "validation_error": "AssertionError: "
+    },
+    {
+      "case": "Q12-patched-model",
+      "capability": "visit_quality",
+      "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+      "expected_snapshot_id": "01a0d26a-11f8-7c77-8965-bf4b36f1890b",
+      "runtime_snapshot_verified": false,
+      "synthetic_only": true,
+      "persisted_business_records": false,
+      "status": "failed",
+      "error_type": "TimeoutError",
+      "elapsed_ms": 12001,
+      "contract_status": "failed",
+      "validation_error": "AssertionError: "
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+/* FDE 视角：协作看板、跟进记录、协助商机。卡片纵向排列，页面整体滚动；抽屉里的榜单不带前缀 */
+.department-ui .ds-fd-page { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-fd { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-fd-card { padding: var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-fd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-fd-head h2 { font-size: var(--ui-text-page); font-weight: 650; } .department-ui .ds-fd-head > div > span { display: block; font-size: var(--ui-text-small); }
+.department-ui .ds-fd-controls, .department-ui .ds-fd-inline { display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; }
+.department-ui .ds-fd-filter { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; padding: var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-background); }
+.department-ui .ds-fd-h { font-size: var(--ui-text-body); font-weight: 600; margin-top: var(--ui-space-1); } .department-ui .ds-fd-h small { font-weight: 400; margin-left: var(--ui-space-1); }
+.department-ui .ds-fd-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-fd-section-head b { font-weight: 600; display: block; } .department-ui .ds-fd-section-head > div > span { display: block; font-size: var(--ui-text-small); }
+.department-ui .ds-fd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); }
+.department-ui .ds-fd-stage-bar { display: flex; align-items: center; gap: var(--ui-space-2); } .department-ui .ds-fd-stage-bar .ant-progress { flex: 1; margin: 0; } .department-ui .ds-fd-stage-bar span, .department-ui .ds-fd-stage-bar b { flex: none; min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+.department-ui .ds-fd-two { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-fd-two b { font-weight: 600; }
+.department-ui .ds-fd-grade { display: inline-block; margin-left: var(--ui-space-1); padding: 0 var(--ui-space-1); border-radius: var(--ui-radius-control); background: var(--ui-background); color: var(--ui-secondary); font-size: var(--ui-text-small); font-weight: 500; }
+.department-ui .ds-fd-bars { list-style: none; margin: 0; padding: var(--ui-space-2) 0 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(40px, 1fr); gap: var(--ui-space-2); overflow-x: auto; height: 180px; }
+.department-ui .ds-fd-bars li { display: flex; flex-direction: column; align-items: center; gap: var(--ui-space-1); min-width: 0; } .department-ui .ds-fd-bars b { font-size: var(--ui-text-small); font-variant-numeric: tabular-nums; } .department-ui .ds-fd-bars small { font-size: var(--ui-text-small); text-align: center; line-height: 1.3; }
+.department-ui .ds-fd-bar-space { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; background: var(--ui-background); border-radius: var(--ui-radius-control); }
+.department-ui .ds-fd-bar { width: 60%; max-width: 28px; min-height: 2px; background: var(--ui-primary); border-radius: 2px 2px 0 0; }
+.department-ui .ds-fd-public { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-fd-rank-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-space-4); }
+.department-ui .ds-fd-rank { background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); padding: var(--ui-space-3) var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-2); min-width: 0; }
+.department-ui .ds-fd-rank-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--ui-space-2); } .department-ui .ds-fd-rank-head b { display: block; font-weight: 600; } .department-ui .ds-fd-rank-head span { display: block; font-size: var(--ui-text-small); }
+.ds-fd-rank-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.ds-fd-rank-row { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-2); border-radius: var(--ui-radius-control); } .ds-fd-rank-row.is-selected { background: var(--ui-selected); }
+.ds-fd-rank-no { flex: none; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--ui-background); color: var(--ui-secondary); font-size: var(--ui-text-small); font-weight: 600; font-variant-numeric: tabular-nums; }
+.ds-fd-rank-main { flex: 1; min-width: 0; display: flex; flex-direction: column; } .ds-fd-rank-main b { font-weight: 600; } .ds-fd-rank-main > span { font-size: var(--ui-text-small); color: var(--ui-muted); } .ds-fd-rank-main .ant-progress { margin: 0; }
+.ds-fd-rank-value { flex: none; font-weight: 650; font-variant-numeric: tabular-nums; }
+.department-ui .ds-fd-activity { display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-fd-activity-list { border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); overflow: hidden; }
+.department-ui .ds-fd-error { color: var(--ui-danger); font-size: var(--ui-text-small); } .ds-fd-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-fd-note { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-fd-tools { display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; } .department-ui .ds-fd-search { flex: 1 1 240px; min-width: 200px; }
+.department-ui .ds-fd-count { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ui-space-3); flex-wrap: wrap; } .department-ui .ds-fd-count b { font-weight: 600; } .department-ui .ds-fd-count span { font-size: var(--ui-text-small); }
+.department-ui .ds-fd-more { display: flex; align-items: center; gap: var(--ui-space-3); font-size: var(--ui-text-small); }
+@media (max-width: 900px) { .department-ui .ds-fd-grid, .department-ui .ds-fd-rank-grid { grid-template-columns: 1fr; } }
+.department-ui .ds-fd-stage-bar span, .ds-fd-rank-value small { font-variant-numeric: normal; }

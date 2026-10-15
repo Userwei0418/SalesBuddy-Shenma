@@ -1,0 +1,563 @@
+{
+  "format": "synthetic-task-activity-fixtures-v1",
+  "source": "offline synthetic only",
+  "available": {
+    "task_activity": {
+      "contract_version": "work_report.task_activity.v1",
+      "attribution_basis": "current_task_owner",
+      "period": {
+        "kind": "week",
+        "start": "2026-10-05T00:00:00+08:00",
+        "end_exclusive": "2026-10-12T00:00:00+08:00",
+        "cutoff": "2026-10-10T18:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "label": "2026-10-05—2026-10-11"
+      },
+      "scope": {
+        "kind": "team",
+        "member_id": null,
+        "team_id": "00000000-0000-0000-0000-000000000003",
+        "label": "合成团队",
+        "member_ids": [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002"
+        ]
+      },
+      "data_as_of": "2026-10-10T18:00:00+08:00",
+      "counts": {
+        "new_tasks": {
+          "value": 2,
+          "known_count": 2,
+          "coverage": "complete",
+          "missing_reasons": []
+        },
+        "completed_tasks": {
+          "value": 2,
+          "known_count": 2,
+          "coverage": "complete",
+          "missing_reasons": []
+        }
+      },
+      "new_tasks": [
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "task_id": "00000000-0000-0000-0000-000000000066",
+          "name": "合成任务102",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": null,
+          "status": "pending_review",
+          "status_label": "待发起人确认",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000066"
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000064",
+          "task_id": "00000000-0000-0000-0000-000000000064",
+          "name": "合成任务100",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            },
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001",
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": "2026-10-06T00:00:00+08:00",
+          "status": "completed",
+          "status_label": "已完成",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "completed_tasks": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "task_id": "00000000-0000-0000-0000-000000000065",
+          "name": "合成任务101",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-09-05T00:00:00+08:00",
+          "completed_at": "2026-10-07T00:00:00+08:00",
+          "status": "in_progress",
+          "status_label": "执行中",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000065"
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000064",
+          "task_id": "00000000-0000-0000-0000-000000000064",
+          "name": "合成任务100",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            },
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001",
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": "2026-10-06T00:00:00+08:00",
+          "status": "completed",
+          "status_label": "已完成",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "members": [
+        {
+          "member_id": "00000000-0000-0000-0000-000000000001",
+          "counts": {
+            "new_tasks": {
+              "value": 1,
+              "known_count": 1,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": 2,
+              "known_count": 2,
+              "coverage": "complete",
+              "missing_reasons": []
+            }
+          },
+          "new_task_ids": [
+            "00000000-0000-0000-0000-000000000064"
+          ],
+          "completed_task_ids": [
+            "00000000-0000-0000-0000-000000000065",
+            "00000000-0000-0000-0000-000000000064"
+          ]
+        },
+        {
+          "member_id": "00000000-0000-0000-0000-000000000002",
+          "counts": {
+            "new_tasks": {
+              "value": 2,
+              "known_count": 2,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": 1,
+              "known_count": 1,
+              "coverage": "complete",
+              "missing_reasons": []
+            }
+          },
+          "new_task_ids": [
+            "00000000-0000-0000-0000-000000000066",
+            "00000000-0000-0000-0000-000000000064"
+          ],
+          "completed_task_ids": [
+            "00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000064",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000064",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-06T00:00:00+08:00",
+          "source_hash": "5e26e780667a2df640ffed1fdb9a40c071a9566183d540b635488711b32357d8"
+        },
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000065",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000065",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-07T00:00:00+08:00",
+          "source_hash": "41722125d01a26cc07ed28bd7a1ad435cbb80ed986aef13f61ba1cea6972846c"
+        },
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000066",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000066",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-05T00:00:00+08:00",
+          "source_hash": "16d6558d52d1d0ac0af812864324c59bc2fe37377594a344748b1029edec9a7a"
+        }
+      ],
+      "missing_reasons": []
+    }
+  },
+  "partial": {
+    "task_activity": {
+      "contract_version": "work_report.task_activity.v1",
+      "attribution_basis": "current_task_owner",
+      "period": {
+        "kind": "week",
+        "start": "2026-10-05T00:00:00+08:00",
+        "end_exclusive": "2026-10-12T00:00:00+08:00",
+        "cutoff": "2026-10-10T18:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "label": "2026-10-05—2026-10-11"
+      },
+      "scope": {
+        "kind": "team",
+        "member_id": null,
+        "team_id": "00000000-0000-0000-0000-000000000003",
+        "label": "合成团队",
+        "member_ids": [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002"
+        ]
+      },
+      "data_as_of": "2026-10-10T18:00:00+08:00",
+      "counts": {
+        "new_tasks": {
+          "value": 2,
+          "known_count": 2,
+          "coverage": "complete",
+          "missing_reasons": []
+        },
+        "completed_tasks": {
+          "value": null,
+          "known_count": 2,
+          "coverage": "partial",
+          "missing_reasons": [
+            "存在已完成任务缺少完成时间和完成事件，本期完成数量未核定"
+          ]
+        }
+      },
+      "new_tasks": [
+        {
+          "id": "00000000-0000-0000-0000-000000000066",
+          "task_id": "00000000-0000-0000-0000-000000000066",
+          "name": "合成任务102",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": null,
+          "status": "pending_review",
+          "status_label": "待发起人确认",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000066"
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000064",
+          "task_id": "00000000-0000-0000-0000-000000000064",
+          "name": "合成任务100",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            },
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001",
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": "2026-10-06T00:00:00+08:00",
+          "status": "completed",
+          "status_label": "已完成",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "completed_tasks": [
+        {
+          "id": "00000000-0000-0000-0000-000000000065",
+          "task_id": "00000000-0000-0000-0000-000000000065",
+          "name": "合成任务101",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-09-05T00:00:00+08:00",
+          "completed_at": "2026-10-07T00:00:00+08:00",
+          "status": "in_progress",
+          "status_label": "执行中",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000065"
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000064",
+          "task_id": "00000000-0000-0000-0000-000000000064",
+          "name": "合成任务100",
+          "owners": [
+            {
+              "member_id": "00000000-0000-0000-0000-000000000001",
+              "name": "合成成员1"
+            },
+            {
+              "member_id": "00000000-0000-0000-0000-000000000002",
+              "name": "合成成员2"
+            }
+          ],
+          "member_ids": [
+            "00000000-0000-0000-0000-000000000001",
+            "00000000-0000-0000-0000-000000000002"
+          ],
+          "customer_id": "00000000-0000-0000-0000-000000000004",
+          "customer_name": "合成客户",
+          "opportunity_id": "00000000-0000-0000-0000-000000000005",
+          "opportunity_name": "合成商机",
+          "created_at": "2026-10-05T00:00:00+08:00",
+          "completed_at": "2026-10-06T00:00:00+08:00",
+          "status": "completed",
+          "status_label": "已完成",
+          "source_refs": [
+            "task_activity:00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "members": [
+        {
+          "member_id": "00000000-0000-0000-0000-000000000001",
+          "counts": {
+            "new_tasks": {
+              "value": 1,
+              "known_count": 1,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": null,
+              "known_count": 2,
+              "coverage": "partial",
+              "missing_reasons": [
+                "存在已完成任务缺少完成时间和完成事件，本期完成数量未核定"
+              ]
+            }
+          },
+          "new_task_ids": [
+            "00000000-0000-0000-0000-000000000064"
+          ],
+          "completed_task_ids": [
+            "00000000-0000-0000-0000-000000000065",
+            "00000000-0000-0000-0000-000000000064"
+          ]
+        },
+        {
+          "member_id": "00000000-0000-0000-0000-000000000002",
+          "counts": {
+            "new_tasks": {
+              "value": 2,
+              "known_count": 2,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": 1,
+              "known_count": 1,
+              "coverage": "complete",
+              "missing_reasons": []
+            }
+          },
+          "new_task_ids": [
+            "00000000-0000-0000-0000-000000000066",
+            "00000000-0000-0000-0000-000000000064"
+          ],
+          "completed_task_ids": [
+            "00000000-0000-0000-0000-000000000064"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000064",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000064",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-06T00:00:00+08:00",
+          "source_hash": "5e26e780667a2df640ffed1fdb9a40c071a9566183d540b635488711b32357d8"
+        },
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000065",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000065",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-07T00:00:00+08:00",
+          "source_hash": "41722125d01a26cc07ed28bd7a1ad435cbb80ed986aef13f61ba1cea6972846c"
+        },
+        {
+          "source_id": "task_activity:00000000-0000-0000-0000-000000000066",
+          "kind": "task",
+          "record_id": "00000000-0000-0000-0000-000000000066",
+          "version": "2",
+          "observed_at": "2026-10-10T18:00:00+08:00",
+          "business_at": "2026-10-05T00:00:00+08:00",
+          "source_hash": "16d6558d52d1d0ac0af812864324c59bc2fe37377594a344748b1029edec9a7a"
+        }
+      ],
+      "missing_reasons": [
+        "存在已完成任务缺少完成时间和完成事件，本期完成数量未核定"
+      ]
+    }
+  },
+  "zero": {
+    "task_activity": {
+      "contract_version": "work_report.task_activity.v1",
+      "attribution_basis": "current_task_owner",
+      "period": {
+        "kind": "week",
+        "start": "2026-10-05T00:00:00+08:00",
+        "end_exclusive": "2026-10-12T00:00:00+08:00",
+        "cutoff": "2026-10-10T18:00:00+08:00",
+        "timezone": "Asia/Shanghai",
+        "label": "2026-10-05—2026-10-11"
+      },
+      "scope": {
+        "kind": "team",
+        "member_id": null,
+        "team_id": "00000000-0000-0000-0000-000000000003",
+        "label": "合成团队",
+        "member_ids": [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002"
+        ]
+      },
+      "data_as_of": "2026-10-10T18:00:00+08:00",
+      "counts": {
+        "new_tasks": {
+          "value": 0,
+          "known_count": 0,
+          "coverage": "complete",
+          "missing_reasons": []
+        },
+        "completed_tasks": {
+          "value": 0,
+          "known_count": 0,
+          "coverage": "complete",
+          "missing_reasons": []
+        }
+      },
+      "new_tasks": [],
+      "completed_tasks": [],
+      "members": [
+        {
+          "member_id": "00000000-0000-0000-0000-000000000001",
+          "counts": {
+            "new_tasks": {
+              "value": 0,
+              "known_count": 0,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": 0,
+              "known_count": 0,
+              "coverage": "complete",
+              "missing_reasons": []
+            }
+          },
+          "new_task_ids": [],
+          "completed_task_ids": []
+        },
+        {
+          "member_id": "00000000-0000-0000-0000-000000000002",
+          "counts": {
+            "new_tasks": {
+              "value": 0,
+              "known_count": 0,
+              "coverage": "complete",
+              "missing_reasons": []
+            },
+            "completed_tasks": {
+              "value": 0,
+              "known_count": 0,
+              "coverage": "complete",
+              "missing_reasons": []
+            }
+          },
+          "new_task_ids": [],
+          "completed_task_ids": []
+        }
+      ],
+      "sources": [],
+      "missing_reasons": []
+    }
+  },
+  "legacy_missing": {},
+  "legacy_null": {
+    "task_activity": null
+  }
+}

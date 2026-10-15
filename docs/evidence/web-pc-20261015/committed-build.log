@@ -1,0 +1,6 @@
+
+> shenma-salesbuddy-web@0.6.12 build
+> python3 scripts/build.py && node scripts/build-department-ui.mjs
+
+BUILD_OK: 28 pages, 14 components; 259 shared files unchanged
+DEPARTMENT_UI_BUILD_OK: installed component packages bundled locally

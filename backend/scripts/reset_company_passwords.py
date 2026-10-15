@@ -94,7 +94,7 @@ async def reset_companies(connection, workspaces, *, source_workspace, administr
 
 async def main(args):
     request_metadata.set(RequestMetadata(request_id=str(uuid4()), user_agent="authorized-password-maintenance"))
-    connection = await asyncpg.connect(host="/var/run/postgresql", database="shenma_sales", user="postgres")
+    connection = await asyncpg.connect(host="/tmp", database="sales_saas", user="postgres")
     await _initialize_connection(connection)
     try:
         async with connection.transaction():

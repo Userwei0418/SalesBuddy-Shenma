@@ -1,7 +1,7 @@
-from typing import Literal, Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, SecretStr, model_validator, field_validator
+from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 
 Role = Literal["sales", "supervisor", "manager", "fde", "fde_lead", "operations", "administrator"]
 
@@ -23,7 +23,14 @@ class AccountContact(BaseModel):
 
 class AccountOrganization(AccountContact):
     organization_team_id: UUID | None = Field(default=None, description="组织归属部门，仅用于组织管理，不产生业务任职或权限。更新时省略保留，null清空。")
-    phone_number: str | None = Field(default=None, pattern=r"^1[3-9][0-9]{9}$", description="可选11位手机号登录标识；与账号名共用密码，不发送验证码。传null或空字符串清空；更新时省略则保留。")
+    phone_number: str | None = Field(
+        default=None, pattern=r"^1[3-9][0-9]{9}$",
+        description=(
+            "管理员核实维护的11位手机号，全平台仅绑定一个未删除账号，与账号名共用密码，不发送验证码。"
+            "正式公司新建或首次增加销售、主管、FDE等业务岗位时必填；已有业务账号及演示公司兼容未绑定。"
+            "更新省略保留，null或空字符串清空并撤销原会话。"
+        ),
+    )
 
     @field_validator("phone_number", mode="before")
     @classmethod

@@ -1,0 +1,9 @@
+/* Keep Shenma weekly draft/history/publication workflow inside PC 2.0's report layout. */
+.department-ui .ds-weekly { gap:16px; }
+.department-ui .ds-weekly .pc-page-head {flex-shrink:0;}
+.department-ui .ds-weekly-columns {gap:16px;}
+.department-ui .ds-weekly .ds-panel {border-radius:var(--ui-radius-panel);box-shadow:var(--ui-shadow-card);}
+.department-ui .ds-weekly-panel-head {padding:12px 16px;background:var(--ui-surface-subtle);}
+.department-ui .ds-weekly-panel-head h2 {font-size:14px;}
+.department-ui .ds-weekly .ds-weekly-paper textarea.ant-input {font-size:14px;line-height:1.85;}
+@media(max-width:600px) { .department-ui .ds-weekly-period {max-width:100%;flex-wrap:wrap;} .department-ui .ds-weekly .pc-page-head-extra {max-width:100%;} }

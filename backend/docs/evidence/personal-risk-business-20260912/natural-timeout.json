@@ -1,0 +1,325 @@
+{
+  "scenario": "normal",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "configured test actor",
+      "passed": true
+    },
+    {
+      "name": "exact scoped visit set still current",
+      "passed": true
+    },
+    {
+      "name": "all source visits explicitly synthetic",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/c51c5ec1-efc6-485a-bf1d-b09d43f199c3/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/c51c5ec1-efc6-485a-bf1d-b09d43f199c3/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/c51c5ec1-efc6-485a-bf1d-b09d43f199c3/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "risk analysis completed",
+      "passed": true
+    },
+    {
+      "name": "customer and opportunity facts and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "no existing risk removed",
+      "passed": true
+    },
+    {
+      "name": "closed and out-of-scope risks unchanged",
+      "passed": true
+    },
+    {
+      "name": "bounded nonempty risk result materialized",
+      "passed": true
+    },
+    {
+      "name": "backend retains source ownership and nonterminal status",
+      "passed": true
+    },
+    {
+      "name": "one backend event per changed risk",
+      "passed": true
+    },
+    {
+      "name": "public card matches persisted risk list",
+      "passed": true
+    },
+    {
+      "name": "route stays private",
+      "passed": true
+    },
+    {
+      "name": "single completed job without replay",
+      "passed": true
+    },
+    {
+      "name": "single completion receipt and answer",
+      "passed": true
+    },
+    {
+      "name": "one operation and final real provider succeeded",
+      "passed": true
+    },
+    {
+      "name": "risk provenance matches actual provider",
+      "passed": true
+    },
+    {
+      "name": "real platform request dispatched",
+      "passed": true
+    },
+    {
+      "name": "platform accepted or validated fallback",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/8724ea98-0cbe-401d-b640-397225df2052 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/08d349e5-87bb-4c95-9425-4a7d24aa5b38 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/1fd11300-5fcd-4519-b8cc-e9d71a9b669a expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/40b7d171-79e2-4f2c-9b53-08cb9560c6cc expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/7909fae5-c8b3-455e-8f26-9b3b8897fb73 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/8fac39e9-9f2e-48ca-a5ac-76b91fe8ec35 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /risks/bdd8bbf5-1d94-4741-ba1b-e2f3d7540457 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/c51c5ec1-efc6-485a-bf1d-b09d43f199c3/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read risk conversation",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "c51c5ec1-efc6-485a-bf1d-b09d43f199c3",
+    "run_id": "8724ea98-0cbe-401d-b640-397225df2052",
+    "risk_ids": [
+      "08d349e5-87bb-4c95-9425-4a7d24aa5b38",
+      "1fd11300-5fcd-4519-b8cc-e9d71a9b669a",
+      "40b7d171-79e2-4f2c-9b53-08cb9560c6cc",
+      "7909fae5-c8b3-455e-8f26-9b3b8897fb73",
+      "8fac39e9-9f2e-48ca-a5ac-76b91fe8ec35",
+      "bdd8bbf5-1d94-4741-ba1b-e2f3d7540457"
+    ],
+    "job_id": "b7fb43ae-9d7e-4e4e-9e36-7c83dab4fd48"
+  },
+  "preflight_only": false,
+  "started_at": "2026-09-11T20:15:04.900558+00:00",
+  "approved_visit_count": 12,
+  "existing_open_risk_count": 18,
+  "facts_fingerprint": "ce48598e11b15293085612645850a9542a4b0143818bcf07b79202a800a94cd3",
+  "crm_fingerprint": "9d538bfcd008524be9d9dffc3924c64d33180818c061ae696f29b98f08e91a40",
+  "protected_risk_count": 25,
+  "submitted_at": "2026-09-11T20:15:05.114334+00:00",
+  "elapsed_ms": 21178,
+  "status": "succeeded",
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 19699,
+    "operation_id": "e3fc15bc-3691-42ca-9bbe-fbc258a341b5",
+    "platform_run": {
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": null,
+        "first_body_byte_ms": 10818,
+        "request_started_ms": 0,
+        "first_data_event_ms": null,
+        "headers_received_ms": 10818,
+        "stream_completed_ms": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a09217-97c0-7043-adb9-3f46d0bc3c10",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "TimeoutError"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "cancelled",
+      "http_status": 200,
+      "error_code": "CancelledError",
+      "operation_id": "e3fc15bc-3691-42ca-9bbe-fbc258a341b5",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "e3fc15bc-3691-42ca-9bbe-fbc258a341b5",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": false,
+  "passed": true,
+  "finished_at": "2026-09-11T20:15:26.446759+00:00"
+}

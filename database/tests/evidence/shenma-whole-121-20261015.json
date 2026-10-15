@@ -1,0 +1,138 @@
+{
+  "passed": 20,
+  "checks": [
+    "V159_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
+    "actual_python_feishu_worker_startup_guard_passes_only_dedicated_role",
+    "V159_runtime_nobypassrls_scoped_permissions_private_credentials_and_worker_denied",
+    "synthetic_customer_and_opportunity_excluded_unpublished_legacy_weekly_not_exported",
+    "exact_e40_API_and_worker_policy_complete_except_strict_customer_request_mutations",
+    "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories",
+    "report_point_lookup_equivalence_scope_revocation_review_guards_and_restricted_runtime_for_update",
+    "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
+    "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
+    "V161_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
+    "actual_python_feishu_worker_startup_guard_passes_only_dedicated_role",
+    "V161_runtime_nobypassrls_scoped_permissions_private_credentials_and_worker_denied",
+    "synthetic_customer_and_opportunity_excluded_unpublished_legacy_weekly_not_exported",
+    "existing_S2_pending_request_and_S3_private_view_retained_reviewer_column_update_works",
+    "exact_e40_API_and_worker_policy_complete_except_strict_customer_request_mutations",
+    "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories",
+    "report_point_lookup_equivalence_scope_revocation_review_guards_and_restricted_runtime_for_update",
+    "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
+    "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
+    "fresh_V399_exact_runtime_grants_bootstrap_secure_password_login_empty_business_and_overwrite_denial"
+  ],
+  "date": "2026-10-15",
+  "source_revision": "e40a8029d94a03fc45448e00d536e5a5b9120831",
+  "expected_schema": "V399",
+  "postgresql_version": "16.15 (Homebrew)",
+  "execution": "real local PostgreSQL; separate randomized databases, removed after testing",
+  "remaining_task_test_databases": 0,
+  "upgrade_migration_counts": {
+    "V159_to_V399": 96,
+    "V161_to_V399": 94
+  },
+  "unit_tests": {
+    "passed": 10
+  },
+  "lint_compile_and_shell_syntax": "passed",
+  "command": "python deployment/check-whole-upgrade-ci.py --socket /tmp/shenma-acceptance-20261015 --port 55465",
+  "files": {
+    "database/shenma_whole_121_manifest.json": "798a6767706f35d6fbf9f6e6a35bfea1b0ced14eaa39e9002c9fe8f1965f62d1",
+    "database/tests/verify_shenma_whole_121_postgres.py": "a36b7dc32b8dcfb9546149f922ac40c5972c12c23d056ded3d1ae26fe1839af7",
+    "database/migrations/V299__shenma_whole_121_compatibility_prelude.sql": "e3aaa402c6836030bdd976b4905b2c3e6f6248e0b08c3b407a11bf2b6d4a8318",
+    "database/migrations/V399__shenma_whole_121_delivery_guards.sql": "8574fe9a4212a05ce38acb9e43fe159fb1a7dfa2e6b6201a60120ab926a5a502",
+    "database/tests/verify_shenma_runtime_repositories.py": "9c77df17801af63f583f5e4f450d14e102d51f225d39296ddfb86bbbd518f3c3",
+    "database/tests/fixtures/upstream_e40_runtime_permissions.json": "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d",
+    "database/scripts/build_shenma_whole_121_bridge.py": "a74b1ae874cfe5b6a1cb1e5d0a5cf87815852e8dc33ce8a5d7874584de1f5aae",
+    "database/tests/test_shenma_whole_121_manifest.py": "c3d6c13512728578476cbd3cd25cc4d3330b592ac676ce8bc17dec00ea61857e",
+    "database/tests/verify_report_source_point_access.py": "d21b0870fdbd0211d1d7eec6aeeb228b77bfb708e5b0d98a3df2bac3f4f597e9"
+  },
+  "not_performed": [
+    "production database mutation",
+    "Feishu/network delivery",
+    "real model invocation"
+  ],
+  "static_mount_smoke": {
+    "passed": 6,
+    "scope": "ASGI TestClient without lifespan/DB/model calls",
+    "paths": [
+      "/workspace/?mode=live",
+      "/workspace/theme.js",
+      "/workspace/department-ui/app.js",
+      "/workspace/department-ui/app.css",
+      "/web/",
+      "/workspace?mode=live -> 307 query preserved"
+    ]
+  },
+  "reviewed_service_policy": {
+    "source_revision": "e40a8029d94a03fc45448e00d536e5a5b9120831",
+    "source_path": "tools/installation/runtime_permissions.json",
+    "source_sha256": "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d",
+    "services": [
+      "api",
+      "worker"
+    ],
+    "remaining_missing": [],
+    "intentional_exceptions": [
+      "crm.customer_creation_request direct INSERT and table UPDATE denied; SELECT and UPDATE(reviewed_payload) retained"
+    ],
+    "restricted_role_created_at": "V125 before V159, matching production and fresh lifecycle",
+    "added_functions": 12,
+    "schema_ledger_access": "SELECT(version,applied_at) only; no table SELECT",
+    "feishu_role": "unchanged narrow entrypoints; direct new report-table reads and customer helper denied"
+  },
+  "actual_runtime_repository_checks": [
+    "customer portfolio read retains owner scope",
+    "report scheme create/read/list, immutable scheme revision and event",
+    "report snapshot create/read without worker or external model",
+    "report document list executes its complete SQL and source guards",
+    "sales submits customer request; no pre-approval customer; sales approval denied",
+    "administrator approves dual customer/partner identity; customer remains unclaimed",
+    "partner directory resolves approved customer via actual enterprise helper",
+    "TaskAlignmentRepository.supports_v2 accepts V392",
+    "_require_overview_schema accepts V384",
+    "_meeting_schema_applied_at equals actual V383.applied_at",
+    "deferred constraints forced before test rollback"
+  ],
+  "report_source_point_lookup": {
+    "change": "Only restore V386 opportunity and meeting_customer primary-key scalar lookups over complete V393 body; no predicate or permission changes",
+    "local_cases": [
+      {
+        "equivalence_cases": 23,
+        "restricted_role": "NOSUPERUSER NOBYPASSRLS",
+        "opportunity_rows_added": 96,
+        "manifest_opportunities": 4,
+        "same_run_for_update_ms": {
+          "before": {
+            "force_custom_plan_ms": 52.584,
+            "force_generic_plan_ms": 49.39
+          },
+          "after": {
+            "force_custom_plan_ms": 19.205,
+            "force_generic_plan_ms": 19.156
+          }
+        },
+        "qualification": "Local synthetic timings, not clone or production latency proof"
+      },
+      {
+        "equivalence_cases": 23,
+        "restricted_role": "NOSUPERUSER NOBYPASSRLS",
+        "opportunity_rows_added": 96,
+        "manifest_opportunities": 4,
+        "same_run_for_update_ms": {
+          "before": {
+            "force_custom_plan_ms": 51.698,
+            "force_generic_plan_ms": 51.347
+          },
+          "after": {
+            "force_custom_plan_ms": 20.804,
+            "force_generic_plan_ms": 25.123
+          }
+        },
+        "qualification": "Local synthetic timings, not clone or production latency proof"
+      }
+    ],
+    "clone_timeout_status": "Local fixtures do not reproduce server 30-second stall; separate server-clone diagnosis remains required"
+  }
+}

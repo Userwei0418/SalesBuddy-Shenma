@@ -4,6 +4,8 @@ import asyncio
 import base64
 import binascii
 import json
+import math
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Any
@@ -13,7 +15,14 @@ import httpx
 from sales_backend.config import Settings
 from sales_backend.domain.agent import ChatMessage
 from sales_backend.integrations.circuit_breaker import CircuitOpenError, GatewayCircuitBreaker
-from sales_backend.integrations.model_observer import ModelObserver, attempt_response
+from sales_backend.integrations.model_observer import (
+    ModelObserver,
+    attempt_dispatch,
+    attempt_response,
+    attempt_sent,
+    finish_observed,
+    prepare_observed,
+)
 
 MAX_ASR_FILE_BYTES = 10 * 1024 * 1024
 RETRYABLE_STATUS_CODES = frozenset({408, 429, 500, 502, 503, 504})
@@ -80,6 +89,20 @@ class SenseAudioError(RuntimeError):
         super().__init__(message)
         self.status_code = status_code
         self.retryable = retryable
+
+
+class EmptyTranscriptionError(SenseAudioError):
+    """The provider returned a valid text field, but no recognized content."""
+
+    def __init__(self, *, status_code=200):
+        super().__init__("ASR returned no recognizable text", status_code=status_code)
+
+
+class InvalidTranscriptionError(SenseAudioError):
+    """A successful HTTP response did not satisfy the ASR response contract."""
+
+    def __init__(self, *, status_code=200):
+        super().__init__("ASR returned an invalid transcription response", status_code=status_code)
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,22 +178,33 @@ class SenseAudioClient:
         }
         if hotwords:
             data["hotwords"] = ",".join(hotwords)
-        response = await self._request(
+        def validate(response):
+            try:
+                payload = self._json(response)
+            except SenseAudioError as exc:
+                raise InvalidTranscriptionError(status_code=response.status_code) from exc
+            text = payload.get("text")
+            if not isinstance(text, str) or "\x00" in text:
+                raise InvalidTranscriptionError(status_code=response.status_code)
+            if not any(character.isprintable() and not character.isspace() for character in text):
+                raise EmptyTranscriptionError(status_code=response.status_code)
+            duration = payload.get("duration")
+            return Transcription(
+                text=text.strip(),
+                duration_seconds=(float(duration) if type(duration) in (int, float)
+                                  and 0 <= duration <= 1e100 and math.isfinite(duration) else None),
+                trace_id=response.headers.get("x-trace-id") or payload.get("trace_id"),
+                raw=payload,
+            )
+
+        # Validate inside the observed attempt: HTTP 200 alone is not a usable
+        # transcription, and must not be recorded as a successful model call.
+        return await self._request(
             "POST",
             "/v1/audio/transcriptions",
+            response_validator=validate,
             data=data,
             files={"file": (filename, content, mime_type)},
-        )
-        payload = self._json(response)
-        text = payload.get("text")
-        if not isinstance(text, str) or not text.strip():
-            raise SenseAudioError("ASR response did not contain non-empty text")
-        duration = payload.get("duration")
-        return Transcription(
-            text=text.strip(),
-            duration_seconds=float(duration) if isinstance(duration, int | float) else None,
-            trace_id=response.headers.get("x-trace-id") or payload.get("trace_id"),
-            raw=payload,
         )
 
     async def chat_json(
@@ -291,8 +325,9 @@ class SenseAudioClient:
             usage_characters=info.get("usage_characters"),
         )
 
-    async def _request(self, method: str, path: str, **kwargs: Any) -> httpx.Response:
-        async def once() -> httpx.Response:
+    async def _request(self, method: str, path: str, *, response_validator: Callable | None = None,
+                       **kwargs: Any) -> Any:
+        async def once():
             response = await self._send(method, path, **kwargs)
             if response.status_code < 400:
                 payload = None
@@ -302,7 +337,7 @@ class SenseAudioClient:
                     payload = None
                 if isinstance(payload, dict):
                     self._raise_if_gateway_busy(payload, response.status_code)
-                return response
+                return response_validator(response) if response_validator else response
             retryable = response.status_code in RETRYABLE_STATUS_CODES or is_busy_text(
                 self._safe_error_message(response)
             )
@@ -325,10 +360,13 @@ class SenseAudioClient:
             if PURPOSES[purpose]["path"] != path:
                 raise SenseAudioError("接口用途与调用类型不一致")
             path = self._settings.model_api_endpoint
+        if observed := attempt_dispatch.get():
+            await prepare_observed(*observed)
+        attempt_sent.set(True)
         response = await self._client.request(method, path, **kwargs)
+        attempt_response.set(response)
         if self._settings.model_api_endpoint and 300 <= response.status_code < 400:
             raise SenseAudioError("模型接口不允许重定向", status_code=response.status_code)
-        attempt_response.set(response)
         return response
 
     async def _run_with_retry(self, operation, *, endpoint="unknown", model="unknown", metadata=None):
@@ -343,6 +381,8 @@ class SenseAudioClient:
                 await self._observer.start(endpoint, model, metadata or {}, attempt + 1) if self._observer else None
             )
             token = attempt_response.set(None)
+            dispatch_token = attempt_dispatch.set((self._observer, invocation_id) if invocation_id else None)
+            sent_token = attempt_sent.set(False)
             error = None
             try:
                 result = await operation()
@@ -352,15 +392,19 @@ class SenseAudioClient:
             except BaseException as exc:
                 error = exc
             finally:
-                if self._settings.model_api_endpoint and isinstance(error, SenseAudioError):
+                if (self._settings.model_api_endpoint and isinstance(error, SenseAudioError)
+                        and not isinstance(error, (EmptyTranscriptionError, InvalidTranscriptionError))):
                     # Untrusted providers may echo headers in an error. Never log their raw text.
                     error = SenseAudioError("模型接口请求失败，请检查服务状态和返回格式",
                                             status_code=error.status_code, retryable=error.retryable)
                 try:
                     if invocation_id:
-                        await self._observer.finish(invocation_id, attempt_response.get(), error)
+                        await finish_observed(self._observer, invocation_id, attempt_response.get(), error,
+                                              network_sent=attempt_sent.get())
                 finally:
                     attempt_response.reset(token)
+                    attempt_dispatch.reset(dispatch_token)
+                    attempt_sent.reset(sent_token)
             if error is None:
                 await self._breaker.record_success()
                 return result

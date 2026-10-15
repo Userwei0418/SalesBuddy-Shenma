@@ -13,6 +13,7 @@
     "sb-status-tag": "/ui/sb/sb-status-tag/index",
     "sb-tabs": "/ui/sb/sb-tabs/index",
     "t-cell": "/ui/tdesign/cell/cell",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "/components/person-picker/index"
   }
 }

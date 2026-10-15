@@ -13,15 +13,16 @@ from sales_backend.contracts.operations import (
     AccountLoginUnlock,
     AccountUpdate,
     DepartmentSave,
-    PasswordReset,
     PasswordPolicyUpdate,
+    PasswordReset,
 )
 from sales_backend.db import Database
+from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.repositories.companies import CompanyRepository
 from sales_backend.repositories.identity import ROLE_NAMES
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
-from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.services.operations import management_write
-from sales_backend.services.operations_accounts import OperationsAccountService
+from sales_backend.services.operations_accounts import BUSINESS_ACCOUNT_ROLES, OperationsAccountService
 
 router = APIRouter(prefix="/api/v1/console", tags=["Accounts and organization"])
 repository = OperationsAccountRepository()
@@ -66,12 +67,18 @@ async def organization(
     async with database.transaction(identity.actor, readonly=True) as connection:
         result = await repository.organization(connection)
         permissions = await AuthorizationRepository().effective(connection)
+        labels = (await CompanyRepository().role_labels(connection, identity.actor.workspace_id))["labels"]
+        requires_business_phone = await repository.requires_business_phone(connection)
     return {
         **result,
+        "phone_policy": {
+            "requires_for_new_business_accounts": requires_business_phone,
+            "business_roles": sorted(BUSINESS_ACCOUNT_ROLES),
+        },
         "roles": [
             {
                 "code": code,
-                "name": name,
+                "name": labels.get(code, name),
                 "assignable": permissions.allows("authorization.accounts_manage")
                 or code not in {"operations", "administrator"},
             }

@@ -1,0 +1,30 @@
+{
+  "id": "01a09a6c-97c7-7631-b580-c3b2b14739ad",
+  "app_id": "55233c9a-c619-482c-a707-bd7b38b7cfc4",
+  "name": "销售智助-销售六维能力复盘-V1",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "6b68a4b9f9663efbc7674571b6ea9d608107b4d12ee475830b4ca2e0fea08e3b",
+  "snapshot_id": "01a0ae35-e1cd-7b66-ac45-cd63871ac389",
+  "url": "https://123.207.235.181/agents/01a09a6c-97c7-7631-b580-c3b2b14739ad/configure",
+  "previous_snapshot_id": "01a0a059-55c4-7b36-97f7-0a588ec3b2f8",
+  "previous_binding_snapshot_id": "01a09a6d-1d00-77b5-9bb8-80c828fc8a6b",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "efee220ff35726fbaeae89658727e9cb5481cee6f08b2d3c76f631863167413e",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "synthetic_acceptance": {
+    "status": "passed",
+    "scope": "isolated adapter plus production contract validation; not production business end-to-end",
+    "receipt": "backend/docs/evidence/agent-company-20260924/synthetic-platform.json",
+    "cases": 1,
+    "passed": 1
+  },
+  "previous_repository_snapshot_id": "01a0a583-b913-7e8c-9f0b-03fa4e97c527",
+  "metadata_verified_at": "2026-09-24",
+  "metadata_verified_account": "zhouwei5@sensetime.com",
+  "tool_counts": {
+    "dify_tools": 0,
+    "cli_tools": 0
+  }
+}

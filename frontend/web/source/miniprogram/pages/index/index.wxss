@@ -1,0 +1,632 @@
+page {
+  height:100%;
+  overflow:hidden;
+  background:var(--ui-background);
+}
+
+.assistant-page {
+  height:100vh;
+  min-height:0;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding:24rpx 32rpx 0;
+  color:var(--ui-ink);
+  background:var(--ui-background);
+}
+
+.overview-fixed {
+  position:relative;
+  z-index:3;
+  flex:0 0 auto;
+}
+
+/* 页头：直接放在页面底色上，不加容器 */
+.workspace-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24rpx;
+  margin:8rpx 0 24rpx;
+}
+
+.greeting {
+  color:var(--ui-ink);
+  font-size:20px;
+  font-weight:600;
+  line-height:1.3;
+}
+
+.workspace-meta {
+  margin-top:8rpx;
+  color:var(--ui-secondary);
+  font-size:14px;
+  line-height:1.4;
+}
+
+/* 范围标签：飞书中性标签，4px 圆角、灰底、无边框 */
+.scope-pill {
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8rpx;
+  padding:0 12rpx;
+  border-radius:4px;
+  color:var(--ui-neutral);
+  background:var(--ui-neutral-soft);
+  font-size:var(--ui-text-small);
+  line-height:20px;
+}
+
+.scope-pill text {
+  width:10rpx;
+  height:10rpx;
+  border-radius:50%;
+  background:var(--ui-primary);
+}
+
+/* 今日经营摘要：sb-summary-card 白卡；外层 brief-card 只做定位，不再画第二圈边 */
+.brief-card {
+  background:var(--ui-surface);
+  border-radius:var(--ui-radius-panel);
+}
+
+.fde-team-summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8rpx;
+  min-height:var(--ui-touch-target);
+  margin-top:8rpx;
+  padding:0 4rpx;
+  color:var(--ui-primary);
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* 按下态：可点的卡片、行、按钮都要有反馈 */
+.home-pressed { opacity:.7; }
+.home-card-pressed { background:var(--ui-neutral-soft); }
+.home-row-pressed { opacity:.7; }
+
+/* 消息流 */
+.chat-stream {
+  display:flex;
+  flex-direction:column;
+  gap:32rpx;
+}
+
+.message-row {
+  display:flex;
+  align-items:flex-start;
+  gap:16rpx;
+}
+
+.message-row.user {
+  justify-content:flex-end;
+}
+
+.agent-avatar {
+  width:56rpx;
+  height:56rpx;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:40rpx;
+  border-radius:var(--ui-radius-control);
+  color:var(--ui-on-primary);
+  background:var(--ui-primary);
+}
+
+.agent-avatar text {
+  font-size:14px;
+}
+
+.message-stack {
+  max-width:590rpx;
+}
+
+.message-meta {
+  margin:0 0 8rpx 4rpx;
+  color:var(--ui-muted);
+  font-size:var(--ui-text-small);
+  line-height:20px;
+}
+
+/* 飞书：白卡、气泡放在灰底上，不描边 */
+.bubble {
+  padding:20rpx 24rpx;
+  border-radius:var(--ui-radius-panel);
+  color:var(--ui-ink);
+  background:var(--ui-surface);
+  font-size:14px;
+  line-height:1.65;
+}
+
+.user .bubble {
+  color:var(--ui-ink);
+  background:var(--ui-selected);
+}
+
+.user-time {
+  margin:8rpx 4rpx 0 0;
+  color:var(--ui-muted);
+  font-size:var(--ui-text-small);
+  text-align:right;
+}
+
+/* 问候卡 */
+.greeting-card { padding:32rpx; border-radius:var(--ui-radius-panel); background:var(--ui-surface); }
+.greeting-card-eyebrow { color:var(--ui-muted); font-size:var(--ui-text-small); line-height:20px; }
+.greeting-card-title { margin-top:8rpx; color:var(--ui-ink); font-size:var(--ui-text-body); font-weight:600; line-height:1.4; }
+.greeting-card-copy { margin-top:8rpx; color:var(--ui-ink); font-size:14px; line-height:1.6; }
+.greeting-card-note { margin-top:24rpx; padding-top:24rpx; border-top:1px solid var(--ui-line); color:var(--ui-secondary); font-size:14px; line-height:1.5; }
+
+/* 经营洞察 */
+.insight-bubble {
+  padding:32rpx;
+  border-radius:var(--ui-radius-panel);
+  background:var(--ui-surface);
+}
+
+.insight-top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16rpx;
+}
+
+.insight-badge {
+  display:flex;
+  align-items:center;
+  gap:8rpx;
+  padding:0 12rpx;
+  border-radius:4px;
+  color:var(--ui-neutral);
+  background:var(--ui-neutral-soft);
+  font-size:var(--ui-text-small);
+  line-height:20px;
+}
+
+.insight-badge text {
+  width:8rpx;
+  height:8rpx;
+  border-radius:50%;
+  background:currentColor;
+}
+
+.insight-type {
+  color:var(--ui-secondary);
+  font-size:var(--ui-text-small);
+}
+
+.insight-title {
+  margin-top:16rpx;
+  color:var(--ui-ink);
+  font-size:var(--ui-text-body);
+  font-weight:600;
+  line-height:1.4;
+}
+
+.insight-copy {
+  margin-top:8rpx;
+  color:var(--ui-secondary);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.insight-link {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:24rpx;
+  padding-top:24rpx;
+  border-top:1px solid var(--ui-line);
+  color:var(--ui-primary);
+  font-size:14px;
+  font-weight:600;
+}
+
+/* 建档下发草案 */
+.result-card {
+  width:590rpx;
+  box-sizing:border-box;
+  padding:32rpx;
+  border-radius:var(--ui-radius-panel);
+  background:var(--ui-surface);
+}
+.management-result .result-action{color:var(--ui-primary)}
+
+.result-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16rpx;
+  padding-bottom:24rpx;
+  border-bottom:1px solid var(--ui-line);
+}
+
+.result-title {
+  color:var(--ui-ink);
+  font-size:var(--ui-text-body);
+  font-weight:600;
+}
+
+.result-sub {
+  margin-top:8rpx;
+  color:var(--ui-secondary);
+  font-size:var(--ui-text-small);
+}
+
+.confidence {
+  flex:0 0 auto;
+}
+
+.result-line {
+  display:flex;
+  justify-content:space-between;
+  gap:24rpx;
+  margin-top:16rpx;
+  color:var(--ui-ink);
+  font-size:14px;
+}
+
+.result-line text:first-child {
+  flex:0 0 auto;
+  color:var(--ui-secondary);
+}
+
+.result-action {
+  display:flex;
+  justify-content:space-between;
+  margin-top:24rpx;
+  padding-top:24rpx;
+  border-top:1px solid var(--ui-line);
+  color:var(--ui-primary);
+  font-size:14px;
+  font-weight:600;
+}
+
+/* 业务卡：统一白卡，状态只由右上角小标签表达 */
+.business-card{width:590rpx;box-sizing:border-box;padding:32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.business-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}
+.business-eyebrow{margin-bottom:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:20px}
+.business-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.change-status{flex:0 0 auto}
+.database-badge{flex:0 0 auto;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:20px;white-space:nowrap}
+.business-subtitle{margin-top:8rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5}
+
+.business-metrics{display:grid;gap:0;margin-top:24rpx}
+.business-metrics.metrics-2{grid-template-columns:repeat(2,1fr)}
+.business-metrics.metrics-3{grid-template-columns:repeat(3,1fr)}
+.business-metrics>view{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:8rpx;min-width:0;padding:0 16rpx}
+.business-metrics>view:first-child{padding-left:0}
+/* 末列不留右内边距，和卡片内容右缘对齐；320 宽屏三列时「暂未评分」这类 4 字值不被截断 */
+.business-metrics>view:last-child{padding-right:0}
+.business-metrics>view+view::before{content:"";position:absolute;left:0;top:4rpx;bottom:4rpx;width:1px;background:var(--ui-line)}
+.business-metrics>view>view:first-child{display:flex;flex-direction:column;min-width:0}
+.business-metrics text{color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.business-metrics.metrics-3 text{font-size:var(--ui-text-body);line-height:1.5}
+.business-metrics label{margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.business-metrics .metric-drill{min-height:var(--ui-touch-target)}
+.business-metrics .metric-enter{display:flex;align-items:center;flex:0 0 auto;color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:600}
+
+.business-rows{margin-top:24rpx;border-top:1px solid var(--ui-line)}
+.business-row{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:48px;box-sizing:border-box;padding:20rpx 0;border-bottom:1px solid var(--ui-line)}
+.business-row:last-child{border-bottom:0;padding-bottom:0}
+.business-row>view:first-child{flex:1;min-width:0}
+.business-row text{display:block;overflow:hidden;color:var(--ui-ink);font-size:14px;font-weight:600;white-space:nowrap;text-overflow:ellipsis}
+.business-row label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;white-space:normal;overflow-wrap:anywhere}
+.row-tag{flex:0 0 auto;padding:0 12rpx;border-radius:4px;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);line-height:20px}
+.row-arrow{flex:0 0 auto;color:var(--ui-muted)}
+.business-empty{margin-top:24rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5}
+.change-footer{margin-top:16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.business-action{display:flex;align-items:center;justify-content:space-between;min-height:var(--ui-touch-target);box-sizing:border-box;margin-top:24rpx;padding-top:24rpx;border-top:1px solid var(--ui-line);color:var(--ui-primary);font-size:14px;font-weight:600}
+.business-action view{font-size:14px}
+
+/* 分组：不再套小卡，组与组之间靠 32rpx 留白和一条细线 */
+.business-sections{display:flex;flex-direction:column;margin-top:8rpx}
+.business-section{padding-top:24rpx;margin-top:24rpx;border-top:1px solid var(--ui-line)}
+.business-section:first-child{margin-top:16rpx}
+.business-section-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.business-section-head>view:first-child{min-width:0}
+.business-section-head>view:first-child>text{display:block;color:var(--ui-ink);font-size:14px;font-weight:600}
+.business-section-head>view:first-child>label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.business-section-head>view:last-child{display:flex;flex:0 0 auto;gap:8rpx}
+.business-section-head>view:last-child>text,.business-section-head>view:last-child>label{padding:0 12rpx;border-radius:4px;font-size:var(--ui-text-small);line-height:20px}
+.business-section-head>view:last-child>text{color:var(--ui-neutral);background:var(--ui-neutral-soft)}
+.business-section-head>view:last-child>label{color:var(--ui-danger);background:var(--ui-danger-soft)}
+.report-section-count{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.section-rows{margin-top:8rpx;border-top:0}
+.business-section-empty{margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+
+/* 卡片色调只落在小标签上，不涂整张卡 */
+.tone-orange .row-tag,.tone-yellow .row-tag{color:var(--ui-warning);background:var(--ui-warning-soft)}
+.tone-red .row-tag{color:var(--ui-danger);background:var(--ui-danger-soft)}
+.tone-orange .business-row label{display:-webkit-box;white-space:normal;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+
+/* 拜访文字稿 */
+.visit-transcript-wrap{display:flex;flex-direction:column;align-items:flex-end;margin:16rpx 0 8rpx;padding-left:72rpx}
+.visit-transcript-meta{display:flex;align-items:center;gap:8rpx;margin:0 4rpx 8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.visit-transcript-meta>text{color:var(--ui-ink);font-weight:600}
+.visit-transcript-bubble{width:100%;box-sizing:border-box;padding:24rpx;border:1px solid transparent;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.visit-transcript-bubble.live{border-color:var(--ui-primary)}
+.visit-transcript-bubble textarea{width:100%;min-height:120rpx;color:var(--ui-ink);font-size:14px;line-height:1.65;background:transparent}
+.live-cursor{display:flex;align-items:center;justify-content:flex-end;gap:8rpx;margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.live-cursor text{width:12rpx;height:12rpx;border-radius:50%;background:var(--ui-danger);animation:livePulse 1.2s ease-in-out infinite}
+@keyframes livePulse{50%{opacity:.35}}
+.transcript-actions{display:grid;grid-template-columns:1fr 1.55fr;gap:16rpx;margin-top:16rpx}
+.transcript-actions button{height:var(--ui-touch-target);display:flex;align-items:center;justify-content:center;margin:0;border-radius:var(--ui-radius-control);font-size:14px;font-weight:600}
+.transcript-actions button::after{border:0}
+.transcript-actions button:first-child{border:1px solid var(--ui-line);color:var(--ui-ink);background:var(--ui-surface)}
+.transcript-actions button:last-child{color:var(--ui-on-primary);background:var(--ui-primary)}
+.transcript-actions button text{margin-left:8rpx}
+
+/* 正在读取 */
+.thinking-row .agent-avatar{margin-top:40rpx}
+.thinking-bubble{display:flex;align-items:center;gap:8rpx;padding:20rpx 24rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.thinking-bubble>view{width:8rpx;height:8rpx;border-radius:50%;background:var(--ui-primary);animation:thinking 1s ease-in-out infinite}
+.thinking-bubble>view:nth-child(2){animation-delay:.15s}
+.thinking-bubble>view:nth-child(3){animation-delay:.3s}
+.thinking-bubble text{margin-left:8rpx;color:var(--ui-secondary);font-size:14px}
+@keyframes thinking{50%{opacity:.3;transform:translateY(-4rpx)}}
+
+/* 摘要和消息流之间留一段分区距离 */
+.chat-scroll{flex:1;height:0;margin-top:16rpx}.chat-stream{margin-top:0;padding:8rpx 0 270rpx;padding-bottom:calc(270rpx + constant(safe-area-inset-bottom));padding-bottom:calc(270rpx + env(safe-area-inset-bottom))}
+
+/* 底部：三个快捷入口，中间圆形拜访按钮压在两侧按钮的缺口上 */
+.composer-wrap {
+  position:fixed;
+  z-index:20;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:8rpx 32rpx 8rpx;
+  padding-bottom:calc(8rpx + constant(safe-area-inset-bottom));
+  padding-bottom:calc(8rpx + env(safe-area-inset-bottom));
+  background:var(--ui-background);
+}
+
+.quick-action-bar {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:0;
+  width:100%;
+  margin-bottom:4rpx;
+  padding-top:8rpx;
+}
+.quick-action-button{position:relative;height:88rpx;min-width:0;display:flex;align-items:center;justify-content:center;gap:8rpx;box-sizing:border-box;flex:1;padding:0 32rpx;border:1px solid var(--ui-line);color:var(--ui-ink);background:var(--ui-surface);transition:transform .15s ease,opacity .15s ease}
+.three-quick-actions .quick-action-button:first-child{margin-right:-56rpx;padding-right:76rpx;border-color:transparent;border-radius:var(--ui-radius-control) 0 0 var(--ui-radius-control);background:radial-gradient(circle 62rpx at 100% 50%,transparent 60rpx,var(--ui-line) 61rpx,var(--ui-surface) 62rpx)}.three-quick-actions .quick-action-button:last-child{margin-left:-56rpx;padding-left:76rpx;border-color:transparent;border-radius:0 var(--ui-radius-control) var(--ui-radius-control) 0;background:radial-gradient(circle 62rpx at 0 50%,transparent 60rpx,var(--ui-line) 61rpx,var(--ui-surface) 62rpx)}
+.quick-action-button.action-visit{width:112rpx;height:112rpx;flex:0 0 112rpx;gap:0;padding:0;border-radius:50%;color:var(--ui-on-primary);border-color:var(--ui-primary);background:var(--ui-primary)}
+.quick-action-button:first-child,.quick-action-button:last-child{z-index:1}.quick-action-button.action-visit{z-index:10;overflow:hidden;transform:translateZ(0)}
+.quick-action-label{min-width:0;overflow:hidden;font-size:14px;font-weight:600;line-height:1.2;white-space:nowrap;text-overflow:ellipsis}.action-visit .quick-action-label{display:none}
+.quick-action-icon{display:flex;align-items:center;justify-content:center;flex:0 0 auto}.action-visit .quick-action-icon{width:72rpx;height:72rpx;border-radius:50%}.visit-entry-microphone{display:block;width:42rpx;height:42rpx}
+.quick-action-button.recording{border-color:var(--ui-danger);background:var(--ui-danger)}.quick-action-pressed{opacity:.84;transform:scale(.975)}
+/* 入口按钮视觉高 88rpx（320 宽屏约 37.5px）：伪元素上下扩到 44px，视觉不变 */
+.quick-action-button::after{content:"";position:absolute;left:0;right:0;top:calc(50% - var(--ui-touch-target) / 2);bottom:calc(50% - var(--ui-touch-target) / 2)}
+
+/* 两个入口（FDE 等）：左侧次按钮，拜访主按钮 */
+.compact-quick-actions{display:flex;justify-content:center;gap:16rpx;padding:12rpx 0;box-sizing:border-box}
+.compact-quick-actions .quick-action-button:first-child,.compact-quick-actions .quick-action-button:last-child{flex:1;min-width:0;height:88rpx;margin:0;padding:0 16rpx;gap:8rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink)}
+/* 两入口的拜访键是圆角矩形，放开裁剪让点击区伪元素扩到 44px */
+.compact-quick-actions .quick-action-button.action-visit{flex:1;width:auto;border-color:var(--ui-primary);border-radius:var(--ui-radius-control);background:var(--ui-primary);color:var(--ui-on-primary);overflow:visible}
+.compact-quick-actions .quick-action-button.recording{border-color:var(--ui-danger);background:var(--ui-danger)}
+.compact-quick-actions .quick-action-label{display:block;font-size:14px;line-height:1.3}
+.compact-quick-actions .action-visit .quick-action-icon{width:40rpx;height:40rpx}
+.compact-quick-actions .visit-entry-microphone{width:34rpx;height:34rpx}
+.compact-composer .chat-stream{padding-bottom:145rpx;padding-bottom:calc(145rpx + constant(safe-area-inset-bottom));padding-bottom:calc(145rpx + env(safe-area-inset-bottom))}
+
+/* 问数输入条 */
+.voice-composer {
+  display:flex;
+  align-items:center;
+  height:96rpx;
+  min-height:96rpx;
+  box-sizing:border-box;
+  margin-top:8rpx;
+  padding:12rpx 16rpx;
+  border:1px solid transparent;
+  border-radius:var(--ui-radius-panel);
+  background:var(--ui-surface);
+  transition:border-color .2s ease, background .2s ease;
+}
+
+.voice-state-icon {
+  width:64rpx;
+  height:64rpx;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:var(--ui-radius-control);
+  background:var(--ui-selected);
+}
+
+.chatbi-mark{color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:600}
+.voice-toggle.chatbi-voice{min-width:102rpx;padding:0 16rpx}
+
+.voice-composer-copy {
+  flex:1;
+  min-width:0;
+  margin-left:16rpx;
+  color:var(--ui-ink);
+  font-size:14px;
+  font-weight:600;
+}
+
+.voice-composer-copy > view {
+  height:40rpx;
+  overflow:hidden;
+  line-height:40rpx;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.recording-active .voice-composer-copy {
+  cursor:pointer;
+}
+
+/* 录音、处理中这段文字可点（停止录音），两行字只有约 32～36px 高，用伪元素把点击区上下扩到 44px */
+.voice-composer-hit{position:relative}
+.voice-composer-hit::after{content:"";position:absolute;left:0;right:0;top:calc(50% - var(--ui-touch-target) / 2);bottom:calc(50% - var(--ui-touch-target) / 2)}
+
+.voice-composer-copy text {
+  display:block;
+  height:32rpx;
+  overflow:hidden;
+  color:var(--ui-secondary);
+  font-size:var(--ui-text-small);
+  font-weight:400;
+  line-height:32rpx;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.composer-input-wrap {
+  flex:1;
+  min-width:0;
+  height:72rpx;
+  margin-left:16rpx;
+}
+
+.composer-input {
+  width:100%;
+  height:40rpx;
+  color:var(--ui-ink);
+  font-size:14px;
+  line-height:40rpx;
+}
+
+.composer-input::placeholder {
+  color:var(--ui-muted);
+}
+
+.composer-input-wrap > text {
+  display:block;
+  height:32rpx;
+  overflow:hidden;
+  color:var(--ui-muted);
+  font-size:var(--ui-text-small);
+  line-height:32rpx;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.send-button {
+  width:64rpx;
+  height:64rpx;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:16rpx;
+  border-radius:var(--ui-radius-control);
+  color:var(--ui-on-primary);
+  background:var(--ui-primary);
+  font-size:var(--ui-text-body);
+  font-weight:600;
+}
+
+/* 发送（64rpx 见方）、语音（至少 72×56rpx）按钮视觉较小：伪元素以按钮为中心把点击区扩到 44×44px（px 不随屏宽缩放，320 宽屏也够）；两者互斥显示，不会叠在一起 */
+.send-button,
+.voice-toggle { position:relative; }
+.send-button::after,
+.voice-toggle::after { content:""; position:absolute; left:calc(50% - var(--ui-touch-target) / 2); right:calc(50% - var(--ui-touch-target) / 2); top:calc(50% - var(--ui-touch-target) / 2); bottom:calc(50% - var(--ui-touch-target) / 2); }
+
+.voice-toggle {
+  min-width:72rpx;
+  height:56rpx;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:16rpx;
+  padding:0 16rpx;
+  border:1px solid var(--ui-line);
+  border-radius:var(--ui-radius-control);
+  color:var(--ui-primary);
+  background:var(--ui-surface);
+  font-size:var(--ui-text-small);
+  font-weight:600;
+}
+
+.voice-composer.recording-active {
+  border-color:var(--ui-danger);
+}
+
+.recording-active .voice-state-icon,
+.stopping .voice-state-icon {
+  background:var(--ui-danger);
+}
+
+.recording-active .voice-toggle,
+.stopping .voice-toggle {
+  border-color:var(--ui-danger);
+  color:var(--ui-danger);
+  background:var(--ui-surface);
+  font-variant-numeric:tabular-nums;
+}
+
+.voice-composer.starting,
+.voice-composer.processing {
+  opacity:.82;
+}
+
+.starting .voice-state-icon,
+.processing .voice-state-icon {
+  background:var(--ui-primary);
+}
+
+.starting .voice-toggle,
+.processing .voice-toggle {
+  color:var(--ui-secondary);
+}
+
+.voice-privacy {
+  margin-top:8rpx;
+  color:var(--ui-muted);
+  font-size:var(--ui-text-small);
+  text-align:center;
+}
+
+.wave {
+  height:28rpx;
+  display:flex;
+  align-items:center;
+  gap:4rpx;
+}
+
+.wave text {
+  width:3rpx;
+  height:12rpx;
+  border-radius:999px;
+  background:var(--ui-primary);
+}
+
+.recording-active .wave text,
+.stopping .wave text,
+.starting .wave text,
+.processing .wave text {
+  background:var(--ui-on-primary);
+}
+
+.wave text:nth-child(2),.wave text:nth-child(4) { height:20rpx; }
+.wave text:nth-child(3) { height:28rpx; }
+.recording-active .wave text { animation:wave .65s ease-in-out infinite alternate; }
+.recording-active .wave text:nth-child(2) { animation-delay:.12s; }
+.recording-active .wave text:nth-child(3) { animation-delay:.24s; }
+.recording-active .wave text:nth-child(4) { animation-delay:.36s; }
+.recording-active .wave text:nth-child(5) { animation-delay:.48s; }
+
+@keyframes wave {
+  to { height:8rpx; opacity:.55; }
+}
+
+/* Palette only: original geometry is preserved. */
+.brief-card { background:var(--sb-hero-bg); }
+.agent-avatar { background:var(--sb-link-blue); }
+.insight-link,.business-action,.business-metrics .metric-enter { color:var(--sb-link-blue); }
+.greeting-card,.insight-bubble { background:var(--sb-group-bg); }

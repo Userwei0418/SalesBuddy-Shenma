@@ -9,7 +9,7 @@ async function harness() {
   const core = await import(pathToFileURL(path.join(assets, 'core.js')).href);
   const detail = await import(pathToFileURL(path.join(assets, 'customer-detail.js')).href);
   core.clearSession();
-  Object.assign(core.state, {actor:{workspace_id:'w',user_id:'ops',role:'administrator'},token:'fixture-only',page:'customers'});
+  Object.assign(core.state, {actor:{workspace_id:'w',user_id:'ops',role:'administrator'},token:'fixture-only',page:'customers',permissions:{'customer.read':true,'opportunity.read':true}});
   const requests = [], regions = {};
   global.fetch = (url, options) => new Promise(resolve => requests.push({url, options, resolve, answered:false}));
   const d = {open:false, contents:'', regions, footer:{},
@@ -33,7 +33,7 @@ async function harness() {
     assert.ok(request); request.answered=true;
     request.resolve({ok:status<400,status,json:async()=>data}); await tick();
   };
-  const open = id => detail.showCustomerDetail(id, value => { d.navigated = value; });
+  const open = (id, onEdit) => detail.showCustomerDetail(id, value => { d.navigated = value; }, onEdit);
   return {core,requests,d,regions,pending,answer,open};
 }
 const overview = name => ({name,customer_type_code:'潜在客户',ownership:{state:'unclaimed'}});
@@ -92,4 +92,14 @@ test('a different management dialog opened while overview is pending is not repl
   await h.answer(h.pending('/slow/overview'),overview('迟到客户')); await open;
   assert.equal(h.d.innerHTML,'账号编辑窗口');
   assert.equal(h.requests.length,1);
+});
+
+test('customer-only readers get a usable detail without an unauthorized opportunity navigation or edit button', async () => {
+  const h=await harness();
+  h.core.state.permissions={'customer.read':true,'customer.update':true};
+  const open=h.open('limited',()=>{throw Error('must not open an unauthorized edit');});
+  await h.answer(h.pending('/overview'),{...overview('只读对象'),can_update:false});await open;
+  assert.equal(h.d.open,true);assert.match(h.d.innerHTML,/只读对象/);
+  assert.doesNotMatch(h.d.innerHTML,/data-detail-opportunities|data-detail-edit/);
+  assert.equal(h.requests.length,3);
 });

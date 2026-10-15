@@ -1,0 +1,52 @@
+{
+  "backend_non_database": {
+    "passed": 1630
+  },
+  "postgres_integration": {
+    "passed": 467,
+    "skipped": 1,
+    "skip_reason": "existing optional 10000 row capacity observation"
+  },
+  "model_api_postgres": {
+    "groups_passed": 7,
+    "ordinary_non_bypass_role": true
+  },
+  "frontend_regression": {
+    "passed": 616
+  },
+  "database_static": {
+    "passed": 5
+  },
+  "openapi_and_ruff_F": "passed",
+  "isolated_admin_browser": [
+    "administrator login",
+    "purpose cards",
+    "check before publish",
+    "publish inherited configuration",
+    "history loads without old key",
+    "editing invalidates test",
+    "invalid HTTP loopback address rejected",
+    "console no errors",
+    "viewport visually inspected"
+  ],
+  "live_provider": {
+    "asr": "fixed sample passed",
+    "text": "HTTP 500; legacy transport and configured transport both failed",
+    "tts": "reserved, not tested"
+  },
+  "production_release": {
+    "commit": "02a7223efeb8fb78ad396d27b0cd9250071c3698",
+    "release": "model-api-20260916-02a7223b",
+    "schema": "V099",
+    "api_worker_ready": true,
+    "verified_backup_bytes": 11963238,
+    "bindings_unchanged": true,
+    "admin_asset_matches": true,
+    "admin_asset_sha256": "579910fe6e2863a3820d06787453697474dfca7db4e01111171ec62e0d8a936d"
+  },
+  "miniprogram_changed": false,
+  "github_ci": {
+    "run_id": 35051587452,
+    "conclusion": "success"
+  }
+}

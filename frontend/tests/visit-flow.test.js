@@ -35,7 +35,7 @@ test('更换客户清空商机、保留正文审核，并忽略迟到的商机�
   let definition;let resolve;
   const api={listOpportunities:()=>new Promise(r=>{resolve=r;})};
   vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/pages/visit-confirm/index.js','utf8'),{
-    require:n=>n.includes('statusLight')?require('../miniprogram/utils/statusLight'):n.includes('visitSnapshot')?require('../miniprogram/utils/visitSnapshot'):n.includes('visitFlow')?flow:n.includes('visitDates')?require('../miniprogram/utils/visitDates'):n.includes('visitFirstVisit')?require('../miniprogram/utils/visitFirstVisit'):n.includes('visitOpportunityAI')?require('../miniprogram/utils/visitOpportunityAI'):api,Page:d=>{definition=d;},clearTimeout,wx:{},
+    require:n=>n.includes('pageWriteContext')?require('../miniprogram/utils/pageWriteContext'):n.includes('statusLight')?require('../miniprogram/utils/statusLight'):n.includes('visitSnapshot')?require('../miniprogram/utils/visitSnapshot'):n.includes('visitFlow')?flow:n.includes('visitDates')?require('../miniprogram/utils/visitDates'):n.includes('visitFirstVisit')?require('../miniprogram/utils/visitFirstVisit'):n.includes('visitOpportunityAI')?require('../miniprogram/utils/visitOpportunityAI'):api,Page:d=>{definition=d;},clearTimeout,wx:{},
   });
   const page={...definition,data:{...definition.data,values,customerId:'a',opportunityId:'oa',reviewRunId:'old'},setData(o){Object.assign(this.data,o);},persist(){},searchCustomers(){}};
   page.loadOpportunities();page.changeCustomer();resolve({items:[{id:'oa',name:'旧商机'}],has_more:false,next_offset:null});await Promise.resolve();
@@ -46,7 +46,7 @@ test('确认客户后才加载已有商机，已有项用于更新，新建项�
   let definition; const calls=[];
   const api={listOpportunities:async(args)=>{calls.push(args);return {items:[{id:'o1',name:'已有商机'}],has_more:false,next_offset:null}}};
   vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/pages/visit-confirm/index.js','utf8'),{
-    require:n=>n.includes('statusLight')?require('../miniprogram/utils/statusLight'):n.includes('visitSnapshot')?require('../miniprogram/utils/visitSnapshot'):n.includes('visitFlow')?flow:n.includes('visitDates')?require('../miniprogram/utils/visitDates'):n.includes('visitFirstVisit')?require('../miniprogram/utils/visitFirstVisit'):n.includes('visitOpportunityAI')?require('../miniprogram/utils/visitOpportunityAI'):api,Page:d=>{definition=d;},clearTimeout,wx:{},
+    require:n=>n.includes('pageWriteContext')?require('../miniprogram/utils/pageWriteContext'):n.includes('statusLight')?require('../miniprogram/utils/statusLight'):n.includes('visitSnapshot')?require('../miniprogram/utils/visitSnapshot'):n.includes('visitFlow')?flow:n.includes('visitDates')?require('../miniprogram/utils/visitDates'):n.includes('visitFirstVisit')?require('../miniprogram/utils/visitFirstVisit'):n.includes('visitOpportunityAI')?require('../miniprogram/utils/visitOpportunityAI'):api,Page:d=>{definition=d;},clearTimeout,wx:{},
   });
   const page={...definition,data:{...definition.data,values,customers:[{id:'c1',name:'客户一',customer_type_code:'prospect'}]},setData(o){Object.assign(this.data,o);},persist(){},refresh(){}};
   page.chooseCustomer({currentTarget:{dataset:{id:'c1'}}}); await new Promise(resolve=>setImmediate(resolve));
@@ -58,8 +58,8 @@ test('确认客户后才加载已有商机，已有项用于更新，新建项�
 test('确认页不提供新建客户入口，商机字段受客户确认状态控制',()=>{
   const wxml=fs.readFileSync(__dirname+'/../miniprogram/pages/visit-confirm/index.wxml','utf8');
   assert.doesNotMatch(wxml,/创建新客户|bindtap="createCustomer"/);
-  assert.match(wxml,/wx:if="\{\{customerConfirmed && \(!isFde \|\| editing\)\}\}" class="optional-field"><view class="field-label">商机名称/);
-  assert.match(wxml,/<fde-visit-opportunity wx:if="\{\{isFde && customerConfirmed && !editing\}\}"/);
+  assert.match(wxml,/wx:if="\{\{customerConfirmed\}\}" class="optional-field"><view class="field-label">商机名称/);
+  assert.doesNotMatch(wxml,/<fde-visit-opportunity/);
   assert.match(wxml,/客户类型<\/view><picker mode="selector" range="\{\{customerTypeOptions\}\}"/);
   assert.doesNotMatch(wxml,/bindtap="changeCustomer"/);
 });

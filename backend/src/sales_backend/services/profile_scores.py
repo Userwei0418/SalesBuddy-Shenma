@@ -22,27 +22,12 @@ async def performance_scores(connection, result):
 
 
 async def competency_score(connection, result):
-    rule = await CompanyRulesRepository().active(connection, "score.competency")
-    if result.get("latest"):
-        latest = result["latest"]
-        values = {
-            key: value.get("score")
-            for key, value in (latest.get("dimension_scores") or {}).items()
-            if isinstance(value, dict)
-        }
-        # Historical overall_score stays intact. Current presentation carries its own rule snapshot.
-        latest["score_summary"] = weighted_score(values, rule)
-        latest["score_summary"]["provenance"] = await projection_provenance(
-            connection,
-            values,
-            {
-                **result.get("provenance", {}),
-                "review_id": latest.get("id"),
-                "reviewed_at": latest.get("reviewed_at"),
-                "framework_version": (result.get("framework") or {}).get("version_no"),
-            },
-        )
-    result["score_policy"] = rule
+    # Kept as the API's compatibility hook. No current rule lookup or historical
+    # recomputation: reads expose only the score and rule frozen with the result.
+    from copy import deepcopy
+
+    latest = result.get("latest")
+    result["score_policy"] = deepcopy((latest.get("score_basis") or {}).get("score_policy")) if latest else None
     return result
 
 

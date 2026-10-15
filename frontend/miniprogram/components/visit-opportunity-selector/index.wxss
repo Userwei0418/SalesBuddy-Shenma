@@ -1,0 +1,25 @@
+/* 放在页面白卡里：只用一条细线分组，不再套小卡。 */
+.visit-choice{margin-top:32rpx;padding-top:32rpx;border-top:1px solid var(--ui-line)}
+.visit-choice-head{display:flex;justify-content:space-between;gap:16rpx;align-items:center}
+.visit-choice-heading{flex:1;min-width:0;display:flex;align-items:center;gap:12rpx}
+.visit-choice-title{font-size:var(--ui-text-body);font-weight:600;color:var(--ui-ink)}
+.visit-choice-optional{font-size:var(--ui-text-small);line-height:1.4;font-weight:400;color:var(--ui-secondary)}
+.visit-choice-hint{display:block;margin-top:8rpx;font-size:14px;line-height:1.5;color:var(--ui-secondary)}
+/* 文字按钮：点按区 44px，负外边距抵掉占位 */
+.visit-choice-change{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto;min-width:88rpx;min-height:0;height:var(--ui-touch-target);margin:-20rpx -16rpx;padding:0 16rpx;line-height:1;background:transparent;color:var(--ui-primary);font-size:14px;font-weight:400}
+.visit-choice-change::after,.visit-choice-retry::after,.visit-choice-more::after{border:0}
+.visit-choice-change[disabled]{opacity:.5}
+.visit-choice-pressed{opacity:.7}
+.visit-choice-search{margin-top:16rpx}
+/* 商机列表：t-cell 整行可点（右侧箭头），行左右与卡片内容对齐，分隔线从文字起点开始 */
+.visit-choice-list{display:block;width:100%;max-height:400rpx;margin-top:8rpx;--td-cell-horizontal-padding:0;--td-cell-vertical-padding:24rpx;--td-cell-border-color:var(--ui-line);--td-cell-title-color:var(--ui-ink);--td-cell-right-icon-color:var(--ui-muted)}
+.visit-choice-list.is-disabled{opacity:.5}
+.visit-choice-name{display:block;flex:1;min-width:0;word-break:break-all;font-size:14px;line-height:1.5;color:var(--ui-ink);font-weight:600}
+.visit-choice-selected{display:flex;align-items:center;gap:16rpx;box-sizing:border-box;min-height:72rpx;padding:8rpx 0;margin-top:16rpx}
+.visit-choice-selected .visit-choice-name{font-size:var(--ui-text-body)}
+.visit-choice-status{flex-shrink:0;height:20px;padding:0 12rpx;border-radius:4px;background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-small);line-height:20px}
+.visit-choice-state,.visit-choice-error{font-size:var(--ui-text-small);line-height:1.6;color:var(--ui-secondary);padding-top:16rpx}
+.visit-choice-error{color:var(--ui-danger)}
+.visit-choice-retry,.visit-choice-more{width:auto;min-height:var(--ui-touch-target);margin:0;padding:0 16rpx;line-height:var(--ui-touch-target);background:transparent;color:var(--ui-primary);font-size:14px;font-weight:400}
+.visit-choice-retry{display:inline-block}
+.visit-choice-more{display:block;margin:0 auto}

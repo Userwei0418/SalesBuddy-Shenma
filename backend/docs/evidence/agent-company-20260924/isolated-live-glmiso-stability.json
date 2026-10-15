@@ -1,0 +1,583 @@
+{
+  "scope": "isolated PostgreSQL/RLS + actual API routes, handler, live provider, audit and archive; synthetic only; no production records; queue scheduling/login excluded",
+  "results": [
+    {
+      "trace": {
+        "provider": "agent_platform",
+        "model_ref": "agent-platform:01a09eff-d317-7725-8941-7b8e37f4a641",
+        "elapsed_ms": 9534,
+        "operation_id": "28f408dc-a8c3-4954-b388-64e577e7a127",
+        "platform_run": {
+          "ids": {
+            "task_id": "30b0404a-9fd0-4707-8e4e-c4cc0f87dc11",
+            "message_id": "122d37e1-7bc2-4725-8d1d-a834eea5d3c2",
+            "conversation_id": "f2514f88-e2cb-4f3a-b9f3-1d5e59610452"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 5812,
+            "first_body_byte_ms": 616,
+            "request_started_ms": 0,
+            "first_data_event_ms": 617,
+            "headers_received_ms": 616,
+            "stream_completed_ms": 7247
+          },
+          "error_code": null,
+          "stop_state": "not_requested",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": null
+      },
+      "case": "Q01-stability-1",
+      "run_id": "f50f9bf4-477f-4aa9-a58e-4daf8237df5c",
+      "source_run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+      "status": "waiting_human",
+      "api_to_terminal_ms": 9600,
+      "quality_review": {
+        "grade": "良好",
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "suggestions": [],
+          "goal_or_plan_found": true
+        },
+        "suggestions": [],
+        "follow_up_score": 85,
+        "admission_policy": {
+          "inclusive": false,
+          "good_score": 80,
+          "schema_version": 1,
+          "excellent_score": 90,
+          "score_threshold": 60,
+          "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+          "suggestion_count": 4,
+          "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+          "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。"
+        }
+      },
+      "fields_unchanged": true,
+      "expected": {
+        "T": true,
+        "G": true,
+        "P": true,
+        "score": 85
+      },
+      "semantic_passed": true,
+      "changed_snapshot_rejected": true,
+      "archive_status": 201,
+      "visit_id": "583d3fc4-fa31-43f0-9cb4-935b52139bfd",
+      "readback_and_replay": true,
+      "passed": true
+    },
+    {
+      "trace": {
+        "provider": "agent_platform",
+        "model_ref": "agent-platform:01a09eff-d317-7725-8941-7b8e37f4a641",
+        "elapsed_ms": 7089,
+        "operation_id": "274dc072-62f5-4082-b06c-1a4bce7fc342",
+        "platform_run": {
+          "ids": {
+            "task_id": "1164f7c6-03c5-4c42-8017-4aacd8890c2b",
+            "message_id": "25b3a12c-c17a-4b7a-8f6e-d148de8c5245",
+            "conversation_id": "58992a50-9137-41ce-8c9f-ae1717006b8f"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 2516,
+            "first_body_byte_ms": 804,
+            "request_started_ms": 0,
+            "first_data_event_ms": 804,
+            "headers_received_ms": 804,
+            "stream_completed_ms": 4272
+          },
+          "error_code": null,
+          "stop_state": "not_requested",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": null
+      },
+      "case": "Q06-stability-1",
+      "run_id": "ead0b707-9fe1-415b-9601-fab5ddc5db86",
+      "source_run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+      "status": "waiting_human",
+      "api_to_terminal_ms": 7160,
+      "quality_review": {
+        "grade": "待完善",
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "suggestions": [
+            "时间已过期：2026-01-02早于当前日期2026-09-24，需改为尚未过期的有效有界时间。"
+          ],
+          "goal_or_plan_found": true
+        },
+        "suggestions": [
+          "下一步时间已过期：2026-01-02早于当前日期，请更新为有效的有界时间（如具体日期或时间范围）。"
+        ],
+        "follow_up_score": 55,
+        "admission_policy": {
+          "inclusive": false,
+          "good_score": 80,
+          "schema_version": 1,
+          "excellent_score": 90,
+          "score_threshold": 60,
+          "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+          "suggestion_count": 4,
+          "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+          "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。"
+        }
+      },
+      "fields_unchanged": true,
+      "expected": {
+        "T": false,
+        "G": true,
+        "P": false,
+        "score": 55
+      },
+      "semantic_passed": true,
+      "archive_status": 422,
+      "passed": true
+    },
+    {
+      "trace": {
+        "provider": "agent_platform",
+        "model_ref": "agent-platform:01a09eff-d317-7725-8941-7b8e37f4a641",
+        "elapsed_ms": 7033,
+        "operation_id": "f121f76d-27ad-4eba-96d1-5f145c1a15ca",
+        "platform_run": {
+          "ids": {
+            "task_id": "cf2d9502-6067-4d98-9c51-809f67ad15b3",
+            "message_id": "e5cf7481-e389-49ce-89dd-4785033f1d67",
+            "conversation_id": "bdabc0b4-03d7-47ab-a930-e533b9af058b"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 2134,
+            "first_body_byte_ms": 603,
+            "request_started_ms": 0,
+            "first_data_event_ms": 603,
+            "headers_received_ms": 603,
+            "stream_completed_ms": 4763
+          },
+          "error_code": null,
+          "stop_state": "not_requested",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": null
+      },
+      "case": "Q05-stability-1",
+      "run_id": "af9351b1-2cbc-4fb7-b1f7-2e36ac3f5a95",
+      "source_run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+      "status": "waiting_human",
+      "api_to_terminal_ms": 7171,
+      "quality_review": {
+        "grade": "待完善",
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "suggestions": [
+            "“近期”不属于有效有界时间，请补充明确日期或可执行时间范围。",
+            "“推进”缺少具体行动或目标，请明确要完成的事项。"
+          ],
+          "goal_or_plan_found": false
+        },
+        "suggestions": [
+          "下一步“近期推进”缺少有效有界时间，请改为明确的日期或时间范围（如具体日期、本周内、未来7天等）并对应具体行动。",
+          "下一步“推进”为泛化动作，请写明具体行动，如提交补充方案、完成剩余2条样本的版本补齐等。"
+        ],
+        "follow_up_score": 55,
+        "admission_policy": {
+          "inclusive": false,
+          "good_score": 80,
+          "schema_version": 1,
+          "excellent_score": 90,
+          "score_threshold": 60,
+          "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+          "suggestion_count": 4,
+          "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+          "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。"
+        }
+      },
+      "fields_unchanged": true,
+      "expected": {
+        "T": false,
+        "G": false,
+        "P": false,
+        "score": 55
+      },
+      "semantic_passed": true,
+      "archive_status": 422,
+      "passed": true
+    },
+    {
+      "trace": {
+        "provider": "agent_platform",
+        "model_ref": "agent-platform:01a09eff-d317-7725-8941-7b8e37f4a641",
+        "elapsed_ms": 8223,
+        "operation_id": "d0dd6c8b-6cc4-404c-b2ae-29b522df6005",
+        "platform_run": {
+          "ids": {
+            "task_id": "497f2daf-20f7-4085-9639-9a50e13a7107",
+            "message_id": "625e1e85-577e-42b2-b503-8fddf089604b",
+            "conversation_id": "a4fb14b7-fd71-441d-b60d-c502546c2fc2"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 3145,
+            "first_body_byte_ms": 820,
+            "request_started_ms": 0,
+            "first_data_event_ms": 820,
+            "headers_received_ms": 820,
+            "stream_completed_ms": 6032
+          },
+          "error_code": null,
+          "stop_state": "not_requested",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": null
+      },
+      "case": "Q10-stability-1",
+      "run_id": "d7c54a63-e329-4510-a1ac-0ae4c4887e96",
+      "source_run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+      "status": "waiting_human",
+      "api_to_terminal_ms": 8293,
+      "quality_review": {
+        "grade": "待完善",
+        "next_action": {
+          "passed": false,
+          "time_found": false,
+          "suggestions": [
+            "“近期推进”属于泛化动作，缺少具体行动或目标，请写明具体要完成的事项。",
+            "“近期”不是有效有界时间，请补充明确日期、截止时间或可执行时间范围，并与具体行动对应。"
+          ],
+          "goal_or_plan_found": false
+        },
+        "suggestions": [
+          "下一步仅有“近期推进”这类泛化表述，缺少具体行动，请明确要完成的具体事项（如提交补充方案、确认剩余2条样本结果等）。",
+          "下一步缺少有效有界时间，请补充明确日期、截止时间或可执行时间范围（如“下周内提交补充方案”）。"
+        ],
+        "follow_up_score": 55,
+        "admission_policy": {
+          "inclusive": false,
+          "good_score": 80,
+          "schema_version": 1,
+          "excellent_score": 90,
+          "score_threshold": 60,
+          "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+          "suggestion_count": 4,
+          "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+          "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。"
+        }
+      },
+      "fields_unchanged": true,
+      "expected": {
+        "T": false,
+        "G": false,
+        "P": false,
+        "score": 55
+      },
+      "semantic_passed": true,
+      "archive_status": 422,
+      "passed": true
+    },
+    {
+      "trace": {
+        "provider": "agent_platform",
+        "model_ref": "agent-platform:01a09eff-d317-7725-8941-7b8e37f4a641",
+        "elapsed_ms": 9871,
+        "operation_id": "9d5a2c03-1161-4443-a3b7-296975731841",
+        "platform_run": {
+          "ids": {
+            "task_id": "1ce2cd3f-0d97-4d89-be7a-c1691d6be9a2",
+            "message_id": "70b2b35f-0950-4c16-ac94-4b512d8d109e",
+            "conversation_id": "87e31faa-9b77-4c2d-b051-1e8a9e687fba"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 5571,
+            "first_body_byte_ms": 639,
+            "request_started_ms": 0,
+            "first_data_event_ms": 639,
+            "headers_received_ms": 639,
+            "stream_completed_ms": 7360
+          },
+          "error_code": null,
+          "stop_state": "not_requested",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": null
+      },
+      "case": "Q01-stability-2",
+      "run_id": "11dace87-2e48-4336-8613-817f4fa80189",
+      "source_run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+      "status": "waiting_human",
+      "api_to_terminal_ms": 9957,
+      "quality_review": {
+        "grade": "良好",
+        "next_action": {
+          "passed": true,
+          "time_found": true,
+          "suggestions": [],
+          "goal_or_plan_found": true
+        },
+        "suggestions": [],
+        "follow_up_score": 85,
+        "admission_policy": {
+          "inclusive": false,
+          "good_score": 80,
+          "schema_version": 1,
+          "excellent_score": 90,
+          "score_threshold": 60,
+          "scoring_guidance": "以原文和两段正文的事实完整性、结论具体性、下一步可执行性综合判断，只输出总分0-100，不输出分项。不得因缺少拜访目标、行业、金额、伙伴、职位、协同人等选填项扣分。",
+          "suggestion_count": 4,
+          "calibration_examples": "只有‘聊了聊、继续跟进’等泛泛描述通常低于40；有具体沟通但没有结果或可执行下一步通常不高于60；客户实际反馈和结论、明确时间及行动的记录通常80-95。",
+          "next_action_guidance": "下一步必须含明确日期、截止时间或可执行时间范围，以及目标或行动；缺一则passed=false。"
+        }
+      },
+      "fields_unchanged": true,
+      "expected": {
+        "T": true,
+        "G": true,
+        "P": true,
+        "score": 85
+      },
+      "semantic_passed": true,
+      "changed_snapshot_rejected": true,
+      "archive_status": 201,
+      "visit_id": "e8b386a5-fad4-4185-8ae1-6e309d010287",
+      "readback_and_replay": true,
+      "passed": true
+    }
+  ],
+  "wire": [
+    {
+      "capability": "visit_entry",
+      "input_bytes": 723,
+      "input_sha256": "e676fd719ff88fa3d6f91fa68a2135f01aa1394c62a675e73ab4273dd5b4ea8d",
+      "answer_bytes": 804,
+      "answer_sha256": "4cb665a21d6b4522b1675a318b963a4b978a94eb2778c87ab72fa54f00915889",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 617,
+        "first_body_byte_ms": 617,
+        "first_data_event_ms": 617,
+        "first_text_ms": 1436,
+        "stream_completed_ms": 2610
+      },
+      "remote_ms": 2610,
+      "ids": {
+        "task_id": "2b39ed3a-d771-4c40-b32a-b51236c117ec",
+        "message_id": "03199481-7719-46ba-a2ca-80f8b6daf570",
+        "conversation_id": "d2f047c2-c03f-4b06-8736-f4e6e947bb73"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8"
+    },
+    {
+      "capability": "visit_quality",
+      "input_bytes": 2499,
+      "input_sha256": "f4de6bc466aea35ae0e6b96ae6f2ef858ede6852092b2081387465092179fee4",
+      "answer_bytes": 771,
+      "answer_sha256": "c3fc9615112699c93c60a39802db7b70b00a1d94d6abf261ca3796364c7ba1d8",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 616,
+        "first_body_byte_ms": 616,
+        "first_data_event_ms": 617,
+        "first_text_ms": 5812,
+        "stream_completed_ms": 7247
+      },
+      "remote_ms": 7248,
+      "ids": {
+        "task_id": "30b0404a-9fd0-4707-8e4e-c4cc0f87dc11",
+        "message_id": "122d37e1-7bc2-4725-8d1d-a834eea5d3c2",
+        "conversation_id": "f2514f88-e2cb-4f3a-b9f3-1d5e59610452"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+      "field_values_unchanged": true,
+      "field_order_matches": true
+    },
+    {
+      "capability": "visit_quality",
+      "input_bytes": 2458,
+      "input_sha256": "0719974df85ebaf59e174a6505c1813f2c9307904bbfc49cb8c70e33b0aebb66",
+      "answer_bytes": 970,
+      "answer_sha256": "981622b00cd7c85526d543951950506af19325a62f82a570d530ba2e43809cba",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 804,
+        "first_body_byte_ms": 804,
+        "first_data_event_ms": 804,
+        "first_text_ms": 2516,
+        "stream_completed_ms": 4272
+      },
+      "remote_ms": 4272,
+      "ids": {
+        "task_id": "1164f7c6-03c5-4c42-8017-4aacd8890c2b",
+        "message_id": "25b3a12c-c17a-4b7a-8f6e-d148de8c5245",
+        "conversation_id": "58992a50-9137-41ce-8c9f-ae1717006b8f"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+      "field_values_unchanged": true,
+      "field_order_matches": true
+    },
+    {
+      "capability": "visit_quality",
+      "input_bytes": 2442,
+      "input_sha256": "f17d36d4f18049484fb7c94ef5e89cf4aa755b3c0e55890de41e4e9437e9bb0c",
+      "answer_bytes": 1185,
+      "answer_sha256": "707b41c44d8d3e251544eb04d15bac1114bf16c6d29965715835e6a337e8e417",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 603,
+        "first_body_byte_ms": 603,
+        "first_data_event_ms": 603,
+        "first_text_ms": 2134,
+        "stream_completed_ms": 4763
+      },
+      "remote_ms": 4764,
+      "ids": {
+        "task_id": "cf2d9502-6067-4d98-9c51-809f67ad15b3",
+        "message_id": "e5cf7481-e389-49ce-89dd-4785033f1d67",
+        "conversation_id": "bdabc0b4-03d7-47ab-a930-e533b9af058b"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+      "field_values_unchanged": true,
+      "field_order_matches": true
+    },
+    {
+      "capability": "visit_quality",
+      "input_bytes": 2493,
+      "input_sha256": "37f74cb02d30925421d0903946bea6c9eb2f15f0e86c8185d9b9e4c9786ca993",
+      "answer_bytes": 1325,
+      "answer_sha256": "83d4f383c8cd0fb5499756be24499f59068051e6d5f4a8809f83de14bb98614d",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 820,
+        "first_body_byte_ms": 820,
+        "first_data_event_ms": 820,
+        "first_text_ms": 3145,
+        "stream_completed_ms": 6032
+      },
+      "remote_ms": 6032,
+      "ids": {
+        "task_id": "497f2daf-20f7-4085-9639-9a50e13a7107",
+        "message_id": "625e1e85-577e-42b2-b503-8fddf089604b",
+        "conversation_id": "a4fb14b7-fd71-441d-b60d-c502546c2fc2"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+      "field_values_unchanged": true,
+      "field_order_matches": true
+    },
+    {
+      "capability": "visit_quality",
+      "input_bytes": 2499,
+      "input_sha256": "b6efc9133bc95af950f7adfc2ef4a99d9003d83aeb4db9e27c559e60dd04382d",
+      "answer_bytes": 771,
+      "answer_sha256": "c3fc9615112699c93c60a39802db7b70b00a1d94d6abf261ca3796364c7ba1d8",
+      "bare_json": true,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 639,
+        "first_body_byte_ms": 639,
+        "first_data_event_ms": 639,
+        "first_text_ms": 5571,
+        "stream_completed_ms": 7360
+      },
+      "remote_ms": 7360,
+      "ids": {
+        "task_id": "1ce2cd3f-0d97-4d89-be7a-c1691d6be9a2",
+        "message_id": "70b2b35f-0950-4c16-ac94-4b512d8d109e",
+        "conversation_id": "87e31faa-9b77-4c2d-b051-1e8a9e687fba"
+      },
+      "runtime_snapshot_verified": false,
+      "configured_snapshot_id": "01a0d28e-2b67-7769-b8f3-9fe0f0d1e3a8",
+      "field_values_unchanged": true,
+      "field_order_matches": true
+    }
+  ],
+  "structure": {
+    "run_id": "6ff2581c-88d5-4763-9822-2858337c36ec",
+    "status": "waiting_human",
+    "api_to_terminal_ms": 5317,
+    "trace": {
+      "provider": "agent_platform",
+      "model_ref": "agent-platform:01a09022-c06d-7ac3-b863-8a1345b069ae",
+      "elapsed_ms": 5198,
+      "operation_id": "69bdd492-ddb0-42f4-ba94-9e4595c23ce0",
+      "platform_run": {
+        "ids": {
+          "task_id": "2b39ed3a-d771-4c40-b32a-b51236c117ec",
+          "message_id": "03199481-7719-46ba-a2ca-80f8b6daf570",
+          "conversation_id": "d2f047c2-c03f-4b06-8736-f4e6e947bb73"
+        },
+        "transport": {
+          "http_status": 200,
+          "first_text_ms": 1436,
+          "first_body_byte_ms": 617,
+          "request_started_ms": 0,
+          "first_data_event_ms": 617,
+          "headers_received_ms": 617,
+          "stream_completed_ms": 2610
+        },
+        "error_code": null,
+        "stop_state": "not_requested",
+        "execution_mode": "filtered_facts",
+        "actual_snapshot_id": null,
+        "test_fault_injected": false,
+        "expected_snapshot_id": "01a0ae35-e51c-712c-ad6d-a688e0299316",
+        "tool_authority_issued": false,
+        "runtime_snapshot_verified": false,
+        "network_dispatch_suppressed": false
+      },
+      "fallback_reason": null
+    }
+  },
+  "error_type": "InterfaceError",
+  "error": "cannot perform operation: another operation is in progress"
+}

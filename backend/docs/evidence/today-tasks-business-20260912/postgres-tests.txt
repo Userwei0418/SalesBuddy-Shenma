@@ -1,0 +1,4 @@
+Legacy resolver owner repair verified; application credential access remains denied
+........................................................................ [ 68%]
+.................................                                        [100%]
+105 passed in 6.62s

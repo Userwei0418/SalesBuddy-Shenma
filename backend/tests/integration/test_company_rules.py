@@ -4,6 +4,7 @@ import asyncpg
 import pytest
 
 from sales_backend.config import get_settings
+from sales_backend.domain.company_rules import TECHNICAL_CAPABILITIES
 from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.services.battle_map_reviews import BattleMapReviewHandler
 from tests.integration.test_operations_api import TransactionDatabase, client_for, sign_in
@@ -135,10 +136,13 @@ async def test_execution_configuration_admin_boundary_and_safe_projection(connec
     async with await client_for(connection) as client:
         await sign_in(client)
         view = (await client.get("/api/v1/console/ai/execution")).json()
-        assert len(view["items"]) == 12 and view["can_publish"] is False
+        assert {item["code"] for item in view["items"]} == {
+            "agent_execution." + capability for capability in TECHNICAL_CAPABILITIES
+        }
+        assert view["can_publish"] is False
         assert all(item["runtime"]["configuration_scope"] == "api_process" for item in view["items"])
         assert "api_key" not in str(view)
-        assert view["management"]["capability_count"] == 12
+        assert view["management"]["capability_count"] == len(TECHNICAL_CAPABILITIES)
         assert all(item["business_rule"]["code"].startswith("agent_business.") for item in view["items"])
         item = next(i for i in view["items"] if i["code"] == "agent_execution.chatbi")
         code = item["code"]
@@ -166,7 +170,7 @@ async def test_execution_configuration_admin_boundary_and_safe_projection(connec
         business = (await client.get(URL)).json()
         assert {item["code"] for item in business["items"]} == {
             "fde_capabilities",
-            "customer_quadrant", "visit_admission", "home_display", "task_schedule",
+            "customer_quadrant", "visit_admission", "home_display", "task_schedule", "opportunity_amount",
             "score.maturity", "score.efficiency", "score.competency",
         }
 
@@ -218,10 +222,15 @@ async def test_rule_catalogs_do_not_require_model_credential_decryption(connecti
     monkeypatch.setattr("sales_backend.security.runtime_credentials.decrypt_credential", unavailable)
     async with await client_for(connection) as client:
         await sign_in(client)
-        for path, count in [(URL, 8), ("/api/v1/console/ai/execution", 12)]:
+        for path, expected_codes in [(URL, {
+            "fde_capabilities", "customer_quadrant", "visit_admission", "home_display", "task_schedule",
+            "opportunity_amount", "score.maturity", "score.efficiency", "score.competency",
+        }), ("/api/v1/console/ai/execution", {
+            "agent_execution." + capability for capability in TECHNICAL_CAPABILITIES
+        })]:
             response = await client.get(path)
             assert response.status_code == 200, response.text
-            assert len(response.json()["items"]) == count
+            assert {item["code"] for item in response.json()["items"]} == expected_codes
             assert "ciphertext" not in response.text
 
 

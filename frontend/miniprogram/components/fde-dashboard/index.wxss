@@ -133,3 +133,6 @@
 
 /* Palette only: original geometry is preserved. */
 .hero-link { color:var(--sb-hero-muted); }
+
+/* New business controls styled with the retained A tokens. */
+.upgrade-person-trigger{display:flex;align-items:center;gap:8rpx;min-height:var(--ui-touch-target);padding:0 16rpx;border-radius:var(--ui-radius-control);color:var(--ui-primary);background:var(--ui-selected);font-size:14px}

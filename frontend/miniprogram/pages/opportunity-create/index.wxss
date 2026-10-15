@@ -20,6 +20,9 @@
 .search{height:calc(var(--ui-field-height) - 2px);min-width:0;flex:1;padding:0 24rpx 0 12rpx;color:var(--ui-ink);font-size:var(--ui-text-body)}
 .search-placeholder{color:var(--ui-muted)}
 .empty-hint{padding:24rpx 0 0;color:var(--ui-secondary);font-size:14px;text-align:center}
+.customer-search-error{display:flex;flex-direction:column;align-items:flex-start;gap:8px;word-break:break-word}
+.search-retry{margin:0;min-height:var(--ui-touch-target);padding:0 16px;color:var(--ui-primary);background:var(--ui-neutral-soft);font-size:var(--ui-text-body);line-height:var(--ui-touch-target);border-radius:var(--ui-radius-control)}
+.search-retry::after{border:0}
 /* 搜索结果：列表行 ≥48px（px，不随屏宽缩；长名折行时上下留 8px），按下变灰，分隔线从文字起点开始 */
 .customer{display:flex;align-items:center;gap:16rpx;min-height:48px;box-sizing:border-box;padding:8px 0;border-bottom:1px solid var(--ui-line)}
 .customer:last-child{border-bottom:0}

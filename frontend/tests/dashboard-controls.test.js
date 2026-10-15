@@ -68,7 +68,7 @@ test('看板单选同步事实和排名，全部选项只在UI中存在且适应
  const filename=path.resolve(__dirname,'../miniprogram/pages/bi/index.js');
  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{
   Page:value=>page=value,
-  require:name=>name.endsWith('/apiClient')?{getDashboardOptions:async()=>({members:[],team_groups:groups})}:require(path.resolve(path.dirname(filename),name)),
+  require:name=>name.endsWith('/apiClient')?{getDashboardOptions:async()=>({members:[],teams:[],defaults:{team_id:null},team_groups:groups})}:require(path.resolve(path.dirname(filename),name)),
   getApp:()=>({globalData:{role:'manager',session:{role:'manager',userId:'self',workspaceId:'w'}}}),
  });
  page.data=JSON.parse(JSON.stringify(page.data));Object.assign(page.data,{role:'manager',viewMode:'team',canViewTeam:true});

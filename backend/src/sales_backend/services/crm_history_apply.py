@@ -167,6 +167,9 @@ class CrmHistoryApply:
         )
         if not await self.connection.fetchval("SELECT security.management_actor() AND security.authorization_has('history.import')"):
             raise ImportBlocked("active_management_identity_required")
+        # check_crm_import_target locks existing opportunity rows. Take the
+        # workspace finance lock first in every stage/apply transaction.
+        await self.connection.execute("SELECT security.finance_write_lock()")
 
     def _target(self, entry):
         return _uuid(entry.get("target_id")) or uuid5(self.workspace, entry["source_key"] + ":" + entry["kind"])

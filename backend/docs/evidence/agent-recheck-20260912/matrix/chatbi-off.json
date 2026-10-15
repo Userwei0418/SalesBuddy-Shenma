@@ -1,0 +1,135 @@
+{
+  "capability": "chatbi",
+  "case": "off",
+  "started_at": "2026-09-12T09:22:11.624384+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "adcbd580462ab5b9d98c72a6ea05a0fa340ef76a3ba5fc20fc84c977c99748bf",
+    "bytes": 485,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 3
+      },
+      "summary": {
+        "type": "dict",
+        "count": 8
+      },
+      "members": {
+        "type": "list",
+        "count": 1
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "176ee6b7-14ed-4e56-ae51-797faf6aa0cd",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 1336
+  },
+  "result": {
+    "sha256": "12d26a37d13a11c57dd2a4e2e9c08f6db3e0982fc8e08a6ac308d90262837978",
+    "bytes": 386,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "metrics": {
+        "type": "list",
+        "count": 3
+      },
+      "rows": {
+        "type": "list",
+        "count": 0
+      },
+      "scope": {
+        "type": "str"
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 1337,
+  "validation": [
+    {
+      "input": {
+        "sha256": "f36cb0b5b30f20de7ac490a7c40993cb4fc8fc38da486ea408ccc453de78fb5a",
+        "bytes": 378,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "metrics": {
+            "type": "list",
+            "count": 3
+          },
+          "rows": {
+            "type": "list",
+            "count": 0
+          },
+          "scope": {
+            "type": "str"
+          },
+          "data_as_of": {
+            "type": "str"
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "12d26a37d13a11c57dd2a4e2e9c08f6db3e0982fc8e08a6ac308d90262837978",
+        "bytes": 386,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "metrics": {
+            "type": "list",
+            "count": 3
+          },
+          "rows": {
+            "type": "list",
+            "count": 0
+          },
+          "scope": {
+            "type": "str"
+          },
+          "data_as_of": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "45753ca3-353b-46f5-b167-7316873fad8e",
+      "provider": "senseaudio",
+      "operation_id": "176ee6b7-14ed-4e56-ae51-797faf6aa0cd",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:22:11.638423+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:22:12.960672+00:00"
+    }
+  ]
+}

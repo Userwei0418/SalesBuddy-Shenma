@@ -16,7 +16,7 @@ test('build verifies shared source, rejects untracked code/config drift and remo
     const version = JSON.parse(await readFile(join(stage, 'dist/version.json')));
     await access(join(stage, 'dist/design-system/index.html'));
     assert.equal(await readFile(join(stage, 'dist/design-tokens.css'), 'utf8'), await readFile(join(root, 'design-tokens.css'), 'utf8'));
-    assert.equal(version.pages, 27); assert.equal(version.components, 14); assert.equal(version.source_files_verified, 259);
+    assert.equal(version.pages, 28); assert.equal(version.components, 14); assert.equal(version.source_files_verified, 259);
     const bundle = JSON.parse((await readFile(join(stage, 'dist/bundle.js'), 'utf8')).replace(/^window.SALES_BUNDLE=/, '').replace(/;\s*$/, ''));
     assert.ok(bundle.pages['pages/workbench/index'].templates['opportunity-list-card']);
     assert.ok(bundle.components['components/fde-projects/index'].templates['opportunity-list-card']);

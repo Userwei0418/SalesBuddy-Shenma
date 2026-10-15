@@ -1,0 +1,11 @@
+{
+  "default": "postgres",
+  "profiles": {
+    "postgres": {"driver": "postgres"},
+    "legacy-local": {"driver": "local", "root": "/var/lib/sales-backend/visit-imports"},
+    "object-storage-v1": {
+      "driver": "s3", "endpoint_url": "https://storage.example.com",
+      "region": "us-east-1", "bucket": "sales-materials", "prefix": "visits"
+    }
+  }
+}

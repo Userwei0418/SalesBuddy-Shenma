@@ -19,7 +19,7 @@ function amountWan(source) {
   const number = Number(raw.replace(/[万元￥¥]/g, ""));
   if (!Number.isFinite(number)) return "";
   if (/万/.test(raw)) return String(number);
-  return String(number / 10000); // API canonical amount is yuan, regardless of magnitude.
+  return opportunity.wan(number); // API canonical amount is yuan, regardless of magnitude.
 }
 
 function stageIndex(source) {

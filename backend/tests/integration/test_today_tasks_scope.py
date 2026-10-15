@@ -1,8 +1,6 @@
 """Acceptance scoping protects real SQL writes on every provider path."""
 
-import asyncio
 import json
-from contextlib import asynccontextmanager
 from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 from uuid import uuid4
@@ -22,6 +20,7 @@ from sales_backend.services.agent_platform.fde_facts_runtime import filtered_fac
 from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.agent_run import handler as business
 from sales_backend.services.agent_run.today_scope import TodayScopeChanged, source_fingerprint
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.test_fde_facts_runtime import Chunks, frame
 from tests.test_today_tasks_platform import configured
 
@@ -89,15 +88,7 @@ async def test_scoped_today_business_only_writes_authorized_unchanged_demo_sourc
                      senseaudio_api_key="synthetic-original-key", senseaudio_base_url="https://original.invalid",
                      agent_inference_platform_seconds=2, agent_inference_total_seconds=5)
 
-    class Pool:
-        lock = asyncio.Lock()
-
-        @asynccontextmanager
-        async def acquire(self):
-            async with self.lock:
-                yield connection
-
-    database = Database(config, pool=Pool())
+    database = Database(config, pool=FixtureConnectionPool(connection))
     calls, observed_facts = [], []
     answer = {"title": "测试待办", "ordered_items": []}
 

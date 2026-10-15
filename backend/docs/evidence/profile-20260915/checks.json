@@ -1,0 +1,81 @@
+{
+  "database_checks": 68,
+  "joint_postgres_api_passed": 23,
+  "backend_agent_postgres_passed": 40,
+  "backend_agent_baseline_deselected": 2,
+  "backend_focused_passed": 61,
+  "frontend_focused_passed": 48,
+  "frontend_structure": {
+    "pages": 26,
+    "json": 47,
+    "files": 343
+  },
+  "wechatide_version": "0.3.9",
+  "native_compilation_files": 8,
+  "full_suite_not_all_passed": {
+    "backend_passed": 1402,
+    "backend_failed_before_openapi_fix": 6,
+    "backend_baseline_failed": 5,
+    "frontend_passed": 537,
+    "frontend_baseline_failed": 27
+  },
+  "baseline": "cab0deec2fea053ea46e7bebfba658eba1316589",
+  "production_runtime_verified": true,
+  "production_runtime": {
+    "evidence": "runtime.json",
+    "checks_passed": 446,
+    "accounts": 10,
+    "roles": {
+      "sales": 3,
+      "supervisor": 2,
+      "manager": 1,
+      "fde": 3,
+      "fde_lead": 1
+    },
+    "readonly": true,
+    "business_writes": false,
+    "model_calls": false,
+    "sessions_created": false
+  },
+  "release": {
+    "evidence": "release.json",
+    "name": "profile-20260915-8c9e243",
+    "revision": "8c9e2435a546c4eaa6ae69611f0dcf0604b9a651",
+    "verified_at": "2026-09-15T06:05:38.371545+00:00",
+    "backup_verified_bytes": 9307386,
+    "verified_source_files": 1314,
+    "database_before": "V090",
+    "database_after": "V092",
+    "verified_checksums": 60,
+    "migration_replay_unchanged": true,
+    "services_healthy": true,
+    "runtime_enforces_rls": true,
+    "agent_configuration_unchanged": true,
+    "environment_files_unchanged": true
+  },
+  "native_visual_verified": true,
+  "native_visual_scope": [
+    "sales_performance",
+    "sales_customer_efficiency",
+    "sales_quarter_target_sheet_after_ui_fix"
+  ],
+  "visual_pending": [
+    "fde_role_pages",
+    "operations_target_pages"
+  ],
+  "native_screenshots": {
+    "local_directory": "/tmp",
+    "committed": false,
+    "contains_original_business_data": true
+  },
+  "wechat_experience_uploaded": false,
+  "frontend_revision": "6f770fe",
+  "operations_ui_readonly": {
+    "target_list_opened": true,
+    "target_form_opened": true,
+    "required_reason_present": true,
+    "unselected_subject_save_disabled": true,
+    "business_submitted": false,
+    "screenshot_unavailable": true
+  }
+}

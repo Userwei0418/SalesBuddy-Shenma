@@ -23,12 +23,14 @@ let info={managed:true,can_manage:false,configured:true,key_hint:'已配置',rev
 let response={...info,can_manage:true,revision:4};
 let sent=null, resolvePost, rejectPost;
 const context={state, console, esc:s=>String(s||'').replace(/</g,'&lt;'), date:s=>s, head:()=>'',
-  bindConnectivityTests:()=>{},
+  bindConnectivityTests:()=>{}, requirePermission:()=>{}, hasPermission:()=>true, readGuard:()=>true,
+  captureConsoleContext:()=>({}), isConsoleContextCurrent:()=>true,
   api:async(path,options)=>{
     if(options) {
       sent={path,options}; return await new Promise((resolve,reject)=>{resolvePost=resolve;rejectPost=reject;});
     }
-    return path.endsWith('unified-model-key')?info:{locked:true,items:[{purpose:'text',label:'文字',impact:'用途',
+    return path.endsWith('unified-model-key')?info:{locked:true,unified_model_key:info,
+      items:[{purpose:'text',label:'文字',impact:'用途',
       configuration:{mode:'custom'},key_hint:'已配置'}]};
   }};
 vm.createContext(context);vm.runInContext(source,context);

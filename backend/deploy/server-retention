@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+CONFIG=${RETENTION_CONFIG:-/etc/server-retention.conf}
+[[ ! -f "$CONFIG" ]] || source "$CONFIG"
+if [[ "${BLOG_ENABLED:-0}" == 1 && -L "${BLOG_CURRENT_LINK:-/srv/ob-blog-content/current}" ]]; then
+  python3 /usr/local/lib/server-retention/retention.py \
+    --releases-dir "${BLOG_RELEASES_DIR:-/srv/ob-blog-content/releases}" \
+    --current-link "${BLOG_CURRENT_LINK:-/srv/ob-blog-content/current}" \
+    --lock-file "${BLOG_STATE_DIR:-/var/lib/ob-blog-sync}/sync.lock" \
+    --git-source-dir "${BLOG_STATE_DIR:-/var/lib/ob-blog-sync}/source" \
+    --keep "${BLOG_KEEP_RELEASES:-3}" --clean-staging \
+    --min-age-seconds "${BLOG_TEMP_MAX_AGE_SECONDS:-3600}" --apply
+fi
+if [[ -x /usr/local/sbin/sales-release-retention && -L "${APP_ROOT:-/www/wwwroot/salegent}/current" ]]; then
+  /usr/local/sbin/sales-release-retention --config "$CONFIG" --apply
+fi

@@ -48,6 +48,15 @@ function connect(child, event, parent, handler, dataset = {}) {
   };
 }
 
+// Real pickers now require their open-session epoch; simulate property observers and opening.
+function confirmPicker(instance, value) {
+  for (const [keys, observer] of Object.entries(instance.observers || {})) {
+    if (keys.startsWith('value')) observer.apply(instance, keys.split(',').map(key=>instance.data[key.trim()]));
+  }
+  instance.onOpen();
+  instance.onConfirm({detail:{value},currentTarget:{dataset:{pickerEpoch:instance.data.pickerEpoch}}});
+}
+
 function loadCheckbox(group = false) {
   const name = group ? 'checkbox-group' : 'checkbox';
   const file = path.join(root, 'ui/tdesign', name, `${name}.js`);
@@ -122,31 +131,31 @@ test('select numeric index reaches owner-team field and disabled choice cannot c
   form.data.ownerTeams = [{id: 'team-a', name: 'A'}, {id: 'team-b', name: 'B'}];
   const select = load('ui/sb/sb-select/index.js', {props: {options: [{value: 0, label: 'A'}, {value: 1, label: 'B'}], value: 0}, wx: {showToast() {}}}).instance;
   connect(select, 'change', form, 'changeOwnerTeam');
-  select.onConfirm({detail: {value: [1]}});
+  confirmPicker(select, [1]);
   assert.equal(form.data.form.owner_team_id, 'team-b');
   assert.equal(form.data.ownerTeamIndex, 1);
   form.properties.disabled = true;
   select.data.value = 1;
-  select.onConfirm({detail: {value: [0]}});
+  confirmPicker(select, [0]);
   assert.equal(form.data.form.owner_team_id, 'team-b');
   form.properties.disabled = false;
   select.data.options[0].disabled = true;
-  select.onConfirm({detail: {value: [0]}});
+  confirmPicker(select, [0]);
   assert.equal(form.data.form.owner_team_id, 'team-b');
 });
 
 test('input change preserves host dataset field and page disabled guard', () => {
   const form = load('components/opportunity-form/index.js').instance;
   const input = load('ui/sb/sb-input/index.js').instance;
-  connect(input, 'change', form, 'input', {key: 'product_line'});
-  input.onChange({detail: {value: '演示产品线'}});
-  assert.equal(form.data.form.product_line, '演示产品线');
+  connect(input, 'change', form, 'input', {key: 'follow_up_plan'});
+  input.onChange({detail: {value: '演示跟进计划'}});
+  assert.equal(form.data.form.follow_up_plan, '演示跟进计划');
   form.properties.disabled = true;
   input.onClear();
-  assert.equal(form.data.form.product_line, '演示产品线');
+  assert.equal(form.data.form.follow_up_plan, '演示跟进计划');
   form.properties.disabled = false;
   input.onClear();
-  assert.equal(form.data.form.product_line, '');
+  assert.equal(form.data.form.follow_up_plan, '');
 });
 
 test('datetime and priority bridges preserve independent recipients and submit lock', () => {
@@ -156,14 +165,14 @@ test('datetime and priority bridges preserve independent recipients and submit l
   connect(date, 'change', page, 'onDueChange');
   connect(priority, 'change', page, 'onPriorityChange');
   page.data.selectedMembers = [{id: 'a'}, {id: 'b'}];
-  date.onConfirm({detail: {value: '2026-10-03 16:45'}});
+  confirmPicker(date, '2026-10-03 16:45');
   assert.equal(page.data.customDueDate, '2026-10-03');
   assert.equal(page.data.customDueTime, '16:45');
   assert.deepEqual(page.data.selectedMembers.map(x => x.id), ['a', 'b']);
   priority.onTap({currentTarget: {dataset: {value: '高'}}});
   assert.equal(page.data.selectedPriority, '高');
   page.data.submissionPending = true;
-  date.onConfirm({detail: {value: '2026-10-04 09:00'}});
+  confirmPicker(date, '2026-10-04 09:00');
   priority.onTap({currentTarget: {dataset: {value: '普通'}}});
   assert.equal(page.data.customDueDate, '2026-10-03');
   assert.equal(page.data.customDueTime, '16:45');
@@ -249,7 +258,7 @@ test('labeled picker clear maps null back to all without losing the host filter 
   connect(select, 'change', page, 'changeFilter', {key: 'grade'});
   let reads = 0;
   page.applyFilters = () => { reads++; };
-  select.onConfirm({detail: {value: [2]}});
+  confirmPicker(select, [2]);
   assert.equal(page.data.gradeIndex, 2);
   select.onClear();
   assert.equal(page.data.gradeIndex, 0);

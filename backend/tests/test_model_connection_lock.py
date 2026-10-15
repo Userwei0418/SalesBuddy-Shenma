@@ -55,7 +55,12 @@ def test_locked_page_can_read_safe_config(locked_client):
     app.dependency_overrides[model_api.service] = lambda: service
     response = client.get("/api/v1/admin/model-apis")
     assert response.status_code == 200
-    assert response.json() == {"items": [], "locked": True, "lock_message": LOCK_MESSAGE}
+    payload = response.json()
+    safe_status = payload.pop("unified_model_key")
+    assert payload == {"items": [], "locked": True, "lock_message": LOCK_MESSAGE}
+    assert safe_status["managed"] is False and safe_status["can_manage"] is False
+    assert set(safe_status) == {"managed", "can_manage", "configured", "key_hint", "revision",
+                                "updated_at", "rotation_status", "message"}
 
 
 def test_agent_connectivity_route_is_not_blocked(locked_client):

@@ -83,7 +83,7 @@ async def test_legacy_never_implicitly_uses_login_secret(settings, actor):
 
 @pytest.mark.asyncio
 async def test_admin_get_masks_without_loading_keyring_or_ciphertext(settings, actor):
-    connection = SimpleNamespace(fetchrow=AsyncMock(return_value={"has_api_key": True, "api_key_tail": "tail",
+    connection = SimpleNamespace(fetchval=AsyncMock(return_value={"shared_enabled": True}), fetchrow=AsyncMock(return_value={"has_api_key": True, "api_key_tail": "tail",
        "cipher_format": "aes256gcm-v1", "encryption_key_id": "lost", "revision_no": 7}))
     settings = replace(settings, config_credential_keyring_file="/missing")
     result = await RuntimeConfigService(settings).get(connection, actor)
@@ -104,12 +104,13 @@ async def test_runtime_bad_credential_does_not_switch_provider_or_erase_prompt(s
     class DB:
         @asynccontextmanager
         async def transaction(self, *args, **kwargs):
-            yield object()
+            yield SimpleNamespace(fetchval=AsyncMock(return_value={"shared_enabled": True}))
     with pytest.raises(RuntimeCredentialUnavailable):
         await _load_provider_configuration(DB(), actor, settings)
     row["enabled"] = False
     runtime = await _load_provider_configuration(DB(), actor, settings)
-    assert runtime.settings is settings and runtime.prompt_overrides == {}
+    assert runtime.settings.senseaudio_api_key == settings.senseaudio_api_key and runtime.prompt_overrides == {}
+    assert runtime.settings.model_api_metadata["ai_service_source"] == "platform"
 
 
 @pytest.mark.asyncio
@@ -184,7 +185,7 @@ def test_admin_api_version_conflict_is_409(actor, settings, monkeypatch):
     class DB:
         @asynccontextmanager
         async def transaction(self, *args, **kwargs):
-            yield object()
+            yield SimpleNamespace(fetchval=AsyncMock(return_value={"shared_enabled": True}))
     monkeypatch.setattr(RuntimeConfigService, "rollback", AsyncMock(side_effect=ConfigVersionConflict()))
     app.dependency_overrides[get_system_identity] = lambda: SimpleNamespace(actor=actor)
     app.dependency_overrides[get_database] = lambda: DB()

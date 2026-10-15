@@ -5,31 +5,38 @@
  */
 const REPORT_ACTIONS = {
   report_personal_daily: {
-    label: "个人即时总结", prompt: "生成一线销售即时总结，范围仅本人，分析当前客户、商机、拜访跟进、任务和风险",
+    label: "经营即时总结", prompt: "生成经营即时总结，按当前业务授权范围分析客户、商机、拜访跟进、任务和风险",
     sections: [
       ["safe_customers", "安全客户", "当前推进健康、有明确下一步且风险可控"],
       ["attention_customers", "需及时处理", "跟进停滞、任务逾期、商机临期或存在风险"],
     ],
   },
   report_team_daily: {
-    label: "个人与团队即时总结", prompt: "生成销售主管即时总结，同时分析总监本人和直属团队的客户、商机、拜访跟进、任务和风险",
+    label: "经营即时总结", prompt: "生成经营即时总结，按当前业务授权范围分析客户、商机、拜访跟进、任务和风险，并分别展示本人和授权范围的结果",
     sections: [
-      ["personal_safe_customers", "本人 · 安全客户", "总监本人负责且当前推进健康的客户"],
-      ["personal_attention_customers", "本人 · 需及时处理", "总监本人需要立即跟进的客户"],
-      ["team_safe_customers", "团队 · 安全客户", "直属团队推进健康的客户"],
-      ["team_attention_customers", "团队 · 需及时处理", "团队中停滞、逾期、临期或有风险的客户"],
+      ["personal_safe_customers", "本人 · 安全客户", "本人负责且当前推进健康的客户"],
+      ["personal_attention_customers", "本人 · 需及时处理", "本人需要立即跟进的客户"],
+      ["team_safe_customers", "授权范围 · 安全客户", "授权范围内推进健康的客户"],
+      ["team_attention_customers", "授权范围 · 需及时处理", "授权范围内停滞、逾期、临期或有风险的客户"],
     ],
   },
   report_department_daily: {
-    label: "部门即时总结", prompt: "生成销售总经理即时总结，分析整个销售部门的客户、商机、拜访跟进、任务和风险",
+    label: "经营即时总结", prompt: "生成经营即时总结，按当前业务授权范围分析客户、商机、拜访跟进、任务和风险，并提供部门处置概览",
     sections: [
-      ["safe_customers", "部门 · 安全客户", "部门内推进健康、下一步明确且风险可控的客户"],
-      ["attention_customers", "部门 · 需及时处理", "重大商机停滞、逾期、临期或重大风险客户"],
-      ["team_comparison", "团队处置概览", "按团队比较待处理客户与任务执行情况"],
+      ["safe_customers", "授权范围 · 安全客户", "授权范围内推进健康、下一步明确且风险可控的客户"],
+      ["attention_customers", "授权范围 · 需及时处理", "授权范围内商机停滞、逾期、临期或有风险的客户"],
+      ["team_comparison", "部门处置概览", "按授权范围内部门比较待处理客户与任务执行情况"],
     ],
   },
 };
 
+// Legacy action names select a result layout, never an authorization scope.
+// Only an explicit user selection narrows the server's effective read scope.
+function reportPrompt(action, options = {}) {
+  const config = REPORT_ACTIONS[action];
+  if (!config) return '';
+  return options.scope === 'self' ? `${config.prompt}；范围仅本人` : config.prompt;
+}
 
 function buildReport(run, action) {
  const config=REPORT_ACTIONS[action];
@@ -97,4 +104,4 @@ function buildReport(run, action) {
 
  return {sections,details};
 }
-module.exports={REPORT_ACTIONS,buildReport};
+module.exports={REPORT_ACTIONS,reportPrompt,buildReport};

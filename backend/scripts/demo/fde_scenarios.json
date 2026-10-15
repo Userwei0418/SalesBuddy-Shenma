@@ -1,0 +1,423 @@
+{
+  "schema_version": 1,
+  "batch": "FDE-DEMO-20260913",
+  "marker": "【演示材料，全部客户故事与业务情节为虚构】",
+  "accounts": {
+    "OPSADMIN": "administrator",
+    "XS001": "sales",
+    "XS002": "sales",
+    "XS003": "sales",
+    "FDE001": "fde",
+    "FDE002": "fde",
+    "FDE003": "fde",
+    "FDEL001": "fde_lead"
+  },
+  "customers": [
+    {
+      "key": "chengxing",
+      "name": "【演示】澄星制造",
+      "owner": "XS001",
+      "industry": "制造业",
+      "customer_type": "潜在客户",
+      "contact_name": "沈宁",
+      "contact_title": "质量经理"
+    },
+    {
+      "key": "yunfan",
+      "name": "【演示】云帆物流",
+      "owner": "XS002",
+      "industry": "物流运输",
+      "customer_type": "已成单客户",
+      "contact_name": "陈悦",
+      "contact_title": "运营经理"
+    },
+    {
+      "key": "wanglan",
+      "name": "【演示】望岚软件",
+      "owner": "XS003",
+      "industry": "软件服务",
+      "customer_type": "已成单客户",
+      "contact_name": "梁禾",
+      "contact_title": "客服经理"
+    },
+    {
+      "key": "qiming",
+      "name": "【演示】启明服务",
+      "owner": "XS003",
+      "industry": "企业服务",
+      "customer_type": "商机客户",
+      "contact_name": "林悦",
+      "contact_title": "服务经理"
+    }
+  ],
+  "opportunities": [
+    {
+      "key": "quality",
+      "customer": "chengxing",
+      "name": "【演示】澄星制造－质量异常知识检索试点",
+      "owner": "XS001",
+      "members": [
+        "FDE001",
+        "FDE002"
+      ],
+      "amount": 280000,
+      "probability": 30,
+      "product_line": "企业知识助手",
+      "close_days": 35,
+      "recognized_amount": 56000,
+      "collection_amount": 28000
+    },
+    {
+      "key": "engineer",
+      "customer": "chengxing",
+      "name": "【演示】澄星制造－设备维修文档助手",
+      "owner": "XS001",
+      "members": [
+        "FDE003"
+      ],
+      "amount": 180000,
+      "probability": 50,
+      "product_line": "企业知识助手",
+      "close_days": 43,
+      "recognized_amount": 36000,
+      "collection_amount": 18000
+    },
+    {
+      "key": "tickets",
+      "customer": "yunfan",
+      "name": "【演示】云帆物流－异常工单分类辅助",
+      "owner": "XS002",
+      "members": [
+        "FDE002",
+        "FDE003"
+      ],
+      "amount": 360000,
+      "probability": 70,
+      "product_line": "智能工单",
+      "close_days": 51,
+      "recognized_amount": 72000,
+      "collection_amount": 36000
+    },
+    {
+      "key": "dispatch",
+      "customer": "yunfan",
+      "name": "【演示】云帆物流－运输调度协作助手",
+      "owner": "XS002",
+      "members": [
+        "FDE001",
+        "FDEL001"
+      ],
+      "amount": 220000,
+      "probability": 30,
+      "product_line": "协作工作流",
+      "close_days": 59,
+      "recognized_amount": 44000,
+      "collection_amount": 22000
+    },
+    {
+      "key": "knowledge",
+      "customer": "wanglan",
+      "name": "【演示】望岚软件－客服政策版本检索",
+      "owner": "XS003",
+      "members": [
+        "FDE001",
+        "FDEL001"
+      ],
+      "amount": 128000,
+      "probability": 50,
+      "product_line": "企业知识助手",
+      "close_days": 67,
+      "recognized_amount": 25600,
+      "collection_amount": 12800
+    },
+    {
+      "key": "service",
+      "customer": "qiming",
+      "name": "【演示】启明服务－服务台标准答复试点",
+      "owner": "XS003",
+      "members": [
+        "FDE002",
+        "FDE003"
+      ],
+      "amount": 96000,
+      "probability": 10,
+      "product_line": "智能客服",
+      "close_days": 75,
+      "recognized_amount": 19200,
+      "collection_amount": 9600
+    }
+  ],
+  "cases": [
+    {
+      "key": "01_first_visit",
+      "title": "新客户：销售发起、多位FDE分别归档",
+      "opportunities": [
+        "quality"
+      ]
+    },
+    {
+      "key": "02_continuous",
+      "title": "同一项目持续跟进：本人次数累积",
+      "opportunities": [
+        "quality"
+      ]
+    },
+    {
+      "key": "03_parallel_project",
+      "title": "同客户不同商机：不同协助名单",
+      "opportunities": [
+        "engineer"
+      ]
+    },
+    {
+      "key": "04_existing_customer",
+      "title": "老客户继续跟进：销售名单不代计FDE次数",
+      "opportunities": [
+        "tickets"
+      ]
+    },
+    {
+      "key": "05_lead_participation",
+      "title": "负责人作为参与人：个人与团队范围",
+      "opportunities": [
+        "dispatch"
+      ]
+    },
+    {
+      "key": "06_shared_review",
+      "title": "跨销售协助项目：负责人和成员分工",
+      "opportunities": [
+        "knowledge"
+      ]
+    },
+    {
+      "key": "07_quality_revision",
+      "title": "低质量草稿完善：真实评分决定能否归档",
+      "opportunities": [
+        "service"
+      ]
+    },
+    {
+      "key": "08_handover",
+      "title": "名单变化、资格回收、任务交接及通知",
+      "opportunities": [
+        "dispatch"
+      ],
+      "workflow": "handover"
+    }
+  ],
+  "visits": [
+    {
+      "key": "v01",
+      "case": "01_first_visit",
+      "opportunity": "quality",
+      "account": "FDE001",
+      "day_offset": -6,
+      "first_visit": true,
+      "participants": [],
+      "expected": "archive",
+      "facts": "首次与质量经理确认知识检索范围。客户8名质量工程师每天核对约40份异常记录，资料分散在3个文件夹。现场用6条脱敏问题验证，4条找到正确依据，2条缺产品批次。客户认可小范围验证，但没有确认报价或采购。",
+      "next_task": "整理2条缺批次样例和字段清单"
+    },
+    {
+      "key": "v02",
+      "case": "01_first_visit",
+      "opportunity": "quality",
+      "account": "FDE002",
+      "day_offset": -6,
+      "first_visit": true,
+      "participants": [],
+      "expected": "archive",
+      "facts": "首次参加质量异常试点讨论，负责样本与权限核对。检查客户提供的6份已脱敏文件，其中5份包含可追溯来源，1份缺原始文档编号。客户要求补齐编号后再开展试点；本次不调整商机金额和阶段。",
+      "next_task": "提交文档编号检查表和访问权限建议"
+    },
+    {
+      "key": "s01",
+      "case": "01_first_visit",
+      "opportunity": "quality",
+      "account": "XS001",
+      "day_offset": -6,
+      "first_visit": true,
+      "participants": [
+        "FDE001",
+        "FDE002"
+      ],
+      "expected": "archive",
+      "facts": "首次拜访质量经理，与周玮、张家涛一起确认试点范围。客户选择质量异常检索作为第一场景，6条样例中4条有正确依据、2条缺批次。28万元仅为本商机预算估计，没有报价确认、合同或采购承诺。",
+      "next_task": "发送试点范围与验收清单"
+    },
+    {
+      "key": "v03",
+      "case": "02_continuous",
+      "opportunity": "quality",
+      "account": "FDE001",
+      "day_offset": -3,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "持续跟进原质量检索商机。复核补齐批次后的10条问题，8条引用准确，2条跨批次检索仍需人工判断。质量经理同意继续验证，要求显示批次和文档日期；未签约、未改变金额。",
+      "next_task": "提交跨批次检索的过滤建议"
+    },
+    {
+      "key": "v04",
+      "case": "02_continuous",
+      "opportunity": "quality",
+      "account": "FDE002",
+      "day_offset": -1,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "持续核对质量异常试点的引用完整性。检查12份样本，10份有文档编号和批次，2份编号仍为空。客户同意保留人工复核步骤，不允许用缺编号回答直接处置异常。",
+      "next_task": "交付12份样本的来源检查结果"
+    },
+    {
+      "key": "v05",
+      "case": "03_parallel_project",
+      "opportunity": "engineer",
+      "account": "FDE003",
+      "day_offset": -4,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "围绕同一客户另一条设备维修商机核对说明书。客户有5名维修人员，20份设备手册存在型号混用。抽查8个问题，6个找到正确型号步骤、2个缺设备序列号；客户要求先补型号映射，暂无采购承诺。",
+      "next_task": "整理型号映射表和2条缺失序列号样本"
+    },
+    {
+      "key": "s02",
+      "case": "03_parallel_project",
+      "opportunity": "engineer",
+      "account": "XS001",
+      "day_offset": -4,
+      "first_visit": false,
+      "participants": [
+        "FDE003"
+      ],
+      "expected": "archive",
+      "facts": "销售与叶源继续跟进设备维修文档助手，明确其与质量异常试点是两条独立商机。客户确认20份设备手册作为试点资料；8个问题中6个可引用正确型号，2个需补序列号。18万元仍为预算估计，本次不修改商业阶段。",
+      "next_task": "给客户发送独立设备试点资料清单"
+    },
+    {
+      "key": "v06",
+      "case": "04_existing_customer",
+      "opportunity": "tickets",
+      "account": "FDE002",
+      "day_offset": -2,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "对老客户的异常工单分类商机开展持续跟进。客户每天约60条异常工单由2名专员分派；用20条历史样本验证，16条建议分类准确，4条需补异常原因。最终分派仍由专员决定，既有合作不等于本新商机已签约。",
+      "next_task": "提交4条分类偏差分析及待补字段"
+    },
+    {
+      "key": "v07",
+      "case": "04_existing_customer",
+      "opportunity": "tickets",
+      "account": "FDE003",
+      "day_offset": -2,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "负责云帆物流工单分类的字段验证。检查20条脱敏历史工单，17条包含线路与签收状态，3条缺签收时间。客户要求先补字段再评估分类结果，本次没有新增报价或确收。",
+      "next_task": "提供签收时间校验规则和3条缺失样本"
+    },
+    {
+      "key": "s03",
+      "case": "04_existing_customer",
+      "opportunity": "tickets",
+      "account": "XS002",
+      "day_offset": -2,
+      "first_visit": false,
+      "participants": [
+        "FDE002",
+        "FDE003"
+      ],
+      "expected": "archive",
+      "facts": "与张家涛、叶源持续跟进老客户异常工单分类项目。客户确认20条样本中16条分类建议可用，4条仍需人工判断；36万元为当前商机预算，本次未更改阶段或金额，也未确认合同与财务实绩。",
+      "next_task": "发送分类验收标准和补样本清单"
+    },
+    {
+      "key": "v08",
+      "case": "05_lead_participation",
+      "opportunity": "dispatch",
+      "account": "FDEL001",
+      "day_offset": -1,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "以参与FDE身份复核运输调度协作助手方案。客户3名调度员每天协调约25单运输，缺少统一异常处理记录。讨论6个异常场景，4个流程已明确负责人，2个缺决策边界。客户要求保留人工派车决策，不承诺自动排班。",
+      "next_task": "提交6个场景的责任边界说明"
+    },
+    {
+      "key": "v09",
+      "case": "05_lead_participation",
+      "opportunity": "dispatch",
+      "account": "FDE001",
+      "day_offset": 0,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "继续验证运输调度协作助手。客户提供6个异常场景，逐条核对后4个能完整记录处理步骤，2个缺状态更新时间。调度经理要求补时间字段后再演示；本次没有财务或商机阶段变化。",
+      "next_task": "整理2个缺更新时间的例子并补充事件字段建议"
+    },
+    {
+      "key": "v10",
+      "case": "06_shared_review",
+      "opportunity": "knowledge",
+      "account": "FDEL001",
+      "day_offset": -2,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "与客服经理持续跟进政策版本检索商机。12名客服每天处理约80条咨询，政策分散在3个知识库。验证10条退款咨询，8条能引用正确政策，2条出现旧新版本冲突；要求以生效日期为准，暂未接受报价。",
+      "next_task": "形成版本冲突处理方案和验收标准"
+    },
+    {
+      "key": "v11",
+      "case": "06_shared_review",
+      "opportunity": "knowledge",
+      "account": "FDE001",
+      "day_offset": 0,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "在负责人复核后继续跟进客服政策版本检索。核对客户补充的10条咨询，9条正确显示来源与生效日期，1条仍缺政策归属部门。客服经理要求补齐归属信息后扩大样本；尚无采购承诺。",
+      "next_task": "交付10条咨询的验证表及缺失归属项"
+    },
+    {
+      "key": "v12_low",
+      "case": "07_quality_revision",
+      "opportunity": "service",
+      "account": "FDE002",
+      "day_offset": 0,
+      "first_visit": false,
+      "participants": [],
+      "expected": "insufficient",
+      "facts": "聊了聊服务台，客户觉得还行，后面再说。",
+      "next_task": "后续有空再联系"
+    },
+    {
+      "key": "v12",
+      "case": "07_quality_revision",
+      "opportunity": "service",
+      "account": "FDE002",
+      "day_offset": 0,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "补充完整服务台标准答复试点的拜访记录。客户6名服务人员每天约35条咨询，答复散落在4份文档。现场检查8条账号开通问题，5条能够找到一致答复，3条存在审批条件缺失。客户要求先明确审批条件，尚未接受报价，也没有决定采购。",
+      "next_task": "提交3条审批条件缺失清单与试点验收表"
+    },
+    {
+      "key": "v13",
+      "case": "07_quality_revision",
+      "opportunity": "service",
+      "account": "FDE003",
+      "day_offset": 0,
+      "first_visit": false,
+      "participants": [],
+      "expected": "archive",
+      "facts": "参加启明服务服务台试点的资料验证。复核8条账号开通问题的引用文档，6条具备来源编号，2条未标记发布部门。客户认可引用展示，但要求标记责任部门，禁止猜测审批规则。",
+      "next_task": "提供2条未标责任部门样本及文档清理建议"
+    }
+  ]
+}

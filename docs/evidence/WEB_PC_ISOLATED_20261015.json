@@ -1,0 +1,88 @@
+{
+  "batch": "S7A Shenma PC UI and read-only visit range",
+  "verified_date": "2026-10-15",
+  "source_base_revision": "20d8dc60cfb6e6b016ef11a6ac5f0f413056e16f",
+  "upstream_web_revision": "e6099547ddaab0f1e4534c6216e7b9977e3c7368",
+  "database_candidate": "V161",
+  "new_database_migration": false,
+  "evidence_boundary": "Local synthetic browser responses; separate real ASGI HTTP and disposable PostgreSQL with RLS. No production mutation or model/Feishu request.",
+  "checks": [
+    {
+      "kind": "web-build-node",
+      "passed": 156,
+      "failed": 0,
+      "log": "web-pc-20261015/web-verify.log"
+    },
+    {
+      "kind": "browser",
+      "passed": 19,
+      "failed": 0,
+      "widths": [
+        390,
+        1024,
+        1440
+      ],
+      "log": "web-pc-20261015/browser.log"
+    },
+    {
+      "kind": "real-http-postgres-rls",
+      "passed": 55,
+      "failed": 0,
+      "log": "web-pc-20261015/http-postgres.log"
+    },
+    {
+      "kind": "route-permission-openapi",
+      "passed": 4,
+      "failed": 0,
+      "log": "web-pc-20261015/contracts.log"
+    },
+    {
+      "kind": "review",
+      "result": "Two permission/association findings and sidebar/mobile account findings fixed; corresponding regression passed"
+    }
+  ],
+  "shared_source_manifest": {
+    "files_verified": 259,
+    "pages_built": 28,
+    "components_built": 14,
+    "native_changed_in_s7a": false
+  },
+  "source_copy_files_hashed": 566,
+  "production_read_only": "web-pc-20261015/production-readonly.json",
+  "protected": [
+    "65-account runtime quota",
+    "company/team/roles/overrides",
+    "synthetic provenance",
+    "model configuration",
+    "Feishu destinations",
+    "Shenma blue UI",
+    "global opportunity-create suppression",
+    "eight-field opportunity detail"
+  ],
+  "not_performed": [
+    "production deployment or database migration",
+    "WeChat upload/release",
+    "native device acceptance",
+    "real model/report generation",
+    "actual Feishu publication",
+    "customer business acceptance"
+  ],
+  "artifacts_sha256": {
+    "browser.log": "ba82daa889bf6d7758adeafa8daac251d69cc426fc9e372442707dae1f6740c8",
+    "contracts.log": "e7054943d4d40cc8b30b1794dd6c922fb6a085d30701c6e031800de97ab2422f",
+    "customers-1440.png": "3611ec1eab42df20d91d912eba8c8f70a9e140f4d772c8d528ff1984f53b7c3d",
+    "http-postgres.log": "d2f77d2eee16c79794baa05105fea00923399c097641309b164d8b532c13bc47",
+    "opportunities-1440.png": "d6e90782822785164bd6646427167f24de738be1e9cbc10b4656c8e60768b51c",
+    "production-readonly.json": "d7c36d792814f21998cf0a0ac7e5d5e6888e97d30fe2f035fa451ff80db4aab7",
+    "records-1440.png": "e55f1dc1602c67d0677c25586b81013da258c9c6e6912b4d4d0b3e3941d61b55",
+    "records-390.png": "fc8436bda1d9e38f8b7fced82fb2ef65fcc5b215c7d692a2ca893abb8a94b58b",
+    "source-sha256.json": "e2935c8fd5aff9115dec92aa5aa66841d1b7ebb36d7b6b76e65ffabf64c769b3",
+    "web-verify.log": "cea18ad2b68a61ff9d521f3ffc7129cef9e7529bdea2dc24d48486e38a5aa275",
+    "workspace-1440.png": "468a9bd990c411f45a7b1a715b11f05dc55c3377a9629152a3bb91ab934fd052",
+    "build.json": "0ea7f8ca72ac5594b9df410452c96debc2d491a598c9f57f3da03974d1d2d002",
+    "committed-build.log": "8266f60a1fe4e2e95e925a2d0c4f3de429923eefad2dc3546c1c25e19b53317d",
+    "dist-sha256.json": "0bb1ccc066fa092777d59b7846fcbaef606fa599b5df5f3a22ee5fbc7bc4d116"
+  },
+  "source_revision": "e9d09fb1f2d835e2e61fe1779f83f0b0e4b21d04",
+  "build_binding": "web-pc-20261015/dist-sha256.json"
+}

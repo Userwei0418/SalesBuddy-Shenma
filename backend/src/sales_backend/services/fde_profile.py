@@ -2,26 +2,26 @@
 
 from sales_backend.domain.agent import AgentMode
 from sales_backend.domain.fde_coaching import model_facts
-from sales_backend.domain.fde_profile import CONTRACT_VERSION, DIMENSIONS, TZ, factual_summary
+from sales_backend.domain.fde_profile import CONTRACT_VERSION, DIMENSIONS, factual_summary
 from sales_backend.repositories import fde_profile
 from sales_backend.repositories.assistant import AssistantRepository
 from sales_backend.repositories.capabilities import CapabilityRepository
 from sales_backend.repositories.collaboration import scope_members
 from sales_backend.services.agent_access import require_agent_access
+from sales_backend.services import fde_profile_projection as projection
 
 
-def presentation(facts, run=None):
+def presentation(facts, run=None, *, readable_refs=()):
     populated = bool(facts["coaching_inputs"]["sources"])
     status = run["status"] if run else ("missing" if populated else "empty")
     if status not in {"empty", "missing", "queued", "running", "succeeded", "failed"}:
         status = "failed"
     result = (run.get("result") or {}) if run and status == "succeeded" else {}
-    advice = [
-        {"title": item.get("title", ""), "content": item.get("detail", "")} for item in result.get("action_plan", [])
-    ]
+    advice = projection.advice(result.get("action_plan", []), readable_refs)
     return {
         "data_source": "database",
         "contract_version": CONTRACT_VERSION,
+        "assessment_kind": "fde_factual_portrait",
         "as_of": facts["data_as_of"],
         "period": facts["period"],
         "sample_count": facts["sample_count"],
@@ -34,11 +34,13 @@ def presentation(facts, run=None):
             "summary": factual_summary(facts),
             "advice": advice,
             "reviewed_at": run["completed_at"] if run and status == "succeeded" else None,
+            "score_basis": projection.score_basis(facts),
         },
         "review_status": status,
         "facts_fingerprint": facts["facts_fingerprint"],
         "review_run_id": run["id"] if run else None,
         "evidence_coverage": facts["evidence_coverage"],
+        "coaching_coverage": projection.coaching_coverage(facts),
         "scope_note": facts["scope_note"],
     }
 
@@ -62,18 +64,16 @@ async def get_profile(connection, actor, days, *, scope="self", member_id=None, 
     result.update(scope=scope, member_id=selected_id, member_name=selected_name, can_review=can_review, history=[])
     if selected_id and (own or any(p["id"] == selected_id for p in members)):
         history = await fde_profile.profile_history(connection, selected_id, days)
-        result["history"] = [
-            {"date": r["reviewed_at"].astimezone(TZ), "dimensions": r["dimensions"], "overall_score": None}
-            for r in reversed(history)
-        ]
+        result["history"] = [projection.history_point(r) for r in reversed(history)]
         if not own and history:
             latest = history[0]
-            result["latest"]["advice"] = [
-                {"title": a.get("title", ""), "content": a.get("detail", "")} for a in latest["advice"]
-            ]
+            result["latest"]["advice"] = projection.detail(latest)["review"]["advice"]
             result["latest"]["reviewed_at"] = latest["reviewed_at"]
             result["review_run_id"] = str(latest["run_id"])
             result["review_status"] = "succeeded"
+    if own and result["review_status"] == "succeeded" and result["review_run_id"]:
+        original = await fde_profile.profile_review_detail(connection, result["review_run_id"])
+        result["latest"]["advice"] = projection.detail(original)["review"]["advice"] if original else []
     if not own:
         subject = selected_name or "所选团队"
         result["latest"]["summary"] = result["latest"]["summary"].replace("本人", subject)
@@ -95,7 +95,11 @@ async def request_review(connection, actor, days):
     facts = await fde_profile.profile_facts(connection, actor, days)
     existing = await fde_profile.matching_run(connection, actor, facts, reusable=True)
     if existing:
-        return presentation(facts, existing)
+        response = presentation(facts, existing)
+        if existing["status"] == "succeeded":
+            original = await fde_profile.profile_review_detail(connection, existing["id"])
+            response["latest"]["advice"] = projection.detail(original)["review"]["advice"] if original else []
+        return response
     if presentation(facts)["review_status"] == "empty":
         return presentation(facts)
     repo = AssistantRepository()
@@ -130,3 +134,16 @@ async def current_run_facts(connection, run):
     if facts["facts_fingerprint"] != run.facts_fingerprint:
         raise PermissionError("FDE画像事实已变化，请重新生成建议")
     return model_facts(facts)
+
+
+async def review_detail(connection, actor, run_id):
+    from sales_backend.services.authorization import require_permission
+
+    await require_permission(connection, "profile.fde_read")
+    original = await fde_profile.profile_review_detail(connection, run_id)
+    if not original:
+        raise LookupError("评估不存在或不可见")
+    can_review = str(original["subject_id"]) == actor.user_id and bool(await connection.fetchval(
+        "SELECT security.authorization_has('profile.fde_review') AND security.fde_user_is_active($1::uuid)",
+        actor.user_id))
+    return projection.detail(original, can_review=can_review)

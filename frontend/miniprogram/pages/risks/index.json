@@ -8,6 +8,7 @@
     "sb-tabs": "/ui/sb/sb-tabs/index",
     "sb-state-panel": "/ui/sb/sb-state-panel/index",
     "sb-summary-card": "/components/review-summary-card/index",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "/components/person-picker/index"
   }
 }

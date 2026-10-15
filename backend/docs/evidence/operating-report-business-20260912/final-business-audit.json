@@ -1,0 +1,73 @@
+{
+  "checked_at": "2026-09-12T08:20:45.448000+00:00",
+  "cases": [
+    {
+      "scenario": "normal-sales",
+      "account": "XS001",
+      "run_id": "0211cdfc-3bab-49ac-b970-11d694db6c75",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "elapsed_ms": 21170,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    },
+    {
+      "scenario": "normal-supervisor",
+      "account": "ZJ001",
+      "run_id": "13e00057-64b6-4830-82a4-ec3f7c811c58",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "elapsed_ms": 24177,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    },
+    {
+      "scenario": "normal-manager",
+      "account": "ZJL001",
+      "run_id": "352451db-f8a8-4261-b0d3-a362ede2f7a2",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "elapsed_ms": 27205,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    },
+    {
+      "scenario": "off",
+      "account": "XS001",
+      "run_id": "3335af18-b86b-497c-8ae7-9eef85222761",
+      "provider": "senseaudio",
+      "fallback_reason": null,
+      "elapsed_ms": 8080,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    },
+    {
+      "scenario": "blocked",
+      "account": "XS001",
+      "run_id": "69baebc9-9792-4906-999c-ec63ce7902e4",
+      "provider": "senseaudio",
+      "fallback_reason": "ControlledPlatformBlock",
+      "elapsed_ms": 8076,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    },
+    {
+      "scenario": "production",
+      "account": "XS001",
+      "run_id": "e84ba47b-bd84-4d80-96cf-e627c768d771",
+      "provider": "senseaudio",
+      "fallback_reason": "TimeoutError",
+      "elapsed_ms": 22166,
+      "formal_records_unchanged_since_predeployment": true,
+      "one_private_card": true
+    }
+  ],
+  "temporary_databases": 0,
+  "temporary_roles": 0,
+  "queued_running_reports": 0,
+  "formal_business_writes": 0,
+  "private_report_cards": 6,
+  "platform_direct_answers": 0,
+  "actual_platform_requests": 4,
+  "all_own_application_sessions_revoked": true
+}

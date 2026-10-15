@@ -1,5 +1,6 @@
 """Self-scoped portrait evidence and reuse of native asynchronous Agent runs."""
 
+from sales_backend.db import json_value
 from sales_backend.domain.fde_coaching import TASK_LIMIT, VISIT_LIMIT, coaching_inputs
 from sales_backend.domain.fde_profile import PORTRAIT_PROMPT_VERSION, portrait, window
 
@@ -178,5 +179,9 @@ async def bind_profile_run(connection, run_id, facts):
 
 
 async def profile_history(connection, user_id, days):
-    rows = await connection.fetch("SELECT * FROM security.fde_profile_history($1::uuid,$2,30)", user_id, days)
-    return [dict(row) for row in rows]
+    rows = await connection.fetch("SELECT review FROM security.fde_profile_history_v2($1::uuid,$2,30)", user_id, days)
+    return [json_value(row["review"]) for row in rows if row["review"]]
+
+
+async def profile_review_detail(connection, run_id):
+    return json_value(await connection.fetchval("SELECT security.fde_profile_review_detail($1::uuid)", str(run_id)))

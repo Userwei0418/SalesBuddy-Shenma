@@ -1,0 +1,142 @@
+{
+  "scenario": "normal",
+  "ids": {
+    "conversation_id": "930af564-2aa0-414f-9f29-764400793571",
+    "run_id": "a62f53cb-adae-42fe-af7e-dc6dd19f7a42",
+    "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd"
+  },
+  "status": "succeeded",
+  "elapsed_ms": 24186,
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 23087,
+    "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+    "platform_run": {
+      "ids": {
+        "task_id": "649b61ec-2a7d-449c-ae9d-c70045aa74be",
+        "message_id": "e60335b6-5e62-4606-9574-22b34e2d241e",
+        "conversation_id": "ed68d375-e2ec-45f8-b56b-47b371deb2c8"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 3044,
+        "first_body_byte_ms": 3044,
+        "request_started_ms": 0,
+        "first_data_event_ms": 3044,
+        "headers_received_ms": 3044,
+        "stream_completed_ms": null
+      },
+      "error_code": null,
+      "stop_state": "unconfirmed",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "TimeoutError"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "cancelled",
+      "http_status": 200,
+      "error_code": "CancelledError",
+      "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": false,
+  "prior_evidence_sha256": "b7339fba4f6109037a882389f1569130eed983c6598f6b34ee3bbd65304c7b27",
+  "original_failed_checks": [],
+  "original_evidence_path": "/var/tmp/salegent-today-business-8ab83a3/normal.json",
+  "checks": [
+    {
+      "name": "same authorized task remains pending with same sole source",
+      "passed": true
+    },
+    {
+      "name": "only original owner assigned",
+      "passed": true
+    },
+    {
+      "name": "all original task facts still unchanged",
+      "passed": true
+    },
+    {
+      "name": "existing notifications unchanged; only exact own-task monitor reminders added",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM crm.customer ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM crm.opportunity ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "protected facts unchanged: SELECT * FROM activity.visit ORDER BY id",
+      "passed": true
+    },
+    {
+      "name": "one task for source",
+      "passed": true
+    },
+    {
+      "name": "existing run succeeded and card names this task",
+      "passed": true
+    },
+    {
+      "name": "task read follows existing customer and opportunity policy",
+      "passed": true
+    },
+    {
+      "name": "task RLS agrees with existing policy",
+      "passed": true
+    },
+    {
+      "name": "another user cannot read private run",
+      "passed": true
+    },
+    {
+      "name": "another user cannot read conversation",
+      "passed": true
+    },
+    {
+      "name": "shared read does not assign this task or feed another users own planning",
+      "passed": true
+    }
+  ],
+  "new_model_calls_in_resume": 0,
+  "new_tasks_in_resume": 0,
+  "new_tasks": 1,
+  "existing_monitor_reminders": [
+    {
+      "id": "b2f3ea95-9883-4792-b153-a272574c5bb9",
+      "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd",
+      "channel": "in_app",
+      "template": "priority_task_due",
+      "recipient_user_id": "02000000-0000-0000-0000-000000000004",
+      "created_at": "2026-09-12T06:34:10.936288+00:00"
+    }
+  ],
+  "new_notifications": 1,
+  "notification_scope_correction": "Original immediate zero-notification check did not cover the later existing priority monitor. Own in-app task reminders are recorded; existing rows and external delivery are protected.",
+  "XS002_expected_task_read_status": 404,
+  "passed": true,
+  "real_business_verified": true,
+  "resume_audited_at": "2026-09-12T06:56:18.851480+00:00",
+  "resume_sessions_revoked": true
+}

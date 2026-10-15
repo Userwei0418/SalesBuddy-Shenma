@@ -1,0 +1,87 @@
+{
+  "capability": "operating_report",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:21:36.104979+00:00",
+  "same_input_sha256": "a54a6558906d43107138fb8506d034757982ae29acfe3ed9ed07073b72927192",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "raw_result": {
+    "sha256": "39ce3fa3946d8ce4ffc9d206ed57e587b7c7e976b837265a86c47c68f98b41c9",
+    "bytes": 7637,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "period": {
+        "type": "str"
+      },
+      "scope": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "safe_customers": {
+        "type": "list",
+        "count": 3
+      },
+      "attention_customers": {
+        "type": "list",
+        "count": 10
+      },
+      "action_plan": {
+        "type": "list",
+        "count": 9
+      }
+    }
+  },
+  "accepted": true,
+  "result": {
+    "sha256": "ab7016656803b0b1eb63019e586c38b1a01c2ca0ba9bcdd047b89097f5824baf",
+    "bytes": 7545,
+    "fields": {
+      "safe_customers": {
+        "type": "list",
+        "count": 3
+      },
+      "attention_customers": {
+        "type": "list",
+        "count": 10
+      },
+      "action_plan": {
+        "type": "list",
+        "count": 9
+      },
+      "title": {
+        "type": "str"
+      },
+      "period": {
+        "type": "str"
+      },
+      "scope": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 21936,
+  "ids": {
+    "task_id": "d3210756-466a-4785-aa72-c557ecfd24d2",
+    "message_id": "72aa58d4-8c43-4ded-8464-7460f9df13de",
+    "conversation_id": "5977819b-61a7-4ba2-a18d-444cc48f83be"
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 8349,
+    "first_body_byte_ms": 8349,
+    "first_data_event_ms": 8349,
+    "first_text_ms": 8350,
+    "stream_completed_ms": 21922
+  },
+  "error_code": null,
+  "answer_chars": 3274
+}

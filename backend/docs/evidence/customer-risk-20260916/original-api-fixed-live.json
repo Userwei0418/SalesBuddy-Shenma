@@ -1,0 +1,172 @@
+[
+  {
+    "case": "budget-risk",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T01:45:32.544936+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户财务负责人明确表示本季度项目预算尚未获批，采购审批因此暂停。",
+          "next_action": "销售将在2026年9月18日与客户财务负责人核实预算审批进展。"
+        },
+        {
+          "id": "SYN-FDE-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "FDE与客户技术负责人完成全部约定测试，技术指标全部通过，没有未处理的技术问题。",
+          "next_action": "FDE将在2026年9月18日向销售提供测试结果。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "result": {
+      "outcome": "risk_found",
+      "reviewed_visit_ids": [
+        "SYN-SALES-01",
+        "SYN-FDE-01"
+      ],
+      "risks": [
+        {
+          "source_visit_id": "SYN-SALES-01",
+          "risk_type": "budget_risk",
+          "title": "项目预算未获批导致采购暂停",
+          "description": "客户财务负责人明确表示本季度项目预算尚未获批，直接导致采购审批流程暂停，存在明确的资金与合规风险。",
+          "severity": "high",
+          "suggested_action": "持续跟进财务审批进度，确认预计获批时间，评估是否需调整交付计划或提供分期方案以缓解客户压力。",
+          "evidence_detail": "客户财务负责人明确表示本季度项目预算尚未获批，采购审批因此暂停。",
+          "due_at": null
+        }
+      ],
+      "reason": "拜访 SYN-SALES-01 中明确记录预算未获批且采购暂停，构成实质性经营风险；SYN-FDE-01 技术测试通过无风险。"
+    },
+    "contract_passed": true,
+    "outcome": "risk_found",
+    "expected_outcome_passed": true,
+    "budget_evidence_identified": true,
+    "elapsed_ms": 1748,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "succeeded",
+        "http_status": 200,
+        "error_type": null
+      }
+    ]
+  },
+  {
+    "case": "explicit-healthy",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T01:45:32.544936+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户决策者、财务负责人和采购负责人共同确认：预算已批准，合同已签署，款项已收齐，全部商务审批已完成，进度按期；没有竞争变更、关系异议或未解决的经营风险。",
+          "next_action": "销售将在2026年9月18日向客户发送本次确认纪要。"
+        },
+        {
+          "id": "SYN-FDE-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户技术负责人已签字确认全部技术指标、验收标准与交付成果通过，双方预期一致，没有待处理问题、延期或技术障碍。",
+          "next_action": "FDE将在2026年9月18日归档验收记录。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "result": {
+      "outcome": "no_risk_identified",
+      "reviewed_visit_ids": [
+        "SYN-SALES-02",
+        "SYN-FDE-02"
+      ],
+      "risks": [],
+      "reason": "输入覆盖完整，销售与FDE拜访记录均明确确认预算已批准、合同签署、款项收齐且技术指标验收通过，无竞争、关系或进度风险证据。"
+    },
+    "contract_passed": true,
+    "outcome": "no_risk_identified",
+    "expected_outcome_passed": true,
+    "elapsed_ms": 868,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "succeeded",
+        "http_status": 200,
+        "error_type": null
+      }
+    ]
+  }
+]

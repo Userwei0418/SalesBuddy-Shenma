@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-09-29T02:11:52.548399+00:00",
+  "scope": "public read-only; no credentials and no business writes",
+  "results": [
+    {
+      "path": "/api/v1/health/ready",
+      "status": 200,
+      "valid_json": true
+    },
+    {
+      "path": "/openapi.json",
+      "error": "HTTP Error 404: Not Found"
+    }
+  ]
+}

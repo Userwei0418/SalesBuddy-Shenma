@@ -2,7 +2,6 @@
   "navigationBarTitleText": "确认拜访记录",
   "usingComponents": {
     "opportunity-form": "/components/opportunity-form/index",
-    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index",
     "advice-actions": "/components/advice-actions/index",
     "sb-result": "/ui/sb/sb-result/index",
     "sb-ai-badge": "/ui/sb/sb-ai-badge/index",
@@ -15,6 +14,7 @@
     "sb-select": "/ui/sb/sb-select/index",
     "sb-date-picker": "/ui/sb/sb-date-picker/index",
     "t-checkbox": "/ui/tdesign/checkbox/checkbox",
+    "t-button": "/ui/tdesign/button/button",
     "t-checkbox-group": "/ui/tdesign/checkbox-group/checkbox-group",
     "t-cell": "/ui/tdesign/cell/cell",
     "t-icon": "/ui/tdesign/icon/icon"

@@ -1,0 +1,28 @@
+{
+  "workspace": "sensetime-ecosystem",
+  "bindings": [
+    {
+      "purpose": "text",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-s2-lite",
+      "has_key": true
+    },
+    {
+      "purpose": "asr",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-asr-lite-1.5-260319",
+      "has_key": true
+    },
+    {
+      "purpose": "tts",
+      "version": 0,
+      "mode": "inherit",
+      "model": "senseaudio-tts-1.5-260319",
+      "has_key": true
+    }
+  ],
+  "tests": [],
+  "bindings_unchanged": true
+}

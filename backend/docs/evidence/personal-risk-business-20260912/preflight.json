@@ -1,0 +1,32 @@
+{
+  "scenario": "normal",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "approved test actor",
+      "passed": true
+    },
+    {
+      "name": "exact approved visit set still current",
+      "passed": true
+    },
+    {
+      "name": "all source visits explicitly synthetic",
+      "passed": true
+    }
+  ],
+  "ids": {},
+  "preflight_only": true,
+  "started_at": "2026-09-11T20:02:03.835640+00:00",
+  "approved_visit_count": 12,
+  "existing_open_risk_count": 18,
+  "facts_fingerprint": "ce48598e11b15293085612645850a9542a4b0143818bcf07b79202a800a94cd3",
+  "crm_fingerprint": "9d538bfcd008524be9d9dffc3924c64d33180818c061ae696f29b98f08e91a40",
+  "protected_risk_count": 25,
+  "preflight_passed": true,
+  "real_business_verified": false,
+  "finished_at": "2026-09-11T20:02:03.912832+00:00"
+}

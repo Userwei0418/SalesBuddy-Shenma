@@ -34,6 +34,8 @@ for relative in (
         fail(f"missing required file: {relative}")
 
 for path in ROOT.rglob("*"):
+    if path.relative_to(ROOT).parts[0] == "web":
+        continue  # The Web client has its own build and dependency checks.
     if path.name in {"project.private.config.json", ".DS_Store"}:
         # WeChat generates this local file when importing the formal development project.
         continue
@@ -42,7 +44,7 @@ for path in ROOT.rglob("*"):
     if path.is_dir() and path.name in {"node_modules", "miniprogram_npm", "__pycache__"}:
         fail(f"generated directory included: {path.relative_to(ROOT)}")
 
-json_files = sorted(p for p in ROOT.rglob("*.json") if p.name != "project.private.config.json")
+json_files = sorted(p for p in ROOT.rglob("*.json") if p.name != "project.private.config.json" and p.relative_to(ROOT).parts[0] != "web")
 for path in json_files:
     json.loads(path.read_text(encoding="utf-8"))
 
@@ -79,6 +81,8 @@ banned_patterns = {
     "developer home path": re.compile(r"/Users/[^/\s]+"),
 }
 for path in ROOT.rglob("*"):
+    if path.relative_to(ROOT).parts[0] == "web":
+        continue  # The Web client has its own build and dependency checks.
     if not path.is_file() or path.suffix.lower() not in {".js", ".json", ".wxml", ".wxss", ".md"}:
         continue
     if path.name == "project.private.config.json" or path.resolve() == Path(__file__).resolve():
@@ -87,10 +91,6 @@ for path in ROOT.rglob("*"):
     for label, pattern in banned_patterns.items():
         # AppIDs identify the application; they are not credentials. Historical
         # release receipts may record the same ID as project.config.json.
-        if label == "owner AppID" and path.relative_to(ROOT).as_posix() in {"VERSION.json", "README.md"}:
-            if any(value != project["appid"] for value in pattern.findall(content)):
-                fail(f"{path.name} AppID differs from the customer project")
-            continue
         if label == "owner AppID" and (path.resolve() == project_config_path.resolve()
                                       or path.relative_to(ROOT).parts[0] == "docs"):
             continue

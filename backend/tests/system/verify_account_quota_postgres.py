@@ -1,5 +1,4 @@
-"""Independent-connection quota races, restricted to a disposable integration DB."""
-
+"""Real competing account transactions against a disposable database only."""
 import asyncio
 import os
 import re
@@ -8,105 +7,90 @@ from uuid import uuid4
 import asyncpg
 
 from sales_backend.db import set_request_context
-from sales_backend.domain.agent import ActorContext, RoleCode
-from sales_backend.repositories.operations_accounts import OperationsAccountRepository
+from sales_backend.domain.agent import ActorContext, DataScope, RoleCode
 
 
-async def verify():
-    dsn, runtime = os.environ["SALES_TEST_DATABASE_URL"], os.environ["SALES_TEST_ROLE"]
-    if not re.fullmatch(r"salegent_verify_role_[a-f0-9]+", runtime):
-        raise RuntimeError("Disposable non-bypass role required")
+async def seed(owner, limit):
+    workspace, admin = uuid4(), uuid4()
+    await owner.execute("INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,$2,'合成并发额度租户')",
+                        workspace, 'quota-'+uuid4().hex)
+    await owner.execute("""INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name)
+        VALUES($1,$2,$3,'合成管理员')""", admin, workspace, str(admin))
+    await owner.execute("""INSERT INTO platform.role_binding(workspace_id,user_ref_id,role_code,data_scope_code)
+        VALUES($1,$2,'administrator','workspace')""", workspace, admin)
+    await owner.execute("UPDATE control.tenant_account_quota SET account_limit=$2 WHERE workspace_id=$1", workspace, limit)
+    return ActorContext(workspace_id=str(workspace), user_id=str(admin), role=RoleCode.ADMINISTRATOR,
+                        data_scope=DataScope.WORKSPACE)
+
+
+async def insert(connection, actor):
+    uid = uuid4()
+    await set_request_context(connection, actor)
+    await connection.execute("""INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name)
+        VALUES($1,$2::uuid,$3,'合成并发用户')""", uid, actor.workspace_id, str(uid))
+    return uid
+
+
+async def verify(dsn):
     owner = await asyncpg.connect(dsn)
-    workspaces, people = [uuid4(), uuid4()], [uuid4(), uuid4()]
-    original_limit = None
+    connections = []
     try:
-        name = await owner.fetchval("SELECT current_database()")
-        if not re.fullmatch(r"salegent_verify_integration_[a-f0-9]+", name):
-            raise RuntimeError("Disposable integration database required")
-        original_limit = await owner.fetchval("SELECT max_active_accounts FROM security.deployment_account_quota")
-        for workspace, person in zip(workspaces, people):
-            await owner.execute("INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,$2,'额度并发隔离公司')", workspace, str(workspace))
-            await owner.execute("INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name) VALUES($1,$2,$3,'隔离管理员')", person, workspace, str(person))
-            await owner.execute("INSERT INTO platform.role_binding(workspace_id,user_ref_id,role_code,data_scope_code) VALUES($1,$2,'administrator','workspace')", workspace, person)
+        assert (await owner.fetchval('SELECT current_database()')).startswith('salegent_verify_integration_')
+        runtime = os.environ['SALES_TEST_ROLE']
+        assert re.fullmatch(r'salegent_verify_role_[a-f0-9]+', runtime)
+        actor = await seed(owner, 4)
+        other = await seed(owner, 2)
+        for _ in range(12):
+            connection = await asyncpg.connect(dsn)
+            await connection.execute(f'SET ROLE "{runtime}"')
+            await connection.execute("SET lock_timeout='5s'; SET statement_timeout='10s'")
+            connections.append(connection)
 
-        async def assert_counter(expected):
-            row = await owner.fetchrow("""SELECT active_accounts,(SELECT count(*) FROM platform.user_ref
-                WHERE status='active' AND deleted_at IS NULL AND COALESCE(attributes->>'platform_managed','false')<>'true') AS actual
-                FROM security.deployment_account_quota""")
-            assert row["active_accounts"] == row["actual"] == expected, dict(row)
+        async def create(connection, identity=actor):
+            async with connection.transaction():
+                return await insert(connection, identity)
 
-        async def race(*, restore=False, isolation="read_committed", rollback_first=False):
-            ids = [uuid4(), uuid4()]
-            if restore:
-                await owner.execute("INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name,status) VALUES($1,$2,$3,'等待启用','inactive')", ids[1], workspaces[1], str(ids[1]))
-            initial = await owner.fetchval("SELECT active_accounts FROM security.deployment_account_quota")
-            await owner.execute("UPDATE security.deployment_account_quota SET max_active_accounts=$1", initial + 1)
-            ready, gate, first_written = 0, asyncio.Event(), asyncio.Event()
+        async with asyncio.timeout(20):
+            outcomes = await asyncio.gather(*(create(c) for c in connections), return_exceptions=True)
+        accepted = [x for x in outcomes if not isinstance(x, BaseException)]
+        assert len(accepted) == 3, outcomes
+        assert all(isinstance(x, asyncpg.PostgresError) and x.sqlstate == 'P7429'
+                   for x in outcomes if isinstance(x, BaseException)), outcomes
+        row = await owner.fetchrow("""SELECT q.active_accounts,(SELECT count(*) FROM platform.user_ref u
+            WHERE u.workspace_id=q.workspace_id AND u.status='active' AND u.deleted_at IS NULL) AS actual
+            FROM control.tenant_account_quota q WHERE workspace_id=$1::uuid""", actor.workspace_id)
+        assert row['active_accounts'] == row['actual'] == 4
+        print('PASS 12 competing restricted transactions accept exactly 3 free seats; rejected rows roll back')
 
-            async def attempt(index):
-                nonlocal ready
-                connection = await asyncpg.connect(dsn)
-                tx = connection.transaction(isolation=isolation)
-                await tx.start()
-                try:
-                    await connection.execute(f'SET LOCAL ROLE "{runtime}"')
-                    assert not await connection.fetchval("SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname=current_user")
-                    actor = ActorContext(workspace_id=str(workspaces[index]), user_id=str(people[index]),
-                                         role=RoleCode.ADMINISTRATOR, data_scope="workspace", team_ids=())
-                    await set_request_context(connection, actor)
-                    # Materialize each REPEATABLE READ snapshot before the race.
-                    await connection.fetchval("SELECT count(*) FROM platform.user_ref")
-                    ready += 1
-                    if ready == 2:
-                        gate.set()
-                    await gate.wait()
-                    if rollback_first and index == 1:
-                        await first_written.wait()
-                    if index == 0:
-                        # Exercise the normal repository lock order against direct SQL.
-                        await OperationsAccountRepository().lock_workspace(connection, str(workspaces[index]))
-                    if restore and index == 1:
-                        await connection.execute("UPDATE platform.user_ref SET status='active' WHERE id=$1", ids[index])
-                    else:
-                        await connection.execute("INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name) VALUES($1,$2,$3,'并发体验账号')", ids[index], workspaces[index], str(ids[index]))
-                    if rollback_first and index == 0:
-                        first_written.set()
-                        await tx.rollback()
-                        return "rolled_back"
-                    await tx.commit()
-                    return "created"
-                except (asyncpg.RaiseError, asyncpg.SerializationError) as exc:
-                    await tx.rollback()
-                    return type(exc).__name__
-                finally:
-                    await connection.close()
-
-            outcomes = await asyncio.wait_for(asyncio.gather(attempt(0), attempt(1)), timeout=20)
-            assert outcomes.count("created") == 1, outcomes
-            assert set(outcomes) <= {"created", "RaiseError", "SerializationError", "rolled_back"}, outcomes
-            await assert_counter(initial + 1)
-            await owner.execute("DELETE FROM platform.user_ref WHERE id=ANY($1::uuid[])", ids)
-            await assert_counter(initial)
-            return outcomes
-
-        results = {
-            "cross_company_create": await race(),
-            "create_vs_restore": await race(restore=True),
-            "repeatable_read": await race(isolation="repeatable_read"),
-            "rollback": await race(rollback_first=True),
-        }
-        print("ACCOUNT_QUOTA_CONCURRENCY_OK", results, flush=True)
+        # Leave one seat. A rolled-back transaction cannot permanently consume it.
+        await owner.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1", accepted[0])
+        first, second, third = connections[:3]
+        transaction = first.transaction()
+        await transaction.start()
+        held = await insert(first, actor)
+        pending = asyncio.create_task(create(second))
+        try:
+            async with asyncio.timeout(4):
+                while not await owner.fetchval("SELECT wait_event_type='Lock' FROM pg_stat_activity WHERE pid=$1", second.get_server_pid()):
+                    if pending.done():
+                        raise AssertionError('Competing account did not wait for the reserved seat')
+                    await asyncio.sleep(0.02)
+            # A blocked company never takes the other company's slot or lock.
+            async with asyncio.timeout(2):
+                await create(third, other)
+        finally:
+            await transaction.rollback()
+        async with asyncio.timeout(5):
+            await pending
+        assert not await owner.fetchval('SELECT EXISTS(SELECT 1 FROM platform.user_ref WHERE id=$1)', held)
+        assert await owner.fetchval('SELECT active_accounts FROM control.tenant_account_quota WHERE workspace_id=$1::uuid', actor.workspace_id) == 4
+        assert await owner.fetchval('SELECT active_accounts FROM control.tenant_account_quota WHERE workspace_id=$1::uuid', other.workspace_id) == 2
+        print('PASS rollback releases the pending slot; a second tenant keeps making progress independently')
     finally:
-        if original_limit is not None:
-            try:
-                # Immutable audit rows reference these actors. Retire their
-                # synthetic companies; the isolated runner drops the whole DB.
-                await owner.execute("UPDATE platform.user_ref SET status='inactive',deleted_at=clock_timestamp() WHERE workspace_id=ANY($1::uuid[])", workspaces)
-                await owner.execute("UPDATE platform.workspace SET deleted_at=clock_timestamp() WHERE id=ANY($1::uuid[])", workspaces)
-            finally:
-                await owner.execute("UPDATE security.deployment_account_quota SET max_active_accounts=$1", original_limit)
+        for connection in connections:
+            await connection.close()
         await owner.close()
 
 
-if __name__ == "__main__":
-    asyncio.run(verify())
+if __name__ == '__main__':
+    asyncio.run(verify(os.environ['SALES_TEST_DATABASE_URL']))

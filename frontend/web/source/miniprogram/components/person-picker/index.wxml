@@ -1,0 +1,17 @@
+<root-portal wx:if="{{open}}">
+  <sb-sheet visible="{{open}}" title="{{title}}" description="先选团队，再选择成员" confirmLabel="{{multiple && draft.length ? '确认（' + draft.length + '人）' : '确认'}}" confirmDisabled="{{!canConfirm}}" bind:confirm="confirm" bind:close="close">
+    <view slot="header" class="person-header">
+      <scroll-view scroll-x class="person-teams"><view class="person-team-list"><button size="mini" class="person-team {{!teamId?'person-team-active':''}}" data-id="" bindtap="chooseTeam">全部团队</button><button wx:for="{{teamRows}}" wx:key="id" size="mini" class="person-team {{teamId===item.id?'person-team-active':''}}" data-id="{{item.id}}" bindtap="chooseTeam">{{item.name}}</button></view></scroll-view>
+      <sb-search plain value="{{query}}" placeholder="搜索姓名、账号或团队" maxlength="{{100}}" bind:change="search" bind:clear="search"/>
+      <scroll-view wx:if="{{selectedRows.length}}" scroll-x class="person-selected"><view class="person-selected-list"><text>已选 {{draft.length}} 人</text><view wx:for="{{selectedRows}}" wx:key="id" class="person-selected-chip"><text>{{item.name}}</text><text wx:if="{{item.account_code}}" class="person-selected-account">{{item.account_code}}</text></view></view></scroll-view>
+    </view>
+    <sb-state-panel wx:if="{{loading}}" size="compact" state="loading" title="正在加载人员…"/>
+    <sb-state-panel wx:elif="{{error}}" size="compact" state="error" title="{{error}}" bind:retry="retry"/>
+    <block wx:else>
+      <t-cell wx:if="{{allowAll}}" title="{{allLabel}}" description="全部授权成员，不受当前团队和搜索限制" right-icon="{{!draft.length?'check':''}}" hover bind:click="chooseAll"/>
+      <t-cell wx:for="{{rows}}" wx:key="id" title="{{item.name}}" description="{{(item.account_code || '未标注账号') + ' · ' + (item.teamLabel || '未分组')}}" right-icon="{{item.checked?'check':''}}" hover data-id="{{item.id}}" bind:click="toggle" aria-label="{{item.name}}{{item.checked?'，已选中':''}}"/>
+      <view wx:if="{{!rows.length}}" class="person-state">没有匹配的成员，请调整团队或关键词</view>
+    </block>
+    <view class="person-note {{selectionError?'person-error':''}}">{{selectionError || (multiple?'切换团队或搜索会保留已选人员':'确认后应用所选成员')}}</view>
+  </sb-sheet>
+</root-portal>

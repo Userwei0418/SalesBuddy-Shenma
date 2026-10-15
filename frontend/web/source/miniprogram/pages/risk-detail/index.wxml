@@ -1,0 +1,30 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{loading}}" class="risk-load-state">正在读取风险…</view>
+<view wx:elif="{{loadError}}" class="risk-load-state"><text>{{loadError}}</text><button bindtap="refreshRisk">重新读取</button></view>
+<view wx:elif="{{risk}}" class="detail-page status-{{risk.statusGroup}} traffic-{{risk.signal.tone}}">
+  <view class="detail-hero">
+    <sb-summary-card appearance="soft" tone="{{risk.signal.tone === 'red' ? 'bad' : risk.signal.tone === 'yellow' ? 'watch' : ''}}" title="{{risk.customerName}}" subtitle="{{risk.title}}" meta="{{risk.owner}} · {{risk.team}}" tags="{{[{label:risk.statusLabel,tone:risk.signal.tone === 'red' ? 'bad' : risk.signal.tone === 'yellow' ? 'watch' : risk.signal.tone === 'green' ? 'good' : 'pending'},{label:risk.severity + '风险'}]}}" />
+  </view>
+
+  <view class="detail-body">
+    <view class="section-card summary-card"><view class="section-title">风险说明</view><view class="summary-text">{{risk.description}}</view><view class="summary-time">识别于 {{risk.openedLabel}}</view></view>
+
+    <view class="section-card evidence-card"><view class="section-title">判断依据</view><view wx:for="{{risk.evidence}}" wx:key="*this" class="evidence-row"><view>{{index + 1}}</view><text>{{item}}</text></view></view>
+
+    <view class="section-card action-card"><view class="section-title">建议下一步</view><view class="action-text">{{risk.nextAction}}</view></view>
+
+    <view wx:if="{{risk.current_decision}}" class="section-card"><view class="section-title">{{risk.decisionLabel}}</view><view class="summary-text">{{risk.current_decision.note}}</view><view class="summary-time">{{risk.current_decision.actor_name}} · {{risk.decisionTime}}</view><view wx:if="{{risk.decisionStale}}" class="decision-notice">建议或风险已更新，原确认仅供追溯</view></view>
+    <view wx:if="{{refreshRequired}}" class="section-card"><view class="decision-notice">{{decisionError || '风险已更新，请刷新后核对再操作'}}</view><button disabled="{{submitting || decisionSubmitting}}" bindtap="refreshRisk">刷新风险</button></view>
+    <view wx:if="{{risk.canDecide}}" class="section-card"><view class="section-title">确认处理建议</view><view class="resolution-help">确认建议会保留你的意见，风险仍保持未关闭。</view><view class="decision-options"><button class="{{decisionChoice === 'adopt' ? 'selected' : ''}}" disabled="{{decisionSubmitting || submitting || refreshRequired}}" data-value="adopt" bindtap="chooseDecisionOption">采纳建议</button><button class="{{decisionChoice === 'defer' ? 'selected' : ''}}" disabled="{{decisionSubmitting || submitting || refreshRequired}}" data-value="defer" bindtap="chooseDecisionOption">暂不采纳</button></view><sb-textarea layout="stacked" plain disabled="{{decisionSubmitting || submitting || refreshRequired}}" maxlength="{{2000}}" value="{{decisionNote}}" placeholder="说明采用或暂不采用的原因" bind:change="inputDecisionNote" /><view wx:if="{{decisionError && !refreshRequired}}" class="decision-notice">{{decisionError}}</view><button class="decision-submit" disabled="{{!decisionChoice || !decisionNote || decisionSubmitting || submitting || refreshRequired}}" loading="{{decisionSubmitting}}" bindtap="confirmDecision">保存建议确认</button></view>
+    <view wx:if="{{risk.historyRows.length}}" class="section-card"><view class="section-title">处理历史</view><view wx:for="{{risk.historyRows}}" wx:key="id" class="risk-history"><view>{{item.label}} {{item.decision}}</view><text>{{item.note}}</text><label>{{item.actor}} · {{item.time}}</label></view></view>
+    <view wx:if="{{risk.status === 'resolved'}}" class="section-card resolved-card"><view class="resolved-main"><view class="resolved-head"><sb-status-tag tone="good" label="已解除" /><text>{{risk.resolvedBy}} 已解除风险</text></view><label>{{risk.resolvedLabel}}</label><view class="resolved-note">{{risk.resolutionNote}}</view></view></view>
+
+    <view wx:elif="{{canResolveRisk && risk.canResolve}}" class="section-card resolution-card"><view class="section-title">解除风险</view><view class="resolution-help">请填写已消除风险的事实依据，便于管理者和后续跟进人员追溯。</view><sb-textarea layout="stacked" plain disabled="{{decisionSubmitting || submitting || refreshRequired}}" maxlength="{{500}}" value="{{resolutionNote}}" placeholder="例如：客户已确认下一步方案和时间，原风险事项已闭环" bind:change="inputResolutionNote" /></view>
+    <view wx:else class="section-card readonly-card"><view class="section-title">风险解除权限</view><view class="summary-text">当前账号可查看该风险，暂无解除权限。</view></view>
+  </view>
+
+  <sb-bottom-bar wx:if="{{risk.status !== 'resolved' && canResolveRisk && risk.canResolve}}" class="bottom-bar" primaryLabel="确认解除风险" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="confirmResolve" note="解除记录会保留处理人、时间和依据" inactive="{{noteCount < 5 || decisionSubmitting || refreshRequired}}" disabledReason="{{refreshRequired ? '请先刷新风险' : decisionSubmitting ? '请等待建议确认完成' : '请填写风险解除依据（至少 5 个字）'}}" />
+</view>
+
+</block>

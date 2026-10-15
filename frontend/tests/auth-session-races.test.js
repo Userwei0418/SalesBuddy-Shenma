@@ -186,9 +186,38 @@ test('upload progress stops at a session boundary and normal uploads can refresh
   h.reply(h.refreshes()[0], 200, auth('a', 'rotated')); await tick();
   assert.equal(h.uploads[1].header.Authorization, 'Bearer access-rotated');
   h.uploads[1].progress({ progress: 80 });
-  h.uploadReply(h.uploads[1], 200, { id: 'real-upload-contract' });
-  assert.deepEqual(await upload, { id: 'real-upload-contract' });
+  h.uploadReply(h.uploads[1], 202, { id: 'real-upload-contract', status: 'queued' });
+  assert.deepEqual(await upload, { id: 'real-upload-contract', status: 'queued' });
   h.api.saveAuth(auth('b'));
   h.uploads[1].progress({ progress: 100 });
   assert.deepEqual(progress, [10, 80]);
+});
+
+test('金额规则每次保存均新读，不能复用在途旧策略且切账号丢弃旧结果', async () => {
+  const h=harness();h.api.saveAuth(auth('a'));
+  const old=h.api.getCompanyPresentation(), fresh=h.api.getCompanyPresentation();
+  assert.equal(h.requests.length,2);assert(h.requests.every(r=>r.url.endsWith('/company-rules/presentation')));
+  h.reply(h.requests[1],200,{opportunity_amount:{definition:{schema_version:1,warning_threshold_wan:1000}}});
+  assert.equal((await fresh).opportunity_amount.definition.warning_threshold_wan,1000);
+  const rejected=assert.rejects(old,changedSession);h.api.saveAuth(auth('b'));
+  h.reply(h.requests[0],200,{opportunity_amount:{definition:{schema_version:1,warning_threshold_wan:2000}}});await rejected;
+});
+
+test('公开公司入口查询不附带会话Token，跨会话或地址迟到结果均拒绝',async()=>{
+  for(const change of ['session','base']) {
+    const h=harness();h.api.saveAuth(auth('a'));
+    const pending=assert.rejects(h.api.getCompanyEntry('company-a'),changedSession);
+    const request=h.requests[0];assert.equal(request.header.Authorization,undefined);
+    assert.match(request.url,/\/auth\/company-entry\?company_code=company-a$/);
+    if(change==='session') h.api.saveAuth(auth('b'));else h.storage.set('salesApiBaseUrl','https://other.invalid/api/v1');
+    h.reply(request,200,{company_code:'company-a',company_name:'公司甲'});await pending;
+  }
+});
+
+test('取消在途登录不注销已有会话，但旧密码响应不得覆盖其身份',async()=>{
+  const h=harness();h.api.saveAuth(auth('current'));
+  const pending=assert.rejects(h.api.loginWithAccount('other','test-only-password',null,'company-b'),changedSession);
+  h.api.cancelPendingLogin();assert.equal(h.api.getAuth().actor.user_id,'current');
+  h.reply(h.requests[0],200,auth('other'));await pending;
+  assert.equal(h.api.getAuth().actor.user_id,'current');assert.equal(h.requests.length,1);
 });

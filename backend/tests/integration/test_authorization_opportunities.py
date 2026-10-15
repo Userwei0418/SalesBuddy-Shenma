@@ -1,11 +1,14 @@
 """Configured grants reach real business writes without changing business appointments."""
 from uuid import uuid4
 
+import asyncpg
 import pytest
 
 from sales_backend.contracts.authorization import AccountAuthorizationSave
 from sales_backend.db import set_request_context
 from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.repositories.operations_accounts import OperationsAccountRepository
+from tests.integration.test_authorization_store import resolve
 from tests.integration.test_operations_api import client_for
 from tests.integration.test_operations_claims_sql import create_customer
 from tests.integration.test_sales_opportunity_permissions import account_fixture, native_login, opportunity_payload
@@ -74,9 +77,6 @@ async def test_deny_update_blocks_existing_sales_permission_but_preserves_create
 
 
 async def test_self_creation_cannot_assign_an_unrelated_team_without_an_explicit_team_grant(connection):
-    import asyncpg
-    from tests.integration.test_authorization_store import resolve
-
     customer = await create_customer(connection)
     user, _, admin = await account_fixture(connection, ['sales'])
     _, foreign_teams, _ = await account_fixture(connection, ['sales'])
@@ -98,6 +98,80 @@ async def test_self_creation_cannot_assign_an_unrelated_team_without_an_explicit
         # Extra functionality did not create a membership or sales appointment.
         await set_request_context(connection,admin)
         assert not await connection.fetchval('SELECT 1 FROM platform.team_membership WHERE user_ref_id=$1::uuid AND team_id=$2::uuid',user['id'],team)
+
+
+async def test_business_read_adapter_keeps_sales_self_scope_without_expanding_writes(connection):
+    user, teams, admin = await account_fixture(connection, ['sales'])
+    foreign_user, foreign, _ = await account_fixture(connection, ['sales'])
+    current = await resolve(connection, admin, user, 'sales')
+    assert not await connection.fetchval(
+        "SELECT security.authorization_business_read('opportunity.read',$1::uuid,$2::uuid,ARRAY[$3::uuid],false)",
+        admin.workspace_id, user['id'], teams['sales'],
+    )
+    assert not await connection.fetchval(
+        "SELECT security.authorization_business_read('opportunity.read',$1::uuid,$2::uuid,ARRAY[$3::uuid],false)",
+        admin.workspace_id, user['id'], foreign['sales'],
+    )
+    # The adapter is read-only: a team read grant cannot be used as an update grant.
+    assert not await connection.fetchval(
+        "SELECT security.authorization_allows('opportunity.update',$1::uuid,$2::uuid,ARRAY[$3::uuid],false)",
+        admin.workspace_id, foreign_user['id'], foreign['sales'],
+    )
+    assert current.workspace_id == admin.workspace_id
+
+
+async def test_supervisor_business_read_includes_active_descendants_only(connection):
+    user, teams, admin = await account_fixture(connection, ['supervisor'])
+    repo = OperationsAccountRepository()
+    child = await repo.save_department(connection, admin, None, dict(
+        code=uuid4().hex, name='权限测试-主管子团队', kind='sales', status='active', parent_team_id=teams['supervisor'],
+    ))
+    sibling_in_department = await repo.save_department(connection, admin, None, dict(
+        code=uuid4().hex, name='权限测试-主管同部门团队', kind='sales', status='active',
+        parent_team_id=teams['supervisor'],
+    ))
+    _, sibling, _ = await account_fixture(connection, ['sales'])
+    await resolve(connection, admin, user, 'supervisor')
+    assert await connection.fetchval(
+        "SELECT security.authorization_business_read('battle_map.read',$1::uuid,NULL,ARRAY[$2::uuid],false)",
+        admin.workspace_id, child['id'],
+    )
+    assert await connection.fetchval(
+        "SELECT security.authorization_business_read('battle_map.read',$1::uuid,NULL,ARRAY[$2::uuid],false)",
+        admin.workspace_id, sibling_in_department['id'],
+    )
+    assert not await connection.fetchval(
+        "SELECT security.authorization_business_read('battle_map.read',$1::uuid,NULL,ARRAY[$2::uuid],false)",
+        admin.workspace_id, sibling['sales'],
+    )
+
+
+async def test_nested_supervisor_does_not_expand_to_parent_siblings(connection):
+    user, teams, admin = await account_fixture(connection, ['supervisor'])
+    repo = OperationsAccountRepository()
+    appointed = await repo.save_department(connection, admin, None, dict(
+        code=uuid4().hex, name='权限测试-嵌套任命团队', kind='sales', status='active',
+        parent_team_id=teams['supervisor'],
+    ))
+    appointed_child = await repo.save_department(connection, admin, None, dict(
+        code=uuid4().hex, name='权限测试-嵌套任命子团队', kind='sales', status='active',
+        parent_team_id=appointed['id'],
+    ))
+    parent_sibling = await repo.save_department(connection, admin, None, dict(
+        code=uuid4().hex, name='权限测试-嵌套任命同级团队', kind='sales', status='active',
+        parent_team_id=teams['supervisor'],
+    ))
+    # Move the supervisor appointment below the root. The read scope must
+    # start there, rather than climbing back to the root and widening again.
+    await connection.execute(
+        "UPDATE platform.team_membership SET team_id=$1::uuid WHERE user_ref_id=$2::uuid AND membership_role='supervisor'",
+        appointed['id'], user['id'],
+    )
+    await resolve(connection, admin, user, 'supervisor')
+    allowed = "SELECT security.authorization_business_read('battle_map.read',$1::uuid,NULL,ARRAY[$2::uuid],false)"
+    assert await connection.fetchval(allowed, admin.workspace_id, appointed['id'])
+    assert await connection.fetchval(allowed, admin.workspace_id, appointed_child['id'])
+    assert not await connection.fetchval(allowed, admin.workspace_id, parent_sibling['id'])
 
 
 async def test_operations_extra_create_returns_only_authorized_team_choices_without_inventing_appointments(connection):

@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+"""Atomic local PostgreSQL backup; no application service or database mutations."""
+
+import argparse
+import datetime as dt
+import fcntl
+import os
+from pathlib import Path
+import pwd
+import re
+import shlex
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+
+
+DEFAULTS = {
+    "DB_KEEP_BACKUPS": "3",
+    "DB_MAX_AGE_DAYS": "14",
+    "MIN_FREE_GIB": "8",
+    "DB_BACKUP_DIR": "/var/backups/sales-management",
+    "DB_SOCKET_DIR": "/tmp",
+    "DB_OS_USER": "postgres",
+    "PG_BIN_DIR": "/usr/bin",
+    "DB_BACKUP_LOCK_FILE": "/run/lock/sales-db-backup.lock",
+    "DB_BACKUP_TIMEOUT_SECONDS": "3300",
+}
+BACKUP_NAME = re.compile(r"sales_saas_([0-9]{8}_[0-9]{6})\.dump\Z")
+
+
+def configuration(path):
+    config = dict(DEFAULTS)
+    # Parse KEY=value as data. Never source a file or evaluate shell substitutions.
+    for number, line in enumerate(path.read_text().splitlines(), 1):
+        tokens = shlex.split(line, comments=True)
+        if not tokens:
+            continue
+        if len(tokens) != 1 or not re.match(r"^[A-Z][A-Z0-9_]*=", tokens[0]):
+            raise ValueError(f"invalid configuration syntax at line {number}")
+        key, value = tokens[0].split("=", 1)
+        if key in DEFAULTS:
+            config[key] = value
+    for key in ("DB_KEEP_BACKUPS", "DB_MAX_AGE_DAYS", "MIN_FREE_GIB", "DB_BACKUP_TIMEOUT_SECONDS"):
+        config[key] = int(config[key])
+        if config[key] < (0 if key == "MIN_FREE_GIB" else 1):
+            raise ValueError(f"invalid {key}")
+    for key in ("DB_BACKUP_DIR", "DB_SOCKET_DIR", "PG_BIN_DIR", "DB_BACKUP_LOCK_FILE"):
+        config[key] = Path(config[key])
+        if not config[key].is_absolute():
+            raise ValueError(f"{key} must be absolute")
+    return config
+
+
+class InsufficientSpace(RuntimeError):
+    pass
+
+
+class BackupInterrupted(RuntimeError):
+    def __init__(self, signum):
+        self.signum = signum
+        super().__init__(f"interrupted by {signal.Signals(signum).name}")
+
+
+def handle_signal(signum, _frame):
+    # Give the finally blocks time to terminate the export and unlink its file.
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    raise BackupInterrupted(signum)
+
+
+def check_free_space(directory, required):
+    free = shutil.disk_usage(directory).free
+    if free < required:
+        raise InsufficientSpace(
+            f"insufficient free space: {free} bytes; need {required}; "
+            "existing backups and application services unchanged")
+
+
+def stop_export(process):
+    # start_new_session gives this export its own process group, including sudo
+    # and pg_dump. Terminate only that group, never unrelated database processes.
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    try:
+        process.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        pass
+    # A stubborn descendant can survive even when its parent exits promptly.
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait()
+
+
+def export_database(command, output, directory, required, timeout):
+    process = subprocess.Popen(command, stdout=output, start_new_session=True)
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            check_free_space(directory, required)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise RuntimeError(f"pg_dump exceeded timeout of {timeout} seconds")
+            try:
+                returncode = process.wait(timeout=min(1, remaining))
+            except subprocess.TimeoutExpired:
+                continue
+            if returncode:
+                raise subprocess.CalledProcessError(returncode, command)
+            check_free_space(directory, required)
+            return
+    except BaseException:
+        stop_export(process)
+        raise
+
+
+def candidates(directory):
+    result = []
+    with os.scandir(directory) as entries:
+        for entry in entries:
+            match = BACKUP_NAME.fullmatch(entry.name)
+            if not match or not entry.is_file(follow_symlinks=False):
+                continue
+            try:
+                stamp = dt.datetime.strptime(match[1], "%Y%m%d_%H%M%S")
+            except ValueError:
+                continue
+            result.append((stamp, Path(entry.path)))
+    return sorted(result, reverse=True)
+
+
+def rotate(directory, keep, age, restore, now):
+    # Count only verified custom-format archives as recovery points. Keep broken
+    # or unrecognised files for diagnosis; never recursively inspect rollback dirs.
+    valid = []
+    for stamp, path in candidates(directory):
+        check = subprocess.run([str(restore), "--list", str(path)],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if check.returncode == 0:
+            valid.append((stamp, path))
+        else:
+            print(f"WARNING unverified archive preserved: {path.name}", file=sys.stderr)
+    for index, (stamp, path) in enumerate(valid):
+        if index == 0:
+            continue  # Always preserve at least the latest successful backup.
+        if index >= keep or now - stamp > dt.timedelta(days=age):
+            path.unlink()
+            print(f"PRUNED {path.name}")
+
+
+def backup(config):
+    directory = config["DB_BACKUP_DIR"]
+    directory.mkdir(parents=True, exist_ok=True, mode=0o750)
+    lock_path = config["DB_BACKUP_LOCK_FILE"]
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print("SKIPPED another database backup is running")
+            return 0
+        required = config["MIN_FREE_GIB"] * 1024**3
+        check_free_space(directory, required)
+        account = pwd.getpwnam(config["DB_OS_USER"])
+        dump = config["PG_BIN_DIR"] / "pg_dump"
+        restore = config["PG_BIN_DIR"] / "pg_restore"
+        command = [str(dump), "-h", str(config["DB_SOCKET_DIR"]), "-Fc", "sales_saas"]
+        if os.geteuid() != account.pw_uid:
+            command = ["sudo", "-n", "-u", account.pw_name, "--"] + command
+        now = dt.datetime.now()
+        name = f"sales_saas_{now:%Y%m%d_%H%M%S}.dump"
+        final = directory / name
+        if final.exists() or final.is_symlink():
+            raise RuntimeError("backup filename already exists; retry in a later second")
+        fd, temporary_name = tempfile.mkstemp(prefix=f".{name}.", suffix=".partial", dir=directory)
+        temporary = Path(temporary_name)
+        try:
+            with os.fdopen(fd, "wb") as output:
+                export_database(command, output, directory, required,
+                                config["DB_BACKUP_TIMEOUT_SECONDS"])
+                output.flush()
+                os.fsync(output.fileno())
+            subprocess.run([str(restore), "--list", str(temporary)],
+                           stdout=subprocess.DEVNULL, check=True)
+            if os.geteuid() == 0:
+                os.chown(temporary, 0, account.pw_gid)
+            temporary.chmod(0o640)
+            temporary.rename(final)
+            # Make the publication durable before removing any older backups.
+            directory_fd = os.open(directory, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+            print(f"BACKUP_OK {final.name} bytes={final.stat().st_size}")
+            rotate(directory, config["DB_KEEP_BACKUPS"], config["DB_MAX_AGE_DAYS"], restore, now)
+        finally:
+            temporary.unlink(missing_ok=True)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=Path("/etc/server-retention.conf"))
+    args = parser.parse_args()
+    signal.signal(signal.SIGTERM, handle_signal)
+    signal.signal(signal.SIGINT, handle_signal)
+    try:
+        return backup(configuration(args.config))
+    except InsufficientSpace as exc:
+        print(f"BACKUP_FAILED {exc}", file=sys.stderr)
+        return 75
+    except BackupInterrupted as exc:
+        print(f"BACKUP_FAILED {exc}", file=sys.stderr)
+        return 128 + exc.signum
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.CalledProcessError) as exc:
+        print(f"BACKUP_FAILED {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

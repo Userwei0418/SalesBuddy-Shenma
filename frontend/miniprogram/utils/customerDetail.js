@@ -1,3 +1,4 @@
+const customerIdentity = require('./customerIdentity');
 const { statusLight, taskLight } = require('./statusLight');
 const { opportunitySignal, visitSignal } = require('./customerSignals');
 const { QUADRANTS } = require("./quadrant");
@@ -171,6 +172,7 @@ function mapScore(value) {
 }
 
 function normalizeCustomerSummary(item) {
+  const identity = customerIdentity.summary(item);
   const potential = mapScore(item.potential_score !== undefined ? item.potential_score : item.potential);
   const relationship = mapScore(item.relationship_score !== undefined ? item.relationship_score : item.relationship);
   const hasMapScores = potential !== null && relationship !== null;
@@ -179,15 +181,16 @@ function normalizeCustomerSummary(item) {
     (item.plan_close_dates || []).map(date=>({date}));
   return {
     ...item,
+    ...identity,
     plan_close_periods: planPeriods.map(period=>({date:period && period.date || null,
       year:period && period.year != null ? period.year : null,quarter:period && period.quarter != null ? period.quarter : null})),
     owner: item.owner_name || item.owner || "待分配",
     team: item.team_name || item.team || "待分配团队",
     level: normalizeCustomerLevel(item.level_code || item.level),
-    potential, relationship, hasMapScores,
-    potentialText: potential === null ? '待评估' : String(potential),
-    relationshipText: relationship === null ? '待评估' : String(relationship),
-    quadrant,
+    potential:identity.isCustomerIdentity?potential:null, relationship:identity.isCustomerIdentity?relationship:null, hasMapScores:identity.isCustomerIdentity && hasMapScores,
+    potentialText: !identity.isCustomerIdentity ? '不适用' : potential === null ? '待评估' : String(potential),
+    relationshipText: !identity.isCustomerIdentity ? '不适用' : relationship === null ? '待评估' : String(relationship),
+    quadrant:identity.isCustomerIdentity?quadrant:'不适用',
     signal:statusLight(item.risk_title || (item.risk && item.risk !== '暂无重大风险') ? 'yellow' : 'green',item.risk_title || item.risk || '当前未发现风险'),
     risk: item.risk_title || item.risk || "暂无重大风险",
     latestVisitAt: item.latest_visit_at || null,
@@ -307,7 +310,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
   normalizedOpportunities.forEach(o=>{o.relatedVisits=visits.filter(v=>v.opportunityId===o.id || v.linkedOpportunities.some(link=>String(link.id)===String(o.id)));o.relatedTasks=tasks.filter(t=>t.opportunityId===o.id);});
   const completedTaskCount = summary ? Number(taskStatusCounts.completed || 0) : tasks.filter((item) => item.status === "completed").length;
   const statusRisk = summary ? summary.status_risk : (raw.risks || []).find(risk => risk.status !== "resolved");
-  const openRisk = summary ? summary.open_risk : (raw.risks || []).find((risk) => !["resolved", "accepted"].includes(risk.status));
+  const openRisk = summary ? summary.open_risk : (raw.risks || []).find((risk) => risk.status !== 'resolved');
   const contacts = (raw.contacts || []).map((contact) => ({
     id: contact.id,
     name: contact.name,
@@ -328,7 +331,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
   const detail = {
     ...customer,
     industry: raw.industry_code || "待补充",
-    customerType: CUSTOMER_TYPE_NAME[raw.customer_type_code] || raw.customer_type_code || "待补充",
+    customerType: customer.isCustomerIdentity ? CUSTOMER_TYPE_NAME[raw.customer_type_code] || raw.customer_type_code || "待补充" : "不适用",
     annualValue: summary ? (summary.open_amount == null ? "—" : amountText(summary.open_amount)) : (opportunities.some(item=>item.status==="open"&&(item.amount==null||Number(item.amount)<0)) ? "—" : amountText(opportunities.filter(item=>item.status==="open").reduce((sum,item)=>sum+Number(item.amount),0))),
     cooperationYears: (raw.cooperation_years ?? attributes.cooperation_years) !== null && (raw.cooperation_years ?? attributes.cooperation_years) !== undefined ? `${raw.cooperation_years ?? attributes.cooperation_years}年` : "未登记",
     cooperationPending: (raw.cooperation_years ?? attributes.cooperation_years) === null || (raw.cooperation_years ?? attributes.cooperation_years) === undefined,
@@ -338,7 +341,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
     currentOpportunitySummary: `${primaryOpportunity.name || "暂无活跃商机"} · ${primaryOpportunity.amount == null ? "—" : amountText(primaryOpportunity.amount)}`,
     grossProfitContract: "合同及毛利数据尚未接入",
     territoryId: `${customer.team} · 当前负责人 ${customer.owner}`,
-    channelEcosystem: `${raw.source_code || "来源待补充"} · 合作伙伴：${raw.primary_partner_name || "无"}`,
+    channelEcosystem: `${raw.source_code || "来源待补充"} · 关联合作伙伴：${raw.primary_partner_name || "无"}`,
     opportunity: {
       id: primaryOpportunity.id || "",
       name: primaryOpportunity.name || "暂无活跃商机",

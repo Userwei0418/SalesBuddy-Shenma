@@ -18,7 +18,7 @@ class TransactionDatabase:
         self.conn = connection
 
     @asynccontextmanager
-    async def transaction(self, actor, readonly=False):
+    async def transaction(self, actor, readonly=False, isolation="read_committed"):
         async with self.conn.transaction():
             await set_request_context(self.conn, actor)
             yield self.conn
@@ -93,7 +93,7 @@ async def test_console_password_session_and_reads(connection):
 
 async def test_create_account_change_password_and_ops_boundary(connection):
     async with await client_for(connection) as client:
-        await sign_in(client)
+        await sign_in(client, "ADMIN001")
         org = (await client.get("/api/v1/console/organization")).json()
         key = str(uuid4())
         account = "API" + uuid4().hex[:12]

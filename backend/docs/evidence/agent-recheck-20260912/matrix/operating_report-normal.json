@@ -1,0 +1,155 @@
+{
+  "capability": "operating_report",
+  "case": "normal",
+  "started_at": "2026-09-12T09:20:54.949856+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "5cecd23fa298bdbced7f2300eb0e4757d0c0a23b8d992fd0df24988cfd935c73",
+    "bytes": 102442,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 5
+      },
+      "windows": {
+        "type": "dict",
+        "count": 3
+      },
+      "visits": {
+        "type": "list",
+        "count": 41
+      },
+      "tasks": {
+        "type": "list",
+        "count": 40
+      },
+      "risks": {
+        "type": "list",
+        "count": 24
+      },
+      "opportunities": {
+        "type": "list",
+        "count": 46
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": false,
+  "error_type": "SenseAudioError",
+  "elapsed_ms": 20189,
+  "validation": [
+    {
+      "input": {
+        "sha256": "5c0db4f03fbde47e52586b9e8887761f2dd71c49c3de6c433d4d538d31807507",
+        "bytes": 4531,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "safe_customers": {
+            "type": "list",
+            "count": 2
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 5
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 5
+          }
+        }
+      },
+      "accepted": false,
+      "error_type": "InvalidAgentResult",
+      "error": "即时总结段落条目格式不合法：action_plan"
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "0d309f8c-e09c-4501-a3c0-7f496d57deab",
+      "provider": "agent_platform",
+      "operation_id": "c4717bd0-ce06-4f7e-86e4-16b1ecbe588f",
+      "model": "agent:01a09022-d0ec-7703-b59f-0699150d63a7",
+      "attempt": 1,
+      "status": "cancelled",
+      "started_at": "2026-09-12T09:20:54.966006+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09022-d0ec-7703-b59f-0699150d63a7",
+        "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 102663,
+        "input_sha256": "a54a6558906d43107138fb8506d034757982ae29acfe3ed9ed07073b72927192",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": false,
+        "network_dispatch_suppressed": false
+      },
+      "error_type": "CancelledError",
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:21:06.954447+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": 200,
+          "request_started_ms": 0,
+          "headers_received_ms": 11164,
+          "first_body_byte_ms": 11164,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "350f325c-9a01-409e-a482-ea2ac746c535",
+      "provider": "senseaudio",
+      "operation_id": "c4717bd0-ce06-4f7e-86e4-16b1ecbe588f",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:21:06.967852+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:21:15.138507+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": false,
+    "network_dispatch_suppressed": false,
+    "transport": {
+      "http_status": 200,
+      "request_started_ms": 0,
+      "headers_received_ms": 11164,
+      "first_body_byte_ms": 11164,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

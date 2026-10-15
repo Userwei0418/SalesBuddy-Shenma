@@ -1,0 +1,152 @@
+/* Web insight/list layouts. State, scopes, writes and pagination stay in native pages. */
+body #page-root .web-insights-workspace{box-sizing:border-box;min-width:0;color:var(--ui-ink);font-size:var(--ui-text-body);background:transparent}
+body #page-root .web-insights-header{flex:none;min-width:0;display:flex;flex-direction:column;gap:var(--ui-space-2)}
+body #page-root .web-insights-scroll{min-width:0;box-sizing:border-box;overscroll-behavior:contain;scrollbar-gutter:stable;overflow-wrap:anywhere}
+body #page-root .web-insights-workspace :is(.surface,.chart-card,.kpi-card,.risk-card,.card,.filter-card,.opportunity-summary-card){border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);box-shadow:none;background:var(--ui-surface)}
+body #page-root .web-insights-workspace :is(.page-head,.metrics-meta,.metrics-section,.profile-insight-tabs,.profile-subject-controls,.risk-tabs,.filter-card){margin:0;min-width:0}
+body #page-root .web-insights-workspace :is(.page-heading>text,.page-title){font-size:var(--ui-text-page);line-height:1.35;letter-spacing:0}
+body #page-root .web-insights-workspace :is(.page-subtitle,.metrics-context,.freshness,.meta,.review-meta,.section-subtitle,.section-note,.data-note label,.countdown-copy label,.countdown-foot,.ring-copy>view,.ring-copy>.planning-tag,.mini-ring label,.kpi-card>view,.section-head>view>label){font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}
+body #page-root .web-insights-workspace :is(.metrics-title,.section-head>view>text,.section-title,.capability-title){font-size:var(--ui-text-section);line-height:1.5}
+body #page-root .web-insights-workspace :is(.loading-card,.empty,.empty-card,.state-card,.state,.empty-state,.web-insights-state){padding:var(--ui-space-6);font-size:var(--ui-text-body);line-height:1.6;text-align:center}
+body #page-root .web-insights-workspace .error{color:var(--ui-danger)}
+body #page-root .web-insights-workspace :is(.chart-card,.maturity-card,.efficiency-card,.capability-card,.growth-card){padding:var(--ui-space-4);margin-top:var(--ui-space-3)}
+body #page-root .web-insights-workspace :is(.metrics-controls,.metrics-heading,.metrics-meta,.profile-subject-controls){flex-wrap:wrap;gap:var(--ui-space-2)}
+body #page-root .web-insights-workspace :is(.quarter-picker,.metrics-scope-option,.quarter-option,.profile-insight-tabs>view,.growth-tab,.risk-tab,.filter-control,.workbench-filter-control){min-height:var(--ui-control-height-compact);box-sizing:border-box;font-size:var(--ui-text-small);border-radius:var(--ui-radius-control)}
+body #page-root .web-insights-workspace :is(.metrics-scope-option,.profile-insight-tabs>view,.growth-tab,.risk-tab){display:flex;align-items:center;justify-content:center}
+body #page-root .web-insights-workspace :is(.dashboard-quarter-filter,.period-filter,.stage-panel,.workbench-stage-panel,.quarter-filter-list){max-height:240px;overflow:auto;overscroll-behavior:contain;padding:var(--ui-space-3);margin:0}
+body #page-root .web-insights-workspace .countdown-card{padding:var(--ui-space-3);margin:0 0 var(--ui-space-3);min-height:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-selected);color:var(--ui-ink);box-shadow:none}
+body #page-root .web-insights-workspace .countdown-copy text{font-size:var(--ui-text-body);color:var(--ui-ink)}
+body #page-root .web-insights-workspace .kpi-grid{gap:var(--ui-space-3);margin-top:var(--ui-space-3);margin-bottom:var(--ui-space-3)}
+body #page-root .web-insights-workspace .kpi-card{min-height:96px;padding:var(--ui-space-3)}
+body #page-root .web-insights-workspace .kpi-card>text{font-size:var(--ui-text-page);line-height:1.3}
+body #page-root .web-insights-workspace .kpi-card>label{font-size:var(--ui-text-small)}
+body #page-root .web-insights-workspace .web-echart{height:220px}
+body #page-root .web-insights-workspace .web-dashboard-charts{gap:var(--ui-space-3)}
+body #page-root .web-insights-workspace .web-ranking-grid{gap:var(--ui-space-3)}
+body #page-root .web-insights-workspace .data-note{padding:var(--ui-space-3);border-radius:var(--ui-radius-panel);background:var(--ui-neutral-soft)}
+body:not(.web-login) #page-root .web-insights-bi .web-kpi-primary .kpi-card{min-height:102px;padding:var(--ui-space-3);border-radius:var(--ui-radius-panel)}
+body #page-root .web-insights-bi .web-kpi-primary .kpi-card>text{font-size:var(--ui-text-page);margin:var(--ui-space-2) 0;line-height:1.3}
+body #page-root .web-insights-bi .web-kpi-secondary{padding:var(--ui-space-3) 0;border-radius:var(--ui-radius-panel)}
+body #page-root .web-insights-bi :is(.web-chart-data,.web-chart-note){font-size:var(--ui-text-small)}
+/* Identity and role selectors remain visible while each selected insight scrolls. */
+body #page-root .web-insights-identity{display:flex;gap:var(--ui-space-3);align-items:center;min-width:0}
+body #page-root .web-insights-identity .profile-card{flex:1;min-width:0;margin:0;padding:var(--ui-space-3);border:0;background:transparent}
+body #page-root .web-insights-identity .avatar{width:40px;height:40px;flex:0 0 40px;font-size:var(--ui-text-section)}
+body #page-root .web-insights-identity .name{font-size:var(--ui-text-section)}
+body #page-root .web-insights-identity .logout-button{width:auto;min-width:0;flex:none;margin:0;padding:0 var(--ui-space-3);min-height:var(--ui-control-height-compact);font-size:var(--ui-text-small);border-radius:var(--ui-radius-control);line-height:1.5}
+body #page-root .web-insights-profile .profile-insight-tabs{max-width:none;width:100%;padding:var(--ui-space-1)}
+body #page-root .web-insights-profile .profile-insight-tabs>view{padding:var(--ui-space-1) var(--ui-space-3)}
+body #page-root .web-insights-profile :is(.maturity-card,.efficiency-card){margin-top:0}
+body #page-root .web-insights-workspace .performance-board{gap:var(--ui-space-3)}
+body #page-root .web-insights-workspace .performance-metric{padding:var(--ui-space-3);border-radius:var(--ui-radius-control)}
+body #page-root .web-insights-workspace .performance-completed>text{font-size:var(--ui-text-page)}
+body #page-root .web-insights-workspace .maturity-facts{gap:var(--ui-space-3)}
+body #page-root .web-insights-workspace :is(.radar-canvas,.growth-canvas){max-width:100%;width:100%;height:240px}
+body #page-root .web-insights-workspace .dimension-grid{gap:var(--ui-space-3)}
+body #page-root .web-insights-workspace .dimension-item>text{font-size:var(--ui-text-small);line-height:1.6}
+body #page-root .web-insights-workspace .ai-advice-list label{font-size:var(--ui-text-body);line-height:1.6}
+body #page-root .web-insights-growth .member-hero{padding:var(--ui-space-3);margin:0;min-height:0}
+body #page-root .web-insights-growth .member-avatar{width:40px;height:40px;font-size:var(--ui-text-section)}
+body #page-root .web-insights-growth .section-heading{margin:var(--ui-space-3) 0;gap:var(--ui-space-3)}
+body #page-root .web-insights-growth .section-heading>view>text{font-size:var(--ui-text-section)}
+body #page-root .web-insights-growth .section-heading label{font-size:var(--ui-text-small)}
+/* List headers use text summaries rather than tall presentation heroes. */
+body #page-root .web-insights-workspace :is(.hero,.risk-hero){padding:0;margin:0;min-height:0;background:transparent;box-shadow:none;border:0;color:var(--ui-ink)}
+body #page-root .web-insights-workspace :is(.hero,.risk-hero)::after{display:none}
+body #page-root .web-insights-workspace :is(.hero-title,.hero>.title){font-size:var(--ui-text-page);margin:0;color:var(--ui-ink)}
+body #page-root .web-insights-workspace :is(.hero-eyebrow,.risk-eyebrow,.hero-subtitle,.risk-subtitle,.hero>.eyebrow,.hero>.subtitle){font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary);margin:0}
+body #page-root .web-insights-workspace :is(.hero-summary,.hero-stats){display:flex;align-items:center;gap:var(--ui-space-4);margin:var(--ui-space-2) 0 0;padding:0;border:0;color:var(--ui-ink)}
+body #page-root .web-insights-workspace :is(.hero-summary>view,.hero-stats>view){display:flex;align-items:center;gap:var(--ui-space-2);padding:0}
+body #page-root .web-insights-workspace :is(.hero-summary text,.hero-stats text){font-size:var(--ui-text-section);margin:0;color:var(--ui-ink)}
+body #page-root .web-insights-workspace :is(.hero-summary label,.hero-stats label){font-size:var(--ui-text-small);margin:0;color:var(--ui-secondary)}
+body #page-root .web-insights-titlebar{display:flex;justify-content:space-between;align-items:center;gap:var(--ui-space-3)}
+body #page-root .web-insights-titlebar .create-row{flex:none;margin:0}
+body #page-root .web-insights-titlebar .create-opportunity{min-height:var(--ui-control-height-compact);display:flex;align-items:center;padding:0 var(--ui-space-3);font-size:var(--ui-text-body);border-radius:var(--ui-radius-control)}
+body #page-root .web-insights-workspace :is(.filter-card,.workbench-opportunity-filter){padding:var(--ui-space-2) var(--ui-space-3);border-radius:var(--ui-radius-panel)}
+body #page-root .web-insights-workspace :is(.filter-line,.workbench-filter-line){gap:var(--ui-space-2);min-width:0}
+body #page-root .web-insights-workspace :is(.filter-scroll,.workbench-filter-scroll){min-width:0;flex:1}
+body #page-root .web-insights-workspace :is(.filter-control,.workbench-filter-control){padding:var(--ui-space-1) var(--ui-space-2);white-space:nowrap}
+body #page-root .web-insights-workspace :is(.filter-control label,.filter-control text,.workbench-filter-control label,.workbench-filter-control text){font-size:var(--ui-text-small)}
+body #page-root .web-insights-workspace :is(.risk-list,.list){margin:0;padding:0;min-width:0}
+body #page-root .web-insights-workspace :is(.card,.risk-card,.workbench-opportunity-card){margin:0 0 var(--ui-space-2);padding:var(--ui-space-3);min-width:0;overflow-wrap:anywhere}
+body #page-root .web-insights-workspace :is(.card-top,.risk-top,.risk-action,.risk-meta){gap:var(--ui-space-2);flex-wrap:wrap}
+body #page-root .web-insights-workspace :is(.card-name,.risk-title,.risk-customer){font-size:var(--ui-text-body);line-height:1.5}
+body #page-root .web-insights-workspace :is(.card-meta,.risk-description,.risk-meta,.owner-row,.order-note){font-size:var(--ui-text-small);line-height:1.6}
+body #page-root .web-insights-workspace .risk-opportunity{padding:var(--ui-space-2);margin:var(--ui-space-2) 0;min-width:0}
+body #page-root .web-insights-opportunities .opportunity-order-note{padding:var(--ui-space-2) 0;margin:0;font-size:var(--ui-text-small)}
+body #page-root .web-insights-opportunities .opportunity-quarter-heading{margin:var(--ui-space-3) 0;padding:var(--ui-space-2) 0;font-size:var(--ui-text-small)}
+body #page-root .web-insights-opportunities .card-top>view>text{font-size:var(--ui-text-body)}
+body #page-root .web-insights-opportunities :is(.card-top label,.meta text,.meta label,.owner,.owner>text,.stage-progress-head){font-size:var(--ui-text-small);line-height:1.5}
+/* FDE components are shared by operating pages; their source handlers are untouched. */
+body #page-root .web-insights-projects :is(.heading,.sub){margin:0;padding:0}
+body #page-root .web-insights-projects .heading{font-size:var(--ui-text-page);color:var(--ui-ink)}
+body #page-root .web-insights-projects .sub{font-size:var(--ui-text-small);line-height:1.5}
+body #page-root .web-insights-projects .opportunity-summary-card{margin:0;padding:var(--ui-space-3)}
+body #page-root .web-insights-projects .opportunity-summary-head{margin:0 0 var(--ui-space-2)}
+body #page-root .web-insights-projects .opportunity-summary-metrics{gap:var(--ui-space-3);margin:0}
+body #page-root .web-insights-projects .opportunity-summary-metric{padding:0 var(--ui-space-2)}
+body #page-root .web-insights-projects .opportunity-summary-title{font-size:var(--ui-text-section)}
+body #page-root .web-insights-projects :is(.opportunity-summary-label,.quarter-filter-title,.quarter-selection-label,.quarter-filter-foot,.fde-summary-note,.fde-result-note){font-size:var(--ui-text-small);line-height:1.5}
+body #page-root .web-insights-projects .opportunity-summary-value{font-size:var(--ui-text-page);margin-top:var(--ui-space-1);line-height:1.3}
+body #page-root .web-insights-projects .quarter-filter-summary{margin-top:var(--ui-space-2);padding:var(--ui-space-2);border-radius:var(--ui-radius-control);display:flex;align-items:center;flex-wrap:wrap;gap:var(--ui-space-2)}
+body #page-root .web-insights-projects .quarter-filter-head{gap:var(--ui-space-2);margin:0}
+body #page-root .web-insights-projects .quarter-options{display:flex;gap:var(--ui-space-1);margin:0;flex:1;min-width:200px}
+body #page-root .web-insights-projects .quarter-option{padding:var(--ui-space-1) var(--ui-space-2);display:flex;align-items:center;justify-content:center;font-size:var(--ui-text-small)}
+body #page-root .web-insights-projects .quarter-filter-foot{margin:0}
+body #page-root .web-insights-projects :is(.workbench-opportunity-tools,.fde-result-note){margin:0}
+body #page-root .web-insights-projects .search{height:var(--ui-control-height-compact);margin-top:var(--ui-space-2);font-size:var(--ui-text-body);padding:0 var(--ui-space-3);border-radius:var(--ui-radius-control)}
+body #page-root .web-insights-fde .hero-card{margin:0;padding:var(--ui-space-3);border-radius:var(--ui-radius-panel);background:var(--ui-selected);color:var(--ui-ink);box-shadow:none}
+body #page-root .web-insights-fde .hero-card::after{display:none}
+body #page-root .web-insights-fde :is(.hero-value,.hero-unit,.hero-foot,.hero-eyebrow){color:var(--ui-ink);margin-top:var(--ui-space-1);font-size:var(--ui-text-small)}
+body #page-root .web-insights-fde .hero-value{font-size:var(--ui-text-page)}
+body #page-root .web-insights-fde .hero-foot{padding:0;border:0;gap:var(--ui-space-3)}
+body #page-root .web-fde-records{position:static;inset:auto;z-index:auto;min-height:0;padding:0;background:transparent}
+body #page-root .web-fde-records .activity-head{margin:0 0 var(--ui-space-3);padding:var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);box-shadow:none}
+body #page-root .web-fde-records :is(.activity-title,.activity-count,.activity-subtitle){color:var(--ui-ink);font-size:var(--ui-text-small)}
+body #page-root .web-fde-records .activity-title{font-size:var(--ui-text-section)}
+body #page-root .web-fde-records .activity-card{padding:var(--ui-space-3);margin-bottom:var(--ui-space-2);border-radius:var(--ui-radius-panel);border-color:var(--ui-line);background:var(--ui-surface);box-shadow:none}
+body #page-root .web-fde-records .activity-customer{font-size:var(--ui-text-body)}
+body #page-root .web-fde-records :is(.activity-project,.activity-date,.activity-recorder,.activity-history,.activity-state){font-size:var(--ui-text-small);line-height:1.6}
+body #page-root .web-fde-records .activity-card-foot{margin-top:var(--ui-space-2);padding-top:var(--ui-space-2)}
+body #page-root .web-fde-records .activity-more{min-height:var(--ui-control-height);font-size:var(--ui-text-body);border-radius:var(--ui-radius-control);padding:var(--ui-space-2)}
+@media(min-width:601px){
+ body #page-root .web-insights-workspace{height:100%;min-height:0;max-width:none;margin:0;padding:var(--ui-space-3) var(--ui-space-4);display:flex;flex-direction:column;gap:var(--ui-space-3);overflow:hidden}
+ body #page-root .web-insights-scroll{flex:1;min-height:0;overflow:auto;padding-bottom:var(--ui-space-3)}
+ body:is([data-route=bi],[data-route=member-growth],[data-route=fde-records]) #page-root>fde-dashboard,body:is([data-route=opportunities],[data-route=workbench]) #page-root>fde-projects{display:block;height:100%;min-height:0}
+ body #page-root .web-insights-workspace .web-insights-header{max-height:56%;overflow:auto;overscroll-behavior:contain}
+ body #page-root .web-insights-fde .web-fde-records{height:100%;display:flex;flex-direction:column;overflow:hidden}
+ body #page-root .web-fde-records .activity-scroll{flex:1;min-height:0;height:auto;overflow:auto;padding-bottom:var(--ui-space-3)}
+ body #page-root .web-insights-growth .capability-card{display:grid;grid-template-columns:minmax(230px,.8fr) minmax(0,1.2fr);gap:var(--ui-space-3)}
+ body #page-root .web-insights-growth .capability-card>.radar-canvas{grid-row:1/4}
+ body #page-root .web-insights-growth .capability-card>.ai-advice-card{grid-column:1/-1}
+ body #page-root .web-insights-growth .capability-card>.dimension-grid{grid-column:2}
+ body #page-root .web-insights-workspace .web-ranking-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body #page-root .web-insights-risks .risk-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-3);align-content:start}
+ body #page-root .web-insights-risks .risk-card{margin:0}
+}
+@media(min-width:1100px){#page-root .web-insights-workspace .web-ranking-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:601px) and (max-width:900px){
+ body #page-root .web-insights-workspace{padding:var(--ui-space-3);gap:var(--ui-space-2)}
+ body #page-root .web-insights-scroll{padding-bottom:56px}
+ body #page-root .web-insights-workspace .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body #page-root .web-insights-workspace .web-ranking-grid{grid-template-columns:1fr}
+ body #page-root .web-insights-risks .risk-list{grid-template-columns:1fr}
+ body #page-root .web-insights-growth .capability-card{grid-template-columns:minmax(190px,.8fr) minmax(0,1.2fr)}
+}
+@media(max-width:600px){
+ body #page-root .web-insights-workspace{padding:var(--ui-space-3);min-height:0;height:auto;display:block}
+ body #page-root .web-insights-header{margin-bottom:var(--ui-space-3)}
+ body #page-root .web-insights-scroll{overflow:visible;padding-bottom:var(--ui-space-6)}
+ body #page-root .web-insights-identity{flex-wrap:wrap;gap:var(--ui-space-2)}
+ body #page-root .web-insights-identity .profile-card{padding:0;flex-basis:100%}
+ body #page-root .web-insights-identity .logout-button{min-height:var(--ui-control-height-compact);margin-left:auto}
+ body #page-root .web-insights-titlebar{align-items:flex-start}
+ body #page-root .web-insights-workspace :is(.hero-title,.page-heading>text){font-size:var(--ui-text-section)}
+ body #page-root .web-insights-workspace .web-ranking-grid{grid-template-columns:1fr}
+ body #page-root .web-insights-projects .opportunity-summary-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-2)}
+ body #page-root .web-insights-projects .quarter-filter-summary{display:block}
+ body #page-root .web-insights-projects .quarter-options{margin-top:var(--ui-space-2);min-width:0}
+ body #page-root .web-fde-records .activity-scroll{height:auto;overflow:visible;flex:none}
+ body #page-root .web-insights-workspace :is(.profile-capability-card,.performance-board){display:block}
+ body #page-root .web-insights-workspace .performance-metric{margin-top:var(--ui-space-2)}
+}

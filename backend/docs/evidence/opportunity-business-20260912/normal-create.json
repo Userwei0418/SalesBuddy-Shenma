@@ -1,0 +1,196 @@
+{
+  "scenario": "normal",
+  "intent": "create",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 own sales identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /customers/1b127c42-c436-470f-a6dc-876de6586d53 expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "explicit synthetic customer matches",
+      "passed": true
+    },
+    {
+      "name": "test actor owns selected customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/742c1902-de50-4007-a908-7299c4e624c2/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/742c1902-de50-4007-a908-7299c4e624c2/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/742c1902-de50-4007-a908-7299c4e624c2/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "candidate waits for human confirmation",
+      "passed": true
+    },
+    {
+      "name": "candidate action matches business intent",
+      "passed": true
+    },
+    {
+      "name": "new candidate preserves explicit values",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays out of public candidate",
+      "passed": true
+    },
+    {
+      "name": "candidate did not mutate formal opportunities or change cards",
+      "passed": true
+    },
+    {
+      "name": "one completed Worker job without whole-job replay",
+      "passed": true
+    },
+    {
+      "name": "one completion receipt",
+      "passed": true
+    },
+    {
+      "name": "one pending candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "one assistant result",
+      "passed": true
+    },
+    {
+      "name": "attempts share one inference operation",
+      "passed": true
+    },
+    {
+      "name": "final real provider completed",
+      "passed": true
+    },
+    {
+      "name": "artifact model reference matches selected provider",
+      "passed": true
+    },
+    {
+      "name": "real platform dispatched",
+      "passed": true
+    },
+    {
+      "name": "platform accepted or validated automatic fallback",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/b150b6a4-d8c6-43e8-aff2-158ebfde61ad expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/742c1902-de50-4007-a908-7299c4e624c2/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "other sales user cannot read candidate artifact",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "customer_id": "1b127c42-c436-470f-a6dc-876de6586d53",
+    "conversation_id": "742c1902-de50-4007-a908-7299c4e624c2",
+    "run_id": "b150b6a4-d8c6-43e8-aff2-158ebfde61ad",
+    "job_id": "2074139c-63d4-4bc5-9a32-1f6e446a937d",
+    "artifact_id": "a65d99a0-a05a-4279-b7c2-687309f807d6"
+  },
+  "started_at": "2026-09-11T19:41:56.443613+00:00",
+  "preflight_only": false,
+  "crm_before_fingerprint": "53c635a837d2751399de8f2d45091a2e527d12a3c68243394c0dfbd8c76cb4db",
+  "submitted_at": "2026-09-11T19:41:56.606198+00:00",
+  "elapsed_ms": 5059,
+  "status": "waiting_human",
+  "inference_route": {
+    "provider": "agent_platform",
+    "model_ref": "agent-platform:01a09022-b58f-7214-85eb-29d035ea6f2c",
+    "elapsed_ms": 3962,
+    "operation_id": "7f7dec4c-541c-4608-9333-75858f53337f",
+    "platform_run": {
+      "ids": {
+        "task_id": "48d1a7f8-32d0-4a26-abe4-f8ca59a2de45",
+        "message_id": "6bdddd32-9a7a-4cd7-a8cb-338d620ba548",
+        "conversation_id": "25e56687-82ec-4823-8f2e-468933f53ee4"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 2424,
+        "first_body_byte_ms": 2424,
+        "request_started_ms": 0,
+        "first_data_event_ms": 2424,
+        "headers_received_ms": 2424,
+        "stream_completed_ms": 3931
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": null
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "7f7dec4c-541c-4608-9333-75858f53337f",
+      "dispatch_suppressed": "false"
+    }
+  ],
+  "platform_accepted": true,
+  "passed": true,
+  "finished_at": "2026-09-11T19:42:01.700464+00:00"
+}

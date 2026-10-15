@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package committed customer source and deployment instructions, without runtime data."""
+"""Package a committed Shenma sales release, without runtime data or the separate middle platform."""
 from __future__ import annotations
 
 import argparse
@@ -15,22 +15,25 @@ import tarfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_PATHS = ('AGENTS.md', 'README.md', 'backend', 'database', 'frontend', 'deployment', 'scripts', 'docs')
 
 
 def git(*args: str) -> bytes:
-    return subprocess.check_output(['git', '-C', str(ROOT), *args])
+    return subprocess.check_output(['git', '-C', str(ROOT), '-c', 'diff.renames=false',
+                                    '-c', 'core.preloadIndex=false', '-c', 'core.fsmonitor=false', *args])
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output-dir', type=Path, required=True)
     parser.add_argument('--include-business-web', action='store_true')
+    parser.add_argument('--include-web', action='store_true', help='Include the paired 1.2.1 frontend/web distribution')
     args = parser.parse_args()
     output = args.output_dir.expanduser().resolve()
     if output == ROOT or ROOT in output.parents:
         parser.error('Output must be outside the Git repository')
-    if git('status', '--porcelain', '--untracked-files=all').strip():
-        parser.error('Commit and review the complete source tree before packaging')
+    if git('status', '--porcelain', '--untracked-files=all', '--', *RELEASE_PATHS).strip():
+        parser.error('Commit and review all sales release source paths before packaging')
     remote = git('remote', 'get-url', 'origin').decode().strip().removesuffix('.git')
     if remote not in ('https://github.com/Userwei0418/SalesBuddy-Shenma',
                       'git@github.com:Userwei0418/SalesBuddy-Shenma'):
@@ -43,33 +46,53 @@ def main() -> None:
     if target.exists() or target.with_suffix(target.suffix + '.sha256').exists():
         parser.error('Release artifact already exists; refusing to overwrite it')
     files: dict[str, tuple[bytes, int]] = {}
-    archive = git('archive', '--format=tar', 'HEAD')
-    with tarfile.open(fileobj=io.BytesIO(archive)) as source:
-        for item in source:
-            path = PurePosixPath(item.name)
-            if item.isdir():
-                continue
+    # Verify local bytes against the committed Git blob IDs. This also works
+    # when an old repository's loose objects reside in cloud-backed storage.
+    entries = git('ls-tree', '-r', '-z', 'HEAD', '--', *RELEASE_PATHS).split(b'\0')
+    for entry in entries:
+        if entry:
+            metadata, filename = entry.split(b'\t', 1)
+            mode, kind, expected_blob = metadata.decode().split()
+            filename = filename.decode()
+            path = PurePosixPath(filename)
             forbidden = (
-                not item.isfile() or path.is_absolute() or '..' in path.parts
+                kind != 'blob' or mode not in {'100644', '100755'} or path.is_absolute() or '..' in path.parts
                 or any(part in {'.git', '.venv', 'node_modules', '__pycache__', '.private'} for part in path.parts)
                 or path.name == 'project.private.config.json'
                 or (path.name.startswith('.env') and path.name != '.env.example')
                 or path.suffix.lower() in {'.dump', '.backup', '.sqlite', '.sqlite3', '.db', '.key', '.pem', '.p12', '.pfx'}
-                or '/runtime/volumes/' in '/' + item.name
-                or '/runtime/tls/' in '/' + item.name
-                or re.search(r'[\x00-\x1f]', item.name)
+                or '/runtime/volumes/' in '/' + filename
+                or '/runtime/tls/' in '/' + filename
+                or re.search(r'[\x00-\x1f]', filename)
             )
             if forbidden:
-                parser.error('Forbidden source artifact: ' + item.name)
-            content = source.extractfile(item).read()
+                parser.error('Forbidden source artifact: ' + filename)
+            local = ROOT / filename
+            if local.is_symlink():
+                parser.error('Source cannot be a symlink: ' + filename)
+            content = local.read_bytes()
+            actual_blob = hashlib.sha1(b'blob ' + str(len(content)).encode() + b'\0' + content).hexdigest()
+            if actual_blob != expected_blob:
+                parser.error('Source differs from committed Git object: ' + filename)
             if re.search(rb'^-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----\s*$', content, re.M):
-                parser.error('Private key found in ' + item.name)
-            files[item.name] = (content, item.mode & 0o777)
+                parser.error('Private key found in ' + filename)
+            files[filename] = (content, int(mode, 8) & 0o777)
     if args.include_business_web:
         dist = ROOT / 'business-web/dist'
         build = json.loads((dist / 'build.json').read_text())
         if build.get('revision') != revision or build.get('customer') != 'shenzhoukuntai':
             parser.error('Rebuild the customer Web at the committed release revision')
+        for file in sorted(dist.rglob('*')):
+            if file.is_symlink():
+                parser.error('Web distribution cannot contain symlinks')
+            if file.is_file():
+                files[file.relative_to(ROOT).as_posix()] = (file.read_bytes(), 0o644)
+    if args.include_web:
+        dist = ROOT / 'frontend/web/dist'
+        build = json.loads((dist / 'version.json').read_text())
+        info = build.get('web_build', {})
+        if info.get('sourceRevision') != revision or info.get('webSourceDirty') is not False:
+            parser.error('Rebuild the complete customer Web from the committed release revision')
         for file in sorted(dist.rglob('*')):
             if file.is_symlink():
                 parser.error('Web distribution cannot contain symlinks')
@@ -88,6 +111,9 @@ def main() -> None:
         'database_head': f'V{max(migrations):03d}', 'contains_business_data': False,
         'contains_runtime_credentials': False,
         'business_web_included': args.include_business_web,
+        'web_121_included': args.include_web,
+        'packaged_source_paths': list(RELEASE_PATHS),
+        'middle_platform_included': False,
         'customer_appid': 'pending' if project['appid'].startswith('REPLACE_') else project['appid'],
         'deployment_status': 'See docs/DEPLOYMENT.md; source packaging is not runtime acceptance.',
         'agent_platform_installer': 'https://github.com/Userwei0418/SalesBuddy-Shenma/releases/tag/agent-platform-20260923',

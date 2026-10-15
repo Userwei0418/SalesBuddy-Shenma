@@ -1,0 +1,11 @@
+<view class="sb-section {{plain ? 'is-plain' : ''}} {{bordered ? 'is-bordered' : ''}}">
+  <view wx:if="{{title || description || extraLabel}}" class="sb-section-head">
+    <view class="sb-section-titles">
+      <view wx:if="{{title}}" class="sb-section-title" aria-role="heading">{{title}}</view>
+      <text wx:if="{{description}}" class="sb-section-desc">{{description}}</text>
+    </view>
+    <text wx:if="{{extraLabel}}" class="sb-section-extra" hover-class="sb-pressed" bind:tap="onExtra" aria-role="link">{{extraLabel}}</text>
+    <slot wx:else name="extra"></slot>
+  </view>
+  <slot></slot>
+</view>

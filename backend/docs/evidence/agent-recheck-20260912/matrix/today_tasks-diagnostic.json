@@ -1,0 +1,29 @@
+{
+  "capability": "today_tasks",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:19:54.857674+00:00",
+  "same_input_sha256": "9891496ec67e409210e6af08655c90297a1682898606e2c2057f5d285275cea6",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "accepted": false,
+  "error_type": "TimeoutError",
+  "error": "",
+  "elapsed_ms": 60023,
+  "ids": {
+    "task_id": null,
+    "message_id": null,
+    "conversation_id": null
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10818,
+    "first_body_byte_ms": 10818,
+    "first_data_event_ms": null,
+    "first_text_ms": null,
+    "stream_completed_ms": null
+  },
+  "error_code": null,
+  "answer_chars": 0
+}

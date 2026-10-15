@@ -19,6 +19,7 @@ dependencies = [
   "PyJWT>=2.10,<3",
   "pydantic>=2.11,<3",
   "python-multipart>=0.0.20,<1",
+  "segno>=1.6,<2",
   "uvicorn[standard]>=0.35,<1",
 ]
 

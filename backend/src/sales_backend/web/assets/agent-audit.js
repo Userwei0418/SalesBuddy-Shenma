@@ -1,5 +1,5 @@
 import {state, api, query, head, filters, options, people, table, pager, esc, date, num,
-  dialog, details, bindCommon, download, roles, stats} from "./core.js";
+  dialog, details, bindCommon, download, roles, stats, hasPermission, requirePermission} from "./core.js";
 import {capabilityLabels, capabilityLabel} from "./ai-capabilities.js";
 import {providers, label, agentId, agentName, modelName, calledAgents, errorName, requestStates, stopStates} from "./ai-audit-labels.js";
 const outcomes = {accepted:"结果校验通过", failed:"未取得合格结果", running:"推理中",
@@ -27,7 +27,8 @@ function runDetail(row) {
   const sections = (row.operations || []).map((o,index) => {
     const config = o.configuration || {}, platform = o.trace?.platform_run || {}, attempts = o.attempts || [];
     return '<section class="activity-section"><h3>推理 '+(index+1)+' · '+esc(label(outcomes, o.inference_status, "推理状态待核实"))+'</h3>' +
-      details([["推理编号",o.id],["开始时间",date(o.started_at)],["完成时间",date(o.completed_at)],
+      details([["推理编号（operation_id）",o.id],["开始时间",date(o.started_at)],["完成时间",date(o.completed_at)],
+        ["业务标识",o.capability || row.capability],["异常原因",errorName(o.error_code)],["异常代码",o.error_code],
         ["采用来源",source(o)],["实际调用智能体",calledAgents(o)],
         ["配置的智能体",agentName(config.agent_id)],["配置的智能体编号",config.agent_id],
         ["兜底方式",row.capability === "opportunity_change" ? "原有商机变化规则" : "原模型接口"],
@@ -46,8 +47,8 @@ function runDetail(row) {
       (o.receipt_warning ? '<p class="notice">'+esc(o.receipt_warning)+'</p>' : '') +
       '<h4>处理过程</h4>' + ((o.events || []).map(e =>
         '<div class="barline"><span>'+esc(label(phases,e.phase,"处理阶段未记录"))+' · '+esc(label(providers,e.provider,"提供方未记录"))+'</span><strong>'+num(e.elapsed_ms)+' 毫秒</strong></div>'+
-        (e.error_code ? '<p class="help">'+esc(errorName(e.error_code))+'</p>' : "")+
-        (e.contract_code ? '<p class="help">'+esc(errorName(e.contract_code))+'</p>' : "")
+        (e.error_code ? '<p class="help">'+esc(errorName(e.error_code))+' · 异常代码：'+esc(e.error_code)+'</p>' : "")+
+        (e.contract_code ? '<p class="help">'+esc(errorName(e.contract_code))+' · 契约代码：'+esc(e.contract_code)+'</p>' : "")
       ).join("") || '<p class="help">该历史记录未保存阶段事件，不补造过程。</p>') +
       '<h4>提供方请求</h4>' + table(["提供方 / 智能体","发送情况","网络状态码","请求结果","耗时","输入 / 输出用量"],attempts,a =>
         '<tr><td>'+esc(label(providers,a.provider,"提供方未记录"))+small(modelName(a.model))+
@@ -57,9 +58,11 @@ function runDetail(row) {
         num(a.input_tokens)+' / '+num(a.output_tokens)+'</td></tr>') +
       '<h4>请求关联编号</h4>'+attempts.map(a => details([
         ["本地请求记录编号",a.id],["请求编号",a.request_id],["上游链路编号",a.upstream_trace_id],
+        ["模型标识",a.model],["异常代码",a.error_code],
       ])).join("")+'</section>';
   }).join("");
   dialog("智能体业务运行详情",details([["业务能力",capabilityLabel(row.capability)],
+    ["业务标识",row.capability],
     ["发起人",row.actor_name],["调用时角色",label(roles,row.actor_role,"历史未记录角色")],
     ["业务关联编号",row.case_id],["关联客户",row.customer_name || "未关联单一客户"],
     ["业务状态",businessState(row)],["保存的助手结果数",row.assistant_results],
@@ -76,7 +79,7 @@ export async function agentRuns() {
   const rate = (accepted, attempted) => attempted ? Math.round(100 * accepted / attempted) + "%" : "暂无样本";
   return {
     html:head("智能体运行审计","从一次业务操作，核对中台、原模型接口、结果校验与最终业务状态。",
-      '<button data-action="export">导出审计清单</button>') +
+      hasPermission('ai.run_export') ? '<button data-action="export">导出审计清单</button>' : '') +
       '<div class="notice">中台结果通过、原模型接口接续和业务完成分别判断。测试仅按已记录标记显示；未标记不代表正式业务。</div>' +
       stats([
         ["参与统计的业务",num(summary.eligible),"已排除 "+num(summary.excluded_fault_tests)+" 条故障测试"],
@@ -99,7 +102,7 @@ export async function agentRuns() {
         (r.test_injected ? small("受控故障测试") : "")+'</td><td>'+esc(label(outcomes, r.inference_status, "推理状态待核实"))+
         '</td><td>'+esc(businessState(r))+'</td><td><button class="link" data-action="detail" data-id="'+esc(r.case_id)+
         '">查看链路</button></td></tr>') + pager(data.total) + '</div>',
-    bind(root) {bindCommon(root,{export:()=>download("/ai/runs/export"+query(),"智能体运行审计"),
+    bind(root) {bindCommon(root,{export:()=>{requirePermission("ai.run_export");return download("/ai/runs/export"+query(),"智能体运行审计");},
       detail:id=>runDetail(data.items.find(r=>r.case_id===id))});},
   };
 }

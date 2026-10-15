@@ -1,0 +1,13 @@
+{
+  "runtime_source_files": 128,
+  "local_matches_deployed": true,
+  "runtime_commit": "571026f71ff925824c0b58ee3f8ad58b7b95d6e3",
+  "source_changes_since_4841b97": false,
+  "database_version": "V054",
+  "pilot_disabled": true,
+  "release": "agent-chatbi-20260912-571026f",
+  "rollback_release": "report-fix-20260911-7b67cb0",
+  "backup_bytes": 2496657,
+  "services_and_health": "verified active/live/ready",
+  "temporary_database_and_role_cleanup": "verified zero matching temporary objects"
+}

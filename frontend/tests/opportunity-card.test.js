@@ -1,66 +1,34 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const { cardFields, loadCardActuals } = require('../miniprogram/utils/opportunityCard');
-const rows = [{ id: 'o1', customer_id: 'c1', amount: 999999, quarterly_forecasts: [{ recognized_amount: 888888 }] }, { id: 'o2', customer_id: 'c1' }, { id: 'o3', customer_id: 'c2' }];
-const entry = (kind, amount, opportunity_id = 'o1') => ({ customer_id: 'c1', opportunity_id, kind, amount });
-function apiFor(entries) {
-  return { getCustomerAssets: async options => options.customer_id
-    ? { view: 'entries', items: entries, has_more: false }
-    : { view: 'customers', items: [{ customer_id: 'c1' }], has_more: false } };
-}
+const test=require('node:test'),assert=require('node:assert/strict');
+const {cardFields,loadCardActuals}=require('../miniprogram/utils/opportunityCard');
+const examples=require('./helpers/finance-periods-v2.json');
+const op=examples.complete.opportunity_id,c=examples.complete.customer_id;
+test('产品线不造示例值，未请求前加载中，已确认0不依赖记录数量',()=>{
+ assert.equal(cardFields({product_line:' Token Plan '}).productLineLabel,'Token Plan');assert.equal(cardFields({}).productLineLabel,'未填写');assert.equal(cardFields({}).recognizedLabel,'加载中');
+ assert.equal(cardFields({actuals:{recognized_amount:'0',collection_amount:null,recognized_complete:true,recognized_count:0}}).recognizedLabel,'0元');
+});
+test('采用来源20+30=50，原始历史50和当前50不再次相加，也不使用ACV或预测',async()=>{
+ const data=structuredClone(examples.complete);data.periods[0].entry_amount='50';data.periods[0].history=[{amount:'50'}];
+ const rows=await loadCardActuals({getOpportunityFinancialOverview:async()=>data,getCustomerAssets(){assert.fail('不扫描原始账本');}},[{id:op,customer_id:c,amount:9999,quarterly_forecasts:[{recognized_amount:8888}]}]);
+ assert.equal(rows[0].recognizedLabel,'50元');assert.equal(rows[0].collectionLabel,'未登记');assert.equal(rows[0].amount,9999);
+});
+test('已有列表投影直接采用，同一财务小计不会改成完整值',async()=>{
+ const actuals=examples.aggregate_complete_plus_partial;
+ const rows=await loadCardActuals({getOpportunityFinancialOverview(){assert.fail('已有投影不重新扫描');}},[{id:op,customer_id:c,actuals}]);
+ assert.equal(rows[0].recognizedLabel,'已登记小计 70元');assert.match(rows[0].financialHints.join(''),/物料/);
+});
+test('详情调用严格匹配商机/客户/schema2，失败不冒充无记录或复用别的客户',async()=>{
+ for(const patch of [{opportunity_id:'other'},{customer_id:'other'},{schema_version:1},{totals:null}]){
+ const result=await loadCardActuals({getOpportunityFinancialOverview:async()=>({...examples.complete,...patch})},[{id:op,customer_id:c}]);assert.equal(result[0].recognizedLabel,'暂不可用');
+ }
+ const result=await loadCardActuals({},[{id:op,customer_id:c}]);assert.equal(result[0].recognizedLabel,'暂不可用');
+});
 
-test('产品线取实际字段，缺失不制造示例产品，初始金额为加载中', () => {
-  assert.equal(cardFields({ product_line: ' Token Plan ' }).productLineLabel, 'Token Plan');
-  assert.equal(cardFields({ product_line: '如影' }).productLineLabel, '如影');
-  assert.equal(cardFields({}).productLineLabel, '未填写');
-  assert.equal(cardFields({}).recognizedLabel, '加载中');
-});
-test('累计实际金额仅计关联商机，不串客户、不分摊未关联记录、不使用预测和ACV', async () => {
-  const result = await loadCardActuals(apiFor([
-    entry('recognized', 100000), entry('recognized', 50000), entry('collection', 0),
-    entry('collection', 88888, null), entry('recognized', 500000, 'o2'),
-    { ...entry('recognized', 1000000), customer_id: 'other-customer' },
-  ]), rows);
-  assert.equal(result[0].recognizedLabel, '15万');
-  assert.equal(result[0].collectionLabel, '0元');
-  assert.equal(result[1].recognizedLabel, '50万');
-  assert.equal(result[1].collectionLabel, '未登记');
-  assert.equal(result[2].recognizedLabel, '未登记');
-  assert.equal(result[0].amount, 999999);
-});
-test('确收与回款均读取全部分页，并且请求不限年度或单一类型', async () => {
-  const calls = [];
-  const result = await loadCardActuals({ getCustomerAssets: async options => {
-    calls.push(options);
-    if (!options.customer_id) return { view: 'customers', items: [{ customer_id: options.offset ? 'c1' : 'other' }], has_more: !options.offset };
-    return { view: 'entries', items: [entry(options.offset ? 'collection' : 'recognized', options.offset ? 40000 : 60000)], has_more: !options.offset };
-  } }, rows);
-  assert.equal(result[0].recognizedLabel, '6万');
-  assert.equal(result[0].collectionLabel, '4万');
-  assert.equal(calls.length, 4);
-  assert.ok(calls.every(options => options.period === 'all' && !options.kind));
-});
-test('分页中途失败时不显示部分金额或伪零，其他无登记客户正常显示', async () => {
-  const result = await loadCardActuals({ getCustomerAssets: async options => {
-    if (!options.customer_id) return { view: 'customers', items: [{ customer_id: 'c1' }], has_more: false };
-    if (options.offset) throw new Error('offline');
-    return { view: 'entries', items: [entry('recognized', 10000)], has_more: true };
-  } }, rows);
-  assert.equal(result[0].recognizedLabel, '暂不可用');
-  assert.equal(result[1].collectionLabel, '暂不可用');
-  assert.equal(result[2].recognizedLabel, '未登记');
-});
-test('实际接口失败或缺失返回暂不可用，不能冒充没有登记', async () => {
-  for (const api of [{}, { getCustomerAssets: async () => { throw new Error('offline'); } }]) {
-    const result = await loadCardActuals(api, rows);
-    assert.ok(result.every(item => item.recognizedLabel === '暂不可用'));
-  }
-});
-test('无效金额和停滞分页不能产生看似有效的汇总', async () => {
-  for (const value of [null, '', true, 'bad']) {
-    const result = await loadCardActuals(apiFor([entry('recognized', value)]), rows);
-    assert.equal(result[0].recognizedLabel, '暂不可用');
-  }
-  const result = await loadCardActuals({ getCustomerAssets: async () => ({ view: 'customers', items: [], has_more: true }) }, rows);
-  assert.equal(result[0].recognizedLabel, '暂不可用');
+test('MINI-R01 卡片财务回退保留单一来源小计、冲突与撤回状态',async()=>{
+ for(const status of ['single_source','conflict','withdrawn']){
+  const total={amount:null,confirmed_subtotal:'20',known_exclusive_subtotal:'20',complete:false,status,source:'entries',tax_unknown:true};
+  const data={schema_version:2,opportunity_id:op,customer_id:c,totals:{recognized:total,collection:{amount:null}}};
+  const [row]=await loadCardActuals({getOpportunityFinancialOverview:async()=>data},[{id:op,customer_id:c}]);
+  assert.equal(row.recognizedLabel,status==='withdrawn'?'已撤回':'已登记小计 20元');
+  if(status==='conflict')assert.match(row.financialHints.join(''),/来源待运营核对/);
+ }
 });

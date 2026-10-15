@@ -1,0 +1,7 @@
+.person-header{display:flex;flex-direction:column;gap:var(--ui-space-2)}
+.person-teams,.person-selected{white-space:nowrap}.person-team-list,.person-selected-list{display:inline-flex;align-items:center;gap:var(--ui-space-2)}
+.person-team{flex:0 0 auto;min-height:var(--ui-touch-target);margin:0;padding:0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px;line-height:var(--ui-touch-target)}
+.person-team-active{border-color:var(--ui-primary);background:var(--ui-selected);color:var(--ui-primary)}
+.person-selected-list{min-height:var(--ui-touch-target);font-size:var(--ui-text-small);color:var(--ui-secondary)}
+.person-selected-chip{display:flex;align-items:center;gap:var(--ui-space-1);padding:8rpx 16rpx;background:var(--ui-selected);border-radius:var(--ui-radius-control);color:var(--ui-primary)}
+.person-selected-account{color:var(--ui-secondary)}.person-state,.person-note{padding:var(--ui-space-3) 0;color:var(--ui-secondary);font-size:14px;line-height:1.6}.person-error{color:var(--ui-danger)}

@@ -14,7 +14,7 @@ async def subject_customers(connection, *, member_ids, scope, team_ids, structur
             AND s.subject_user_ref_id=ANY($1::uuid[])
           ORDER BY s.calculated_at DESC,s.id DESC LIMIT 1
         ) q ON true
-        WHERE c.deleted_at IS NULL
+        WHERE c.deleted_at IS NULL AND 'customer'=ANY(c.business_identities)
           AND ($6::uuid[] IS NULL OR c.id=ANY($6::uuid[]))
           AND (security.profile_customer_owner(c.id)=ANY($1::uuid[]) OR ($2='team' AND c.owner_team_id=ANY($3::uuid[]))
             OR ($2='department' AND EXISTS(SELECT 1 FROM platform.team_membership tm

@@ -1,0 +1,44 @@
+/* Shared desktop feedback. Keep semantic state fills and visible actions. */
+:is(#page-root, #wx-overlays, .web-topbar, .web-sidebar, dialog) :is(button, a, summary, input, textarea, select, [tabindex="0"]) {
+  transition: background-color var(--ui-duration-fast), border-color var(--ui-duration-fast), color var(--ui-duration-fast), filter var(--ui-duration-fast);
+}
+:is(#page-root, #wx-overlays, .web-topbar, .web-sidebar, dialog) :is(button, a, summary, input, textarea, select, [tabindex="0"]):focus-visible {
+  outline: 2px solid var(--ui-focus);
+  outline-offset: 2px;
+}
+#page-root :is(button, .wx-interactive)[aria-disabled="true"],
+#page-root button:disabled { cursor: not-allowed; }
+@media (hover: hover) {
+  #page-root :is(.customer-card, .web-task-row, .opportunity-item, .web-activity-summary, .web-customer-row, .web-detail-tabs [role="button"], .web-customer-tabs [role="button"]):hover {
+    background-color: var(--ui-hover);
+  }
+  #page-root :is(.web-home-metric, .web-home-actions button):hover {
+    border-color: var(--ui-focus);
+  }
+  #page-root button:not(:disabled):not([aria-disabled="true"]):hover { filter: brightness(.97); }
+  #page-root a:hover { text-decoration: underline; }
+}
+.web-shortcut-help {
+  width: min(420px, calc(100vw - 32px));
+  color: var(--ui-ink);
+  background: var(--ui-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius-panel);
+  padding: var(--ui-space-6);
+  box-shadow: var(--ui-shadow-popup);
+  font-size: var(--ui-text-body);
+}
+.web-shortcut-help header { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-4); }
+.web-shortcut-help h2 { margin: 0; font-size: var(--ui-text-section); }
+.web-shortcut-help dl { margin: var(--ui-space-4) 0; }
+.web-shortcut-help dl > div { display: flex; align-items: center; gap: var(--ui-space-4); padding: var(--ui-space-2) 0; }
+.web-shortcut-help dt { min-width: 72px; }
+.web-shortcut-help dd { margin: 0; }
+.web-shortcut-help kbd { border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface-subtle); padding: var(--ui-space-1) var(--ui-space-2); }
+.web-shortcut-help p { color: var(--ui-muted); font-size: var(--ui-text-small); margin-bottom: 0; }
+.web-shortcut-help button { border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-secondary); width: var(--ui-control-height); height: var(--ui-control-height); }
+.web-login #shortcut-help-button { display: none; }
+@media (max-width: 900px) { #shortcut-help-button { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  :is(#page-root, #wx-overlays, .web-topbar, .web-sidebar, dialog) * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

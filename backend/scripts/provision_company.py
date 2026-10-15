@@ -19,12 +19,7 @@ from sales_backend.db import _initialize_connection, set_request_context
 from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
 from sales_backend.request_metadata import RequestMetadata, request_metadata
-from sales_backend.auth.passwords import encode_password
-
-
-def initial_hash(password, allow_letters=False):
-    # Customer fork uses the current common policy, with no historical exception.
-    return encode_password(password)
+from adjust_organization_20260915 import initial_hash
 
 
 async def provision(connection, manifest, *, apply=False, expected=None, password="", allow_letters=False):

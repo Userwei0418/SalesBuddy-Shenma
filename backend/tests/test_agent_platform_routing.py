@@ -3,6 +3,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
+from sales_backend.contracts.visit_flow import canonical_fields, validate_stage_result
+from sales_backend.domain.company_rules import VisitAdmissionPolicy
 from sales_backend.services.agent_platform.routing import (
     AgentRouter,
     AgentUnavailable,
@@ -37,6 +39,51 @@ async def test_platform_payload_is_preserved_without_calling_direct_provider():
     result = await run(AsyncMock(return_value=payload), direct)
     assert result.payload == payload
     assert result.provider == "agent_platform"
+    direct.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_quality_only_platform_result_passes_without_fallback():
+    fields = canonical_fields(
+        {
+            "customer_name": "演示客户",
+            "follow_up_record": "客户确认试点结果。",
+            "next_action": "下周提交补充方案",
+            "interaction_at": "2026-09-15",
+            "created_date": "2026-09-15",
+            "contact_name": "陈经理",
+        }
+    )
+    facts = {
+        "visit_stage": "quality",
+        "fields": fields,
+        "summary": "客户确认试点结果",
+        "company_policy": {"id": "current", "definition": VisitAdmissionPolicy().model_dump()},
+    }
+    payload = {
+        "quality_review": {
+            "follow_up_score": 81,
+            "suggestions": [],
+            "next_action": {
+                "passed": True,
+                "time_found": True,
+                "goal_or_plan_found": True,
+                "suggestions": [],
+            },
+        }
+    }
+    direct = AsyncMock()
+    result = await AgentRouter().evaluate(
+        policy=RoutingPolicy(platform_enabled=True),
+        platform=AsyncMock(return_value=payload),
+        direct=direct,
+        validate=lambda value: validate_stage_result(value, facts),
+        write_state=AsyncMock(return_value=WriteState.NONE),
+    )
+    assert result.provider == "agent_platform"
+    assert result.fallback_reason is None
+    assert result.payload["fields"] == fields
+    assert result.payload["summary"] == facts["summary"]
     direct.assert_not_awaited()
 
 

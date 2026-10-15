@@ -1,0 +1,18 @@
+.sb-lselect { display: inline-flex; align-items: center; gap: var(--ui-space-1); min-height: var(--ui-control-height); padding: 0 var(--ui-space-2) 0 var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); font-size: var(--ui-text-body); max-width: 100%; }
+.sb-lselect.on { border-color: var(--ui-primary); }
+.sb-lselect.disabled { background: var(--ui-background); color: var(--ui-muted); }
+.sb-lselect-label { color: var(--ui-secondary); white-space: nowrap; }
+.sb-lselect-text { color: var(--ui-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-lselect.on .sb-lselect-text { color: var(--ui-primary); font-weight: 600; }
+.sb-lselect-arrow, .sb-lselect-clear { color: var(--ui-muted); display: inline-flex; }
+.sb-pressed { opacity: .7; }
+/* size=small：飞书筛选片，灰底无边框，选中浅蓝底主色字；宽度撑满宿主，超出省略 */
+.sb-lselect.small { display: flex; width: 100%; box-sizing: border-box; min-height: 32px; padding: 0 var(--ui-space-2) 0 var(--ui-space-3); border: 0; background: var(--ui-neutral-soft); font-size: 14px; }
+.sb-lselect.small .sb-lselect-label, .sb-lselect.small .sb-lselect-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ui-ink); }
+.sb-lselect.small.on { background: var(--ui-selected); }
+.sb-lselect.small.on .sb-lselect-text { color: var(--ui-primary); font-weight: 600; }
+.sb-lselect.small.disabled { background: var(--ui-neutral-soft); }
+.sb-lselect.small.disabled .sb-lselect-label { color: var(--ui-muted); }
+/* 小程序体验：筛选片看起来 32px，点击区向上下各扩 6px 到 44px */
+.sb-lselect.small { position: relative; }
+.sb-lselect.small::after { content: ''; position: absolute; left: 0; right: 0; top: calc(50% - 22px); bottom: calc(50% - 22px); } /* 点击区以片中线为准上下各 22px，任何屏宽都是 44px */

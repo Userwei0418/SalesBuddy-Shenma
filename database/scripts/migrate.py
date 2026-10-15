@@ -12,9 +12,9 @@ import asyncio
 import hashlib
 import json
 import os
+import re
 from dataclasses import dataclass
 from pathlib import Path
-import re
 
 ROOT = Path(__file__).resolve().parents[1]
 DEPLOY_LOCK = 202609102101
@@ -53,8 +53,8 @@ def discover(root: Path = ROOT) -> list[Migration]:
 def transactional_sql(path: Path) -> str:
     content = path.read_text(encoding='utf-8')
     # pg_dump restrict keys are psql commands, not schema or user data.
-    content = re.sub(r'^\\(?:un)?restrict\s+\S+\s*$', '', content, flags=re.M)
-    if re.search(r'^\s*\\', content, flags=re.M):
+    content = re.sub(r'^\\(?:un)?restrict\s+\S+\s*$', '', content, flags=re.MULTILINE)
+    if re.search(r'^\s*\\', content, flags=re.MULTILINE):
         raise MigrationError(f'Unsupported psql directive: {path.name}')
     lines = content.splitlines()
     significant = [i for i, line in enumerate(lines) if line.strip() and not line.lstrip().startswith('--')]
@@ -124,14 +124,22 @@ async def apply(connection, migration: Migration, root: Path, *, adopt_existing:
     return 'applied'
 
 
-async def migrate(connection, root: Path = ROOT, *, adopt_existing: bool = False) -> list[dict]:
+async def migrate(connection, root: Path = ROOT, *, adopt_existing: bool = False, through_version: int | None = None) -> list[dict]:
     migrations = discover(root)  # Validate all file names before any database mutation.
+    if through_version is not None:
+        if f'V{through_version:03d}' not in {m.key for m in migrations}:
+            raise MigrationError('Requested migration boundary is not in this release')
+        migrations = [m for m in migrations if int(m.key[1:]) <= through_version]
     baseline = item('BASELINE_V1', root / 'baseline/V001__current_schema.sql')
     seeds = [item(path.stem.split('__', 1)[0], path) for path in sorted((root / 'seeds').glob('S*.sql'))]
     results = []
     await connection.execute('SELECT pg_advisory_lock($1)', DEPLOY_LOCK)
     try:
         exists = await connection.fetchval("SELECT to_regclass('ops.schema_migration') IS NOT NULL")
+        if exists and through_version is not None:
+            latest = await connection.fetchval("SELECT max(substring(version FROM 2)::integer) FROM ops.schema_migration WHERE version ~ '^V[0-9]+$'")
+            if latest is not None and latest > through_version:
+                raise MigrationError('Requested boundary is older than the installed schema; downgrades are not supported')
         if not exists:
             partial = await connection.fetchval("SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname=ANY($1))",
                                                 ['crm', 'activity', 'agent', 'platform', 'ops', 'config'])
@@ -172,10 +180,11 @@ async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--plan', action='store_true', help='List files without connecting to a database')
     parser.add_argument('--adopt-existing', action='store_true', help='Record unchecksummed historical migrations without replay')
+    parser.add_argument('--through-version', type=int, help='Fresh installation boundary before provisioning the versioned runtime ACL; never downgrades')
     args = parser.parse_args()
     if args.plan:
         files = [item('BASELINE_V1', ROOT / 'baseline/V001__current_schema.sql'),
-                 *(item(p.stem.split('__', 1)[0], p) for p in sorted((ROOT / 'seeds').glob('S*.sql'))), *discover()]
+                 *(item(p.stem.split('__', 1)[0], p) for p in sorted((ROOT / 'seeds').glob('S*.sql'))), *(m for m in discover() if args.through_version is None or int(m.key[1:]) <= args.through_version)]
         print(json.dumps([{'key': m.key, 'file': str(m.path.relative_to(ROOT)), 'sha256': m.checksum}
                           for m in files], indent=2))
         return
@@ -185,7 +194,7 @@ async def main() -> None:
     import asyncpg
     connection = await asyncpg.connect(dsn=dsn, command_timeout=300)
     try:
-        print(json.dumps(await migrate(connection, adopt_existing=args.adopt_existing), indent=2))
+        print(json.dumps(await migrate(connection, adopt_existing=args.adopt_existing, through_version=args.through_version), indent=2))
     finally:
         await connection.close()
 
@@ -195,6 +204,6 @@ if __name__ == '__main__':
         asyncio.run(main())
     except MigrationError as error:
         raise SystemExit(str(error)) from None
-    except Exception as error:
+    except Exception as error:  # noqa: BLE001 - do not expose DSNs or row contents at the CLI boundary
         # Connection exceptions can contain credentials or business values. Keep console output bounded.
         raise SystemExit(f'Database deployment failed ({type(error).__name__}); current file rolled back') from None

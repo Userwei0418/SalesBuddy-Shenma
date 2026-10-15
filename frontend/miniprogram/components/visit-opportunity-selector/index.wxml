@@ -1,0 +1,15 @@
+<view class="visit-choice">
+  <view class="visit-choice-head"><view class="visit-choice-heading"><text class="visit-choice-title">关联已有商机</text><text class="visit-choice-optional">选填</text></view><button wx:if="{{selected || selectedId}}" class="visit-choice-change" hover-class="visit-choice-pressed" disabled="{{disabled}}" bindtap="clear">清除关联</button></view>
+  <view class="visit-choice-hint">可只记录客户跟进；选择商机后，请核对本次关联。</view>
+  <view wx:if="{{selected}}" class="visit-choice-selected"><text class="visit-choice-name">{{selected.name}}</text><text class="visit-choice-status">已选择</text></view>
+  <block wx:elif="{{!selectedId}}">
+    <view class="visit-choice-search"><sb-search plain value="{{query}}" maxlength="{{100}}" placeholder="搜索该客户下已有商机" disabled="{{disabled}}" loading="{{loading && !!query}}" bind:change="search" bind:clear="search"/></view>
+    <scroll-view class="visit-choice-list {{disabled ? 'is-disabled' : ''}}" scroll-y>
+      <t-cell wx:for="{{items}}" wx:key="id" title="{{item.name}}" arrow hover="{{!disabled}}" data-id="{{item.id}}" bind:click="choose"/>
+      <button wx:if="{{hasMore}}" class="visit-choice-more" hover-class="visit-choice-pressed" disabled="{{loading || disabled}}" bindtap="more">加载更多</button>
+    </scroll-view>
+  </block>
+  <view wx:if="{{loading && !query}}" class="visit-choice-state">正在加载商机…</view>
+  <view wx:elif="{{error}}" class="visit-choice-error">{{error}}<button class="visit-choice-retry" hover-class="visit-choice-pressed" bindtap="retry" disabled="{{disabled}}">重新加载</button></view>
+  <view wx:elif="{{!selected && !items.length}}" class="visit-choice-state">{{query ? '没有匹配的商机，请调整关键词。' : '暂无可选商机，可直接记录客户跟进。'}}</view>
+</view>

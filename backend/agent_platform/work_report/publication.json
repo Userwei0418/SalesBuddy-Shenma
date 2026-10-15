@@ -1,0 +1,20 @@
+{
+  "id": "01a11ff5-f520-76c0-b1c6-8fd73f0c98d4",
+  "app_id": "df857cc3-fa7a-41e0-ab9b-385f53cd41fe",
+  "name": "Raccoon SalesBuddy-工作报告（周报）-V2",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "baaa9266ef314665a505138629af5ae374975bdb9d1145407e3c7d786cf8a9ce",
+  "snapshot_id": "01a1200d-9b17-7615-a262-63393ea9e9d3",
+  "url": "https://123.207.235.181/agents/01a11ff5-f520-76c0-b1c6-8fd73f0c98d4/configure",
+  "observed_at": "2026-10-09T09:45:25.192651+00:00",
+  "previous_snapshot_id": "01a11fff-6c19-7322-b6fa-d4f6cc86add9",
+  "previous_revision": "07ee2addc2ecedcaacdcf0d6203b582f761fd7b941a31d2f29f7fd6c2f1dfdd3",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "6d6a206d151ae4ffd18d89ae2814e442205fffa538d8522daec40c8e24626c93",
+  "config_sha256": "9d5a383a605bc848969634f16143dbcc74f08b4517fb9c48a619bbdbbdc5742f",
+  "record_type": "platform_publication_and_get_verification",
+  "runtime_snapshot_verified": false,
+  "tool_connected": false,
+  "application_bound": false
+}

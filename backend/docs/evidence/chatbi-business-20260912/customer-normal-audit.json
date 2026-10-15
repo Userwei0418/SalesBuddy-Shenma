@@ -1,0 +1,84 @@
+{
+  "checked_at": "2026-09-11T17:54:46.910152+00:00",
+  "run_id": "3f3eefd2-d56f-4d69-979c-1015cade4fa1",
+  "scenario": "normal",
+  "checks": [
+    {
+      "name": "restricted role, no RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "successful run",
+      "passed": true
+    },
+    {
+      "name": "one persisted assistant",
+      "passed": true
+    },
+    {
+      "name": "one queued business job",
+      "passed": true
+    },
+    {
+      "name": "real platform result accepted",
+      "passed": false
+    },
+    {
+      "name": "one real platform HTTP 200",
+      "passed": false
+    },
+    {
+      "name": "platform runtime IDs recorded",
+      "passed": false
+    },
+    {
+      "name": "answer matches current actor-scoped open task aggregate",
+      "passed": true
+    }
+  ],
+  "route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 12962,
+    "operation_id": "e798ae05-95cb-485b-9afd-ebfbddfd19d1",
+    "platform_run": {
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "TimeoutError"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "cancelled",
+      "http_status": null,
+      "error_code": "CancelledError",
+      "operation_id": "e798ae05-95cb-485b-9afd-ebfbddfd19d1",
+      "fault_injected": "false",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "e798ae05-95cb-485b-9afd-ebfbddfd19d1",
+      "fault_injected": null,
+      "dispatch_suppressed": null
+    }
+  ],
+  "facts_verification": "same restricted actor aggregate at audit time; values redacted",
+  "passed": false
+}

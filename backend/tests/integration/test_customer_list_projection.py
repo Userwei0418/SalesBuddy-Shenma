@@ -8,6 +8,8 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
+from tests.integration.tenant_fixtures import active_foreign_workspace
+
 import pytest
 
 from sales_backend.db import set_request_context
@@ -250,7 +252,7 @@ async def test_list_rechecks_fde_revocation_and_workspace_on_reused_connection(c
                    await actor(connection, "ZJL001"), fde):
         await set_request_context(connection, person)
         assert await compared(connection)
-        await set_request_context(connection, person.model_copy(update={"workspace_id": str(uuid4())}))
+        await set_request_context(connection, person.model_copy(update={"workspace_id": await active_foreign_workspace(connection)}))
         assert await compared(connection) == []
     await members(connection, data["sales"], project, [data["people"]["second"]["id"]])
     await set_request_context(connection, fde)

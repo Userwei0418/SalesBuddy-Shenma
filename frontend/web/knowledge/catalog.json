@@ -1,0 +1,12 @@
+{
+  "version": "",
+  "updated_at": "",
+  "owner": "",
+  "categories": [
+    {"key": "solution", "label": "解决方案"},
+    {"key": "pricing", "label": "产品定价"},
+    {"key": "case", "label": "案例与资质"},
+    {"key": "template", "label": "模板与话术"}
+  ],
+  "items": []
+}

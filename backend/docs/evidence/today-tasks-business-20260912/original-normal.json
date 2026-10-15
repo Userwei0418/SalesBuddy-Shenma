@@ -1,0 +1,232 @@
+{
+  "scenario": "normal",
+  "preflight_only": false,
+  "started_at": "2026-09-12T06:33:37.576863+00:00",
+  "checks": [
+    {
+      "name": "database role obeys RLS",
+      "passed": true
+    },
+    {
+      "name": "exact authorized sales actor",
+      "passed": true
+    },
+    {
+      "name": "exactly one unchanged authorized demo source",
+      "passed": true
+    },
+    {
+      "name": "approved demo customer name",
+      "passed": true
+    },
+    {
+      "name": "Worker scope equals approved case",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations: 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/930af564-2aa0-414f-9f29-764400793571/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/930af564-2aa0-414f-9f29-764400793571/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/930af564-2aa0-414f-9f29-764400793571/messages: 409",
+      "passed": true
+    },
+    {
+      "name": "automatic task planning completed",
+      "passed": true
+    },
+    {
+      "name": "all prior tasks unchanged",
+      "passed": true
+    },
+    {
+      "name": "exactly one task created",
+      "passed": true
+    },
+    {
+      "name": "task uses only backend source and own pending status",
+      "passed": true
+    },
+    {
+      "name": "sole owner is the current sales user",
+      "passed": true
+    },
+    {
+      "name": "one creation event for this run",
+      "passed": true
+    },
+    {
+      "name": "existing assignees unchanged",
+      "passed": true
+    },
+    {
+      "name": "CRM visits and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "existing card contains persisted task",
+      "passed": true
+    },
+    {
+      "name": "no provider metadata in card",
+      "passed": true
+    },
+    {
+      "name": "automatic mode has no pending artifact",
+      "passed": true
+    },
+    {
+      "name": "one completed Worker job",
+      "passed": true
+    },
+    {
+      "name": "one receipt and answer",
+      "passed": true
+    },
+    {
+      "name": "same operation final real API success",
+      "passed": true
+    },
+    {
+      "name": "real platform dispatch",
+      "passed": true
+    },
+    {
+      "name": "platform result or automatic original fallback",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /tasks/d3e9f0ba-54b6-463f-967d-15e0ecd7cafd: 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /tasks/d3e9f0ba-54b6-463f-967d-15e0ecd7cafd: 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/a62f53cb-adae-42fe-af7e-dc6dd19f7a42: 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/930af564-2aa0-414f-9f29-764400793571/messages: 200",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read conversation",
+      "passed": true
+    },
+    {
+      "name": "task is isolated by RLS",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "930af564-2aa0-414f-9f29-764400793571",
+    "run_id": "a62f53cb-adae-42fe-af7e-dc6dd19f7a42",
+    "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd"
+  },
+  "active_tasks_before": 29,
+  "candidate_count": 1,
+  "source_fingerprint": "8b2769c8492b8caf90e4e4764842e15ab5e8197e811990630a00c29f9ba39ba0",
+  "tasks_before_fingerprint": "530fbe1a231746b8dec84c3bf876003e5cfda1168cf404fe3b390b6b3ac39903",
+  "protected_before": {
+    "SELECT * FROM crm.customer ORDER BY id": "1452d85ed3a315861a733c47987ee8364b45d3cee176fb64eb8f22c3f3d8f3ee",
+    "SELECT * FROM crm.opportunity ORDER BY id": "34f607069dd963047a72f36cd0b631c3628da81610a1ebaa73fb262169d1152b",
+    "SELECT * FROM activity.visit ORDER BY id": "e5c3daec5c8d7a47fb684673d4604c39e29e50a907b2476121524d02342b3887",
+    "SELECT * FROM workflow.notification ORDER BY id": "1b712d5a91713bf686848ff73e662a7e01d320982304f5079e5242b52da35803"
+  },
+  "elapsed_ms": 24186,
+  "status": "succeeded",
+  "inference_route": {
+    "provider": "senseaudio",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 23087,
+    "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+    "platform_run": {
+      "ids": {
+        "task_id": "649b61ec-2a7d-449c-ae9d-c70045aa74be",
+        "message_id": "e60335b6-5e62-4606-9574-22b34e2d241e",
+        "conversation_id": "ed68d375-e2ec-45f8-b56b-47b371deb2c8"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 3044,
+        "first_body_byte_ms": 3044,
+        "request_started_ms": 0,
+        "first_data_event_ms": 3044,
+        "headers_received_ms": 3044,
+        "stream_completed_ms": null
+      },
+      "error_code": null,
+      "stop_state": "unconfirmed",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": "TimeoutError"
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "cancelled",
+      "http_status": 200,
+      "error_code": "CancelledError",
+      "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+      "dispatch_suppressed": "false"
+    },
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "80ff9663-b57b-4842-9fdf-1acd66eb98e3",
+      "dispatch_suppressed": null
+    }
+  ],
+  "platform_accepted": false,
+  "new_tasks": 1,
+  "new_notifications": 0,
+  "real_business_verified": true,
+  "passed": true,
+  "finished_at": "2026-09-12T06:34:02.143313+00:00"
+}

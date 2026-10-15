@@ -1,0 +1,15 @@
+{
+  "id": "01a09021-b848-7e7f-9567-e20859d29bf8",
+  "name": "销售智助-客户作战地图评估-BETA",
+  "published": false,
+  "revision": "7595b23ff17d65228838dfa66904f5c28e1ae6c2d793715698717fb0144bc4f6",
+  "snapshot_id": "01a09021-b84c-7f00-a490-1e508a41f58a",
+  "url": "https://123.207.235.181/agents/01a09021-b848-7e7f-9567-e20859d29bf8/configure",
+  "checked_at": "2026-09-11T18:40:01.667513+00:00",
+  "account_email": "zhouwei5@sensetime.com",
+  "workspace": "FDE Workspace",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "71d90d01697156fc761ba6752f6c02320180ee212c13c8caa535388abacdbb80",
+  "matches_existing_initial_prompt": true,
+  "platform_write_performed": false
+}
