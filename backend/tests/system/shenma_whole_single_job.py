@@ -200,7 +200,7 @@ async def execute_exact(*, job_id: UUID, workspace_id: UUID, user_id: UUID,
                 locked_until=clock_timestamp()+make_interval(secs=>$7),
                 lease_token=gen_random_uuid(),updated_at=clock_timestamp()
                 WHERE j.id=$1 AND j.workspace_id=$2 AND j.aggregate_id=$3 AND j.job_type=$4
-                AND j.payload->>'workspace_id'=$2::text AND j.payload->>'user_id'=$5::text
+                AND j.payload->>'workspace_id'=($2::uuid)::text AND j.payload->>'user_id'=($5::uuid)::text
                 AND j.status='queued' AND j.attempts=0 AND j.max_attempts>=1
                 AND j.created_at>=clock_timestamp()-interval '30 minutes'
                 AND j.available_at<=clock_timestamp()

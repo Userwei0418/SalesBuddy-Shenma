@@ -177,3 +177,15 @@ def test_identity_environment_rejects_root_home_before_identity_switch():
     for path in ("/root", "/root/private", "relative-home"):
         with pytest.raises(ValueError):
             runner.identity_environment(SimpleNamespace(pw_name="shenma-sales", pw_dir=path))
+
+
+def test_exact_claim_keeps_uuid_parameter_types_when_comparing_json_payload():
+    import inspect
+
+    from tests.system import shenma_whole_single_job as runner
+    source = inspect.getsource(runner.execute_exact)
+    # PostgreSQL otherwise infers $2/$5 as text, breaking the same parameters'
+    # uuid projection predicates before any queue item is claimed.
+    assert "j.payload->>'workspace_id'=($2::uuid)::text" in source
+    assert "j.payload->>'user_id'=($5::uuid)::text" in source
+    assert "$2::text" not in source and "$5::text" not in source
