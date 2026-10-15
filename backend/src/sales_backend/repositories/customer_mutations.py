@@ -7,6 +7,8 @@ import asyncpg
 
 from sales_backend.domain.agent import ActorContext
 from sales_backend.domain.concurrency import require_version
+from sales_backend.domain.customer_identity import identity_update
+from sales_backend.repositories.customer_identity import related_partner, set_identity
 from sales_backend.repositories.authorization_checks import require_permission
 from sales_backend.repositories.customer_risk import enqueue_customer_risk_review
 from sales_backend.repositories.jobs import enqueue_battle_map_review
@@ -29,6 +31,7 @@ class CustomerMutationRepository:
             raise ValueError("请至少修改一项客户信息")
         customer = await connection.fetchrow(
             """SELECT id::text, name, owner_user_ref_id::text, owner_team_id::text, version_no,
+                 business_identities, partner_profile_id, primary_partner_id,
                  industry_code, customer_type_code, source_code, level_code,
                  primary_partner_name, demand_summary, next_action,
                  operation_type, cooperation_years, main_business, customer_budget
@@ -40,7 +43,11 @@ class CustomerMutationRepository:
         if not customer:
             raise LookupError("客户不存在或不在当前权限范围内")
         require_version(customer["version_no"], expected_version)
+        data = await related_partner(connection, identity_update(data, customer), customer)
         mapping = {
+            "business_identities": "business_identities",
+            "partner_profile_id": "partner_profile_id",
+            "partner_id": "primary_partner_id",
             "name": "name",
             "industry": "industry_code",
             "customer_type": "customer_type_code",
@@ -61,6 +68,9 @@ class CustomerMutationRepository:
         if set(data) - (mapping.keys() | contact_mapping.keys()):
             raise ValueError("包含不可修改的客户字段")
         labels = {
+            "business_identities": "业务身份",
+            "partner_profile_id": "自身伙伴档案",
+            "partner_id": "关联伙伴ID",
             "name": "客户名称",
             "industry": "行业",
             "customer_type": "客户类型",
@@ -95,11 +105,13 @@ class CustomerMutationRepository:
         # Omitted fields never change. Only the management contract allows an
         # explicit null cooperation_years; zero is a real value, not "unfilled".
         def comparable(value):
-            return "" if value is None else value
+            if value is None: return ""
+            if isinstance(value, uuid.UUID): return str(value)
+            return value
 
         updates = {
             key: value for key, value in data.items()
-            if (value is not None or (management_profile and key == "cooperation_years"))
+            if (value is not None or key in {"customer_type", "partner_id", "partner_profile_id"} or (management_profile and key == "cooperation_years"))
             and comparable(value) != comparable(prior.get(key))
         }
         if not updates:
@@ -124,7 +136,7 @@ class CustomerMutationRepository:
         values = [customer_id]
         assignments = ["updated_at=clock_timestamp()", "version_no=version_no+1"]
         for key, column in mapping.items():
-            if key in updates:
+            if key in updates and key != "partner_profile_id":
                 values.append(updates[key])
                 assignments.append(f"{column}=${len(values)}")
                 if key == "name":
@@ -133,6 +145,14 @@ class CustomerMutationRepository:
         await connection.execute(
             "UPDATE crm.customer SET " + ",".join(assignments) + " WHERE id=$1::uuid", *values,  # noqa: S608
         )
+
+        if {"business_identities", "partner_profile_id"} & updates.keys():
+            profile = await set_identity(connection, customer_id,
+                data.get("business_identities", customer["business_identities"]),
+                data.get("partner_profile_id", customer["partner_profile_id"]))
+            if profile != (str(customer["partner_profile_id"]) if customer["partner_profile_id"] else None):
+                changes.append({"label": "自身伙伴档案", "before": str(customer["partner_profile_id"] or "未填写"),
+                                "after": profile or "未填写"})
 
         contact_updates = {key: value for key, value in updates.items() if key in contact_mapping}
         if contact_updates:
@@ -178,7 +198,10 @@ class CustomerMutationRepository:
             "id": customer_id,
             "name": data.get("name") or customer["name"],
             "updated_fields": sorted(updates),
-            "battle_map_review": "queued",
+            "battle_map_review": (
+                "queued" if "customer" in data.get("business_identities", customer["business_identities"])
+                else "not_applicable"
+            ),
         }
 
     async def create(
@@ -189,8 +212,8 @@ class CustomerMutationRepository:
         data: dict[str, Any],
     ) -> dict[str, Any]:
         await require_permission(connection, 'customer.create')
-        if not str(data.get("company_reference") or "").strip():
-            raise ValueError("请填写已核实的公司客户编号或审批单号")
+        data = await related_partner(connection, data)
+        roles = data.get('business_identities', ['customer'])
         from sales_backend.repositories.team_directory import selectable_teams
 
         teams = await selectable_teams(connection, actor, 'assignment', permission='customer.create')
@@ -200,24 +223,6 @@ class CustomerMutationRepository:
         if len(matches) != 1:
             raise PermissionError("请选择当前管理范围内的有效业务团队")
         team = matches[0]
-        # Serialize both direct entry and approvals before checking name/reference.
-        # No unique index is imposed on existing customer data during this upgrade.
-        await connection.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended($1||':customer-name:'||"
-            "lower(regexp_replace($2, '\\s+', '', 'g')),0))",
-            actor.workspace_id, data['name'],
-        )
-        await connection.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended($1||':customer-reference:'||lower(btrim($2)),0))",
-            actor.workspace_id, data['company_reference'],
-        )
-        duplicate_reference = await connection.fetchval(
-            "SELECT EXISTS(SELECT 1 FROM crm.customer WHERE workspace_id=$1::uuid AND deleted_at IS NULL "
-            "AND lower(btrim(company_reference))=lower(btrim($2)))",
-            actor.workspace_id, data['company_reference'],
-        )
-        if duplicate_reference:
-            raise FileExistsError("公司客户编号或审批单号已用于其他客户，请核对已有档案")
         duplicate = await connection.fetchval(
             """
             SELECT EXISTS(SELECT 1 FROM crm.customer
@@ -239,11 +244,11 @@ class CustomerMutationRepository:
               id, workspace_id, name, normalized_name, industry_code, customer_type_code,
               source_code, lifecycle_status, owner_team_id, owner_user_ref_id, primary_partner_name,
               demand_summary, data_source, data_kind, created_by_user_ref_id, next_action, level_code,
-              company_reference,
+              company_reference, primary_partner_id,
               company_verified_at, company_verified_by
             ) VALUES ($1::uuid, $2::uuid, $3, lower(regexp_replace($3, '\\s+', '', 'g')),
               $4, $5, $6, $7, $8::uuid, $9::uuid, $10, $11, 'manual', 'production',
-              $12::uuid, $13, $14, $15, clock_timestamp(), $12::uuid)
+              $12::uuid, $13, $14, $15, $16::uuid, clock_timestamp(), $12::uuid)
             """,
             customer_id,
             actor.workspace_id,
@@ -259,8 +264,12 @@ class CustomerMutationRepository:
             actor.user_id,
             None,
             data["level_code"],
-            data["company_reference"].strip(),
+            str(data.get("company_reference") or "").strip() or None,
+            str(data["partner_id"]) if data.get("partner_id") else None,
         )
+        profile = None
+        if roles != ["customer"] or data.get("partner_profile_id"):
+            profile = await set_identity(connection, customer_id, roles, data.get("partner_profile_id"))
         await connection.execute(
             """
             INSERT INTO crm.contact (
@@ -281,6 +290,9 @@ class CustomerMutationRepository:
         return {
             "id": customer_id,
             "name": data["name"],
+            "business_identities": roles,
+            "partner_profile_id": profile,
+            "primary_partner_id": data.get("partner_id"),
             "industry": data["industry"],
             "customer_type": data["customer_type"],
             "level_code": data["level_code"],

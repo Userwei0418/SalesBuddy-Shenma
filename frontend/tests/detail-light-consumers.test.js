@@ -46,7 +46,7 @@ test('opportunity load cannot populate a different selected customer or unloaded
   const after=h.page.load();h.page.onUnload();waits[2][1].resolve({id:'new',name:'离页迟到'});await after;assert.equal(h.page.data.customerName,'');
 });
 test('search is invalidated when typing, before debounce, and when selecting a customer',async()=>{
-  const waits=[];const h=load('opportunity-create',{listCustomers:()=>{const d=deferred();waits.push(d);return d.promise;},getCustomerReference:async id=>({id,name:'已选择'})});
+  const waits=[];const h=load('opportunity-create',{listOpportunityCustomerReferences:()=>{const d=deferred();waits.push(d);return d.promise;},getCustomerReference:async id=>({id,name:'已选择'})});
   h.page.inputCustomer({detail:{value:'旧'}});h.runTimers();h.page.inputCustomer({detail:{value:'新'}});waits[0].resolve({items:[{id:'old'}]});await tick();assert.equal(h.page.data.customers.length,0);
   h.runTimers();await h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});waits[1].resolve({items:[{id:'new'}]});await tick();assert.equal(h.page.data.customers.length,0);
 });

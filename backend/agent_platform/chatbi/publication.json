@@ -1,0 +1,24 @@
+{
+  "id": "01a09022-c5ff-7562-bd7d-f8d6c74f5486",
+  "app_id": "620edb5c-6204-4444-9444-372d0882fb73",
+  "name": "销售智助-销售经营问数-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "333dcce2f8585eee276f1a0197c2fe97a0101de87fa60c673ca87202530d2366",
+  "snapshot_id": "01a0a588-f13b-7c13-a8c4-9e002df68dfc",
+  "url": "https://123.207.235.181/agents/01a09022-c5ff-7562-bd7d-f8d6c74f5486/configure",
+  "previous_snapshot_id": "01a0a05e-057a-7356-9b78-bfb7b7aecd3c",
+  "previous_binding_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "a3373865d66e561c17b6f9fc94956f8078e62b2754ad96bda6373188be557bea",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "synthetic_acceptance": {
+    "status": "passed",
+    "evidence": "docs/evidence/agent-business-policy-20260915/business-policy-chatbi.json",
+    "scope": "synthetic facts only; no business writes; no runtime snapshot attestation",
+    "elapsed_ms": [
+      2240
+    ]
+  }
+}

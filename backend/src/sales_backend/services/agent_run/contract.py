@@ -7,16 +7,16 @@ from sales_backend.integrations.senseaudio import SenseAudioError
 from sales_backend.services.agent_run.models import RunInput
 
 INSTANT_SUMMARY_CONTRACT: dict[RoleCode, tuple[str, tuple[str, ...]]] = {
-    RoleCode.FDE: ("FDE个人协作即时总结", ("safe_customers", "attention_customers", "action_plan")),
+    RoleCode.FDE: ("FDE协作即时总结", ("safe_customers", "attention_customers", "action_plan")),
     RoleCode.FDE_LEAD: (
-        "FDE部门协作即时总结", ("safe_customers", "attention_customers", "team_comparison", "action_plan")
+        "FDE负责人协作即时总结", ("safe_customers", "attention_customers", "team_comparison", "action_plan")
     ),
     RoleCode.SALES: (
-        "一线销售个人即时总结",
+        "一线销售即时总结",
         ("safe_customers", "attention_customers", "action_plan"),
     ),
     RoleCode.SUPERVISOR: (
-        "销售主管个人与团队即时总结",
+        "销售主管经营即时总结",
         (
             "personal_safe_customers",
             "personal_attention_customers",
@@ -26,7 +26,7 @@ INSTANT_SUMMARY_CONTRACT: dict[RoleCode, tuple[str, tuple[str, ...]]] = {
         ),
     ),
     RoleCode.MANAGER: (
-        "销售总经理部门即时总结",
+        "销售总经理经营即时总结",
         ("safe_customers", "attention_customers", "team_comparison", "action_plan"),
     ),
 }

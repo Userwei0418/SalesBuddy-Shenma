@@ -1,0 +1,11 @@
+.ds-advice-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.ds-advice-note{margin:8px 0 0}
+.ds-recording-guide{margin:8px 0 16px}
+.ds-recording-guide>button{padding-inline:0}
+.ds-recording-guide>div{padding:16px;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-bg-muted)}
+.ds-recording-guide h3{font-size:var(--ui-text-body);margin:12px 0 8px}.ds-recording-guide h3:first-child{margin-top:0}
+.ds-recording-guide p{margin:6px 0;line-height:1.7}
+.ds-presentation-switch{margin-bottom:12px}
+.ds-ranking-members{padding:8px 0;max-width:100%;min-width:0}.ds-ranking-members small{display:block;margin-top:4px}
+.ds-claim-filters{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:0 20px 12px}.ds-claim-filter{padding:4px 8px;border-radius:var(--ui-radius-control);background:var(--ui-bg-muted);color:var(--ui-ink-muted);font-size:var(--ui-text-caption)}
+.ds-claim-radio{accent-color:var(--ui-primary);width:16px;height:16px;cursor:pointer}.ds-claim-radio:disabled{cursor:not-allowed}

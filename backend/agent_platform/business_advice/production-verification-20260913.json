@@ -1,0 +1,140 @@
+{
+  "verified_on": "2026-09-13",
+  "environment": "current server sales_saas",
+  "demo_data_tag": "【演示验收0913】",
+  "business_calls": "public HTTPS with native password accounts and normal authorization",
+  "application_release": "integrated-20260913-d49e92f",
+  "database_version": "V067",
+  "checks": [
+    "native_password_login_and_first_change_all_roles",
+    "ops_customer_creation_sales_claim_approval",
+    "non_owner_reference_only_claim_conflict",
+    "opportunity_scoped_detail_duplicate_rejection_and_stage_update",
+    "real_visit_ai_review_archive_and_idempotency",
+    "real_customer_advice_persisted_and_cached",
+    "real_opportunity_advice_persisted_and_cached",
+    "real_visit_advice_persisted_and_cached",
+    "human_no_task_decision_persisted",
+    "human_adoption_creates_one_task_and_replays",
+    "adopted_task_accept_complete",
+    "position_one_claimant_completes_others_cannot_claim",
+    "person_task_rejection",
+    "actuals_native_confirmation_retry_source_deduplication",
+    "dashboard_matches_actual_ledger_without_forecast_substitution",
+    "sales_dashboard_profile_tasks_notifications_readable",
+    "supervisor_dashboard_profile_tasks_notifications_readable",
+    "manager_dashboard_profile_tasks_notifications_readable",
+    "operations_native_management_reads",
+    "real_low_quality_model_review_blocks_archive",
+    "three_production_worker_agents_succeeded",
+    "home_contains_archived_visit",
+    "opportunity_change_and_task_reminders_persisted",
+    "one_adopted_task_and_one_assigned_notification",
+    "current_db_wechat_login_dashboard_profile",
+    "wechat_suggestion_task_edit_send_accept_complete",
+    "wechat_task_completion_home_persisted"
+  ],
+  "advice": [
+    {
+      "kind": "customer",
+      "status": "succeeded",
+      "provider": "agent_platform",
+      "elapsed_ms": 5995,
+      "operation_id": "67d642de-7182-4c46-96a4-937afb588017",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "kind": "opportunity",
+      "status": "succeeded",
+      "provider": "agent_platform",
+      "elapsed_ms": 9952,
+      "operation_id": "b07713b2-462c-416a-83fe-f00e9f4c327a",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "kind": "visit",
+      "status": "succeeded",
+      "provider": "agent_platform",
+      "elapsed_ms": 4684,
+      "operation_id": "cee784eb-5bff-4680-a65b-6bf1e3c39755",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    }
+  ],
+  "visit_score": 75,
+  "low_quality_score": 20,
+  "actuals": {
+    "recognized_amount": 25000.0,
+    "collection_amount": 10000.0,
+    "recognized_count": 1,
+    "collection_count": 1,
+    "customer_count": 1,
+    "entry_count": 2,
+    "unlinked_count": 0,
+    "first_date": "2026-09-13"
+  },
+  "passed": true,
+  "credentials_included": false,
+  "runtime_fix": "API and Worker now load the merged Agent bindings last; prior Worker configuration mismatch superseded results before invocation",
+  "ui_boundary": "Current online sales_saas database via native password accounts. WeChat native custom-component adopt button, first picker item confirmation, task send, home reminder and same-batch second no-task decision passed; HTTPS readback confirms source link, one assigned notification and cache reuse. Earlier native task acceptance/completion also passed. Admin fresh browser shows current menus; partner create/edit and human-readable audit readback passed. No wx API mocking or page-data injection. Real-device audio permissions, navigation-icon rendering, company SSO and 50-100 user load remain external verification boundaries.",
+  "ui_task": {
+    "id": "0b2b9792-c3d6-4b07-911e-95d3e34ef6ae",
+    "status": "completed",
+    "source_suggestion_id": "b2b18967-b741-4c1b-b701-c69b77c2824d",
+    "unique_assigned_notification": 1,
+    "home_notification_readback": true,
+    "tool": "wechatide 0.3.9, official CLI/MCP service on port 23689"
+  },
+  "wechat_mcp_registered": true,
+  "final_verification": {
+    "verified_on": "2026-09-13",
+    "application_release": "integrated-20260913-f9f0bf3",
+    "revision": "f9f0bf33204af85bbdeb2fec8577715fa2bf8ce4",
+    "database_version": "V068",
+    "checks": [
+      "native_custom_component_adopt_entry_clicked",
+      "native_picker_default_first_item_confirmed",
+      "native_same_batch_second_no_task",
+      "same_batch_cache_preserved_after_adoption",
+      "native_admin_partner_create_edit_audit",
+      "admin_assets_revalidate_200_and_origin_304",
+      "native_admin_agent_audit_matches_suggestion_decisions_after_query"
+    ],
+    "native_ui": {
+      "environment": "current server sales_saas",
+      "api_base": "https://www.ericepc.com/api/v1",
+      "account_code": "VA0913A",
+      "customer_id": "768fd1ff-de00-43d0-9834-b1b5eb8848f0",
+      "opportunity_id": "201a4164-4b0d-4662-b240-e1920068aac3",
+      "advice_id": "b303593a-0a75-4fe3-bad8-eba53b9bd378",
+      "advice_status": "succeeded",
+      "suggestion_decisions": [
+        "adopted",
+        "no_task",
+        "pending"
+      ],
+      "task_id": "2af4489f-27e9-4a95-a7d4-e209d575293a",
+      "task_status": "pending_confirm",
+      "source_suggestion_id": "5a57a6ed-5f23-4bbe-97d3-0851c053f98f",
+      "unique_assigned_notification": 1,
+      "same_batch_cache_reused": true,
+      "native_picker_first_item_confirmed": true,
+      "native_custom_component_adopt_entry_clicked": true,
+      "native_second_no_task_confirmed": true,
+      "no_page_data_injection": true,
+      "admin_agent_audit_decisions_readback": true,
+      "admin_agent_audit_refresh": "Explicit query reload required after cross-client changes; detail uses queried list."
+    },
+    "runtime": {
+      "api_worker_same_release_active": true,
+      "public_live_ready": "200 ok",
+      "public_admin_asset_200_cache_control": "no-cache, must-revalidate",
+      "origin_etag_and_last_modified_304_cache_control": "no-cache, must-revalidate",
+      "public_conditional_request_observed_status": 200,
+      "migration": "V068 applied; second run unchanged",
+      "backup_bytes": 3591506
+    }
+  }
+}

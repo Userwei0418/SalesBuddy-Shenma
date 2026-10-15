@@ -1,0 +1,45 @@
+✔ 1440px account menu cancels safely, then switches shortcut A to typed B without stale navigation (7034.260417ms)
+✔ 390px account menu cancels safely, then switches shortcut A to typed B without stale navigation (5653.965333ms)
+✔ forced password change can exit without changing credentials or bypassing the requirement (1897.608541ms)
+✔ slow logout and old actor responses do not block or overwrite the next account (1981.873625ms)
+✔ source profile logout also opens blank manual login; failed re-login remains editable (2166.915417ms)
+✔ account dialog keyboard wraps and Escape restores the trigger (1775.451917ms)
+✔ 直接连续录入、键盘顺序、中文合成事件及动态下拉选项 (5491.582542ms)
+✔ 必填清空即时阻止创建、就地提示、保存并恢复空值和其他输入 (6428.413583ms)
+✔ sales 保留团队稳定 ID、草稿、创建确认、失败后输入及合成创建结果 (4947.065833ms)
+✔ manager 保留团队稳定 ID、草稿、创建确认、失败后输入及合成创建结果 (6102.433583ms)
+✔ 沿用语音草案回填，处理时禁用编辑；只读字段保持只读 (831.137084ms)
+✔ 1440x900 页面无横向溢出，全部字段及底部操作可达 (1316.84375ms)
+✔ 1366x768 页面无横向溢出，全部字段及底部操作可达 (1182.151042ms)
+✔ 1024x600 页面无横向溢出，全部字段及底部操作可达 (1453.114541ms)
+✔ 390x844 页面无横向溢出，全部字段及底部操作可达 (1204.454459ms)
+✔ 1440x900 无语音入口，进度轨道铺满整行并随填写清空变化 (906.53925ms)
+✔ 390x844 无语音入口，进度轨道铺满整行并随填写清空变化 (1005.073916ms)
+✔ team/name/account picker creates independent tasks; cancelled confirm and failed submission preserve all input (6180.208333ms)
+✔ task cancellation requires reason and server version; transfer uses stable candidate and retains event history (7159.977292ms)
+✔ large amount shows exact yuan and company rule; returning does not save, retry keeps input and acknowledgment matches (2991.052417ms)
+✔ company entry shows exact name, switching invalidates old session and requires fresh login (2059.234208ms)
+✔ responsive 1440: map/list, task picker, login and keyboard (3062.608083ms)
+✔ responsive 1366: map/list, task picker, login and keyboard (2166.251333ms)
+✔ responsive 1024: map/list, task picker, login and keyboard (2372.825458ms)
+✔ responsive 390: map/list, task picker, login and keyboard (3275.657958ms)
+✔ map update failure hides incomplete points; retry restores consistent list and ranking expands (2178.379875ms)
+✔ visit final archive failure retains reviewed input and retries with the same idempotency key (2179.634292ms)
+✔ pending handover, pending review and revoked cancellation permission remain distinct (1180.366291ms)
+✔ Web sidebar uses native visit save/discard and restores the same draft after reload (5581.151125ms)
+✔ browser back prompts once and source-driven visit structure still opens confirmation (3198.255458ms)
+✔ async native visit transition dismisses the exit prompt without discarding or hijacking navigation (2811.226625ms)
+✔ sidebar entry, source scope, generate, edit, copy, refresh restoration, regeneration cancel (9028.346875ms)
+✔ all pages loaded, stable user ID filtered, empty/error/retry and selected-only sources (3378.985792ms)
+✔ weekly workspace fits 1366x768 (2208.271458ms)
+✔ weekly workspace fits 1024x600 (2086.387291ms)
+✔ weekly workspace fits 390x844 (2220.441917ms)
+✔ period switch and navigation preserve separate edited drafts; search does not silently change selection (2848.816666ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35323.95175

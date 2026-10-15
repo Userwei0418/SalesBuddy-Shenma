@@ -1,0 +1,3065 @@
+{
+  "source_revision": "5f022c53432ace4f22958f12f3f61fbc7511fec7",
+  "backend_revision": "b925708f0d3b18d9ddcfe42745e9d6a6176ba071",
+  "files": [
+    {
+      "path": "backend/web/admin.html",
+      "source_path": "backend/src/sales_backend/web/admin.html",
+      "source_sha256": "41c6902cf9d0c4bb27a36945206b4a32b5693ce2e28fa28164fd928801ba2047",
+      "package_sha256": "41c6902cf9d0c4bb27a36945206b4a32b5693ce2e28fa28164fd928801ba2047",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/activity.js",
+      "source_path": "backend/src/sales_backend/web/assets/activity.js",
+      "source_sha256": "28ab1214f828d5a22fe6f1b973b02dec494ee460dab70a875f0e9e89c2f7b53b",
+      "package_sha256": "28ab1214f828d5a22fe6f1b973b02dec494ee460dab70a875f0e9e89c2f7b53b",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/agent-audit.js",
+      "source_path": "backend/src/sales_backend/web/assets/agent-audit.js",
+      "source_sha256": "6e5fdad05f4b6bd1448d2bf06f369f33ceed28a5afa2c179631482926e61def4",
+      "package_sha256": "6e5fdad05f4b6bd1448d2bf06f369f33ceed28a5afa2c179631482926e61def4",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/ai-audit-labels.js",
+      "source_path": "backend/src/sales_backend/web/assets/ai-audit-labels.js",
+      "source_sha256": "b6b0b94353421dd47010b815ce6ddcaa539f9381d7bcc2ee4714e535c86b4e01",
+      "package_sha256": "b6b0b94353421dd47010b815ce6ddcaa539f9381d7bcc2ee4714e535c86b4e01",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/ai-capabilities.js",
+      "source_path": "backend/src/sales_backend/web/assets/ai-capabilities.js",
+      "source_sha256": "2421dc1828aa354affc12bd5454db3c257d25d196d176b6e79a729a04eb35960",
+      "package_sha256": "2421dc1828aa354affc12bd5454db3c257d25d196d176b6e79a729a04eb35960",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/ai-connectivity.js",
+      "source_path": "backend/src/sales_backend/web/assets/ai-connectivity.js",
+      "source_sha256": "635cb2a6863d5be7b98c99f8b5ae1ee177848e3e4952dc9a39026067fa0438cf",
+      "package_sha256": "635cb2a6863d5be7b98c99f8b5ae1ee177848e3e4952dc9a39026067fa0438cf",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/brand-mark-white.svg",
+      "source_path": "backend/src/sales_backend/web/assets/brand-mark-white.svg",
+      "source_sha256": "7ad5606db7dadd20ce83e39239758f08ce2ec061c702ba371aaf041b03d5423d",
+      "package_sha256": "7ad5606db7dadd20ce83e39239758f08ce2ec061c702ba371aaf041b03d5423d",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/brand-navy.svg",
+      "source_path": "backend/src/sales_backend/web/assets/brand-navy.svg",
+      "source_sha256": "acd2163d89f70882fb635ea9f42a2dc635142c96de6a93dc635dd32f3acdb610",
+      "package_sha256": "acd2163d89f70882fb635ea9f42a2dc635142c96de6a93dc635dd32f3acdb610",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/brand-square.png",
+      "source_path": "backend/src/sales_backend/web/assets/brand-square.png",
+      "source_sha256": "d21c88c931d1fb6e6e5f64e3ff4f9742581221531dac11546108499d2c518ea6",
+      "package_sha256": "d21c88c931d1fb6e6e5f64e3ff4f9742581221531dac11546108499d2c518ea6",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/brand-white.svg",
+      "source_path": "backend/src/sales_backend/web/assets/brand-white.svg",
+      "source_sha256": "ce7fecda7074c2cfd95b21134997ded4913516afdb2ef88bb665f796aaf0b11b",
+      "package_sha256": "ce7fecda7074c2cfd95b21134997ded4913516afdb2ef88bb665f796aaf0b11b",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/closed-company-export.css",
+      "source_path": "backend/src/sales_backend/web/assets/closed-company-export.css",
+      "source_sha256": "465dfe2e8200898e1989ed114b5b1a1fd19d252ba3dbf5e2c45c0441c6334577",
+      "package_sha256": "465dfe2e8200898e1989ed114b5b1a1fd19d252ba3dbf5e2c45c0441c6334577",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/closed-company-export.js",
+      "source_path": "backend/src/sales_backend/web/assets/closed-company-export.js",
+      "source_sha256": "b3be1518024066d74fc4ea5f390d70370459dd6f2a2567c6488e12b9cd637633",
+      "package_sha256": "b3be1518024066d74fc4ea5f390d70370459dd6f2a2567c6488e12b9cd637633",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/companies.js",
+      "source_path": "backend/src/sales_backend/web/assets/companies.js",
+      "source_sha256": "b35bc99e175284d7456dd7a4e30077fd15631bf475ac65814bdf2af6ca77ca3f",
+      "package_sha256": "b35bc99e175284d7456dd7a4e30077fd15631bf475ac65814bdf2af6ca77ca3f",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/company-activate.js",
+      "source_path": "backend/src/sales_backend/web/assets/company-activate.js",
+      "source_sha256": "1b4070ff8b07a31d27c8ef231926b87055a67e4209406c89511fbb6c8375de0d",
+      "package_sha256": "1b4070ff8b07a31d27c8ef231926b87055a67e4209406c89511fbb6c8375de0d",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/company-login.js",
+      "source_path": "backend/src/sales_backend/web/assets/company-login.js",
+      "source_sha256": "27130affb4ced9436ab88cf0441043dbc00648625d8b73b7d840242a738a327b",
+      "package_sha256": "27130affb4ced9436ab88cf0441043dbc00648625d8b73b7d840242a738a327b",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/company-rules.js",
+      "source_path": "backend/src/sales_backend/web/assets/company-rules.js",
+      "source_sha256": "e1c866c616547d29438f58836d09310c99e0c118b43a409582774e949b40fe06",
+      "package_sha256": "e1c866c616547d29438f58836d09310c99e0c118b43a409582774e949b40fe06",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/console.css",
+      "source_path": "backend/src/sales_backend/web/assets/console.css",
+      "source_sha256": "4a5fcf09b93eaf1f673bd1c74b8b00837da6a6e9a56f4f1701a8af5c5e32e982",
+      "package_sha256": "4a5fcf09b93eaf1f673bd1c74b8b00837da6a6e9a56f4f1701a8af5c5e32e982",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/console.js",
+      "source_path": "backend/src/sales_backend/web/assets/console.js",
+      "source_sha256": "17bc91efaaf3adccc4c5a5ecc22700ec91327687a9a675542dee35e03d4a00e5",
+      "package_sha256": "17bc91efaaf3adccc4c5a5ecc22700ec91327687a9a675542dee35e03d4a00e5",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/core.js",
+      "source_path": "backend/src/sales_backend/web/assets/core.js",
+      "source_sha256": "4d25e3c8fc22dc2c999b1096152e19c6651768e305382c3749d5f63f850245ce",
+      "package_sha256": "4d25e3c8fc22dc2c999b1096152e19c6651768e305382c3749d5f63f850245ce",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/customer-detail.js",
+      "source_path": "backend/src/sales_backend/web/assets/customer-detail.js",
+      "source_sha256": "ee9fc90ba79bc2666d54eace929f21eb6d98d86b580a62d8f4828e06e2ac3532",
+      "package_sha256": "ee9fc90ba79bc2666d54eace929f21eb6d98d86b580a62d8f4828e06e2ac3532",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/customer-profile.js",
+      "source_path": "backend/src/sales_backend/web/assets/customer-profile.js",
+      "source_sha256": "ebf5f66bcd3ab9c75daa83c8102cdace2e69cca3f8f9db3c9408701e8fc55086",
+      "package_sha256": "ebf5f66bcd3ab9c75daa83c8102cdace2e69cca3f8f9db3c9408701e8fc55086",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/feishu-sync.js",
+      "source_path": "backend/src/sales_backend/web/assets/feishu-sync.js",
+      "source_sha256": "78bdc5a504eab5ef502dd884ff17abd2289f55478f033e6e0250780950a1e72a",
+      "package_sha256": "78bdc5a504eab5ef502dd884ff17abd2289f55478f033e6e0250780950a1e72a",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/model-api.js",
+      "source_path": "backend/src/sales_backend/web/assets/model-api.js",
+      "source_sha256": "3248a159f0197d64a97f5d64e70dea64c3d5925aa0adac3ccb4691f492922065",
+      "package_sha256": "3248a159f0197d64a97f5d64e70dea64c3d5925aa0adac3ccb4691f492922065",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/opportunity-amount.js",
+      "source_path": "backend/src/sales_backend/web/assets/opportunity-amount.js",
+      "source_sha256": "cd414a88abe9232d7e76a845028abc8a964ff5082170393e946ca8654ce2f735",
+      "package_sha256": "cd414a88abe9232d7e76a845028abc8a964ff5082170393e946ca8654ce2f735",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/organization.js",
+      "source_path": "backend/src/sales_backend/web/assets/organization.js",
+      "source_sha256": "c4546334925c414071335d14c258170e3e649fde2e7f43d89c99bdc65e193a8f",
+      "package_sha256": "c4546334925c414071335d14c258170e3e649fde2e7f43d89c99bdc65e193a8f",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/pages.js",
+      "source_path": "backend/src/sales_backend/web/assets/pages.js",
+      "source_sha256": "1482ff9e3f1e64e9dec2441bf375d18a46d0a8fb38263cf95f9dc68a0ad539b8",
+      "package_sha256": "1482ff9e3f1e64e9dec2441bf375d18a46d0a8fb38263cf95f9dc68a0ad539b8",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/partners.js",
+      "source_path": "backend/src/sales_backend/web/assets/partners.js",
+      "source_sha256": "809d912735810618d6df8b0b0eb4cc53634e23616ce0070e4b03715f9bba60dc",
+      "package_sha256": "809d912735810618d6df8b0b0eb4cc53634e23616ce0070e4b03715f9bba60dc",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/permissions.js",
+      "source_path": "backend/src/sales_backend/web/assets/permissions.js",
+      "source_sha256": "acb7dbe0beb1194e36f7d32b25a12c5616283d064abd7c4eea73a2a4835f7881",
+      "package_sha256": "acb7dbe0beb1194e36f7d32b25a12c5616283d064abd7c4eea73a2a4835f7881",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/platform-configuration.js",
+      "source_path": "backend/src/sales_backend/web/assets/platform-configuration.js",
+      "source_sha256": "51c09f01427c919638bb888ed43e998e89b0b758f351266aa34627d011bb8712",
+      "package_sha256": "51c09f01427c919638bb888ed43e998e89b0b758f351266aa34627d011bb8712",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/platform-runtime.js",
+      "source_path": "backend/src/sales_backend/web/assets/platform-runtime.js",
+      "source_sha256": "c55694420f991f43c3098267e191d88f253c6c954cf4ec70293c50f7b79c4043",
+      "package_sha256": "c55694420f991f43c3098267e191d88f253c6c954cf4ec70293c50f7b79c4043",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/platform-support.js",
+      "source_path": "backend/src/sales_backend/web/assets/platform-support.js",
+      "source_sha256": "f7bcef2cae16d5ced8dd748585d43603863782281b4650ed83d61fa294df2ff9",
+      "package_sha256": "f7bcef2cae16d5ced8dd748585d43603863782281b4650ed83d61fa294df2ff9",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/platform.css",
+      "source_path": "backend/src/sales_backend/web/assets/platform.css",
+      "source_sha256": "ed320e32afbec22a9122f810fd09e29c0ef3e3f8ef11730b4677f85a3f85bdea",
+      "package_sha256": "ed320e32afbec22a9122f810fd09e29c0ef3e3f8ef11730b4677f85a3f85bdea",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/platform.js",
+      "source_path": "backend/src/sales_backend/web/assets/platform.js",
+      "source_sha256": "0346c2f66ab3da00da0c157a56387ef82604d20ce6da4d96f6851f5328a51292",
+      "package_sha256": "0346c2f66ab3da00da0c157a56387ef82604d20ce6da4d96f6851f5328a51292",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/support-access.js",
+      "source_path": "backend/src/sales_backend/web/assets/support-access.js",
+      "source_sha256": "293b50a6b9549a4a3c9afe5653bdaa0ecfbd7697f8af9cb7709c9bff7e457e64",
+      "package_sha256": "293b50a6b9549a4a3c9afe5653bdaa0ecfbd7697f8af9cb7709c9bff7e457e64",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/targets.js",
+      "source_path": "backend/src/sales_backend/web/assets/targets.js",
+      "source_sha256": "7af58cef9a8fc1d4c5a916f7ba65ea637eab6ead0f687776b52f02678f6a29f8",
+      "package_sha256": "7af58cef9a8fc1d4c5a916f7ba65ea637eab6ead0f687776b52f02678f6a29f8",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/task-imports.js",
+      "source_path": "backend/src/sales_backend/web/assets/task-imports.js",
+      "source_sha256": "06c3df297d6e27295a823bde47b611995913d47222b12d93a03cea37fd069455",
+      "package_sha256": "06c3df297d6e27295a823bde47b611995913d47222b12d93a03cea37fd069455",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/assets/tasks.js",
+      "source_path": "backend/src/sales_backend/web/assets/tasks.js",
+      "source_sha256": "e403c9c62824a9ed72cb849ef5418cf7c2362fa81b2563d28f73ec6f8b87750b",
+      "package_sha256": "e403c9c62824a9ed72cb849ef5418cf7c2362fa81b2563d28f73ec6f8b87750b",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/closed-company-export.html",
+      "source_path": "backend/src/sales_backend/web/closed-company-export.html",
+      "source_sha256": "c068b2714afb1d43a6c8ee9b8b8df61b28d2a0307a57b8d097767982d4ec94bf",
+      "package_sha256": "c068b2714afb1d43a6c8ee9b8b8df61b28d2a0307a57b8d097767982d4ec94bf",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/company-activate.html",
+      "source_path": "backend/src/sales_backend/web/company-activate.html",
+      "source_sha256": "f662509c1a3690e0cf27e62186e13a9fc2faec6554e3f65959e67948590eb384",
+      "package_sha256": "f662509c1a3690e0cf27e62186e13a9fc2faec6554e3f65959e67948590eb384",
+      "unchanged": true
+    },
+    {
+      "path": "backend/web/platform.html",
+      "source_path": "backend/src/sales_backend/web/platform.html",
+      "source_sha256": "e573a1fbf603c4e5146712eb967df7e7ad8086aa38759dd7779da126688bb751",
+      "package_sha256": "e573a1fbf603c4e5146712eb967df7e7ad8086aa38759dd7779da126688bb751",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/.gitignore",
+      "source_path": "frontend/.gitignore",
+      "source_sha256": "06a12d7b29d3c7388b8c0a5e9dfc97de1a9560e97a2d3e1ab8164c7072da4cd7",
+      "package_sha256": "06a12d7b29d3c7388b8c0a5e9dfc97de1a9560e97a2d3e1ab8164c7072da4cd7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/README.md",
+      "source_path": "frontend/README.md",
+      "source_sha256": "7ec6a2610b98765aaa8ce60f73cf64246e6ce03db3b6bdf6cadae0808adfd3e4",
+      "package_sha256": "e830b786f6564bc0225f6c99a80fd0f797b6bd46a610836470343e465e41a84a",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/VERSION.json",
+      "source_path": "frontend/VERSION.json",
+      "source_sha256": "eae71caa8ad90619433e17907265e5613c638d7a2d29792476efdf6bd0ddbc99",
+      "package_sha256": "b970aee11791401d05ae13d69e6fd3af3e408866b9eb320c8764a00817e2634f",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/docs/给AI的启动提示词.md",
+      "source_path": "frontend/docs/给AI的启动提示词.md",
+      "source_sha256": "e8989366af9ab8780d455952e9b2721036e4a3f8e7ed020dd4a39dcbfd10b2c7",
+      "package_sha256": "87431986530d02040f1b0a926ab96c53f0fe0935931f1f6f774846b6353cc6c6",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/miniprogram/app.js",
+      "source_path": "frontend/miniprogram/app.js",
+      "source_sha256": "4c36149c7b8ebe7f41b5c1d283df5df1e1559b723dae28993c347c982217806b",
+      "package_sha256": "4c36149c7b8ebe7f41b5c1d283df5df1e1559b723dae28993c347c982217806b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/app.json",
+      "source_path": "frontend/miniprogram/app.json",
+      "source_sha256": "c9f9b2c2f1ffe0ad88e4d61d1b9969eb934d48dce03cb93ea94d9ddcc5584fbb",
+      "package_sha256": "c9f9b2c2f1ffe0ad88e4d61d1b9969eb934d48dce03cb93ea94d9ddcc5584fbb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/app.wxss",
+      "source_path": "frontend/miniprogram/app.wxss",
+      "source_sha256": "b89f5d322b2218d19557360b3eb68f9ea29f7519c3cc01b80b4bdea6e99882c5",
+      "package_sha256": "b89f5d322b2218d19557360b3eb68f9ea29f7519c3cc01b80b4bdea6e99882c5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/advice-actions/index.js",
+      "source_path": "frontend/miniprogram/components/advice-actions/index.js",
+      "source_sha256": "3ecbbf21eb45176bac0cb92ef7aaeb7d6c0c11f1087061956fe70124ad572f41",
+      "package_sha256": "3ecbbf21eb45176bac0cb92ef7aaeb7d6c0c11f1087061956fe70124ad572f41",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/advice-actions/index.json",
+      "source_path": "frontend/miniprogram/components/advice-actions/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/advice-actions/index.wxml",
+      "source_path": "frontend/miniprogram/components/advice-actions/index.wxml",
+      "source_sha256": "93652a7872d9fef3bb41ecc4551c011352f4c81c501f9351f4d8ac90ac1638cc",
+      "package_sha256": "93652a7872d9fef3bb41ecc4551c011352f4c81c501f9351f4d8ac90ac1638cc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/advice-actions/index.wxss",
+      "source_path": "frontend/miniprogram/components/advice-actions/index.wxss",
+      "source_sha256": "db7dc58f53c61f1460b61e58806dd40ae3b442f7434413b7ca3844985ffae6b1",
+      "package_sha256": "db7dc58f53c61f1460b61e58806dd40ae3b442f7434413b7ca3844985ffae6b1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-picker/index.js",
+      "source_path": "frontend/miniprogram/components/dashboard-picker/index.js",
+      "source_sha256": "02c8a5747ad33e734fce6fad7a565c93a8558226c33322582e923a020ef8cfc7",
+      "package_sha256": "02c8a5747ad33e734fce6fad7a565c93a8558226c33322582e923a020ef8cfc7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-picker/index.json",
+      "source_path": "frontend/miniprogram/components/dashboard-picker/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-picker/index.wxml",
+      "source_path": "frontend/miniprogram/components/dashboard-picker/index.wxml",
+      "source_sha256": "3c3eafefd7ffa245d0b5c8e0c0e00af3ad90a58f87d36e3bf6bda2d9182bac26",
+      "package_sha256": "3c3eafefd7ffa245d0b5c8e0c0e00af3ad90a58f87d36e3bf6bda2d9182bac26",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-picker/index.wxss",
+      "source_path": "frontend/miniprogram/components/dashboard-picker/index.wxss",
+      "source_sha256": "a3abf712a1196f7c0ff912aaf2f6630048848a517f9b1b6df92ab98ad179b176",
+      "package_sha256": "a3abf712a1196f7c0ff912aaf2f6630048848a517f9b1b6df92ab98ad179b176",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-ranking/index.js",
+      "source_path": "frontend/miniprogram/components/dashboard-ranking/index.js",
+      "source_sha256": "699d6635aa26d372c07bc331650188a3a585c1124f516013fdeb54eaa7731d18",
+      "package_sha256": "699d6635aa26d372c07bc331650188a3a585c1124f516013fdeb54eaa7731d18",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-ranking/index.json",
+      "source_path": "frontend/miniprogram/components/dashboard-ranking/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-ranking/index.wxml",
+      "source_path": "frontend/miniprogram/components/dashboard-ranking/index.wxml",
+      "source_sha256": "e77206ce3fe7efb77382082a11b175ae1f17b5cf4b3fb8d1b5f7a36c7c6dbf3d",
+      "package_sha256": "e77206ce3fe7efb77382082a11b175ae1f17b5cf4b3fb8d1b5f7a36c7c6dbf3d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/dashboard-ranking/index.wxss",
+      "source_path": "frontend/miniprogram/components/dashboard-ranking/index.wxss",
+      "source_sha256": "995da8eecd5da260d2057c202a749e4b096462800acd47a20ef568273c483bd1",
+      "package_sha256": "995da8eecd5da260d2057c202a749e4b096462800acd47a20ef568273c483bd1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/detail-pagination/index.js",
+      "source_path": "frontend/miniprogram/components/detail-pagination/index.js",
+      "source_sha256": "592b30a8efea7a0efe5e0106c587d0870a91558dc0bd9c65fbefa637ae1997b0",
+      "package_sha256": "592b30a8efea7a0efe5e0106c587d0870a91558dc0bd9c65fbefa637ae1997b0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/detail-pagination/index.json",
+      "source_path": "frontend/miniprogram/components/detail-pagination/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/detail-pagination/index.wxml",
+      "source_path": "frontend/miniprogram/components/detail-pagination/index.wxml",
+      "source_sha256": "e6f224b7fafe9201f866257dec84617a5a3ff9c280c7b281d825927e14a4f8da",
+      "package_sha256": "e6f224b7fafe9201f866257dec84617a5a3ff9c280c7b281d825927e14a4f8da",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/detail-pagination/index.wxss",
+      "source_path": "frontend/miniprogram/components/detail-pagination/index.wxss",
+      "source_sha256": "17f94cbedde3c9fd7245dc716724e8c627049b47dcd0700e8175b33f5228a674",
+      "package_sha256": "17f94cbedde3c9fd7245dc716724e8c627049b47dcd0700e8175b33f5228a674",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-dashboard/index.js",
+      "source_path": "frontend/miniprogram/components/fde-dashboard/index.js",
+      "source_sha256": "56d1be2e4f391a6d6d97fde21e71b235a9b3c361727107946759d23315bb1607",
+      "package_sha256": "56d1be2e4f391a6d6d97fde21e71b235a9b3c361727107946759d23315bb1607",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-dashboard/index.json",
+      "source_path": "frontend/miniprogram/components/fde-dashboard/index.json",
+      "source_sha256": "1da9638ee17d949368da80c71a7c48b84580b2e38d67968f1e82cae099683a65",
+      "package_sha256": "1da9638ee17d949368da80c71a7c48b84580b2e38d67968f1e82cae099683a65",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-dashboard/index.wxml",
+      "source_path": "frontend/miniprogram/components/fde-dashboard/index.wxml",
+      "source_sha256": "c6d5b363ba9b9256ddb8bd0915d7a3f5ea1e67ce29d7f2e70e9485d0a5e807e5",
+      "package_sha256": "c6d5b363ba9b9256ddb8bd0915d7a3f5ea1e67ce29d7f2e70e9485d0a5e807e5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-dashboard/index.wxss",
+      "source_path": "frontend/miniprogram/components/fde-dashboard/index.wxss",
+      "source_sha256": "015a39c896ff423081a57c4e449fcd27b36342e8f4bdb9d2bee893fa47b83203",
+      "package_sha256": "015a39c896ff423081a57c4e449fcd27b36342e8f4bdb9d2bee893fa47b83203",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-picker/index.js",
+      "source_path": "frontend/miniprogram/components/fde-picker/index.js",
+      "source_sha256": "35cbf83b43837a6517f9aa2e403babcd1b64ba28dade201bd98043dab204149c",
+      "package_sha256": "35cbf83b43837a6517f9aa2e403babcd1b64ba28dade201bd98043dab204149c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-picker/index.json",
+      "source_path": "frontend/miniprogram/components/fde-picker/index.json",
+      "source_sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "package_sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-picker/index.wxml",
+      "source_path": "frontend/miniprogram/components/fde-picker/index.wxml",
+      "source_sha256": "4acb70e8c4cb93d057dd5d47fbde9c16edf38666ad9aa4586f1be8caa3898c42",
+      "package_sha256": "4acb70e8c4cb93d057dd5d47fbde9c16edf38666ad9aa4586f1be8caa3898c42",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-picker/index.wxss",
+      "source_path": "frontend/miniprogram/components/fde-picker/index.wxss",
+      "source_sha256": "36c07a980d23c6218ae57bc32ccbd91b874ca215c7f6173b1f464545f80f7e68",
+      "package_sha256": "36c07a980d23c6218ae57bc32ccbd91b874ca215c7f6173b1f464545f80f7e68",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-profile/index.js",
+      "source_path": "frontend/miniprogram/components/fde-profile/index.js",
+      "source_sha256": "ac0c1e440736b732aa51c95449e3964c9f43e74441768e74ded188320ae1d2a6",
+      "package_sha256": "ac0c1e440736b732aa51c95449e3964c9f43e74441768e74ded188320ae1d2a6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-profile/index.json",
+      "source_path": "frontend/miniprogram/components/fde-profile/index.json",
+      "source_sha256": "af1784bc68d40fe5f2cb3f6ad0e2be462a29b57d19270905c9cc9961433c7a52",
+      "package_sha256": "af1784bc68d40fe5f2cb3f6ad0e2be462a29b57d19270905c9cc9961433c7a52",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-profile/index.wxml",
+      "source_path": "frontend/miniprogram/components/fde-profile/index.wxml",
+      "source_sha256": "d65dc3723eeccafdaa29e2d9e06791e55977bce44f17deba0c19f35871a83f08",
+      "package_sha256": "d65dc3723eeccafdaa29e2d9e06791e55977bce44f17deba0c19f35871a83f08",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-profile/index.wxss",
+      "source_path": "frontend/miniprogram/components/fde-profile/index.wxss",
+      "source_sha256": "78eb251b1223d5e24af43d11a12b2a0332b048f75629acf3c7e775c4a4ae911a",
+      "package_sha256": "78eb251b1223d5e24af43d11a12b2a0332b048f75629acf3c7e775c4a4ae911a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-projects/index.js",
+      "source_path": "frontend/miniprogram/components/fde-projects/index.js",
+      "source_sha256": "780c0c2db6e4f89ff3c1ba08a260e0f82a168d2bc2674e21bc7d09cfada4c9e4",
+      "package_sha256": "780c0c2db6e4f89ff3c1ba08a260e0f82a168d2bc2674e21bc7d09cfada4c9e4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-projects/index.json",
+      "source_path": "frontend/miniprogram/components/fde-projects/index.json",
+      "source_sha256": "d792e942e9db03b14691ef3e1498eeaf4b18444f88237d7dc5e950fad13954ce",
+      "package_sha256": "d792e942e9db03b14691ef3e1498eeaf4b18444f88237d7dc5e950fad13954ce",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-projects/index.wxml",
+      "source_path": "frontend/miniprogram/components/fde-projects/index.wxml",
+      "source_sha256": "9c472833c30e0245f32bd62b7ddf9c990ea7fcbbb4323ff75d8f0741587a6e20",
+      "package_sha256": "9c472833c30e0245f32bd62b7ddf9c990ea7fcbbb4323ff75d8f0741587a6e20",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-projects/index.wxss",
+      "source_path": "frontend/miniprogram/components/fde-projects/index.wxss",
+      "source_sha256": "c12c985d9fb1f5506fe7f6979b5dbe57b27a6c7c5e1519be30e26556c1ab7063",
+      "package_sha256": "c12c985d9fb1f5506fe7f6979b5dbe57b27a6c7c5e1519be30e26556c1ab7063",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-visit-opportunity/index.js",
+      "source_path": "frontend/miniprogram/components/fde-visit-opportunity/index.js",
+      "source_sha256": "61ca5327415a49e458a5f38505f47a4c11a5ed2cebb6906a5be1d2171a16664a",
+      "package_sha256": "61ca5327415a49e458a5f38505f47a4c11a5ed2cebb6906a5be1d2171a16664a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-visit-opportunity/index.json",
+      "source_path": "frontend/miniprogram/components/fde-visit-opportunity/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-visit-opportunity/index.wxml",
+      "source_path": "frontend/miniprogram/components/fde-visit-opportunity/index.wxml",
+      "source_sha256": "78abaf9ed74e9e80277b1552e0e0430c6dcfe2e4e2dbdad6dd4b1ad40e267a1f",
+      "package_sha256": "78abaf9ed74e9e80277b1552e0e0430c6dcfe2e4e2dbdad6dd4b1ad40e267a1f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/fde-visit-opportunity/index.wxss",
+      "source_path": "frontend/miniprogram/components/fde-visit-opportunity/index.wxss",
+      "source_sha256": "ee7363a42e5a4ce80d9c2d0b9ff1c560bcc2bbf50177917dffbccd1a02504dc1",
+      "package_sha256": "ee7363a42e5a4ce80d9c2d0b9ff1c560bcc2bbf50177917dffbccd1a02504dc1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/member-scope-filter/index.js",
+      "source_path": "frontend/miniprogram/components/member-scope-filter/index.js",
+      "source_sha256": "9f9ead61fa61b5ddd7e2dfbeae00b7b17655ecaa48d37cfd52363e19b1fe1a50",
+      "package_sha256": "9f9ead61fa61b5ddd7e2dfbeae00b7b17655ecaa48d37cfd52363e19b1fe1a50",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/member-scope-filter/index.json",
+      "source_path": "frontend/miniprogram/components/member-scope-filter/index.json",
+      "source_sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "package_sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/member-scope-filter/index.wxml",
+      "source_path": "frontend/miniprogram/components/member-scope-filter/index.wxml",
+      "source_sha256": "f68300206f2863ed590365690feb80d40acfc8ddad02866b9d1876be8f9205ef",
+      "package_sha256": "f68300206f2863ed590365690feb80d40acfc8ddad02866b9d1876be8f9205ef",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/member-scope-filter/index.wxss",
+      "source_path": "frontend/miniprogram/components/member-scope-filter/index.wxss",
+      "source_sha256": "9507aa2ea9e4f1faaf486ca65b189371b0d023c85e9708185eb9acef43e87ca7",
+      "package_sha256": "9507aa2ea9e4f1faaf486ca65b189371b0d023c85e9708185eb9acef43e87ca7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/opportunity-form/index.js",
+      "source_path": "frontend/miniprogram/components/opportunity-form/index.js",
+      "source_sha256": "643c24015521ffda05629d29b7d7cf4de4a8ce5144594b8713ab047f850ad182",
+      "package_sha256": "643c24015521ffda05629d29b7d7cf4de4a8ce5144594b8713ab047f850ad182",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/opportunity-form/index.json",
+      "source_path": "frontend/miniprogram/components/opportunity-form/index.json",
+      "source_sha256": "348f2467c4ea4b9b12203fc3a05fd4c03526c32e6521282685368946ec41ae72",
+      "package_sha256": "348f2467c4ea4b9b12203fc3a05fd4c03526c32e6521282685368946ec41ae72",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/opportunity-form/index.wxml",
+      "source_path": "frontend/miniprogram/components/opportunity-form/index.wxml",
+      "source_sha256": "a715d5fee086cf1a4b79ac1012aa8013a459b3127ecd0896414b2b540f6035b4",
+      "package_sha256": "a715d5fee086cf1a4b79ac1012aa8013a459b3127ecd0896414b2b540f6035b4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/opportunity-form/index.wxss",
+      "source_path": "frontend/miniprogram/components/opportunity-form/index.wxss",
+      "source_sha256": "64b6aa6999a9471d4a078fa16187f64ca6975d5ffb330cdbcbb69de267cea4bb",
+      "package_sha256": "64b6aa6999a9471d4a078fa16187f64ca6975d5ffb330cdbcbb69de267cea4bb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/page-navigation/index.js",
+      "source_path": "frontend/miniprogram/components/page-navigation/index.js",
+      "source_sha256": "2005afb0f27e4fd4e76f85b432fd183192d9522534249e6c3f2ba8d0d7502846",
+      "package_sha256": "2005afb0f27e4fd4e76f85b432fd183192d9522534249e6c3f2ba8d0d7502846",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/page-navigation/index.json",
+      "source_path": "frontend/miniprogram/components/page-navigation/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/page-navigation/index.wxml",
+      "source_path": "frontend/miniprogram/components/page-navigation/index.wxml",
+      "source_sha256": "6731cdcf1be06c6aba7203b0852829198ea2eb7580e53a5e8425b78874832041",
+      "package_sha256": "6731cdcf1be06c6aba7203b0852829198ea2eb7580e53a5e8425b78874832041",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/page-navigation/index.wxss",
+      "source_path": "frontend/miniprogram/components/page-navigation/index.wxss",
+      "source_sha256": "1262cde0a4fbbe9e3574f527b72eef19d8776daec5a6841ae110e7aa4ccc81be",
+      "package_sha256": "1262cde0a4fbbe9e3574f527b72eef19d8776daec5a6841ae110e7aa4ccc81be",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/person-picker/index.js",
+      "source_path": "frontend/miniprogram/components/person-picker/index.js",
+      "source_sha256": "fc37edf29e55af906adf394f3686a26a9ae372f62698f3f547699b832abe06f8",
+      "package_sha256": "fc37edf29e55af906adf394f3686a26a9ae372f62698f3f547699b832abe06f8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/person-picker/index.json",
+      "source_path": "frontend/miniprogram/components/person-picker/index.json",
+      "source_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "package_sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/person-picker/index.wxml",
+      "source_path": "frontend/miniprogram/components/person-picker/index.wxml",
+      "source_sha256": "2cf25a9eef665d1041af0420c28d73af7d03dcb7cf2144f77fe441298722671c",
+      "package_sha256": "2cf25a9eef665d1041af0420c28d73af7d03dcb7cf2144f77fe441298722671c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/person-picker/index.wxss",
+      "source_path": "frontend/miniprogram/components/person-picker/index.wxss",
+      "source_sha256": "5731bce1c2a482347341e812a2e4de3aebe902ee5f34320dd7aeaa3ec797e7e9",
+      "package_sha256": "5731bce1c2a482347341e812a2e4de3aebe902ee5f34320dd7aeaa3ec797e7e9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/profile-scope-picker/index.js",
+      "source_path": "frontend/miniprogram/components/profile-scope-picker/index.js",
+      "source_sha256": "cca9233b47a42ccf00b2cd5a223cbc9c06ac00fbef3de52449710138a9748aa1",
+      "package_sha256": "cca9233b47a42ccf00b2cd5a223cbc9c06ac00fbef3de52449710138a9748aa1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/profile-scope-picker/index.json",
+      "source_path": "frontend/miniprogram/components/profile-scope-picker/index.json",
+      "source_sha256": "a157733970e50e0848eea8389f7c99354d66563a1d70cc36f1b26d246098d518",
+      "package_sha256": "a157733970e50e0848eea8389f7c99354d66563a1d70cc36f1b26d246098d518",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/profile-scope-picker/index.wxml",
+      "source_path": "frontend/miniprogram/components/profile-scope-picker/index.wxml",
+      "source_sha256": "3facf9ad212a6277fbc043c383d12959c6717daef9c9c60807b3d307128c2a83",
+      "package_sha256": "3facf9ad212a6277fbc043c383d12959c6717daef9c9c60807b3d307128c2a83",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/profile-scope-picker/index.wxss",
+      "source_path": "frontend/miniprogram/components/profile-scope-picker/index.wxss",
+      "source_sha256": "380f1f1927c4058055e4f688046644afd966a3c0796852620defc2ecc79276fa",
+      "package_sha256": "380f1f1927c4058055e4f688046644afd966a3c0796852620defc2ecc79276fa",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/quarter-target/index.js",
+      "source_path": "frontend/miniprogram/components/quarter-target/index.js",
+      "source_sha256": "a8a1dac62a77583cf7221fddc2ae4d40961841c27c34f855536185a22349b956",
+      "package_sha256": "a8a1dac62a77583cf7221fddc2ae4d40961841c27c34f855536185a22349b956",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/quarter-target/index.json",
+      "source_path": "frontend/miniprogram/components/quarter-target/index.json",
+      "source_sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "package_sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/quarter-target/index.wxml",
+      "source_path": "frontend/miniprogram/components/quarter-target/index.wxml",
+      "source_sha256": "6a01b4b3fe8650619c0a0990961433e4a2ea1153c2417e782e98c166dd77ba7c",
+      "package_sha256": "6a01b4b3fe8650619c0a0990961433e4a2ea1153c2417e782e98c166dd77ba7c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/quarter-target/index.wxss",
+      "source_path": "frontend/miniprogram/components/quarter-target/index.wxss",
+      "source_sha256": "73db409a44e08ba0a047b39c08a05a5b8a79bab05844dc3dc1f91ea0ea1f34d3",
+      "package_sha256": "73db409a44e08ba0a047b39c08a05a5b8a79bab05844dc3dc1f91ea0ea1f34d3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/task-cancel-dialog/index.js",
+      "source_path": "frontend/miniprogram/components/task-cancel-dialog/index.js",
+      "source_sha256": "934d6057cee889e608480c14225afd49039c948bd7b2abbb8caffae87d171891",
+      "package_sha256": "934d6057cee889e608480c14225afd49039c948bd7b2abbb8caffae87d171891",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/task-cancel-dialog/index.json",
+      "source_path": "frontend/miniprogram/components/task-cancel-dialog/index.json",
+      "source_sha256": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+      "package_sha256": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/task-cancel-dialog/index.wxml",
+      "source_path": "frontend/miniprogram/components/task-cancel-dialog/index.wxml",
+      "source_sha256": "5bd9e127d23f37585cb6e1a3ff2d58b62d51e4b4d6c1212b7589e9122143eefc",
+      "package_sha256": "5bd9e127d23f37585cb6e1a3ff2d58b62d51e4b4d6c1212b7589e9122143eefc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/components/task-cancel-dialog/index.wxss",
+      "source_path": "frontend/miniprogram/components/task-cancel-dialog/index.wxss",
+      "source_sha256": "2a5f2308ca05b9bc3284b23da8f8b53b72ed2864b9c8b19ebd83c698526ff0ce",
+      "package_sha256": "2a5f2308ca05b9bc3284b23da8f8b53b72ed2864b9c8b19ebd83c698526ff0ce",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/config.js",
+      "source_path": "frontend/miniprogram/config.js",
+      "source_sha256": "f52591de5d20f42f9e71d2337320b144c1cc31a6284c7d4e5d3bcd3e6d6e62ab",
+      "package_sha256": "f52591de5d20f42f9e71d2337320b144c1cc31a6284c7d4e5d3bcd3e6d6e62ab",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/avatar.png",
+      "source_path": "frontend/miniprogram/images/icons/avatar.png",
+      "source_sha256": "0f62ddcf18042b612262fa25ad60a08ffbc8711e6b28ff7a060fee389b7a11f6",
+      "package_sha256": "0f62ddcf18042b612262fa25ad60a08ffbc8711e6b28ff7a060fee389b7a11f6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/business-active.png",
+      "source_path": "frontend/miniprogram/images/icons/business-active.png",
+      "source_sha256": "a9995739ef0f094c20b03ac0a816e15dbd5d7ca174e4885061f61a9546a9f060",
+      "package_sha256": "a9995739ef0f094c20b03ac0a816e15dbd5d7ca174e4885061f61a9546a9f060",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/business.png",
+      "source_path": "frontend/miniprogram/images/icons/business.png",
+      "source_sha256": "5e93b2c3850d24d8087cc1569d2f4a6c695743fa7e8990b66be7f05e8a22b94f",
+      "package_sha256": "5e93b2c3850d24d8087cc1569d2f4a6c695743fa7e8990b66be7f05e8a22b94f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/close.png",
+      "source_path": "frontend/miniprogram/images/icons/close.png",
+      "source_sha256": "826f6fba339c5c679d4b349d7c77791cbd5f67a874b3845e87197740b7ad524d",
+      "package_sha256": "826f6fba339c5c679d4b349d7c77791cbd5f67a874b3845e87197740b7ad524d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/copy.png",
+      "source_path": "frontend/miniprogram/images/icons/copy.png",
+      "source_sha256": "981011aa8fccf1c7f5548d4a3d1b92a7117d7d8ef5ff4b8404b5821c64ff348f",
+      "package_sha256": "981011aa8fccf1c7f5548d4a3d1b92a7117d7d8ef5ff4b8404b5821c64ff348f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/customer-service.svg",
+      "source_path": "frontend/miniprogram/images/icons/customer-service.svg",
+      "source_sha256": "1b856120d7f1fff02a61956207b0d9eeb2105421320860e1307f41678af5c37e",
+      "package_sha256": "1b856120d7f1fff02a61956207b0d9eeb2105421320860e1307f41678af5c37e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/examples-active.png",
+      "source_path": "frontend/miniprogram/images/icons/examples-active.png",
+      "source_sha256": "472e85cc1ad44529ec48984bd4de8e2dbd2005ccabcbfca3ef0f6fe963efbbe7",
+      "package_sha256": "472e85cc1ad44529ec48984bd4de8e2dbd2005ccabcbfca3ef0f6fe963efbbe7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/examples.png",
+      "source_path": "frontend/miniprogram/images/icons/examples.png",
+      "source_sha256": "ad40fd589b526486e58da35be6a80c96fe3b6fcf3865c981092b4dfee154af0e",
+      "package_sha256": "ad40fd589b526486e58da35be6a80c96fe3b6fcf3865c981092b4dfee154af0e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/goods-active.png",
+      "source_path": "frontend/miniprogram/images/icons/goods-active.png",
+      "source_sha256": "5e0e5c6644c095ba6e4bbcf5d8ac98c103f38569fc1f33e19a5104be9397a0ac",
+      "package_sha256": "5e0e5c6644c095ba6e4bbcf5d8ac98c103f38569fc1f33e19a5104be9397a0ac",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/goods.png",
+      "source_path": "frontend/miniprogram/images/icons/goods.png",
+      "source_sha256": "9220a9208ee43c40022660c86dc585d6570d36d692c573060fa04ae16d9e18c2",
+      "package_sha256": "9220a9208ee43c40022660c86dc585d6570d36d692c573060fa04ae16d9e18c2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/home-active.png",
+      "source_path": "frontend/miniprogram/images/icons/home-active.png",
+      "source_sha256": "cb24b98068b816229f79bd51d9a319168ada66eabc6bb5b1c32f5e0b8e126e3b",
+      "package_sha256": "cb24b98068b816229f79bd51d9a319168ada66eabc6bb5b1c32f5e0b8e126e3b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/home.png",
+      "source_path": "frontend/miniprogram/images/icons/home.png",
+      "source_sha256": "be4012b5a17e53cc68d7ece49d0bdd285b1732610c129f2a7b3bca8360295a61",
+      "package_sha256": "be4012b5a17e53cc68d7ece49d0bdd285b1732610c129f2a7b3bca8360295a61",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/microphone.svg",
+      "source_path": "frontend/miniprogram/images/icons/microphone.svg",
+      "source_sha256": "e87c435a37c09368a97fed46043bd3570c48e6810c03837e19eed0589ca0cf3a",
+      "package_sha256": "e87c435a37c09368a97fed46043bd3570c48e6810c03837e19eed0589ca0cf3a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/question.svg",
+      "source_path": "frontend/miniprogram/images/icons/question.svg",
+      "source_sha256": "219b5980fd99ea067a26fc70fcccc97cb15661bcf2c536c012ba54f5960434f6",
+      "package_sha256": "219b5980fd99ea067a26fc70fcccc97cb15661bcf2c536c012ba54f5960434f6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/setting.svg",
+      "source_path": "frontend/miniprogram/images/icons/setting.svg",
+      "source_sha256": "2a51c6cf1d0b2b478bae284571813d65fc9d9a9d749dc44b64b8d5be87dc492c",
+      "package_sha256": "2a51c6cf1d0b2b478bae284571813d65fc9d9a9d749dc44b64b8d5be87dc492c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/share.svg",
+      "source_path": "frontend/miniprogram/images/icons/share.svg",
+      "source_sha256": "12a3e375498282f01f24a8f95bceced10425456dcd2344ada908aac858e647a6",
+      "package_sha256": "12a3e375498282f01f24a8f95bceced10425456dcd2344ada908aac858e647a6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-assistant-active.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-assistant-active.png",
+      "source_sha256": "b9ec2c67e02573df55cd0be73c47b263c78514d6b762ef4fdf4b3c48d105bc30",
+      "package_sha256": "b9ec2c67e02573df55cd0be73c47b263c78514d6b762ef4fdf4b3c48d105bc30",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-assistant-active.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-assistant-active.svg",
+      "source_sha256": "e48675a9a3a2c561d59e5b543b872271725d0a3a28d866a2759d340ad4b42daf",
+      "package_sha256": "e48675a9a3a2c561d59e5b543b872271725d0a3a28d866a2759d340ad4b42daf",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-assistant.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-assistant.png",
+      "source_sha256": "df9f2e3d2936175300d4fef167ccedaca8aadbd9b5831a99ad7db87c05ac91ce",
+      "package_sha256": "df9f2e3d2936175300d4fef167ccedaca8aadbd9b5831a99ad7db87c05ac91ce",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-assistant.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-assistant.svg",
+      "source_sha256": "6e5d8fd9e7a42609e7957c30abaeb479045c54d717238cbb2e1fd94837ccdf04",
+      "package_sha256": "6e5d8fd9e7a42609e7957c30abaeb479045c54d717238cbb2e1fd94837ccdf04",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-customers-active.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-customers-active.png",
+      "source_sha256": "087a12dc1810b1848ec9b6419d4c34160fbe107d3bf73abc969ecc4dfe0010e7",
+      "package_sha256": "087a12dc1810b1848ec9b6419d4c34160fbe107d3bf73abc969ecc4dfe0010e7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-customers-active.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-customers-active.svg",
+      "source_sha256": "368ce4f6cf4781b21792d54bb3040ae7abeef2baee4a263e5dc143b5252b8c8b",
+      "package_sha256": "368ce4f6cf4781b21792d54bb3040ae7abeef2baee4a263e5dc143b5252b8c8b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-customers.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-customers.png",
+      "source_sha256": "707bc11b8504afe3a16a830e42ea88fc55047cba9a278dc34fcd60c0ced05e46",
+      "package_sha256": "707bc11b8504afe3a16a830e42ea88fc55047cba9a278dc34fcd60c0ced05e46",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-customers.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-customers.svg",
+      "source_sha256": "9ead03af001110eb45acad10aae44a1f951e71a1382d9e1a3d3931e62dbe6533",
+      "package_sha256": "9ead03af001110eb45acad10aae44a1f951e71a1382d9e1a3d3931e62dbe6533",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-profile-active.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-profile-active.png",
+      "source_sha256": "402673b8823d4a2a38f96c647805bbcffc9b331bbe3fd5670335a5c7af1731cd",
+      "package_sha256": "402673b8823d4a2a38f96c647805bbcffc9b331bbe3fd5670335a5c7af1731cd",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-profile-active.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-profile-active.svg",
+      "source_sha256": "4b4558f0210d8e97507eefc85db4206a94e5e26b7a43362e9dd76ed43aaee8c2",
+      "package_sha256": "4b4558f0210d8e97507eefc85db4206a94e5e26b7a43362e9dd76ed43aaee8c2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-profile.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-profile.png",
+      "source_sha256": "900591b28f7c4195d59b32510975c3cc0c66c3573cc6e6aa78a89334ddf95b35",
+      "package_sha256": "900591b28f7c4195d59b32510975c3cc0c66c3573cc6e6aa78a89334ddf95b35",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-profile.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-profile.svg",
+      "source_sha256": "5d1cc2901605b4f76a6e0b7ff9013590290fb8d318e021bd8b840cf110d3615b",
+      "package_sha256": "5d1cc2901605b4f76a6e0b7ff9013590290fb8d318e021bd8b840cf110d3615b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-workbench-active.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-workbench-active.png",
+      "source_sha256": "fb4de1b0faf7a2b8e36f91861ad52db9dad9346875cb9c732a8ffff6386db9ef",
+      "package_sha256": "fb4de1b0faf7a2b8e36f91861ad52db9dad9346875cb9c732a8ffff6386db9ef",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-workbench-active.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-workbench-active.svg",
+      "source_sha256": "379424d18438c2b5fc0f9252f9c7c66135ffc254fbda81502e414c3204abf865",
+      "package_sha256": "379424d18438c2b5fc0f9252f9c7c66135ffc254fbda81502e414c3204abf865",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-workbench.png",
+      "source_path": "frontend/miniprogram/images/icons/tab-workbench.png",
+      "source_sha256": "80a773ccb9a607ffd41ae5e0c0f78f99b4fc1832920bcb727beb57e9d8351841",
+      "package_sha256": "80a773ccb9a607ffd41ae5e0c0f78f99b4fc1832920bcb727beb57e9d8351841",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/tab-workbench.svg",
+      "source_path": "frontend/miniprogram/images/icons/tab-workbench.svg",
+      "source_sha256": "ecdaa5063072dd19c5d7457c51fcd74007d63af79ce696647653f57a6307e666",
+      "package_sha256": "ecdaa5063072dd19c5d7457c51fcd74007d63af79ce696647653f57a6307e666",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/usercenter-active.png",
+      "source_path": "frontend/miniprogram/images/icons/usercenter-active.png",
+      "source_sha256": "9e916c0f7e57cb735e5dbf59f81eb79e0a21d89427c73c2cba88f3804309db43",
+      "package_sha256": "9e916c0f7e57cb735e5dbf59f81eb79e0a21d89427c73c2cba88f3804309db43",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/icons/usercenter.png",
+      "source_path": "frontend/miniprogram/images/icons/usercenter.png",
+      "source_sha256": "e0b84555631657cb0c5e214aa6b14e5b24c21890a8d72183a5eb7098531a7f75",
+      "package_sha256": "e0b84555631657cb0c5e214aa6b14e5b24c21890a8d72183a5eb7098531a7f75",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/raccoon-salesbuddy-white.png",
+      "source_path": "frontend/miniprogram/images/raccoon-salesbuddy-white.png",
+      "source_sha256": "917950fb50b3d53d4122a6885468938f2314191af22eb9256541b96c06fa368f",
+      "package_sha256": "917950fb50b3d53d4122a6885468938f2314191af22eb9256541b96c06fa368f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/raccoon-salesbuddy.png",
+      "source_path": "frontend/miniprogram/images/raccoon-salesbuddy.png",
+      "source_sha256": "ba9c42ba5a9b7b30778c061b9a8d24d212e3684f1d8855f60565ea9d302b01a3",
+      "package_sha256": "ba9c42ba5a9b7b30778c061b9a8d24d212e3684f1d8855f60565ea9d302b01a3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/images/raccoon-white.svg",
+      "source_path": "frontend/miniprogram/images/raccoon-white.svg",
+      "source_sha256": "751f82247e4e52eaf7ece57cd87287ccacebfe3c0fd9f8f939f2f6e3bbb2634a",
+      "package_sha256": "751f82247e4e52eaf7ece57cd87287ccacebfe3c0fd9f8f939f2f6e3bbb2634a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/bi/index.js",
+      "source_path": "frontend/miniprogram/pages/bi/index.js",
+      "source_sha256": "21abd696faadd0993d65d0a4978a102ea38e080c3cb8328f875e85acca01937b",
+      "package_sha256": "21abd696faadd0993d65d0a4978a102ea38e080c3cb8328f875e85acca01937b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/bi/index.json",
+      "source_path": "frontend/miniprogram/pages/bi/index.json",
+      "source_sha256": "5d7af1b500f58b2d233687f002a70a6a8fb36cf1e3b746886b76600d46c328d2",
+      "package_sha256": "5d7af1b500f58b2d233687f002a70a6a8fb36cf1e3b746886b76600d46c328d2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/bi/index.wxml",
+      "source_path": "frontend/miniprogram/pages/bi/index.wxml",
+      "source_sha256": "0223d39d948ff5090bd638d9c1651d832c9e261ac106acac26bf35f2e6e1c1b2",
+      "package_sha256": "0223d39d948ff5090bd638d9c1651d832c9e261ac106acac26bf35f2e6e1c1b2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/bi/index.wxss",
+      "source_path": "frontend/miniprogram/pages/bi/index.wxss",
+      "source_sha256": "2942b44fa1a4ca5b0aa0f010fe113564e4a10e915523771764731657367617ad",
+      "package_sha256": "2942b44fa1a4ca5b0aa0f010fe113564e4a10e915523771764731657367617ad",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assets/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-assets/index.js",
+      "source_sha256": "ec37479ff606deb03d2498134b8b7918b4ccc700ba20c77be6dc5ea53ab504e0",
+      "package_sha256": "ec37479ff606deb03d2498134b8b7918b4ccc700ba20c77be6dc5ea53ab504e0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assets/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-assets/index.json",
+      "source_sha256": "bdbca38e361ffbe4f875c7b73c1f1ab9239e5a728692e460797fc2724c58669f",
+      "package_sha256": "bdbca38e361ffbe4f875c7b73c1f1ab9239e5a728692e460797fc2724c58669f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assets/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-assets/index.wxml",
+      "source_sha256": "ffad851f3a9243761ef281a828d9d9d134c50ca8044027599fa25d0bbd4b6958",
+      "package_sha256": "ffad851f3a9243761ef281a828d9d9d134c50ca8044027599fa25d0bbd4b6958",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assets/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-assets/index.wxss",
+      "source_sha256": "ccb48d47a9c0c9f42dcaadfb2d218a2f54b048f4508209a59ee8acebf608f93a",
+      "package_sha256": "ccb48d47a9c0c9f42dcaadfb2d218a2f54b048f4508209a59ee8acebf608f93a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assets/opportunity-view.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-assets/opportunity-view.wxss",
+      "source_sha256": "0baa07c1a3bac87ce2fd375166d6ef78a9cdefe8d1a6b258f3a8a7f33bc7bd0c",
+      "package_sha256": "0baa07c1a3bac87ce2fd375166d6ef78a9cdefe8d1a6b258f3a8a7f33bc7bd0c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assign-confirm/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-assign-confirm/index.js",
+      "source_sha256": "85a8df61a911e74a35043b17443aefffac55f204a16048e47e9b65f057ec4532",
+      "package_sha256": "85a8df61a911e74a35043b17443aefffac55f204a16048e47e9b65f057ec4532",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assign-confirm/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-assign-confirm/index.json",
+      "source_sha256": "cb4322332cf395342223f1450ffd285db39d03eb5c86ebcb1280b37c94d51bb0",
+      "package_sha256": "cb4322332cf395342223f1450ffd285db39d03eb5c86ebcb1280b37c94d51bb0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assign-confirm/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-assign-confirm/index.wxml",
+      "source_sha256": "9d995abc50653d59978ade61b3d040949b74a756d8d915cd0d900d1487e95499",
+      "package_sha256": "9d995abc50653d59978ade61b3d040949b74a756d8d915cd0d900d1487e95499",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-assign-confirm/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-assign-confirm/index.wxss",
+      "source_sha256": "d083d9a5f640363a55bc5cfa6ea06b549c169f10ca7898439aeb6daabf5329e9",
+      "package_sha256": "d083d9a5f640363a55bc5cfa6ea06b549c169f10ca7898439aeb6daabf5329e9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-claim/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-claim/index.js",
+      "source_sha256": "f5369f7c3bef33670f812e361a01e41370b9c5cc17218544e10f8351f1c7fd65",
+      "package_sha256": "f5369f7c3bef33670f812e361a01e41370b9c5cc17218544e10f8351f1c7fd65",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-claim/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-claim/index.json",
+      "source_sha256": "e1b5a5f7a46b8c8436226c39a1ce797696f3d52ea57f555286c7b852011e1b93",
+      "package_sha256": "e1b5a5f7a46b8c8436226c39a1ce797696f3d52ea57f555286c7b852011e1b93",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-claim/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-claim/index.wxml",
+      "source_sha256": "400e2062ef1f0e6b6328b094826d1b1ebfd066324cc4ffc5584e1b42548b3e9f",
+      "package_sha256": "400e2062ef1f0e6b6328b094826d1b1ebfd066324cc4ffc5584e1b42548b3e9f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-claim/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-claim/index.wxss",
+      "source_sha256": "ea4e2e747bec56aef553ec8673b9efeb7672de996eb507a6e09ccc217f0c8575",
+      "package_sha256": "ea4e2e747bec56aef553ec8673b9efeb7672de996eb507a6e09ccc217f0c8575",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-create/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-create/index.js",
+      "source_sha256": "88f0290e608dd6a916d076bb69bf6a7e0bb5570d266a44c1f0377d3e101314cc",
+      "package_sha256": "88f0290e608dd6a916d076bb69bf6a7e0bb5570d266a44c1f0377d3e101314cc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-create/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-create/index.json",
+      "source_sha256": "f09217fa72866e6a959f7ffdd253b8a3075dfc9b472e88688bbda80a206d6d96",
+      "package_sha256": "f09217fa72866e6a959f7ffdd253b8a3075dfc9b472e88688bbda80a206d6d96",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-create/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-create/index.wxml",
+      "source_sha256": "3e2e9d7021d237d8955dbf3c591ef936436d06843ace1618de0253a64b58e504",
+      "package_sha256": "3e2e9d7021d237d8955dbf3c591ef936436d06843ace1618de0253a64b58e504",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-create/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-create/index.wxss",
+      "source_sha256": "aefce508ddfa3adabb174b3ee36dc6d356f4526a1a04af1df793705b5cae0cfb",
+      "package_sha256": "aefce508ddfa3adabb174b3ee36dc6d356f4526a1a04af1df793705b5cae0cfb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-detail/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-detail/index.js",
+      "source_sha256": "d950defbc0176ad5bf2876d6a722988b3467613d95e4cb938bdcfc694154ff32",
+      "package_sha256": "d950defbc0176ad5bf2876d6a722988b3467613d95e4cb938bdcfc694154ff32",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-detail/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-detail/index.json",
+      "source_sha256": "df14d3fdab3e3a4eff2e7612347f4c549e46fe13a4c88b4c385657a86d2476b6",
+      "package_sha256": "df14d3fdab3e3a4eff2e7612347f4c549e46fe13a4c88b4c385657a86d2476b6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-detail/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-detail/index.wxml",
+      "source_sha256": "37265ddd0c618f822a90755227d3551f4c24d501f79f58e9c8d6e217310a2099",
+      "package_sha256": "37265ddd0c618f822a90755227d3551f4c24d501f79f58e9c8d6e217310a2099",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-detail/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-detail/index.wxss",
+      "source_sha256": "52df51c11ac085f7fa8d384b10671951775af0db86fbafb55fb5d7c19a998209",
+      "package_sha256": "52df51c11ac085f7fa8d384b10671951775af0db86fbafb55fb5d7c19a998209",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-edit/index.js",
+      "source_path": "frontend/miniprogram/pages/customer-edit/index.js",
+      "source_sha256": "5347b4e1373036431569a213bdaa230b2a625bf2a4d5b3a754ce6547b664ae49",
+      "package_sha256": "5347b4e1373036431569a213bdaa230b2a625bf2a4d5b3a754ce6547b664ae49",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-edit/index.json",
+      "source_path": "frontend/miniprogram/pages/customer-edit/index.json",
+      "source_sha256": "2748f2f6d37d59b16871c74281466055320b2c335020f1ccbc3425b364448928",
+      "package_sha256": "2748f2f6d37d59b16871c74281466055320b2c335020f1ccbc3425b364448928",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-edit/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customer-edit/index.wxml",
+      "source_sha256": "314bbd5f3ed85d95a1a696de3ea13db1c3a1e8e69e5189c09051f1ffcddf3f35",
+      "package_sha256": "314bbd5f3ed85d95a1a696de3ea13db1c3a1e8e69e5189c09051f1ffcddf3f35",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customer-edit/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customer-edit/index.wxss",
+      "source_sha256": "270f3e73cbb4f5c6b8ce813c5af728c80d702cbf1e29de495949a837b868208f",
+      "package_sha256": "270f3e73cbb4f5c6b8ce813c5af728c80d702cbf1e29de495949a837b868208f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/battle-map.wxss",
+      "source_path": "frontend/miniprogram/pages/customers/battle-map.wxss",
+      "source_sha256": "ad4a9cbb4a9257897f0b2ba56dfec8f24e99c2851607ca4603f2670e3d7bcc3a",
+      "package_sha256": "ad4a9cbb4a9257897f0b2ba56dfec8f24e99c2851607ca4603f2670e3d7bcc3a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/filter-bar.wxss",
+      "source_path": "frontend/miniprogram/pages/customers/filter-bar.wxss",
+      "source_sha256": "c8602c3bcd9f5e393664e18995904f6600fe9c8e57d7312aabcb221c87c8159c",
+      "package_sha256": "c8602c3bcd9f5e393664e18995904f6600fe9c8e57d7312aabcb221c87c8159c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/index.js",
+      "source_path": "frontend/miniprogram/pages/customers/index.js",
+      "source_sha256": "e26c890b1a7efc24044a9093f190da69d83156c0da327924e83328b6605d03d8",
+      "package_sha256": "e26c890b1a7efc24044a9093f190da69d83156c0da327924e83328b6605d03d8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/index.json",
+      "source_path": "frontend/miniprogram/pages/customers/index.json",
+      "source_sha256": "344df70246db5d9a65f826d7ef790cb01698e3670c3889c1556c1cfc7147b359",
+      "package_sha256": "344df70246db5d9a65f826d7ef790cb01698e3670c3889c1556c1cfc7147b359",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/index.wxml",
+      "source_path": "frontend/miniprogram/pages/customers/index.wxml",
+      "source_sha256": "ea898bb9de88f71514b94fa303b9fb5d7c77984d3d90357906ca1f53b05b5d1a",
+      "package_sha256": "ea898bb9de88f71514b94fa303b9fb5d7c77984d3d90357906ca1f53b05b5d1a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/index.wxss",
+      "source_path": "frontend/miniprogram/pages/customers/index.wxss",
+      "source_sha256": "05ac0eca3ee828913f060ab7e0285c2b163f13e9c86e92897707dd65eab59a71",
+      "package_sha256": "05ac0eca3ee828913f060ab7e0285c2b163f13e9c86e92897707dd65eab59a71",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/customers/opportunity-actual-link.wxss",
+      "source_path": "frontend/miniprogram/pages/customers/opportunity-actual-link.wxss",
+      "source_sha256": "f4c077e5e004ec50b89f00fc691deea1881696dcbc3b8bd92553254072c750fe",
+      "package_sha256": "f4c077e5e004ec50b89f00fc691deea1881696dcbc3b8bd92553254072c750fe",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/demo-create/index.js",
+      "source_path": "frontend/miniprogram/pages/demo-create/index.js",
+      "source_sha256": "fb7daef80b103c3835599877a195db1f4130ee3cbcad713f2e4f137b748cb0af",
+      "package_sha256": "fb7daef80b103c3835599877a195db1f4130ee3cbcad713f2e4f137b748cb0af",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/demo-create/index.json",
+      "source_path": "frontend/miniprogram/pages/demo-create/index.json",
+      "source_sha256": "a48b8707f42c3dd206046c14303f1e1b2e7468e83f010aa08765168dd7bfdf21",
+      "package_sha256": "a48b8707f42c3dd206046c14303f1e1b2e7468e83f010aa08765168dd7bfdf21",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/demo-create/index.wxml",
+      "source_path": "frontend/miniprogram/pages/demo-create/index.wxml",
+      "source_sha256": "79c29e680d26f23a74b9f6363a1cf1a557fb8c73aa1aba0ee25ffefc6a6f10cf",
+      "package_sha256": "79c29e680d26f23a74b9f6363a1cf1a557fb8c73aa1aba0ee25ffefc6a6f10cf",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/demo-create/index.wxss",
+      "source_path": "frontend/miniprogram/pages/demo-create/index.wxss",
+      "source_sha256": "d7ae6d41f740ac5eae92f7b731aeeeb8be1d39762f5cce3de0497c7d7502687d",
+      "package_sha256": "d7ae6d41f740ac5eae92f7b731aeeeb8be1d39762f5cce3de0497c7d7502687d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/fde-records/index.js",
+      "source_path": "frontend/miniprogram/pages/fde-records/index.js",
+      "source_sha256": "7d979ce7e9b6fda08921ee396e7cc626b908ebdb34760af9ad7cc62745efacb8",
+      "package_sha256": "7d979ce7e9b6fda08921ee396e7cc626b908ebdb34760af9ad7cc62745efacb8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/fde-records/index.json",
+      "source_path": "frontend/miniprogram/pages/fde-records/index.json",
+      "source_sha256": "346740c6bfd3614a1a8ae38b34dd321fdc711bb496c071e283e7fd71284384b6",
+      "package_sha256": "346740c6bfd3614a1a8ae38b34dd321fdc711bb496c071e283e7fd71284384b6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/fde-records/index.wxml",
+      "source_path": "frontend/miniprogram/pages/fde-records/index.wxml",
+      "source_sha256": "83142ed309fc008087738b7efec93ab5ee78f149c2fa89870cc7d56b0fc50e28",
+      "package_sha256": "83142ed309fc008087738b7efec93ab5ee78f149c2fa89870cc7d56b0fc50e28",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/fde-records/index.wxss",
+      "source_path": "frontend/miniprogram/pages/fde-records/index.wxss",
+      "source_sha256": "3c81bcb0dbf0148bfd92131a940257b806082c47dc091b432d1c3fbe1035b485",
+      "package_sha256": "3c81bcb0dbf0148bfd92131a940257b806082c47dc091b432d1c3fbe1035b485",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/index/index.js",
+      "source_path": "frontend/miniprogram/pages/index/index.js",
+      "source_sha256": "c2857ad44a4eca6adc796a6d98af013832df82f5ea37118020df64291fdff434",
+      "package_sha256": "c2857ad44a4eca6adc796a6d98af013832df82f5ea37118020df64291fdff434",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/index/index.json",
+      "source_path": "frontend/miniprogram/pages/index/index.json",
+      "source_sha256": "ae176ffb7c7c617d328f9f7468d7666814929bd03361b087f6ebae2f5a223e6f",
+      "package_sha256": "ae176ffb7c7c617d328f9f7468d7666814929bd03361b087f6ebae2f5a223e6f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/index/index.wxml",
+      "source_path": "frontend/miniprogram/pages/index/index.wxml",
+      "source_sha256": "09abdce65ed4d57e2650bcef4d7984babfc29d82a3b8cacd396f720dc1b642c9",
+      "package_sha256": "09abdce65ed4d57e2650bcef4d7984babfc29d82a3b8cacd396f720dc1b642c9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/index/index.wxss",
+      "source_path": "frontend/miniprogram/pages/index/index.wxss",
+      "source_sha256": "a37ca423fe52464a228bcf8405f436919bfe7a4cb6ea7a04c99bd55c5093b83a",
+      "package_sha256": "a37ca423fe52464a228bcf8405f436919bfe7a4cb6ea7a04c99bd55c5093b83a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/login/index.js",
+      "source_path": "frontend/miniprogram/pages/login/index.js",
+      "source_sha256": "8676532ae400f52f7543bc6393154bd5925c5a2c8782280eaae7797d170627a4",
+      "package_sha256": "8676532ae400f52f7543bc6393154bd5925c5a2c8782280eaae7797d170627a4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/login/index.json",
+      "source_path": "frontend/miniprogram/pages/login/index.json",
+      "source_sha256": "cf510f5640ddc7f61323d728abbfd249741aed34b6dd3c037eb1fca4020b9bd7",
+      "package_sha256": "cf510f5640ddc7f61323d728abbfd249741aed34b6dd3c037eb1fca4020b9bd7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/login/index.wxml",
+      "source_path": "frontend/miniprogram/pages/login/index.wxml",
+      "source_sha256": "de6d225a9fbca4f40a376196fcf8f5d5d3b03d01c614dcf4292bbdfaac897079",
+      "package_sha256": "de6d225a9fbca4f40a376196fcf8f5d5d3b03d01c614dcf4292bbdfaac897079",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/login/index.wxss",
+      "source_path": "frontend/miniprogram/pages/login/index.wxss",
+      "source_sha256": "c97037af342639ad7cd2c91686833fd04068b45dcd7e71df3526bcabaace78ff",
+      "package_sha256": "c97037af342639ad7cd2c91686833fd04068b45dcd7e71df3526bcabaace78ff",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/management-task-create/index.js",
+      "source_path": "frontend/miniprogram/pages/management-task-create/index.js",
+      "source_sha256": "03c816d820844755c58c310ccc98b8ab11547c979e648ef31a21f85e1aadf46c",
+      "package_sha256": "03c816d820844755c58c310ccc98b8ab11547c979e648ef31a21f85e1aadf46c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/management-task-create/index.json",
+      "source_path": "frontend/miniprogram/pages/management-task-create/index.json",
+      "source_sha256": "4ca731588fe30ab8e410897da13a018c1b9bfa2cec0d94ab77cc41229fac82d2",
+      "package_sha256": "4ca731588fe30ab8e410897da13a018c1b9bfa2cec0d94ab77cc41229fac82d2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/management-task-create/index.wxml",
+      "source_path": "frontend/miniprogram/pages/management-task-create/index.wxml",
+      "source_sha256": "3ad1bac31a98062608915034e78ce8f6a6a8b10b1304279accd00438888c83eb",
+      "package_sha256": "3ad1bac31a98062608915034e78ce8f6a6a8b10b1304279accd00438888c83eb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/management-task-create/index.wxss",
+      "source_path": "frontend/miniprogram/pages/management-task-create/index.wxss",
+      "source_sha256": "d6d630162c87b90d42c18d079ec7badf527182c638599b702fbcf349ae35e899",
+      "package_sha256": "d6d630162c87b90d42c18d079ec7badf527182c638599b702fbcf349ae35e899",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/member-growth/index.js",
+      "source_path": "frontend/miniprogram/pages/member-growth/index.js",
+      "source_sha256": "d957874d4571e6547ed4934734fc63b8f3ec901416ee634ca1efefed7c3e9fb0",
+      "package_sha256": "d957874d4571e6547ed4934734fc63b8f3ec901416ee634ca1efefed7c3e9fb0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/member-growth/index.json",
+      "source_path": "frontend/miniprogram/pages/member-growth/index.json",
+      "source_sha256": "87df439fd0d0f8732bd35b404fc3148c72d1748c1e2f444652c71e0c4cf0d00a",
+      "package_sha256": "87df439fd0d0f8732bd35b404fc3148c72d1748c1e2f444652c71e0c4cf0d00a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/member-growth/index.wxml",
+      "source_path": "frontend/miniprogram/pages/member-growth/index.wxml",
+      "source_sha256": "79dda7cedd221930a88e4a12b7b24112faf516299611d508c9ab23604ac77a2a",
+      "package_sha256": "79dda7cedd221930a88e4a12b7b24112faf516299611d508c9ab23604ac77a2a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/member-growth/index.wxss",
+      "source_path": "frontend/miniprogram/pages/member-growth/index.wxss",
+      "source_sha256": "ea80ddcec254272d8bdb5fd860fd2988d26184079d5fa17a79734e4331649b62",
+      "package_sha256": "ea80ddcec254272d8bdb5fd860fd2988d26184079d5fa17a79734e4331649b62",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunities/index.js",
+      "source_path": "frontend/miniprogram/pages/opportunities/index.js",
+      "source_sha256": "0722367c6772c25c91cce6a6ddfcf25f2cd20fe8fed16eebaf9c641cff6522e7",
+      "package_sha256": "0722367c6772c25c91cce6a6ddfcf25f2cd20fe8fed16eebaf9c641cff6522e7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunities/index.json",
+      "source_path": "frontend/miniprogram/pages/opportunities/index.json",
+      "source_sha256": "a3f054ae654f1c9ebdc9b997def53dec8088bc721ac361028821f78dfa4e7da4",
+      "package_sha256": "a3f054ae654f1c9ebdc9b997def53dec8088bc721ac361028821f78dfa4e7da4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunities/index.wxml",
+      "source_path": "frontend/miniprogram/pages/opportunities/index.wxml",
+      "source_sha256": "56fc7fa1542a26841824482ffbc3e1e17dfca4bc2aee2a7828792739071f25a7",
+      "package_sha256": "56fc7fa1542a26841824482ffbc3e1e17dfca4bc2aee2a7828792739071f25a7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunities/index.wxss",
+      "source_path": "frontend/miniprogram/pages/opportunities/index.wxss",
+      "source_sha256": "659d0eac248e346f775c1101d44d677efadcf3a5e202d2141c8e20b60f1f374e",
+      "package_sha256": "659d0eac248e346f775c1101d44d677efadcf3a5e202d2141c8e20b60f1f374e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunity-create/index.js",
+      "source_path": "frontend/miniprogram/pages/opportunity-create/index.js",
+      "source_sha256": "a181ba23e7d90b9f16b4453981b76e94b243170f5a4288191e87328ff9d0f391",
+      "package_sha256": "a181ba23e7d90b9f16b4453981b76e94b243170f5a4288191e87328ff9d0f391",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunity-create/index.json",
+      "source_path": "frontend/miniprogram/pages/opportunity-create/index.json",
+      "source_sha256": "28e8f5eb220bebf35ceef165ad687c124ad72d4b44cad27e24450568020432cf",
+      "package_sha256": "28e8f5eb220bebf35ceef165ad687c124ad72d4b44cad27e24450568020432cf",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunity-create/index.wxml",
+      "source_path": "frontend/miniprogram/pages/opportunity-create/index.wxml",
+      "source_sha256": "a7a25bcc72b0ea2dd6872be30fb81542b2a7c1156c1a3081e4603122027221a9",
+      "package_sha256": "a7a25bcc72b0ea2dd6872be30fb81542b2a7c1156c1a3081e4603122027221a9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/opportunity-create/index.wxss",
+      "source_path": "frontend/miniprogram/pages/opportunity-create/index.wxss",
+      "source_sha256": "81e480150ac5b7a76387341b539f80506922cc63f7cb6a7a0046fc41b161ef3e",
+      "package_sha256": "81e480150ac5b7a76387341b539f80506922cc63f7cb6a7a0046fc41b161ef3e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/profile/index.js",
+      "source_path": "frontend/miniprogram/pages/profile/index.js",
+      "source_sha256": "5ae6c4cf9ae1f7bc4bc50edad0fa29fc2c1f6a9ec1d1a85c19430be186879270",
+      "package_sha256": "5ae6c4cf9ae1f7bc4bc50edad0fa29fc2c1f6a9ec1d1a85c19430be186879270",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/profile/index.json",
+      "source_path": "frontend/miniprogram/pages/profile/index.json",
+      "source_sha256": "1dfbb20ea69e12476b69c552f464963f76a87a95add8c3db479be3c335d3879e",
+      "package_sha256": "1dfbb20ea69e12476b69c552f464963f76a87a95add8c3db479be3c335d3879e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/profile/index.wxml",
+      "source_path": "frontend/miniprogram/pages/profile/index.wxml",
+      "source_sha256": "2db229664e6389d36af0c7902efd75aa8adabf71d8047b7dc80b58f5d01663e9",
+      "package_sha256": "2db229664e6389d36af0c7902efd75aa8adabf71d8047b7dc80b58f5d01663e9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/profile/index.wxss",
+      "source_path": "frontend/miniprogram/pages/profile/index.wxss",
+      "source_sha256": "810f816f82d901a14f1497bf040c60b8f5d82453681bc462df630d4e29a6dcde",
+      "package_sha256": "810f816f82d901a14f1497bf040c60b8f5d82453681bc462df630d4e29a6dcde",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/profile/profile-compact.wxss",
+      "source_path": "frontend/miniprogram/pages/profile/profile-compact.wxss",
+      "source_sha256": "8ee49f46b277775eeb606218d79f55d7f2a19aeec9ef98cfcceb68fe712cd493",
+      "package_sha256": "8ee49f46b277775eeb606218d79f55d7f2a19aeec9ef98cfcceb68fe712cd493",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/report-detail/index.js",
+      "source_path": "frontend/miniprogram/pages/report-detail/index.js",
+      "source_sha256": "9ea2c129d4ff0bc14fc1d914a62f44b16ae912dae32b744a70387f3a0eb2542e",
+      "package_sha256": "9ea2c129d4ff0bc14fc1d914a62f44b16ae912dae32b744a70387f3a0eb2542e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/report-detail/index.json",
+      "source_path": "frontend/miniprogram/pages/report-detail/index.json",
+      "source_sha256": "4779525acec0c8b6e9bb77ad29d9cd10db15219ff91081959b8552e8e419e3d3",
+      "package_sha256": "4779525acec0c8b6e9bb77ad29d9cd10db15219ff91081959b8552e8e419e3d3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/report-detail/index.wxml",
+      "source_path": "frontend/miniprogram/pages/report-detail/index.wxml",
+      "source_sha256": "0c4b0eeb8e56015441df8a3e5a3c754d362c635a9fa7d22b1191cc599a3239d7",
+      "package_sha256": "0c4b0eeb8e56015441df8a3e5a3c754d362c635a9fa7d22b1191cc599a3239d7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/report-detail/index.wxss",
+      "source_path": "frontend/miniprogram/pages/report-detail/index.wxss",
+      "source_sha256": "81a132afd7982eafaa4c1a03c67449b19db84f3fc8cc922c8002fdbb66fc7343",
+      "package_sha256": "81a132afd7982eafaa4c1a03c67449b19db84f3fc8cc922c8002fdbb66fc7343",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risk-detail/index.js",
+      "source_path": "frontend/miniprogram/pages/risk-detail/index.js",
+      "source_sha256": "bbc3bbaf29a96484f1ff5737b5661af0088ad38aa2258f421b0670971c26ec91",
+      "package_sha256": "bbc3bbaf29a96484f1ff5737b5661af0088ad38aa2258f421b0670971c26ec91",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risk-detail/index.json",
+      "source_path": "frontend/miniprogram/pages/risk-detail/index.json",
+      "source_sha256": "98d83f2cc5edf0c9dbc11540457341be8e80466ae9103c4558a0f57b5f56ad36",
+      "package_sha256": "98d83f2cc5edf0c9dbc11540457341be8e80466ae9103c4558a0f57b5f56ad36",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risk-detail/index.wxml",
+      "source_path": "frontend/miniprogram/pages/risk-detail/index.wxml",
+      "source_sha256": "91dc7a3de51ad717c96e64999a59953ad8873d729ad43a2e5dc9bcdfa66e53f8",
+      "package_sha256": "91dc7a3de51ad717c96e64999a59953ad8873d729ad43a2e5dc9bcdfa66e53f8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risk-detail/index.wxss",
+      "source_path": "frontend/miniprogram/pages/risk-detail/index.wxss",
+      "source_sha256": "f4342416480619426ecb980af816f638906cb8f5d5cc97575c48e49ba0b3b632",
+      "package_sha256": "f4342416480619426ecb980af816f638906cb8f5d5cc97575c48e49ba0b3b632",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risks/index.js",
+      "source_path": "frontend/miniprogram/pages/risks/index.js",
+      "source_sha256": "358e94fcc5f146662624fe2b4f9e15c841cffbe746ad9e6fdb034cc883a9cb8b",
+      "package_sha256": "358e94fcc5f146662624fe2b4f9e15c841cffbe746ad9e6fdb034cc883a9cb8b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risks/index.json",
+      "source_path": "frontend/miniprogram/pages/risks/index.json",
+      "source_sha256": "36c19f3a3799234eed3dcfd1689c3f1c8cac6a7a5f4c06982c893f5b0d5b696a",
+      "package_sha256": "36c19f3a3799234eed3dcfd1689c3f1c8cac6a7a5f4c06982c893f5b0d5b696a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risks/index.wxml",
+      "source_path": "frontend/miniprogram/pages/risks/index.wxml",
+      "source_sha256": "03b956f627f045c4cc074572c83a331aa4aab1ca50f3804ed55f228c793b8a63",
+      "package_sha256": "03b956f627f045c4cc074572c83a331aa4aab1ca50f3804ed55f228c793b8a63",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/risks/index.wxss",
+      "source_path": "frontend/miniprogram/pages/risks/index.wxss",
+      "source_sha256": "5382070c6344b82a84f37a5fb6958a6ca3882a8da33956eaecc84b85a63f8d93",
+      "package_sha256": "5382070c6344b82a84f37a5fb6958a6ca3882a8da33956eaecc84b85a63f8d93",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/task-detail/index.js",
+      "source_path": "frontend/miniprogram/pages/task-detail/index.js",
+      "source_sha256": "2ecb4f6f0a6f2f71581d73d43c828209d6aeb96f9bef0e1296750b1d0baa52cc",
+      "package_sha256": "2ecb4f6f0a6f2f71581d73d43c828209d6aeb96f9bef0e1296750b1d0baa52cc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/task-detail/index.json",
+      "source_path": "frontend/miniprogram/pages/task-detail/index.json",
+      "source_sha256": "6d62f6b485379793f4e0781fbf58367cfb11ac8362c2b279c35ef34360253bbc",
+      "package_sha256": "6d62f6b485379793f4e0781fbf58367cfb11ac8362c2b279c35ef34360253bbc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/task-detail/index.wxml",
+      "source_path": "frontend/miniprogram/pages/task-detail/index.wxml",
+      "source_sha256": "408be27a37a0e38ccce59ccb8fddbdf3b2beb646db5a1c28aaceba2e6f405e34",
+      "package_sha256": "408be27a37a0e38ccce59ccb8fddbdf3b2beb646db5a1c28aaceba2e6f405e34",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/task-detail/index.wxss",
+      "source_path": "frontend/miniprogram/pages/task-detail/index.wxss",
+      "source_sha256": "a1c84596f7b8dff91cbb7942be86a7e9e2a3afadffb7b9d6495bab4dba66f65d",
+      "package_sha256": "a1c84596f7b8dff91cbb7942be86a7e9e2a3afadffb7b9d6495bab4dba66f65d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/tasks/index.js",
+      "source_path": "frontend/miniprogram/pages/tasks/index.js",
+      "source_sha256": "beda3b8149de55c7fddf8f7e39094880fe5e0a4c54aae73e6829d43f814dddbe",
+      "package_sha256": "beda3b8149de55c7fddf8f7e39094880fe5e0a4c54aae73e6829d43f814dddbe",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/tasks/index.json",
+      "source_path": "frontend/miniprogram/pages/tasks/index.json",
+      "source_sha256": "2373fcda0e163f672972ecbc32dc796563f6162d09d5d1867b80cf7c5e239a87",
+      "package_sha256": "2373fcda0e163f672972ecbc32dc796563f6162d09d5d1867b80cf7c5e239a87",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/tasks/index.wxml",
+      "source_path": "frontend/miniprogram/pages/tasks/index.wxml",
+      "source_sha256": "b56046e41eca075bc7c072e5c0dd45c0b88d3b31d6b3c36fa64b388f1578385b",
+      "package_sha256": "b56046e41eca075bc7c072e5c0dd45c0b88d3b31d6b3c36fa64b388f1578385b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/tasks/index.wxss",
+      "source_path": "frontend/miniprogram/pages/tasks/index.wxss",
+      "source_sha256": "5091baa2ef471dc4c68fdb1e05aa8c3695b7ccad3788d5bdc7dd5ec36afd9d52",
+      "package_sha256": "5091baa2ef471dc4c68fdb1e05aa8c3695b7ccad3788d5bdc7dd5ec36afd9d52",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-confirm/index.js",
+      "source_path": "frontend/miniprogram/pages/visit-confirm/index.js",
+      "source_sha256": "3544a4d8cd419a9245da369b58562239b3837f3e5262873102b9621fe46aecdf",
+      "package_sha256": "3544a4d8cd419a9245da369b58562239b3837f3e5262873102b9621fe46aecdf",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-confirm/index.json",
+      "source_path": "frontend/miniprogram/pages/visit-confirm/index.json",
+      "source_sha256": "132c14974141abb8701bdbf67d23dd81ae04e9306d1d157d1e2b42cb19fbf2f1",
+      "package_sha256": "132c14974141abb8701bdbf67d23dd81ae04e9306d1d157d1e2b42cb19fbf2f1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-confirm/index.wxml",
+      "source_path": "frontend/miniprogram/pages/visit-confirm/index.wxml",
+      "source_sha256": "a1e0a69cfb057ed0b38d82a313b52dc224acc5a3b5af0fdfa9526e2b16058616",
+      "package_sha256": "a1e0a69cfb057ed0b38d82a313b52dc224acc5a3b5af0fdfa9526e2b16058616",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-confirm/index.wxss",
+      "source_path": "frontend/miniprogram/pages/visit-confirm/index.wxss",
+      "source_sha256": "d8d454d1b8c4217ed3304915f4c8c5293fcd97cd3eccf1292360eed04d32cc8f",
+      "package_sha256": "d8d454d1b8c4217ed3304915f4c8c5293fcd97cd3eccf1292360eed04d32cc8f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-detail/index.js",
+      "source_path": "frontend/miniprogram/pages/visit-detail/index.js",
+      "source_sha256": "533879a3805f6ab78f5cc5f14b454d31c687c52d15e67e5e7629cf22e34cb488",
+      "package_sha256": "533879a3805f6ab78f5cc5f14b454d31c687c52d15e67e5e7629cf22e34cb488",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-detail/index.json",
+      "source_path": "frontend/miniprogram/pages/visit-detail/index.json",
+      "source_sha256": "e6d9467eb7701a40130aa216561640d9f2ff2933efecd9c0bf95fce296786692",
+      "package_sha256": "e6d9467eb7701a40130aa216561640d9f2ff2933efecd9c0bf95fce296786692",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-detail/index.wxml",
+      "source_path": "frontend/miniprogram/pages/visit-detail/index.wxml",
+      "source_sha256": "9de6ea09f4cb8daead42397015b0b2261bfebe08f9660e80da145fdab76647f6",
+      "package_sha256": "9de6ea09f4cb8daead42397015b0b2261bfebe08f9660e80da145fdab76647f6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-detail/index.wxss",
+      "source_path": "frontend/miniprogram/pages/visit-detail/index.wxss",
+      "source_sha256": "f42bab29c57d4eb255455151c582f5babdb2a64b1ea8ce0a853061a4d5c5c8e3",
+      "package_sha256": "f42bab29c57d4eb255455151c582f5babdb2a64b1ea8ce0a853061a4d5c5c8e3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-entry/index.js",
+      "source_path": "frontend/miniprogram/pages/visit-entry/index.js",
+      "source_sha256": "e43a39358133b041a0819fead3b77da02744db83d7f83763a054ed5f101e5a17",
+      "package_sha256": "e43a39358133b041a0819fead3b77da02744db83d7f83763a054ed5f101e5a17",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-entry/index.json",
+      "source_path": "frontend/miniprogram/pages/visit-entry/index.json",
+      "source_sha256": "a8a028d7674df94f882840ff01cc65845a59cb3b452a8afb415179b200b37f7d",
+      "package_sha256": "a8a028d7674df94f882840ff01cc65845a59cb3b452a8afb415179b200b37f7d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-entry/index.wxml",
+      "source_path": "frontend/miniprogram/pages/visit-entry/index.wxml",
+      "source_sha256": "391ea88f1a47ffc17076fa04835c779b770bb030638f61da3c05c7ac750c46ef",
+      "package_sha256": "391ea88f1a47ffc17076fa04835c779b770bb030638f61da3c05c7ac750c46ef",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/visit-entry/index.wxss",
+      "source_path": "frontend/miniprogram/pages/visit-entry/index.wxss",
+      "source_sha256": "4c298ad33c4e0f6c69fa4546631a6b08965a7d8d7535e0c3b87df0dd9036fa12",
+      "package_sha256": "4c298ad33c4e0f6c69fa4546631a6b08965a7d8d7535e0c3b87df0dd9036fa12",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/workbench/index.js",
+      "source_path": "frontend/miniprogram/pages/workbench/index.js",
+      "source_sha256": "329da41c17eed01b5f566b383c6412b3adab907c4faa0e0fbf0fc8c2c9cd5bba",
+      "package_sha256": "329da41c17eed01b5f566b383c6412b3adab907c4faa0e0fbf0fc8c2c9cd5bba",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/workbench/index.json",
+      "source_path": "frontend/miniprogram/pages/workbench/index.json",
+      "source_sha256": "c966563984f6d399e92a9d02f556be21049b1aa7ef38542da91cf639b8e81a83",
+      "package_sha256": "c966563984f6d399e92a9d02f556be21049b1aa7ef38542da91cf639b8e81a83",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/workbench/index.wxml",
+      "source_path": "frontend/miniprogram/pages/workbench/index.wxml",
+      "source_sha256": "71af9076a958c48b22337a00a6e0006927c60a3ac373ae5ce7f78ed9cd861897",
+      "package_sha256": "71af9076a958c48b22337a00a6e0006927c60a3ac373ae5ce7f78ed9cd861897",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/pages/workbench/index.wxss",
+      "source_path": "frontend/miniprogram/pages/workbench/index.wxss",
+      "source_sha256": "bed52fee8ea062c0728273ab7671fc93f3b420cfcd081e9a2435b9522fd06eff",
+      "package_sha256": "bed52fee8ea062c0728273ab7671fc93f3b420cfcd081e9a2435b9522fd06eff",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/sitemap.json",
+      "source_path": "frontend/miniprogram/sitemap.json",
+      "source_sha256": "9b6f9ce8a1cd47042022491f1a8cd55862a73466f3615a52014b4d350859fbd1",
+      "package_sha256": "9b6f9ce8a1cd47042022491f1a8cd55862a73466f3615a52014b4d350859fbd1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/dashboard-section.wxss",
+      "source_path": "frontend/miniprogram/styles/dashboard-section.wxss",
+      "source_sha256": "c150fa59973798d6e5f8d2d090ac3ce104aacebbb7fedb6e2c8e2d05f889419f",
+      "package_sha256": "c150fa59973798d6e5f8d2d090ac3ce104aacebbb7fedb6e2c8e2d05f889419f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/detail-summary.wxss",
+      "source_path": "frontend/miniprogram/styles/detail-summary.wxss",
+      "source_sha256": "45b71c2d375f08a07a6be239150495f69888588b43d4f95a8d9850892f81b8f6",
+      "package_sha256": "45b71c2d375f08a07a6be239150495f69888588b43d4f95a8d9850892f81b8f6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/opportunity-edit-entry.wxss",
+      "source_path": "frontend/miniprogram/styles/opportunity-edit-entry.wxss",
+      "source_sha256": "dbd23526fa27d5479fa5e012194838af0b550ac908fd117d188081344ffc0db7",
+      "package_sha256": "dbd23526fa27d5479fa5e012194838af0b550ac908fd117d188081344ffc0db7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/opportunity-list-card.wxss",
+      "source_path": "frontend/miniprogram/styles/opportunity-list-card.wxss",
+      "source_sha256": "3680791d4ac9eba5d85f98301077cf3c0260fb46a17e2d97fc0782fc04fb4c01",
+      "package_sha256": "3680791d4ac9eba5d85f98301077cf3c0260fb46a17e2d97fc0782fc04fb4c01",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/opportunity-list-header.wxss",
+      "source_path": "frontend/miniprogram/styles/opportunity-list-header.wxss",
+      "source_sha256": "82d768ed4eddc0db507cb9e4aedae0bdeb73a21b766d0b883b526f03fd0b1f5c",
+      "package_sha256": "82d768ed4eddc0db507cb9e4aedae0bdeb73a21b766d0b883b526f03fd0b1f5c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/styles/role-controls.wxss",
+      "source_path": "frontend/miniprogram/styles/role-controls.wxss",
+      "source_sha256": "d427f94bc89ed41c0176fa05edb30c18181445d05c65611741afd9bd1f0802c6",
+      "package_sha256": "d427f94bc89ed41c0176fa05edb30c18181445d05c65611741afd9bd1f0802c6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/templates/opportunity-list-card.wxml",
+      "source_path": "frontend/miniprogram/templates/opportunity-list-card.wxml",
+      "source_sha256": "8b41be8608b50fae5b7ff79378f7e1e962abd8e4fb356abcf59ee2808aa4c77a",
+      "package_sha256": "8b41be8608b50fae5b7ff79378f7e1e962abd8e4fb356abcf59ee2808aa4c77a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/access.js",
+      "source_path": "frontend/miniprogram/utils/access.js",
+      "source_sha256": "87eb6ac0c6492fc8ed2e3eab5860473c22bbbdf45c40c7eb15baad5201251359",
+      "package_sha256": "87eb6ac0c6492fc8ed2e3eab5860473c22bbbdf45c40c7eb15baad5201251359",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/advicePool.js",
+      "source_path": "frontend/miniprogram/utils/advicePool.js",
+      "source_sha256": "1faab011c5159802af698d4f3c56ba53a7b145bdc96453af32b6c3461bc68b40",
+      "package_sha256": "1faab011c5159802af698d4f3c56ba53a7b145bdc96453af32b6c3461bc68b40",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/apiClient.js",
+      "source_path": "frontend/miniprogram/utils/apiClient.js",
+      "source_sha256": "b960c4722d3fad0f0f4ce575b08b7acbb057ac294855ee60e837730cb56bd417",
+      "package_sha256": "b960c4722d3fad0f0f4ce575b08b7acbb057ac294855ee60e837730cb56bd417",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/businessOptions.js",
+      "source_path": "frontend/miniprogram/utils/businessOptions.js",
+      "source_sha256": "a0d3788253aee49d25f341658b135bfc77c20f7c9310ecf995d3d596949c89f1",
+      "package_sha256": "a0d3788253aee49d25f341658b135bfc77c20f7c9310ecf995d3d596949c89f1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/companyEntry.js",
+      "source_path": "frontend/miniprogram/utils/companyEntry.js",
+      "source_sha256": "96a0e7370fb98e17216a80ba1bb685a3f43ea63bf1c449f6583bd196ccc1d26f",
+      "package_sha256": "96a0e7370fb98e17216a80ba1bb685a3f43ea63bf1c449f6583bd196ccc1d26f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerAdvice.js",
+      "source_path": "frontend/miniprogram/utils/customerAdvice.js",
+      "source_sha256": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
+      "package_sha256": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerDetail.js",
+      "source_path": "frontend/miniprogram/utils/customerDetail.js",
+      "source_sha256": "078fcd27265c32abaf54e9894d69c854288886e24be6e8e45898e2f00fbc30d3",
+      "package_sha256": "078fcd27265c32abaf54e9894d69c854288886e24be6e8e45898e2f00fbc30d3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerLevel.js",
+      "source_path": "frontend/miniprogram/utils/customerLevel.js",
+      "source_sha256": "1eab66d4cba26e8a9225dd08c2e4390d8330b1a597f1a62340ebb3122b6d12e4",
+      "package_sha256": "1eab66d4cba26e8a9225dd08c2e4390d8330b1a597f1a62340ebb3122b6d12e4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerMap.js",
+      "source_path": "frontend/miniprogram/utils/customerMap.js",
+      "source_sha256": "9c914524b72a25d607bcdd0dc7219503df28255ac5fb7bbab8553c2ba8bafac5",
+      "package_sha256": "9c914524b72a25d607bcdd0dc7219503df28255ac5fb7bbab8553c2ba8bafac5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerRadar.js",
+      "source_path": "frontend/miniprogram/utils/customerRadar.js",
+      "source_sha256": "74af2d51caa9ab4fcdb5985d379058f60f2c7b8972f2b0637f0a1aac6cd8fbfe",
+      "package_sha256": "74af2d51caa9ab4fcdb5985d379058f60f2c7b8972f2b0637f0a1aac6cd8fbfe",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/customerSignals.js",
+      "source_path": "frontend/miniprogram/utils/customerSignals.js",
+      "source_sha256": "cc6fd203c4b94072a07a975af751962b48bedd2c5b353fb3951fed8b5c36d029",
+      "package_sha256": "cc6fd203c4b94072a07a975af751962b48bedd2c5b353fb3951fed8b5c36d029",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/dashboardQuarters.js",
+      "source_path": "frontend/miniprogram/utils/dashboardQuarters.js",
+      "source_sha256": "83ec8130ee550111a0f43b67dfb1ec29c56c5d9c6a981ad8206e33f821a4fc71",
+      "package_sha256": "83ec8130ee550111a0f43b67dfb1ec29c56c5d9c6a981ad8206e33f821a4fc71",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/demoDisplay.js",
+      "source_path": "frontend/miniprogram/utils/demoDisplay.js",
+      "source_sha256": "93657805553060a7b4f25e3fb4adb5135e3f14a18d6bfcad4800d0a42c900250",
+      "package_sha256": "93657805553060a7b4f25e3fb4adb5135e3f14a18d6bfcad4800d0a42c900250",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/detailReadSession.js",
+      "source_path": "frontend/miniprogram/utils/detailReadSession.js",
+      "source_sha256": "476a47f8c2fa72c313d20a109daf15f0ae4b0ca711746aeefe2674a34f84f7b8",
+      "package_sha256": "476a47f8c2fa72c313d20a109daf15f0ae4b0ca711746aeefe2674a34f84f7b8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/draftScope.js",
+      "source_path": "frontend/miniprogram/utils/draftScope.js",
+      "source_sha256": "6958a91522a55a654ebab88cfdae2856e3f202cb116e759c649bd755adff7a95",
+      "package_sha256": "6958a91522a55a654ebab88cfdae2856e3f202cb116e759c649bd755adff7a95",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/fdeCompanyRankings.js",
+      "source_path": "frontend/miniprogram/utils/fdeCompanyRankings.js",
+      "source_sha256": "2ac9c292ac58425b9e5b79e6b308f7aacbf95872717ac3dac805a12024f4a871",
+      "package_sha256": "2ac9c292ac58425b9e5b79e6b308f7aacbf95872717ac3dac805a12024f4a871",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/fdeEfficiency.js",
+      "source_path": "frontend/miniprogram/utils/fdeEfficiency.js",
+      "source_sha256": "5771215df1ae3594c2b4787ff18ef1b8d45d90c6efaac38b27ecc8115836ceeb",
+      "package_sha256": "5771215df1ae3594c2b4787ff18ef1b8d45d90c6efaac38b27ecc8115836ceeb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/fdeHistory.js",
+      "source_path": "frontend/miniprogram/utils/fdeHistory.js",
+      "source_sha256": "1df99ad69877fbcf0f412ee1d57811940c720c10c936200a3ff7b42018305a68",
+      "package_sha256": "1df99ad69877fbcf0f412ee1d57811940c720c10c936200a3ff7b42018305a68",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/fdePresentation.js",
+      "source_path": "frontend/miniprogram/utils/fdePresentation.js",
+      "source_sha256": "27aaf39ac583dfb9629cd5b50d115c63b711089cbddacdb2a9c4bce1628daf60",
+      "package_sha256": "27aaf39ac583dfb9629cd5b50d115c63b711089cbddacdb2a9c4bce1628daf60",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/fdeRadar.js",
+      "source_path": "frontend/miniprogram/utils/fdeRadar.js",
+      "source_sha256": "4c6ecb752953a3b2608702db350b5c4225426e319167a6f760fd8c141a7a37c5",
+      "package_sha256": "4c6ecb752953a3b2608702db350b5c4225426e319167a6f760fd8c141a7a37c5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/followupRanking.js",
+      "source_path": "frontend/miniprogram/utils/followupRanking.js",
+      "source_sha256": "150c5d9d2ff05db7dd008136e552b263695065b1eebe56c892d85dd6a0d7a981",
+      "package_sha256": "150c5d9d2ff05db7dd008136e552b263695065b1eebe56c892d85dd6a0d7a981",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/operatingReport.js",
+      "source_path": "frontend/miniprogram/utils/operatingReport.js",
+      "source_sha256": "52b13bc202cfb53cb2ddd601aa44a3b45e027f7975ca3ccbb8f6b579b6a594d3",
+      "package_sha256": "52b13bc202cfb53cb2ddd601aa44a3b45e027f7975ca3ccbb8f6b579b6a594d3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunity.js",
+      "source_path": "frontend/miniprogram/utils/opportunity.js",
+      "source_sha256": "b4eeeda3cec106317c5d73a48e8e067515de6094cb2642cc238bb92e19294aea",
+      "package_sha256": "b4eeeda3cec106317c5d73a48e8e067515de6094cb2642cc238bb92e19294aea",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityAdvice.js",
+      "source_path": "frontend/miniprogram/utils/opportunityAdvice.js",
+      "source_sha256": "4fdc290a9d7c1a2d4d00d8558d07629f5e493dfe74727410c083df0abf69520b",
+      "package_sha256": "4fdc290a9d7c1a2d4d00d8558d07629f5e493dfe74727410c083df0abf69520b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityAmount.js",
+      "source_path": "frontend/miniprogram/utils/opportunityAmount.js",
+      "source_sha256": "42c8c023bba95e8b851b869d6bdd851cca391888dce4c4ad8923bfcdda0b562f",
+      "package_sha256": "42c8c023bba95e8b851b869d6bdd851cca391888dce4c4ad8923bfcdda0b562f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityCard.js",
+      "source_path": "frontend/miniprogram/utils/opportunityCard.js",
+      "source_sha256": "a008377886dda77f357819e4c66e03281f6070ba60f3ae1c855c05e55f43d4a2",
+      "package_sha256": "a008377886dda77f357819e4c66e03281f6070ba60f3ae1c855c05e55f43d4a2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityListCard.js",
+      "source_path": "frontend/miniprogram/utils/opportunityListCard.js",
+      "source_sha256": "4347972c6c6bcf9f3b43a8823ddfb136be1454784775f5f4e719ec281e8d21fb",
+      "package_sha256": "4347972c6c6bcf9f3b43a8823ddfb136be1454784775f5f4e719ec281e8d21fb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityQuarter.js",
+      "source_path": "frontend/miniprogram/utils/opportunityQuarter.js",
+      "source_sha256": "5068e7941d955a3f2329e3254181ed8448743718c52f89fb26744a395c72404c",
+      "package_sha256": "5068e7941d955a3f2329e3254181ed8448743718c52f89fb26744a395c72404c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/opportunityQuarterActuals.js",
+      "source_path": "frontend/miniprogram/utils/opportunityQuarterActuals.js",
+      "source_sha256": "87515b7c8c25aca0f08cf6bb2f31cde39284114179bc746c35fcf6ad5f41a2c4",
+      "package_sha256": "87515b7c8c25aca0f08cf6bb2f31cde39284114179bc746c35fcf6ad5f41a2c4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/pageWriteContext.js",
+      "source_path": "frontend/miniprogram/utils/pageWriteContext.js",
+      "source_sha256": "7ca5416eaf11e329fafded5d70f44a99d75a05a1cbe5a965208a96d30ed176db",
+      "package_sha256": "7ca5416eaf11e329fafded5d70f44a99d75a05a1cbe5a965208a96d30ed176db",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/pagination.js",
+      "source_path": "frontend/miniprogram/utils/pagination.js",
+      "source_sha256": "392a62e8a4d3103b12b62e101865831d87bf38b5fb5296e78f33e14851dda94e",
+      "package_sha256": "392a62e8a4d3103b12b62e101865831d87bf38b5fb5296e78f33e14851dda94e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/personPicker.js",
+      "source_path": "frontend/miniprogram/utils/personPicker.js",
+      "source_sha256": "0966acba8549e3d64ce22822521fde0ef6dbd0c019fa947d830ab5a0dcd88e02",
+      "package_sha256": "0966acba8549e3d64ce22822521fde0ef6dbd0c019fa947d830ab5a0dcd88e02",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/profileMetrics.js",
+      "source_path": "frontend/miniprogram/utils/profileMetrics.js",
+      "source_sha256": "0fa6710f6819f58f9617bc9c1429ebd7d4586f12225708783f872d1f1ddb1ed9",
+      "package_sha256": "0fa6710f6819f58f9617bc9c1429ebd7d4586f12225708783f872d1f1ddb1ed9",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/profileScores.js",
+      "source_path": "frontend/miniprogram/utils/profileScores.js",
+      "source_sha256": "b90457ff4142cb83f6e3299577ad6ecfeaeaa010c29367be94e7c5710915ea1d",
+      "package_sha256": "b90457ff4142cb83f6e3299577ad6ecfeaeaa010c29367be94e7c5710915ea1d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/quadrant.js",
+      "source_path": "frontend/miniprogram/utils/quadrant.js",
+      "source_sha256": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
+      "package_sha256": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/rankingDisplay.js",
+      "source_path": "frontend/miniprogram/utils/rankingDisplay.js",
+      "source_sha256": "b0f0eda8f9cd5688becf74d8800b4221a53708f4ca38f3e854530c5000df8385",
+      "package_sha256": "b0f0eda8f9cd5688becf74d8800b4221a53708f4ca38f3e854530c5000df8385",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/rememberedLogin.js",
+      "source_path": "frontend/miniprogram/utils/rememberedLogin.js",
+      "source_sha256": "fc42ce1645bf1b9d7f09ac558082873d05bf443747466fd7da77d23f344eaf25",
+      "package_sha256": "fc42ce1645bf1b9d7f09ac558082873d05bf443747466fd7da77d23f344eaf25",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/requestIdentity.js",
+      "source_path": "frontend/miniprogram/utils/requestIdentity.js",
+      "source_sha256": "d359a82148f27b954786c5980c92f9ce583d53ac2e3d55f3480614a8ca5c676b",
+      "package_sha256": "d359a82148f27b954786c5980c92f9ce583d53ac2e3d55f3480614a8ca5c676b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/statusLight.js",
+      "source_path": "frontend/miniprogram/utils/statusLight.js",
+      "source_sha256": "cd71de6a2b3f0f2d08e1286f26b9f5ab371041c97acc03c0a71875271fb9ca43",
+      "package_sha256": "cd71de6a2b3f0f2d08e1286f26b9f5ab371041c97acc03c0a71875271fb9ca43",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/taskCancellation.js",
+      "source_path": "frontend/miniprogram/utils/taskCancellation.js",
+      "source_sha256": "8f2b004c1f692ab213a44426ceaeadc2447bc84d076e6d791a207e99ef4f4d26",
+      "package_sha256": "8f2b004c1f692ab213a44426ceaeadc2447bc84d076e6d791a207e99ef4f4d26",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/taskOverview.js",
+      "source_path": "frontend/miniprogram/utils/taskOverview.js",
+      "source_sha256": "c3bf26ac5eb483a58eee7883cc17617184ad926e534ff8a492e0d716d90374d5",
+      "package_sha256": "c3bf26ac5eb483a58eee7883cc17617184ad926e534ff8a492e0d716d90374d5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/taskPresentation.js",
+      "source_path": "frontend/miniprogram/utils/taskPresentation.js",
+      "source_sha256": "d4784d60cedcc101a654c2806a6f539d25a13ca25129dfb204201ff99a18eb4b",
+      "package_sha256": "d4784d60cedcc101a654c2806a6f539d25a13ca25129dfb204201ff99a18eb4b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/taskRecipients.js",
+      "source_path": "frontend/miniprogram/utils/taskRecipients.js",
+      "source_sha256": "b4c3d234de806e519466f603ac566215c5e4aacc431fb3fd451b5a2e796a0cdc",
+      "package_sha256": "b4c3d234de806e519466f603ac566215c5e4aacc431fb3fd451b5a2e796a0cdc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitCards.js",
+      "source_path": "frontend/miniprogram/utils/visitCards.js",
+      "source_sha256": "832b1485ef0f6126b04238b73343b8c0543d16589aa6d0845fe8cb8298db3a2c",
+      "package_sha256": "832b1485ef0f6126b04238b73343b8c0543d16589aa6d0845fe8cb8298db3a2c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitDates.js",
+      "source_path": "frontend/miniprogram/utils/visitDates.js",
+      "source_sha256": "11bdd95903797a28442d402cbf0bd89a3e98d60ce1c5bb6cb885b7f01ff41042",
+      "package_sha256": "11bdd95903797a28442d402cbf0bd89a3e98d60ce1c5bb6cb885b7f01ff41042",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitFieldNormalizer.js",
+      "source_path": "frontend/miniprogram/utils/visitFieldNormalizer.js",
+      "source_sha256": "2734ac01b18eb141667a814f2b2dc259228ed60e7f1e007328ae65818e387499",
+      "package_sha256": "2734ac01b18eb141667a814f2b2dc259228ed60e7f1e007328ae65818e387499",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitFirstVisit.js",
+      "source_path": "frontend/miniprogram/utils/visitFirstVisit.js",
+      "source_sha256": "3cb68acbd13a77bf4636dfa2d006f8fd06406d3c23f420bda461a05f81dc0e31",
+      "package_sha256": "3cb68acbd13a77bf4636dfa2d006f8fd06406d3c23f420bda461a05f81dc0e31",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitFlow.js",
+      "source_path": "frontend/miniprogram/utils/visitFlow.js",
+      "source_sha256": "9e33fcac8af19f7d72f62268ae26d6b73e8c9d80e5e5414dea83f683ceac2413",
+      "package_sha256": "9e33fcac8af19f7d72f62268ae26d6b73e8c9d80e5e5414dea83f683ceac2413",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitNavigation.js",
+      "source_path": "frontend/miniprogram/utils/visitNavigation.js",
+      "source_sha256": "ed6d2b656a608078303c3b7317f71bb654754a839adb57a0d0449d9499e48533",
+      "package_sha256": "ed6d2b656a608078303c3b7317f71bb654754a839adb57a0d0449d9499e48533",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitOpportunityAI.js",
+      "source_path": "frontend/miniprogram/utils/visitOpportunityAI.js",
+      "source_sha256": "8b049b94b388b6fa49a27bef1957394c1a5ee40c9ca7ff311cd55a72dd5f68c0",
+      "package_sha256": "8b049b94b388b6fa49a27bef1957394c1a5ee40c9ca7ff311cd55a72dd5f68c0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/miniprogram/utils/visitSnapshot.js",
+      "source_path": "frontend/miniprogram/utils/visitSnapshot.js",
+      "source_sha256": "2f2c7c5f6d4e67987ccfd4ba3faeb8a72082077f8543a940a843b83db5e3a594",
+      "package_sha256": "2f2c7c5f6d4e67987ccfd4ba3faeb8a72082077f8543a940a843b83db5e3a594",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/project.config.json",
+      "source_path": "frontend/project.config.json",
+      "source_sha256": "80c95b91d34754d48a1ce927040f5b3269ca6afa6afdcadb34fc707c9ac891a7",
+      "package_sha256": "80c95b91d34754d48a1ce927040f5b3269ca6afa6afdcadb34fc707c9ac891a7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/scripts/package_frontend.py",
+      "source_path": "frontend/scripts/package_frontend.py",
+      "source_sha256": "c8f726aed0252f222aed3fb0fca533b3c4c6b3f8f42fbcee33906c5470f44d69",
+      "package_sha256": "c8f726aed0252f222aed3fb0fca533b3c4c6b3f8f42fbcee33906c5470f44d69",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/scripts/verify_frontend.py",
+      "source_path": "frontend/scripts/verify_frontend.py",
+      "source_sha256": "7e39c7df99753e9804b945f44c42996a7b19411b3e7a089c5a237b3d8467c42c",
+      "package_sha256": "7e39c7df99753e9804b945f44c42996a7b19411b3e7a089c5a237b3d8467c42c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/advice-pool.test.js",
+      "source_path": "frontend/tests/advice-pool.test.js",
+      "source_sha256": "beb48fef81a6fd511a6f5ef584942b2c8905fdb13a9b0860fa69fd839d9d4e93",
+      "package_sha256": "beb48fef81a6fd511a6f5ef584942b2c8905fdb13a9b0860fa69fd839d9d4e93",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/auth-session-races.test.js",
+      "source_path": "frontend/tests/auth-session-races.test.js",
+      "source_sha256": "a7c5de8611b05496b4bc8e7175b1ea79c300828e744672707de42c5fa38580e3",
+      "package_sha256": "a7c5de8611b05496b4bc8e7175b1ea79c300828e744672707de42c5fa38580e3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/bi.test.js",
+      "source_path": "frontend/tests/bi.test.js",
+      "source_sha256": "6ac14716624b326e42bc2226422b239e3325170c34a0029a38cad35b3a9e1efa",
+      "package_sha256": "6ac14716624b326e42bc2226422b239e3325170c34a0029a38cad35b3a9e1efa",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/business-options.test.js",
+      "source_path": "frontend/tests/business-options.test.js",
+      "source_sha256": "e9635aea8783dfd5b83dd9b5b7f7a899edf93652af7482d253de6c9f1cf9ad36",
+      "package_sha256": "e9635aea8783dfd5b83dd9b5b7f7a899edf93652af7482d253de6c9f1cf9ad36",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/business-write-robustness.test.js",
+      "source_path": "frontend/tests/business-write-robustness.test.js",
+      "source_sha256": "48818ec55d4144266cecb50a7ed8370ef4c65629db349a9710e81445198f1aab",
+      "package_sha256": "48818ec55d4144266cecb50a7ed8370ef4c65629db349a9710e81445198f1aab",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/chatbi-entry.test.js",
+      "source_path": "frontend/tests/chatbi-entry.test.js",
+      "source_sha256": "1caa0379daa0b245c0bc56c9cf6fe9e55056cfeacff8ecae6280c935451e1008",
+      "package_sha256": "1caa0379daa0b245c0bc56c9cf6fe9e55056cfeacff8ecae6280c935451e1008",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/chatbi-wait.test.js",
+      "source_path": "frontend/tests/chatbi-wait.test.js",
+      "source_sha256": "0a5f9fb76a98c1b4082fa68707e5048b03ce1ae9f7e6e128782a9b888c846427",
+      "package_sha256": "0a5f9fb76a98c1b4082fa68707e5048b03ce1ae9f7e6e128782a9b888c846427",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/closed-company-export.test.js",
+      "source_path": "frontend/tests/closed-company-export.test.js",
+      "source_sha256": "497ce1de14e43e99ddba0c97841636494c7c465c3b074916b96e36cdce18fdca",
+      "package_sha256": "dccc608ace5631b82065130b45b88c5a58377fc21f08dcd84b7f93530b67d59e",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/company-entry-login.test.js",
+      "source_path": "frontend/tests/company-entry-login.test.js",
+      "source_sha256": "4311846e2673e55fb71c6e8bc0230ce4fa50b037eca72352814488490fac0b6d",
+      "package_sha256": "4311846e2673e55fb71c6e8bc0230ce4fa50b037eca72352814488490fac0b6d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/company-rules.test.js",
+      "source_path": "frontend/tests/company-rules.test.js",
+      "source_sha256": "325b5b01116c1b33c7b31c9e1d3ab1df152f870332ac090f43f79682c2931b7f",
+      "package_sha256": "aaa7ef864cb8bd64f852baca241314fcf605b17ad8a6212cdfe2afa2a2512a56",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/configurable-access.test.js",
+      "source_path": "frontend/tests/configurable-access.test.js",
+      "source_sha256": "e80583bd7d85eb9acc27ea0ea67566f2ee430b0653cf7385ebe7fdec5f396a20",
+      "package_sha256": "e80583bd7d85eb9acc27ea0ea67566f2ee430b0653cf7385ebe7fdec5f396a20",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/console-business-permissions.test.js",
+      "source_path": "frontend/tests/console-business-permissions.test.js",
+      "source_sha256": "de890f4ec6f18f95b39de9d5a38bd747d2d3222f2ae66c62d248ab61143c7d71",
+      "package_sha256": "cb5d708b6ca376bd7db37685acdcae369a3f978cb8c8449162a9f022f10fd470",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-company-admin.test.js",
+      "source_path": "frontend/tests/console-company-admin.test.js",
+      "source_sha256": "20802f00d1bde677840cd5770407fcbc13810a833b6f06b8cf544ccacea1f5a2",
+      "package_sha256": "c6ec6f39a7df171d99d273a9c21ca89d542fe17ec9913067ff4f82d0da400993",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-configuration-permissions.test.js",
+      "source_path": "frontend/tests/console-configuration-permissions.test.js",
+      "source_sha256": "52e14fe726a8e3fd5c0e92e55f810f1f20cc9bf2153f2ea81f5f7280c5f61124",
+      "package_sha256": "7d61aafb3652e2b1cfedd090bc41af7d6f183b1829c0755673f1b297ea3534fc",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-customer-detail-pages.test.js",
+      "source_path": "frontend/tests/console-customer-detail-pages.test.js",
+      "source_sha256": "746842d39f0e3a5411d22bb6cc2a871399b993cf9068e8c9419f467f13bc5798",
+      "package_sha256": "faa9b53a66c5ba68e0474927d72554577647370b99305f461440e1838d87ab90",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-customer-profile.test.js",
+      "source_path": "frontend/tests/console-customer-profile.test.js",
+      "source_sha256": "bccda871c59e30afc46b45965557b43324a281a6250c005b70ec8bf8c2000f42",
+      "package_sha256": "30b88b1e71c9f3cd03bdd721db2e60fa2ae082ca8e608f68cc8aab89d52265e9",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-delegation.test.js",
+      "source_path": "frontend/tests/console-delegation.test.js",
+      "source_sha256": "174ed3640cb76793757f59026bff4753d8a7be3fe0d8057e4dfa281f0ff0a58e",
+      "package_sha256": "b009f9a99d328567ec4302ebee2fc1e8e30129633befa801333550390ca172f5",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-dialog-races.test.js",
+      "source_path": "frontend/tests/console-dialog-races.test.js",
+      "source_sha256": "bb74736401ac00e774aa4e31cbf829e6239b7aa2f0477863fb8e35a27a6d50d5",
+      "package_sha256": "c7ba3720eccc830a56a8027d53eb1abb16d2a90e9527fa722bebd3117d2433f0",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-opportunity-permissions.test.js",
+      "source_path": "frontend/tests/console-opportunity-permissions.test.js",
+      "source_sha256": "99a53b22ed5f4c0137cb76920e1d8c62dbbd813fabf4d3aa410f26a1ad1555ed",
+      "package_sha256": "39a508bccf8d806fcd96efc4aafe54e0b014c5efd95ca813f24128af281a01e0",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-partial-loading.test.js",
+      "source_path": "frontend/tests/console-partial-loading.test.js",
+      "source_sha256": "d2542c7d925fd3484e409d7e5ea507f1b7f17f3a478d96329a4cd558ecd9d0aa",
+      "package_sha256": "1e3446fe9234d66f27ed99293a345a6712de06e3b46b6d28471d42b0641cb587",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-permission-scopes.test.js",
+      "source_path": "frontend/tests/console-permission-scopes.test.js",
+      "source_sha256": "ee5056c3d5bf7b635e7196e7b7904e46a6d492d13b07dec83a0f1b941c6a2336",
+      "package_sha256": "5f98a338281bf93e2672b6303309c7969277857560bf66a73ec63350809d212b",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-session-races.test.js",
+      "source_path": "frontend/tests/console-session-races.test.js",
+      "source_sha256": "f2e0dc391bddea99b4ab2c7bb2a946a872324ca3a5b69745e8df7369cdc399de",
+      "package_sha256": "45237d3eebb86e0d80d7312ba623b431f1f49ae9579b3c278ce83844e8c8b167",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-task-imports.test.js",
+      "source_path": "frontend/tests/console-task-imports.test.js",
+      "source_sha256": "52487a4502f366b389fd30c8800c4289777fe1d7c55d2d4f5453d18b2f9e1011",
+      "package_sha256": "ac4fbcd40499bdd47455d9851982126c6793b97206df29926b2c989af61855ad",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/console-task-partner-permissions.test.js",
+      "source_path": "frontend/tests/console-task-partner-permissions.test.js",
+      "source_sha256": "804c50f755c4abc3b81fd3f2116fc7de78930ccd6af2ab3b7329ba7518c374ea",
+      "package_sha256": "11a695d7bd0d511d2b14a6cb10f4d45d6d2fa0e8bef591fa1be2aa2f2ae708a9",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/customer-advice-signals.test.js",
+      "source_path": "frontend/tests/customer-advice-signals.test.js",
+      "source_sha256": "fec27105fa7b6285c6af373146a27987158257348707df888ee2e70c456d37c1",
+      "package_sha256": "fec27105fa7b6285c6af373146a27987158257348707df888ee2e70c456d37c1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-assets-readonly.test.js",
+      "source_path": "frontend/tests/customer-assets-readonly.test.js",
+      "source_sha256": "9a5d593975bb34fee76a277222d1b61faa6249d97cb2eaec41fa8ef218a3f863",
+      "package_sha256": "9a5d593975bb34fee76a277222d1b61faa6249d97cb2eaec41fa8ef218a3f863",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-claim.test.js",
+      "source_path": "frontend/tests/customer-claim.test.js",
+      "source_sha256": "6cdd166ffe7645a5d5fbcc6cd8e59fcc6ed2fc0f80aac4f6af88ee0f0f13cb86",
+      "package_sha256": "6cdd166ffe7645a5d5fbcc6cd8e59fcc6ed2fc0f80aac4f6af88ee0f0f13cb86",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-create-fields.test.js",
+      "source_path": "frontend/tests/customer-create-fields.test.js",
+      "source_sha256": "512e4393000789605bd8e13356c054d7dd0ef686bb3b4989b901285e0b6fe0d4",
+      "package_sha256": "512e4393000789605bd8e13356c054d7dd0ef686bb3b4989b901285e0b6fe0d4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-edit-name.test.js",
+      "source_path": "frontend/tests/customer-edit-name.test.js",
+      "source_sha256": "28302cd96538b4781b6c8afd1b0652e496bd9804108fe4b0c880f74d8726558c",
+      "package_sha256": "28302cd96538b4781b6c8afd1b0652e496bd9804108fe4b0c880f74d8726558c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-map-layout.test.js",
+      "source_path": "frontend/tests/customer-map-layout.test.js",
+      "source_sha256": "f90258e9097ee879473c22a27eedb11e1f83631d03b79e9fcc21cdd989155e48",
+      "package_sha256": "f90258e9097ee879473c22a27eedb11e1f83631d03b79e9fcc21cdd989155e48",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-map.test.js",
+      "source_path": "frontend/tests/customer-map.test.js",
+      "source_sha256": "1fe07bb6ee75814edeed6682aa191cbc320615ecbb3c6222caa1754d08e4794c",
+      "package_sha256": "1fe07bb6ee75814edeed6682aa191cbc320615ecbb3c6222caa1754d08e4794c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/customer-radar.test.js",
+      "source_path": "frontend/tests/customer-radar.test.js",
+      "source_sha256": "bc6dda32d4abe53dd073835cf48a16672202132731402f81cceb23dd4d4d6c46",
+      "package_sha256": "bc6dda32d4abe53dd073835cf48a16672202132731402f81cceb23dd4d4d6c46",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/dashboard-controls.test.js",
+      "source_path": "frontend/tests/dashboard-controls.test.js",
+      "source_sha256": "379356b9fa95392fb2c780965b6814c7cbccfbb83db3fc04bb5b0fb25baf6ec7",
+      "package_sha256": "379356b9fa95392fb2c780965b6814c7cbccfbb83db3fc04bb5b0fb25baf6ec7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/data-integrity.test.js",
+      "source_path": "frontend/tests/data-integrity.test.js",
+      "source_sha256": "d08592be28249a0cd8a51a2ea518a3b2a586e82e05b2d5b43815c0836192fb77",
+      "package_sha256": "d08592be28249a0cd8a51a2ea518a3b2a586e82e05b2d5b43815c0836192fb77",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/demo-display.test.js",
+      "source_path": "frontend/tests/demo-display.test.js",
+      "source_sha256": "9e53cbbb9a8e6f23092a000d587d2e1417303bc7521274269d333ba76557e113",
+      "package_sha256": "9e53cbbb9a8e6f23092a000d587d2e1417303bc7521274269d333ba76557e113",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/demo-scene-navigation.test.js",
+      "source_path": "frontend/tests/demo-scene-navigation.test.js",
+      "source_sha256": "df2a72809e5b17a98a980787e4622b51010f829894abcdd3e503de941632cea8",
+      "package_sha256": "df2a72809e5b17a98a980787e4622b51010f829894abcdd3e503de941632cea8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/detail-history-pages.test.js",
+      "source_path": "frontend/tests/detail-history-pages.test.js",
+      "source_sha256": "5b369414a05c4169cf31832a96dedec79102020d3ac4cbd38f8f2e6cd5f9225e",
+      "package_sha256": "5b369414a05c4169cf31832a96dedec79102020d3ac4cbd38f8f2e6cd5f9225e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/detail-light-consumers.test.js",
+      "source_path": "frontend/tests/detail-light-consumers.test.js",
+      "source_sha256": "9d8ae6446f55e3315ad6cbde5c061624a229a05849bb7cbbc2ee413907f5324f",
+      "package_sha256": "9d8ae6446f55e3315ad6cbde5c061624a229a05849bb7cbbc2ee413907f5324f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/detail-page-lifecycle.test.js",
+      "source_path": "frontend/tests/detail-page-lifecycle.test.js",
+      "source_sha256": "e82090101d36bbafa1768a6be30ce83d27c24a8798655b989b20fadf3f0362ca",
+      "package_sha256": "e82090101d36bbafa1768a6be30ce83d27c24a8798655b989b20fadf3f0362ca",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/detail-read-requests.test.js",
+      "source_path": "frontend/tests/detail-read-requests.test.js",
+      "source_sha256": "0f4f93d0d4ebc114f59ce2a69a5f383af4b997e1a2d31ef2bd4902d250ad1208",
+      "package_sha256": "0f4f93d0d4ebc114f59ce2a69a5f383af4b997e1a2d31ef2bd4902d250ad1208",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/detail-read-session.test.js",
+      "source_path": "frontend/tests/detail-read-session.test.js",
+      "source_sha256": "3dcfe57f8a4aa780e17c3f5e3ec46c682f71bf21ed5dbc1ddfa2958b40deec2a",
+      "package_sha256": "3dcfe57f8a4aa780e17c3f5e3ec46c682f71bf21ed5dbc1ddfa2958b40deec2a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/draft-scope.test.js",
+      "source_path": "frontend/tests/draft-scope.test.js",
+      "source_sha256": "f0fadabab5ab0c1a29b2edefab013d3add1d73b704a5f7546bf3340e3b836ecb",
+      "package_sha256": "f0fadabab5ab0c1a29b2edefab013d3add1d73b704a5f7546bf3340e3b836ecb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-company-rankings.test.js",
+      "source_path": "frontend/tests/fde-company-rankings.test.js",
+      "source_sha256": "016ba7f5e247d40312caef31cbe2dc7f2b34d327b544dc73be8d56a18474e8dd",
+      "package_sha256": "016ba7f5e247d40312caef31cbe2dc7f2b34d327b544dc73be8d56a18474e8dd",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-efficiency.test.js",
+      "source_path": "frontend/tests/fde-efficiency.test.js",
+      "source_sha256": "d6040a70c112454a02f00ca200689a5e1f807856cfa6db3d8fb0116d011bbc26",
+      "package_sha256": "d6040a70c112454a02f00ca200689a5e1f807856cfa6db3d8fb0116d011bbc26",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-identity.test.js",
+      "source_path": "frontend/tests/fde-identity.test.js",
+      "source_sha256": "447f00cd6116be0bdd0dc22a3027afae55909fe43ac8323137804c3d6aacb353",
+      "package_sha256": "447f00cd6116be0bdd0dc22a3027afae55909fe43ac8323137804c3d6aacb353",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-list-scope.test.js",
+      "source_path": "frontend/tests/fde-list-scope.test.js",
+      "source_sha256": "afc4c139d06135f2990aba8875ac1613bd400a06a7d83a2dc2a356107b83d997",
+      "package_sha256": "afc4c139d06135f2990aba8875ac1613bd400a06a7d83a2dc2a356107b83d997",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-own-visit.test.js",
+      "source_path": "frontend/tests/fde-own-visit.test.js",
+      "source_sha256": "8fdaab3dcbb3d8241ce5ce10b208e4b271cb70bed7ef217d87e8f8e68cf0ae05",
+      "package_sha256": "8fdaab3dcbb3d8241ce5ce10b208e4b271cb70bed7ef217d87e8f8e68cf0ae05",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-profile-visual.test.js",
+      "source_path": "frontend/tests/fde-profile-visual.test.js",
+      "source_sha256": "5fb026073287e24bccaeec3dc03afd46e5b7f4d82fb84f3a254836637537b90c",
+      "package_sha256": "5fb026073287e24bccaeec3dc03afd46e5b7f4d82fb84f3a254836637537b90c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-progress.test.js",
+      "source_path": "frontend/tests/fde-progress.test.js",
+      "source_sha256": "b253d578175379ca5ef12d3161b34af0b5444e523f9307cc46a5e7f08795a16b",
+      "package_sha256": "b253d578175379ca5ef12d3161b34af0b5444e523f9307cc46a5e7f08795a16b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-projects-lifecycle.test.js",
+      "source_path": "frontend/tests/fde-projects-lifecycle.test.js",
+      "source_sha256": "d3e542b717a30daac87948845fe219bc04a5d65e85aa563e0e0e049ff6272bff",
+      "package_sha256": "d3e542b717a30daac87948845fe219bc04a5d65e85aa563e0e0e049ff6272bff",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/fde-projects-loading.test.js",
+      "source_path": "frontend/tests/fde-projects-loading.test.js",
+      "source_sha256": "86c0550798393a7c01335376e1e8ffdd0f14825c4d8cb2d4a65aaba5bad4e133",
+      "package_sha256": "86c0550798393a7c01335376e1e8ffdd0f14825c4d8cb2d4a65aaba5bad4e133",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/followup-ranking.test.js",
+      "source_path": "frontend/tests/followup-ranking.test.js",
+      "source_sha256": "3126ecd2b22f5d9286509cc5a210cfb05e41e136e46b33d5dbfecddb425dd56d",
+      "package_sha256": "3126ecd2b22f5d9286509cc5a210cfb05e41e136e46b33d5dbfecddb425dd56d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/followup-scope.test.js",
+      "source_path": "frontend/tests/followup-scope.test.js",
+      "source_sha256": "fdb75675ca27b0d056c051cb433a52de8d968f14bce764bf42ff3ee0b7bdd8aa",
+      "package_sha256": "fdb75675ca27b0d056c051cb433a52de8d968f14bce764bf42ff3ee0b7bdd8aa",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/frontend-package.test.js",
+      "source_path": "frontend/tests/frontend-package.test.js",
+      "source_sha256": "2e77750230c27b8fcabe19170af8b46aec7bd53ca6796fa7bbaa6cea9e6db7fb",
+      "package_sha256": "2e77750230c27b8fcabe19170af8b46aec7bd53ca6796fa7bbaa6cea9e6db7fb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/helpers/business-options.js",
+      "source_path": "frontend/tests/helpers/business-options.js",
+      "source_sha256": "e7ccc5e18c09385d13e5dcf4faddf88d0f5bd107d787d81bdc1e0bbd2f49c0f7",
+      "package_sha256": "e7ccc5e18c09385d13e5dcf4faddf88d0f5bd107d787d81bdc1e0bbd2f49c0f7",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/helpers/business-options.json",
+      "source_path": "frontend/tests/helpers/business-options.json",
+      "source_sha256": "c50cf2f3f7e5c04a4e384f08f1c3fc397a4b47cf5ae1352138943ac97deb2b87",
+      "package_sha256": "c50cf2f3f7e5c04a4e384f08f1c3fc397a4b47cf5ae1352138943ac97deb2b87",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/helpers/opportunity-pages.js",
+      "source_path": "frontend/tests/helpers/opportunity-pages.js",
+      "source_sha256": "c5aea41affcdd76ecf47e51ebb4859ef0dccb5061267f60c8f2a7a9f24178fa1",
+      "package_sha256": "c5aea41affcdd76ecf47e51ebb4859ef0dccb5061267f60c8f2a7a9f24178fa1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/history-readonly-fields.test.js",
+      "source_path": "frontend/tests/history-readonly-fields.test.js",
+      "source_sha256": "1805202776ed2b9be51a008d2543ebd7438aea45178064250635cac5cdff905d",
+      "package_sha256": "1805202776ed2b9be51a008d2543ebd7438aea45178064250635cac5cdff905d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/home-quick-actions.test.js",
+      "source_path": "frontend/tests/home-quick-actions.test.js",
+      "source_sha256": "a6e1b23ce080c85741f5308a090c6f866b2eaeacf3012b9f9e5b8949045b5434",
+      "package_sha256": "a6e1b23ce080c85741f5308a090c6f866b2eaeacf3012b9f9e5b8949045b5434",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/home-refresh.test.js",
+      "source_path": "frontend/tests/home-refresh.test.js",
+      "source_sha256": "516e412101e671cc6a496b9de1509dc37268cef3ea438da78f67fa1bdd9f04b4",
+      "package_sha256": "516e412101e671cc6a496b9de1509dc37268cef3ea438da78f67fa1bdd9f04b4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/manager-ranking.test.js",
+      "source_path": "frontend/tests/manager-ranking.test.js",
+      "source_sha256": "f0864b1b1b9e12017b94eee85738af76abb8076ae3ebdcd2e9ea60c163c22b85",
+      "package_sha256": "f0864b1b1b9e12017b94eee85738af76abb8076ae3ebdcd2e9ea60c163c22b85",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/map-quadrant-zoom.test.js",
+      "source_path": "frontend/tests/map-quadrant-zoom.test.js",
+      "source_sha256": "e682655d3d2fbd62fbf62255a2b20b5fcecd25acbe37b2cfebc21c2318cb277a",
+      "package_sha256": "e682655d3d2fbd62fbf62255a2b20b5fcecd25acbe37b2cfebc21c2318cb277a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/map-tabbar-recovery.test.js",
+      "source_path": "frontend/tests/map-tabbar-recovery.test.js",
+      "source_sha256": "9eb0bb0f2c96af18b475a7d60e8a4112b9b5830d3ea5b5f70938d584dd70c8d2",
+      "package_sha256": "9eb0bb0f2c96af18b475a7d60e8a4112b9b5830d3ea5b5f70938d584dd70c8d2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/native-login.test.js",
+      "source_path": "frontend/tests/native-login.test.js",
+      "source_sha256": "21a37d63d9efa7f4fbe87432c3bd74327b09ccf956db5ea37fbd222671771a76",
+      "package_sha256": "21a37d63d9efa7f4fbe87432c3bd74327b09ccf956db5ea37fbd222671771a76",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunities-filters.test.js",
+      "source_path": "frontend/tests/opportunities-filters.test.js",
+      "source_sha256": "b172a2592bda70baea1f04d756d32bb5a1d123b66239d5efc08877f7b924d0b8",
+      "package_sha256": "b172a2592bda70baea1f04d756d32bb5a1d123b66239d5efc08877f7b924d0b8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-amount-confirmation.test.js",
+      "source_path": "frontend/tests/opportunity-amount-confirmation.test.js",
+      "source_sha256": "02614586f82559899f7fe895ba01220067f273d845c1bec02100079616740b30",
+      "package_sha256": "02614586f82559899f7fe895ba01220067f273d845c1bec02100079616740b30",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-browse-pagination.test.js",
+      "source_path": "frontend/tests/opportunity-browse-pagination.test.js",
+      "source_sha256": "899a67df9cd65de44af423479931644f3e0294288a8c32e689fbac14d3586251",
+      "package_sha256": "899a67df9cd65de44af423479931644f3e0294288a8c32e689fbac14d3586251",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-card.test.js",
+      "source_path": "frontend/tests/opportunity-card.test.js",
+      "source_sha256": "82a0417ca58b17cc1c7207053b63ab5ef908ffcf01b8a408ee322276ca2ffceb",
+      "package_sha256": "82a0417ca58b17cc1c7207053b63ab5ef908ffcf01b8a408ee322276ca2ffceb",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-change.test.js",
+      "source_path": "frontend/tests/opportunity-change.test.js",
+      "source_sha256": "6f17ed590311a63ed8e0d2a0d5dfe2ee84c643370474f1fbd5a0bcadf57e5a9a",
+      "package_sha256": "6f17ed590311a63ed8e0d2a0d5dfe2ee84c643370474f1fbd5a0bcadf57e5a9a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-linked-boards.test.js",
+      "source_path": "frontend/tests/opportunity-linked-boards.test.js",
+      "source_sha256": "41e5022c6ad2fcb8b7c5f27327c23385302a4cd8afa0c07fdbf2e6b45f644db2",
+      "package_sha256": "41e5022c6ad2fcb8b7c5f27327c23385302a4cd8afa0c07fdbf2e6b45f644db2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-names.test.js",
+      "source_path": "frontend/tests/opportunity-names.test.js",
+      "source_sha256": "eae6ec0155c697e6468a6fe990dd21c23e22ce943bf6715f7f3dea0514b8edf1",
+      "package_sha256": "eae6ec0155c697e6468a6fe990dd21c23e22ce943bf6715f7f3dea0514b8edf1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-notifications.test.js",
+      "source_path": "frontend/tests/opportunity-notifications.test.js",
+      "source_sha256": "5a54023e0d70081592fb91cd9cb15bc1bbd599bf3b7d80fc7955660cc7d70d9e",
+      "package_sha256": "5a54023e0d70081592fb91cd9cb15bc1bbd599bf3b7d80fc7955660cc7d70d9e",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-quarter-actuals.test.js",
+      "source_path": "frontend/tests/opportunity-quarter-actuals.test.js",
+      "source_sha256": "1852c9de1355b6d2ef2b6303c2897933c403421bcb20c67343537ac6bc1ff0b2",
+      "package_sha256": "1852c9de1355b6d2ef2b6303c2897933c403421bcb20c67343537ac6bc1ff0b2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-ranking.test.js",
+      "source_path": "frontend/tests/opportunity-ranking.test.js",
+      "source_sha256": "366c10e47cde603b7536796b98d83e0dd7fa33226b64dafa3d22517b52621f02",
+      "package_sha256": "366c10e47cde603b7536796b98d83e0dd7fa33226b64dafa3d22517b52621f02",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-request-contract.test.js",
+      "source_path": "frontend/tests/opportunity-request-contract.test.js",
+      "source_sha256": "cead4b07f382bff378bdfa2d92c92b6966971014ddd748de2c4a52fa60faeee0",
+      "package_sha256": "cead4b07f382bff378bdfa2d92c92b6966971014ddd748de2c4a52fa60faeee0",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/opportunity-team-options.test.js",
+      "source_path": "frontend/tests/opportunity-team-options.test.js",
+      "source_sha256": "02701ac0866544fb552aeedb9e269708ff7ce26fbcc62cd590796f977f26864b",
+      "package_sha256": "02701ac0866544fb552aeedb9e269708ff7ce26fbcc62cd590796f977f26864b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/page-write-context.test.js",
+      "source_path": "frontend/tests/page-write-context.test.js",
+      "source_sha256": "27777fc06fd0fd9131ad1f44d1281b75aee6e4fb5aaf0fd431db582264253b59",
+      "package_sha256": "27777fc06fd0fd9131ad1f44d1281b75aee6e4fb5aaf0fd431db582264253b59",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/pagination.test.js",
+      "source_path": "frontend/tests/pagination.test.js",
+      "source_sha256": "e2ebdbf493e8bcff0035d40d83bf533fad4e0122f951b0196b41bc9892766cc5",
+      "package_sha256": "e2ebdbf493e8bcff0035d40d83bf533fad4e0122f951b0196b41bc9892766cc5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/person-picker-pages.test.js",
+      "source_path": "frontend/tests/person-picker-pages.test.js",
+      "source_sha256": "b68665e1b0f02e921855972e46bc23f7ed0f5fa30673b28f1bab88982b3bf4e2",
+      "package_sha256": "b68665e1b0f02e921855972e46bc23f7ed0f5fa30673b28f1bab88982b3bf4e2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/person-picker.test.js",
+      "source_path": "frontend/tests/person-picker.test.js",
+      "source_sha256": "83f231b957f9c06977ac69b1e73d137349e730705b1e2995bf16465cf7fcdf62",
+      "package_sha256": "83f231b957f9c06977ac69b1e73d137349e730705b1e2995bf16465cf7fcdf62",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/platform-security.test.js",
+      "source_path": "frontend/tests/platform-security.test.js",
+      "source_sha256": "9df32e1a3e5088f05c521fdd02bfb647346a7501d7576bbd7602ffbcfcdf7fc6",
+      "package_sha256": "3bfb43991f895e7f036e582d78cc30501d9df76790ab79359753d2bb610c0df0",
+      "unchanged": false
+    },
+    {
+      "path": "frontend/tests/profile-data.test.js",
+      "source_path": "frontend/tests/profile-data.test.js",
+      "source_sha256": "58298f392a26db7ff0bfa8bc85fb8f33f9bd6ff0cccad81101105be867a805fa",
+      "package_sha256": "58298f392a26db7ff0bfa8bc85fb8f33f9bd6ff0cccad81101105be867a805fa",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/profile-logout.test.js",
+      "source_path": "frontend/tests/profile-logout.test.js",
+      "source_sha256": "8b6fa23e09a964dbeb286003a8069ea905bf0c16667521145effe7c8a9507f2c",
+      "package_sha256": "8b6fa23e09a964dbeb286003a8069ea905bf0c16667521145effe7c8a9507f2c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/profile-scores.test.js",
+      "source_path": "frontend/tests/profile-scores.test.js",
+      "source_sha256": "d402d0a217ea80c8853834d74f153bbc9d2dd92185124a9a1d41c17914a383e6",
+      "package_sha256": "d402d0a217ea80c8853834d74f153bbc9d2dd92185124a9a1d41c17914a383e6",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/recording-authorization.test.js",
+      "source_path": "frontend/tests/recording-authorization.test.js",
+      "source_sha256": "8f3413428b14bf624a59b84c5d0c8fc84beb851b160484f3ccfe6f83c6f5c3fa",
+      "package_sha256": "8f3413428b14bf624a59b84c5d0c8fc84beb851b160484f3ccfe6f83c6f5c3fa",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/request-idempotency.test.js",
+      "source_path": "frontend/tests/request-idempotency.test.js",
+      "source_sha256": "bffefb5a8db9a5b53576f6ac47e3a3d35d4501ac39cb0996291f067e31a761ce",
+      "package_sha256": "bffefb5a8db9a5b53576f6ac47e3a3d35d4501ac39cb0996291f067e31a761ce",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/status-light.test.js",
+      "source_path": "frontend/tests/status-light.test.js",
+      "source_sha256": "918239d6590c94ef4769107055d38ccc8ff48d1a9a2c023a9447f49270dd1482",
+      "package_sha256": "918239d6590c94ef4769107055d38ccc8ff48d1a9a2c023a9447f49270dd1482",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-cancel-dialog.test.js",
+      "source_path": "frontend/tests/task-cancel-dialog.test.js",
+      "source_sha256": "a7ea80474b36fd3c5d582a4bf83636c01034c499d30ab4727b703c37dbc7c33c",
+      "package_sha256": "a7ea80474b36fd3c5d582a4bf83636c01034c499d30ab4727b703c37dbc7c33c",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-cancellation-detail.test.js",
+      "source_path": "frontend/tests/task-cancellation-detail.test.js",
+      "source_sha256": "8b73e6ac11c6898fba49cf5226c6e196c109b5a1da8aaec5e7d743cfc38a5c4f",
+      "package_sha256": "8b73e6ac11c6898fba49cf5226c6e196c109b5a1da8aaec5e7d743cfc38a5c4f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-cancellation-list.test.js",
+      "source_path": "frontend/tests/task-cancellation-list.test.js",
+      "source_sha256": "784aafc79d7cadc6ae1bc29eafdf9df430144b88e3ca1b962c8febb9559c3069",
+      "package_sha256": "784aafc79d7cadc6ae1bc29eafdf9df430144b88e3ca1b962c8febb9559c3069",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-completion-review.test.js",
+      "source_path": "frontend/tests/task-completion-review.test.js",
+      "source_sha256": "acc7f84614809d57b9518d6b809667f8555b5ac08dffdd53f96ba73954baf25d",
+      "package_sha256": "acc7f84614809d57b9518d6b809667f8555b5ac08dffdd53f96ba73954baf25d",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-detail-robustness.test.js",
+      "source_path": "frontend/tests/task-detail-robustness.test.js",
+      "source_sha256": "f8d89701ae78d51bcff21af3ad2ab833ed281029de9853ebcefad09cbf58abd5",
+      "package_sha256": "f8d89701ae78d51bcff21af3ad2ab833ed281029de9853ebcefad09cbf58abd5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-notification.test.js",
+      "source_path": "frontend/tests/task-notification.test.js",
+      "source_sha256": "6de78f4c4a9a7c941054fddd391049f36fe2040be1c3ed486d96ffd0cd2ac770",
+      "package_sha256": "6de78f4c4a9a7c941054fddd391049f36fe2040be1c3ed486d96ffd0cd2ac770",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-overview.test.js",
+      "source_path": "frontend/tests/task-overview.test.js",
+      "source_sha256": "19d3043a4acf6aeecddee8032de9e5e2e47538c81b33aef95062c675776330c8",
+      "package_sha256": "19d3043a4acf6aeecddee8032de9e5e2e47538c81b33aef95062c675776330c8",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-page-requests.test.js",
+      "source_path": "frontend/tests/task-page-requests.test.js",
+      "source_sha256": "1f722871365df1e751d63d80a25ff87be614b92f19d88c254ff52298d3344a51",
+      "package_sha256": "1f722871365df1e751d63d80a25ff87be614b92f19d88c254ff52298d3344a51",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-pagination.test.js",
+      "source_path": "frontend/tests/task-pagination.test.js",
+      "source_sha256": "ac77184178927598963f119ea5ca0f85bd7bc4966d8d3421d0adf9e93eaf6b5a",
+      "package_sha256": "ac77184178927598963f119ea5ca0f85bd7bc4966d8d3421d0adf9e93eaf6b5a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-reassignment-picker.test.js",
+      "source_path": "frontend/tests/task-reassignment-picker.test.js",
+      "source_sha256": "7019ec4a23e003d88239ac1a135c42e352bdb153b3f0eb1e1dd815fa5394295a",
+      "package_sha256": "7019ec4a23e003d88239ac1a135c42e352bdb153b3f0eb1e1dd815fa5394295a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-recipient-directory.test.js",
+      "source_path": "frontend/tests/task-recipient-directory.test.js",
+      "source_sha256": "066eb72b41f5a659b4bc8199b884690b4c47c3f7975b0af56aa7f983483c877b",
+      "package_sha256": "066eb72b41f5a659b4bc8199b884690b4c47c3f7975b0af56aa7f983483c877b",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-recipient-picker.test.js",
+      "source_path": "frontend/tests/task-recipient-picker.test.js",
+      "source_sha256": "e363e7960c02170f92fa7dac7fbcc03071fae3ea4b7bf7fa02a17a95641c24e4",
+      "package_sha256": "e363e7960c02170f92fa7dac7fbcc03071fae3ea4b7bf7fa02a17a95641c24e4",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/task-type-links.test.js",
+      "source_path": "frontend/tests/task-type-links.test.js",
+      "source_sha256": "ac278770583a26a6cfa11709cfa8a53a6cb9942fc94e908005fca5defd7584c5",
+      "package_sha256": "ac278770583a26a6cfa11709cfa8a53a6cb9942fc94e908005fca5defd7584c5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-archive-advice.test.js",
+      "source_path": "frontend/tests/visit-archive-advice.test.js",
+      "source_sha256": "37fd3e7dc847e64c3ed84e670419190e1e499339470746cb8bb8ace19ed1000f",
+      "package_sha256": "37fd3e7dc847e64c3ed84e670419190e1e499339470746cb8bb8ace19ed1000f",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-capability-resume.test.js",
+      "source_path": "frontend/tests/visit-capability-resume.test.js",
+      "source_sha256": "0628088e1fdf1ff3f80976698f2e338368229318fd0085c6faa38d82408fde69",
+      "package_sha256": "0628088e1fdf1ff3f80976698f2e338368229318fd0085c6faa38d82408fde69",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-collaborators.test.js",
+      "source_path": "frontend/tests/visit-collaborators.test.js",
+      "source_sha256": "4cc51e7009bce68a172d89330c2d1e035037ca579f5648fe87f063e5524285f1",
+      "package_sha256": "4cc51e7009bce68a172d89330c2d1e035037ca579f5648fe87f063e5524285f1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-customer-navigation.test.js",
+      "source_path": "frontend/tests/visit-customer-navigation.test.js",
+      "source_sha256": "45ee73395049f8e73e69f07855f3ce474e5c40d79162a0023dc64e925fb931b2",
+      "package_sha256": "45ee73395049f8e73e69f07855f3ce474e5c40d79162a0023dc64e925fb931b2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-dates.test.js",
+      "source_path": "frontend/tests/visit-dates.test.js",
+      "source_sha256": "2aa0899faab34531fca715da8baffd6234c65515a0fdae2a5b24252d9b17dc42",
+      "package_sha256": "2aa0899faab34531fca715da8baffd6234c65515a0fdae2a5b24252d9b17dc42",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-default-dates.test.js",
+      "source_path": "frontend/tests/visit-default-dates.test.js",
+      "source_sha256": "f398492b212549e92e2d073f24a0a595453f65a04ea423b5c72f4af5fc9575e3",
+      "package_sha256": "f398492b212549e92e2d073f24a0a595453f65a04ea423b5c72f4af5fc9575e3",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-entry-draft.test.js",
+      "source_path": "frontend/tests/visit-entry-draft.test.js",
+      "source_sha256": "8bf4e89f78e6c2fe637d1343f1c710c6fc7559613ae9b5483e61f4608e899ebc",
+      "package_sha256": "8bf4e89f78e6c2fe637d1343f1c710c6fc7559613ae9b5483e61f4608e899ebc",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-entry.test.js",
+      "source_path": "frontend/tests/visit-entry.test.js",
+      "source_sha256": "42cbaf4dd2b6c02572982a08a3d516964344cc3d93937ddfbe6be80242a86dd2",
+      "package_sha256": "42cbaf4dd2b6c02572982a08a3d516964344cc3d93937ddfbe6be80242a86dd2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-first-visit.test.js",
+      "source_path": "frontend/tests/visit-first-visit.test.js",
+      "source_sha256": "c210ea980fb60a54e9935209c9608b52468761ce3120e36c983bb6038f68128a",
+      "package_sha256": "c210ea980fb60a54e9935209c9608b52468761ce3120e36c983bb6038f68128a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-flow.test.js",
+      "source_path": "frontend/tests/visit-flow.test.js",
+      "source_sha256": "f8abdd7dccd9d228c6e737e57430a86b6b40c130226a1177168fd5bd1b3a64e2",
+      "package_sha256": "f8abdd7dccd9d228c6e737e57430a86b6b40c130226a1177168fd5bd1b3a64e2",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-opportunity-pagination.test.js",
+      "source_path": "frontend/tests/visit-opportunity-pagination.test.js",
+      "source_sha256": "b35d26a1f3b3db77a8aa1684f27abbc9d82acc81692fb29d33f90240496b89f1",
+      "package_sha256": "b35d26a1f3b3db77a8aa1684f27abbc9d82acc81692fb29d33f90240496b89f1",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-partner-source.test.js",
+      "source_path": "frontend/tests/visit-partner-source.test.js",
+      "source_sha256": "0a45813e7229e608c96cd017d677ec179c56a79bcd11ea2cdb5295bc44c65772",
+      "package_sha256": "0a45813e7229e608c96cd017d677ec179c56a79bcd11ea2cdb5295bc44c65772",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-quality-signal.test.js",
+      "source_path": "frontend/tests/visit-quality-signal.test.js",
+      "source_sha256": "fce059a85bc2d460c9b70b2108b6029990d3a881966d67f5f0b044d96285653a",
+      "package_sha256": "fce059a85bc2d460c9b70b2108b6029990d3a881966d67f5f0b044d96285653a",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-receipts.test.js",
+      "source_path": "frontend/tests/visit-receipts.test.js",
+      "source_sha256": "1e2ef6c21a2c10c68939eb4f083ca8b2ba01fbe384463ee09c18ce835979aabf",
+      "package_sha256": "1e2ef6c21a2c10c68939eb4f083ca8b2ba01fbe384463ee09c18ce835979aabf",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/visit-split.test.js",
+      "source_path": "frontend/tests/visit-split.test.js",
+      "source_sha256": "94c8e582a18b0d98e975d063df44840e3b896d6fefcb99129de513f4a4c75fe5",
+      "package_sha256": "94c8e582a18b0d98e975d063df44840e3b896d6fefcb99129de513f4a4c75fe5",
+      "unchanged": true
+    },
+    {
+      "path": "frontend/tests/workbench-quarters.test.js",
+      "source_path": "frontend/tests/workbench-quarters.test.js",
+      "source_sha256": "eeb152f48d37f99ae422e1ba3b0136802cb310925f4e2307f348a3e794d88947",
+      "package_sha256": "eeb152f48d37f99ae422e1ba3b0136802cb310925f4e2307f348a3e794d88947",
+      "unchanged": true
+    },
+    {
+      "path": "接口说明/openapi.yaml",
+      "source_path": "backend/openapi/openapi.yaml",
+      "source_sha256": "25e0a537cf88d505bfa5a190acd3a883d1afc04f4c88c510ed3c32843cee0932",
+      "package_sha256": "25e0a537cf88d505bfa5a190acd3a883d1afc04f4c88c510ed3c32843cee0932",
+      "unchanged": true
+    }
+  ]
+}

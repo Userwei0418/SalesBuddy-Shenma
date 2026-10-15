@@ -1,0 +1,40 @@
+{
+  "revision": "537623c6cfba3b859a0f78122c5c29b7f6c2ae3d",
+  "verified_at": "2026-09-15T07:39:48.085326+00:00",
+  "postgres": {
+    "passed": 14,
+    "failed": 0,
+    "isolated": true,
+    "runtime_bypass_rls": false,
+    "log": "/tmp/fde-fix-postgres-results.log"
+  },
+  "backend_contract_boundaries": {
+    "passed": 5,
+    "failed": 0
+  },
+  "database_static": {
+    "passed": 5,
+    "failed": 0
+  },
+  "frontend_logic": {
+    "passed": 46,
+    "failed": 0
+  },
+  "frontend_ui_existing": {
+    "passed": 55,
+    "baseline_failures": 13,
+    "baseline_revision": "8d5650f",
+    "baseline_log": "/tmp/fde-ui-8d5650f-loading-baseline.log"
+  },
+  "wechat_compile": {
+    "wxml": 4,
+    "wxss": 3,
+    "success": true
+  },
+  "frontend_structure_and_syntax": "passed",
+  "independent_review": "passed",
+  "database_owner_review": "passed",
+  "fde_native_visual_acceptance": "pending_user",
+  "model_calls": false,
+  "business_test_writes_in_production": false
+}

@@ -1,0 +1,38 @@
+.review-targets { min-width: 0; }
+.review-targets .pc-panel-body { padding: 16px 20px; }
+.review-target-toolbar, .review-target-dictionary-head { display: flex; gap: 12px; align-items: end; margin-bottom: 16px; flex-wrap: wrap; }
+.review-target-toolbar-actions { display: flex; gap: 8px; margin-left: auto; }
+.review-target-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; color: var(--ui-secondary, #5b6c82); }
+.review-target-field > span:first-child { font-weight: 500; }
+.review-target-field .ant-select { width: 100%; min-width: 100px; }
+.review-target-toolbar > .review-target-field { min-width: 130px; }
+.review-target-toolbar > .review-target-field:nth-child(3) { min-width: 220px; }
+.review-target-table-wrap { width: 100%; overflow-x: auto; margin-top: 12px; }
+.review-target-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; text-align: left; }
+.review-target-table th { color: var(--ui-secondary, #5b6c82); background: var(--ui-background, #f5f6f8); font-weight: 500; padding: 12px; white-space: nowrap; border-bottom: 1px solid var(--ui-line, #e2e8f0); }
+.review-target-table td { padding: 16px 12px; border-bottom: 1px solid var(--ui-line, #e2e8f0); vertical-align: top; }
+.review-target-table small { display: block; color: var(--ui-muted, #617188); font-size: 12px; margin-top: 4px; }
+.review-target-number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.review-target-row-actions { display: flex; gap: 4px; }
+.review-target-edit { background: #f1f6ff; }
+.review-target-edit td { padding: 16px; border: 1px solid #b7d0ff; }
+.review-target-form { display: grid; grid-template-columns: minmax(240px, 1.5fr) minmax(100px, .6fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(140px, .8fr); gap: 12px; }
+.review-target-form > .review-target-field:last-child { grid-column: 1 / -1; }
+.review-target-period { display: flex; gap: 6px; }
+.review-target-period .ant-select { width: 88px; min-width: 80px; }
+.review-target-period input { min-width: 150px; }
+.review-target-definition { margin: 10px 0; color: var(--ui-secondary, #5b6c82); font-size: 12px; }
+.review-target-edit-actions { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.review-target-edit-actions > span:first-child { margin-right: auto; }
+.review-target-edit-actions > button:first-of-type { margin-left: auto; }
+.review-target-table .is-editing { opacity: .55; }
+.review-target-empty { padding: 40px !important; text-align: center; color: var(--ui-muted, #617188); }
+.review-target-footer { display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between; align-items: center; margin: 16px 0; }
+.review-target-history { padding-left: 20px; }
+.review-target-history li { margin: 12px 0; }
+.review-target-history span, .review-target-history small { margin-left: 12px; }
+.review-target-dictionary-head { align-items: center; justify-content: space-between; }
+.review-target-metric-form { padding: 16px; background: #f1f6ff; border: 1px solid #b7d0ff; border-radius: var(--ui-radius-panel, 8px); display: grid; grid-template-columns: 1fr 1fr 120px 2fr 120px; gap: 12px; }
+.review-target-metric-form .review-target-edit-actions { grid-column: 1 / -1; }
+@media (max-width: 900px) { .review-target-form { grid-template-columns: 1fr 1fr; } .review-target-metric-form { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .review-target-toolbar-actions { width: 100%; } .review-targets .pc-panel-body { padding: 12px; } }

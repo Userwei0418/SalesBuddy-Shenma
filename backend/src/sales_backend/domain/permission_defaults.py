@@ -1,5 +1,6 @@
 """Initial templates only. Published tenant configuration replaces these defaults."""
 
+from sales_backend.domain.business_read import BUSINESS_READ_PERMISSIONS
 from sales_backend.domain.permission_catalog import CATALOG
 
 ROLE_LABELS = {
@@ -8,12 +9,14 @@ ROLE_LABELS = {
 }
 
 BUSINESS_COMMON = frozenset({
+    "access.business_web", "weekly_report.generate", "weekly_report.read", "weekly_report.edit", "weekly_report.cancel",
+    "material.read",
     "access.mini_program", "overview.read", "customer.reference", "customer.read", "battle_map.read",
     "opportunity.read", "visit.read", "task.read", "task.create_daily", "task.create_customer",
     "task.accept", "task.decline", "task.complete", "task.cancel", "task.review", "task.assign", "task.coordinate",
     "advice.request", "advice.read", "advice.decide", "advice.opportunity", "advice.visit", "agent.chatbi", "agent.customer_chatbi",
-    "agent.operating_report", "agent.history", "partner.read", "directory.read",
-    "notification.read", "notification.mark_read",
+    "agent.operating_report", "agent.work_report", "work_report.read", "work_report.write", "work_report.share", "agent.history", "partner.read", "directory.read",
+    "notification.read", "notification.mark_read", "risk.decide",
 })
 VISIT_ENTRY = frozenset({
     "visit.create", "visit.supplement", "visit.upload", "visit.transcribe", "visit.retry_import",
@@ -21,16 +24,16 @@ VISIT_ENTRY = frozenset({
 })
 SALES_COMMON = BUSINESS_COMMON | VISIT_ENTRY | frozenset({
     "visit.first_visit", "visit.attendance_manage",
-    "access.business_web", "weekly_report.generate", "weekly_report.read", "weekly_report.edit", "weekly_report.cancel",
-    "customer.update", "customer.claim", "customer.claim_directory", "opportunity.create", "opportunity.update", "opportunity.close",
+    "customer.update", "customer.create_request", "customer.claim", "customer.claim_directory", "opportunity.create", "opportunity.update", "opportunity.close",
     "opportunity.reopen", "opportunity.fde_members", "task.assign", "risk.read", "risk.resolve", "risk.auto_review", "advice.customer",
     "actual.read", "dashboard.read", "dashboard.ranking", "profile.sales_read", "profile.sales_review",
     "target.read", "target.submit", "target.history", "agent.opportunity_draft",
     "demo_scene.read", "demo_scene.create", "demo_scene.update", "demo_scene.delete",
 })
 CONSOLE_COMMON = frozenset({
+    "material.read", "material.manage",
     "access.console", "history.import", "overview.read", "visit.read", "visit.download_original", "customer.reference", "customer.read", "customer.create", "customer.update",
-    "customer.claim_directory", "customer.claim_review", "customer.release", "customer.resolve_owner", "customer.export",
+    "customer.claim_directory", "customer.claim_review", "customer.create_review", "customer.release", "customer.resolve_owner", "customer.export",
     "opportunity.read", "opportunity.create", "opportunity.update", "opportunity.close", "opportunity.reopen",
     "opportunity.create_for_others", "opportunity.quote_create", "opportunity.fde_members", "opportunity.export",
     "task.read", "task.create_daily", "task.create_customer", "task.assign", "task.accept", "task.decline",
@@ -49,18 +52,16 @@ def default_permissions(role: str) -> list[dict]:
         # business use still requires a business role or an explicit additional grant.
         codes = CONSOLE_COMMON | {
             "authorization.read", "authorization.roles_manage", "authorization.accounts_manage", "authorization.audit",
-            "account.password_policy", "company.update", "rule.publish", "rule.restore",
+            "support.manage", "account.password_policy", "company.update", "company.export", "rule.publish", "rule.restore",
             "ai.config_read", "ai.config_test", "ai.config_publish", "ai.config_rollback",
             "feishu.read", "feishu.configure", "feishu.control", "feishu.recover",
-            "customer.create_review",
         }
     elif role == "operations":
-        codes = (CONSOLE_COMMON - {"opportunity.create", "opportunity.create_for_others"}) | {"customer.create_review"}
+        codes = CONSOLE_COMMON - {"opportunity.create", "opportunity.create_for_others"}
     elif role in {"sales", "supervisor", "manager"}:
         codes = SALES_COMMON | ({"agent.today_tasks", "agent.personal_risks"} if role == "sales" else {
-            "agent.management_task", "task.coordinate", "actual.create", "actual.void",
+            "agent.management_task", "task.coordinate",
         })
-        codes = codes | {"customer.create_request"}
         if role == "manager":
             codes = codes | {"ai.usage_read"}
     elif role in {"fde", "fde_lead"}:
@@ -80,7 +81,11 @@ def default_permissions(role: str) -> list[dict]:
             scope = "self"
         elif role in {"fde", "fde_lead"} and code in {"visit.create", "visit.supplement", "visit.structure", "visit.quality_review"}:
             scope = "assigned"
-        elif role == "fde" and code in {"task.read", "risk.read", "customer.read", "opportunity.read", "battle_map.read", "demo_scene.read", "demo_scene.create", "demo_scene.update", "demo_scene.delete", "actual.read", "visit.read", "overview.read", "profile.fde_read", "profile.fde_activity", "agent.chatbi", "agent.customer_chatbi", "agent.operating_report", "advice.request", "advice.read", "advice.decide", "advice.opportunity", "advice.visit"}:
+        elif role == "fde" and code in {"task.read", "risk.read", "risk.decide", "customer.read", "opportunity.read", "battle_map.read", "demo_scene.read", "demo_scene.create", "demo_scene.update", "demo_scene.delete", "actual.read", "visit.read", "overview.read", "profile.fde_read", "profile.fde_activity", "agent.chatbi", "agent.customer_chatbi", "agent.operating_report", "agent.work_report", "work_report.read", "work_report.write", "work_report.share", "advice.request", "advice.read", "advice.decide", "advice.opportunity", "advice.visit"}:
             scope = "assigned"
+        if code in BUSINESS_READ_PERMISSIONS and role in {"sales", "fde"}:
+            scope = "departments"
+        elif code in BUSINESS_READ_PERMISSIONS and role in {"supervisor", "fde_lead", "manager"}:
+            scope = "workspace"
         result.append({"permission": code, "scope": scope, "team_ids": []})
     return result

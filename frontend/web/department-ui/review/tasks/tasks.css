@@ -1,0 +1,19 @@
+.review-task-alignment{border-top:1px solid var(--ui-line,#e4e7ec);margin-top:24px;padding-top:20px;min-width:0}
+.review-task-alignment h3{font-size:16px;margin:0 0 12px;color:var(--ui-ink,#242a33)}
+.review-task-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.review-task-section-heading h3{margin:0}.review-task-section-heading>span,.review-task-section-heading small{font-size:12px;font-weight:400;color:var(--ui-muted,#737c89)}
+.review-task-alignment .ant-select{width:100%}.review-task-derived{margin:4px 0 16px;font-size:13px;color:var(--ui-muted,#737c89)}
+.review-task-contribution{padding:14px;border-radius:8px;background:var(--ui-bg-subtle,#f7f8fa);margin-top:12px}
+.review-task-contribution-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:10px}
+.review-task-help{font-size:12px;color:var(--ui-muted,#737c89);line-height:1.7;margin:10px 0 0}.review-task-error{font-size:13px;color:var(--ui-danger,#d43838);margin-top:8px}
+.review-task-summary-contribution{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:14px}.review-task-summary-contribution p{width:100%;margin:0;white-space:pre-wrap}.review-task-kr-list{padding-left:20px;font-size:14px;line-height:1.8}
+.review-task-editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.review-task-load-state{margin-top:20px}
+.department-ui .review-task-detail .ds-td-main{overflow-y:auto}
+.department-ui .review-task-detail .ds-td-main>*{flex-shrink:0}
+@media(max-width:640px){.review-task-section-heading{align-items:flex-start;flex-direction:column;gap:4px}.review-task-contribution-grid{grid-template-columns:minmax(0,1fr)}}
+
+.review-task-target-filter{display:grid;grid-template-columns:100px minmax(130px,1fr) 120px;gap:8px;margin-bottom:8px}
+.review-task-alignment>.ant-radio-group{margin-bottom:18px}
+.review-task-other-reason p{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;font-size:14px;line-height:1.7}
+.review-task-kr-list li{margin:8px 0}.review-task-kr-list li>div{font-size:12px;color:var(--ui-muted,#737c89);overflow-wrap:anywhere}
+@media(max-width:640px){.review-task-target-filter{grid-template-columns:100px minmax(0,1fr)}.review-task-target-filter>.ant-select:last-child{grid-column:1/-1}}

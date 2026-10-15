@@ -1,0 +1,36 @@
+{
+  "date": "2026-09-12",
+  "environment": "production",
+  "url": "https://www.ericepc.com/admin",
+  "actor": "OPSADMIN",
+  "release": "admin-20260912-0f27dac",
+  "browser": "Codex In-app Browser",
+  "observations": {
+    "audit_list_filter_and_detail": "passed",
+    "business_run_id": "349c375f-eec6-4e6b-a5ad-baad7c4c0115",
+    "inference_operation_id": "18081aaf-3927-4e54-9664-6cb30da2dfff",
+    "filtered_statistics": {"total": 1, "platform_accepted": 0, "fallback_accepted": 1, "business_completed": 1, "incomplete": 0},
+    "company_rules_four_baselines": "passed",
+    "home_ascending_preview_then_cancel": "passed",
+    "execution_seven_baselines": "passed",
+    "operating_report_direct_only_preview_then_cancel": "passed",
+    "execution_version_history": "passed",
+    "visual_viewport_width": 642,
+    "console_errors_or_warnings": [],
+    "production_rule_mutations": 0,
+    "export_backend_receipt": "passed",
+    "export_local_file": "not_verified"
+  },
+  "wechat_developer_tools": {
+    "project": "salegent-v1/frontend",
+    "version": "2.02.2608060",
+    "compile_action_and_home_render": "observed",
+    "home_cards_newest_first": true,
+    "five_tab_icons_visible": true,
+    "chatbi_entry_hidden": true,
+    "historical_console_errors_present": true,
+    "new_package_uploaded": false,
+    "physical_device_acceptance": "not_performed"
+  },
+  "limitations": ["Platform timeout is still present.", "Runtime platform snapshot remains unverified.", "This is not a new seven-Agent stability matrix."]
+}

@@ -1,0 +1,23 @@
+{
+  "format": "salesbuddy-demo-template-v1",
+  "id": "sales-cycle-v1",
+  "name": "销售经营闭环合成演示",
+  "synthetic": true,
+  "teams": [
+    {"key": "east", "name": "演示销售一组"},
+    {"key": "west", "name": "演示销售二组"},
+    {"key": "fde", "name": "演示产品支持"}
+  ],
+  "accounts": [
+    {"code": "DEMO_SALES_A", "name": "演示销售甲", "role": "sales", "scope": "self", "team": "east"},
+    {"code": "DEMO_SALES_B", "name": "演示销售乙", "role": "sales", "scope": "self", "team": "west"},
+    {"code": "DEMO_MANAGER", "name": "演示销售经理", "role": "manager", "scope": "workspace", "team": "east"},
+    {"code": "DEMO_FDE", "name": "演示产品顾问", "role": "fde", "scope": "self", "team": "fde"}
+  ],
+  "customers": [
+    {"key": "attack", "name": "合成演示·晨光制造", "owner": "DEMO_SALES_A", "potential": 86, "relationship": 35, "quadrant": "main_attack", "amount": "800000.00", "probability": 30, "visit_days_ago": 1, "scenario": "客户愿意提供脱敏测试资料，待确认试点范围与验收口径。"},
+    {"key": "asset", "name": "合成演示·远帆物流", "owner": "DEMO_SALES_A", "potential": 92, "relationship": 88, "quadrant": "customer_asset", "amount": "1200000.00", "probability": 70, "visit_days_ago": 2, "scenario": "已有合作基础，本次沟通扩容计划，下一步确认采购时间与交付边界。"},
+    {"key": "order", "name": "合成演示·青禾零售", "owner": "DEMO_SALES_B", "potential": 38, "relationship": 82, "quadrant": "order_driven", "amount": "150000.00", "probability": 50, "visit_days_ago": 3, "scenario": "客户需求清晰，计划先采购小规模服务，待负责人确认报价与试用日期。"},
+    {"key": "resource", "name": "合成演示·星桥园区", "owner": "DEMO_SALES_B", "potential": 32, "relationship": 28, "quadrant": "customer_resource", "amount": "100000.00", "probability": 10, "visit_days_ago": 6, "scenario": "首次建立联系，当前仅了解业务方向，尚未确认正式预算与决策流程。"}
+  ]
+}

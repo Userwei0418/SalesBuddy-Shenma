@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "capability": "visit_quality",
+  "agent_id": "01a09eff-d317-7725-8941-7b8e37f4a641",
+  "source_head": "4fded32b4aca2002583114d7e1b7387ee1e26840",
+  "url": "https://123.207.235.181/agents/01a09eff-d317-7725-8941-7b8e37f4a641/configure",
+  "method": "normal authenticated browser UI",
+  "publish_clicks": 1,
+  "published": true,
+  "visible_version_label": "版本 37",
+  "visible_version_number": 37,
+  "visible_latest": true,
+  "published_at_display": "2026-10-15 17:45:09",
+  "display_timezone": "Asia/Shanghai",
+  "requested_note": "v3.16 shared-date scope 20261015",
+  "requested_note_applied": false,
+  "note_limitation": "Publish Update submitted immediately without a note dialog; the visible version history and read-only version detail expose no note edit control. No second publish was attempted.",
+  "before": {
+    "draft_matched_published": true,
+    "visible_version_label": "v3.15 quality-only 20261007",
+    "published_at_display": "2026-10-07 20:45:26",
+    "source_prompt_sha256": "8b6b198cf405d805532d362d2fce32f3f52d56f82ae90e2b2197a68f93c71577",
+    "rendered_prompt_whitespace_removed_sha256": "b53df8e52fd107dad2a19cfb710a1106e7c3f37a0534f5c6ed6e9b6f8fe17ed8"
+  },
+  "after": {
+    "prompt_version": "visit-quality-v3.16-time-scope-20261015",
+    "source_prompt_sha256": "ae7f96c4e0c84acb9de077b5c000e3c27a8b4a9e18321d872ca02ca178c2ec3e",
+    "rendered_prompt_whitespace_removed_sha256": "e9ea486d457accd494044a6198d3692f5a7f365e2ba654d35d33c4a3afb2d8b3",
+    "published_prompt_matches_reviewed_source_after_whitespace_removal": true,
+    "snapshot_id": null,
+    "revision": null,
+    "snapshot_revision_limitation": "Not exposed in visible configure/history UI; history attribution UUID is not claimed as snapshot or revision."
+  },
+  "non_prompt_configuration": {
+    "visible_fields_unchanged": true,
+    "model": "senseaudio-s2-lite",
+    "fallback_model": "glm-5.3-flash",
+    "primary_visible_parameters": {
+      "numberInputs": [
+        {
+          "label": "温度",
+          "value": "0.7"
+        },
+        {
+          "label": "Top P",
+          "value": "1"
+        },
+        {
+          "label": "频率惩罚",
+          "value": "0"
+        },
+        {
+          "label": "存在惩罚",
+          "value": "0"
+        },
+        {
+          "label": "最大标记",
+          "value": "512"
+        }
+      ],
+      "switches": [
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        }
+      ]
+    },
+    "fallback_visible_parameters": {
+      "numberInputs": [
+        {
+          "label": "温度",
+          "value": "0.7"
+        },
+        {
+          "label": "Top P",
+          "value": "1"
+        },
+        {
+          "label": "频率惩罚",
+          "value": "0"
+        },
+        {
+          "label": "存在惩罚",
+          "value": "0"
+        },
+        {
+          "label": "最大标记",
+          "value": "512"
+        }
+      ],
+      "switches": [
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        },
+        {
+          "checked": "false",
+          "label": null
+        }
+      ]
+    },
+    "parameter_overrides_enabled": false,
+    "stop_sequences": [],
+    "skills": 0,
+    "files": 0,
+    "dify_tools": 0,
+    "knowledge_retrieval": 0,
+    "env_rows_with_values": 0,
+    "verification_scope": "Visible model/parameter controls and resource/env fields before and after prompt edit; current published view confirms model labels and empty resources. Hidden or unexposed settings are not claimed verified."
+  },
+  "runtime_snapshot_verified": false,
+  "model_calls": 0,
+  "db_binding_mutations": 0,
+  "other_agent_mutations": 0,
+  "semantic_acceptance": "pending; platform publication/readback only",
+  "screenshot": "PLATFORM_PUBLISHED_V37.png",
+  "screenshot_sha256": "e73c00b046ce5e7ada7fb4b3d21cdc584ab9b768bc1f440b7ef5cfcbb72128b8",
+  "screenshot_directory": "/Users/zhouwei5/Developer/SalesBuddy-deliveries/quality-time-scope-candidate-20261015"
+}

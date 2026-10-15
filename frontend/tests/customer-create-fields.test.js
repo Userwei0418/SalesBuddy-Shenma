@@ -11,7 +11,7 @@ async function loadPage(savedDraft = null, draftKey = "customerCreateDraft:w1:u1
   const toasts = [];
   const storage = new Map(savedDraft ? [[draftKey, savedDraft]] : []);
   const context = {
-    require: (name) => name.includes('businessOptions') ? require('../miniprogram/utils/businessOptions') : name.includes('access') ? require('../miniprogram/utils/access') : name.includes('customerLevel') ? require('../miniprogram/utils/customerLevel') : name.includes('draftScope') ? require('../miniprogram/utils/draftScope') : ({
+    require: (name) => name.includes('customerIdentity') ? require('../miniprogram/utils/customerIdentity') : name.includes('pageWriteContext') ? require('../miniprogram/utils/pageWriteContext') : name.includes('businessOptions') ? require('../miniprogram/utils/businessOptions') : name.includes('access') ? require('../miniprogram/utils/access') : name.includes('customerLevel') ? require('../miniprogram/utils/customerLevel') : name.includes('draftScope') ? require('../miniprogram/utils/draftScope') : ({
       getBusinessOptions: () => Promise.resolve(require('./helpers/business-options.json')),
       getTeamDirectory: () => Promise.resolve({ teams: [{id:'south',name:'南区'}] }),
       createCustomer: (payload) => { apiCalls.push(payload); return Promise.resolve({ id: "customer-1" }); },
@@ -51,7 +51,7 @@ async function loadPage(savedDraft = null, draftKey = "customerCreateDraft:w1:u1
 test("customer create includes the shared Tier customer level", async () => {
   const { page } = await loadPage();
   assert.deepEqual([...page.data.fields.map((field) => field.key)], [
-    "customer_name", "company_reference", "industry", "customer_type", "level_code", "lead_source", "target_team",
+    "customer_name", "industry", "customer_type", "level_code", "lead_source", "target_team",
     "partner_name", "contact_name", "contact_title", "contact_role",
   ]);
   assert.equal(page.data.fields.find((field) => field.key === "customer_name").required, true);
@@ -59,34 +59,32 @@ test("customer create includes the shared Tier customer level", async () => {
   assert.equal(page.data.fields.find((field) => field.key === "partner_name").required, false);
   assert.equal(page.data.fields.find((field) => field.key === "contact_role").required, true);
 
-  page.openEditor({ currentTarget: { dataset: { index: page.data.fields.findIndex(field => field.key === "customer_type") } } });
-  assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], require("./helpers/business-options.json").customer.customer_type);
-  page.openEditor({ currentTarget: { dataset: { index: page.data.fields.findIndex(field => field.key === "level_code") } } });
+  page.openEditor({ currentTarget: { dataset: { index: 2 } } });
+  assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], require("./helpers/business-options.json").customer_creation.customer_type);
+  page.openEditor({ currentTarget: { dataset: { index: 3 } } });
   assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], ["Tier-1", "Tier-2", "Tier-3"]);
-  page.openEditor({ currentTarget: { dataset: { index: page.data.fields.findIndex(field => field.key === "lead_source") } } });
-  assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], require("./helpers/business-options.json").customer.source);
-  page.openEditor({ currentTarget: { dataset: { index: page.data.fields.findIndex(field => field.key === "contact_role") } } });
+  page.openEditor({ currentTarget: { dataset: { index: 4 } } });
+  assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], require("./helpers/business-options.json").customer_creation.source);
+  page.openEditor({ currentTarget: { dataset: { index: 9 } } });
   assert.deepEqual([...page.data.editorOptions.map((option) => option.label)], ["使用者", "影响者", "决策者"]);
 });
 
 test("optional fields may stay blank while a missing contact role blocks submission", async () => {
   const { page, apiCalls, toasts, storage } = await loadPage();
   page.applyVoiceDraft({ customer_name: "验收客户", source: "销售自拓", level_code: "Tier-2", contact_name: "联系人", contact_title: "采购经理" });
-  assert.equal(page.data.missingCount, 2);
-  page.refresh(page.data.fields.map(field => field.key === "company_reference" ? {...field, value: "S2-REF-001"} : field));
   assert.equal(page.data.missingCount, 1);
   page.submitCustomer();
   assert.equal(apiCalls.length, 0);
-  page.openEditor({ currentTarget: { dataset: { index: page.data.fields.findIndex(field => field.key === "contact_role") } } });
+  page.openEditor({ currentTarget: { dataset: { index: 9 } } });
   page.selectOption({ currentTarget: { dataset: { index: 2 } } });
   page.saveEditor();
   assert.equal(page.data.missingCount, 0);
   assert.equal(page.data.progressPercent, 100);
   page.submitCustomer();
-  await new Promise(resolve => setImmediate(resolve));
+  await Promise.resolve();
+  await Promise.resolve();
   assert.equal(apiCalls.length, 1);
   assert.equal(apiCalls[0].contact_role, "决策者");
-  assert.equal(apiCalls[0].company_reference, "S2-REF-001");
   assert.equal(apiCalls[0].level_code, "Tier-2");
   assert.equal(apiCalls[0].industry, "");
   assert.equal(apiCalls[0].partner_name, "");
@@ -110,27 +108,31 @@ test("legacy drafts restore values into the new schema without reviving deleted 
     { key: "next_action", value: "旧行动", required: true },
   ] });
   assert.equal(page.data.draftRestored, true);
-  assert.equal(page.data.fields.length, 11);
+  assert.equal(page.data.fields.length, 10);
   assert.equal(page.data.customerName, "上次填写的客户");
-  assert.equal(page.data.requiredCount, 9);
-  assert.equal(page.data.fields.find((field) => field.key === "lead_source").value, "销售线索");
+  assert.equal(page.data.requiredCount, 8);
+  assert.equal(page.data.fields.find((field) => field.key === "lead_source").value, "公司分配");
+  assert.match(page.data.fields.find((field) => field.key === "lead_source").validationError, /请选择有效选项/);
   assert.equal(page.data.fields.find((field) => field.key === "target_team").value, "南区");
   assert.equal(page.data.fields.find((field) => field.key === "contact_role").missing, true);
   page.saveDraft();
   const { page: restored } = await loadPage(storage.get("customerCreateDraft:w1:u1"));
-  assert.equal(restored.data.fields.length, 11);
+  assert.equal(restored.data.fields.length, 10);
   assert.equal(restored.data.customerName, "上次填写的客户");
 });
 
-test("voice suggestions cannot introduce unsupported customer types or contact roles", async () => {
-  const { page } = await loadPage();
+test("voice suggestions preserve unsupported values visibly and require correction before submission", async () => {
+  const { page, apiCalls } = await loadPage();
   page.applyVoiceDraft({ customer_type: "旧类型", source: "公司分配", contact_role: "采购负责人", opportunity_name: "旧商机" });
-  assert.equal(page.data.fields.find((field) => field.key === "customer_type").value, "潜在客户");
-  assert.equal(page.data.fields.find((field) => field.key === "lead_source").value, "销售线索");
-  assert.equal(page.data.fields.find((field) => field.key === "contact_role").missing, true);
+  assert.equal(page.data.fields.find((field) => field.key === "customer_type").value, "旧类型");
+  assert.equal(page.data.fields.find((field) => field.key === "lead_source").value, "公司分配");
+  assert.equal(page.data.fields.find((field) => field.key === "contact_role").value, "采购负责人");
+  for(const key of ['customer_type','lead_source','contact_role'])assert.ok(page.data.fields.find(field=>field.key===key).validationError);
   assert.equal(page.data.fields.some((field) => field.key === "opportunity_name"), false);
   page.applyVoiceDraft({ level_code: "A级" });
-  assert.equal(page.data.fields.find((field) => field.key === "level_code").value, "");
+  assert.equal(page.data.fields.find((field) => field.key === "level_code").value, "A级");
+  assert.ok(page.data.fields.find((field) => field.key === "level_code").validationError);
+  page.submitCustomer();assert.equal(apiCalls.length,0);
 });
 
 

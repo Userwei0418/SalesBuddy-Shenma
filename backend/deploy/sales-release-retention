@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+"""Keep current and recent application releases; print a JSON plan before deletion."""
+
+import argparse
+import datetime as dt
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import shutil
+import stat
+import sys
+
+
+SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}\Z")
+DEFAULTS = {"APP_ROOT": "/www/wwwroot/salegent", "APP_KEEP_RELEASES": "3"}
+
+
+def configuration(path):
+    values = dict(DEFAULTS)
+    for number, line in enumerate(path.read_text().splitlines(), 1):
+        tokens = shlex.split(line, comments=True)
+        if not tokens:
+            continue
+        if len(tokens) != 1 or not re.match(r"^[A-Z][A-Z0-9_]*=", tokens[0]):
+            raise ValueError(f"invalid configuration syntax at line {number}")
+        key, value = tokens[0].split("=", 1)
+        if key in DEFAULTS:
+            values[key] = value
+    root = Path(values["APP_ROOT"])
+    if not root.is_absolute() or root == Path("/"):
+        raise ValueError("APP_ROOT must be an absolute application directory, not /")
+    keep = int(values["APP_KEEP_RELEASES"])
+    if keep < 2:
+        raise ValueError("APP_KEEP_RELEASES must be at least 2 (current and a rollback)")
+    return root.resolve(strict=True), keep
+
+
+def release_for_path(path, releases):
+    """Map a resolved descendant (including a runtime executable) to its release."""
+    resolved = Path(str(path).removesuffix(" (deleted)")).resolve(strict=False)
+    try:
+        parts = resolved.relative_to(releases).parts
+    except ValueError:
+        return None
+    return parts[0] if parts else None
+
+
+def eligible(path):
+    if not SAFE_NAME.fullmatch(path.name) or path.is_symlink() or not path.is_dir():
+        return False
+    # Both layouts exist in production: git archive <sha>:backend (flat) and
+    # whole-repository archives (backend/). Require real source directories too;
+    # a stray pyproject.toml must not make an unrelated directory deletable.
+    for backend in (path, path / "backend"):
+        marker = backend / "pyproject.toml"
+        source = backend / "src"
+        package = source / "sales_backend"
+        if (not backend.is_symlink() and backend.is_dir() and
+                not marker.is_symlink() and marker.is_file() and
+                not source.is_symlink() and source.is_dir() and
+                not package.is_symlink() and package.is_dir()):
+            return True
+    return False
+
+
+def process_references(releases, proc_root=Path("/proc")):
+    if not proc_root.is_dir():
+        raise RuntimeError("process inspection unavailable; refusing release deletion")
+    references = {}
+    for process in proc_root.iterdir():
+        if not process.name.isdigit() or not process.is_dir():
+            continue
+        for field in ("cwd", "exe"):
+            try:
+                target = os.readlink(process / field)
+            except FileNotFoundError:
+                continue  # Process exited, or kernel thread without a userspace path.
+            except PermissionError as exc:
+                raise RuntimeError(f"cannot inspect process {process.name}/{field}; run as root") from exc
+            name = release_for_path(target, releases)
+            if name:
+                references.setdefault(name, []).append(f"process:{process.name}/{field}")
+    return references
+
+
+def build_plan(root, keep, proc_root=Path("/proc")):
+    releases = root / "releases"
+    if releases.is_symlink() or not releases.is_dir():
+        raise ValueError("APP_ROOT/releases must be a real directory")
+    current = root / "current"
+    if not current.is_symlink() or not current.exists():
+        raise ValueError("current must be a valid symlink before releases can be pruned")
+    current_name = release_for_path(current, releases)
+    if not current_name or current.resolve() != releases / current_name:
+        raise ValueError("current must point to a direct release directory")
+    if not eligible(releases / current_name):
+        raise ValueError("current release is not an identifiable application release")
+
+    protected = process_references(releases, proc_root)
+    # All root-level pointers are honoured, including current, .venv, previous,
+    # rollback and named rollback pointers. Targets outside releases are untouched.
+    for pointer in root.iterdir():
+        if pointer.is_symlink():
+            name = release_for_path(pointer, releases)
+            if name:
+                protected.setdefault(name, []).append(f"pointer:{pointer.name}")
+    protected.setdefault(current_name, []).append("current")
+    candidates = []
+    skipped = []
+    for path in releases.iterdir():
+        if not eligible(path):
+            skipped.append({"name": path.name, "reason": "unrecognised-or-symlink"})
+            continue
+        info = path.lstat()
+        candidates.append((info.st_mtime_ns, path.name, info.st_dev, info.st_ino))
+    candidates.sort(reverse=True)
+    # Current counts towards the budget even when it is an older rollback. Other
+    # protected releases are additional recovery points, never deletion victims.
+    recent = [name for _, name, _, _ in candidates if name != current_name][:keep - 1]
+    selected = {current_name, *recent}
+    retained, delete = [], []
+    for mtime, name, device, inode in candidates:
+        reasons = sorted(set(protected.get(name, [])))
+        if name in selected:
+            reasons.append("retention-window")
+        entry = {"name": name, "path": str(releases / name), "mtime_ns": mtime,
+                 "device": device, "inode": inode}
+        if reasons:
+            retained.append({**entry, "reasons": reasons})
+        else:
+            delete.append(entry)
+    return {"app_root": str(root), "keep_releases": keep, "current": current_name,
+            "lock_file": str(root / ".deploy.lock"), "retained": retained,
+            "delete": delete, "skipped": sorted(skipped, key=lambda row: row["name"])}
+
+
+def apply_plan(plan, proc_root=Path("/proc")):
+    if not shutil.rmtree.avoids_symlink_attacks:
+        raise RuntimeError("safe directory removal unavailable on this platform")
+    root = Path(plan["app_root"])
+    deleted = []
+    for entry in plan["delete"]:
+        # Refresh process/pointer protection immediately before each removal. The
+        # shared deployment lock prevents cooperating publishers from changing it.
+        fresh = build_plan(root, plan["keep_releases"], proc_root)
+        names = {item["name"]: item for item in fresh["delete"]}
+        path = root / "releases" / entry["name"]
+        candidate = names.get(entry["name"])
+        if not candidate:
+            raise RuntimeError(f"release became protected or changed: {entry['name']}")
+        if (candidate["device"], candidate["inode"], candidate["mtime_ns"]) != (
+                entry["device"], entry["inode"], entry["mtime_ns"]):
+            raise RuntimeError(f"release changed since plan: {entry['name']}")
+        info = path.lstat()
+        if not stat.S_ISDIR(info.st_mode) or path.is_mount():
+            raise RuntimeError(f"unsafe release path: {entry['name']}")
+        # A mounted dependency directory is external data, even when it lives
+        # beneath an otherwise valid release. Never traverse such a mount.
+        for directory, children, _ in os.walk(path, followlinks=False):
+            for child in children:
+                nested = Path(directory) / child
+                if not nested.is_symlink() and nested.is_mount():
+                    raise RuntimeError(f"mounted directory inside release: {entry['name']}")
+        shutil.rmtree(path)
+        deleted.append(entry["name"])
+        emit({"event": "release-deleted", "name": entry["name"]})
+    return deleted
+
+
+def emit(value):
+    print(json.dumps(value, ensure_ascii=False, sort_keys=True), flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=Path("/etc/server-retention.conf"))
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true", help="delete only eligible releases outside retention")
+    mode.add_argument("--dry-run", action="store_true", help="print plan only (default)")
+    args = parser.parse_args()
+    try:
+        root, keep = configuration(args.config)
+        lock_path = root / ".deploy.lock"
+        # A lock symlink could direct a privileged command outside the app root.
+        descriptor = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(descriptor, "a") as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                emit({"event": "release-retention-skipped", "reason": "deployment-lock-busy"})
+                return 0
+            plan = build_plan(root, keep)
+            emit({"event": "release-retention-plan", "mode": "apply" if args.apply else "dry-run",
+                  "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(), **plan})
+            deleted = apply_plan(plan) if args.apply else []
+            emit({"event": "release-retention-complete", "deleted": deleted})
+        return 0
+    except (OSError, ValueError, RuntimeError) as exc:
+        emit({"event": "release-retention-failed", "error": str(exc)})
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

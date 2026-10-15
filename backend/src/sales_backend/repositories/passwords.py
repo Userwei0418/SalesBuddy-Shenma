@@ -2,12 +2,14 @@ from sales_backend.db import json_value
 
 
 class PasswordRepository:
-    async def login_identifier(self, connection, workspace, account):
-        row = await connection.fetchrow("SELECT * FROM security.password_login_identifier($1,$2)", workspace, account)
+    async def login_identifier(self, connection, workspace, account, login_type="auto"):
+        row = await connection.fetchrow(
+            "SELECT * FROM security.password_login_identifier($1,$2,$3)", workspace, account, login_type,
+        )
         return dict(row) if row else None
 
-    async def lock_login_identifier(self, connection, account):
-        return await connection.fetchval("SELECT security.lock_password_login_identifier($1)", account)
+    async def lock_login_identifier(self, connection, account, login_type="auto"):
+        return await connection.fetchval("SELECT security.lock_password_login_identifier($1,$2)", account, login_type)
 
     async def account_workspace(self, connection, account):
         return await connection.fetchval("SELECT security.password_account_workspace($1)", account)
@@ -18,9 +20,11 @@ class PasswordRepository:
     async def limit_status(self, connection, key, limit):
         return dict(await connection.fetchrow("SELECT * FROM security.login_limit_status($1,$2)", key, limit))
 
-    async def candidate(self, connection, workspace, account, role=None):
+    async def candidate(self, connection, workspace, account, role=None, login_type="auto"):
         return json_value(
-            await connection.fetchval("SELECT security.password_candidate($1,$2,$3)", workspace, account, role)
+            await connection.fetchval(
+                "SELECT security.password_candidate($1,$2,$3,$4)", workspace, account, role, login_type,
+            )
         )
 
     async def complete_login(self, connection, session_id, password_hash, attempt_key):

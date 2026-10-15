@@ -95,6 +95,8 @@ python-multipart==0.0.32
     # via sales-assistant-backend
 pyyaml==6.0.3
     # via uvicorn
+segno==1.6.6
+    # via sales-assistant-backend
 six==1.17.0
     # via python-dateutil
 starlette==1.6.0

@@ -1,0 +1,172 @@
+{
+  "scenario": "off",
+  "case": "regular",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "scoped sales identity",
+      "passed": true
+    },
+    {
+      "name": "scoped synthetic customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/bb2ebc05-2a5f-46b5-bbd5-912e7a36dba0/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/bb2ebc05-2a5f-46b5-bbd5-912e7a36dba0/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "same message returns one run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/bb2ebc05-2a5f-46b5-bbd5-912e7a36dba0/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "visit remains awaiting human confirmation",
+      "passed": true
+    },
+    {
+      "name": "current structured review contract",
+      "passed": true
+    },
+    {
+      "name": "concrete visit has usable review",
+      "passed": true
+    },
+    {
+      "name": "explicit customer and contact preserved",
+      "passed": true
+    },
+    {
+      "name": "formal visits CRM and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "provider metadata stays private",
+      "passed": true
+    },
+    {
+      "name": "one pending visit artifact",
+      "passed": true
+    },
+    {
+      "name": "no human confirmation created",
+      "passed": true
+    },
+    {
+      "name": "one completed worker job without replay",
+      "passed": true
+    },
+    {
+      "name": "one receipt and answer",
+      "passed": true
+    },
+    {
+      "name": "one operation and real final provider success",
+      "passed": true
+    },
+    {
+      "name": "off uses original API only",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/adeef0c9-3646-4fd8-8c30-7021afbda382 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/bb2ebc05-2a5f-46b5-bbd5-912e7a36dba0/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read artifact",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "bb2ebc05-2a5f-46b5-bbd5-912e7a36dba0",
+    "run_id": "adeef0c9-3646-4fd8-8c30-7021afbda382",
+    "artifact_id": "16b3256d-3288-410c-a6dd-809b2c91c48e",
+    "job_id": "40ef6192-a379-4e2f-9c66-f4f45a2aae90"
+  },
+  "preflight_only": false,
+  "started_at": "2026-09-12T04:44:05.050180+00:00",
+  "formal_before_fingerprint": "857628dcaf4a6b7e91ceb101c67914e1ab44ecbf6145d8aa7874aa91f43113d2",
+  "input_fingerprint": "4dfc1031f957ac463442c9fe5f1b5e77ac94973843fdd461729781fd53ddbd9f",
+  "submitted_at": "2026-09-12T04:44:05.158033+00:00",
+  "elapsed_ms": 4047,
+  "status": "waiting_human",
+  "inference_route": null,
+  "attempts": [
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "adeef0c9-3646-4fd8-8c30-7021afbda382",
+      "dispatch_suppressed": null
+    }
+  ],
+  "passed": true,
+  "finished_at": "2026-09-12T04:44:09.252809+00:00"
+}

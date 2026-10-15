@@ -1,0 +1,14 @@
+{
+  "id": "01a09022-cb7b-7f33-8b58-410850ac1d8a",
+  "app_id": "31742010-cea6-48aa-a841-ba5ee1dcc57c",
+  "name": "销售智助-今日待办规划-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "42c4be5d8afc8ee3e5aeb76918466fc869be1a2b680d3e763d97cd187fc3c0f2",
+  "snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+  "url": "https://123.207.235.181/agents/01a09022-cb7b-7f33-8b58-410850ac1d8a/configure",
+  "authorized": true,
+  "dedicated_api_key_created": true,
+  "credential_in_evidence": false,
+  "api_service_enabled": true
+}

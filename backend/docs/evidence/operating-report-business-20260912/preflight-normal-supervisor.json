@@ -1,0 +1,46 @@
+{
+  "scenario": "normal-supervisor",
+  "account": "ZJ001",
+  "checks": [
+    {
+      "name": "RLS enforced",
+      "passed": true
+    },
+    {
+      "name": "exact approved identity",
+      "passed": true
+    },
+    {
+      "name": "facts use actual role and scope",
+      "passed": true
+    }
+  ],
+  "ids": {},
+  "preflight_only": true,
+  "started_at": "2026-09-12T07:19:52.648076+00:00",
+  "facts": {
+    "counts": {
+      "tasks": 32,
+      "visits": 78,
+      "risks": 31,
+      "opportunities": 85
+    },
+    "sha256": "0ceb2af33b65228cc6497716014826398683a67ec6e9108190d561e01397d407",
+    "json_bytes": 173866,
+    "scope_label": "直属团队"
+  },
+  "protected_before": {
+    "crm.customer": "53f11605076ac0436469ec570299fa1cd005ea7cf093e8ab770f2fde45928552",
+    "crm.opportunity": "86cb3ff8f01359c64d8b393290b8d696b2ebce0f5653cf6b06f469490667236d",
+    "activity.visit": "c7be11a3a681c90b8ad25e07f9187ae89c8fa9759c41e4201d1339d124bf75a2",
+    "workflow.task": "4c0b982e0c72c18abef5959de1429dbc233b905548f1c094f42b55b69188e527",
+    "workflow.task_assignee": "c9c1f5a51cf108e5d707002fc533807cd46f6758277edf877270f6c9913a4550",
+    "insight.risk": "d2b1e72d76257ad2b2e3f04a2e234d8e8a754be29356632816beec80ab0fc944",
+    "workflow.notification": "4e53a1c18841b1b3ad1e5c09f691fb8cdf54b070fb572d97c211e2ead9c121b2"
+  },
+  "passed": true,
+  "model_calls": 0,
+  "application_sessions": 0,
+  "business_writes": 0,
+  "finished_at": "2026-09-12T07:19:52.983453+00:00"
+}

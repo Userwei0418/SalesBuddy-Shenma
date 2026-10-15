@@ -1,0 +1,18 @@
+{
+  "id": "01a09022-cb7b-7f33-8b58-410850ac1d8a",
+  "app_id": "31742010-cea6-48aa-a841-ba5ee1dcc57c",
+  "name": "销售智助-今日待办规划-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": false,
+  "revision": "794415fd9b596cffb177eb0b32b4c3af9052f761469bb2c1855371f040838e75",
+  "snapshot_id": "01a09022-cb7d-7644-ae8e-d63bb9f24960",
+  "url": "https://123.207.235.181/agents/01a09022-cb7b-7f33-8b58-410850ac1d8a/configure",
+  "prompt_verified": true,
+  "model": "senseaudio-s2",
+  "tools": {
+    "dify_tools": [],
+    "cli_tools": []
+  },
+  "business_rule": "auto_own_pending_execution_backend_future_due",
+  "publication_authorized": false
+}

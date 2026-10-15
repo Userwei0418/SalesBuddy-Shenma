@@ -61,14 +61,20 @@ class MaterialStorage:
             ),
         )
 
-    async def prepare(self, actor, upload):
+    async def describe(self, actor, upload):
         profile = self.profile(self.default)
         digest = await file_io(self._hash, upload.path)
         key = str(upload.path) if profile["driver"] == "local" else f"{actor.workspace_id}/{upload.import_id}"
         if profile["driver"] == "s3":
             key = profile.get("prefix", "visits").strip("/") + "/" + key
-            await self._upload_s3(profile, upload.path, key)
         return {"profile": self.default, "driver": profile["driver"], "key": key, "sha256": digest}
+
+    async def prepare(self, actor, upload, *, location=None):
+        location = location or await self.describe(actor, upload)
+        profile = self.profile(location['profile'], location['driver'])
+        if profile['driver'] == 's3':
+            await self._upload_s3(profile, upload.path, location['key'])
+        return location
 
     @staticmethod
     def _hash(path):
@@ -78,6 +84,9 @@ class MaterialStorage:
     async def _upload_s3(self, profile, path, key):
         # Bounded originals (upload limit 100 MiB); network cancellation closes the client.
         content = await file_io(path.read_bytes)
+        await self._put_s3_content(profile, content, key)
+
+    async def _put_s3_content(self, profile, content, key):
         async with asyncio.timeout(120), self._client(profile) as client:
             await client.put_object(Bucket=profile["bucket"], Key=key, Body=content)
 
@@ -106,27 +115,36 @@ class MaterialStorage:
                     )
                     number += 1
 
-    async def read(self, database, actor, row):
+    async def read(self, database, actor, row, *, postgres_chunks=None):
         profile = self.profile(row.get("storage_profile", "legacy-local"), row.get("storage_driver", "local"))
         key = row.get("storage_key") or row["file_path"]
         if not 0 < row["file_size"] <= 100 * CHUNK_SIZE:
             raise ValueError("文件大小不正确")
         if profile["driver"] == "postgres":
-            async with database.transaction(actor, readonly=True) as connection:
-                # Ordered chunks avoid fetching binary content in ordinary list/detail queries.
-                chunks = bytearray()
-                index = 0
-                async for part in connection.cursor(
-                    "SELECT chunk_no,content FROM activity.visit_import_content "
-                    "WHERE import_id=$1::uuid ORDER BY chunk_no",
-                    str(row["id"]),
-                    prefetch=4,
-                ):
-                    if part["chunk_no"] != index or len(chunks) + len(part["content"]) > row["file_size"]:
+            async def current_chunks():
+                async with database.transaction(actor, readonly=True) as connection:
+                    async for part in connection.cursor(
+                        "SELECT chunk_no,content FROM activity.visit_import_content "
+                        "WHERE import_id=$1::uuid ORDER BY chunk_no",
+                        str(row["id"]),
+                        prefetch=4,
+                    ):
+                        yield part
+            # The optional reader is an internal, authenticated narrow SQL
+            # adapter for closed-company exports, never a request-supplied path.
+            parts = postgres_chunks() if postgres_chunks else current_chunks()
+            chunks = bytearray()
+            index = 0
+            try:
+                async for part in parts:
+                    if (part["chunk_no"] != index or not part["content"]
+                            or len(chunks) + len(part["content"]) > row["file_size"]):
                         raise ValueError("原始文件不完整，请联系运营")
                     chunks.extend(part["content"])
                     index += 1
-                content = bytes(chunks)
+            finally:
+                await parts.aclose()
+            content = bytes(chunks)
         elif profile["driver"] == "local":
             path = Path(key)
             if path.resolve().parent != Path(profile["root"]).resolve():

@@ -101,24 +101,24 @@ class AgentPromptBuilder:
         elif run.mode == "operating_report":
             blueprints = {
                 RoleCode.FDE: (
-                    "FDE个人协作即时总结",
+                    "FDE协作即时总结",
                     (
-                        ("safe_customers", "协作顺利的客户", "基于已参与商机与本人确认归档记录"),
+                        ("safe_customers", "协作顺利的客户", "基于授权可见的商机、拜访与协作事实"),
                         ("attention_customers", "需要协助的客户", "技术验证、客户反馈或待办阻塞"),
                         ("action_plan", "协作行动建议", "本人可执行事项与需要销售确认的事项分开"),
                     ),
                 ),
                 RoleCode.FDE_LEAD: (
-                    "FDE部门协作即时总结",
+                    "FDE负责人协作即时总结",
                     (
-                        ("safe_customers", "协作顺利的客户", "团队已参与项目的正向事实"),
+                        ("safe_customers", "协作顺利的客户", "授权范围内的正向协作事实"),
                         ("attention_customers", "需要协调的客户", "团队任务阻塞或协作资源缺口"),
-                        ("team_comparison", "团队协作概览", "本人归档记录、项目覆盖与任务情况"),
-                        ("action_plan", "部门协调建议", "部门安排与需要销售确认的事项分开"),
+                        ("team_comparison", "团队协作概览", "按实际人员与部门归属汇总可见记录、项目和任务"),
+                        ("action_plan", "协作协调建议", "协作安排与需要销售确认的事项分开"),
                     ),
                 ),
                 RoleCode.SALES: (
-                    "一线销售个人即时总结",
+                    "一线销售即时总结",
                     (
                         ("safe_customers", "安全客户", "推进健康、有明确下一步且风险可控"),
                         ("attention_customers", "需及时处理客户", "跟进停滞、任务逾期、商机临期或存在风险"),
@@ -126,22 +126,23 @@ class AgentPromptBuilder:
                     ),
                 ),
                 RoleCode.SUPERVISOR: (
-                    "销售主管个人与团队即时总结",
+                    "销售主管经营即时总结",
                     (
                         ("personal_safe_customers", "本人安全客户", "总监本人负责且推进健康"),
                         ("personal_attention_customers", "本人需及时处理客户", "总监本人需立即处理"),
-                        ("team_safe_customers", "团队安全客户", "直属团队推进健康"),
-                        ("team_attention_customers", "团队需及时处理客户", "团队停滞、逾期、临期或有风险"),
+                        ("team_safe_customers", "团队安全客户", "授权范围内其他人员负责且推进健康"),
+                        ("team_attention_customers", "团队需及时处理客户",
+                         "授权范围内其他人员负责且停滞、逾期、临期或有风险"),
                         ("action_plan", "AI行动方案", "本人行动、团队辅导与管理动作"),
                     ),
                 ),
                 RoleCode.MANAGER: (
-                    "销售总经理部门即时总结",
+                    "销售总经理经营即时总结",
                     (
-                        ("safe_customers", "部门安全客户", "部门内推进健康且风险可控"),
-                        ("attention_customers", "部门需及时处理客户", "重大商机停滞、逾期、临期或重大风险"),
+                        ("safe_customers", "安全客户", "授权范围内推进健康且风险可控"),
+                        ("attention_customers", "需及时处理客户", "重大商机停滞、逾期、临期或重大风险"),
                         ("team_comparison", "团队处置概览", "按团队比较待处理客户与任务执行情况"),
-                        ("action_plan", "AI部门行动方案", "跨团队协调、负责人、动作、期限和升级建议"),
+                        ("action_plan", "AI经营行动方案", "跨团队协调、负责人、动作、期限和升级建议"),
                     ),
                 ),
             }
@@ -258,10 +259,26 @@ class AgentPromptBuilder:
                 )
                 + "。若包含 required_output_receipt，必须将其字段逐字返回到输出JSON顶层。"
             )
+        general_analysis = (
+            run.mode in {"chatbi", "customer_chatbi", "operating_report"} and run.surface != "fde_profile"
+        )
+        if general_analysis:
+            system += (
+                "\n业务读取范围以后端facts.scope.business_read中的逐业务授权和selection筛选为准。"
+                "role、scope_type与team_ids是身份信息，不能据此把已提供的授权事实裁成仅本人或直属团队。"
+                "各资源的授权不同，不得将某项全公司可读外推为全部资源可读。"
+                "allowed=false表示缺少该类读取权限，空列表或零计数不能解释为该业务没有记录、没有风险或业绩为零。"
+                "selection.personal=true时仅分析本次已筛选的本人事实；其他范围按事实中的实际负责人、记录人和部门区分。"
+                "可读不代表可以写入或审批，输出仅作分析建议。"
+            )
         if run.actor.role in {RoleCode.FDE, RoleCode.FDE_LEAD}:
+            visit_scope_note = (
+                "拜访统计遵循本次业务授权范围，按实际记录人归属，不得把他人的记录归为本人。"
+                if general_analysis else "拜访统计只按本人创建并确认归档的记录。"
+            )
             system += (
                 "\n当前身份是FDE技术协作人员或负责人。参与商机的ACV、确收和回款为项目事实，"
-                "不得称为个人独占业绩或推断分成；拜访统计只按本人创建并确认归档的记录。"
+                f"不得称为个人独占业绩或推断分成；{visit_scope_note}"
                 "客户完整经营背景可供理解，但不能冒充本人的销售跟进。"
                 "仅给协作建议；阶段、金额、业绩、风险处置和销售建议采纳仍由有权销售人工处理。"
             )

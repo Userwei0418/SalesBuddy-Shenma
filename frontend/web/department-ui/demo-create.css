@@ -1,0 +1,15 @@
+/* Demo 场景：一张白卡，场景列表自己滚动，底部保存 */
+.department-ui[data-department-page="pages/demo-create/index"] { height: 100%; }
+.department-ui .ds-demo { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.department-ui .ds-demo-main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0; overflow: hidden; max-width: 960px; width: 100%; }
+.department-ui .ds-demo-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--ui-space-3); flex-wrap: wrap; padding: var(--ui-space-3) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-demo-head span { font-size: var(--ui-text-small); } .department-ui .ds-demo-head h2 { font-size: var(--ui-text-page); font-weight: 650; }
+.department-ui .ds-demo-body { flex: 1; min-height: 0; overflow: auto; padding: var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-3); align-items: flex-start; }
+.department-ui .ds-demo-body > .ant-btn { align-self: flex-start; }
+.department-ui .ds-demo-list { display: flex; flex-direction: column; gap: var(--ui-space-3); width: 100%; }
+.department-ui .ds-demo-scene { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); display: flex; flex-direction: column; gap: var(--ui-space-3); }
+.department-ui .ds-demo-scene header { display: flex; justify-content: space-between; align-items: center; } .department-ui .ds-demo-scene header b { font-weight: 600; }
+.department-ui .ds-demo-voice { margin-top: var(--ui-space-2); }
+.department-ui .ds-demo-copy { white-space: pre-wrap; line-height: 1.7; }
+.department-ui .ds-demo-error { color: var(--ui-danger); font-size: var(--ui-text-small); }
+.department-ui .ds-demo-bar { border-top: 1px solid var(--ui-line); }

@@ -49,12 +49,19 @@ def test_read_endpoints_derive_workspace_from_identity():
         async def fetchval(self, sql, *args):
             if "authorization_snapshot" in sql:
                 return permission_snapshot(actor, {"access.console": "workspace"})
+            if "organization_permission_roles" in sql:
+                return {"roles": [], "assignments": []}
             if "count(*)" in sql.lower():
                 return 0
             return {"must_change_password": False, "auth_method": "password"}
 
         async def fetch(self, sql, *args):
             return []
+
+        async def fetchrow(self, sql, *args):
+            assert "platform.workspace" in sql and "common.current_workspace_id()" in sql
+            assert args == (actor.workspace_id,)
+            return {"attributes": {}, "version_no": 1}
 
     app = FastAPI()
     app.include_router(accounts)
@@ -66,5 +73,6 @@ def test_read_endpoints_derive_workspace_from_identity():
     client = TestClient(app)
     result = client.get("/api/v1/console/organization?workspace_id=other").json()
     assert result["departments"] == [] and result["accounts"] == [] and len(result["roles"]) == 7
+    assert result["permission_roles"] == []
     assert client.get("/api/v1/console/audit").json() == {"items": [], "total": 0}
     assert client.get("/api/v1/console/audit?limit=501").status_code == 422

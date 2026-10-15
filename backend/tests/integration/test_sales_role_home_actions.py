@@ -6,6 +6,8 @@ archival use production implementations in the disposable PostgreSQL database.
 
 from uuid import uuid4
 
+from tests.integration.tenant_fixtures import active_foreign_workspace
+
 import asyncpg
 import pytest
 from tests.integration.feishu_fixtures import seed_fetchval
@@ -258,7 +260,7 @@ async def test_claim_rejects_inactive_or_foreign_actor_without_formal_writes(con
         await actor(connection, "ADMIN001")
         await connection.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1::uuid", subject.user_id)
     else:
-        subject = subject.model_copy(update={"workspace_id": str(uuid4())})
+        subject = subject.model_copy(update={"workspace_id": await active_foreign_workspace(connection)})
     await set_request_context(connection, subject)
     assert not await connection.fetchval("SELECT security.can_claim_customer($1::uuid)", customer["id"])
     with pytest.raises(asyncpg.InsufficientPrivilegeError):

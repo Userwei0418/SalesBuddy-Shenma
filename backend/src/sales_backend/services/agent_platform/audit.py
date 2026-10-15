@@ -15,6 +15,12 @@ from sales_backend.db import set_request_context
 from sales_backend.job_context import current_job_lease
 from sales_backend.observability import current_request_id
 from sales_backend.services.agent_business_rules import business_policy_metadata
+from sales_backend.services.agent_platform.authorization_snapshot import (
+    PermissionCheckedObserver,
+    for_inference,
+    from_facts,
+    recheck,
+)
 
 logger = logging.getLogger(__name__)
 SHAPE_FIELDS = frozenset(
@@ -24,6 +30,7 @@ SHAPE_FIELDS = frozenset(
         "detail",
         "action_plan",
         "rows",
+        "items", "source_line", "description",
         "metrics",
         "sections",
         "fields",
@@ -57,9 +64,13 @@ def result_shape(value, depth=0):
 
 
 class InferenceAudit:
-    def __init__(self, database, actor, operation_id, *, mode, run_id, facts, config):
+    def __init__(self, database, actor, operation_id, *, mode, run_id, facts, config, authorization_scope=None):
         self.database, self.actor, self.operation_id = database, actor, operation_id
         self.mode, self.run_id, self.config = mode, run_id, config
+        self.scope_snapshot = {
+            "data_scope": actor.data_scope.value, "team_ids": list(actor.team_ids),
+            "business_authorization": authorization_scope or from_facts(facts),
+        }
         if facts.get("company_policy"):
             policy = facts["company_policy"]
             self.config = {**config, "company_policy": {k: policy.get(k) for k in ("id", "code", "version", "source")}}
@@ -101,23 +112,23 @@ class InferenceAudit:
             self.run_id,
             lease.job_id if lease else None,
             request_id,
-            {"data_scope": self.actor.data_scope.value, "team_ids": list(self.actor.team_ids)},
+            self.scope_snapshot,
             self.config,
             self.input_summary,
         )
 
     async def finish(self, status, *, trace, error_code=None):
         await self._write(
-            """UPDATE agent.inference_operation SET status=$2,trace=$3::jsonb,events=$4::jsonb,
-               error_code=$5,completed_at=clock_timestamp() WHERE id=$1::uuid AND status='running'""",
+            """SELECT security.finish_inference_operation($1::uuid,$2,$3::jsonb,$4::jsonb,$5)""",
             self.operation_id,
             status,
             trace,
             self.events,
             error_code,
+            completion=True,
         )
 
-    async def _write(self, sql, *args):
+    async def _write(self, sql, *args, completion=False):
         if self.database is None:  # Pure routing tests use an explicit in-memory service.
             return
         try:
@@ -126,7 +137,19 @@ class InferenceAudit:
             async with asyncio.timeout(1):
                 async with self.database.connection() as connection:
                     async with connection.transaction():
-                        await set_request_context(connection, self.actor)
+                        if completion:
+                            # Finish only the receipt begun under this trusted
+                            # identity. Tenant suspension/permission revocation
+                            # must not prevent recording cancellation or failure.
+                            # This transaction contains no business operations.
+                            await connection.execute(
+                                """SELECT set_config('app.workspace_id',$1,true),
+                                   set_config('app.user_ref_id',$2,true),
+                                   set_config('app.role_code',$3,true)""",
+                                self.actor.workspace_id, self.actor.user_id, self.actor.role.value,
+                            )
+                        else:
+                            await set_request_context(connection, self.actor)
                         await connection.execute(sql, *args)
         except Exception:
             logger.exception(
@@ -143,6 +166,7 @@ async def audit_original(*, database, actor, mode, facts, model, invoke, validat
     policy = (execution_policy or {}).get("definition") or {}
     budget = policy.get("total_seconds") if policy.get("override_budget") else None
     operation_id = str(uuid4())
+    authorization_scope = await for_inference(database, actor, facts)
     audit = InferenceAudit(
         database,
         actor,
@@ -150,6 +174,7 @@ async def audit_original(*, database, actor, mode, facts, model, invoke, validat
         mode=mode,
         run_id=run_id,
         facts=facts,
+        authorization_scope=authorization_scope,
         config={"platform_enabled": False, "direct_model": model, "routing_reason": "platform_not_selected",
                 "execution_policy": execution_policy or {},
                 **({"platform_seconds": 0, "total_seconds": budget} if budget is not None else {})},
@@ -158,13 +183,18 @@ async def audit_original(*, database, actor, mode, facts, model, invoke, validat
     status, error = "failed", None
     trace = {"operation_id": operation_id, "provider": None, "fallback_reason": None}
     try:
+        await recheck(database, actor, authorization_scope)
         audit.event("route_started", "senseaudio")
         async with asyncio.timeout(budget):
             result = await invoke(
-                DatabaseModelObserver(database, actor, mode, operation_id=operation_id, run_id=run_id)
+                PermissionCheckedObserver(
+                    DatabaseModelObserver(database, actor, mode, operation_id=operation_id, run_id=run_id),
+                    lambda: recheck(database, actor, authorization_scope),
+                )
             )
         audit.event("output_received", "senseaudio", shape=result_shape(result))
         result = validate(result)
+        await recheck(database, actor, authorization_scope)
         audit.event("contract_accepted", "senseaudio")
         status = "accepted"
         trace.update(provider="senseaudio", model_ref=model, elapsed_ms=round((monotonic() - audit.started) * 1000))

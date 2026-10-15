@@ -1,0 +1,36 @@
+{
+  "candidate_commit": "7b2c6b95a292a4f524e8e6b27735be877a0a1a7a",
+  "runtime_commit": "3465f56f59460d241cd45e1a2360f1baedb21edd",
+  "non_database_tests": {
+    "passed": 614,
+    "duration_seconds": 3.54,
+    "database_tests_skipped": 131
+  },
+  "additional_operator_tests": {
+    "passed": 8
+  },
+  "isolated_postgres_tests": {
+    "passed": 131,
+    "duration_seconds": 8.34,
+    "provider_http": "synthetic",
+    "rls_bypass": false
+  },
+  "first_pg_attempt": {
+    "passed": 113,
+    "failed": 18,
+    "cause": "New test snapshot incorrectly sorted task_assignee by nonexistent id; fixed to composite key; runtime unchanged"
+  },
+  "verified_source_files": 419,
+  "ruff_changed_files": "passed",
+  "ruff_all_src": "91 existing unrelated lint findings; not auto-fixed",
+  "deployed": false,
+  "platform_published": false,
+  "live_provider_calls": 0,
+  "production_business_writes": 0,
+  "runtime_snapshot_verified": false,
+  "temporary_databases": 0,
+  "temporary_roles": 0,
+  "production_current_release": "agent-today-20260912-163707d",
+  "api_worker_healthy": true,
+  "preflight_cases": 6
+}

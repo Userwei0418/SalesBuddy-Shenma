@@ -1,0 +1,16 @@
+{
+  "actor": "OPSADMIN",
+  "database_role": "sales_runtime",
+  "exports": [{
+    "id": "18967",
+    "occurred_at": "2026-09-12 14:30:21.259034+00:00",
+    "actor_role_code": "administrator",
+    "result_code": "success",
+    "path": "/api/v1/console/ai/runs/export",
+    "status": "200",
+    "export_count": "1",
+    "filters": {"period": "month", "outcome": "accepted"}
+  }],
+  "company_custom_versions": [],
+  "browser_local_file_verified": false
+}

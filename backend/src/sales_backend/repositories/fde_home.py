@@ -23,7 +23,7 @@ async def fde_home(connection, actor):
               AND security.fde_user_is_active(p.user_ref_id)))
         SELECT (SELECT count(*) FROM personal_projects WHERE status='open') AS open_opportunities,
           (SELECT count(*) FROM insight.risk r WHERE r.deleted_at IS NULL
-            AND r.status IN ('new','pending','in_progress','escalated')
+            AND r.status <> 'resolved'
             AND EXISTS(SELECT 1 FROM personal_projects p WHERE p.id=r.opportunity_id)) AS open_risks""",
         actor.user_id,
     )

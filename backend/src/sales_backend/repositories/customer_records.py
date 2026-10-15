@@ -54,7 +54,7 @@ async def related_records(connection, customer_id, *, opportunity_id=None):
             FROM insight.risk
             WHERE customer_id = $1::uuid AND deleted_at IS NULL
               AND ($2::uuid IS NULL OR opportunity_id=$2::uuid)
-            ORDER BY CASE WHEN status IN ('new','pending','in_progress','escalated') THEN 0 ELSE 1 END,
+            ORDER BY CASE WHEN status <> 'resolved' THEN 0 ELSE 1 END,
                      opened_at DESC,id
             """,
         customer_id,

@@ -1,0 +1,45 @@
+{
+  "account": "XS001",
+  "actor_id": "02000000-0000-0000-0000-000000000004",
+  "customer_id": "1b127c42-c436-470f-a6dc-876de6586d53",
+  "customer_name": "【演示】字段验收-422815",
+  "approval_status": "approved",
+  "preflight_verified": true,
+  "allowed_effects": [
+    "create visit_entry conversation, input, run and pending artifact",
+    "no human confirmation or formal archival; no CRM mutation"
+  ],
+  "planned_cases": [
+    [
+      "normal",
+      "regular"
+    ],
+    [
+      "normal",
+      "first"
+    ],
+    [
+      "normal",
+      "review"
+    ],
+    [
+      "normal",
+      "poor"
+    ],
+    [
+      "off",
+      "regular"
+    ],
+    [
+      "blocked",
+      "review"
+    ],
+    [
+      "production",
+      "regular"
+    ]
+  ],
+  "preflight_at": "2026-09-12T03:51:56.302465+00:00",
+  "approval_source": "User in current thread: 同意授权 继续",
+  "approval_date": "2026-09-12"
+}

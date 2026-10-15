@@ -6,7 +6,7 @@
   <t-icon wx:else name="chevron-down" size="32rpx" class="sb-lselect-arrow" />
 </view>
 <root-portal>
-  <t-picker visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" bind:cancel="onCancel" bind:confirm="onConfirm">
+  <t-picker wx:if="{{open}}" data-picker-epoch="{{pickerEpoch}}" visible="{{open}}" title="{{title || label}}" value="{{pickerValue}}" cancel-btn="取消" confirm-btn="确定" bind:cancel="onCancel" bind:confirm="onConfirm" bind:close="onClose">
     <t-picker-item options="{{columns}}" />
   </t-picker>
 </root-portal>

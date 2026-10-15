@@ -4,9 +4,9 @@ import asyncio
 import importlib.util
 import json
 import os
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 from uuid import uuid4
 
 import asyncpg
@@ -23,7 +23,7 @@ async def main():
         raise SystemExit(
             "This check only runs inside the disposable GitHub CI environment"
         )
-    settings = {"host": "127.0.0.1", "user": "postgres"}
+    settings = {"host": "127.0.0.1", "user": "postgres", "port": int(os.environ.get("PGPORT", "5432"))}
     admin = await asyncpg.connect(database="postgres", **settings)
     name = "shenma_provision_ci_" + uuid4().hex[:12]
     created = False
@@ -37,12 +37,13 @@ async def main():
             )
         await admin.execute(f'CREATE DATABASE "{name}" TEMPLATE template0')
         c = await asyncpg.connect(database=name, **settings)
-        await migrate(c)
+        await migrate(c, through_version=125)
         await admin.execute(
             "CREATE ROLE shenma_runtime NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS"
         )
         created = True
         await c.execute((ROOT / "deployment/runtime-grants.sql").read_text())
+        await migrate(c)
         spec = importlib.util.spec_from_file_location(
             "customer_bootstrap", ROOT / "deployment/bootstrap-customer.py"
         )

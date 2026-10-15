@@ -3,7 +3,7 @@
   "navigationBarBackgroundColor": "#F3F5F9",
   "navigationBarTextStyle": "black",
   "usingComponents": {
-    "fde-visit-opportunity": "../../components/fde-visit-opportunity/index",
+    "visit-opportunity-selector": "../../components/visit-opportunity-selector/index",
     "sb-summary-card": "/ui/sb/sb-summary-card/index",
     "sb-search": "/ui/sb/sb-search/index",
     "sb-segmented": "/ui/sb/sb-segmented/index",

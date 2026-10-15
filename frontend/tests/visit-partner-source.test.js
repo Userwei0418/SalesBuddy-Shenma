@@ -96,9 +96,9 @@ test('迟到表单及隐藏输入事件不能改写当前商机或未关联伙�
 
 test('只读商机及FDE选择复用接口伙伴，不借用手工输入或旧表单',async()=>{
   const h=setup();await flush();h.page.data.isFde=true;h.page.data.canEditOpportunity=false;
-  h.page.fdeOpportunityChanged({detail:{opportunity:first,verified:true}});
+  h.page.setData({opportunityOptions:[{id:'',name:'不关联商机'},first]});h.page.selectOpportunity({detail:{value:1}});
   assert.equal(h.page.data.linkedPartnerName,'伙伴甲');assert.equal(snapshot.fields(h.page.data).partner_name,'伙伴甲');
-  h.page.fdeOpportunityChanged({detail:{opportunity:{...second,sales_channel:'direct',partner_name:null},verified:true}});
+  h.page.setData({opportunityOptions:[{id:'',name:'不关联商机'},{...second,sales_channel:'direct',partner_name:null}]});h.page.selectOpportunity({detail:{value:1}});
   assert.equal(snapshot.fields(h.page.data).partner_name,'直销');
 });
 

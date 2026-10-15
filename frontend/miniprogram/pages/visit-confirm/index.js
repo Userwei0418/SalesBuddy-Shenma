@@ -8,12 +8,16 @@
 const { scoreLight } = require('../../utils/statusLight');
 const api = require("../../utils/apiClient");
 const access = require("../../utils/access");
-const {draftScope} = require("../../utils/draftScope");
+const {adviceAllowed,adviceState}=require('../../utils/businessAdviceState');
+const customerSearch = require('../../utils/visitCustomerSearch');
+const writes = require('../../utils/pageWriteContext').createPageWriteContext(()=>getApp().globalData.session);
+const visitDraft = require("../../utils/visitDraft");
 const flow = require("../../utils/visitFlow");
 const snapshot = require("../../utils/visitSnapshot");
 const dates = require("../../utils/visitDates");
 const firstVisit = require("../../utils/visitFirstVisit");
-const opportunityAI = flow;
+const opportunityAI = require('../../utils/visitOpportunityAI');
+const opportunityAmount = require('../../utils/opportunityAmount');
 
 function visitTargetType(value) {
   return ["伙伴", "partner"].includes(String(value || "").toLowerCase()) ? "伙伴" : "客户";
@@ -22,7 +26,7 @@ function visitTargetType(value) {
 Page({
   data: {
     flowVersion: 1, flowStep: "edit", sourceRunId: "", summary: "", reviewPayload: null, pendingReviewId: "",
-    analysisPhrase: "正在分析这份拜访记录…", advice: null, adviceBusy: false, adviceError: "", showAdvice: false,
+    analysisPhrase: "正在分析这份拜访记录…", advice: null, adviceStatus:'idle',adviceBusy: false, adviceError: "", showAdvice: false,
     values: {},
     linkedPartnerName: '',
     core: [],
@@ -32,13 +36,14 @@ Page({
     customerQuery: "",
     customers: [],
     searching: false,
+    customerSearchError:'',customerSearchDone:false,
     customerConfirmed: false,
     opportunityOptions: [{ id: "", name: "不关联商机" }],
     opportunityIndex: 0,
     opportunityQuery: "", opportunityItems: [], opportunityLoading: false, opportunityError: "",
     opportunityHasMore: false, opportunityNextOffset: 0, opportunityPickerOpen: false, opportunityResolveError: "",
     opportunityPendingId: "", opportunityPendingOption: null, opportunityDrafts: {},
-    selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null, fdeOpportunityVerified:false,
+    selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null,
     opportunityAIRecognized: false, opportunityAIHint: "",
     collaboratorIds: [],
     colleagues: [],
@@ -81,25 +86,32 @@ Page({
     contactRoleIndex: 0,
   },
   onLoad(options = {}) {
+    this.draftReady = false; this.draftReadFailed = false;
     this.confirmOptions = options;
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'visit-confirm', options)) return;
     if (!getApp().ensureLogin()) return;
+    this.writeIdentity=access.identity(getApp().globalData.session);this.loadGeneration=(this.loadGeneration||0)+1;this.adviceReadSerial=(this.adviceReadSerial||0)+1;
+    const load=writes.capture(this,()=>this.loadGeneration);
     this.setData({isFde:require('../../utils/access').assignedVisitOnly(getApp().globalData.session)});
     this.confirmInitialized = true;
     this.closed = false;
-    this.userKey = draftScope(getApp().globalData.session);
+    this.userKey = visitDraft.scope(getApp().globalData.session, api);
     this.loadBusinessOptions();
     this.setData({ recorderName: getApp().globalData.session.userName });
-    this.draftKey = `visitConfirmV2:${this.userKey}`;
+    this.draftContext = visitDraft.context(options);
+    this.draftKey = options.visitId ? visitDraft.key("visitSupplementV1", this.userKey, encodeURIComponent(options.visitId))
+      : visitDraft.key("visitConfirmV2", this.userKey, this.draftContext);
+    this.setData({draftNotice:"",draftSaveError:"",draftSavedAt:0,draftConflict:false});
+    try { this.draftStore = visitDraft.open(wx, this.draftKey); }
+    catch (_) { this.draftReadFailed = true; this.setData({draftSaveError:"草稿读取失败，请保留此页面并重新打开后重试"}); }
     if (!this.data.isFde) api
       .request({ path: "/directory/colleagues" })
       .then((r) => {
+        if(!load.current())return;
         this.allColleagues = r.items || r;
         this.refresh();
       })
-      .catch((e) =>
-        this.setData({ errorText: `协同人加载失败：${e.message}` }),
-      );
+      .catch((e) => {if(load.current())this.setData({ errorText: `协同人加载失败：${e.message}` });});
     if (options.visitId) {
       this.setData({
         editing: true,
@@ -109,6 +121,7 @@ Page({
       api
         .request({ path: `/visits/${options.visitId}` })
         .then((r) => {
+          if(!load.current())return;
           this.setData({
             values: firstVisit.normalizeValues(r, firstVisit.enabled(r)),
             isFirstVisit: firstVisit.enabled(r),
@@ -121,15 +134,26 @@ Page({
             version: r.version_no,
             busy: false,
           });
+          this.editSavedSignature = JSON.stringify([this.data.values, this.data.collaboratorIds]);
+          const saved = this.draftStore && this.draftStore.value;
+          if (saved && saved.visitId === options.visitId && saved.customerId === r.customer_id) {
+            this.setData({values:saved.values,collaboratorIds:saved.collaboratorIds || [],version:saved.version,
+              draftNotice:"已恢复本条跟进未提交的补充信息",draftConflict:saved.version !== r.version_no});
+            if (this.data.draftConflict) this.setData({draftSaveError:"这条跟进已被更新，草稿仍保留。请核对后放弃旧草稿并重新编辑"});
+          }
+          this.draftReady = true;
           this.refresh();
         })
-        .catch((e) => this.fail(e));
+        .catch((e) => {if(load.current())this.fail(e);});
       return;
     }
-    const source = wx.getStorageSync(`visitStructuredV2:${this.userKey}`) || {};
-    const storedDraft = wx.getStorageSync(this.draftKey);
+    let source = {};
+    try { source = wx.getStorageSync(visitDraft.key("visitStructuredV2", this.userKey, this.draftContext)) || {}; }
+    catch (_) { this.draftReadFailed = true; this.setData({draftSaveError:"草稿读取失败，请重新打开后重试"}); }
+    const storedDraft = this.draftStore && this.draftStore.value;
     const draft = storedDraft && (!source.draftId || storedDraft.draftId === source.draftId) ? storedDraft : null;
     this.entryDraftId = source.draftId || "";
+    if (draft) this.setData({draftNotice:"已恢复上次未提交的跟进草稿"});
     const result = source.result || {};
     const restored = flow.restoreReview(source, draft);
     if(restored.flowStep==='analyzing')restored.flowStep='edit';
@@ -154,8 +178,13 @@ Page({
         isFirstVisit,
         values: draft ? values : dates.withDefaultDates(values),
     });
-    if(this.data.isFde)this.setData({reviewedOpportunityId:draft ? draft.reviewedOpportunityId || "" : source.opportunityId || "",opportunityId:restored.opportunityId || source.opportunityId || "",fdeOpportunityVerified:false,opportunityEditing:false,opportunityDraft:null,opportunityAIRecognized:false,opportunityAIHint:""});
+    // A saved empty selection is intentional; never revive the entry's old ID.
+    this.setData({opportunityId:draft ? draft.opportunityId || "" : source.opportunityId || "",selectedOpportunity:null});
+    if(this.data.isFde) {this.aiOpportunitySuggestion=null;this.setData({opportunityEditing:false,opportunityDraft:null,opportunityAIRecognized:false,opportunityAIHint:""});}
+    const optionsForRestore=this.opportunityOptionsFor([]);
+    this.setData({opportunityOptions:optionsForRestore,opportunityIndex:Math.max(0,optionsForRestore.findIndex(row=>row.id===this.data.opportunityId))});
     this.refresh();
+    this.draftReady = true;
     // Persist the actual defaults once so reopening after midnight keeps this visit's dates.
     if (!draft) this.persist();
     if (!this.data.customerConfirmed) this.searchCustomers();
@@ -172,13 +201,20 @@ Page({
   onShow() {
     if (this.confirmOptions && !this.confirmInitialized) return this.onLoad(this.confirmOptions);
     if(typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this,"visit-confirm",this.data.editing?{visitId:this.data.visitId}:{}))return;
+    if(this.writeIdentity!==undefined && this.writeIdentity!==access.identity(getApp().globalData.session)){
+      this.preparing=false;this.allColleagues=undefined;clearInterval(this.analysisTimer);clearTimeout(this.searchTimer);
+      this.invalidateOpportunityReads();
+      this.setData({busy:false,adviceBusy:false,advice:null,adviceStatus:'idle',adviceError:'',showAdvice:false,archived:false,values:{},reviewPayload:null,quality:null,reviewRunId:'',reviewedContent:'',
+        collaboratorsOpen:false,colleagueQuery:'',colleagues:[],collaboratorIds:[],collaboratorNames:'',customers:[],searching:false,
+        selectedOpportunity:null,opportunityItems:[],opportunityDrafts:{},opportunityDraft:null,opportunityPendingId:'',opportunityPendingOption:null,opportunityPickerOpen:false});
+      return this.onLoad(this.confirmOptions || {});
+    }
     const resume=this.closed;this.closed=false;
-    if(!this.data.isFde && this.data.archived && this.data.advice)this.reloadAdvice();
-    if(resume && !this.data.isFde && !this.data.editing && this.data.customerConfirmed)this.loadOpportunities();
-    if(this.data.isFde && !this.data.editing && this.selectComponent){const picker=this.selectComponent("#fdeVisitOpportunity");if(picker)picker.checkSelection(true);}
+    if(!this.data.isFde && this.data.archived)this.reloadAdvice();
+    if(resume && !this.data.editing && !this.data.archived){if(this.data.customerConfirmed)this.loadOpportunities();else this.searchCustomers();}
   },
-  onHide() { this.closed=true;this.closeOpportunityPicker();this.invalidateOpportunityReads(); },
-  onUnload() { this.unloaded=true;clearInterval(this.analysisTimer);clearTimeout(this.searchTimer);this.onHide(); },
+  onHide() { this.persist();this.closed=true;clearTimeout(this.searchTimer);this.searchSerial=(this.searchSerial||0)+1;this.adviceReadSerial=(this.adviceReadSerial||0)+1;this.setData({searching:false,...(!(this.pageWrites&&this.pageWrites.advice)?{adviceBusy:false}: {})});this.closeOpportunityPicker();this.invalidateOpportunityReads(); },
+  onUnload() { this.onHide();this.unloaded=true;clearInterval(this.analysisTimer);clearTimeout(this.searchTimer); },
   refresh() {
     const d = this.data;
     // Reconcile restored selections only after the current directory has loaded.
@@ -241,16 +277,20 @@ Page({
   refreshGate() {
     const reviewStale = !this.data.reviewedContent ||
       snapshot.signature(this.data) !== this.data.reviewedContent;
-    const opportunityUnverified = !this.data.isFde && !this.data.editing && (this.data.opportunityResolveError ||
-      (this.data.opportunityId && this.data.opportunityId !== "__new__" && !this.data.selectedOpportunity));
-    const blockReason = opportunityUnverified ? "请先核对关联商机，或明确选择不关联商机" : this.data.isFde && !this.data.editing && (!this.data.opportunityId || !this.data.fdeOpportunityVerified)
-      ? "请选择并确认本人参与的商机" : flow.archiveBlockReason({ ...this.data, reviewStale });
+    const blockReason = this.opportunityNeedsResolution()
+      ? "请先核对关联商机，或明确选择不关联商机" : flow.archiveBlockReason({ ...this.data, reviewStale });
     this.setData({ reviewStale, blockReason, canSubmit: !blockReason, linkedPartnerName: snapshot.partnerName(this.data) });
   },
   persist() {
-    if (this.data.editing || this.data.archived) return;
+    if (!this.draftReady || this.unloaded || this.data.archived || this.draftReadFailed || !this.draftKey) return false;
+    if(this.userKey && this.userKey!==visitDraft.scope(getApp().globalData.session, api))return false;
     const d = this.data;
-    wx.setStorageSync(this.draftKey, {
+    try {
+      if (!this.draftStore) this.draftStore = visitDraft.open(wx, this.draftKey);
+      if (d.editing && JSON.stringify([d.values, d.collaboratorIds]) === this.editSavedSignature &&
+          !this.draftStore.hasValue() && this.draftStore.current()) return true;
+      this.draftStore.write(d.editing ? {visitId:d.visitId,customerId:d.customerId,version:d.version,
+        values:d.values,collaboratorIds:d.collaboratorIds,savedAt:Date.now()} : {
       draftId:this.entryDraftId || "",
       values: d.values,
       customerId: d.customerId,
@@ -274,12 +314,27 @@ Page({
       reviewedOpportunityId: d.reviewedOpportunityId,
       sourceImportId: d.sourceImportId,
       isFirstVisit: d.isFirstVisit,
+      savedAt:Date.now(),
     });
+      this.setData({draftSavedAt:Date.now(),...(d.draftConflict ? {} : {draftSaveError:""})});
+      return true;
+    } catch(error) {
+      this.setData({draftSaveError:["DRAFT_CHANGED","DRAFT_STORAGE_PENDING","DRAFT_STORAGE_CONFLICT"].includes(error.code) ? error.message : "草稿未能保存，请保留此页面后重试"});
+      return false;
+    }
+  },
+  discardSavedDraft() {
+    if (!this.data.editing || this.data.busy || !this.draftStore) return;
+    wx.showModal({title:"放弃这条跟进的本地草稿？",content:"未提交的补充信息将清除，重新加载已保存的跟进。",confirmText:"放弃草稿",success: result => {
+      if (!result.confirm || this.userKey !== visitDraft.scope(getApp().globalData.session, api)) return;
+      try { this.draftStore.remove(); this.draftReady=false; this.onLoad(this.confirmOptions); }
+      catch(error) {this.setData({draftSaveError:error.message || "草稿清除失败，请重试"});}
+    }});
   },
   fail(e) {
     this.setData({ busy: false, errorText: e.message || String(e) });
     this.refresh();
-    wx.showToast({ title: this.data.errorText, icon: "none", duration: 3500 });
+    if(!this.closed && !this.unloaded)wx.showToast({ title: this.data.errorText, icon: "none", duration: 3500 });
   },
   inputField(e) {
     const key = e.currentTarget.dataset.key;
@@ -313,17 +368,19 @@ Page({
   },
   inputCustomer(e) {
     if (this.data.busy) return;
+    this.searchSerial=(this.searchSerial||0)+1;
     this.setData({opportunityDrafts:{},opportunityPendingId:"",opportunityPendingOption:null});
     this.invalidateOpportunityReads();
     this.setData({opportunityQuery:"",opportunityItems:[],opportunityHasMore:false,opportunityNextOffset:0,opportunityError:"",opportunityResolveError:"",opportunityPickerOpen:false});
     this.setData({
-      customerQuery: e.detail.value,
+      customerQuery: customerSearch.query(e.detail.value),
+      customers:[],searching:true,customerSearchError:'',customerSearchDone:false,
       customerConfirmed: false,
       customerId: "",
       customerName: "",
       customerType: this.data.customerType || "客户",
       opportunityId: "",
-      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null, fdeOpportunityVerified:false,
+      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null,
       opportunityAIRecognized: false, opportunityAIHint: "",
       opportunityIndex: 0,
       opportunityOptions: [{ id: "", name: "不关联商机" }],
@@ -335,21 +392,28 @@ Page({
     this.persist();
   },
   searchCustomers() {
-    const query = this.data.customerQuery.trim();
-    this.setData({ searching: true });
-    api
-      .listCustomers({ q: query, scope: this.data.isFde ? "self" : "company", pageSize: 100 })
+    if(this.data.busy)return;
+    clearTimeout(this.searchTimer);
+    const query = customerSearch.query(this.data.customerQuery).trim(),serial=this.searchSerial=(this.searchSerial||0)+1;
+    const context=writes.capture(this,()=>[this.loadGeneration,this.data.customerQuery.trim()]);
+    const current=()=>serial===this.searchSerial && context.visible();
+    const session=getApp().globalData.session;this.customerSearchIdentity=access.identity(session);
+    this.setData({ searching: true,customers:[],customerSearchError:'',customerSearchDone:false,isFde:access.assignedVisitOnly(session) });
+    return customerSearch.list(api,session,{q:query,pageSize:100})
       .then((r) => {
-        if (this.closed || query !== this.data.customerQuery.trim()) return;
-        this.setData({ customers: r.items || [], searching: false });
+        if (!current()) return;
+        if(!r || !Array.isArray(r.items))throw Error('客户列表响应不完整');
+        this.setData({ customers: r.items, searching: false,customerSearchDone:true });
       })
       .catch((e) => {
-        this.setData({ searching: false });
-        this.fail(e);
+        if(!current())return;
+        this.setData({ searching: false,customers:[],customerSearchError:customerSearch.errorMessage(e),customerSearchDone:false });
       });
   },
+  retryCustomerSearch(){return this.searchCustomers();},
   chooseCustomer(e) {
-    if (this.data.busy) return;
+    if (this.data.busy || this.data.searching) return;
+    if(this.customerSearchIdentity!==undefined && this.customerSearchIdentity!==access.identity(getApp().globalData.session))return;
     this.setData({opportunityDrafts:{},opportunityPendingId:"",opportunityPendingOption:null});
     this.invalidateOpportunityReads();
     this.setData({opportunityQuery:"",opportunityItems:[],opportunityHasMore:false,opportunityNextOffset:0,opportunityError:"",opportunityResolveError:"",opportunityPickerOpen:false});
@@ -357,14 +421,16 @@ Page({
       (c) => c.id === e.currentTarget.dataset.id,
     );
     if (!customer) return;
+    clearTimeout(this.searchTimer);this.searchSerial=(this.searchSerial||0)+1;
     this.setData({
       customerId: customer.id,
       customerName: customer.name,
       customerQuery: customer.name,
       customerConfirmed: true,
       customers: [],
+      searching:false,customerSearchError:'',customerSearchDone:false,
       opportunityId: "",
-      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null, fdeOpportunityVerified:false,
+      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null,
       opportunityAIRecognized: false, opportunityAIHint: "",
       opportunityIndex: 0,
       errorText: "",
@@ -383,7 +449,7 @@ Page({
       customerId: "",
       customerType: this.data.customerType || "客户",
       opportunityId: "",
-      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null, fdeOpportunityVerified:false,
+      selectedOpportunity: null, opportunityEditing: false, opportunityDraft: null,
       opportunityAIRecognized: false, opportunityAIHint: "",
       opportunityIndex: 0,
       opportunityOptions: [{ id: "", name: "不关联商机" }],
@@ -392,11 +458,13 @@ Page({
     this.persist();
     this.searchCustomers();
   },
-  fdeOpportunityChanged(e) {
-    const row=e.detail.opportunity;
-    this.setData({fdeOpportunityVerified:e.detail.verified===true, opportunityEditing:false, opportunityDraft:null,
-      ...(row?{opportunityId:row.id,selectedOpportunity:row,opportunityOptions:[{id:"",name:"请选择商机"},row],opportunityIndex:1}:e.detail.cleared?{opportunityId:"",selectedOpportunity:null,opportunityOptions:[{id:"",name:"请选择商机"}],opportunityIndex:0}:{})});
-    this.refresh(); this.persist();
+  canMutateOpportunity() { return !this.data.isFde && this.data.canEditOpportunity !== false; },
+  opportunityNeedsResolution() {
+    if (this.data.editing) return false;
+    const id=this.data.opportunityId || "";
+    if (id==='__new__') return !this.canMutateOpportunity();
+    return Boolean((this.data.opportunityResolveError && (id || this.aiOpportunitySuggestion)) ||
+      (id && (!this.data.selectedOpportunity || this.data.selectedOpportunity.id!==id)));
   },
   opportunityIdentity() { return typeof getApp === "function" ? access.identity(getApp().globalData.session) : ""; },
   invalidateOpportunityReads() {
@@ -411,11 +479,10 @@ Page({
       options.push({id:this.data.opportunityId,name:"已关联商机（待核对）",unverified:true});
     const pending=this.data.opportunityPickerOpen&&this.data.opportunityPendingOption;
     if(pending&&pending.id&&pending.id!=="__new__"&&!options.some(row=>row.id===pending.id))options.push(pending);
-    if(this.data.canEditOpportunity!==false)options.push({id:"__new__",name:"本次拜访产生新商机"});
+    if(this.canMutateOpportunity())options.push({id:"__new__",name:"本次拜访产生新商机"});
     return options;
   },
   async loadOpportunities({more=false,search=false}={}) {
-    if(this.data.isFde) {this.setData({fdeOpportunityVerified:false,opportunityEditing:false,opportunityDraft:null});this.refresh();return;}
     const id=this.data.customerId;if(!id || this.closed || (more && (this.data.opportunityLoading || !this.data.opportunityHasMore)))return;
     const identity=this.opportunityIdentity(),seq=this._opportunitySeq=(this._opportunitySeq||0)+1;
     const current=()=>!this.closed && seq===this._opportunitySeq && id===this.data.customerId && identity===this.opportunityIdentity();
@@ -425,7 +492,7 @@ Page({
     this.setData({opportunityLoading:true,opportunityError:"",opportunityFailedMore:false,...(initial?{opportunityResolveError:"正在核对商机关联"}:{})});
     this.refresh();
     try {
-      // Same personal opportunity scope as before; following a company customer does not grant its history.
+      // Candidate reads are not write authorization; every submission is validated by the server.
       const result=await api.listOpportunities({customerId:id,pageSize:20,includeClosed:true,query,offset});
       if(!current())return;
       if(!result || !Array.isArray(result.items) || result.items.length>20 || typeof result.has_more!=="boolean" ||
@@ -436,7 +503,7 @@ Page({
       if(initial){
         // A requested ID is retained while its lookup is pending; it is not a manual choice.
         // Explicit selection consumes the suggestion in selectOpportunity, successful resolution here.
-        const pendingSuggestion=this.data.canEditOpportunity!==false?this.aiOpportunitySuggestion:null;
+        const pendingSuggestion=this.canMutateOpportunity()?this.aiOpportunitySuggestion:null;
         const suggestion=pendingSuggestion && (!this.data.opportunityId ||
           String(pendingSuggestion.opportunityId||"")===String(this.data.opportunityId))?pendingSuggestion:null;
         const wanted=this.data.opportunityId || (suggestion&&suggestion.opportunityId) || "";
@@ -461,7 +528,7 @@ Page({
         const selectedId=wanted || (suggestion&&suggestion.hasContent?(selected?selected.id:"__new__"):"");
         const applySuggestion=Boolean(suggestion&&suggestion.hasContent&&!this.data.opportunityDraft);
         this.setData({opportunityId:selectedId,selectedOpportunity:selected,
-          opportunityEditing:this.data.canEditOpportunity!==false&&Boolean(selectedId),
+          opportunityEditing:this.canMutateOpportunity()&&Boolean(selectedId),
           opportunityDraft:applySuggestion?opportunityAI.formFromSuggestion(selected,suggestion):this.data.opportunityDraft,
           opportunityAIRecognized:applySuggestion||this.data.opportunityAIRecognized,opportunityResolveError:"",
           opportunityAIHint:applySuggestion?(selected?`AI 已匹配已有商机“${selected.name}”，请核对识别字段`:"AI 已识别到新商机信息，请核对并补齐必填项"):this.data.opportunityAIHint});
@@ -476,7 +543,7 @@ Page({
     }} finally {if(current()){this.setData({opportunityLoading:false});this.refresh();}}
   },
   toggleOpportunityPicker() {
-    if(this.data.busy||this.data.archived||this.data.isFde||this.data.editing||!this.data.customerConfirmed)return;
+    if(this.data.busy||this.data.archived||this.data.editing||!this.data.customerConfirmed)return;
     if(this.data.opportunityPickerOpen)return this.closeOpportunityPicker();
     const id=this.data.opportunityId||"";
     this.setData({opportunityPickerOpen:true,opportunityPendingId:id,
@@ -512,9 +579,9 @@ Page({
     const index = Number(e.detail.value);
     const selected = this.data.opportunityOptions[index];
     if(!selected || selected.unverified)return;
-    if(selected.id==='__new__'&&this.data.canEditOpportunity===false)return;
+    if(selected.id==='__new__'&&!this.canMutateOpportunity())return;
     const currentId=this.data.opportunityId||"";
-    if(selected.id===currentId&&(!currentId||currentId==='__new__'||this.data.selectedOpportunity)){
+    if(selected.id===currentId&&!this.data.opportunityResolveError&&!this.aiOpportunitySuggestion&&(!currentId||currentId==='__new__'||this.data.selectedOpportunity)){
       this.closeOpportunityPicker();return;
     }
     const drafts={...this.data.opportunityDrafts};
@@ -525,7 +592,7 @@ Page({
       opportunityDrafts:drafts,opportunityDraft: selected.id&&drafts[selected.id]?JSON.parse(JSON.stringify(drafts[selected.id])):null,
       opportunityIndex: index, opportunityId: selected.id,
       selectedOpportunity: selected.id && selected.id !== '__new__' ? selected : null,
-      opportunityEditing: this.data.canEditOpportunity !== false && Boolean(selected.id), opportunityAIRecognized: false, opportunityAIHint: "" });
+      opportunityEditing: this.canMutateOpportunity() && Boolean(selected.id), opportunityAIRecognized: false, opportunityAIHint: "" });
     this.refresh();this.persist();
   },
   changeOpportunityForm(e) {
@@ -576,8 +643,7 @@ Page({
     this.persist();
   },
   saveDraft() {
-    this.persist();
-    wx.showToast({ title: "草稿已保存", icon: "success" });
+    if (this.persist()) wx.showToast({ title: "草稿已保存", icon: "success" });
   },
   backToEdit() {
     if(this.data.busy)return;
@@ -593,19 +659,24 @@ Page({
   },
   async review() {
     if(this.data.busy || this.preparing)return;
+    if(this.persist() === false)return;
     if(!this.data.customerConfirmed)return this.fail('请先确认关联客户');
-    if(this.data.isFde && (!this.data.opportunityId || !this.data.fdeOpportunityVerified))return this.fail('请选择并确认本人参与的商机');
+    if(this.opportunityNeedsResolution())return this.fail('请先核对关联商机，或明确选择不关联商机');
     let fields=snapshot.fields(this.data);
     const missing=[...flow.CORE,...flow.REQUIRED_DETAILS].find(f=>!fields[f.key]);
     if(missing)return this.fail(`请补充${missing.label}`);
     const firstMissing=firstVisit.missingField(fields);
     if(firstMissing)return this.fail(`首次拜访请补充${firstMissing.label}`);
     if(!this.data.sourceRunId)return this.fail('请返回录入页重新整理原文');
-    this.preparing=true;
+    const write=writes.begin(this,'review',()=>[this.data.customerId,this.data.sourceRunId,this.entryDraftId || '']);if(!write)return;
+    const prepareSignature=snapshot.signature(this.data);
+    this.preparing=write;
     let mutation;
     try {mutation=!this.data.isFde && this.data.opportunityEditing ? await this.selectComponent('#visitOpportunityForm').prepare() : null;}
-    catch(error){this.preparing=false;return this.fail(error);}
-    this.preparing=false;
+    catch(error){if(this.preparing===write)this.preparing=false;if(write.current())this.fail(error);write.finish();return;}
+    if(this.preparing===write)this.preparing=false;
+    if(!write.visible()){write.finish();return;}
+    if(prepareSignature!==snapshot.signature(this.data)){write.finish();return this.fail('内容已变化，请重新质检');}
     fields=snapshot.fields(this.data);
     const signature=snapshot.signature(this.data);
     const payload={customer_id:this.data.customerId,opportunity_id:this.data.opportunityId && this.data.opportunityId!=='__new__'?this.data.opportunityId:null,
@@ -617,49 +688,68 @@ Page({
     let id=same?this.data.pendingReviewId:'';
     this.setData({reviewPayload:payload,quality:null,reviewRunId:'',reviewedContent:'',pendingReviewId:id});
     this.startAnalysis();this.persist();
+    const analysisTimer=this.analysisTimer;
     try {
       if(!id){const accepted=await api.submitVisitStage('quality',payload);id=accepted.run_id;
-        if(this.unloaded)return;this.setData({pendingReviewId:id});this.persist();}
+        if(!write.current())return;this.setData({pendingReviewId:id});this.persist();}
       const run=await api.waitVisitRun(id);
-      if(this.unloaded)return;
+      if(!write.current())return;
       if(signature!==snapshot.signature(this.data))throw Error('内容已变化，请重新质检');
       const result=run.result || {}, quality=result.quality_review;
       if(result.visit_stage!=='quality' || !quality || !Number.isInteger(quality.follow_up_score))throw Error('质检没有返回有效评分，请重试');
       this.setData({quality,busy:false,flowStep:'result',pendingReviewId:'',reviewRunId:id,reviewedContent:signature});
       this.refresh();this.persist();
     } catch(error) {
-      if(this.unloaded)return;
-      this.setData({flowStep:'edit',pendingReviewId:error.code==='RUN_TIMEOUT'?id:''});
+      if(!write.current())return;
+      // Keep the accepted run through transport/read failures; changed content is separated by reviewPayload.
+      this.setData({flowStep:'edit',pendingReviewId:['failed','cancelled'].includes(error.runStatus)?'':id});
       this.fail(error);this.persist();
-    } finally {clearInterval(this.analysisTimer);}
+    } finally {clearInterval(analysisTimer);write.finish('busy');}
   },
   async archive() {
     this.refreshGate();
     if(!this.data.canSubmit || this.data.busy)return;
-    this.opportunityMutation=this.data.reviewPayload.opportunity_mutation;
-    wx.showModal({
+    const confirmation=writes.begin(this,'archiveConfirm',()=>[this.data.customerId,this.data.reviewRunId,snapshot.signature(this.data),this.data.reviewPayload,this.data.selectedOpportunity]);if(!confirmation)return;
+    try {
+      const mutation=this.data.reviewPayload.opportunity_mutation;
+      const assessment=mutation ? await opportunityAmount.assess(api,mutation,this.data.selectedOpportunity) : {mutation:null,required:false,content:''};
+      if(!confirmation.visible()){confirmation.finish();return;}
+      wx.showModal({
       title: "确认并归档这次拜访？",
-      content: `客户：${this.data.customerName}\n商机：${this.opportunityMutation ? this.opportunityMutation.name : (this.data.opportunityOptions[this.data.opportunityIndex] || {name:"不关联商机"}).name}\n请确认以上关联与拜访内容准确。`,
+      content: `客户：${this.data.customerName}\n商机：${mutation ? mutation.name : (this.data.opportunityOptions[this.data.opportunityIndex] || {name:"不关联商机"}).name}\n${assessment.required ? assessment.content+'\n' : ''}请确认以上关联与拜访内容准确。`,
       confirmText: "确认归档",
       success: (r) => {
-        if (r.confirm) this.submitArchive();
+        if(confirmation.started)return;
+        if (r.confirm && confirmation.visible() && confirmation.start()) this.submitArchive(opportunityAmount.acknowledged(assessment));
+        confirmation.finish();
       },
-    });
+      fail:()=>confirmation.finish(),
+      });
+    } catch(error) {
+      if(confirmation.current())this.setData({errorText:error.message || '金额核对失败，请重试保存'});
+      confirmation.finish();
+    }
   },
-  submitArchive() {
+  submitArchive(confirmedMutation) {
     if (this.data.archived || !this.data.canSubmit || this.data.busy) return;
+    if (this.persist() === false) return;
+    const write=writes.begin(this,'archive',()=>[this.data.customerId,this.data.reviewRunId,this.entryDraftId || '']);if(!write)return;
+    const customerId=this.data.customerId,payload=JSON.parse(JSON.stringify(this.data.reviewPayload));
+    payload.opportunity_mutation=confirmedMutation || opportunityAmount.cleanMutation(payload.opportunity_mutation);
+    const reviewRunId=this.data.reviewRunId,userKey=this.userKey,draftKey=this.draftKey,entryDraftId=this.entryDraftId;
     this.setData({ busy: true, errorText: "" });
     this.refresh();
     api
-      .createVisit(this.data.customerId, {
-        ...this.data.reviewPayload.fields,
-        opportunity_id:this.data.reviewPayload.opportunity_id,
-        _opportunity_mutation:this.data.reviewPayload.opportunity_mutation,
-        collaborator_ids:this.data.reviewPayload.collaborator_ids,
-        source_import_id:this.data.reviewPayload.source_import_id,
-        _quality_review_run_id:this.data.reviewRunId,
-      }, this.data.reviewPayload.fde_participant_ids || [])
+      .createVisit(customerId, {
+        ...payload.fields,
+        opportunity_id:payload.opportunity_id,
+        _opportunity_mutation:payload.opportunity_mutation,
+        collaborator_ids:payload.collaborator_ids,
+        source_import_id:payload.source_import_id,
+        _quality_review_run_id:reviewRunId,
+      }, payload.fde_participant_ids || [])
       .then((r) => {
+        if(!write.current())return;
         this.setData({
           archived: true,
           visitId: r.id,
@@ -671,38 +761,43 @@ Page({
         });
         this.refresh();
         try {
-          const currentEntry = wx.getStorageSync(`visitEntryV2:${this.userKey}`);
-          const sameAction = !this.entryDraftId || !currentEntry || currentEntry.draftId === this.entryDraftId;
-          if (sameAction) [
-            this.draftKey,
-            `visitEntryV2:${this.userKey}`,
-            `visitStructuredV2:${this.userKey}`,
-            `visitStructureRun:${this.userKey}`,
-          ].forEach((k) => wx.removeStorageSync(k));
+          if (this.draftStore && !this.draftStore.current()) throw Error("草稿已在其他页面更新");
+          visitDraft.removeAction(wx, [draftKey, ...["visitEntryV2", "visitStructuredV2", "visitStructureRun"]
+            .map(prefix => visitDraft.key(prefix, userKey, this.draftContext))], entryDraftId);
         } catch (_) {
           this.setData({archiveWarning:"记录已保存，本地草稿清理失败，请勿重复提交。"});
         }
         if(!this.data.isFde)this.loadAdvice();
-        wx.setNavigationBarTitle({ title: "拜访已归档" });
+        if(write.visible())wx.setNavigationBarTitle({ title: "拜访已归档" });
       })
-      .catch((e) => this.fail(e));
+      .catch((e) => {if(write.current())this.fail(e);}).finally(()=>write.finish('busy'));
   },
   async loadAdvice() {
-    if(this.data.isFde || this.data.adviceBusy || !this.data.archived)return;
-    const retry=Boolean(this.data.adviceError);
+    if(this.data.isFde || this.data.adviceBusy || !this.data.archived || !adviceAllowed(getApp().globalData.session,'visit',true))return;
+    if(['queued','running'].includes(this.data.adviceStatus))return this.reloadAdvice();
+    const write=writes.begin(this,'advice',()=>this.data.visitId);if(!write)return;
+    const visitId=this.data.visitId;this.adviceReadSerial=(this.adviceReadSerial||0)+1;
+    const retry=Boolean(this.data.adviceError || ['ready','stale'].includes(this.data.adviceStatus));
     this.setData({showAdvice:true,adviceBusy:true,adviceError:''});
-    try {const result=await api.queryBusinessAdvice('visit',this.data.visitId,'tasks',retry);
-      if(!this.unloaded)this.setData({advice:result});}
-    catch(error){if(!this.unloaded)this.setData({adviceError:'记录已保存，待办建议生成失败：'+(error.message || '请重试')});}
-    finally {if(!this.unloaded)this.setData({adviceBusy:false});}
+    try {const result=await api.requestBusinessAdvice('visit',visitId,'tasks',retry);
+      const state=adviceState(result,'visit',visitId,'tasks');
+      if(write.current())this.setData({advice:result,adviceStatus:state.status,adviceError:state.error || ''});}
+    catch(error){if(write.current())this.setData({advice:null,adviceStatus:'error',adviceError:'记录已保存，待办建议生成未确认：'+(error.message || '请重试')});}
+    finally {write.finish('adviceBusy');}
   },
   async reloadAdvice() {
-    if(this.data.isFde || !this.data.advice)return;
-    try{const result=await api.getBusinessAdvice(this.data.advice.id);if(!this.unloaded)this.setData({advice:result});}
-    catch(error){if(!this.unloaded)this.setData({adviceError:error.message});}
+    if(this.data.isFde || !this.data.archived || this.data.adviceBusy || !adviceAllowed(getApp().globalData.session,'visit'))return;
+    const visitId=this.data.visitId;
+    const read=writes.capture(this,()=>this.data.visitId),serial=this.adviceReadSerial=(this.adviceReadSerial||0)+1;
+    const current=()=>serial===this.adviceReadSerial && read.current();
+    this.setData({adviceBusy:true,advice:null,adviceStatus:'idle',adviceError:''});
+    try{const result=await api.getLatestBusinessAdvice('visit',visitId,'tasks');const state=adviceState(result,'visit',visitId,'tasks',{allowEmpty:true});
+      if(current())this.setData({advice:result,adviceStatus:state.status,adviceError:state.error || ''});}
+    catch(error){if(current())this.setData({advice:null,adviceStatus:'error',adviceError:error.message});}
+    finally{if(current())this.setData({adviceBusy:false});}
   },
   closeAdvice(){this.adviceTouch=null;this.setData({showAdvice:false});},
-  openAdvice(){if(!this.data.isFde)this.setData({showAdvice:true});},
+  openAdvice(){if(!this.data.isFde){this.setData({showAdvice:true});this.reloadAdvice();}},
   startAdviceDrag(e){this.adviceTouch=e.touches.length===1 ? e.touches[0] : null;},
   endAdviceDrag(e){
     const start=this.adviceTouch, end=e.changedTouches && e.changedTouches[0];
@@ -712,7 +807,10 @@ Page({
   cancelAdviceDrag(){this.adviceTouch=null;},
   stopAdviceTap(){},
   saveSupplement() {
-    if (this.data.busy) return;
+    if (this.data.busy || this.data.draftConflict) return;
+    if (this.persist() === false) return;
+    const write=writes.begin(this,'supplement',()=>[this.data.visitId,this.data.customerId]);if(!write)return;
+    const visitId=this.data.visitId;
     const body = {
       version_no: this.data.version,
       ...(this.data.isFde ? {} : {collaborator_ids: this.data.collaboratorIds}),
@@ -731,16 +829,23 @@ Page({
     this.setData({ busy: true, errorText: "" });
     api
       .request({
-        path: `/visits/${this.data.visitId}`,
+        path: `/visits/${visitId}`,
         method: "PATCH",
         data: body,
       })
       .then((r) => {
+        if(!write.current())return;
         this.setData({ version: r.version_no, values: r, busy: false });
+        this.editSavedSignature = JSON.stringify([this.data.values, this.data.collaboratorIds]);
+        try {
+          if (this.draftStore) this.draftStore.remove();
+          this.draftStore = visitDraft.open(wx, this.draftKey);
+          this.setData({draftNotice:"",draftSavedAt:0,draftSaveError:""});
+        } catch (_) {this.setData({draftSaveError:"补充信息已保存，另一页面的草稿已保留，请勿重复提交"});}
         this.refresh();
-        wx.showToast({ title: "补充信息已保存", icon: "success" });
+        if(write.visible())wx.showToast({ title: "补充信息已保存", icon: "success" });
       })
-      .catch((e) => this.fail(e));
+      .catch((e) => {if(write.current())this.fail(e);}).finally(()=>write.finish('busy'));
   },
   openVisit() {
     const {customerId,visitId}=this.data;

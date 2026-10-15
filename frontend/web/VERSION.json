@@ -1,0 +1,31 @@
+{
+  "artifact_kind": "web_frontend_delivery",
+  "web_version": "1.1.0-web.2",
+  "mini_program_version": "1.1.0",
+  "frontend_revision": "4d9491637dbb785c09b5c904b57ad509dcf6ea83",
+  "release_label": "Web 对齐当前小程序主线，移除周报 Demo",
+  "pages": 27,
+  "business_pages": 26,
+  "components": 16,
+  "shared_source_files": 272,
+  "delivery_date": "2026-09-29",
+  "distribution": "adapted_local_candidate",
+  "dependencies_upgraded": false,
+  "backend_api": "/api/v1",
+  "backend_transport_verified": true,
+  "backend_transport_scope": "Public GET /api/v1/health/ready only",
+  "live_contract_semantic_match": null,
+  "business_authentication_verified": false,
+  "live_business_workflows_verified": false,
+  "real_company_mutations_tested": false,
+  "reported_backend": {
+    "revision": "b925708f0d3b18d9ddcfe42745e9d6a6176ba071",
+    "database": "V195",
+    "evidence": "Supplied package metadata, not independently verified on live server"
+  },
+  "weekly_report": "removed_from_web_scope",
+  "local_crm_data_included": false,
+  "credentials_included": false,
+  "verification_document": "docs/cloud/upgrade-110/验证记录.md",
+  "adaptation_note": "Rebased publishable Mini Program assets to current phone-login, task/follow-up and opportunity-filter commits; removed weekly-report Demo entry points."
+}

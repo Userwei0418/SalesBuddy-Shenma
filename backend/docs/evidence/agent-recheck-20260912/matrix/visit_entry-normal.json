@@ -1,0 +1,195 @@
+{
+  "capability": "visit_entry",
+  "case": "normal",
+  "started_at": "2026-09-12T09:18:05.286764+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "2abe010ab311eda2a63634c42ac548e31cb50557ce5f59309957777a64ab150d",
+    "bytes": 49,
+    "fields": {
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "1b27c0a5-8028-4de0-8168-70ecde0b3bae",
+    "provider": "senseaudio",
+    "fallback_reason": "TimeoutError",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 14489,
+    "platform_run": {
+      "execution_mode": "filtered_facts",
+      "expected_snapshot_id": "01a093e9-eb31-7c35-a3e8-4409a374b967",
+      "actual_snapshot_id": null,
+      "runtime_snapshot_verified": false,
+      "tool_authority_issued": false,
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "test_fault_injected": false,
+      "network_dispatch_suppressed": false,
+      "transport": {
+        "http_status": 200,
+        "request_started_ms": 0,
+        "headers_received_ms": 10610,
+        "first_body_byte_ms": 10610,
+        "first_data_event_ms": null,
+        "first_text_ms": null,
+        "stream_completed_ms": null
+      }
+    }
+  },
+  "result": {
+    "sha256": "082d9a38ec0607eb9f66597890613c5aacc5bbe5f5fa37dd9080d280556398f8",
+    "bytes": 1422,
+    "fields": {
+      "fields": {
+        "type": "dict",
+        "count": 18
+      },
+      "summary": {
+        "type": "str"
+      },
+      "quality_review": {
+        "type": "dict",
+        "count": 4
+      },
+      "prompt_version": {
+        "type": "str"
+      },
+      "missing_fields": {
+        "type": "list",
+        "count": 0
+      }
+    }
+  },
+  "elapsed_ms": 14490,
+  "validation": [
+    {
+      "input": {
+        "sha256": "ebac98174c6b9cdc99e041ce8af189b7e8ee91593d352103d16a45535d651b79",
+        "bytes": 1346,
+        "fields": {
+          "fields": {
+            "type": "dict",
+            "count": 18
+          },
+          "summary": {
+            "type": "str"
+          },
+          "quality_review": {
+            "type": "dict",
+            "count": 3
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "082d9a38ec0607eb9f66597890613c5aacc5bbe5f5fa37dd9080d280556398f8",
+        "bytes": 1422,
+        "fields": {
+          "fields": {
+            "type": "dict",
+            "count": 18
+          },
+          "summary": {
+            "type": "str"
+          },
+          "quality_review": {
+            "type": "dict",
+            "count": 4
+          },
+          "prompt_version": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 0
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "9571286a-5885-4520-bda7-2ab464002b3e",
+      "provider": "agent_platform",
+      "operation_id": "1b27c0a5-8028-4de0-8168-70ecde0b3bae",
+      "model": "agent:01a09022-c06d-7ac3-b863-8a1345b069ae",
+      "attempt": 1,
+      "status": "cancelled",
+      "started_at": "2026-09-12T09:18:05.300809+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09022-c06d-7ac3-b863-8a1345b069ae",
+        "expected_snapshot_id": "01a093e9-eb31-7c35-a3e8-4409a374b967",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 614,
+        "input_sha256": "6421f9ac3b99286895ad9da99da7eaa1939ec9ebc251fd6fe9f845f342e1096b",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": false,
+        "network_dispatch_suppressed": false
+      },
+      "error_type": "CancelledError",
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:18:17.289981+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": 200,
+          "request_started_ms": 0,
+          "headers_received_ms": 10610,
+          "first_body_byte_ms": 10610,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "81bd41b1-d108-4b29-b1b0-a4ca9d221fd9",
+      "provider": "senseaudio",
+      "operation_id": "1b27c0a5-8028-4de0-8168-70ecde0b3bae",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:18:17.303464+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:18:19.775797+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a093e9-eb31-7c35-a3e8-4409a374b967",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": false,
+    "network_dispatch_suppressed": false,
+    "transport": {
+      "http_status": 200,
+      "request_started_ms": 0,
+      "headers_received_ms": 10610,
+      "first_body_byte_ms": 10610,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import {state, api, dialog, details, esc, statuses, date} from './core.js';
+import {state, api, dialog, details, esc, statuses, date, hasPermission, requirePermission} from './core.js';
 import {customerProfileDetails} from './customer-profile.js';
 
 let generation = 0;
@@ -13,20 +13,23 @@ const historyRow = (kind, item) => kind === 'ownership' ? {
 };
 
 export async function showCustomerDetail(id, onOpportunities, onEdit) {
+  requirePermission('customer.read');
   const serial = ++generation, identity = JSON.stringify(state.actor), page = state.page;
   const current = () => serial === generation && identity === JSON.stringify(state.actor) && page === state.page;
   const pendingDialog = document.querySelector('#dialog'), pendingContent = pendingDialog.innerHTML;
   const customer = await api(`/customers/${encodeURIComponent(id)}/overview`);
   if (!current() || document.querySelector('#dialog') !== pendingDialog || pendingDialog.innerHTML !== pendingContent) return;
   const ownership = customer.ownership || {};
+  const canEdit=hasPermission('customer.update') && customer.can_update===true && onEdit;
+  const canOpenOpportunities=hasPermission('opportunity.read') && onOpportunities;
   const sections = ['ownership', 'claims'];
   dialog(`客户档案 · ${customer.name}`, customerProfileDetails(customer) + '<h3>客户归属</h3>' + details([
     ['认领状态', statuses[ownership.state]], ['当前认领人', ownership.owner_name || '尚未认领'],
   ]) + sections.map(kind => `<section data-customer-history="${kind}"><h3>${kind === 'ownership' ? '认领与交接记录' : '审批记录'}</h3><div data-history-body>正在加载…</div></section>`).join(''), {
     wide: true,
-    footer: '<button type="button" data-detail-opportunities>关联商机</button>' + (onEdit ? '<button type="button" class="primary" data-detail-edit>编辑资料</button>' : ''),
+    footer: (canOpenOpportunities ? '<button type="button" data-detail-opportunities>关联商机</button>' : '') + (canEdit ? '<button type="button" class="primary" data-detail-edit>编辑资料</button>' : ''),
     afterRender(d) {
-      if (onEdit) d.querySelector('[data-detail-edit]').onclick = async () => {
+      if (canEdit) d.querySelector('[data-detail-edit]').onclick = async () => {
         if (!current()) return;
         const button = d.querySelector('[data-detail-edit]');
         button.disabled = true;
@@ -34,8 +37,9 @@ export async function showCustomerDetail(id, onOpportunities, onEdit) {
         catch (error) { if (current() && d.open) d.querySelector('.form-error').textContent = error.message; }
         finally { button.disabled = false; }
       };
-      d.querySelector('[data-detail-opportunities]').onclick = () => {
+      if (canOpenOpportunities) d.querySelector('[data-detail-opportunities]').onclick = () => {
         if (!current()) return;
+        requirePermission('opportunity.read');
         d.close();
         onOpportunities(id);
       };

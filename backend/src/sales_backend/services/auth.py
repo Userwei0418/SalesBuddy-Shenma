@@ -7,7 +7,7 @@ from datetime import UTC, datetime, timedelta
 from sales_backend.auth.models import ActorResponse, SessionResponse
 from sales_backend.auth.tokens import SessionReference, TokenService
 from sales_backend.config import Settings
-from sales_backend.db import Database, set_request_context
+from sales_backend.db import Database, TenantInactive, set_request_context
 from sales_backend.domain.capabilities import permission_version, role_capabilities
 from sales_backend.repositories.identity import (
     ROLE_NAMES,
@@ -54,13 +54,13 @@ class AuthService:
                     client={**client, "channel": "wechat-mini-program"},
                 )
                 effective = await capability_snapshot(connection, record.context)
+                effective.update(await self.repository.company_identity(connection, record.context.workspace_id))
         response = self._response(record, issued)
         return response.model_copy(update={"actor": response.actor.model_copy(update=effective)})
 
     async def refresh(
         self, refresh_token: str, *, require_password: bool = False,
         expected_session: SessionReference | None = None,
-        expected_channel: str | None = None,
     ) -> SessionResponse:
         new_refresh_token = secrets.token_urlsafe(48)
         new_refresh = self.tokens.hash_refresh_token(new_refresh_token)
@@ -89,12 +89,8 @@ class AuthService:
                 credentials = await PasswordRepository().session_credentials(connection, refreshed.session_id)
                 if require_password and credentials.get("auth_method") != "password":
                     raise AuthenticationFailed("password session is required")
-                if expected_channel and credentials.get("client_channel") != expected_channel:
-                    raise AuthenticationFailed("session surface mismatch")
-                if expected_channel == "business_web":
-                    from sales_backend.services.authorization import require_permission
-                    await require_permission(connection, "access.business_web")
                 effective = await capability_snapshot(connection, refreshed.actor.context)
+                effective.update(await self.repository.company_identity(connection, refreshed.actor.context.workspace_id))
                 session = self._response(refreshed.actor, issued)
                 # Do not commit rotation until every required response read succeeds.
                 result = session.model_copy(update={
@@ -139,7 +135,14 @@ class AuthService:
                         audit_identity = (refreshed.actor, refreshed.session_id)
                         targets.add(actual)
                 if audit_identity:
-                    await set_request_context(connection, audit_identity[0].context)
+                    try:
+                        async with connection.transaction():
+                            await set_request_context(connection, audit_identity[0].context)
+                    except TenantInactive:
+                        # Platform suspension already revokes company sessions. A
+                        # signed logout must still clear the browser credentials;
+                        # it must not establish a business/audit actor afterwards.
+                        audit_identity = None
                 for reference in sorted(targets, key=lambda ref: ref.session_id):
                     await self.repository.revoke_identified_session(connection, reference)
         return audit_identity

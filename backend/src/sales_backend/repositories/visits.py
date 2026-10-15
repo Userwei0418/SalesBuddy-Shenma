@@ -181,6 +181,9 @@ class VisitRepository:
             v.status,v.expectation_code,v.follow_up_score,v.duration_minutes,v.interaction_mode_code,
             v.partner_name_snapshot,v.contact_name_snapshot,v.partner_id::text,
             v.original_recorder_name,manager.display_name AS manager_name,
+            v.recording_role_code_snapshot,v.recording_team_id_snapshot::text,
+            CASE WHEN v.import_meta->>'import_type'='crm_history' THEN 'crm_history'
+            WHEN v.recording_role_code_snapshot IS NOT NULL THEN 'recorded' ELSE 'unknown' END AS record_source,
             COALESCE((SELECT jsonb_agg(jsonb_build_object('id',linked.id::text,'name',linked.name)
               ORDER BY linked.name,linked.id) FROM activity.visit_opportunity vo
               JOIN crm.opportunity linked ON linked.id=vo.opportunity_id AND linked.deleted_at IS NULL
@@ -217,7 +220,11 @@ class VisitRepository:
         if not row:
             raise LookupError("拜访记录不存在或不可见")
         item = dict(row)
+        recording = {name: item.get(name) for name in
+                     ('recording_role_code_snapshot', 'recording_team_id_snapshot', 'record_source')}
         item.update(json_value(item.get("first_visit_profile")) or {})
+        # Form/profile JSON cannot replace the immutable database provenance.
+        item.update(recording)
         return visit_date_fields(item)
 
     async def supplement(self, connection, actor, visit_id, data):
@@ -248,6 +255,8 @@ class VisitRepository:
             raise ValueError("仅跟进人可以补充本次记录")
         if data.get("version_no") != row["version_no"]:
             raise ValueError("记录已更新，请刷新后再补充")
+        from sales_backend.services.growth_triggers import visit_model_content
+        competency_before = await visit_model_content(connection, actor, visit_id)
         columns = {
             "partner_name": "partner_name_snapshot",
             "contact_name": "contact_name_snapshot",
@@ -330,4 +339,8 @@ class VisitRepository:
                 connection, actor, customer_id=result["customer_id"],
                 trigger_type="visit.supplemented", trigger_id=visit_id,
             )
+            from sales_backend.services.growth_triggers import enqueue_visit_review
+            competency_after = await visit_model_content(connection, actor, visit_id)
+            if competency_after is not None and competency_before != competency_after:
+                await enqueue_visit_review(connection, actor, result, trigger_type="visit.supplemented")
         return result

@@ -1,0 +1,52 @@
+{
+  "observed_at": "2026-09-11T20:46:39.133184+00:00",
+  "ssh_alias": "sales-demo",
+  "ssh_host": "8.219.182.227",
+  "ssh_port": 22,
+  "ssh_result": "connection timed out",
+  "ssh_exit_code": 255,
+  "https_url": "https://www.ericepc.com/api/v1/health/ready",
+  "https_result": "connection timed out after 5 seconds",
+  "curl_exit_code": 28,
+  "remote_test_started": false,
+  "fifth_deployment_performed": false,
+  "interpretation": "Unreachable from this workstation; not proof that the remote services are down",
+  "local_default_docker_daemon": "not running",
+  "last_rechecked_at": "2026-09-11T21:00:35.694189+00:00",
+  "local_postgres_install": {
+    "formula": "postgresql@16",
+    "options": [
+      "--skip-post-install",
+      "--skip-link"
+    ],
+    "result": "cancelled after stalled download connection",
+    "exit_code": 130,
+    "processes_confirmed_exited": true,
+    "database_started": false,
+    "download_connection_state": "SYN_SENT"
+  },
+  "ssh_last_exit_code": 255,
+  "curl_last_exit_code": 28,
+  "latest_revalidation": {
+    "ssh_exit_code": 255,
+    "business_https_exit_code": 28,
+    "github_https_exit_code": 28,
+    "postgres_binaries_available": false,
+    "docker_daemon_available": false,
+    "live_dependency_processes": false,
+    "result": "same connectivity blocker; fifth database and business validation cannot proceed"
+  },
+  "current_status": "business_server_reachable_github_still_unreachable",
+  "recovery": {
+    "observed_at": "2026-09-12T03:54:54.777350+00:00",
+    "user_confirmed_network_adjusted": true,
+    "local_interface": "en0",
+    "ssh_success": true,
+    "business_ready": true,
+    "api_worker_active": true,
+    "release": "agent-risk-20260912-47956c7-r2",
+    "github_https_exit_code": 128,
+    "vault_github_ssh_exit_code": 128,
+    "fifth_deployment_performed": false
+  }
+}

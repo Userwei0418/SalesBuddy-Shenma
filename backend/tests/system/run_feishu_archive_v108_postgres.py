@@ -48,6 +48,9 @@ async def main(version=108):
             # entirely enforced by the actual V108/V117 policies under test.
             await connection.execute("CREATE OR REPLACE FUNCTION security.authorization_refresh() RETURNS void "
                                      "LANGUAGE sql AS 'SELECT NULL::void'")
+            await connection.execute("CREATE OR REPLACE FUNCTION security.workspace_module_enabled(uuid,text) RETURNS boolean "
+                                     "LANGUAGE sql STABLE SECURITY DEFINER SET search_path=pg_catalog AS "
+                                     "'SELECT EXISTS(SELECT 1 FROM platform.workspace WHERE id=$1 AND status=''active'' AND deleted_at IS NULL)'")
             return result
 
         async def verify(config, name, role):

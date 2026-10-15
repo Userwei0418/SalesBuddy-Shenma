@@ -1,4 +1,4 @@
-import {api, dialog, esc, details, state, date} from './core.js';
+import {api, dialog, esc, details, state, date, requirePermission} from './core.js';
 
 const labels = {passed:'通过',failed:'未通过',not_tested:'未执行',running:'测试中',unavailable:'暂不可测试',unknown:'未取得完成回执'};
 export function connectivityResult(result) {
@@ -29,12 +29,14 @@ export function bindConnectivityTests(root) {
       if(busy || !current())return;
       busy=true;retry.disabled=true;output.textContent='正在测试，请稍候…';
       try {
+        requirePermission('ai.config_test');
         if(settled)requestId=crypto.randomUUID();
         let result=await api(`/api/v1/admin/ai-connectivity/${kind}/${target}/tests`,{method:'POST',body:{request_id:requestId}});
         for(let attempt=0;result.status==='running' && attempt<30 && current();attempt++){
           output.textContent=result.message;
           await new Promise(resolve=>setTimeout(resolve,2000));
           if(!current())return;
+          requirePermission('ai.config_test');
           result=await api(`/api/v1/admin/ai-connectivity/tests/${requestId}`);
         }
         if(!current())return;

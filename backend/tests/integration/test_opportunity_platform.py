@@ -1,7 +1,6 @@
 """Actual RLS facts, candidate persistence and explicit confirmation; synthetic HTTP."""
 
 import json
-from contextlib import asynccontextmanager
 from dataclasses import replace
 from datetime import date
 from uuid import uuid4
@@ -21,6 +20,7 @@ from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.agent_run import handler as business
 from sales_backend.services.idempotency import execute_mutation
 from sales_backend.services.opportunities import save_opportunity
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.test_fde_facts_runtime import Chunks, frame
 from tests.test_opportunity_platform import ANSWER, configured
 
@@ -53,12 +53,7 @@ async def test_agent_only_saves_candidate_and_confirmation_retains_business_boun
         agent_inference_platform_seconds=2, agent_inference_total_seconds=5,
     )
 
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
-
-    database = Database(config, pool=Pool())
+    database = Database(config, pool=FixtureConnectionPool(connection))
     candidate = dict(ANSWER)
     if scenario == "update":
         candidate = {"action": "update", "opportunity_id": original["id"], "amount": 1200}

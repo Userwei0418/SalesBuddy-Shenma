@@ -1,12 +1,20 @@
 // Shared business names for provider calls and end-to-end Agent audit records.
 export const capabilityLabels = Object.freeze({
   connectivity_test: "接口连通性测试",
+  model_connection_test: "模型接口连通性测试",
   battle_map_review: "客户作战地图评估",
   visit_entry: "拜访记录结构化",
   visit_quality: "拜访记录质检",
   opportunity_draft: "商机新建/更新判断",
   personal_risks: "个人客户风险识别",
   today_tasks: "今日待办规划",
+  task_import: "周会任务整理",
+  visit_import: "拜访录音导入转写",
+  "audio.chatbi": "经营问数语音转写",
+  "audio.visit_entry": "拜访记录语音转写",
+  "audio.customer_create": "客户建档语音转写",
+  "audio.management_task": "管理任务语音转写",
+  "audio.demo_scene": "演示场景语音转写",
   operating_report: "经营即时总结",
   chatbi: "经营问数（二期）",
   customer_chatbi: "客户问数（二期）",
@@ -24,5 +32,5 @@ export function capabilityLabel(code) {
   if (!key) return "未记录业务能力";
   return Object.hasOwn(capabilityLabels, key)
     ? capabilityLabels[key]
-    : "未识别的业务";
+    : `未登记业务（${key}）`;
 }

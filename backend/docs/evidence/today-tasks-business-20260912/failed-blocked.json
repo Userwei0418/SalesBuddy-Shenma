@@ -1,0 +1,95 @@
+{
+  "scenario": "blocked",
+  "preflight_only": false,
+  "started_at": "2026-09-12T06:51:42.122514+00:00",
+  "checks": [
+    {
+      "name": "database role obeys RLS",
+      "passed": true
+    },
+    {
+      "name": "exact authorized sales actor",
+      "passed": true
+    },
+    {
+      "name": "exactly one unchanged authorized demo source",
+      "passed": true
+    },
+    {
+      "name": "approved demo customer name",
+      "passed": true
+    },
+    {
+      "name": "Worker scope equals approved case",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations: 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/2fa737f4-e99d-4722-8a71-d6051b2ef228/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/2fa737f4-e99d-4722-8a71-d6051b2ef228/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "message replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/2fa737f4-e99d-4722-8a71-d6051b2ef228/messages: 409",
+      "passed": true
+    },
+    {
+      "name": "automatic task planning completed",
+      "passed": false
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "2fa737f4-e99d-4722-8a71-d6051b2ef228",
+    "run_id": "a1d18f55-bcad-4e70-b56a-f107e5e074a6"
+  },
+  "XS002_expected_task_read_status": 404,
+  "active_tasks_before": 31,
+  "candidate_count": 1,
+  "source_fingerprint": "9d60ff90128364c177a85dd5ff89bf0ccf0236c2bd1c44f9caf71458014c21c9",
+  "tasks_before_fingerprint": "8928bd8fcc63e85c8c685a0eece2e1bf3b3a914f2db51c203281edfa0094cbb8",
+  "protected_before": {
+    "SELECT * FROM crm.customer ORDER BY id": "1452d85ed3a315861a733c47987ee8364b45d3cee176fb64eb8f22c3f3d8f3ee",
+    "SELECT * FROM crm.opportunity ORDER BY id": "34f607069dd963047a72f36cd0b631c3628da81610a1ebaa73fb262169d1152b",
+    "SELECT * FROM activity.visit ORDER BY id": "e5c3daec5c8d7a47fb684673d4604c39e29e50a907b2476121524d02342b3887"
+  },
+  "notifications_before_fingerprint": "e3bf0b1a68f8dc15c090ccb47bd0c0b8faddbd22dda890f27d5e595d2b7e6b10",
+  "elapsed_ms": 17136,
+  "status": "failed",
+  "passed": false,
+  "error_type": "AssertionError",
+  "finished_at": "2026-09-12T06:51:59.527217+00:00"
+}

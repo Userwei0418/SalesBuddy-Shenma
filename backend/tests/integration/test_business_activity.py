@@ -143,7 +143,7 @@ async def test_opportunity_changes_and_tasks_have_human_business_semantics(conne
 async def test_account_grouping_snapshot_and_export_http(connection):
     token = request_metadata.set(RequestMetadata(str(uuid4())))
     try:
-        ops = await actor(connection, "OPS001")
+        ops = await actor(connection, "ADMIN001")
         account = await OperationsAccountService().create(
             connection,
             ops,
@@ -157,13 +157,13 @@ async def test_account_grouping_snapshot_and_export_http(connection):
         )
         found = await rows(connection, category="account", q="记录核对账号")
         assert found["total"] == 1 and found["items"][0]["action_label"] == "开通账号"
-        assert found["items"][0]["actor_name"] == "OPS001" and found["items"][0]["actor_department"] == "南区"
+        assert found["items"][0]["actor_name"] == "ADMIN001" and found["items"][0]["actor_department"] == "南区"
         assert "password_hash" not in str(found)
         assert str(found["items"][0]["object_id"]) == account["id"]
         await connection.execute(
             "UPDATE platform.user_ref SET display_name='运营新姓名' WHERE id=$1::uuid", ops.user_id
         )
-        assert (await rows(connection, category="account", q="记录核对账号"))["items"][0]["actor_name"] == "OPS001"
+        assert (await rows(connection, category="account", q="记录核对账号"))["items"][0]["actor_name"] == "ADMIN001"
     finally:
         request_metadata.reset(token)
     async with await client_for(connection) as client:

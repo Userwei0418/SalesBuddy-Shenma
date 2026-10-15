@@ -1,9 +1,10 @@
-import {state, $, api, esc, date, badge, options, field, dialog, table, pager, head, query, filters, search, bindCommon} from './core.js';
+import {state, $, api, esc, date, badge, options, field, dialog, table, pager, head, query, filters, search, bindCommon,hasPermission,requirePermission} from './core.js';
 
-function editPartner(row = {}) {
+export function editPartner(row = {}) {
+  requirePermission('partner.manage');
   return dialog(row.id ? '编辑伙伴' : '添加伙伴',
     `<p class="help">伙伴停用后不能用于新的关联，已有商机记录保留。</p>${field('伙伴名称','name',row.name || '',{required:true})}${field('状态','status','',{select:options([['active','启用'],['inactive','停用']],row.status || 'active',null)})}`,
-    {onSubmit:async (form, key) => api('/partners',{method:'POST',key,body:{id:row.id || null,name:String(form.get('name')).trim(),status:form.get('status'),version_no:row.version_no || null}})});
+    {onSubmit:async (form, key) => {requirePermission('partner.manage');return api('/partners',{method:'POST',key,body:{id:row.id || null,name:String(form.get('name')).trim(),status:form.get('status'),version_no:row.version_no || null}});}});
 }
 
 export function partnerFields(row = {}) {
@@ -38,8 +39,8 @@ export function bindPartnerFields(root, row = {}) {
 export async function partners() {
   const result = await api('/partners' + query({offset:state.offset}));
   return {
-    html:head('伙伴目录','统一维护可选伙伴，销售从目录选择，历史关联持续保留。','<button class="primary" data-action="create">添加伙伴</button>') +
-      `<section class="card">${filters(search('搜索伙伴名称')+`<select name="status" aria-label="伙伴状态">${options([['active','启用'],['inactive','停用']],state.filters.status || '')}</select>`)}${table(['伙伴名称','状态','更新时间','操作'],result.items,r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${badge(r.status)}</td><td>${date(r.updated_at)}</td><td><button class="link" data-action="edit" data-id="${esc(r.id)}">编辑</button></td></tr>`)}${pager(result.total)}</section>`,
+    html:head('伙伴目录','统一维护可选伙伴，销售从目录选择，历史关联持续保留。',hasPermission('partner.manage')?'<button class="primary" data-action="create">添加伙伴</button>':'') +
+      `<section class="card">${filters(search('搜索伙伴名称')+`<select name="status" aria-label="伙伴状态">${options([['active','启用'],['inactive','停用']],state.filters.status || '')}</select>`)}${table(['伙伴名称','状态','更新时间','操作'],result.items,r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${badge(r.status)}</td><td>${date(r.updated_at)}</td><td>${hasPermission('partner.manage')?`<button class="link" data-action="edit" data-id="${esc(r.id)}">编辑</button>`:''}</td></tr>`)}${pager(result.total)}</section>`,
     bind:root => bindCommon(root,{create:()=>editPartner(),edit:id=>editPartner(result.items.find(p=>p.id===id))}),
   };
 }

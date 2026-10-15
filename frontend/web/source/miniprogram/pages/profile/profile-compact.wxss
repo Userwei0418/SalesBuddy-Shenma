@@ -1,0 +1,24 @@
+/* 由 app.wxss 引入，只作用于 .profile-page 内。营销成熟度卡里的两块指标不再套小卡，靠竖线与留白分组。 */
+.profile-page .performance-board{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:8px}
+.profile-page .performance-metric{min-width:0;padding:8rpx 24rpx 8rpx 0;border:0;border-radius:0;background:transparent}
+.profile-page .performance-metric+.performance-metric{padding:8rpx 0 8rpx 24rpx;border-left:1px solid var(--ui-line)}
+.profile-page .performance-metric-head{display:flex;align-items:center;justify-content:space-between;gap:8rpx}
+.profile-page .performance-metric-head>text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.profile-page .performance-metric-head>label{flex-shrink:0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4;white-space:nowrap}
+.profile-page .performance-completed{margin-top:8px}
+.profile-page .performance-completed>label{display:block;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4}
+.profile-page .performance-completed>text{display:block;margin-top:4rpx;overflow:hidden;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 窄于 375 的屏：超过 11 个字符的金额（1 亿以上，如 ¥123,456,789）20px 放不下（320 宽 1 亿起、360 宽 10 亿起），降到 16px，不截断 */
+@media (max-width:374px){.profile-page .performance-completed>text.long-value{font-size:16px}}
+.profile-page .performance-target{display:flex;align-items:center;justify-content:space-between;gap:8rpx;margin-top:8px}
+.profile-page .performance-target>view{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0;gap:8rpx}
+.profile-page .performance-target label{flex:0 0 auto;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.profile-page .performance-target>view>text{overflow:hidden;color:var(--ui-ink);font-size:var(--ui-text-small);font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.profile-page .performance-track{height:8rpx;margin-top:8px;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.profile-page .performance-track>view{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.profile-page .maturity-facts{display:grid;grid-template-columns:1fr 1fr;gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.profile-page .maturity-fact{min-width:0;padding:0;border:0;border-radius:0;background:transparent}
+.profile-page .maturity-fact.wide{grid-column:1 / -1}
+.profile-page .maturity-fact>text{color:var(--ui-secondary);font-size:14px;line-height:1.4}
+.profile-page .maturity-fact>view{margin:4rpx 0;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3}
+.profile-page .maturity-fact>label{display:block;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}

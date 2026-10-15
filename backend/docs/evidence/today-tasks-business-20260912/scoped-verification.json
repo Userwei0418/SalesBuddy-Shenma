@@ -1,0 +1,34 @@
+{
+  "source_commit": "9beec5b",
+  "non_database_tests": {
+    "passed": 559,
+    "skipped_database_tests": 113,
+    "duration_seconds": 3.53
+  },
+  "isolated_postgres_tests": {
+    "passed": 113,
+    "duration_seconds": 7.3,
+    "provider_http": "synthetic",
+    "rls_bypassed": false
+  },
+  "archive_sha256": "2f345b636a68868480c2894d800e3d9937d15e9b14c56f247cac910be0eea404",
+  "stage_audit": {
+    "verified_files": 384,
+    "mismatches": [],
+    "temporary": {
+      "temporary_databases": 0,
+      "temporary_roles": 0
+    },
+    "current_release": "/www/wwwroot/salegent/releases/agent-visit-20260912-bf5bd29",
+    "services": [
+      "active",
+      "active"
+    ]
+  },
+  "ruff": "passed",
+  "openapi": "unchanged",
+  "deployed": false,
+  "live_provider_calls": 0,
+  "production_business_writes": 0,
+  "previous_scoped_candidate": "7f238e0 passed556 nonDB and113 PG before exact target identity added"
+}

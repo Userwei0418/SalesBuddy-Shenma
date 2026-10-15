@@ -10,10 +10,11 @@ function loginPage(login, changePassword=async()=>{}, storage=new Map()) {
   const wx={showToast:r=>notices.push(r.title),switchTab:r=>saved.push(r.url),
     getStorageSync:key=>storage.get(key),setStorageSync:(key,value)=>storage.set(key,value),
     removeStorageSync:key=>storage.delete(key),nextTick:f=>f()};
-  const module={exports:{}};
+  const module={exports:{}},secureModule={exports:{}};
   vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/utils/rememberedLogin.js','utf8'),{module,wx});
+  vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/utils/encryptedCredentials.js','utf8'),{module:secureModule,wx,Map});
   vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/pages/login/index.js','utf8'),{
-    Page:d=>{definition=d;},getApp:()=>app,require:name=>name.includes("rememberedLogin")?module.exports:({changePassword,getBaseUrl:()=>"https://test.invalid/api/v1"}),wx,
+    Page:d=>{definition=d;},getApp:()=>app,require:name=>name.includes("encryptedCredentials")?secureModule.exports:name.includes("rememberedLogin")?module.exports:name.includes("companyEntry")?require("../miniprogram/utils/companyEntry"):({changePassword,getBaseUrl:()=>"https://test.invalid/api/v1",getCompanyEntry:async code=>({company_code:code,company_name:"公司 "+code}),cancelPendingLogin(){}}),wx,
   });
   const page={...definition,data:{...definition.data},setData:data=>Object.assign(page.data,data)};
   return {page,notices,saved,calls,app,storage,wx};
@@ -24,7 +25,7 @@ test('账号与密码交给服务端验证，任意真实密码不会被本地�
   assert.equal(page.data.account,'');assert.equal(page.data.password,'');
   Object.assign(page.data,{agreed:true,account:' native-account ',password:'Real-User-Password-2026'});
   await page.submitLogin();
-  assert.deepEqual(calls,[[null,'NATIVE-ACCOUNT','Real-User-Password-2026']]);
+  assert.deepEqual(calls,[[null,'NATIVE-ACCOUNT','Real-User-Password-2026',undefined,'auto']]);
   assert.equal(saved.length,1);assert.equal(page.data.password,'');
 });
 
@@ -112,150 +113,66 @@ test('切换后旧登录失败不能覆盖新账号表单或弹出旧错误',asy
   assert.equal(x.page.data.account,'other');assert.equal(x.notices.length,0);assert.equal(x.saved.length,0);
 });
 
-const rememberedKey='salesRememberedLoginV1';
-const credentials={account:'member@example.com',password:'Isolated-Remember-2026',agreed:true};
-
-test('默认不勾选，成功登录不存密码；主动勾选成功才存且重新打开回填为隐藏状态',async()=>{
-  const plain=loginPage(async()=>({role:'sales'}));plain.page.onLoad();
-  assert.equal(plain.page.data.rememberPassword,false);
-  Object.assign(plain.page.data,credentials);await plain.page.submitLogin();
-  assert.equal(plain.storage.has(rememberedKey),false);
-  const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials);
-  x.page.toggleRememberPassword();assert.equal(x.storage.has(rememberedKey),false);
-  await x.page.submitLogin();assert.equal(x.storage.get(rememberedKey).entries[0].password,credentials.password);
-  const reopened=loginPage(async()=>{},undefined,x.storage);reopened.page.onLoad();
-  assert.equal(reopened.page.data.account,credentials.account);
-  assert.equal(reopened.page.data.password,credentials.password);
-  assert.equal(reopened.page.data.rememberPassword,true);
-  assert.equal(reopened.page.data.passwordVisible,false);
-  assert.equal(reopened.page.data.agreed,false);
+const rememberedKey='salesAccountHistoryV3',legacyKey='salesRememberedLoginV1';
+const credentials={account:'ADMIN',password:'Isolated-Only-In-Memory-2026',agreed:true};
+test('remember account stores labels only, never old or new passwords',async()=>{
+ const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials);
+ x.page.toggleRememberAccount();await x.page.submitLogin();
+ const stored=x.storage.get(rememberedKey);assert.equal(stored.entries[0].account,'ADMIN');
+ assert.equal(JSON.stringify([...x.storage]).includes(credentials.password),false);
+ const next=loginPage(async()=>{},undefined,x.storage);next.page.onLoad();
+ assert.equal(next.page.data.account,'ADMIN');assert.equal(next.page.data.password,'');
+ assert.equal(next.page.data.rememberAccount,true);next.page.toggleRememberAccount();
+ assert.equal(next.storage.has(rememberedKey),false);
+});
+test('legacy single and multi-account passwords are removed during migration',()=>{
+ for(const legacy of [{version:1,baseUrl:'https://test.invalid/api/v1',...credentials},
+  {version:2,entries:[{baseUrl:'https://test.invalid/api/v1',...credentials},{baseUrl:'https://other.invalid',account:'OTHER',password:'other-secret'}]}]) {
+  const storage=new Map([[legacyKey,legacy]]);const x=loginPage(async()=>{},undefined,storage);x.page.onLoad();
+  assert.equal(storage.has(legacyKey),false);assert.equal(x.page.data.password,'');
+  const serialized=JSON.stringify([...storage]);assert.ok(!serialized.includes(credentials.password));assert.ok(!serialized.includes('other-secret'));
+  assert.equal(x.page.data.account,'ADMIN');
+ }
+});
+test('company histories never mix account suggestions or retain password on selection',async()=>{
+ const x=loginPage(async(_role,_account,_password,workspace)=>({role:'sales',companyCode:workspace}));
+ x.page.inputWorkspace({detail:{value:'alpha'}});Object.assign(x.page.data,credentials,{rememberAccount:true});await x.page.submitLogin();
+ x.page.switchAccount();x.page.inputWorkspace({detail:{value:'beta'}});Object.assign(x.page.data,credentials,{account:'ADMIN2',rememberAccount:true});await x.page.submitLogin();
+ x.page.switchAccount();
+ x.page.inputWorkspace({detail:{value:'alpha'}});x.page.inputAccount({detail:{value:'A'}});
+ assert.deepEqual(Array.from(x.page.data.accountSuggestions),['ADMIN']);
+ x.page.selectAccountSuggestion({currentTarget:{dataset:{account:'ADMIN'}}});
+ assert.equal(x.page.data.password,'');assert.equal(x.page.data.workspace,'alpha');
+ x.page.inputWorkspace({detail:{value:'beta'}});x.page.inputAccount({detail:{value:'A'}});
+ assert.deepEqual(Array.from(x.page.data.accountSuggestions),['ADMIN2']);
+});
+test('account history remains opt-in and storage failure does not cancel successful login',async()=>{
+ const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials);await x.page.submitLogin();
+ assert.equal(x.storage.has(rememberedKey),false);
+ Object.assign(x.page.data,credentials,{rememberAccount:true});x.wx.setStorageSync=()=>{throw Error('storage unavailable');};
+ await x.page.submitLogin();assert.equal(x.saved.length,2);assert.equal(x.page.data.password,'');assert.match(x.notices.at(-1),/未能记住账号/);
+});
+test('history migration removes old password even if saving sanitized labels fails',()=>{
+ const storage=new Map([[legacyKey,{version:1,baseUrl:'https://test.invalid/api/v1',...credentials}]]);
+ const x=loginPage(async()=>{},undefined,storage);x.wx.setStorageSync=()=>{throw Error('unavailable');};x.page.onLoad();
+ assert.equal(storage.has(legacyKey),false);assert.equal(x.page.data.password,'');
+});
+test('a failed login or an abandoned request never remembers input credentials',async()=>{
+ const x=loginPage(async()=>{throw Object.assign(Error('incorrect'),{statusCode:401});});Object.assign(x.page.data,credentials,{rememberAccount:true});await x.page.submitLogin();assert.equal(x.storage.has(rememberedKey),false);
+ let complete;const late=loginPage(()=>new Promise(r=>complete=r));Object.assign(late.page.data,credentials,{rememberAccount:true});
+ const pending=late.page.submitLogin();late.page.onUnload();complete({role:'sales'});await pending;
+ assert.equal(late.storage.has(rememberedKey),false);
 });
 
-test('登录失败不存密码，未经同意也不存',async()=>{
-  const x=loginPage(async()=>{throw Object.assign(Error('denied'),{statusCode:401});});
-  Object.assign(x.page.data,credentials,{rememberPassword:true});await x.page.submitLogin();
-  assert.equal(x.storage.has(rememberedKey),false);
-  x.page.data.agreed=false;await x.page.submitLogin();assert.equal(x.calls.length,1);
-});
-
-test('取消勾选删除当前记录；切换账号只清空输入并保留记忆',async()=>{
-  const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials,{rememberPassword:true});
-  await x.page.submitLogin();x.page.toggleRememberPassword();assert.equal(x.storage.has(rememberedKey),false);
-  const fresh=loginPage(async()=>{},undefined,x.storage);fresh.page.onLoad();assert.equal(fresh.page.data.password,'');
-  Object.assign(x.page.data,credentials,{rememberPassword:true});await x.page.submitLogin();
-  x.page.switchAccount();assert.equal(x.storage.has(rememberedKey),true);
-  assert.equal(x.page.data.rememberPassword,false);assert.equal(x.page.data.password,'');assert.equal(x.page.data.account,'');
-});
-
-test('手动修改账号不带出旧密码，大小写与首尾空格不视为新账号',async()=>{
-  const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials,{rememberPassword:true});await x.page.submitLogin();
-  const fresh=loginPage(async()=>{},undefined,x.storage);fresh.page.onLoad();
-  fresh.page.inputAccount({detail:{value:' MEMBER@example.com '}});assert.equal(fresh.page.data.password,credentials.password);
-  fresh.page.inputAccount({detail:{value:'other@example.com'}});
-  assert.equal(fresh.page.data.password,'');assert.equal(fresh.storage.has(rememberedKey),true);assert.equal(fresh.page.data.rememberPassword,false);
-  fresh.page.inputAccount({detail:{value:credentials.account}});assert.equal(fresh.page.data.password,credentials.password);
-});
-
-test('请求中取消勾选或切换账号，迟到成功不能保存旧凭据',async()=>{
-  for(const action of ['toggleRememberPassword','switchAccount']){
-    let done;const x=loginPage(()=>new Promise(r=>{done=r;}));Object.assign(x.page.data,credentials,{rememberPassword:true});
-    const pending=x.page.submitLogin();x.page[action]();done({role:'sales'});await pending;
-    assert.equal(x.storage.has(rememberedKey),false);
-  }
-});
-
-test('强制改密不记初始密码，成功后只记提交的新密码',async()=>{
-  let finish;const x=loginPage(async()=>({role:'sales',mustChangePassword:true}),()=>new Promise(r=>{finish=r;}));
-  Object.assign(x.page.data,credentials,{rememberPassword:true});await x.page.submitLogin();assert.equal(x.storage.has(rememberedKey),false);
-  x.page.data.newPassword='Isolated-Changed-2026';const pending=x.page.submitPasswordChange();
-  x.page.inputNewPassword({detail:{value:'not-the-submitted-value'}});finish();await pending;
-  assert.equal(x.storage.get(rememberedKey).entries[0].password,'Isolated-Changed-2026');
-});
-
-test('存储写入失败不阻断登录；清除失败不能声称取消，但不影响切换账号',async()=>{
-  const x=loginPage(async()=>({role:'sales'}));Object.assign(x.page.data,credentials,{rememberPassword:true});
-  x.wx.setStorageSync=()=>{throw Error('storage unavailable');};await x.page.submitLogin();
-  assert.equal(x.saved.length,1);assert.equal(x.page.data.rememberPassword,false);assert.match(x.notices[0],/未能记住/);
-  x.page.data.rememberPassword=true;x.wx.removeStorageSync=()=>{throw Error('unavailable');};
-  x.page.toggleRememberPassword();assert.equal(x.page.data.rememberPassword,true);
-  x.page.switchAccount();assert.equal(x.page.data.account,'');
-});
-
-test('不同API环境、损坏缓存不回填；离开页面重新隐藏密码',()=>{
-  for(const record of [null,{}, {version:1,baseUrl:'https://other.invalid',...credentials},
-    {version:1,baseUrl:'https://test.invalid/api/v1',account:'user',password:12}]) {
-    const x=loginPage(async()=>{},undefined,new Map([[rememberedKey,record]]));x.page.onLoad();
-    assert.equal(x.page.data.password,'');assert.equal(x.page.data.rememberPassword,false);
-  }
-  const x=loginPage(async()=>{});x.page.data.passwordVisible=true;x.page.onHide();assert.equal(x.page.data.passwordVisible,false);
-});
-
-test('A记住→切换B记住→再输入A，回填各自密码；取消A不影响B',async()=>{
+test('SaaS 同名账号显式传公司码，切换公司清空密码且不带入旧账号密码',async()=>{
   const x=loginPage(async()=>({role:'sales'}));
-  Object.assign(x.page.data,credentials,{rememberPassword:true});await x.page.submitLogin();
-  x.page.switchAccount();
-  x.page.inputAccount({detail:{value:'second@example.com'}});
-  assert.equal(x.page.data.password,'');assert.equal(x.page.data.rememberPassword,false);
-  Object.assign(x.page.data,{password:'Isolated-Second-2026',agreed:true,rememberPassword:true});
-  await x.page.submitLogin();assert.equal(x.storage.get(rememberedKey).entries.length,2);
-  x.page.switchAccount();x.page.inputAccount({detail:{value:' MEMBER@EXAMPLE.COM '}});
-  assert.equal(x.page.data.password,credentials.password);assert.equal(x.page.data.passwordVisible,false);
-  assert.equal(x.page.data.rememberPassword,true);
-  x.page.toggleRememberPassword();assert.equal(x.storage.get(rememberedKey).entries.length,1);
-  x.page.switchAccount();x.page.inputAccount({detail:{value:credentials.account}});
-  assert.equal(x.page.data.password,'');assert.equal(x.page.data.rememberPassword,false);
-  x.page.inputAccount({detail:{value:'second@example.com'}});
-  assert.equal(x.page.data.password,'Isolated-Second-2026');assert.equal(x.page.data.rememberPassword,true);
-});
-
-test('旧单账号记录可回填且保存第二账号时迁移，取消只删目标环境',async()=>{
-  const legacy={version:1,baseUrl:'https://test.invalid/api/v1',...credentials};
-  const storage=new Map([[rememberedKey,legacy]]);
-  const x=loginPage(async()=>({role:'sales'}),undefined,storage);x.page.onLoad();
-  assert.equal(x.page.data.password,credentials.password);
-  x.page.switchAccount();Object.assign(x.page.data,{...credentials,account:'new@example.com',rememberPassword:true});
-  await x.page.submitLogin();assert.equal(storage.get(rememberedKey).entries.length,2);
-  storage.get(rememberedKey).entries.push({baseUrl:'https://other.invalid',...credentials});
-  x.page.inputAccount({detail:{value:credentials.account}});x.page.toggleRememberPassword();
-  const entries=storage.get(rememberedKey).entries;
-  assert.equal(entries.length,2);assert.equal(entries.some(v=>v.baseUrl==='https://other.invalid'),true);
-});
-
-test('当前账号密码被拒绝只删除自己记录，不删除其他已记住账号',async()=>{
-  const storage=new Map([[rememberedKey,{version:2,entries:[
-    {baseUrl:'https://test.invalid/api/v1',...credentials},
-    {baseUrl:'https://test.invalid/api/v1',account:'other@example.com',password:'Isolated-Other-2026'}]}]]);
-  const x=loginPage(async()=>{throw Object.assign(Error('denied'),{statusCode:401});},undefined,storage);
-  x.page.inputAccount({detail:{value:credentials.account}});x.page.data.agreed=true;
+  Object.assign(x.page.data,{account:'admin',password:'old-password',rememberAccount:true,agreed:true});
+  x.page.inputWorkspace({detail:{value:' Customer-A '}});
+  assert.equal(x.page.data.workspace,'customer-a');assert.equal(x.page.data.password,'');
+  assert.equal(x.page.data.rememberAccount,false);
+  x.page.inputAccount({detail:{value:'admin'}});
+  x.page.inputPassword({detail:{value:'tenant-new-password'}});
   await x.page.submitLogin();
-  assert.equal(storage.get(rememberedKey).entries.length,1);
-  assert.equal(storage.get(rememberedKey).entries[0].account,'other@example.com');
-});
-
-test('账号前缀推荐只显示本机当前环境账号，点选后补全并回填对应密码',()=>{
-  const storage=new Map([[rememberedKey,{version:2,entries:[
-    {baseUrl:'https://test.invalid/api/v1',account:'hanqiwei@example.com',password:'Isolated-Han-Only'},
-    {baseUrl:'https://other.invalid/api/v1',account:'hanqi-other@example.com',password:'Isolated-Other'},
-    {baseUrl:'https://test.invalid/api/v1',account:'zhou@example.com',password:'Isolated-Zhou'}]}]]);
-  const x=loginPage(async()=>{},undefined,storage);
-  x.page.inputAccount({detail:{value:'HaNqI'}});
-  assert.deepEqual(Array.from(x.page.data.accountSuggestions),['hanqiwei@example.com']);
-  assert.equal(x.page.data.password,'');
-  assert.equal(JSON.stringify(x.page.data.accountSuggestions).includes('Isolated'),false);
-  x.page.blurAccount(); // blur from a real tap must not remove the target before its tap event
-  x.page.selectAccountSuggestion({currentTarget:{dataset:{account:'hanqiwei@example.com'}}});
-  assert.equal(x.page.data.account,'hanqiwei@example.com');assert.equal(x.page.data.password,'Isolated-Han-Only');
-  assert.equal(x.page.data.rememberPassword,true);assert.equal(x.page.data.passwordVisible,false);
-  assert.equal(x.page.data.accountSuggestions.length,0);assert.equal(x.page.data.agreed,false);
-  x.page.switchAccount();assert.equal(x.page.data.accountSuggestions.length,0);
-});
-
-test('无匹配和空输入不推荐；完整账号不重复推荐，推荐最多5条',()=>{
-  const entries=Array.from({length:8},(_,i)=>({baseUrl:'https://test.invalid/api/v1',account:'han'+i+'@example.com',password:'Isolated-Only'}));
-  const x=loginPage(async()=>{},undefined,new Map([[rememberedKey,{version:2,entries}]]));
-  for(const value of ['','unknown','han7@example.com']){
-    x.page.inputAccount({detail:{value}});assert.equal(x.page.data.accountSuggestions.length,0);
-  }
-  x.page.inputAccount({detail:{value:'han'}});assert.equal(x.page.data.accountSuggestions.length,5);
-  x.page.hideAccountSuggestions();assert.equal(x.page.data.accountSuggestions.length,0);
+  assert.deepEqual(x.calls,[[null,'ADMIN','tenant-new-password','customer-a','auto']]);
+  assert.equal(x.storage.has('salesRememberedLoginV1'),false);
 });

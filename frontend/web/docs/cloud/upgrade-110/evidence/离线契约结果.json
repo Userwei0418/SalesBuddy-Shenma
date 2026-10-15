@@ -1,0 +1,86 @@
+{
+  "baseline": "5f022c53432ace4f22958f12f3f61fbc7511fec7",
+  "source_sha256": "25e0a537cf88d505bfa5a190acd3a883d1afc04f4c88c510ed3c32843cee0932",
+  "client_sha256": "b960c4722d3fad0f0f4ce575b08b7acbb057ac294855ee60e837730cb56bd417",
+  "offline": true,
+  "realRequests": 0,
+  "scenarioCount": 103,
+  "requestCount": 107,
+  "coveredOperationCount": 86,
+  "totalContractOperations": 267,
+  "errors": [],
+  "warnings": [
+    {
+      "scenario": "refreshCustomerMap",
+      "operation": "POST /api/v1/customer-assets/map/refresh",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "createTasks",
+      "operation": "POST /api/v1/tasks/batch",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "runAgent",
+      "operation": "POST /api/v1/conversations",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "runAgent",
+      "operation": "POST /api/v1/conversations",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "reviewFdeProfile",
+      "operation": "POST /api/v1/fde/profile/review",
+      "message": "Undeclared query parameter: scope"
+    },
+    {
+      "scenario": "saveTargetBatch",
+      "operation": "POST /api/v1/targets/batch",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "submitVisitStage",
+      "operation": "POST /api/v1/visit-flow/structure",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    },
+    {
+      "scenario": "submitVisitStage",
+      "operation": "POST /api/v1/visit-flow/quality",
+      "message": "OpenAPI supports Idempotency-Key; this sample omits the optional header"
+    }
+  ],
+  "semantics": {
+    "opportunityAmountYuan": 123456,
+    "recognizedForecastYuan": 0,
+    "collectionForecastYuan": 20000,
+    "actualAmountYuan": "123.45",
+    "actualRequestIdPresent": true,
+    "opportunityVersionOmittedOnCreate": true,
+    "taskEventVersion": 3,
+    "taskCompletionEvents": [
+      {
+        "event_type": "complete",
+        "version_no": 3
+      },
+      {
+        "event_type": "approve_completion",
+        "version_no": 4
+      },
+      {
+        "event_type": "reject_completion",
+        "version_no": 4
+      }
+    ],
+    "metadataRequestCount": 1,
+    "teamDirectoryPurposes": [
+      "browse",
+      "dashboard",
+      "profile",
+      "fde",
+      "assignment"
+    ],
+    "dueAtUTC": "2026-12-31T02:00:00.000Z"
+  }
+}

@@ -1,14 +1,16 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const path = require('node:path');
 const vm = require('node:vm');
 
 function makePage(api = {}) {
   let definition;
   const storage = new Map();
-  const wx = {setStorageSync: (key, value) => storage.set(key, value)};
+  const wx = {getStorageSync:key=>storage.get(key),setStorageSync: (key, value) => storage.set(key, value)};
   vm.runInNewContext(fs.readFileSync(__dirname + '/../miniprogram/pages/visit-entry/index.js', 'utf8'), {
-    require: name => name.includes("apiClient") ? api : ({}), Page: value => { definition = value; }, wx, clearTimeout, clearInterval,
+    require: name => name.includes("apiClient") ? api : require(path.resolve(__dirname, '../miniprogram/pages/visit-entry', name)), Page: value => { definition = value; }, wx, clearTimeout, clearInterval,
+    getApp: () => ({globalData:{session:{workspaceId:'w',userId:'u',role:'sales'}}}),
   });
   return { ...definition, draftKey: 'visit-test', storage, data: {...definition.data},
     setData(value) { Object.assign(this.data, value); } };
@@ -75,7 +77,7 @@ test('拜访录入先从公司客户中搜索并确认客户', () => {
   assert.match(wxml, /输入客户名称关键词/);
   assert.match(wxml, /class="customer-results"/);
   assert.match(wxml, /!customerConfirmed \? '请先选择客户'/);
-  assert.match(js, /listCustomers\(\{ q: query, scope: isFde \? "mine" : "company", pageSize: 100 \}\)/);
+  assert.match(js, /customerSearch\.list\(api,getApp\(\)\.globalData\.session,/);
   assert.match(js, /if \(!this\.data\.customerId\)[\s\S]*请先选择客户/);
 });
 

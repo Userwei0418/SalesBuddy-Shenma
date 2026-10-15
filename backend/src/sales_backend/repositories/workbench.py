@@ -42,11 +42,11 @@ class WorkbenchRepository:
             LEFT JOIN LATERAL (
               SELECT r.title FROM insight.risk r
               WHERE r.customer_id = c.id AND r.deleted_at IS NULL
-                AND r.status IN ('new','pending','in_progress','escalated')
+                AND r.status <> 'resolved'
               ORDER BY CASE r.severity_code WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
                        r.opened_at DESC LIMIT 1
             ) risk ON true
-            WHERE c.deleted_at IS NULL AND security.authorization_customer('overview.read',c.id)
+            WHERE c.deleted_at IS NULL AND 'customer'=ANY(c.business_identities) AND security.authorization_customer('overview.read',c.id)
             ORDER BY latest.interaction_at DESC NULLS LAST, c.name
             """
         )
@@ -54,7 +54,7 @@ class WorkbenchRepository:
             """
             SELECT
               (SELECT max(interaction_at) FROM activity.visit WHERE deleted_at IS NULL) AS source_date,
-              (SELECT count(*) FROM crm.customer WHERE deleted_at IS NULL
+              (SELECT count(*) FROM crm.customer WHERE deleted_at IS NULL AND 'customer'=ANY(business_identities)
                 AND NOT EXISTS(SELECT 1 FROM crm.customer_sales_member cm
                   WHERE cm.customer_id=crm.customer.id)) AS pending_assignment_count
             """
@@ -152,7 +152,7 @@ class WorkbenchRepository:
                security.authorization_subject('overview.read','person',r.owner_user_ref_id,NULL)
                OR (r.owner_user_ref_id IS NULL AND
                  security.authorization_customer('overview.read',r.customer_id)))
-               AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+               AND r.status <> 'resolved'
              ORDER BY CASE r.severity_code
                WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
                r.opened_at DESC

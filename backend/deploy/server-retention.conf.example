@@ -1,0 +1,14 @@
+# Shared policy only. Install root-owned 0644 at /etc/server-retention.conf.
+# Existing values are preserved by install-maintenance.sh. Never put secrets here.
+BLOG_ENABLED=0
+MIN_FREE_GIB=8
+DB_KEEP_BACKUPS=3
+DB_MAX_AGE_DAYS=14
+DB_BACKUP_DIR=/var/backups/sales-management
+DB_SOCKET_DIR=/tmp
+DB_OS_USER=postgres
+PG_BIN_DIR=/usr/bin
+DB_BACKUP_LOCK_FILE=/run/lock/sales-db-backup.lock
+DB_BACKUP_TIMEOUT_SECONDS=3300
+APP_ROOT=/www/wwwroot/salegent
+APP_KEEP_RELEASES=3

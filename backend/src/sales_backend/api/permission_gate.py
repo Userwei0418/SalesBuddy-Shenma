@@ -41,8 +41,30 @@ async def enforce_route_permission(request: Request):
                 raise HTTPException(422, "请求内容格式无效") from None
             if not isinstance(body, dict):
                 raise HTTPException(422, "请求内容必须为对象")
-        if permission == "$opportunity":
+        if permission == "$team_directory":
+            from sales_backend.domain.team_directory import ASSIGNMENT_PERMISSIONS, team_directory_permission
+
+            try:
+                purpose = request.query_params.get('purpose', 'browse')
+                selected = team_directory_permission(purpose, request.query_params.get('permission'))
+                permission = selected if purpose == 'assignment' and selected in ASSIGNMENT_PERMISSIONS else 'directory.read'
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+        elif permission == "$opportunity":
             permission = "opportunity.update" if body.get("action") == "update" else "opportunity.create"
+        elif permission == "$review_target":
+            if not any(effective.allows(code) for code in ("target.submit", "target.manage")):
+                raise PermissionError("当前账号未获目标维护授权")
+            # PostgreSQL checks the exact person/team/department scope again.
+            yield
+            return
+        elif permission == "$task_alignment":
+            if not any(effective.allows(code) for code in ("task.coordinate", "task.cancel")):
+                raise PermissionError("当前账号未获任务关联维护授权")
+            # The database also requires task.read and the exact coordinator or
+            # creator-with-cancel permission for this specific task.
+            yield
+            return
         elif permission in {"$opportunity_name", "$task_choices"}:
             codes = ("opportunity.create", "opportunity.update") if permission == "$opportunity_name" else (
                 "task.create_daily", "task.create_customer")

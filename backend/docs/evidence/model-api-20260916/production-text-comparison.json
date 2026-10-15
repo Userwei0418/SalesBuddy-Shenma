@@ -1,0 +1,14 @@
+[
+  {
+    "configured_transport": false,
+    "max_tokens": 64,
+    "ok": false,
+    "error": "服务商返回错误（状态码 500），请核对协议和地址"
+  },
+  {
+    "configured_transport": true,
+    "max_tokens": 512,
+    "ok": false,
+    "error": "服务商返回错误（状态码 500），请核对协议和地址"
+  }
+]

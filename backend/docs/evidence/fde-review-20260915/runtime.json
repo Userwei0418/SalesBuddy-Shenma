@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "roles": {
+    "fde": 3,
+    "fde_lead": 1
+  },
+  "checks": {
+    "maintenance_identity_available": 1,
+    "all_business_roles_available": 1,
+    "personal_cohort": 4,
+    "personal_complete": 4,
+    "team_complete": 4,
+    "selected_team": 4,
+    "team_project_count": 4,
+    "summary_matches_team_projects": 4,
+    "summary_matches_team_visits": 4
+  },
+  "total_checks": 30,
+  "readonly": true,
+  "business_writes": false,
+  "model_calls": false,
+  "sessions_created": false
+}

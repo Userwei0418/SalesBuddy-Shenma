@@ -1,6 +1,8 @@
 # 神码部署记录与操作入口
 
-本轮双端验收与修复见 [验收记录](FULL_ACCEPTANCE_20260927.md)。后续发布的实际版本以 `/api/v1/health/version`、`/workspace/build.json` 及对应 Release 回执为准。
+2026-10-15 起采用[完整 1.2.1 神码升级](WHOLE_RELEASE_1.2.1_SHENMA.md)，原线上基线为 `094841a60c446d88febfdc199be5d0877424193a` / V159。当前是否完成切换见该页验收与发布记录。新 Web 使用 `/workspace/version.json`，API 使用 `/api/v1/health/version`；两者须与发布回执一致。
+
+以下为按日期保留的历史记录。[2026-09-27 验收记录](FULL_ACCEPTANCE_20260927.md)及旧 `/workspace/build.json` 不代表新版本当前状态。
 
 ## 2026-09-27 周报接续基线
 

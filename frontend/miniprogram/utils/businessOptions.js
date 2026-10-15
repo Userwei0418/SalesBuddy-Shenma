@@ -1,9 +1,12 @@
 // Runtime contract, populated exclusively by the authenticated metadata endpoint.
 // Arrays keep their identity so consumers never retain a previous account's copy.
 const customer = {industry:[],customer_type:[],level_code:[],source:[],contact_role:[]};
+const customerCreation = {industry:[],customer_type:[],level_code:[],source:[],contact_role:[]};
+const businessIdentities = [];
 const stages = [], grades = [], mapAmountRanges = [];
 let ready = false;
-function clear() {ready=false;Object.values(customer).forEach(a=>a.splice(0));stages.splice(0);grades.splice(0);mapAmountRanges.splice(0);}
+let creationReady = false;
+function clear() {businessIdentities.splice(0);ready=false;creationReady=false;Object.values(customer).forEach(a=>a.splice(0));Object.values(customerCreation).forEach(a=>a.splice(0));stages.splice(0);grades.splice(0);mapAmountRanges.splice(0);}
 function install(value) {
   if (!value || value.contract_version!==1 || !value.customer || !value.opportunity ||
       Object.keys(customer).some(k=>!Array.isArray(value.customer[k]) || !value.customer[k].length || value.customer[k].some(v=>typeof v!=='string')) ||
@@ -15,9 +18,18 @@ function install(value) {
      gg.some(g=>!g.code||!g.label||!Number.isFinite(g.min)||!(g.max===null||Number.isFinite(g.max))) ||
      new Set(ss.map(s=>s.code)).size!==ss.length||new Set(gg.map(g=>g.code)).size!==gg.length) throw Error('业务选项目录格式错误，请重试');
   Object.keys(customer).forEach(k=>customer[k].splice(0,customer[k].length,...value.customer[k]));
+  // Older metadata remains usable for reads, but cannot supply creation choices.
+  const creation=value.customer_creation;
+  const identities=creation && creation.business_identities;
+  const validIdentity=Array.isArray(identities) && identities.length===2 && ['customer','partner'].every(v=>identities.some(x=>x.value===v && typeof x.label==='string' && x.label));
+  businessIdentities.splice(0,businessIdentities.length,...(validIdentity?identities.map(x=>({...x})):[]));
+  creationReady=Boolean(creation && Object.keys(customerCreation).every(k=>
+    Array.isArray(creation[k]) && creation[k].length &&
+    creation[k].every(v=>typeof v==='string' && v.trim()) && new Set(creation[k]).size===creation[k].length));
+  Object.keys(customerCreation).forEach(k=>customerCreation[k].splice(0,customerCreation[k].length,...(creationReady?creation[k]:[])));
   stages.splice(0,stages.length,...ss.map(s=>({...s})));
   grades.splice(0,grades.length,...gg.map(g=>({...g,max:g.max===null?Infinity:g.max})));
   mapAmountRanges.splice(0,mapAmountRanges.length,...value.map_amount_ranges.map(r=>({...r,max:r.max===null?Infinity:r.max})));
   ready=true;return value;
 }
-module.exports={customer,stages,grades,mapAmountRanges,install,clear,isReady:()=>ready};
+module.exports={businessIdentities,customer,customerCreation,stages,grades,mapAmountRanges,install,clear,isReady:()=>ready,isCustomerCreationReady:()=>creationReady};

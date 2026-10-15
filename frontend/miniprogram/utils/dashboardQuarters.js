@@ -7,8 +7,9 @@ function selectedQuarters(options, keys) {
   const rows=options.filter(item=>keys.includes(item.key)).sort((a,b)=>a.year-b.year||a.quarter-b.quarter);
   if (!rows.length) return null;
   const last=rows[rows.length-1];
+  const isFullYear=rows.length===4;
   return { ...last, quarters:rows.map(item=>item.quarter), keys:rows.map(item=>item.key),
-    label:`${last.year} ${rows.map(item=>`Q${item.quarter}`).join('+')}` };
+    isFullYear, label:isFullYear?`${last.year}年 全年`:`${last.year} ${rows.map(item=>`Q${item.quarter}`).join('+')}` };
 }
 // BACKEND-CONTRACT QUARTER: selection只表示一个年份内多个季度，不支持跨年混合求和。
 function matchesSelectedQuarter(date, selection) {

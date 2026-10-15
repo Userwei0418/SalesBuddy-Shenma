@@ -1,0 +1,156 @@
+{
+  "scenario": "off",
+  "account": "XS001",
+  "checks": [
+    {
+      "name": "RLS enforced",
+      "passed": true
+    },
+    {
+      "name": "exact approved identity",
+      "passed": true
+    },
+    {
+      "name": "facts use actual role and scope",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "session belongs to XS001",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session: 200",
+      "passed": true
+    },
+    {
+      "name": "session belongs to XS002",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations: 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/af335ac8-251b-4fc0-b505-20c8bd84cd44/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/af335ac8-251b-4fc0-b505-20c8bd84cd44/messages: 202",
+      "passed": true
+    },
+    {
+      "name": "same message replays same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/af335ac8-251b-4fc0-b505-20c8bd84cd44/messages: 409",
+      "passed": true
+    },
+    {
+      "name": "report completed",
+      "passed": true
+    },
+    {
+      "name": "same role card contract",
+      "passed": true
+    },
+    {
+      "name": "no model operations or provider fields in public card",
+      "passed": true
+    },
+    {
+      "name": "formal business and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "one answer and no draft artifact",
+      "passed": true
+    },
+    {
+      "name": "one worker job and receipt",
+      "passed": true
+    },
+    {
+      "name": "real provider final HTTP success in one operation",
+      "passed": true
+    },
+    {
+      "name": "original only",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/3335af18-b86b-497c-8ae7-9eef85222761: 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/af335ac8-251b-4fc0-b505-20c8bd84cd44/messages: 200",
+      "passed": true
+    },
+    {
+      "name": "private conversation unreadable",
+      "passed": true
+    },
+    {
+      "name": "private report RLS unreadable",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "af335ac8-251b-4fc0-b505-20c8bd84cd44",
+    "run_id": "3335af18-b86b-497c-8ae7-9eef85222761"
+  },
+  "preflight_only": false,
+  "started_at": "2026-09-12T08:19:37.149484+00:00",
+  "facts": {
+    "counts": {
+      "tasks": 40,
+      "visits": 41,
+      "risks": 24,
+      "opportunities": 46
+    },
+    "sha256": "aba2a8ff84f4d674b72b8feeb6519b42c7203d0883ca22e621a94d18139feaab",
+    "json_bytes": 106393,
+    "scope_label": "个人"
+  },
+  "protected_before": {
+    "crm.customer": "1452d85ed3a315861a733c47987ee8364b45d3cee176fb64eb8f22c3f3d8f3ee",
+    "crm.opportunity": "34f607069dd963047a72f36cd0b631c3628da81610a1ebaa73fb262169d1152b",
+    "activity.visit": "e5c3daec5c8d7a47fb684673d4604c39e29e50a907b2476121524d02342b3887",
+    "workflow.task": "3bcc4c8fd6bdf50eb481709a58ab4a456b24c5e608039da67f2f4f884a65ee3d",
+    "workflow.task_assignee": "c9c1f5a51cf108e5d707002fc533807cd46f6758277edf877270f6c9913a4550",
+    "insight.risk": "9b07e74c8ab0cce740bc43f7ec2a929022f5168abe600adcf7f74b75b10f2244",
+    "workflow.notification": "d20d2193fe32970af9bb33f982cd8c13a7dd6dd1d4080e63b2d144d919620cf5"
+  },
+  "status": "succeeded",
+  "elapsed_ms": 8080,
+  "inference_route": null,
+  "business_error_code": null,
+  "attempts": [
+    {
+      "provider_code": "senseaudio",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "3335af18-b86b-497c-8ae7-9eef85222761",
+      "dispatch_suppressed": null
+    }
+  ],
+  "passed": true,
+  "real_business_verified": true,
+  "platform_accepted": false,
+  "new_report_cards": 1,
+  "formal_business_writes": 0,
+  "finished_at": "2026-09-12T08:19:45.609302+00:00"
+}

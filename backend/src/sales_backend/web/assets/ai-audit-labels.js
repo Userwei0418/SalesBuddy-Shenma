@@ -1,6 +1,7 @@
 // Current product display names follow the recorded Agent ID, never the business purpose of a call.
 // Remote publication titles and historical receipts remain separate evidence.
 const names = Object.freeze({
+  "01a0e770-93f7-74ce-84a7-1265283a54f8": "Raccoon SalesBuddy·周会任务整理",
   "01a09022-c5ff-7562-bd7d-f8d6c74f5486": "Raccoon SalesBuddy·销售经营问数",
   "01a09021-b848-7e7f-9567-e20859d29bf8": "Raccoon SalesBuddy·客户作战地图评估",
   "01a09022-bb1a-7dab-8481-917e0472c528": "Raccoon SalesBuddy·个人客户风险识别",
@@ -19,7 +20,7 @@ export const providers = Object.freeze({agent_platform:"中台智能体", sensea
 export const label = (map, key, fallback = "历史未记录") => Object.hasOwn(map, key) ? map[key] : fallback;
 export const agentId = model => String(model || "").startsWith("agent:") ? String(model).slice(6) : null;
 export const agentName = id => id ? label(names, id, "未登记名称的中台智能体") : "未记录智能体";
-export const modelName = model => agentId(model) ? agentName(agentId(model)) : model ? "原模型接口" : "未记录模型";
+export const modelName = model => agentId(model) ? agentName(agentId(model)) : model ? String(model) : "未记录模型";
 export function calledAgents(operation) {
   const ids = [...new Set((operation.attempts || []).filter(a =>
     a.provider === "agent_platform" && !a.network_dispatch_suppressed).map(a => agentId(a.model)).filter(Boolean))];
@@ -31,8 +32,15 @@ const errors = Object.freeze({
   "competency_review.dimension_code":"能力复盘维度未定义或重复",
   "competency_review.score":"能力复盘分数不是零到一百分之间的有效数值",
   "competency_review.evidence":"能力复盘证据列表格式或数量不符合要求",
-  TimeoutError:"中台响应超时", InvalidAgentResult:"中台返回未通过业务字段校验",
-  ProviderUnavailable:"中台服务不可用", ControlledPlatformBlock:"测试拦截，未向中台发送",
+  TimeoutError:"模型请求超时", InvalidAgentResult:"模型返回未通过业务字段校验",
+  ProviderUnavailable:"模型服务不可用", ControlledPlatformBlock:"测试拦截，未向中台发送",
+  SenseAudioError:"模型接口请求未成功",
+  CancelledError:"请求已中止，可能由超时或取消引起",
+  CallQuotaExceeded:"公司 AI 或语音调用额度不足",
+  AIServiceUnavailable:"当前公司 AI 服务不可用",
+  CircuitOpenError:"模型接口连续失败，暂时停止发送请求",
+  AgentUnavailable:"未取得可用的模型结果",
+  ReconciliationRequired:"操作结果需要核对，请勿重复提交",
   PlatformNotSelected:"中台未启用或未配置", fde_invalid_json:"返回内容无法解析为完整、无歧义的结构化对象",
   fde_expected_json_object:"返回类型错误，需要一个结构化对象",
   "today_tasks.due_conflicts_with_source":"建议时间与原任务截止时间冲突",
@@ -40,6 +48,6 @@ const errors = Object.freeze({
   "today_tasks.due_without_source":"建议时间缺少来源依据",
   "today_tasks.source_deadline_needs_confirmation":"原任务截止时间尚未确认",
 });
-export const errorName = code => code ? label(errors, code, "返回字段、类型或引用不符合业务契约，技术明细可导出核对") : "未记录异常";
+export const errorName = code => code ? label(errors, code, `未归类错误（${String(code)}）`) : "未记录异常";
 export const requestStates = Object.freeze({succeeded:"请求成功",accepted:"请求成功",failed:"请求失败",running:"请求中",cancelled:"请求已取消",suppressed:"未发送"});
 export const stopStates = Object.freeze({not_requested:"无需停止请求",acknowledged:"中台已确认停止",requested:"已请求停止",failed:"停止请求失败",not_available:"未取得可停止的任务编号",unknown:"停止状态未核实"});

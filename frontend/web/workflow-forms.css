@@ -1,0 +1,295 @@
+/* Web-only composition for the shared opportunity and task creation flows. */
+body:not(.web-login) #page-root .web-workflow{color:var(--ui-ink);font:var(--ui-text-body)/1.65 var(--ui-font);background:transparent;min-width:0}
+body:not(.web-login) #page-root .web-workflow :is(.opportunity-create-hero,.task-hero){background:transparent;box-shadow:none;border:0;border-radius:0;color:var(--ui-ink);margin:0;padding:0 0 var(--ui-space-4);overflow:visible}
+body:not(.web-login) #page-root .web-workflow .hero-title{font-size:var(--ui-text-page);line-height:1.5;font-weight:650;letter-spacing:0}
+body:not(.web-login) #page-root .web-workflow .hero-subtitle{font-size:var(--ui-text-small);color:var(--ui-secondary);margin:var(--ui-space-1) 0 0;line-height:1.65}
+body:not(.web-login) #page-root .web-workflow .hero-scope{padding:var(--ui-space-1) var(--ui-space-2);margin:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:var(--ui-text-small);box-shadow:none}
+body:not(.web-login) #page-root .web-workflow .hero-scope>text{display:none}
+body:not(.web-login) #page-root .web-workflow :is(.surface,.web-workflow-panel){border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);box-shadow:none;background:var(--ui-surface);padding:var(--ui-space-6);margin:0;min-width:0}
+body:not(.web-login) #page-root .web-workflow .section-head{display:flex;align-items:start;justify-content:space-between;gap:var(--ui-space-3);margin:0 0 var(--ui-space-3);padding:0}
+body:not(.web-login) #page-root .web-workflow :is(.card-title,.section-head>view>text){font-size:var(--ui-text-section);font-weight:600;color:var(--ui-ink);line-height:1.5}
+body:not(.web-login) #page-root .web-workflow :is(.card-description,.section-head label,.section-head>text){display:block;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.65;margin-top:var(--ui-space-1)}
+body:not(.web-login) #page-root .web-workflow :is(.submit,.task-type-option){font-family:var(--ui-font);font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow :is(.submit,.search-shell,.task-type-option,.setting-card,.description-card,.assignee-select,.choice,.custom-due,.due-field){border-radius:var(--ui-radius-control);box-shadow:none}
+body:not(.web-login) #page-root .web-workflow :is(.submit,.task-type-option)::after{border:0}
+body:not(.web-login) #page-root .web-workflow .submit{height:var(--ui-control-height);min-height:var(--ui-control-height);width:auto;min-width:132px;flex:none;line-height:34px;padding:0 var(--ui-space-6);margin:0;border:1px solid var(--ui-primary);background:var(--ui-primary);color:#fff;font-weight:600;box-shadow:none;letter-spacing:0}
+body:not(.web-login) #page-root .web-workflow .submit:hover:not(:disabled):not(.disabled){background:var(--ui-primary-hover)}
+body:not(.web-login) #page-root .web-workflow .submit:is(:disabled,.disabled,.submit-disabled){background:var(--ui-neutral-soft);border-color:var(--ui-line);color:var(--ui-muted);opacity:1;cursor:not-allowed}
+body:not(.web-login) #page-root .web-workflow :is(.web-workflow-footer,.footer){font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-workflow-scroll{min-width:0;min-height:0}
+
+/* Opportunity: customer context on the left, form and optional sections on the right. */
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-columns{display:grid;grid-template-columns:280px minmax(0,1fr);gap:var(--ui-space-6);align-items:start}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-customer-pane{position:sticky;top:0;min-width:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-picker-card{padding:var(--ui-space-4)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .search-shell{display:flex;gap:var(--ui-space-2);align-items:center;height:var(--ui-field-height);padding:0 var(--ui-space-3);margin:var(--ui-space-4) 0 var(--ui-space-2);border:1px solid var(--ui-line);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .search-shell:focus-within{border-color:var(--ui-focus);box-shadow:0 0 0 2px var(--ui-selected)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .search-icon{font-size:var(--ui-text-section);color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .search{border:0;background:transparent;box-shadow:none;padding:0;flex:1;min-width:0;height:38px;font-size:var(--ui-text-body);outline:none}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer{width:100%;display:flex;align-items:center;gap:var(--ui-space-2);margin:0;padding:var(--ui-space-3) 0;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;min-height:44px;background:transparent;text-align:left;font:inherit;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer:hover{background:var(--ui-selected)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-avatar{display:none}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-result-name{flex:1;min-width:0;font-size:var(--ui-text-body);white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-arrow{font-size:var(--ui-text-section);color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-context{display:flex;align-items:start;gap:var(--ui-space-3);width:100%;box-sizing:border-box;padding:var(--ui-space-4);margin:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-context-icon{width:32px;height:32px;flex:0 0 32px;line-height:32px;background:var(--ui-selected);color:var(--ui-primary);border-radius:var(--ui-radius-control);font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-context-copy{min-width:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-context-copy>text{font-size:var(--ui-text-small);color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .customer-context-copy>view{font-size:var(--ui-text-body);color:var(--ui-ink);line-height:1.65;overflow-wrap:anywhere;margin-top:var(--ui-space-1)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-awaiting{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:var(--ui-space-3);min-height:260px;padding:var(--ui-space-6);border:1px dashed var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);text-align:center}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-awaiting-mark{width:32px;height:32px;line-height:32px;border:1px solid var(--ui-line);color:var(--ui-muted);border-radius:50%}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-awaiting>text{font-size:var(--ui-text-section);font-weight:600}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-awaiting>label{max-width:320px;color:var(--ui-muted);font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .form-heading{padding-bottom:var(--ui-space-4);margin-bottom:var(--ui-space-4);border-bottom:1px solid var(--ui-line)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form{padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-4)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form>:is(.field:first-child,.field:nth-child(2),.grid,.hint,.fold,.forecast,.field:last-child){grid-column:1/-1}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .field{margin:0;padding:0;min-width:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-4);margin:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .label{font-size:var(--ui-text-body);font-weight:500;margin:0 0 var(--ui-space-2);line-height:1.5;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form :is(.required,.optional){font-size:var(--ui-text-small);margin-left:var(--ui-space-1);font-weight:400}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .required{color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .optional{color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form :is(.control,.quarter){box-sizing:border-box;width:100%;min-height:var(--ui-field-height);height:auto;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);font-size:var(--ui-text-body);line-height:22px;color:var(--ui-ink);box-shadow:none}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form input.control{height:var(--ui-field-height)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .track{height:3px;margin:var(--ui-space-2) 0 0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .track .step{height:3px}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form :is(.hint,.error,.chevron,.quarter-text,.forecast-results-head label){font-size:var(--ui-text-small);line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .hint{color:var(--ui-muted);margin-top:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fold{margin:0;padding:var(--ui-space-3) var(--ui-space-4);border-top:0;font-size:var(--ui-text-body);min-height:var(--ui-field-height);align-items:center}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fold-text{font-size:var(--ui-text-small);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .forecast{padding:var(--ui-space-4);margin:0;background:var(--ui-surface-subtle);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .forecast>.grid{margin-top:var(--ui-space-4)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .forecast-results{padding:var(--ui-space-3);margin-top:var(--ui-space-4);border-radius:var(--ui-radius-control);background:var(--ui-surface);border:1px solid var(--ui-line)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .forecast-result label{font-size:var(--ui-text-section)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .forecast-result text{font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fde-picker-view.field{padding:0;margin:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fde-picker-view.heading{margin:0 0 var(--ui-space-2);font-size:var(--ui-text-body);line-height:21px}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fde-picker-view.heading text{font-size:var(--ui-text-body);font-weight:500}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fde-picker-view.chosen{padding:var(--ui-space-2) var(--ui-space-3);min-height:40px;box-sizing:border-box;background:var(--ui-surface);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .fde-picker-label{font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form .partner-option{font-size:var(--ui-text-body);padding:var(--ui-space-3) 0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .loading-card{font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create :is(.empty-hint,.error-card){font-size:var(--ui-text-small);padding:var(--ui-space-3);margin:var(--ui-space-2) 0;line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create>.footer{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:var(--ui-space-4);margin:0}
+body:not(.web-login) #page-root .web-workflow.web-opportunity-create .footer-hint{font-size:var(--ui-text-small);color:var(--ui-muted);margin:0}
+
+/* Task: readable description beside compact execution settings. */
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-hero{display:grid;grid-template-columns:1fr auto;align-items:center}
+body:not(.web-login) #page-root .web-workflow.web-task-create .hero-title{grid-column:1;grid-row:1}
+body:not(.web-login) #page-root .web-workflow.web-task-create .hero-subtitle{grid-column:1;grid-row:2}
+body:not(.web-login) #page-root .web-workflow.web-task-create .hero-scope{grid-column:2;grid-row:1/3}
+body:not(.web-login) #page-root .web-workflow.web-task-create .web-task-columns{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:var(--ui-space-6);padding:0;align-items:start}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-options{gap:var(--ui-space-3);margin:0 0 var(--ui-space-6)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-option{padding:var(--ui-space-3);margin:0;min-width:0;background:var(--ui-surface);border:1px solid var(--ui-line);line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-option.selected{background:var(--ui-selected);border-color:var(--ui-focus)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-title{font-size:var(--ui-text-body);font-weight:600}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-note{font-size:var(--ui-text-small);margin-top:var(--ui-space-1);color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-check{width:16px;height:16px;font-size:12px;line-height:16px}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.task-link-card,.advice-source){padding:var(--ui-space-3);margin:0 0 var(--ui-space-6);background:var(--ui-surface-subtle);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-link-row{min-height:40px;padding:var(--ui-space-2) 0;gap:var(--ui-space-3)}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.task-link-label,.task-link-value,.advice-source-title){font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.task-link-note,.task-link-error,.advice-source-note){font-size:var(--ui-text-small);line-height:1.65;margin-top:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .description-card{padding:0;margin:0;border:0;background:transparent;box-shadow:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .description-card textarea{display:block;box-sizing:border-box;width:100%;min-height:160px;height:160px;max-height:320px;resize:vertical;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);padding:var(--ui-space-3);font:var(--ui-text-body)/1.65 var(--ui-font);color:var(--ui-ink);background:var(--ui-surface);margin:0}
+body:not(.web-login) #page-root .web-workflow.web-task-create .description-card textarea:focus{border-color:var(--ui-focus);outline:2px solid var(--ui-selected)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice{padding:var(--ui-space-2) var(--ui-space-3);margin-top:var(--ui-space-3);gap:var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-subtle);box-shadow:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice-icon{width:28px;height:28px;border-radius:var(--ui-radius-control);box-shadow:none;background:var(--ui-selected);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-wave{height:16px;gap:2px}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-wave text{width:2px;background:var(--ui-primary)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice-copy>view{font-size:var(--ui-text-body);font-weight:500}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.task-voice-copy>text,.task-voice-action,.description-tip){font-size:var(--ui-text-small);line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice-action{padding:var(--ui-space-1) var(--ui-space-2);border-radius:var(--ui-radius-control);background:var(--ui-selected);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice-copy{flex:1;min-width:0}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-voice-action{flex:0 0 auto;min-width:40px;white-space:nowrap;text-align:center;box-sizing:border-box}
+body:not(.web-login) #page-root .web-workflow.web-task-create .description-tip{padding:0;margin-top:var(--ui-space-3);color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .assignee-select{padding:var(--ui-space-3);margin:0 0 var(--ui-space-6);border:1px solid var(--ui-line);background:var(--ui-surface);gap:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .assignee-avatar{width:32px;height:32px;line-height:32px;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-selected);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .assignee-copy>view{font-size:var(--ui-text-body);line-height:1.65;font-weight:500}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.assignee-copy label,.assignee-copy text){font-size:var(--ui-text-small);line-height:1.65;color:var(--ui-muted)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .setting-card{padding:0;border:0;margin:0;background:transparent;box-shadow:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .setting-block{padding:0}
+body:not(.web-login) #page-root .web-workflow.web-task-create .setting-label{font-size:var(--ui-text-body);font-weight:500;line-height:1.65;margin:0 0 var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .setting-label-row label{display:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .setting-label-row .web-required{font-size:var(--ui-text-small);font-weight:400;color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .choice-row{gap:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .choice{height:var(--ui-control-height);line-height:34px;box-sizing:border-box;min-width:0;flex:1;padding:0 var(--ui-space-3);font-size:var(--ui-text-body);background:var(--ui-surface);border:1px solid var(--ui-line)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .choice.selected{color:var(--ui-primary);border-color:var(--ui-focus);background:var(--ui-selected)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .divider{margin:var(--ui-space-6) 0;background:var(--ui-line)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .custom-due{padding:0;border:0;background:transparent;box-shadow:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .custom-due-head{display:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .custom-due-fields{gap:var(--ui-space-2);margin:0;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .due-field{display:flex;gap:var(--ui-space-2);min-height:var(--ui-field-height);padding:var(--ui-space-2);box-sizing:border-box;border:1px solid var(--ui-line);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .due-field>view:first-child{display:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .due-field label{font-size:var(--ui-text-small);line-height:1.5}
+body:not(.web-login) #page-root .web-workflow.web-task-create .due-field text{font-size:var(--ui-text-body);line-height:1.65;white-space:nowrap}
+body:not(.web-login) #page-root .web-workflow.web-task-create .delivery-preview{margin:var(--ui-space-4) 0 0;padding:var(--ui-space-3);border-radius:var(--ui-radius-control);background:var(--ui-selected);gap:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .delivery-preview text{font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .delivery-preview label{font-size:var(--ui-text-small);line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-task-create .delivery-preview .preview-icon{font-size:var(--ui-text-body);width:20px;height:20px;line-height:20px}
+body:not(.web-login) #page-root .web-workflow.web-task-create .bottom-bar{display:flex;flex-direction:row-reverse;align-items:center;justify-content:space-between;gap:var(--ui-space-4);margin:0}
+body:not(.web-login) #page-root .web-workflow.web-task-create .bottom-bar>view{font-size:var(--ui-text-small);line-height:1.65;color:var(--ui-muted);margin:0;text-align:left}
+body:not(.web-login) #page-root .web-workflow.web-task-create .bottom-bar .submit text{display:none}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-sheet{width:min(560px,calc(100vw - 32px));border-radius:var(--ui-radius-panel);padding:var(--ui-space-6)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-head button{height:var(--ui-control-height-compact);padding:0 var(--ui-space-3);font-size:var(--ui-text-small);line-height:30px;border-radius:var(--ui-radius-control);color:var(--ui-secondary);background:var(--ui-neutral-soft)}
+body:not(.web-login) #page-root .web-workflow.web-task-create :is(.task-selector-head,.task-selector-row){font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-search{height:40px;font-size:var(--ui-text-body);padding:0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);box-sizing:border-box}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-row{padding:var(--ui-space-3) 0;line-height:1.65}
+body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-state{font-size:var(--ui-text-small)}
+
+@media(min-width:901px){
+ body:not(.web-login):is([data-route=opportunity-create],[data-route=management-task-create]) #page-root{overflow:hidden;min-height:0;padding:var(--ui-space-6);scroll-padding-bottom:0}
+ body:not(.web-login) #page-root>.web-workflow:is(.task-page,.page-shell){display:flex;flex-direction:column;gap:0;width:100%;max-width:1160px;height:100%;min-height:0;box-sizing:border-box;margin:0 auto;padding:0;background:transparent}
+ body:not(.web-login) #page-root .web-workflow :is(.opportunity-create-hero,.task-hero){flex:none;padding:0 0 var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow .web-workflow-scroll{flex:1;overflow:auto;scrollbar-gutter:stable;padding:0 var(--ui-space-1) var(--ui-space-4) 0;overscroll-behavior:contain}
+ body:not(.web-login) #page-root .web-workflow>:is(.footer,.bottom-bar){position:static;flex:none;inset:auto;width:100%;box-sizing:border-box;padding:var(--ui-space-3) 0 0;min-height:49px;border-top:1px solid var(--ui-line);background:transparent;backdrop-filter:none}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-layer{align-items:center;justify-content:center}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .task-selector-sheet{height:min(600px,calc(100dvh - 64px));background:var(--ui-surface)}
+}
+@media(min-width:901px) and (max-width:1200px){
+ body:not(.web-login) #page-root .web-workflow.web-task-create .web-task-columns{grid-template-columns:minmax(0,1fr) 300px;gap:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-columns{grid-template-columns:224px minmax(0,1fr);gap:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow :is(.surface,.web-workflow-panel){padding:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-options{grid-template-columns:1fr}
+}
+@media(max-width:900px){
+ body:not(.web-login) #page-root .web-workflow:is(.task-page,.page-shell){padding:var(--ui-space-4);max-width:none;margin:0;background:transparent}
+ body:not(.web-login) #page-root .web-workflow:is(.web-opportunity-create,.web-task-create) :is(.web-op-columns,.web-task-columns){display:flex;flex-direction:column;gap:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow:is(.web-opportunity-create,.web-task-create) :is(.web-op-customer-pane,.web-op-form-pane,.web-workflow-panel){width:100%;box-sizing:border-box;position:static}
+ body:not(.web-login) #page-root .web-workflow :is(.surface,.web-workflow-panel){padding:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-workflow.web-opportunity-create .web-op-awaiting{display:none}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .hero-scope{grid-column:1;grid-row:3;justify-self:start;margin-top:var(--ui-space-2)}
+ body:not(.web-login) #page-root .web-workflow>:is(.footer,.bottom-bar){position:sticky;bottom:66px;inset-inline:auto;width:100%;box-sizing:border-box;padding:var(--ui-space-3) 0;margin-top:var(--ui-space-4);background:var(--ui-surface);border-top:1px solid var(--ui-line);z-index:5;gap:var(--ui-space-2)}
+ body:not(.web-login) #page-root .web-workflow .submit{min-width:116px;padding-inline:var(--ui-space-3)}
+ body:not(.web-login) #page-root .web-workflow.web-opportunity-create .opp-form{grid-template-columns:1fr}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-options{gap:var(--ui-space-2)}
+ body:not(.web-login) #page-root .web-workflow.web-task-create .task-type-option{padding:var(--ui-space-2)}
+}
+
+/* Extended forms: customer creation/maintenance/assignment and Demo registration.
+ * Scoped wrappers preserve their native conditions, validation and submit handlers. */
+body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]) #page-root{overflow:hidden;min-height:0;padding:var(--ui-space-4) var(--ui-space-6);scroll-padding-bottom:0}
+body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]) #page-root>.web-extended-form{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;max-width:1160px;box-sizing:border-box;margin:0 auto;padding:0;background:transparent;color:var(--ui-ink);font:var(--ui-text-body)/1.6 var(--ui-font)}
+body:not(.web-login) #page-root .web-extended-form .web-extended-loaded{display:flex;flex:1;flex-direction:column;min-height:0}
+body:not(.web-login) #page-root .web-extended-form .web-extended-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 var(--ui-space-1) var(--ui-space-3) 0}
+body:not(.web-login) #page-root .web-extended-form :is(.create-hero,.confirm-hero,.hero,.demo-head){position:relative;flex:none;background:transparent;color:var(--ui-ink);box-shadow:none;border:0;border-radius:0;margin:0;padding:0 0 var(--ui-space-3);overflow:visible}
+body:not(.web-login) #page-root .web-extended-form :is(.hero-title,.title,.demo-title){margin:0;font-size:var(--ui-text-page);font-weight:650;line-height:1.4;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body:not(.web-login) #page-root .web-extended-form :is(.hero-subtitle,.subtitle,.hero-meta,.progress-copy,.demo-context){margin-top:var(--ui-space-1);color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;opacity:1;overflow-wrap:anywhere}
+body:not(.web-login) #page-root .web-extended-form :is(.hero-eyebrow,.eyebrow,.demo-eyebrow,.editor-eyebrow,.sheet-handle){display:none}
+body:not(.web-login) #page-root .web-extended-form :is(.hero-progress,.progress){height:3px;margin:var(--ui-space-2) 0 0;background:var(--ui-line);box-shadow:none;border-radius:0}
+body:not(.web-login) #page-root .web-extended-form :is(.hero-progress,.progress)>view{background:var(--ui-primary)}
+body:not(.web-login) #page-root .web-extended-form .hero-copy{padding-right:56px}
+body:not(.web-login) #page-root .web-extended-form :is(.progress-orb,.score){position:absolute;right:0;top:0;display:flex;align-items:center;justify-content:center;width:44px;height:32px;padding:0;border:0;border-radius:var(--ui-radius-control);background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-section);box-shadow:none;backdrop-filter:none}
+body:not(.web-login) #page-root .web-extended-form :is(.progress-orb label,.score text){font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-extended-form .hero-top{padding-right:56px}
+body:not(.web-login) #page-root .web-extended-form .hero-meta{display:flex;justify-content:space-between;gap:var(--ui-space-3)}
+body:not(.web-login) #page-root .web-extended-form :is(.notice,.ai-card,.voice-card){margin:0 0 var(--ui-space-3);padding:var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font-size:var(--ui-text-small);line-height:1.6;box-shadow:none;backdrop-filter:none}
+body:not(.web-login) #page-root .web-extended-form .notice.blue{color:var(--ui-primary);background:var(--ui-selected)}
+body:not(.web-login) #page-root .web-extended-form .notice.orange{color:var(--ui-warning);background:var(--ui-warning-soft)}
+body:not(.web-login) #page-root .web-extended-form .notice.green{color:var(--ui-success);background:var(--ui-success-soft)}
+body:not(.web-login) #page-root .web-extended-form :is(.voice-card,.ai-card){background:var(--ui-surface-subtle)}
+body:not(.web-login) #page-root .web-extended-form .voice-card{display:flex;align-items:center;gap:var(--ui-space-3)}
+body:not(.web-login) #page-root .web-extended-form :is(.voice-icon,.ai-badge){display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;padding:0;border-radius:var(--ui-radius-control);background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-small);box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form :is(.voice-copy>view,.ai-head>view:last-child>view){font-size:var(--ui-text-body);color:var(--ui-ink);line-height:1.5}
+body:not(.web-login) #page-root .web-extended-form :is(.voice-copy>text,.voice-action,.ai-head>view:last-child>text,.ai-copy){font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-extended-form .voice-action{background:var(--ui-selected);color:var(--ui-primary);padding:var(--ui-space-1) var(--ui-space-2)}
+body:not(.web-login) #page-root .web-extended-form .recording .voice-action{background:var(--ui-danger);color:var(--ui-surface)}
+body:not(.web-login) #page-root .web-extended-form .ai-copy{margin-top:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-extended-form :is(.section-heading,.section-head){margin:var(--ui-space-3) 0 var(--ui-space-2);padding:0}
+body:not(.web-login) #page-root .web-extended-form :is(.section-heading text,.section-head text){font-size:var(--ui-text-section);font-weight:600;line-height:1.5;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-extended-form :is(.section-heading label,.section-head label,.section-heading>text:last-child){font-size:var(--ui-text-small);font-weight:400;line-height:1.5;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-extended-form .field-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--ui-line);padding:0;margin:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);box-shadow:none;backdrop-filter:none;overflow:hidden}
+body:not(.web-login) #page-root .web-extended-form .field-row{min-width:0;margin:0;padding:var(--ui-space-3) var(--ui-space-4);border:0;background:var(--ui-surface);cursor:pointer}
+body:not(.web-login) #page-root .web-extended-form .field-row.missing{background:var(--ui-warning-soft)}
+body:not(.web-login) #page-root .web-extended-form .field-row.system{background:var(--ui-surface-subtle)}
+body:not(.web-login) #page-root .web-extended-form .field-row.edited{box-shadow:inset 3px 0 var(--ui-success)}
+body:not(.web-login) #page-root .web-extended-form .field-row.voice-filled:not(.edited){box-shadow:inset 3px 0 var(--ui-primary)}
+body:not(.web-login) #page-root .web-extended-form :is(.field-label,.field-label>text,.field-label label,.field-value>label,.field-value>view,.field-value label){font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-extended-form .field-label label{padding:0 var(--ui-space-1);background:var(--ui-neutral-soft);color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-extended-form .field-value{margin-top:var(--ui-space-1);gap:var(--ui-space-3);align-items:start}
+body:not(.web-login) #page-root .web-extended-form .field-value>text{min-width:0;font-size:var(--ui-text-body);line-height:1.6;color:var(--ui-ink);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body:not(.web-login) #page-root .web-extended-form .field-row.missing .field-value>:is(text,view,label){color:var(--ui-warning)}
+body:not(.web-login) #page-root .web-extended-form .web-extended-footer{position:static;inset:auto;flex:none;display:flex;justify-content:flex-end;align-items:center;gap:var(--ui-space-3);width:100%;margin:0;padding:var(--ui-space-3) 0 0;border-top:1px solid var(--ui-line);background:transparent;box-shadow:none;backdrop-filter:none;z-index:2}
+body:not(.web-login) #page-root .web-extended-form .web-extended-footer button{display:flex;align-items:center;justify-content:center;flex:0 1 auto;min-width:120px;width:auto;height:var(--ui-field-height);min-height:var(--ui-field-height);margin:0;padding:0 var(--ui-space-4);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font:600 var(--ui-text-body)/1.5 var(--ui-font);box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form .web-extended-footer :is(.primary,.demo-submit),body:not(.web-login) #page-root .web-customer-edit .submit-bar button{background:var(--ui-primary);color:var(--ui-surface);border-color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-extended-form .web-extended-footer .secondary{background:var(--ui-surface);color:var(--ui-secondary)}
+/* Field editor keeps its original cancel/save handlers while only options scroll. */
+body:not(.web-login) #page-root .web-extended-form .editor-layer{display:flex;align-items:center;justify-content:center;padding:var(--ui-space-4);z-index:1000}
+body:not(.web-login) #page-root .web-extended-form .editor-sheet{position:relative;inset:auto;display:flex;flex-direction:column;width:min(560px,100%);max-height:calc(100dvh - 32px);padding:var(--ui-space-6);overflow:hidden;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);box-shadow:var(--ui-shadow-popup);backdrop-filter:none}
+body:not(.web-login) #page-root .web-extended-form .editor-head{flex:none;gap:var(--ui-space-3);margin:0 0 var(--ui-space-4)}
+body:not(.web-login) #page-root .web-extended-form .editor-title{margin:0;font-size:var(--ui-text-section);line-height:1.5;color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-extended-form .editor-close{width:36px;height:36px;flex:none;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);font-size:22px}
+body:not(.web-login) #page-root .web-extended-form .web-extended-editor-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;padding:2px}
+body:not(.web-login) #page-root .web-extended-form :is(.editor-control,.editor-textarea){padding:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-extended-form .editor-control{min-height:40px}
+body:not(.web-login) #page-root .web-extended-form .editor-control input{width:100%;height:40px;min-width:0;padding:0 var(--ui-space-3);font-size:var(--ui-text-body);color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-extended-form .editor-textarea textarea{width:100%;height:160px;min-height:100px;max-height:240px;padding:var(--ui-space-3);resize:vertical;font:var(--ui-text-body)/1.6 var(--ui-font)}
+body:not(.web-login) #page-root .web-extended-form :is(.editor-textarea>view,.editor-helper){padding:0 var(--ui-space-2);font-size:var(--ui-text-small);line-height:1.6;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-extended-form .editor-helper{margin-top:var(--ui-space-3)}
+body:not(.web-login) #page-root .web-extended-form .option-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-extended-form .option-item{min-width:0;min-height:40px;padding:var(--ui-space-2) var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);color:var(--ui-ink);overflow-wrap:anywhere}
+body:not(.web-login) #page-root .web-extended-form .option-item.selected{background:var(--ui-selected);color:var(--ui-primary);border-color:var(--ui-focus)}
+body:not(.web-login) #page-root .web-extended-form .option-item>view{width:16px;height:16px;flex:none;font-size:12px}
+body:not(.web-login) #page-root .web-extended-form .editor-actions{flex:none;margin-top:var(--ui-space-4);padding-top:var(--ui-space-3);border-top:1px solid var(--ui-line);gap:var(--ui-space-3)}
+body:not(.web-login) #page-root .web-extended-form .editor-actions button{height:40px;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);box-shadow:none}
+body:not(.web-login) #page-root .web-extended-form .editor-save{background:var(--ui-primary);color:var(--ui-surface)}
+/* Manual customer fields first; independently read-only Agent facts remain visible. */
+body:not(.web-login) #page-root .web-customer-edit .web-extended-edit-columns{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:var(--ui-space-4);align-items:start}
+body:not(.web-login) #page-root .web-customer-edit :is(.form-card,.agent-card){min-width:0;padding:var(--ui-space-4);margin:0;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface);box-shadow:none}
+body:not(.web-login) #page-root .web-customer-edit .form-card{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--ui-space-3) var(--ui-space-4)}
+body:not(.web-login) #page-root .web-customer-edit .form-card>:is(.section-head,.field:nth-child(2)){grid-column:1/-1}
+body:not(.web-login) #page-root .web-customer-edit .section-head{margin:0;padding:0 0 var(--ui-space-2)}
+body:not(.web-login) #page-root .web-customer-edit .field{min-width:0;padding:0;border:0}
+body:not(.web-login) #page-root .web-customer-edit .field>text{font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary);margin-bottom:var(--ui-space-2)}
+body:not(.web-login) #page-root .web-customer-edit .field input,body:not(.web-login) #page-root .web-customer-edit .picker{min-width:0;width:100%;min-height:40px;height:40px;padding:0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink);font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-customer-edit .customer-name-readonly{height:auto;min-height:40px;background:var(--ui-surface-subtle)}
+body:not(.web-login) #page-root .web-customer-edit :is(.picker label,.customer-name-readonly>label){font-size:var(--ui-text-small)}
+body:not(.web-login) #page-root .web-customer-edit .agent-head>view:first-child{width:28px;height:28px;border-radius:var(--ui-radius-control);font-size:12px;background:var(--ui-selected);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-customer-edit .agent-head text{font-size:var(--ui-text-body);color:var(--ui-ink)}
+body:not(.web-login) #page-root .web-customer-edit :is(.agent-head label,.lock,.agent-grid label,.agent-risk){font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-customer-edit .agent-grid{display:flex;flex-wrap:wrap;margin-top:var(--ui-space-3);border:0;border-radius:0;background:transparent}
+body:not(.web-login) #page-root .web-customer-edit .agent-grid>view{flex:1;min-width:64px;padding:var(--ui-space-2);border-color:var(--ui-line)}
+body:not(.web-login) #page-root .web-customer-edit .agent-grid text{font-size:var(--ui-text-section);line-height:1.5;color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-customer-edit .agent-risk{margin-top:var(--ui-space-3);overflow-wrap:anywhere}
+/* Demo create and authorized detail share a bounded editor, including multi-scene drafts. */
+body:not(.web-login) #page-root .web-demo-form .demo-sheet{display:flex;flex-direction:column;height:100%;min-height:0;width:100%;background:transparent;border-radius:0}
+body:not(.web-login) #page-root .web-demo-form .demo-scroll,body:not(.web-login) #page-root .web-demo-form .demo-detail-scroll{height:0;min-height:0}
+body:not(.web-login) #page-root .web-demo-form .demo-scene{padding:var(--ui-space-4);margin:0 0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-demo-form .demo-scene-number{flex:0 0 28px;height:28px;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-demo-form .demo-scene-title{font-size:var(--ui-text-body)}
+body:not(.web-login) #page-root .web-demo-form :is(.demo-scene-caption,.demo-label,.demo-note,.demo-error,.demo-submit-note,.demo-detail-meta,.demo-voice-title,.demo-voice-caption,.demo-voice-action){font-size:var(--ui-text-small);line-height:1.6}
+body:not(.web-login) #page-root .web-demo-form .demo-label{margin:var(--ui-space-3) 0 var(--ui-space-2);color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-demo-form .demo-input-shell{height:40px;padding:0 var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface)}
+body:not(.web-login) #page-root .web-demo-form .demo-input{height:38px;min-height:0;padding:0;font-size:var(--ui-text-body);background:transparent}
+body:not(.web-login) #page-root .web-demo-form .demo-description{height:130px;min-height:100px;max-height:260px;padding:var(--ui-space-3);border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);font:var(--ui-text-body)/1.6 var(--ui-font);background:var(--ui-surface);color:var(--ui-ink);resize:vertical}
+body:not(.web-login) #page-root .web-demo-form .demo-voice{min-height:40px;gap:var(--ui-space-3);padding:var(--ui-space-2) var(--ui-space-3);margin:var(--ui-space-3) 0 0;border-color:var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface-subtle)}
+body:not(.web-login) #page-root .web-demo-form .demo-voice-caption{margin:0}
+body:not(.web-login) #page-root .web-demo-form .demo-voice-action{padding:var(--ui-space-1) var(--ui-space-2);border-radius:var(--ui-radius-control)}
+body:not(.web-login) #page-root .web-demo-form .demo-mic{width:20px;flex:0 0 20px}
+body:not(.web-login) #page-root .web-demo-form .demo-remove{flex:0 0 36px;width:36px;height:36px;margin:0;border-radius:var(--ui-radius-control)}
+body:not(.web-login) #page-root .web-demo-form .demo-add{min-height:40px;padding:var(--ui-space-2);border:1px dashed var(--ui-focus);border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-selected);color:var(--ui-primary)}
+body:not(.web-login) #page-root .web-demo-form :is(.demo-note,.demo-error){padding:var(--ui-space-2) 0;margin:0;text-align:left;color:var(--ui-secondary)}
+body:not(.web-login) #page-root .web-demo-form .demo-error{color:var(--ui-danger)}
+body:not(.web-login) #page-root .web-demo-form .demo-submit-note{order:-1;flex:1;margin:0;color:var(--ui-secondary);text-align:left}
+body:not(.web-login) #page-root .web-demo-form .demo-detail-copy{font-size:var(--ui-text-body);line-height:1.8;overflow-wrap:anywhere;word-break:normal}
+body:not(.web-login) #page-root .web-demo-form .demo-detail-delete{background:var(--ui-danger-soft);color:var(--ui-danger)}
+@media(min-width:601px) and (max-width:1100px){
+ body:not(.web-login) #page-root .web-customer-edit .web-extended-edit-columns{grid-template-columns:minmax(0,1fr)}
+ body:not(.web-login) #page-root .web-customer-edit .agent-card{display:grid;grid-template-columns:1fr 1fr;gap:var(--ui-space-3)}
+ body:not(.web-login) #page-root .web-customer-edit .agent-risk{grid-column:1/-1;margin:0}
+ body:not(.web-login) #page-root .web-customer-edit .agent-grid{margin:0}
+}
+@media(max-width:600px){
+ body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]){height:100dvh;min-height:0;overflow:hidden}
+ body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]) .web-main{display:flex;flex-direction:column;height:100dvh;min-height:0;padding-bottom:66px;overflow:hidden}
+ body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]) :is(.web-topbar,.web-preview-notice){flex:none}
+ body:not(.web-login):is([data-route=customer-create],[data-route=customer-edit],[data-route=customer-assign-confirm],[data-route=demo-create]) #page-root{flex:1 1 0;height:auto;min-height:0;padding:var(--ui-space-3);overflow:hidden}
+ body:not(.web-login) #page-root .web-extended-form .field-list,body:not(.web-login) #page-root .web-customer-edit .web-extended-edit-columns{grid-template-columns:minmax(0,1fr)}
+ body:not(.web-login) #page-root .web-customer-edit .form-card{grid-template-columns:minmax(0,1fr)}
+ body:not(.web-login) #page-root .web-extended-form :is(.hero-title,.title,.demo-title){font-size:20px}
+ body:not(.web-login) #page-root .web-extended-form .web-extended-footer{gap:var(--ui-space-2)}
+ body:not(.web-login) #page-root .web-extended-form .web-extended-footer button{min-width:0;flex:1;padding:0 var(--ui-space-2);font-size:13px}
+ body:not(.web-login) #page-root .web-extended-form .editor-sheet{padding:var(--ui-space-4)}
+ body:not(.web-login) #page-root .web-extended-form .option-grid{grid-template-columns:minmax(0,1fr)}
+ body:not(.web-login) #page-root .web-demo-form .demo-submit-note{flex-basis:100%;order:1}
+ body:not(.web-login) #page-root .web-demo-form .demo-footer{flex-wrap:wrap}
+}

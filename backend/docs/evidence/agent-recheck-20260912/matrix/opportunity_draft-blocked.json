@@ -1,0 +1,286 @@
+{
+  "capability": "opportunity_draft",
+  "case": "blocked",
+  "started_at": "2026-09-12T09:15:32.860688+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "ae04f5f541969b23b7d02bb0ed1d9e1117a3d6d795719c5e1b1e99408e8b3d02",
+    "bytes": 1079,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 2
+      },
+      "customer": {
+        "type": "dict",
+        "count": 4
+      },
+      "current_opportunities": {
+        "type": "list",
+        "count": 3
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "9a9557f0-4105-4af3-b2e3-550e8bda7579",
+    "provider": "senseaudio",
+    "fallback_reason": "ControlledPlatformBlock",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 1379,
+    "platform_run": {
+      "execution_mode": "filtered_facts",
+      "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+      "actual_snapshot_id": null,
+      "runtime_snapshot_verified": false,
+      "tool_authority_issued": false,
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "test_fault_injected": true,
+      "network_dispatch_suppressed": true,
+      "transport": {
+        "http_status": null,
+        "request_started_ms": null,
+        "headers_received_ms": null,
+        "first_body_byte_ms": null,
+        "first_data_event_ms": null,
+        "first_text_ms": null,
+        "stream_completed_ms": null
+      }
+    }
+  },
+  "result": {
+    "sha256": "86fb6fe3a8937a5ffebbd85c512783510b916a18edd1cbdec3097e0e01af1df1",
+    "bytes": 636,
+    "fields": {
+      "action": {
+        "type": "str"
+      },
+      "opportunity_id": {
+        "type": "str"
+      },
+      "name": {
+        "type": "str"
+      },
+      "probability": {
+        "type": "NoneType"
+      },
+      "status": {
+        "type": "str"
+      },
+      "expected_close_date": {
+        "type": "NoneType"
+      },
+      "amount": {
+        "type": "float"
+      },
+      "partner_name": {
+        "type": "str"
+      },
+      "product_line": {
+        "type": "str"
+      },
+      "rationale": {
+        "type": "str"
+      },
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "missing_fields": {
+        "type": "list",
+        "count": 2
+      },
+      "prompt_version": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 1381,
+  "validation": [
+    {
+      "input": {
+        "sha256": "cadb806440214756e54541529f9e2d96df1654c63fd94c163dc463158a84bc87",
+        "bytes": 581,
+        "fields": {
+          "action": {
+            "type": "str"
+          },
+          "opportunity_id": {
+            "type": "str"
+          },
+          "name": {
+            "type": "str"
+          },
+          "probability": {
+            "type": "NoneType"
+          },
+          "status": {
+            "type": "str"
+          },
+          "expected_close_date": {
+            "type": "NoneType"
+          },
+          "amount": {
+            "type": "int"
+          },
+          "partner_name": {
+            "type": "str"
+          },
+          "product_line": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "str"
+          },
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 2
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "86fb6fe3a8937a5ffebbd85c512783510b916a18edd1cbdec3097e0e01af1df1",
+        "bytes": 636,
+        "fields": {
+          "action": {
+            "type": "str"
+          },
+          "opportunity_id": {
+            "type": "str"
+          },
+          "name": {
+            "type": "str"
+          },
+          "probability": {
+            "type": "NoneType"
+          },
+          "status": {
+            "type": "str"
+          },
+          "expected_close_date": {
+            "type": "NoneType"
+          },
+          "amount": {
+            "type": "float"
+          },
+          "partner_name": {
+            "type": "str"
+          },
+          "product_line": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "str"
+          },
+          "title": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "missing_fields": {
+            "type": "list",
+            "count": 2
+          },
+          "prompt_version": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "5e448c82-12f4-4cf8-b11d-cccb983b39d2",
+      "provider": "agent_platform",
+      "operation_id": "9a9557f0-4105-4af3-b2e3-550e8bda7579",
+      "model": "agent:01a09022-b58f-7214-85eb-29d035ea6f2c",
+      "attempt": 1,
+      "status": "failed",
+      "started_at": "2026-09-12T09:15:32.874810+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09022-b58f-7214-85eb-29d035ea6f2c",
+        "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 1372,
+        "input_sha256": "16a81a2b556e826e7c38497f3418da58f7b8118157863f42f85b6276c53c32f3",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": true,
+        "network_dispatch_suppressed": true
+      },
+      "error_type": "ControlledPlatformBlock",
+      "http_status": null,
+      "finished_at": "2026-09-12T09:15:32.874856+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": null,
+          "request_started_ms": null,
+          "headers_received_ms": null,
+          "first_body_byte_ms": null,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "b39600f3-5123-441a-9389-6d37e4e94186",
+      "provider": "senseaudio",
+      "operation_id": "9a9557f0-4105-4af3-b2e3-550e8bda7579",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:15:32.888186+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:15:34.240139+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": true,
+    "network_dispatch_suppressed": true,
+    "transport": {
+      "http_status": null,
+      "request_started_ms": null,
+      "headers_received_ms": null,
+      "first_body_byte_ms": null,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

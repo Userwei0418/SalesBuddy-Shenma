@@ -1,0 +1,79 @@
+{
+  "cases": [
+    {
+      "case": "normal-regular",
+      "elapsed_ms": 5061,
+      "run_id": "b8ba89cf-b9aa-4f04-9a5d-ed8f70b15932",
+      "operation_id": "d72ae3b5-d3bd-4fb9-b1b1-6fdd809ed24a",
+      "provider": "agent_platform",
+      "fallback_reason": null,
+      "platform_conversation_id": "5e1e13e5-1ef7-468a-aa5b-53d3b3cee63a",
+      "platform_task_id": "10ad241d-96da-4798-aa37-d2f7199eae2f"
+    },
+    {
+      "case": "normal-first",
+      "elapsed_ms": 3039,
+      "run_id": "3927102c-8fe9-4353-a6bb-9b359e070185",
+      "operation_id": "2372e2c2-8fb8-4a65-a324-f953d9b046df",
+      "provider": "agent_platform",
+      "fallback_reason": null,
+      "platform_conversation_id": "36cab733-7075-4ae6-9630-0f7e264ddab0",
+      "platform_task_id": "d08aa911-78ae-4569-a2b8-8224e3fe1476"
+    },
+    {
+      "case": "normal-review",
+      "elapsed_ms": 5053,
+      "run_id": "11f95d72-1d62-4973-a577-7001a732ede1",
+      "operation_id": "04c13c6a-a4d4-4d99-a923-5998c3a488c7",
+      "provider": "senseaudio",
+      "fallback_reason": "InvalidAgentResult",
+      "platform_conversation_id": "ce8f2c3b-fe07-405b-91d8-b468f0f28588",
+      "platform_task_id": "6e2d1f83-7c66-4b99-9b54-986cf4081704"
+    },
+    {
+      "case": "normal-poor",
+      "elapsed_ms": 6060,
+      "run_id": "4758cf7d-3f92-48ab-800d-be62e2fc0236",
+      "operation_id": "4d0bf91e-0056-41eb-b0f8-65b70a01a3e8",
+      "provider": "agent_platform",
+      "fallback_reason": null,
+      "platform_conversation_id": "84c79c9e-474a-4214-987c-a25e9f09b0e0",
+      "platform_task_id": "5cf78cbb-1e43-4e03-ac05-ffd2b57f5525"
+    },
+    {
+      "case": "off-regular",
+      "elapsed_ms": 4047,
+      "run_id": "adeef0c9-3646-4fd8-8c30-7021afbda382",
+      "operation_id": "adeef0c9-3646-4fd8-8c30-7021afbda382",
+      "provider": "senseaudio",
+      "fallback_reason": null,
+      "platform_conversation_id": null,
+      "platform_task_id": null
+    },
+    {
+      "case": "blocked-review",
+      "elapsed_ms": 3039,
+      "run_id": "28651927-3d81-4fb4-9bec-00ada1d2a9c1",
+      "operation_id": "c61bf7ef-2ae1-49c9-9ab8-752421765023",
+      "provider": "senseaudio",
+      "fallback_reason": "ControlledPlatformBlock",
+      "platform_conversation_id": null,
+      "platform_task_id": null
+    },
+    {
+      "case": "production-regular",
+      "elapsed_ms": 7066,
+      "run_id": "80a533bc-54bb-4994-84b1-c3e1e1f3917e",
+      "operation_id": "bb402521-f482-4d80-8830-0166d5c31322",
+      "provider": "senseaudio",
+      "fallback_reason": "InvalidAgentResult",
+      "platform_conversation_id": "5bebe273-8190-4cbf-be35-6d806492859d",
+      "platform_task_id": "ff881d49-a427-4ae8-9d47-35e6e7f52fb3"
+    }
+  ],
+  "passed_count": 7,
+  "platform_direct_count": 3,
+  "formal_data_unchanged": true,
+  "manual_archival_performed": false,
+  "owned_sessions_revoked": true
+}

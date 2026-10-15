@@ -61,7 +61,13 @@ class TaskService:
         opportunity_id=None,
         source_suggestion_id=None,
         association_kind=None,
+        source_code=None,
+        alignment=None,
+        alignment_contract_version=None,
     ):
+        source_code = source_code or ("business_advice" if source_suggestion_id else "mini_program")
+        if source_code not in {"mini_program", "business_advice", "meeting_import"}:
+            raise ValueError("未知任务来源")
         permission = "task.create_" + task_association_kind(customer_id, opportunity_id, association_kind)
         effective = await AuthorizationRepository().effective(connection)
         own_scope = ObjectScope(actor.workspace_id, actor.user_id,
@@ -89,7 +95,7 @@ class TaskService:
             """INSERT INTO workflow.task(workspace_id,title,description,creator_user_ref_id,creator_team_id,
               customer_id,priority_code,status,due_at,source_code,opportunity_id,target_position,source_suggestion_id,association_kind)
             VALUES($1::uuid,$2,$3,$4::uuid,$5::uuid,$6::uuid,$7,'pending_confirm',$8,
-              CASE WHEN $11::uuid IS NULL THEN 'mini_program' ELSE 'business_advice' END,$9::uuid,$10,$11::uuid,$12)
+              $13,$9::uuid,$10,$11::uuid,$12)
             RETURNING id::text""",
             actor.workspace_id,
             title,
@@ -103,6 +109,7 @@ class TaskService:
             target_position,
             source_suggestion_id,
             association_kind,
+            source_code,
         )
         for target in targets:
             if target_position:
@@ -132,6 +139,7 @@ class TaskService:
                     "assignee_name": target["display_name"],
                     "due_at": due_at.isoformat(),
                     "priority_code": priority_code,
+                    "source_code": source_code,
                 },
             )
         await TaskMutationRepository.event(
@@ -144,6 +152,9 @@ class TaskService:
             "岗位待办已发出，等待一人领取" if target_position else f"任务下发给{targets[0]['display_name']}",
             {"target_position": target_position, "recipient_ids": [t["user_id"] for t in targets]},
         )
+        if alignment is not None or alignment_contract_version is not None:
+            from sales_backend.services.task_alignment import save_task_alignment
+            await save_task_alignment(connection, task_id, alignment, contract_version=alignment_contract_version)
         return await TaskRepository().detail(connection, task_id=task_id)
 
     async def _respond_position(self, connection, actor, task, event_type, note):
@@ -241,6 +252,7 @@ class TaskService:
         note: str | None,
         expected_version: int | None = None,
         assignee_account_code: str | None = None,
+        actual_contribution=None,
     ) -> dict[str, Any]:
         await require_permission(connection, TASK_EVENTS.get(event_type, ""), task_id=task_id)
         if event_type in {"cancel", "reassign"}:
@@ -252,6 +264,9 @@ class TaskService:
             return await review_completion(connection, actor=actor, task_id=task_id,
                 event_type=event_type, note=note, expected_version=expected_version)
         if event_type == "complete":
+            if actual_contribution is not None:
+                from sales_backend.services.task_alignment import report_task_contribution
+                await report_task_contribution(connection, task_id, actual_contribution, expected_version)
             return await self.complete(
                 connection, actor=actor, task_id=task_id, note=note, expected_version=expected_version
             )

@@ -91,6 +91,7 @@ page{background:var(--ui-background)}
 .chosen .strong{line-height:1.5;word-break:break-all}
 /* 商机读取失败行和上方可点行隔 16px，「重新加载」扩出的点击区不压到它们 */
 .opportunity-error{margin-top:16px;color:var(--ui-danger);font-size:var(--ui-text-small);line-height:1.6}
+.customer-search-error{display:flex;flex-direction:column;align-items:flex-start;gap:8px;word-break:break-word}
 /* 「清除日期」：只有文字本身可点（靠右），伪元素把点击区上下扩到 44px、左右各 8px；在快捷片「今天」的另一侧，不重叠 */
 .date-clear{position:relative;display:table;margin:0 0 0 auto;font-size:14px;line-height:20px;color:var(--ui-primary)}
 .date-clear::after{content:'';position:absolute;left:-16rpx;right:-16rpx;top:-12px;bottom:-12px}

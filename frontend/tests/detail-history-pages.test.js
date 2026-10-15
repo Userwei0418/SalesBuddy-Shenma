@@ -11,7 +11,7 @@ const overview=id=>({id,name:`客户${id}`,primary_opportunity:opportunity('o-la
 function harness(name,api={}){
  const filename=path.resolve(__dirname,`../miniprogram/pages/${name}/index.js`);let page,timerId=0;const timers=new Map(),toast=[];
  const app={ensureLogin:()=>true,globalData:{role:'sales',roles:{sales:{name:'销售',scope:'本人'}},session:{workspaceId:'w',userId:'u',role:'sales',permissionVersion:1,loginAt:'first'}}};
- const defaults={getCustomer(){throw Error('full customer forbidden');},getOpportunityDetail(){throw Error('full opportunity forbidden');},queryBusinessAdvice:async()=>({status:'succeeded',summary:'测试建议',suggestions:[]}),getCustomerHeader:async id=>({id,name:`客户${id}`,read_model:'detail_header_v1'}),getCustomerOverview:async id=>overview(id),listCustomerContacts:async()=>list(),listCustomerOpportunities:async()=>list(),listVisits:async()=>list(),listDetailTasks:async()=>list(),getOpportunityTimeline:async()=>list()};
+ const defaults={getCustomer(){throw Error('full customer forbidden');},getOpportunityDetail(){throw Error('full opportunity forbidden');},getLatestBusinessAdvice:async()=>({status:'succeeded',summary:'测试建议',suggestions:[]}),getCustomerHeader:async id=>({id,name:`客户${id}`,read_model:'detail_header_v1'}),getCustomerOverview:async id=>overview(id),listCustomerContacts:async()=>list(),listCustomerOpportunities:async()=>list(),listVisits:async()=>list(),listDetailTasks:async()=>list(),getOpportunityTimeline:async()=>list()};
  const wx={showLoading(){},hideLoading(){},showTabBar(){},hideTabBar(){},showNavigationBarLoading(){},hideNavigationBarLoading(){},showToast:x=>toast.push(x),showModal:x=>toast.push(x),navigateTo(){},setNavigationBarTitle(){}};
  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{Page:p=>page=p,getApp:()=>app,require:n=>n.endsWith('/apiClient')?{...defaults,...api}:require(path.resolve(path.dirname(filename),n)),wx,Date,Map,Set,setTimeout:f=>{const id=++timerId;timers.set(id,f);return id;},clearTimeout:id=>timers.delete(id)});
  page.data=JSON.parse(JSON.stringify(page.data));page.setData=(v,cb)=>{Object.assign(page.data,v);if(cb)cb();};
@@ -83,14 +83,21 @@ test('opportunity overview stays responsive while each history tab loads and tot
  Object.assign(h.page.data,{customerId:'c',opportunityId:'o'});await h.page.loadOpportunity();await tick();assert.equal(h.page.data.opportunity.name,'商机o');assert.equal(h.page.data.taskStats.total,88);assert.equal(calls.length,0);h.page.selectOpportunityTab(event('tab','tasks'));assert.equal(h.page.data.detailPages.tasks.loading,true);
  h.app.globalData.session.permissionVersion=2;tasks.resolve(list([{id:'secret'}]));await tick();assert.equal(h.page.data.relatedTasks.length,0);
 });
-test('actual form can search and page all customer opportunities and preselect a target beyond page 20',async()=>{
- const target=deferred(),calls=[];const h=harness('customer-assets',{getCustomerOpportunityOverview:(c,o)=>{calls.push(['target',c,o]);return target.promise;},listCustomerOpportunities:async(c,p)=>{calls.push(['list',c,p]);return list([opportunity(p.q?'found':p.offset?'next':'first')],!p.offset,p.offset?null:20);}});
- Object.assign(h.page.data,{canManage:true,customerId:'c',opportunityId:'outside'});const pending=h.page.openForm();await tick();h.page.searchFormOpportunity({detail:{value:'找到'}});h.runTimers();await tick();target.resolve({id:'c',opportunities:[opportunity('outside')]});await pending;
- assert.equal(h.page.data.formOpportunity.id,'outside');assert.equal(h.page.data.formTargetLoading,false);assert.equal(h.page.data.formChoices[0].id,'found');await h.page.moreFormChoices();assert.equal(calls.at(-1)[2].offset,20);assert.equal(calls.at(-1)[2].q,'找到');h.page.closeForm();
+test('sales asset page exposes no legacy actual registration or opportunity preselection flow',()=>{
+ const h=harness('customer-assets');for(const method of ['openForm','submit','submitConfirmed','loadFormChoices','selectFormOpportunity'])assert.equal(h.page[method],undefined);
 });
-test('actual form late preselection never overwrites a manual choice; failed original requires explicit selection',async()=>{
- const d=deferred();const h=harness('customer-assets',{getCustomerOpportunityOverview:()=>d.promise,listCustomerOpportunities:async()=>list([opportunity('manual')])});Object.assign(h.page.data,{canManage:true,customerId:'c',opportunityId:'old'});const p=h.page.openForm();await tick();h.page.selectFormOpportunity(event('id','manual'));d.resolve({id:'c',opportunities:[opportunity('old')]});await p;assert.equal(h.page.data.formOpportunity.id,'manual');assert.equal(h.page.data.formTargetLoading,false);
- const broken=harness('customer-assets',{getCustomerOpportunityOverview:async()=>{throw Error('not visible');}});Object.assign(broken.page.data,{canManage:true,customerId:'c',opportunityId:'old'});await broken.page.openForm();assert.equal(broken.page.data.formSelectionRequired,true);broken.page.selectFormOpportunity(event('id',''));assert.equal(broken.page.data.formSelectionRequired,false);
+test('intent changes load only on progress tab, preserve timeline and form selections, and discard hidden responses',async()=>{
+ const history=deferred();let reads=0;
+ const h=harness('customer-assets',{getOpportunityDetailHeader:async()=>({id:'c',name:'客户c',read_model:'detail_header_v1',opportunities:[opportunity('o')]}),getOpportunityDetailOverview:async()=>({...overview('c'),opportunities:[opportunity('o')]}),getOpportunityTimeline:async()=>list([{key:'created',title:'商机创建',at:'2026-10-01'}]),getOpportunityIntentHistory:()=>{reads++;return history.promise;}});
+ Object.assign(h.page.data,{customerId:'c',opportunityId:'o'});await h.page.loadOpportunity();await tick();assert.equal(reads,0);
+ h.page.fdeMembersChanged({detail:{members:[{id:'manual',name:'人工选择'}]}});
+ h.page.selectOpportunityTab(event('tab','opportunity'));await tick();assert.equal(reads,1);assert.equal(h.page.data.progressEvents[0].title,'商机创建');assert.equal(h.page.data.intentHistory.loading,true);
+ h.page.onHide();history.resolve({opportunity_id:'o',items:[{id:'private',fields:[]}],offset:0,has_more:false,next_offset:null,history_revision:'a'.repeat(64)});await tick();
+ assert.equal(h.page.data.intentHistory.items.length,0);assert.equal(h.page.data.fdeMembers[0].id,'manual');assert.equal(h.page.data.fdeRelationDirty,true);
+});
+test('legacy actual permission cannot resurrect sales create or void UI',()=>{
+ const h=harness('customer-assets');Object.assign(h.page.data,{canManage:true,canCreateActual:true,canVoidActual:true});
+ assert.equal(h.page.openForm,undefined);assert.equal(h.page.voidEntry,undefined);
 });
 
 for(const returningFrom of ['background','supplement']){
@@ -126,7 +133,7 @@ test('inline visit template requires both the full record and ready state before
 for(const name of ['customers','customer-detail']){
  test(`${name}: header and visible history work before the requested complete summary`,async()=>{
   const summary=deferred();let summaryCalls=0,visits=0,advice=0;
-  const h=harness(name,{getCustomerOverview:()=>{summaryCalls++;return summary.promise;},listVisits:async()=>{visits++;return list([{id:'v',is_summary:true,follow_up_record:'已加载'}]);},queryBusinessAdvice:async()=>{advice++;return {status:'succeeded',summary:'建议',suggestions:[]};}});
+  const h=harness(name,{getCustomerOverview:()=>{summaryCalls++;return summary.promise;},listVisits:async()=>{visits++;return list([{id:'v',is_summary:true,follow_up_record:'已加载'}]);},getLatestBusinessAdvice:async()=>{advice++;return {status:'succeeded',summary:'建议',suggestions:[]};}});
   h.page.data.customerId='c';h.page.data.activeTab='visits';
   if(name==='customers')await h.page.showCustomerDetail('c','','visits');else await h.page.loadCustomer();await tick();
   const detail=()=>name==='customers'?h.page.data.selectedCustomer:h.page.data.customer;
@@ -139,7 +146,7 @@ for(const name of ['customers','customer-detail']){
  });
  test(`${name}: summary failure retries locally without discarding lists or restarting advice`,async()=>{
   let attempts=0,listCalls=0,advice=0;
-  const h=harness(name,{getCustomerOverview:async()=>{if(++attempts===1)throw Error('summary offline');return overview('c');},listCustomerOpportunities:async()=>{listCalls++;return list([opportunity('o')]);},queryBusinessAdvice:async()=>{advice++;return {status:'succeeded',summary:'建议',suggestions:[]};}});
+  const h=harness(name,{getCustomerOverview:async()=>{if(++attempts===1)throw Error('summary offline');return overview('c');},listCustomerOpportunities:async()=>{listCalls++;return list([opportunity('o')]);},getLatestBusinessAdvice:async()=>{advice++;return {status:'succeeded',summary:'建议',suggestions:[]};}});
   h.page.data.customerId='c';if(name==='customers')await h.page.showCustomerDetail('c');else await h.page.loadCustomer();await tick();
   const detail=()=>name==='customers'?h.page.data.selectedCustomer:h.page.data.customer;
   assert.equal(detail().opportunities.length,1);assert.equal(detail().opportunityCount,'—');assert.equal(detail().signal.tone,'gray');assert.equal(h.page.data.detailSummary.error,'summary offline');

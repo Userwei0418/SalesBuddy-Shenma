@@ -1,0 +1,138 @@
+@import "../../styles/dashboard-section.wxss";
+/* 与销售看板同一套版式（飞书）：白卡放在灰底上不描边，卡内分组用细线，数字深色，主色只给操作与选中。只用类选择器。 */
+.fde-board{min-height:100vh;box-sizing:border-box;padding:32rpx 32rpx 64rpx;color:var(--ui-ink);background:var(--ui-background)}
+
+/* 页头：周期触发片与筛选片同尺寸（灰底、chevron-down）；外层按 px 补足 44px 点击区，320 宽屏也不缩 */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24rpx;flex-wrap:wrap}
+.page-heading{flex:1;min-width:200rpx}
+.page-title{display:block;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4;word-break:break-all}
+.page-subtitle{display:block;margin-top:4px;color:var(--ui-secondary);font-size:14px}
+.quarter-picker{display:flex;align-items:center;flex:0 1 auto;min-width:0;max-width:440rpx;min-height:44px}
+.quarter-chip{display:flex;align-items:center;gap:8rpx;min-width:0;box-sizing:border-box;height:64rpx;padding:0 16rpx 0 24rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-ink)}
+.quarter-picker-value{flex:1;min-width:0;overflow:hidden;font-size:14px;line-height:1.3;white-space:nowrap;text-overflow:ellipsis}
+.quarter-picker-caret{display:inline-flex;flex-shrink:0;color:var(--ui-secondary)}
+.quarter-picker-on .quarter-chip{background:var(--ui-selected);color:var(--ui-primary)}
+.quarter-picker-on .quarter-picker-value{font-weight:600}
+.quarter-picker-on .quarter-picker-caret{color:var(--ui-primary)}
+.quarter-picker-open .quarter-picker-caret{transform:rotate(180deg)}
+.quarter-picker-pressed .quarter-chip{opacity:.7}
+
+/* 周期筛选面板：年份一行 sb-select；全年与季度同样式的筛选片；「确定」后才生效 */
+.period-filter{margin-top:8px;padding:4px 16px 8px;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.period-year{display:block;border-bottom:1px solid var(--ui-line)}
+.filter-head{margin-top:12px;color:var(--ui-secondary);font-size:var(--ui-text-body);font-weight:400;line-height:1.5}
+.quarter-options{display:flex;gap:8px;margin-top:4px}
+.quarter-option{display:flex;align-items:center;flex:1;min-width:0;min-height:44px}
+.quarter-chip-face{display:flex;align-items:center;justify-content:center;flex:1;min-width:0;height:64rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-ink);font-size:14px;white-space:nowrap}
+.quarter-option.selected .quarter-chip-face{background:var(--ui-selected);color:var(--ui-primary);font-weight:600}
+.quarter-option-pressed .quarter-chip-face{opacity:.7}
+.filter-footer{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:44px;margin-top:4px}
+/* 「确定」视觉保持 small（64rpx），伪元素把点击区上下扩到 44px。t-button 内部是 catch:tap，按钮本体的点击不会冒泡到外层，
+   所以 t-button 自己保留 bind:tap="applyPeriod"，外层 view 的 bindtap 只接住伪元素扩出的那条；两处各只触发一次。
+   按下态：点按钮本体用按钮自己的（hover-stop-propagation 不连带外层），点扩区时外层整体 .7 透明度 */
+.footer-action{position:relative;z-index:0;flex-shrink:0}
+.footer-action-pressed{opacity:.7}
+.footer-action::after{content:'';position:absolute;z-index:-1;left:0;right:0;top:calc((64rpx - 44px) / 2);bottom:calc((64rpx - 44px) / 2)}
+.filter-hint{flex:1;min-width:0;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+
+/* 状态 */
+.loading-card{margin-top:16px;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.empty{padding:32rpx 12rpx;text-align:center;color:var(--ui-secondary);font-size:14px;line-height:1.6}
+.error{color:var(--ui-danger)}
+
+/* 按下态：卡片、单元格、链接 */
+.card-pressed{opacity:.7}
+.cell-pressed{background:var(--ui-neutral-soft)}
+.link-pressed{opacity:.7}
+
+/* 当前协助商机：sb-summary-card 白卡；指标卡：sb-kpi-card size=compact，外层 view 承接点击 */
+.hero-card{margin-top:16px}
+.hero-link{display:flex;align-items:center;align-self:flex-end;color:var(--ui-primary);font-size:14px}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16rpx;margin-top:16rpx}
+.kpi-cell{min-width:0;border-radius:var(--ui-radius-panel)}
+
+/* 图表卡 */
+.chart-card{margin-top:16px;padding:16px;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx;flex-wrap:wrap}
+.section-title{display:block;font-size:var(--ui-text-section);color:var(--ui-ink);font-weight:600;line-height:1.4}
+.section-subtitle{display:block;margin-top:4px;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.5}
+.section-note{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.section-link{display:flex;align-items:center;min-height:44px;color:var(--ui-primary);font-size:14px}
+
+/* 任务进展：三格靠竖线分开 */
+.task-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:16px}
+.task-metric{text-align:center;padding:12rpx 4rpx;border-right:1px solid var(--ui-line)}
+.task-metric:last-child{border-right:0}
+.task-value{display:block;font-size:var(--ui-text-page);font-weight:600;color:var(--ui-ink);line-height:1.2}
+.task-value.attention{color:var(--ui-danger)}
+.task-label{display:flex;align-items:center;justify-content:center;margin-top:8rpx;font-size:var(--ui-text-small);color:var(--ui-secondary)}
+
+/* 商机阶段：单一主色横向条 */
+.funnel-list{margin-top:8px}
+.funnel-row{box-sizing:border-box;min-height:var(--ui-touch-target);padding:8px 0}
+.funnel-copy{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx}
+.funnel-name{flex:1;min-width:0;color:var(--ui-ink);font-size:14px}
+.funnel-amount{color:var(--ui-ink);font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.funnel-count{min-width:64rpx;text-align:right;font-size:var(--ui-text-small);color:var(--ui-secondary)}
+.funnel-track{height:16rpx;margin-top:8rpx;background:var(--ui-neutral-soft);border-radius:var(--ui-radius-control);overflow:hidden}
+.funnel-bar{height:100%;border-radius:var(--ui-radius-control);background:var(--ui-chart-1)}
+
+/* 拜访节奏：柱子用 chart-1，只画底线 */
+.rhythm-switch{margin-top:8px}
+.rhythm-note{display:block;margin-top:8px;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.rhythm-scroll{width:100%;margin-top:16px}
+.visit-bars{display:flex;gap:12rpx;padding:0 0 8rpx;min-width:100%;box-sizing:border-box}
+.visit-day{flex:1 0 72rpx;display:flex;flex-direction:column;align-items:center;max-width:104rpx;border-radius:var(--ui-radius-control)}
+.bar-value{font-size:var(--ui-text-small);color:var(--ui-secondary);margin-bottom:8rpx}
+.bar-space{width:100%;height:160rpx;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid var(--ui-line)}
+.visit-bar{width:24rpx;border-radius:var(--ui-radius-control) var(--ui-radius-control) 0 0;background:var(--ui-chart-1)}
+.bar-date{margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.bar-week-end{margin-top:4rpx;font-size:var(--ui-text-small);color:var(--ui-muted);white-space:nowrap}
+
+/* 团队工作分布：周期（周、月、季度，未选时沿用所选周期）、排序各一组，标签在上、分段撑满一行等分（320 宽屏也放得下，不横向溢出） */
+.ranking-control{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:12px}
+.team-periods{margin-top:16px}
+.ranking-control-label{color:var(--ui-secondary);font-size:14px;line-height:1.5}
+.ranking-row{display:flex;align-items:center;justify-content:space-between;gap:16rpx;width:100%;max-width:100%;min-width:0;margin:0;padding:24rpx 0;border:0;border-bottom:1px solid var(--ui-line);border-radius:0;background:transparent;color:inherit;font-size:inherit;font-weight:inherit;line-height:inherit;text-align:left;white-space:normal;overflow:visible;box-sizing:border-box}
+.ranking-row::after{border:0}
+.ranking-row:first-of-type{margin-top:8px}
+.ranking-row:last-child{border-bottom:0}
+.ranking-row-pressed{background:var(--ui-neutral-soft)}
+.rank-badge{width:40rpx;height:40rpx;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:50%;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);font-weight:600}
+.rank-person{min-width:0;flex:1}
+.rank-name{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;word-break:break-all;line-height:1.4}
+.rank-meta{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.rank-track{width:100%;height:8rpx;margin-top:12rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.rank-progress{height:100%;border-radius:var(--ui-radius-control);background:var(--ui-chart-1)}
+.rank-result{flex:0 0 136rpx;text-align:right}
+.rank-value{display:flex;align-items:center;justify-content:flex-end;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.rank-arrow{display:inline-flex;color:var(--ui-muted)}
+.rank-unit{display:block;margin-top:4rpx;font-size:var(--ui-text-small);color:var(--ui-secondary)}
+
+/* 跟进记录（fde-records 页整页使用）：标题 + 白卡列表，一行一条靠细线分开；底部留安全区 */
+.activity-layer{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;box-sizing:border-box;padding:32rpx 32rpx calc(32rpx + constant(safe-area-inset-bottom));padding:32rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));background:var(--ui-background)}
+.activity-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx;flex-shrink:0;margin-bottom:16px;padding:0}
+.activity-heading{min-width:0;flex:1}
+.activity-title-line{display:flex;align-items:center;gap:16rpx}
+.activity-title{color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4}
+.activity-count{padding:0 8px;border-radius:4px;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);line-height:20px}
+.activity-subtitle{display:block;margin-top:4px;color:var(--ui-secondary);font-size:14px;line-height:1.5}
+.activity-scroll{height:0;flex:1}
+.activity-list{padding:0 32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.activity-card{box-sizing:border-box;padding:24rpx 0;border-bottom:1px solid var(--ui-line);background:var(--ui-surface)}
+.activity-card-active{background:var(--ui-neutral-soft)}
+.activity-card-head{display:flex;align-items:center;gap:16rpx}
+.visit-copy{min-width:0;flex:1}
+.activity-customer{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4;word-break:break-all}
+.activity-project{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5;word-break:break-all}
+.activity-arrow{display:inline-flex;flex-shrink:0;color:var(--ui-muted)}
+.activity-card-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 16rpx;margin-top:8px}
+.activity-date{flex:1;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.activity-recorder{color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.activity-history{padding:0 8px;border-radius:4px;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);line-height:20px}
+
+/* Palette only: original geometry is preserved. */
+.hero-link { color:var(--sb-hero-muted); }
+
+/* New business controls styled with the retained A tokens. */
+.upgrade-person-trigger{display:flex;align-items:center;gap:8rpx;min-height:var(--ui-touch-target);padding:0 16rpx;border-radius:var(--ui-radius-control);color:var(--ui-primary);background:var(--ui-selected);font-size:14px}

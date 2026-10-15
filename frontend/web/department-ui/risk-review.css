@@ -1,0 +1,24 @@
+.department-ui .pc-risk-list { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.department-ui .pc-risk-list > :not(.pc-risk-results) { flex-shrink: 0; }
+.department-ui .pc-risk-filters { padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .pc-risk-results { display: flex; flex-direction: column; flex: 1; min-height: 250px; }
+.department-ui .pc-risk-results > .ds-sp-error { padding: 0 var(--ui-space-4); }
+.department-ui .pc-risk-tab-count { margin-left: var(--ui-space-1); font-size: var(--ui-text-small); color: var(--ui-muted); }
+.department-ui .pc-risk-pagination { flex-shrink: 0; display: flex; justify-content: flex-end; padding: var(--ui-space-3) var(--ui-space-4); border-top: 1px solid var(--ui-line); }
+.department-ui .pc-risk-detail .ds-sp-main > *, .department-ui .pc-risk-detail .ds-sp-side > * { flex-shrink: 0; }
+.department-ui .pc-risk-detail { min-height: 480px; }
+.department-ui .pc-risk-detail .ds-sp-side { align-self: start; max-height: 100%; }
+.department-ui .pc-risk-detail .ds-sp-main { overflow-wrap: anywhere; }
+.department-ui .pc-risk-decision { display: flex; flex-direction: column; gap: var(--ui-space-1); border-top: 1px solid var(--ui-line); padding-top: var(--ui-space-3); }
+.department-ui .pc-risk-decision > span, .department-ui .pc-risk-confirm > span { font-size: var(--ui-text-small); }
+.department-ui .pc-risk-confirm { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--ui-space-3); }
+.department-ui .pc-risk-history summary { cursor: pointer; font-weight: 600; }
+.department-ui .pc-risk-history ol { display: flex; flex-direction: column; gap: var(--ui-space-3); padding-left: var(--ui-space-4); }
+.department-ui .pc-risk-history li > span { display: block; font-size: var(--ui-text-small); }
+@media (min-width: 901px) and (max-width: 1100px) {
+  .department-ui .pc-risk-detail { grid-template-columns: 240px minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  .department-ui .pc-risk-list { height: auto; }
+  .department-ui .pc-risk-detail { min-height: 0; }
+}

@@ -7,14 +7,14 @@ module.exports = { idx: idx, rest: rest, pick: pick };
 </wxs>
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
-<view wx:if="{{completedYear}}" class="fde-note">已完成记录按 {{completedYear}} 年{{completedQuarters.length?'所选季度':'全年'}}筛选；未完成任务为当前状态。</view>
+<view wx:if="{{completedYear}}" class="fde-note">已完成记录按 {{completedPeriodLabel}} 筛选；未完成任务为当前状态。</view>
 <view class="tasks-page">
   <view class="tasks-hero">
     <sb-summary-card appearance="hero" wx:if="{{overviewFilter}}" title="{{opportunityOnly ? '商机待办' : overviewTitle || '我的待办'}}" subtitle="{{opportunityOnly ? '待办项均绑定商机，可直接返回查看商机卡片' : overviewDescription || '每一项都可进入详情、追踪状态并反馈完成结果'}}" meta="{{loading ? '正在同步任务…' : loadError ? '任务数量暂未加载' : '共 ' + filteredTotal + ' 项任务'}}" scope="{{scope}}" />
     <sb-summary-card appearance="hero" wx:else title="{{opportunityOnly ? '商机待办' : overviewTitle || '我的待办'}}" subtitle="{{opportunityOnly ? '待办项均绑定商机，可直接返回查看商机卡片' : overviewDescription || '每一项都可进入详情、追踪状态并反馈完成结果'}}" scope="{{scope}}" metrics="{{[{label:'未完成',value:loading || loadError ? '' : pendingCount,missingText:'—'},{label:'已完成',value:loading || loadError ? '' : completedCount,missingText:'—'},{label:'全部任务',value:loading || loadError ? '' : totalCount,missingText:'—'}]}}" />
   </view>
 
-  <view wx:if="{{isFde && canViewTeam}}" class="task-view-switch">
+  <view wx:if="{{canViewTeam}}" class="task-view-switch">
     <sb-segmented block emitSame options="{{taskViewOptions}}" value="{{taskView}}" bind:change="onTaskViewChange" />
     <view wx:if="{{taskView === 'team' && fdeTaskMemberId}}" class="member-scope" hover-class="task-row-pressed" data-view="team" bindtap="changeTaskView" aria-role="button" aria-label="当前仅看所选成员的任务，点击查看全部团队任务"><text>仅看所选成员的任务</text><view class="task-link">查看全部团队<t-icon name="chevron-right" size="32rpx" /></view></view>
   </view>
@@ -41,6 +41,7 @@ module.exports = { idx: idx, rest: rest, pick: pick };
         <view class="task-description">{{item.description}}</view>
         <view wx:if="{{item.opportunityId}}" class="task-opportunity" data-customer-id="{{item.customerId}}" data-opportunity-id="{{item.opportunityId}}" hover-class="task-row-pressed" hover-stop-propagation catchtap="openOpportunity"><view><text>关联商机</text><label>{{item.opportunityName || '查看对应商机'}}</label></view><view class="task-link">查看商机<t-icon name="chevron-right" size="32rpx" /></view></view>
         <view class="task-meta"><view><text>负责人</text><label>{{item.owner}}</label></view><view><text>{{item.status === 'completed' ? '完成时间' : '截止时间'}}</text><label>{{item.status === 'completed' ? item.completedLabel : item.dueLabel}}</label></view></view>
+        <view wx:if="{{item.canCancel}}" class="upgrade-cancel-action"><button size="mini" data-id="{{item.id}}" catchtap="openCancellation">取消任务</button></view>
         <view class="task-source"><text>{{item.customer}}</text><label>{{item.sourceLabel}}</label><view class="task-link">查看详情<t-icon name="chevron-right" size="32rpx" /></view></view>
       </view>
     </view>
@@ -51,3 +52,5 @@ module.exports = { idx: idx, rest: rest, pick: pick };
 </view>
 
 </block>
+
+<task-cancel-dialog id="taskCancellation" open="{{cancelOpen}}" task-id="{{cancelTaskId}}" task-version="{{cancelTaskVersion}}" bind:close="closeCancellation" bind:cancelled="taskCancelled" bind:refreshed="taskCancellationRefreshed" />

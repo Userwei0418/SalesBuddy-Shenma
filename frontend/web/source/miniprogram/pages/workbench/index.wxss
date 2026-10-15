@@ -1,0 +1,22 @@
+@import "../../styles/opportunity-list-header.wxss";
+@import "../../styles/opportunity-list-card.wxss";
+/* 原生 tabBar 页：内容底部只留常规间距，tabBar 与安全区由微信处理 */
+.workbench{padding-bottom:48rpx}
+/* 页面标题：页底色上直接放标题，不用横幅 */
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:24rpx;margin:8rpx 0 32rpx}
+.page-head .title{margin:0;color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.3}
+.page-head .eyebrow{margin-top:8rpx;color:var(--ui-secondary);font-size:14px;font-weight:400;line-height:1.4}
+.head-side{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto}
+.workbench-create-opportunity{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:var(--ui-touch-target);padding:0 32rpx;border-radius:var(--ui-radius-control);color:var(--ui-on-primary);background:var(--ui-primary);box-shadow:none;font-size:var(--ui-text-body);font-weight:600}
+.workbench-create-opportunity-active{background:var(--ui-primary-hover)}
+/* 总览说明与重试：「重试」上下各 13px 撑到 44px（px 不随屏宽缩放）；错误行和上一块隔 16px，扩出的点击区不压到上面的卡片 */
+.summary-data-note{margin-top:16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.summary-data-error{margin-top:16px;color:var(--ui-danger)}
+.summary-retry{display:inline-block;margin:-13px 0 -13px 16rpx;padding:13px 8rpx;color:var(--ui-primary)}
+.summary-retry-pressed{opacity:.7}
+/* 筛选控件宽度（与 FDE 商机页一致）；高 32px，和 sb-labeled-select size=small 同高 */
+.workbench-filter-item{width:104px;height:32px}
+/* 列表 */
+.workbench-opportunity-list{display:flex;flex-direction:column;gap:16rpx}
+.workbench-state,.workbench-list-state,.workbench-opportunity-empty{display:block}
+.workbench-pager{display:block;margin-top:8rpx}

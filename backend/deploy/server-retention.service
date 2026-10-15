@@ -1,0 +1,9 @@
+[Unit]
+Description=Prune accepted blog releases and stale Git temporary files
+Before=sales-db-backup.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/server-retention
+SuccessExitStatus=75
+TimeoutStartSec=5min

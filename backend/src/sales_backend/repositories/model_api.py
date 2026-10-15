@@ -14,7 +14,8 @@ class ModelApiRepository:
 
     async def current(self, conn, actor, purpose):
         row = await conn.fetchrow(
-            """SELECT r.* FROM config.model_api_current c
+            """SELECT r.*,security.model_credential_owned(r.purpose,r.version_no) AS credential_owned
+          FROM config.model_api_current c
           JOIN config.model_api_release r USING(workspace_id,purpose,version_no)
           WHERE c.workspace_id=$1::uuid AND c.purpose=$2""",
             actor.workspace_id,

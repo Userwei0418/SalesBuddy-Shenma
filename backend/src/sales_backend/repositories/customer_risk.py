@@ -3,6 +3,7 @@
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.domain.advice import fingerprint
 from sales_backend.repositories.identity import IdentityRepository
 
@@ -75,6 +76,8 @@ async def enqueue_customer_risk_review(connection, actor, *, customer_id, trigge
     FDE can trigger evaluation of a visible customer, but gains no risk-write permission.
     The database independently checks the current owner and active execution identity.
     """
+    if not await customer_analysis_applies(connection, customer_id):
+        return None
     await connection.execute(
         "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", "customer-risk:" + str(customer_id),
     )

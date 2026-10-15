@@ -1,0 +1,60 @@
+{
+  "release": "/www/wwwroot/salegent/releases/agent-report-20260912-7b2c6b9",
+  "commit": "7b2c6b95a292a4f524e8e6b27735be877a0a1a7a",
+  "verified_files": 419,
+  "mismatches": [],
+  "rollout": {
+    "00000000-0000-0000-0000-000000000001": {
+      "capabilities": {
+        "battle_map_review": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "opportunity_draft": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "personal_risks": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "visit_entry": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "today_tasks": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "operating_report": {
+          "enabled": true,
+          "rollout": "production"
+        }
+      }
+    }
+  },
+  "scope_limit_explicitly_disabled": true,
+  "services": {
+    "sales-api.service": {
+      "active": true,
+      "cwd_matches_release": true
+    },
+    "sales-worker.service": {
+      "active": true,
+      "cwd_matches_release": true
+    }
+  },
+  "health_ready": true,
+  "dedicated_credential_mode": "0600 root",
+  "worker_environment_file_count": 7,
+  "backup_bytes": 2907559,
+  "backup_archive_list_verified": true,
+  "backup_timer_active": true,
+  "backup_last_result": "success",
+  "rollback_release": "/www/wwwroot/salegent/releases/agent-today-20260912-163707d",
+  "rollback_executed_this_release": false,
+  "frontend_changed": false,
+  "runtime_and_schema_files_equal_tested_7b2c6b9": 169,
+  "checked_at": "2026-09-12T08:22:32.269678+00:00",
+  "schema_version": "V054"
+}

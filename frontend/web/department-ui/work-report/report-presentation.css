@@ -1,0 +1,17 @@
+.wr-presentation-modal .ant-modal-container,.wr-presentation-modal .ant-modal-content { height:100dvh; padding:0; border-radius:0; overflow:hidden; }
+.wr-presentation-modal .ant-modal-header { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+.wr-presentation-modal .ant-modal-body { height:100%; background:var(--ui-background); }
+.wr-presentation { display:flex; flex-direction:column; height:100%; color:var(--ui-ink); }
+.wr-presentation-header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px 32px; border-bottom:1px solid var(--ui-line); background:var(--ui-surface); flex:none; }
+.wr-presentation-header>div { min-width:0; }.wr-presentation-header span,.wr-presentation-header p { color:var(--ui-secondary); font-size:var(--ui-text-caption); }
+.wr-presentation-header h2 { margin:4px 0; font-size:var(--ui-text-page); overflow-wrap:anywhere; }.wr-presentation-header p { margin:0; }.wr-presentation-header>.ant-btn { flex:none; }
+.wr-presentation-body { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:24px 32px; outline-offset:-2px; }
+.wr-presentation-body>div { max-width:1480px; margin:0 auto; }.wr-presentation-body .wr-paper { padding:24px; }
+.wr-presentation-body .wr-change-current .wr-change-money,.wr-presentation-body .wr-change-counts strong { font-size:var(--ui-text-meeting-metric); }
+.wr-presentation-body .ant-table,.wr-presentation-body .wr-reader-item p,.wr-presentation-body .wr-change-followups p { font-size:var(--ui-text-title); line-height:1.8; }
+.wr-presentation-summary { display:flex; flex-direction:column; gap:20px; }
+.wr-presentation-cover h1 { font-size:var(--ui-text-metric); line-height:1.6; overflow-wrap:anywhere; }.wr-presentation-cover p { font-size:var(--ui-text-title); color:var(--ui-secondary); }
+.wr-presentation-footer { flex:none; display:flex; align-items:center; gap:20px; padding:14px 32px; border-top:1px solid var(--ui-line); background:var(--ui-surface); }
+.wr-presentation-footer>.ant-select { width:280px; max-width:40%; }.wr-presentation-shortcut { color:var(--ui-muted); font-size:var(--ui-text-small); }
+.wr-presentation-footer nav { display:flex; align-items:center; gap:16px; margin-left:auto; }.wr-presentation-footer [role="status"] { min-width:60px; text-align:center; font-variant-numeric:tabular-nums; color:var(--ui-secondary); }
+@media(max-width:800px) { .wr-presentation-header { padding:16px; gap:12px; }.wr-presentation-body { padding:16px; }.wr-presentation-footer { flex-wrap:wrap; padding:12px 16px; gap:12px; }.wr-presentation-shortcut { display:none; }.wr-presentation-footer>.ant-select { max-width:100%; width:220px; }.wr-presentation-footer nav { gap:8px; }.wr-presentation-body .wr-paper { padding:16px; } }

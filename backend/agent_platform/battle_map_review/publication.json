@@ -1,0 +1,34 @@
+{
+  "id": "01a09021-b848-7e7f-9567-e20859d29bf8",
+  "app_id": "14f18211-5849-4969-ac40-2744828356ca",
+  "name": "销售智助-客户作战地图评估-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "efc84cebe649bb9e71414bf307b7a2566df6d14bf014e634a2fb4285f2e3c527",
+  "snapshot_id": "01a0ae35-e66d-778a-a858-08faeb94302a",
+  "url": "https://123.207.235.181/agents/01a09021-b848-7e7f-9567-e20859d29bf8/configure",
+  "previous_snapshot_id": "01a0a56e-b608-7617-8817-7dc8a16d7869",
+  "previous_binding_snapshot_id": "01a0a526-7c64-77c7-b930-0b66cea49209",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "213c45b83d2270be184616f8b0ec7e59e9c6d8b4b8045326958d6d8ab1448ee4",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "synthetic_acceptance": {
+    "status": "passed",
+    "scope": "isolated adapter plus production contract validation; not production business end-to-end",
+    "receipt": "backend/docs/evidence/agent-company-20260924/synthetic-platform.json",
+    "cases": 1,
+    "passed": 1
+  },
+  "prompt_version": "map-facts-v13-20260915",
+  "model_settings": {
+    "temperature": 0
+  },
+  "previous_repository_snapshot_id": "01a0a57b-ad7f-7cb5-9ca6-490a9edb40f2",
+  "metadata_verified_at": "2026-09-24",
+  "metadata_verified_account": "zhouwei5@sensetime.com",
+  "tool_counts": {
+    "dify_tools": 0,
+    "cli_tools": 0
+  }
+}

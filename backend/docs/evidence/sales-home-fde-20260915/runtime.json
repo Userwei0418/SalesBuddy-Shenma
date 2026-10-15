@@ -1,0 +1,31 @@
+{
+  "ok": true,
+  "roles": {
+    "fde": 3,
+    "fde_lead": 1,
+    "manager": 1,
+    "sales": 3,
+    "supervisor": 2
+  },
+  "checks": {
+    "readonly_transaction": 1,
+    "maintenance_identity_available": 1,
+    "all_business_roles_available": 1,
+    "capability_version": 10,
+    "personal_visit": 10,
+    "task_create": 10,
+    "no_direct_customer_create": 10,
+    "claim_role_boundary": 10,
+    "home_action_order": 10,
+    "fde_claim_directory_denied": 4,
+    "claim_directory_page": 6,
+    "claim_eligibility": 300,
+    "claim_sql_agrees": 300,
+    "five_roles": 1
+  },
+  "total_checks": 674,
+  "readonly": true,
+  "business_writes": false,
+  "model_calls": false,
+  "sessions_created": false
+}

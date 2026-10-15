@@ -7,7 +7,6 @@ from pydantic import ValidationError
 
 from sales_backend.api.models import TaskCreate, TaskEventCreate
 from sales_backend.main import app
-from sales_backend.services.tasks import TaskService
 
 
 def test_task_routes_are_registered() -> None:

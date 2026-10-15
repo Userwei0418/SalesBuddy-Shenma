@@ -1,0 +1,700 @@
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "status": "ready",
+  "selection": {
+    "facts_contract": "work_report.meeting_facts.v1",
+    "period": {
+      "kind": "week",
+      "anchor_date": "2026-10-10",
+      "timezone": "Asia/Shanghai"
+    },
+    "scope": {
+      "kind": "managed_team",
+      "team_id": "00000000-0000-0000-0000-000000000010"
+    }
+  },
+  "period": {
+    "kind": "week",
+    "start": "2026-10-05T00:00:00+08:00",
+    "end_exclusive": "2026-10-12T00:00:00+08:00",
+    "cutoff": "2026-10-10T21:00:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "label": "2026-10-05—2026-10-11"
+  },
+  "scope": {
+    "kind": "managed_team",
+    "team_id": "00000000-0000-0000-0000-000000000010",
+    "label": "示例团队",
+    "member_ids": [
+      "00000000-0000-0000-0000-000000000011",
+      "00000000-0000-0000-0000-000000000012"
+    ]
+  },
+  "created_at": "2026-10-10T21:00:00+08:00",
+  "data_as_of": "2026-10-10T21:00:00+08:00",
+  "snapshot_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "meeting_facts": {
+    "contract_version": "work_report.meeting_facts.v1",
+    "period": {
+      "kind": "week",
+      "start": "2026-10-05T00:00:00+08:00",
+      "end_exclusive": "2026-10-12T00:00:00+08:00",
+      "cutoff": "2026-10-10T21:00:00+08:00",
+      "timezone": "Asia/Shanghai",
+      "label": "2026-10-05—2026-10-11"
+    },
+    "data_as_of": "2026-10-10T21:00:00+08:00",
+    "quarter": {
+      "year": 2026,
+      "quarter": 4
+    },
+    "scope": {
+      "kind": "managed_team",
+      "team_id": "00000000-0000-0000-0000-000000000010",
+      "label": "示例团队",
+      "member_ids": [
+        "00000000-0000-0000-0000-000000000011",
+        "00000000-0000-0000-0000-000000000012"
+      ]
+    },
+    "counts": {
+      "new_claimed_customers": {
+        "value": 0,
+        "known_count": 0,
+        "coverage": "complete",
+        "missing_reasons": []
+      },
+      "formal_visits": {
+        "value": 0,
+        "known_count": 0,
+        "coverage": "complete",
+        "missing_reasons": []
+      },
+      "new_opportunities": {
+        "value": 0,
+        "known_count": 0,
+        "coverage": "complete",
+        "missing_reasons": []
+      },
+      "lost_opportunities": {
+        "value": 0,
+        "known_count": 0,
+        "coverage": "complete",
+        "missing_reasons": []
+      }
+    },
+    "amounts": {
+      "acv": {
+        "opening": "1200000.00",
+        "change": "-200000.00",
+        "closing": "1000000.00",
+        "currency": "CNY",
+        "unit": "元",
+        "known_subtotals": {
+          "opening": "1200000.00",
+          "change": "-200000.00",
+          "closing": "1000000.00"
+        },
+        "coverage": {
+          "opening": "complete",
+          "change": "complete",
+          "closing": "complete"
+        },
+        "missing_reasons": []
+      },
+      "quarter_revenue": {
+        "opening": "1200000.00",
+        "change": "-200000.00",
+        "closing": "1000000.00",
+        "currency": "CNY",
+        "unit": "元",
+        "known_subtotals": {
+          "opening": "1200000.00",
+          "change": "-200000.00",
+          "closing": "1000000.00"
+        },
+        "coverage": {
+          "opening": "complete",
+          "change": "complete",
+          "closing": "complete"
+        },
+        "missing_reasons": []
+      },
+      "quarter_collection": {
+        "opening": "1200000.00",
+        "change": "-200000.00",
+        "closing": "1000000.00",
+        "currency": "CNY",
+        "unit": "元",
+        "known_subtotals": {
+          "opening": "1200000.00",
+          "change": "-200000.00",
+          "closing": "1000000.00"
+        },
+        "coverage": {
+          "opening": "complete",
+          "change": "complete",
+          "closing": "complete"
+        },
+        "missing_reasons": []
+      }
+    },
+    "opportunity_changes": [
+      {
+        "opportunity_id": "00000000-0000-0000-0000-000000000020",
+        "name": "商机A",
+        "customer_id": "00000000-0000-0000-0000-000000000030",
+        "amounts": {
+          "acv": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_revenue": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_collection": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          }
+        },
+        "opening_member_ids": [
+          "00000000-0000-0000-0000-000000000011"
+        ],
+        "closing_member_ids": [
+          "00000000-0000-0000-0000-000000000011"
+        ],
+        "reasons": [
+          {
+            "code": "forecast_change",
+            "text": "示例中已登记的金额调整",
+            "source_refs": [
+              "business_change:00000000-0000-0000-0000-000000000100"
+            ]
+          }
+        ],
+        "follow_up_ids": [],
+        "next_step_ids": [],
+        "source_refs": [
+          "business_change:00000000-0000-0000-0000-000000000100"
+        ],
+        "customer_name": "示例客户A"
+      },
+      {
+        "opportunity_id": "00000000-0000-0000-0000-000000000021",
+        "name": "商机B",
+        "customer_id": "00000000-0000-0000-0000-000000000031",
+        "amounts": {
+          "acv": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_revenue": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_collection": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          }
+        },
+        "opening_member_ids": [
+          "00000000-0000-0000-0000-000000000012"
+        ],
+        "closing_member_ids": [
+          "00000000-0000-0000-0000-000000000012"
+        ],
+        "reasons": [
+          {
+            "code": "forecast_change",
+            "text": "示例中已登记的金额调整",
+            "source_refs": [
+              "business_change:00000000-0000-0000-0000-000000000101"
+            ]
+          }
+        ],
+        "follow_up_ids": [],
+        "next_step_ids": [],
+        "source_refs": [
+          "business_change:00000000-0000-0000-0000-000000000101"
+        ],
+        "customer_name": "示例客户B"
+      }
+    ],
+    "new_claimed_customers": [],
+    "formal_visits": [],
+    "new_opportunities": [],
+    "lost_opportunities": [],
+    "next_steps": [],
+    "members": [
+      {
+        "member_id": "00000000-0000-0000-0000-000000000011",
+        "name": "示例成员1",
+        "counts": {
+          "new_claimed_customers": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "formal_visits": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "new_opportunities": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "lost_opportunities": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          }
+        },
+        "amounts": {
+          "acv": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_revenue": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_collection": {
+            "opening": "1000000.00",
+            "change": "-300000.00",
+            "closing": "700000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "1000000.00",
+              "change": "-300000.00",
+              "closing": "700000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          }
+        },
+        "opportunity_ids": [
+          "00000000-0000-0000-0000-000000000020"
+        ],
+        "deduplicated_team_total": false,
+        "membership_state": "current",
+        "missing_reasons": [],
+        "opportunity_changes": [
+          {
+            "opportunity_id": "00000000-0000-0000-0000-000000000020",
+            "name": "商机A",
+            "customer_id": "00000000-0000-0000-0000-000000000030",
+            "amounts": {
+              "acv": {
+                "opening": "1000000.00",
+                "change": "-300000.00",
+                "closing": "700000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "1000000.00",
+                  "change": "-300000.00",
+                  "closing": "700000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              },
+              "quarter_revenue": {
+                "opening": "1000000.00",
+                "change": "-300000.00",
+                "closing": "700000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "1000000.00",
+                  "change": "-300000.00",
+                  "closing": "700000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              },
+              "quarter_collection": {
+                "opening": "1000000.00",
+                "change": "-300000.00",
+                "closing": "700000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "1000000.00",
+                  "change": "-300000.00",
+                  "closing": "700000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              }
+            },
+            "opening_member_ids": [
+              "00000000-0000-0000-0000-000000000011"
+            ],
+            "closing_member_ids": [
+              "00000000-0000-0000-0000-000000000011"
+            ],
+            "reasons": [
+              {
+                "code": "forecast_change",
+                "text": "示例中已登记的金额调整",
+                "source_refs": [
+                  "business_change:00000000-0000-0000-0000-000000000100"
+                ]
+              }
+            ],
+            "follow_up_ids": [],
+            "next_step_ids": [],
+            "source_refs": [
+              "business_change:00000000-0000-0000-0000-000000000100"
+            ],
+            "customer_name": "示例客户A"
+          }
+        ],
+        "new_claimed_customer_ids": [],
+        "formal_visit_ids": [],
+        "new_opportunity_ids": [],
+        "lost_opportunity_ids": [],
+        "next_step_ids": []
+      },
+      {
+        "member_id": "00000000-0000-0000-0000-000000000012",
+        "name": "示例成员2",
+        "counts": {
+          "new_claimed_customers": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "formal_visits": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "new_opportunities": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          },
+          "lost_opportunities": {
+            "value": 0,
+            "known_count": 0,
+            "coverage": "complete",
+            "missing_reasons": []
+          }
+        },
+        "amounts": {
+          "acv": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_revenue": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          },
+          "quarter_collection": {
+            "opening": "200000.00",
+            "change": "100000.00",
+            "closing": "300000.00",
+            "currency": "CNY",
+            "unit": "元",
+            "known_subtotals": {
+              "opening": "200000.00",
+              "change": "100000.00",
+              "closing": "300000.00"
+            },
+            "coverage": {
+              "opening": "complete",
+              "change": "complete",
+              "closing": "complete"
+            },
+            "missing_reasons": []
+          }
+        },
+        "opportunity_ids": [
+          "00000000-0000-0000-0000-000000000021"
+        ],
+        "deduplicated_team_total": false,
+        "membership_state": "current",
+        "missing_reasons": [],
+        "opportunity_changes": [
+          {
+            "opportunity_id": "00000000-0000-0000-0000-000000000021",
+            "name": "商机B",
+            "customer_id": "00000000-0000-0000-0000-000000000031",
+            "amounts": {
+              "acv": {
+                "opening": "200000.00",
+                "change": "100000.00",
+                "closing": "300000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "200000.00",
+                  "change": "100000.00",
+                  "closing": "300000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              },
+              "quarter_revenue": {
+                "opening": "200000.00",
+                "change": "100000.00",
+                "closing": "300000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "200000.00",
+                  "change": "100000.00",
+                  "closing": "300000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              },
+              "quarter_collection": {
+                "opening": "200000.00",
+                "change": "100000.00",
+                "closing": "300000.00",
+                "currency": "CNY",
+                "unit": "元",
+                "known_subtotals": {
+                  "opening": "200000.00",
+                  "change": "100000.00",
+                  "closing": "300000.00"
+                },
+                "coverage": {
+                  "opening": "complete",
+                  "change": "complete",
+                  "closing": "complete"
+                },
+                "missing_reasons": []
+              }
+            },
+            "opening_member_ids": [
+              "00000000-0000-0000-0000-000000000012"
+            ],
+            "closing_member_ids": [
+              "00000000-0000-0000-0000-000000000012"
+            ],
+            "reasons": [
+              {
+                "code": "forecast_change",
+                "text": "示例中已登记的金额调整",
+                "source_refs": [
+                  "business_change:00000000-0000-0000-0000-000000000101"
+                ]
+              }
+            ],
+            "follow_up_ids": [],
+            "next_step_ids": [],
+            "source_refs": [
+              "business_change:00000000-0000-0000-0000-000000000101"
+            ],
+            "customer_name": "示例客户B"
+          }
+        ],
+        "new_claimed_customer_ids": [],
+        "formal_visit_ids": [],
+        "new_opportunity_ids": [],
+        "lost_opportunity_ids": [],
+        "next_step_ids": []
+      }
+    ],
+    "sources": [
+      {
+        "source_id": "business_change:00000000-0000-0000-0000-000000000100",
+        "kind": "business_change",
+        "record_id": "00000000-0000-0000-0000-000000000100",
+        "version": "1",
+        "observed_at": "2026-10-10T21:00:00+08:00",
+        "business_at": "2026-10-10T21:00:00+08:00",
+        "source_hash": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      {
+        "source_id": "business_change:00000000-0000-0000-0000-000000000101",
+        "kind": "business_change",
+        "record_id": "00000000-0000-0000-0000-000000000101",
+        "version": "1",
+        "observed_at": "2026-10-10T21:00:00+08:00",
+        "business_at": "2026-10-10T21:00:00+08:00",
+        "source_hash": "2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    ],
+    "missing_reasons": []
+  },
+  "error": null
+}

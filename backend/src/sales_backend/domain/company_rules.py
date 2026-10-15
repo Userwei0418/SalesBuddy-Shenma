@@ -1,6 +1,7 @@
 """Typed company policies. Safety and workflow contracts are not editable rules."""
 
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from typing import Literal
 from zoneinfo import ZoneInfo
 
@@ -130,6 +131,27 @@ class HomeDisplayPolicy(BaseModel):
     message_order: Literal["desc", "asc"] = "desc"
 
 
+class OpportunityAmountPolicy(BaseModel):
+    """A human confirmation threshold, never a limit on legitimate opportunity value."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    schema_version: Literal[1] = 1
+    warning_threshold_wan: int = Field(1000, ge=1, le=100_000_000)
+
+    @property
+    def threshold_yuan(self) -> Decimal:
+        return Decimal(self.warning_threshold_wan) * 10000
+
+    def require_confirmation(self, amount: Decimal, confirmed_value: Decimal | None) -> None:
+        if amount >= self.threshold_yuan and confirmed_value != amount:
+            raise ValueError(
+                f"商机金额为 {amount:,.2f} 元（{amount / 10000:,.4f} 万元），"
+                f"达到本公司 {self.warning_threshold_wan:,} 万元提醒阈值。"
+                "请返回编辑页核对金额及单位，确认该金额后再保存。"
+                "若未显示金额确认，请先复制保留当前填写内容，完全退出后从新版体验版入口重新打开，或联系本公司有权限的管理员在后台核对保存。"
+            )
+
+
 class TaskSchedulePolicy(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     schema_version: Literal[1] = 1
@@ -167,6 +189,7 @@ RULE_MODELS = {
     "customer_quadrant": QuadrantPolicy,
     "visit_admission": VisitAdmissionPolicy,
     "home_display": HomeDisplayPolicy,
+    "opportunity_amount": OpportunityAmountPolicy,
     "task_schedule": TaskSchedulePolicy,
 }
 RULE_LABELS = {
@@ -174,9 +197,14 @@ RULE_LABELS = {
     "customer_quadrant": "客户作战地图：四象限与评分政策",
     "visit_admission": "拜访准入：评分与下一步审核",
     "home_display": "首页基础展示顺序",
+    "opportunity_amount": "商机大额确认提醒",
     "task_schedule": "今日待办：默认未来执行时间",
 }
 RULE_FIELDS = {
+    "opportunity_amount": [
+        {"key": "warning_threshold_wan", "label": "提醒阈值（万元，达到即提醒；确认后仍可保存）",
+         "type": "number", "min": 1, "max": 100_000_000},
+    ],
     "fde_capabilities": [
         {"key": "visit_entry_enabled", "label": "默认允许FDE自主录入拜访", "type": "boolean"},
         {"key": "role_overrides", "label": "按岗位设置", "type": "capability_roles"},
@@ -247,6 +275,7 @@ TECHNICAL_CAPABILITIES = {
     "personal_risks": "个人客户风险识别",
     "visit_entry": "拜访记录结构化",
     "today_tasks": "今日待办规划",
+    "task_import": "周会任务整理",
     "operating_report": "经营即时总结",
     "competency_review": "销售六维能力复盘",
     "chatbi": "经营问数（二期）",

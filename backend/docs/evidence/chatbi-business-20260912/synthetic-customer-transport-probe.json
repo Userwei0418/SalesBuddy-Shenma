@@ -1,0 +1,28 @@
+{
+  "purpose": "synthetic transport diagnosis; not business acceptance",
+  "started_at": "2026-09-11T18:13:36.506878+00:00",
+  "input_bytes": 2055,
+  "input_sha256": "318a5f1a8bc33968d5dc9e9d2eca67f8f15e30d94fd279090de4b14e67af05b2",
+  "attempts": 1,
+  "budget_seconds": 12,
+  "retry_performed": false,
+  "error_type": "ProviderUnavailable",
+  "structured_answer_returned": false,
+  "elapsed_ms": 12038,
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10390,
+    "first_body_byte_ms": 10390,
+    "first_data_event_ms": null,
+    "first_text_ms": null,
+    "stream_completed_ms": null
+  },
+  "ids": {
+    "task_id": null,
+    "message_id": null,
+    "conversation_id": null
+  },
+  "error_code": "timeout",
+  "stop": "no task id; remote outcome unknown"
+}

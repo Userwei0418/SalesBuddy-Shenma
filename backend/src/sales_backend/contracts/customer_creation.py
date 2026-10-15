@@ -4,25 +4,37 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from sales_backend.contracts.models import CustomerCreate
+from sales_backend.contracts.customer_request_history import CustomerRequestHistorySummary
+from sales_backend.domain.customer_creation_options import normalize_creation_source
 
 
 class CustomerCreationRequestBody(CustomerCreate):
-    """销售提交的客户快照；审批前不写入 crm.customer。"""
+    """客户建档申请。公司编号可选；旧来源“自主拓展”规范为“销售自拓”，其他非规范选项需重新选择。"""
 
-    company_reference: str = Field(min_length=1, max_length=200)
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("source", mode="before")
+    @classmethod
+    def normalize_legacy_source(cls, value: object) -> object:
+        return normalize_creation_source(value)
 
 
 class CustomerCreationRequestDecision(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     decision: Literal["approved", "rejected"]
     reason: str = Field(default="", max_length=2000)
+    version_no: int | None = Field(default=None, ge=1)
+    approved_payload: CustomerCreationRequestBody | None = None
 
     @model_validator(mode="after")
     def rejected_requires_reason(self):
         if self.decision == "rejected" and not self.reason.strip():
             raise ValueError("驳回客户新建申请必须填写原因")
+        if self.decision != "approved" and self.approved_payload is not None:
+            raise ValueError("只有批准时可以提交修正后的建档内容")
         return self
 
 
@@ -38,6 +50,8 @@ class CustomerCreationRequestItem(BaseModel):
     reviewer_user_ref_id: UUID | None = None
     decision_reason: str = ""
     created_customer_id: UUID | None = None
+    reviewed_payload: dict[str, Any] | None = None
+    version_no: int = 1
 
 
 class CustomerCreationRequestPage(BaseModel):
@@ -47,7 +61,4 @@ class CustomerCreationRequestPage(BaseModel):
     limit: int
     has_more: bool
     next_offset: int | None = None
-
-
-class CustomerCreationRequestResult(CustomerCreationRequestItem):
-    customer: dict[str, Any] | None = None
+    summary: CustomerRequestHistorySummary

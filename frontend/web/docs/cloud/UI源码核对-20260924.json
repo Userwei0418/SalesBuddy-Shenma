@@ -1,0 +1,1390 @@
+{
+  "date": "2026-09-24",
+  "baseline": "SalesBuddy-Web-v10 (1).zip",
+  "baseline_zip_sha256": "9ea5483e8a5cd4c0820d54716ff87e0294bccaef8c01a2da4ef074dc276d8ddf",
+  "delivery_scope": "local frontend source and built dist; no upload or deployment",
+  "existing_source_files_unchanged": 492,
+  "changed_existing_source_files": [
+    "department-ui/CustomerCreate.jsx",
+    "department-ui/customer-create.css",
+    "department-ui/index.jsx",
+    "docs/cloud/delivery-readme.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/build.py",
+    "scripts/package_department.py",
+    "shell.js",
+    "tests/build.test.mjs"
+  ],
+  "missing_existing_source_files": [],
+  "business_manifest_files_verified": 256,
+  "compiled_original_content": {
+    "modules": {
+      "existing_unchanged": 85,
+      "added": [
+        "pages/weekly-report/index"
+      ]
+    },
+    "pages": {
+      "existing_unchanged": 26,
+      "added": [
+        "pages/weekly-report/index"
+      ]
+    },
+    "components": {
+      "existing_unchanged": 14,
+      "added": []
+    },
+    "images": {
+      "existing_unchanged": 37,
+      "added": []
+    }
+  },
+  "existing_dependency_versions_and_integrities_unchanged": true,
+  "dependency_resolution_note": "Two @shandiant packages retain versions/integrities; machine-specific Linux file paths use official public package URLs. Optional esbuild platform entries included.",
+  "backend_protected_files": [
+    {
+      "path": "source/manifest.json",
+      "sha256": "4df40867c9b11f91f2f44fbe95fc2eabbf90b5dfec134f252904049e29a8a174",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/app.js",
+      "sha256": "b7da162f372bea4860758f58a17d9fe9763b57ab4179fab33ac4c8e51130b40a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/app.json",
+      "sha256": "a0fdaa396828399844591bff26722a27828f838dee952a455b6b1ca7bb84ae75",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/app.wxss",
+      "sha256": "b89f5d322b2218d19557360b3eb68f9ea29f7519c3cc01b80b4bdea6e99882c5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.js",
+      "sha256": "2fdb89707e3c0a6ab7063e9880759b6a666c994997e3c255063836ee9cf7a4f5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.wxml",
+      "sha256": "a09d3ef9f7dfa8140dac877d35943354eee97205b4692f838fb258fe2517d857",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.wxss",
+      "sha256": "99c62b40bb5288b973baf6418140cebb28f9bc2c410aada146f16df1223a35ef",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-picker/index.js",
+      "sha256": "02c8a5747ad33e734fce6fad7a565c93a8558226c33322582e923a020ef8cfc7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-picker/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-picker/index.wxml",
+      "sha256": "3c3eafefd7ffa245d0b5c8e0c0e00af3ad90a58f87d36e3bf6bda2d9182bac26",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-picker/index.wxss",
+      "sha256": "a3abf712a1196f7c0ff912aaf2f6630048848a517f9b1b6df92ab98ad179b176",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.js",
+      "sha256": "a538f9a4d5e8b7166a0fc2a5ba37f6ea02e10b95b857c18c1fe9b23cc77659b1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.wxml",
+      "sha256": "4af2600d8d17dcc22157cf1969c80337f5747b60fec3bb278f5e0ddf94c0a908",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.wxss",
+      "sha256": "010c9dd0661d16277feae4b1c236285d4560b81c45bab2680ef02798b3f5a2d9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/detail-pagination/index.js",
+      "sha256": "592b30a8efea7a0efe5e0106c587d0870a91558dc0bd9c65fbefa637ae1997b0",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/detail-pagination/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/detail-pagination/index.wxml",
+      "sha256": "e6f224b7fafe9201f866257dec84617a5a3ff9c280c7b281d825927e14a4f8da",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/detail-pagination/index.wxss",
+      "sha256": "17f94cbedde3c9fd7245dc716724e8c627049b47dcd0700e8175b33f5228a674",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.js",
+      "sha256": "24b3010121da98fe6659c15f93ae8aa2ef0e87803366ba912dbce32aab2db23a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.json",
+      "sha256": "4c7b785665e74004268825bf23891c44e5b3f001b6022b1546e795728f030a3a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.wxml",
+      "sha256": "ed19d3ae53550c161b0a8b2b6f36b332c819384108c44ba91c4049166d01399d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.wxss",
+      "sha256": "9558321a11bdfb0267551610296928344362a8ea6ae26ffcae356febef8deb6b",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-picker/index.js",
+      "sha256": "35cbf83b43837a6517f9aa2e403babcd1b64ba28dade201bd98043dab204149c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-picker/index.json",
+      "sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-picker/index.wxml",
+      "sha256": "4acb70e8c4cb93d057dd5d47fbde9c16edf38666ad9aa4586f1be8caa3898c42",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-picker/index.wxss",
+      "sha256": "36c07a980d23c6218ae57bc32ccbd91b874ca215c7f6173b1f464545f80f7e68",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.js",
+      "sha256": "4caab6e290a0fa697922b0e9625dadb20fe597380ebed63d68fbf23e98672cde",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.json",
+      "sha256": "af1784bc68d40fe5f2cb3f6ad0e2be462a29b57d19270905c9cc9961433c7a52",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.wxml",
+      "sha256": "9ddd8f064165c3d71c1dc0ccc91a3ea3190fab985421051f4fef7434dbb45eb6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.wxss",
+      "sha256": "78eb251b1223d5e24af43d11a12b2a0332b048f75629acf3c7e775c4a4ae911a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.js",
+      "sha256": "398bfdbd24b756ff2e234aa94fb7e262cb5538816e0b8c10502bd7173c522ee9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.json",
+      "sha256": "737a135c40cea03d88880b45015c8281eebdeec520bac65994512543148b7313",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.wxml",
+      "sha256": "7f0647d25724025aca4b388b090cc628a6151c3d3b6c37ba9531040cc8c9c504",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.wxss",
+      "sha256": "c12c985d9fb1f5506fe7f6979b5dbe57b27a6c7c5e1519be30e26556c1ab7063",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-visit-opportunity/index.js",
+      "sha256": "61ca5327415a49e458a5f38505f47a4c11a5ed2cebb6906a5be1d2171a16664a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-visit-opportunity/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-visit-opportunity/index.wxml",
+      "sha256": "78abaf9ed74e9e80277b1552e0e0430c6dcfe2e4e2dbdad6dd4b1ad40e267a1f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/fde-visit-opportunity/index.wxss",
+      "sha256": "ee7363a42e5a4ce80d9c2d0b9ff1c560bcc2bbf50177917dffbccd1a02504dc1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/member-scope-filter/index.js",
+      "sha256": "9f9ead61fa61b5ddd7e2dfbeae00b7b17655ecaa48d37cfd52363e19b1fe1a50",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/member-scope-filter/index.json",
+      "sha256": "364134db7a80adbfaf13972e5b22066b66d5408359169e471db183d01fd3612d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/member-scope-filter/index.wxml",
+      "sha256": "f68300206f2863ed590365690feb80d40acfc8ddad02866b9d1876be8f9205ef",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/member-scope-filter/index.wxss",
+      "sha256": "9507aa2ea9e4f1faaf486ca65b189371b0d023c85e9708185eb9acef43e87ca7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.js",
+      "sha256": "b5249f1b967154fcf34a73ce172061131ab5cce4e2ac01f53282ce4dcab78fb6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.json",
+      "sha256": "348f2467c4ea4b9b12203fc3a05fd4c03526c32e6521282685368946ec41ae72",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.wxml",
+      "sha256": "80994529e585d2855044aae00c565b60713acdf3213e00fa92896d369eeaa98d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.wxss",
+      "sha256": "f9e18beebe03e60b323397725d0e7ce03b2869c33b800cf1093854b52b1dbcb3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/page-navigation/index.js",
+      "sha256": "2005afb0f27e4fd4e76f85b432fd183192d9522534249e6c3f2ba8d0d7502846",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/page-navigation/index.json",
+      "sha256": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/page-navigation/index.wxml",
+      "sha256": "6731cdcf1be06c6aba7203b0852829198ea2eb7580e53a5e8425b78874832041",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/page-navigation/index.wxss",
+      "sha256": "1262cde0a4fbbe9e3574f527b72eef19d8776daec5a6841ae110e7aa4ccc81be",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.js",
+      "sha256": "221984c8db66196fcedc5ccf074e008a89e8e781092f128e655ddcb86317d657",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.json",
+      "sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.wxml",
+      "sha256": "297f5de38e3d0055b50986a121df554934399c5913c0d91354219b6828231e2e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.wxss",
+      "sha256": "380f1f1927c4058055e4f688046644afd966a3c0796852620defc2ecc79276fa",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/quarter-target/index.js",
+      "sha256": "d4f35a4a86426944a23674f63b9f2e125556334f986fc2efe88b29cae1cefcfc",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/quarter-target/index.json",
+      "sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/quarter-target/index.wxml",
+      "sha256": "6a01b4b3fe8650619c0a0990961433e4a2ea1153c2417e782e98c166dd77ba7c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/components/quarter-target/index.wxss",
+      "sha256": "73db409a44e08ba0a047b39c08a05a5b8a79bab05844dc3dc1f91ea0ea1f34d3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/config.js",
+      "sha256": "fb952d2561c1f82dfb6525e3472d2821abed8992f10d7a5865399c2e74c9b585",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/avatar.png",
+      "sha256": "0f62ddcf18042b612262fa25ad60a08ffbc8711e6b28ff7a060fee389b7a11f6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/business-active.png",
+      "sha256": "a9995739ef0f094c20b03ac0a816e15dbd5d7ca174e4885061f61a9546a9f060",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/business.png",
+      "sha256": "5e93b2c3850d24d8087cc1569d2f4a6c695743fa7e8990b66be7f05e8a22b94f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/close.png",
+      "sha256": "826f6fba339c5c679d4b349d7c77791cbd5f67a874b3845e87197740b7ad524d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/copy.png",
+      "sha256": "981011aa8fccf1c7f5548d4a3d1b92a7117d7d8ef5ff4b8404b5821c64ff348f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/customer-service.svg",
+      "sha256": "1b856120d7f1fff02a61956207b0d9eeb2105421320860e1307f41678af5c37e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/examples-active.png",
+      "sha256": "472e85cc1ad44529ec48984bd4de8e2dbd2005ccabcbfca3ef0f6fe963efbbe7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/examples.png",
+      "sha256": "ad40fd589b526486e58da35be6a80c96fe3b6fcf3865c981092b4dfee154af0e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/goods-active.png",
+      "sha256": "5e0e5c6644c095ba6e4bbcf5d8ac98c103f38569fc1f33e19a5104be9397a0ac",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/goods.png",
+      "sha256": "9220a9208ee43c40022660c86dc585d6570d36d692c573060fa04ae16d9e18c2",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/home-active.png",
+      "sha256": "cb24b98068b816229f79bd51d9a319168ada66eabc6bb5b1c32f5e0b8e126e3b",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/home.png",
+      "sha256": "be4012b5a17e53cc68d7ece49d0bdd285b1732610c129f2a7b3bca8360295a61",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/microphone.svg",
+      "sha256": "e87c435a37c09368a97fed46043bd3570c48e6810c03837e19eed0589ca0cf3a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/question.svg",
+      "sha256": "219b5980fd99ea067a26fc70fcccc97cb15661bcf2c536c012ba54f5960434f6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/setting.svg",
+      "sha256": "2a51c6cf1d0b2b478bae284571813d65fc9d9a9d749dc44b64b8d5be87dc492c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/share.svg",
+      "sha256": "12a3e375498282f01f24a8f95bceced10425456dcd2344ada908aac858e647a6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-assistant-active.png",
+      "sha256": "b9ec2c67e02573df55cd0be73c47b263c78514d6b762ef4fdf4b3c48d105bc30",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-assistant-active.svg",
+      "sha256": "e48675a9a3a2c561d59e5b543b872271725d0a3a28d866a2759d340ad4b42daf",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-assistant.png",
+      "sha256": "df9f2e3d2936175300d4fef167ccedaca8aadbd9b5831a99ad7db87c05ac91ce",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-assistant.svg",
+      "sha256": "6e5d8fd9e7a42609e7957c30abaeb479045c54d717238cbb2e1fd94837ccdf04",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-customers-active.png",
+      "sha256": "087a12dc1810b1848ec9b6419d4c34160fbe107d3bf73abc969ecc4dfe0010e7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-customers-active.svg",
+      "sha256": "368ce4f6cf4781b21792d54bb3040ae7abeef2baee4a263e5dc143b5252b8c8b",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-customers.png",
+      "sha256": "707bc11b8504afe3a16a830e42ea88fc55047cba9a278dc34fcd60c0ced05e46",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-customers.svg",
+      "sha256": "9ead03af001110eb45acad10aae44a1f951e71a1382d9e1a3d3931e62dbe6533",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-profile-active.png",
+      "sha256": "402673b8823d4a2a38f96c647805bbcffc9b331bbe3fd5670335a5c7af1731cd",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-profile-active.svg",
+      "sha256": "4b4558f0210d8e97507eefc85db4206a94e5e26b7a43362e9dd76ed43aaee8c2",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-profile.png",
+      "sha256": "900591b28f7c4195d59b32510975c3cc0c66c3573cc6e6aa78a89334ddf95b35",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-profile.svg",
+      "sha256": "5d1cc2901605b4f76a6e0b7ff9013590290fb8d318e021bd8b840cf110d3615b",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-workbench-active.png",
+      "sha256": "fb4de1b0faf7a2b8e36f91861ad52db9dad9346875cb9c732a8ffff6386db9ef",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-workbench-active.svg",
+      "sha256": "379424d18438c2b5fc0f9252f9c7c66135ffc254fbda81502e414c3204abf865",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-workbench.png",
+      "sha256": "80a773ccb9a607ffd41ae5e0c0f78f99b4fc1832920bcb727beb57e9d8351841",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/tab-workbench.svg",
+      "sha256": "ecdaa5063072dd19c5d7457c51fcd74007d63af79ce696647653f57a6307e666",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/usercenter-active.png",
+      "sha256": "9e916c0f7e57cb735e5dbf59f81eb79e0a21d89427c73c2cba88f3804309db43",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/icons/usercenter.png",
+      "sha256": "e0b84555631657cb0c5e214aa6b14e5b24c21890a8d72183a5eb7098531a7f75",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/raccoon-salesbuddy-white.png",
+      "sha256": "917950fb50b3d53d4122a6885468938f2314191af22eb9256541b96c06fa368f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/raccoon-salesbuddy.png",
+      "sha256": "ba9c42ba5a9b7b30778c061b9a8d24d212e3684f1d8855f60565ea9d302b01a3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/images/raccoon-white.svg",
+      "sha256": "751f82247e4e52eaf7ece57cd87287ccacebfe3c0fd9f8f939f2f6e3bbb2634a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.js",
+      "sha256": "40fdae4e4f41053197131f05ff4e07e2cab79ab74ae14fa1976f5161228bb60f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.json",
+      "sha256": "bcce44dd5dc3cfbcb66ee128521e1fc72723a37dc8365e1fe329efc9d6ed60c4",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.wxml",
+      "sha256": "981a461f0fbb16d6cb5dad6e13aa9a819dfbe6d61286cc9a9d4d23b0936a4deb",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.wxss",
+      "sha256": "a6d488211d64d4bb530f09520b624ba6d3f551f5134792d1ea0d97f55d5b7789",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.js",
+      "sha256": "042cc09e1905ae945a148151dd9fb638acfd0367b26fdb3a9f1f9a8ffa50d36f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.json",
+      "sha256": "bdbca38e361ffbe4f875c7b73c1f1ab9239e5a728692e460797fc2724c58669f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.wxml",
+      "sha256": "46519dfb6d6f39c802695204c55b6c3e789b8fd52cbb34b582f2249f4df3559b",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.wxss",
+      "sha256": "5486a8376af5f43c19ba9d1ad54039e561262fed4280950c445467daa6d8f09e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/opportunity-view.wxss",
+      "sha256": "0baa07c1a3bac87ce2fd375166d6ef78a9cdefe8d1a6b258f3a8a7f33bc7bd0c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assign-confirm/index.js",
+      "sha256": "96fe75f6d4611878a1343be738f25dd1d73f5bb4333ca83f5f084cd1d0c8aacc",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assign-confirm/index.json",
+      "sha256": "cb4322332cf395342223f1450ffd285db39d03eb5c86ebcb1280b37c94d51bb0",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assign-confirm/index.wxml",
+      "sha256": "9d995abc50653d59978ade61b3d040949b74a756d8d915cd0d900d1487e95499",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assign-confirm/index.wxss",
+      "sha256": "d083d9a5f640363a55bc5cfa6ea06b549c169f10ca7898439aeb6daabf5329e9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.js",
+      "sha256": "e8b684252fede70a825121dc47b6dd85cf425d4a5616f29a49812e2a088df782",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.json",
+      "sha256": "e1b5a5f7a46b8c8436226c39a1ce797696f3d52ea57f555286c7b852011e1b93",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.wxml",
+      "sha256": "e58decab96af2db903d01b462cbb4cd8a0cac33425f161794e9df731665a0013",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.wxss",
+      "sha256": "2079744ae58a429f1236a4616ad930ee9ff99606debe55166e7d04c8d3bd7010",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.js",
+      "sha256": "45da6aada512a7126734f6eb5ad40f68a82564f794ee44d247f921d62d7c6fb8",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.json",
+      "sha256": "f09217fa72866e6a959f7ffdd253b8a3075dfc9b472e88688bbda80a206d6d96",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.wxml",
+      "sha256": "26c8f951f85bb80a8ab8720f96bb088c0dcbe2da48298c6f002b85840a467b4e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.wxss",
+      "sha256": "aefce508ddfa3adabb174b3ee36dc6d356f4526a1a04af1df793705b5cae0cfb",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.js",
+      "sha256": "d16758a41236cdd5ee54b50b09b1fe835ba938a797dc382c56ef135ae3f3176a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.json",
+      "sha256": "df14d3fdab3e3a4eff2e7612347f4c549e46fe13a4c88b4c385657a86d2476b6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.wxml",
+      "sha256": "20266569e679e71aef0953beb483b2c5ee3a999b9886612f08ed345b41a9fbdf",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.wxss",
+      "sha256": "7174c75113814e774a5a4be1cdd011a87f0dec843dd2de28a14eb1b02eab0e88",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-edit/index.js",
+      "sha256": "c8f19e99592a97e181d6b7968ec5545fa217ac1462432ae1e72b3b7d5669d73f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-edit/index.json",
+      "sha256": "2748f2f6d37d59b16871c74281466055320b2c335020f1ccbc3425b364448928",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-edit/index.wxml",
+      "sha256": "314bbd5f3ed85d95a1a696de3ea13db1c3a1e8e69e5189c09051f1ffcddf3f35",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customer-edit/index.wxss",
+      "sha256": "270f3e73cbb4f5c6b8ce813c5af728c80d702cbf1e29de495949a837b868208f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/battle-map.wxss",
+      "sha256": "ad4a9cbb4a9257897f0b2ba56dfec8f24e99c2851607ca4603f2670e3d7bcc3a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/filter-bar.wxss",
+      "sha256": "c8602c3bcd9f5e393664e18995904f6600fe9c8e57d7312aabcb221c87c8159c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.js",
+      "sha256": "d0f6c38b948c5145e7930fe540814a0b065779d4350548d75e6ee699392c4646",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.json",
+      "sha256": "cfa1fb7b6f04005588d0b5065bddab202fda766782bf1e7a6098ab60fe168373",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.wxml",
+      "sha256": "83547576a5ae10a8fb2fbbcebd231741f79449c7c3ff815e2267894a204e4752",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.wxss",
+      "sha256": "bdaee4808ead0a3cae19e4c5b5712cd5a4e9f16bba7e5040c393e85c52c95d9e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/customers/opportunity-actual-link.wxss",
+      "sha256": "f4c077e5e004ec50b89f00fc691deea1881696dcbc3b8bd92553254072c750fe",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.js",
+      "sha256": "f7138b6c1c7e8e2605e40e9d3c34512cb3017f0bdfcc788283fbcbd9bdc18b28",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.json",
+      "sha256": "a48b8707f42c3dd206046c14303f1e1b2e7468e83f010aa08765168dd7bfdf21",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.wxml",
+      "sha256": "f51fa3e611f5f4b26be739ad5f4d83f7b7fed721f5aabe2f3094172d5766f983",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.wxss",
+      "sha256": "d7ae6d41f740ac5eae92f7b731aeeeb8be1d39762f5cce3de0497c7d7502687d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/fde-records/index.js",
+      "sha256": "42c4bcbddb4c09471ad96e4a68c5790d743dccb29a12c07594e3eb154268c86d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/fde-records/index.json",
+      "sha256": "346740c6bfd3614a1a8ae38b34dd321fdc711bb496c071e283e7fd71284384b6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/fde-records/index.wxml",
+      "sha256": "83142ed309fc008087738b7efec93ab5ee78f149c2fa89870cc7d56b0fc50e28",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/fde-records/index.wxss",
+      "sha256": "3c81bcb0dbf0148bfd92131a940257b806082c47dc091b432d1c3fbe1035b485",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/index/index.js",
+      "sha256": "a7b425af1f2850797b8b20c4280fddf45a5172bcf6f9c73bfe927b4f8497b153",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/index/index.json",
+      "sha256": "ae176ffb7c7c617d328f9f7468d7666814929bd03361b087f6ebae2f5a223e6f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/index/index.wxml",
+      "sha256": "09abdce65ed4d57e2650bcef4d7984babfc29d82a3b8cacd396f720dc1b642c9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/index/index.wxss",
+      "sha256": "a37ca423fe52464a228bcf8405f436919bfe7a4cb6ea7a04c99bd55c5093b83a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.js",
+      "sha256": "9042179bee94cdad54378db8a4a3352a406ed21b58bdfc2b9c5aa110fcc3d2ab",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.json",
+      "sha256": "cf510f5640ddc7f61323d728abbfd249741aed34b6dd3c037eb1fca4020b9bd7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.wxml",
+      "sha256": "3b23ec6cb0746d983c69a2be91b17a69c99b249e4cb121926db4a9a548fe81d5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.wxss",
+      "sha256": "48bfd0e3ac4de161dbce2df8674937b19538004485aedb3ff3ecd51fd27edf06",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.js",
+      "sha256": "76be38468def05ec90cfb365485ca75aa7684a14aa93d7927356b65f83e3a55e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.json",
+      "sha256": "80e788e39ee900aaa03457d981209931a476616bef6c1da2d6bdd7ee121719b4",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.wxml",
+      "sha256": "39c70a301f2f8087e41f929416675cd78fd18d12475a3ce561463cd3228ee1b6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.wxss",
+      "sha256": "780054b268128c922873f0bcd3b3d2abf99f0ebbbe33862cb0a0a839b8d5b089",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/member-growth/index.js",
+      "sha256": "a61a420aa52fcfd2a649c36a3cbbf0b6fe504e7d2068f80a947658b0f0fb4f7c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/member-growth/index.json",
+      "sha256": "87df439fd0d0f8732bd35b404fc3148c72d1748c1e2f444652c71e0c4cf0d00a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/member-growth/index.wxml",
+      "sha256": "79dda7cedd221930a88e4a12b7b24112faf516299611d508c9ab23604ac77a2a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/member-growth/index.wxss",
+      "sha256": "ea80ddcec254272d8bdb5fd860fd2988d26184079d5fa17a79734e4331649b62",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.js",
+      "sha256": "2632347c0e272d4d86b3d129e544c790b49cd7bcff356ac24b9372ddada87e97",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.json",
+      "sha256": "0bada951547e5ed7be621c3a90d49c2f9cfcd65ad1ab6a6d749c510f79b8cbf2",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.wxml",
+      "sha256": "47f15c0225befe4568b1acb6f8aa0023272a9ddcc05b1e646dc03516983a79bd",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.wxss",
+      "sha256": "659d0eac248e346f775c1101d44d677efadcf3a5e202d2141c8e20b60f1f374e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunity-create/index.js",
+      "sha256": "61a14feacda62296a0eb4d19df64697e81354961ebe8455e08a74dde27ba9233",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunity-create/index.json",
+      "sha256": "28e8f5eb220bebf35ceef165ad687c124ad72d4b44cad27e24450568020432cf",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunity-create/index.wxml",
+      "sha256": "a7a25bcc72b0ea2dd6872be30fb81542b2a7c1156c1a3081e4603122027221a9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/opportunity-create/index.wxss",
+      "sha256": "81e480150ac5b7a76387341b539f80506922cc63f7cb6a7a0046fc41b161ef3e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.js",
+      "sha256": "f2360b83fe9b9571652873f2ad363a0938a516c347b0a4ea0fd97037b8ce9380",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.json",
+      "sha256": "1dfbb20ea69e12476b69c552f464963f76a87a95add8c3db479be3c335d3879e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.wxml",
+      "sha256": "754b60434c4c8ce84321924e70a56e6fa50b0259868b84b3c387bbdcb7c2ba4f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.wxss",
+      "sha256": "02e2cf5b2395f82683a62fb08f144a74591fc0b97c6a8ffab543e7ba0da9e2e3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/profile/profile-compact.wxss",
+      "sha256": "8ee49f46b277775eeb606218d79f55d7f2a19aeec9ef98cfcceb68fe712cd493",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/report-detail/index.js",
+      "sha256": "607072e14fb566e6342953098240f6e2c4200453dc8d76b986cb5dba2682deb6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/report-detail/index.json",
+      "sha256": "4779525acec0c8b6e9bb77ad29d9cd10db15219ff91081959b8552e8e419e3d3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/report-detail/index.wxml",
+      "sha256": "0c4b0eeb8e56015441df8a3e5a3c754d362c635a9fa7d22b1191cc599a3239d7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/report-detail/index.wxss",
+      "sha256": "81a132afd7982eafaa4c1a03c67449b19db84f3fc8cc922c8002fdbb66fc7343",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risk-detail/index.js",
+      "sha256": "b9fcd41ec3a022247e77b687006ecb92e29c740e40e1a6b85fbc19d673901227",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risk-detail/index.json",
+      "sha256": "98d83f2cc5edf0c9dbc11540457341be8e80466ae9103c4558a0f57b5f56ad36",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risk-detail/index.wxml",
+      "sha256": "91dc7a3de51ad717c96e64999a59953ad8873d729ad43a2e5dc9bcdfa66e53f8",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risk-detail/index.wxss",
+      "sha256": "f4342416480619426ecb980af816f638906cb8f5d5cc97575c48e49ba0b3b632",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risks/index.js",
+      "sha256": "6dad7dc1182b4baa0dd778f8be11022063ee89d8a410e749537555fe63f3af37",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risks/index.json",
+      "sha256": "36c19f3a3799234eed3dcfd1689c3f1c8cac6a7a5f4c06982c893f5b0d5b696a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risks/index.wxml",
+      "sha256": "03b956f627f045c4cc074572c83a331aa4aab1ca50f3804ed55f228c793b8a63",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/risks/index.wxss",
+      "sha256": "5382070c6344b82a84f37a5fb6958a6ca3882a8da33956eaecc84b85a63f8d93",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.js",
+      "sha256": "7ec9dd21ab13e0d5dab44754cce57d84f24d12938e92918d438824af4a943b92",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.json",
+      "sha256": "f41806d5b20a0cf8e87bcc0574b3958881f2449671f827390b36e8f271e70c69",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.wxml",
+      "sha256": "ce6f0b27432c191afb1f1f6e4720e6cf550577fdf63f2f0030c7170ca39cb73d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.wxss",
+      "sha256": "59037b498a5bbb1baf268980d4ebec1ca3ecea1b29dc9f65359d76f81aef3d4a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.js",
+      "sha256": "1a01c521c3d903eae5ac316ce2810bf93922aba2446e73177a1b900c3389e096",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.json",
+      "sha256": "00b05d1b3be96505c00b2c0b6f99514ff4f8a0cca048d75751eeba07cb9d9da8",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.wxml",
+      "sha256": "2a7090ddc207044c6dff5840ce6bc586a69afe77608c6399cd0f612621e9f897",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.wxss",
+      "sha256": "76451a8ec6540f7636ffd5509dd7cf211a995d47c502cfab22ac1f35f43d7885",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.js",
+      "sha256": "23991cb2db5e459d41f0d0873770852ac1e8b25002784e003da219b3b29aa5ad",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.json",
+      "sha256": "132c14974141abb8701bdbf67d23dd81ae04e9306d1d157d1e2b42cb19fbf2f1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.wxml",
+      "sha256": "da49bf48d41221e7d48693bfb6541bcd912e50a2abda5bf7e0a4fdf98f1ea531",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.wxss",
+      "sha256": "d8d454d1b8c4217ed3304915f4c8c5293fcd97cd3eccf1292360eed04d32cc8f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.js",
+      "sha256": "21432cc655153a802ba3c763093680df6eb24e641c556d130e94786b07928d69",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.json",
+      "sha256": "e6d9467eb7701a40130aa216561640d9f2ff2933efecd9c0bf95fce296786692",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.wxml",
+      "sha256": "b0327a473a0efc73f25044ff4834ac240825f79a71e4451431aafe57621b3baf",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.wxss",
+      "sha256": "f42bab29c57d4eb255455151c582f5babdb2a64b1ea8ce0a853061a4d5c5c8e3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.js",
+      "sha256": "b329384e9dc4f22c7d2ac2283effece381648059025a5dca5127e67ff36f13a3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.json",
+      "sha256": "a8a028d7674df94f882840ff01cc65845a59cb3b452a8afb415179b200b37f7d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.wxml",
+      "sha256": "29351f32774e27063143dfcdfb128f2f8d14e14682bee6637ee0f492ade85af7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.wxss",
+      "sha256": "8c144314048a4c60c4b2a13aad6886ccc40e31af31efab6d74a4f81d3b46fdcb",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.js",
+      "sha256": "17a5435e0a3a07ab4fa3e4e3d5e1824b8ed36905c330df7e6d82f9d41820118c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.json",
+      "sha256": "c966563984f6d399e92a9d02f556be21049b1aa7ef38542da91cf639b8e81a83",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.wxml",
+      "sha256": "5c5dfd4c893b1600cc51e616d5fae0cbae45231b00faf2b76f6e006ab6917ae8",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.wxss",
+      "sha256": "bed52fee8ea062c0728273ab7671fc93f3b420cfcd081e9a2435b9522fd06eff",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/sitemap.json",
+      "sha256": "9b6f9ce8a1cd47042022491f1a8cd55862a73466f3615a52014b4d350859fbd1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/dashboard-section.wxss",
+      "sha256": "c150fa59973798d6e5f8d2d090ac3ce104aacebbb7fedb6e2c8e2d05f889419f",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/detail-summary.wxss",
+      "sha256": "45b71c2d375f08a07a6be239150495f69888588b43d4f95a8d9850892f81b8f6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/opportunity-edit-entry.wxss",
+      "sha256": "dbd23526fa27d5479fa5e012194838af0b550ac908fd117d188081344ffc0db7",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/opportunity-list-card.wxss",
+      "sha256": "3680791d4ac9eba5d85f98301077cf3c0260fb46a17e2d97fc0782fc04fb4c01",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/opportunity-list-header.wxss",
+      "sha256": "82d768ed4eddc0db507cb9e4aedae0bdeb73a21b766d0b883b526f03fd0b1f5c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/styles/role-controls.wxss",
+      "sha256": "d427f94bc89ed41c0176fa05edb30c18181445d05c65611741afd9bd1f0802c6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/templates/opportunity-list-card.wxml",
+      "sha256": "8b41be8608b50fae5b7ff79378f7e1e962abd8e4fb356abcf59ee2808aa4c77a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/access.js",
+      "sha256": "b57068b2716d8cafe85a7d490c0c4f1bc6683ceb7018b26aa42c043253af0137",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/apiClient.js",
+      "sha256": "9a9f596d982f5e27ec43a89a75ea16df67b80748113169c1e94df3a4893a3b83",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/businessOptions.js",
+      "sha256": "a0d3788253aee49d25f341658b135bfc77c20f7c9310ecf995d3d596949c89f1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerAdvice.js",
+      "sha256": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerDetail.js",
+      "sha256": "a0e8fd4abaaebad708aaf8aec089ff50cec5c33c86a7dbac54602da02a025f80",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerLevel.js",
+      "sha256": "1eab66d4cba26e8a9225dd08c2e4390d8330b1a597f1a62340ebb3122b6d12e4",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerMap.js",
+      "sha256": "ad06044d7d04438dbe8c3a536bbfa91237868293f986f473291f1318be0a0540",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerRadar.js",
+      "sha256": "74af2d51caa9ab4fcdb5985d379058f60f2c7b8972f2b0637f0a1aac6cd8fbfe",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/customerSignals.js",
+      "sha256": "50b1d8838932088e24389d4d5e2dc2c353bd811d53e8b093fd17af402080a4d9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/dashboardQuarters.js",
+      "sha256": "83ec8130ee550111a0f43b67dfb1ec29c56c5d9c6a981ad8206e33f821a4fc71",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/demoDisplay.js",
+      "sha256": "93657805553060a7b4f25e3fb4adb5135e3f14a18d6bfcad4800d0a42c900250",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/detailReadSession.js",
+      "sha256": "476a47f8c2fa72c313d20a109daf15f0ae4b0ca711746aeefe2674a34f84f7b8",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/draftScope.js",
+      "sha256": "6958a91522a55a654ebab88cfdae2856e3f202cb116e759c649bd755adff7a95",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/fdeCompanyRankings.js",
+      "sha256": "2ac9c292ac58425b9e5b79e6b308f7aacbf95872717ac3dac805a12024f4a871",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/fdeEfficiency.js",
+      "sha256": "5771215df1ae3594c2b4787ff18ef1b8d45d90c6efaac38b27ecc8115836ceeb",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/fdeHistory.js",
+      "sha256": "1df99ad69877fbcf0f412ee1d57811940c720c10c936200a3ff7b42018305a68",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/fdePresentation.js",
+      "sha256": "27aaf39ac583dfb9629cd5b50d115c63b711089cbddacdb2a9c4bce1628daf60",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/fdeRadar.js",
+      "sha256": "4c6ecb752953a3b2608702db350b5c4225426e319167a6f760fd8c141a7a37c5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/followupRanking.js",
+      "sha256": "150c5d9d2ff05db7dd008136e552b263695065b1eebe56c892d85dd6a0d7a981",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/operatingReport.js",
+      "sha256": "52b13bc202cfb53cb2ddd601aa44a3b45e027f7975ca3ccbb8f6b579b6a594d3",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunity.js",
+      "sha256": "6848f268f1d2508fd0aac74a346a69e301997166e3c99679b90ce93fb64940ae",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityAdvice.js",
+      "sha256": "97e9bb4428c700df18dbf2bd647538a3e636be5cadb3aca74948dff620ade483",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityCard.js",
+      "sha256": "a008377886dda77f357819e4c66e03281f6070ba60f3ae1c855c05e55f43d4a2",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityListCard.js",
+      "sha256": "2ce1ba9a6ccd212a4f33029d0c26b8ea863eaba20f76b728d45a6e66a438ee6a",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityQuarter.js",
+      "sha256": "2d8f560b71e6fdd2813f6ca81bd17c88205bf8bdb9f7109924098eb6e45436a5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityQuarterActuals.js",
+      "sha256": "87515b7c8c25aca0f08cf6bb2f31cde39284114179bc746c35fcf6ad5f41a2c4",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/pagination.js",
+      "sha256": "392a62e8a4d3103b12b62e101865831d87bf38b5fb5296e78f33e14851dda94e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/profileMetrics.js",
+      "sha256": "0fa6710f6819f58f9617bc9c1429ebd7d4586f12225708783f872d1f1ddb1ed9",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/profileScores.js",
+      "sha256": "b90457ff4142cb83f6e3299577ad6ecfeaeaa010c29367be94e7c5710915ea1d",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/quadrant.js",
+      "sha256": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/rankingDisplay.js",
+      "sha256": "9b6f3b952da8f4afe11e3ae890de307d39cfc2e0bc1371fde7fcd6ade8a124c1",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/rememberedLogin.js",
+      "sha256": "6c890b1a7a54cc3eb19c5239512da1628d04f1705287a763aaa039976c7df3cd",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/requestIdentity.js",
+      "sha256": "ae702a5a687aae9980933250a2dcd9694cd9aa125789e92ca16d15ce5b1103b6",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/statusLight.js",
+      "sha256": "cd71de6a2b3f0f2d08e1286f26b9f5ab371041c97acc03c0a71875271fb9ca43",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/taskOverview.js",
+      "sha256": "c3bf26ac5eb483a58eee7883cc17617184ad926e534ff8a492e0d716d90374d5",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/taskRecipients.js",
+      "sha256": "9873b71874665ee7ba1fabf8de14f79bc39883a3d1e45f8bbef55b328c14cc4e",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitCards.js",
+      "sha256": "832b1485ef0f6126b04238b73343b8c0543d16589aa6d0845fe8cb8298db3a2c",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitDates.js",
+      "sha256": "3ad43dd7401d6b56c84e0a27e6f7d61b03950a858e4ee31a86358ea4c4014642",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitFieldNormalizer.js",
+      "sha256": "2734ac01b18eb141667a814f2b2dc259228ed60e7f1e007328ae65818e387499",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitFirstVisit.js",
+      "sha256": "3cb68acbd13a77bf4636dfa2d006f8fd06406d3c23f420bda461a05f81dc0e31",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitFlow.js",
+      "sha256": "613f92c38b4a13059fe9714311a43ef85cb773660348f528a2e78574f4c5df98",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitOpportunityAI.js",
+      "sha256": "87844c23fb9ff3de40afc66218a6f8c236dee4b58f3c81e0cf0c773e35548e23",
+      "matches_v10": true
+    },
+    {
+      "path": "source/miniprogram/utils/visitSnapshot.js",
+      "sha256": "7bf975210ba3fef0fc02bfaf9e7f296e78fffcf5bc256b6e9b63dfd8cb2dc0ac",
+      "matches_v10": true
+    },
+    {
+      "path": "runtime.js",
+      "sha256": "d1541ca5429e691e400f27ea30f2190b9ef17645134f3e7e5a8a5619e81b266a",
+      "matches_v10": true
+    },
+    {
+      "path": "browser-platform.js",
+      "sha256": "7c66923d576936e85d259b272dbc52793627a7d8a8b0e6d3e4c3d70139713f19",
+      "matches_v10": true
+    },
+    {
+      "path": "connection.config.json",
+      "sha256": "8b9c48cecd3533685455f6ef37afb29c9de4a355016f3de4a0c0cce1c3908c54",
+      "matches_v10": true
+    },
+    {
+      "path": "server.mjs",
+      "sha256": "13331ac73ed29a7bf1786cb3492c96ee652ddedc9c98d67fe784cee9e51d221b",
+      "matches_v10": true
+    },
+    {
+      "path": "entry.js",
+      "sha256": "0531ae9f3450e135b4f5964081e3f79ed03ff427ad8f057cd91714c80a4aad91",
+      "matches_v10": true
+    },
+    {
+      "path": "local-login.mjs",
+      "sha256": "fcff1877988664903aaad21f040a4858ae80f79669431dc1a2463aa9db4e8ed4",
+      "matches_v10": true
+    },
+    {
+      "path": "local-preview.mjs",
+      "sha256": "8183a95a8c9af91a7fade7eaf73eb051ea97f15b438a23b5a21d19038efff489",
+      "matches_v10": true
+    }
+  ],
+  "npm_run_verify": {
+    "pass": 121,
+    "fail": 0
+  },
+  "browser_checks": {
+    "pass": 17,
+    "fail": 0,
+    "backend": "synthetic preview only",
+    "viewports": [
+      "1440x900",
+      "1366x768",
+      "1024x600",
+      "390x844"
+    ]
+  },
+  "original_project_snapshot_files_checked": 509,
+  "original_project_unchanged": true,
+  "real_backend_acceptance_performed": false
+}

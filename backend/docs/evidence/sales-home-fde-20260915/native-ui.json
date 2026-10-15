@@ -1,0 +1,29 @@
+{
+  "role": "manager",
+  "verified": "existing_authenticated_account",
+  "quick_actions": [
+    "客户认领",
+    "记录客户拜访",
+    "创建任务"
+  ],
+  "screenshot": "/tmp/sales-home-manager-restored.png",
+  "visual_result": "三个入口完整，麦克风居中，未裁切",
+  "routes": [
+    {
+      "route": "pages/customer-claim/index",
+      "accessBlocked": false,
+      "loadError": ""
+    },
+    {
+      "route": "pages/visit-entry/index",
+      "accessBlocked": false
+    },
+    {
+      "route": "pages/management-task-create/index",
+      "accessBlocked": false
+    }
+  ],
+  "business_submit": false,
+  "new_login": false,
+  "fde_native_visual": "awaiting_user_acceptance"
+}

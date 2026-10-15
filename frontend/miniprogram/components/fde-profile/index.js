@@ -1,17 +1,20 @@
 const api = require('../../utils/apiClient');
 const access = require('../../utils/access');
 const present = require('../../utils/fdePresentation');
+const finance = require('../../utils/financialDisplay');
 const salesMetrics = require('../../utils/profileMetrics');
 const radar = require('../../utils/fdeRadar');
+const growth = require('../../utils/growthProfile');
 const {visitDetailUrl} = require('../../utils/visitNavigation');
 
 Component({
   observers: {'chartsHidden': function(hidden) { if (!hidden) { this.drawRadar(); this.selectHistory(); } }},
   properties: {chartsHidden:Boolean,identityKey:{type:String,value:"",observer(){if(this.visible){this.load();this.loadMetrics();}}},selectedTeamId:{type:String,value:'',observer(){if(this.visible){this.load();this.loadMetrics();}}},selectedMemberId:{type:String,value:'',observer(){if(this.visible){this.load();this.loadMetrics();}}},selectedMemberName:String, profileScope:{type:String,value:'self',observer(){if(this.visible){this.load();this.loadMetrics();}}}, section: {type:String,value:"profile",observer(value) { this.setData({activeTab:value}); if(value==="profile") {this.drawRadar();this.selectHistory();} }}, embedded: Boolean, userName: String, roleName: String, team: String, account: String, initial: String, logoutBusy: Boolean, logoutNavigating: Boolean},
   data: {
+    growthEvidence:growth.emptyEvidence(),latestReviewId:"",evaluationState:"legacy_unknown",evidenceCoverage:null,coachingCoverage:null,scoreBasis:null,coverageText:"",coachingCoverageText:"",basisText:"",
     canReadTargets:false,canReadTasks:false,canReadRecords:false,canReview:false,history:[],historyCode:'',historyName:'',historyPoints:[],canEditOwnTargets:false,targetNotice:'',metricsLoading:false, metricsError:'', projectMetrics:[], performanceBoard:[], maturityFacts:[], collaborationMetrics:[], stages:[], rhythm:[], rhythmSource:[], rhythmMode:'day', metricYear:0,metricQuarter:0,targetContextKey:"",
     activeTab: 'profile', tabs: [{key: 'profile', label: '工作画像'}, {key: 'tasks', label: '任务执行'}, {key: 'records', label: '跟进记录'}],
-    portraitScore:'—', portraitScoreLabel:'待评估 · 总分 / 100', loading: false, ready: false, error: '', dimensions: [], sampleCount: 0, summary: '', updatedText: '', periodText: '近30天',
+    portraitScore:'—', portraitScoreLabel:'六项业务事实指标', loading: false, ready: false, error: '', dimensions: [], sampleCount: 0, summary: '', updatedText: '', periodText: '近30天',
     reviewStatus: 'missing', reviewBusy: false, reviewError: '', reviewMessage: '', advice: [], pollPaused: false,
     tasks: [], taskSummary: null, tasksLoading: false, tasksError: '', taskAdvice: [], recordAdvice: [],
     records: [], recordsReady: false, recordsLoading: false, recordsError: '', recordsMore: false, recordsOffset: 0, recordsTotal: 0,
@@ -25,11 +28,14 @@ Component({
     hide() { this.pause(); },
   },
   methods: {
+    ...growth.evidenceMethods(api,()=>getApp().globalData.session,true,url=>wx.navigateTo({url})),
+    growthEvidenceContext(){return JSON.stringify([access.identity(getApp().globalData.session),this.profileParams()]);},
+    clearGrowthAccess(message="当前画像不可读取，请刷新后重试"){this.growthReadOwner=null;this.closeGrowthEvidence();clearTimeout(this.reviewTimer);this.serial=(this.serial||0)+1;this.setData({ready:false,loading:false,canReview:false,reviewBusy:false,history:[],historyPoints:[],dimensions:[],advice:[],taskAdvice:[],recordAdvice:[],summary:"",portraitScore:"—",latestReviewId:"",evaluationState:"legacy_unknown",evidenceCoverage:null,coachingCoverage:null,scoreBasis:null,coverageText:"",coachingCoverageText:"",basisText:"",error:message});},
     onHistoryTab(e){return this.selectHistory({currentTarget:{dataset:{code:e.detail.key}}});},
-    pause() { this.visible = false; clearTimeout(this.reviewTimer); this.serial = (this.serial || 0) + 1; this.recordSerial = (this.recordSerial || 0) + 1; this.taskSerial = (this.taskSerial || 0) + 1; this.metricSerial = (this.metricSerial || 0) + 1; this.setData({tasksLoading:false}); },
+    pause() { this.closeGrowthEvidence();this.visible = false; clearTimeout(this.reviewTimer); this.serial = (this.serial || 0) + 1; this.recordSerial = (this.recordSerial || 0) + 1; this.taskSerial = (this.taskSerial || 0) + 1; this.metricSerial = (this.metricSerial || 0) + 1; this.setData({tasksLoading:false}); },
     profileParams(){return {days:30,team_id:this.properties.profileScope==='team'?this.properties.selectedTeamId||undefined:undefined,scope:this.properties.profileScope==='team'?'team':'self',member_id:this.properties.profileScope==='team'?undefined:this.properties.selectedMemberId||undefined};},
     activityParams(){return {team_id:this.properties.profileScope==='team'?this.properties.selectedTeamId||undefined:undefined,scope:this.properties.profileScope==='team'||this.properties.selectedMemberId?'team':'self',member_id:this.properties.profileScope==='team'?undefined:this.properties.selectedMemberId||undefined};},
-    valid(serial, identity) { return !this.closed && this.visible !== false && serial === this.serial && identity === access.identity(getApp().globalData.session); },
+    valid(serial, identity) { return !this.closed && this.visible !== false && serial === this.serial && identity === access.identity(getApp().globalData.session) && this.profileContext===JSON.stringify(this.profileParams()); },
     syncPermissions() {
       const session=getApp().globalData.session,modern=!!(session&&session.permissions);
       const canReadTasks=!modern||access.can(session,'task.read'),canReadRecords=!modern||access.can(session,'profile.fde_activity');
@@ -42,29 +48,30 @@ Component({
     },
     async load(polling = false) {
       this.syncPermissions();
-      if(this.properties.profileScope==='team'&&!this.properties.selectedTeamId){this.setData({loading:false,ready:false,error:'请选择要查看的团队'});return;}
+      if(getApp().globalData.session.permissions&&!access.can(getApp().globalData.session,'profile.fde_read')){this.clearGrowthAccess();return;}
+      if(this.properties.profileScope==='team'&&!this.properties.selectedTeamId){this.clearGrowthAccess('请选择要查看的团队');return;}
+      this.profileContext=JSON.stringify(this.profileParams());
       clearTimeout(this.reviewTimer);
       const identity = access.identity(getApp().globalData.session), serial = this.serial = (this.serial || 0) + 1;
       if (polling !== true) {
+        this.growthReadOwner=null;this.closeGrowthEvidence();
         this.pollCount = 0;
         this.recordSerial = (this.recordSerial || 0) + 1;
-        this.setData({canReview:false,portraitScore:"—",portraitScoreLabel:"待评估 · 总分 / 100",history:[],historyPoints:[],summary:"",updatedText:"",loading: true, ready: false, error: '', dimensions: [], advice: [], taskAdvice: [], recordAdvice: [], reviewError: '', pollPaused: false, records: [], recordsReady: false, recordsLoading: false, recordsOffset: 0});
+        this.setData({canReview:false,portraitScore:"—",portraitScoreLabel:"六项业务事实指标",latestReviewId:"",evidenceCoverage:null,coachingCoverage:null,scoreBasis:null,history:[],historyPoints:[],summary:"",updatedText:"",loading: true, ready: false, error: '', dimensions: [], advice: [], taskAdvice: [], recordAdvice: [], reviewError: '', pollPaused: false, records: [], recordsReady: false, recordsLoading: false, recordsOffset: 0});
         if (this.data.activeTab === 'records') this.loadRecords();
         if (this.data.activeTab === 'tasks') this.loadTasks();
       }
       try {
         const response = await api.getFdeProfile(this.profileParams());
         if (!this.valid(serial, identity)) return;
+        this.growthReadOwner=this.growthEvidenceContext();
         const definitions = (response.framework || {}).dimensions, latest = response.latest;
         if (response.data_source !== 'database' || !Array.isArray(definitions) || definitions.length !== 6 || !latest || !Array.isArray(latest.dimensions)) throw Error('画像暂未加载完成，请重试');
         const dimensions = definitions.map(definition => {
           const fact = latest.dimensions.find(item => item.code === definition.code) || {}, score = present.numeric(fact.score);
-          return {...definition, shortName: definition.short_name || definition.name, score, scoreText: score === null ? '未评估' : String(Math.round(score * 10) / 10), width: score === null ? 0 : Math.max(0, Math.min(100, score)), assessment: fact.assessment || '暂无可评估记录', evidenceCount: present.numeric(fact.evidence_count)};
+          return {...definition,numerator:fact.numerator,denominator:fact.denominator,unit:definition.code==='record_quality'?'分':'%', shortName: definition.short_name || definition.name, score, scoreText: score === null ? '未评估' : String(Math.round(score * 10) / 10), width: score === null ? 0 : Math.max(0, Math.min(100, score)), assessment: fact.assessment || '暂无可评估记录', evidenceCount: present.numeric(fact.evidence_count)};
         });
-        const serverScore=present.numeric(latest.overall_score);
-        const validScore=value=>value!==null && value>=0 && value<=100;
-        const score=validScore(serverScore)?serverScore:null;
-        this.setData({portraitScore:score===null?'—':String(Math.round(score*10)/10),portraitScoreLabel:score===null?'待评估 · 总分 / 100':'画像得分 / 100'});
+        this.setData({portraitScore:'—',portraitScoreLabel:'六项业务事实指标',latestReviewId:response.review_run_id||latest.run_id||latest.review_run_id||'',evaluationState:latest.evaluation_state||'legacy_unknown',evidenceCoverage:response.evidence_coverage||null,coachingCoverage:response.coaching_coverage||null,scoreBasis:latest.score_basis||null,basisText:growth.basisLabel(latest.score_basis),coverageText:growth.fdeCoverageText(response.evidence_coverage),coachingCoverageText:growth.coachingCoverageText(response.coaching_coverage)});
         const status = response.review_status || 'missing', reviewBusy = ['queued', 'running'].includes(status);
         const advice = status === 'succeeded' && Array.isArray(latest.advice) ? latest.advice.map((item, index) => typeof item === 'string' ? {title: '建议 ' + (index + 1), content: item} : {title: item.title || '建议 ' + (index + 1), content: item.content || item.action || ''}).filter(item => item.content) : [];
         this.setData({canReview:response.can_review!==false&&this.ownTargetScope()&&(!getApp().globalData.session.permissions||access.can(getApp().globalData.session,'profile.fde_review')),history:response.history||[],loading: false, ready: true, error: '', dimensions, sampleCount: present.numeric(response.sample_count) || 0, summary: latest.summary || '', updatedText: present.beijingTime(response.as_of), reviewStatus: status, reviewBusy, advice, taskAdvice: advice.filter(item => /任务|待办|交付|截止|逾期|优先/.test(item.title + item.content)), recordAdvice: advice.filter(item => /拜访|跟进|沟通|记录|验证|材料/.test(item.title + item.content)),
@@ -73,26 +80,28 @@ Component({
         if (this.data.activeTab === 'records' && !this.data.recordsReady && !this.data.recordsLoading) this.loadRecords();
         if (reviewBusy) this.schedulePoll();
       } catch (error) {
-        if (this.valid(serial, identity)) this.setData({loading: false, ready: false, error: error.message || '画像加载失败，请重试', advice: [], dimensions: [], reviewBusy: false});
+        if (this.valid(serial, identity)) this.clearGrowthAccess(error.message || '画像加载失败，请重试');
       }
     },
     schedulePoll() {
       if (this.closed || this.visible === false) return;
       this.pollCount = (this.pollCount || 0) + 1;
       if (this.pollCount > 40) { this.setData({pollPaused: true, reviewMessage: '仍在后台生成，可稍后刷新查看'}); return; }
-      this.reviewTimer = setTimeout(() => this.load(true), 1500);
+      const identity=access.identity(getApp().globalData.session),serial=this.serial;
+      this.reviewTimer = setTimeout(() => {if(this.valid(serial,identity))return this.load(true);}, 1500);
     },
     async generateAdvice() {
-      if (getApp().globalData.session.permissions&&!access.can(getApp().globalData.session,'profile.fde_review'))return;
+      if (this.closed||this.visible===false||this.growthReadOwner!==this.growthEvidenceContext()||!this.ownTargetScope()||(getApp().globalData.session.permissions&&!access.can(getApp().globalData.session,'profile.fde_review')))return;
       if (!this.data.canReview || this.data.reviewBusy || !this.data.ready || this.data.reviewStatus === 'empty') return;
       const identity = access.identity(getApp().globalData.session), serial = this.serial;
+      this.closeGrowthEvidence();
       this.setData({reviewBusy: true, reviewStatus: 'queued', advice: [], taskAdvice: [], recordAdvice: [], summary: '', reviewError: '', reviewMessage: '正在提交复盘…'});
       try {
         await api.reviewFdeProfile(this.profileParams());
         if (!this.valid(serial, identity)) return;
         this.pollCount = 0;
         await this.load(true);
-      } catch (error) { if (this.valid(serial, identity)) this.setData({reviewBusy: false, reviewStatus: 'failed', reviewError: error.message || '建议生成失败，请重试'}); }
+      } catch (error) { if (this.valid(serial, identity)) {if([401,403,404].includes(error.statusCode)){this.clearGrowthAccess(error.message);return;}this.setData({reviewBusy: false, reviewStatus: 'failed', reviewError: error.message || '建议生成失败，请重试'});} }
     },
     tab(e) { const activeTab = e.currentTarget.dataset.tab; if (!this.data.tabs.some(item => item.key === activeTab)) return; this.setData({activeTab}); if (activeTab === 'profile') this.drawRadar(); if (activeTab === 'tasks') this.loadTasks(); if (activeTab === 'records' && !this.data.recordsReady) this.loadRecords(); },
     drawRadar() {
@@ -122,14 +131,14 @@ Component({
       (response.items||[]).forEach(item=>{targets[item.kind]=Number(item.amount);});
       this._targetRows=response.items||[];
       this.setData({canEditOwnTargets:response.editable===true&&(getApp().globalData.session.permissions?access.can(getApp().globalData.session,'target.submit'):this.ownTargetScope()),targetNotice:response.notice||''});
-      return ['collection','recognized'].map(kind=>{const target=this._targetRows.find(item=>item.kind===kind);return {...salesMetrics.performanceMetric({targets},kind,row[kind+'_amount']),targetAmount:targets[kind],versionNo:target&&target.version_no,targetLabel:year+' Q'+this.data.metricQuarter+(this.properties.profileScope==='team'?' 团队目标':' 个人目标')};});
+      return ['collection','recognized'].map(kind=>{const target=this._targetRows.find(item=>item.kind===kind);return {...salesMetrics.performanceMetric({targets},kind,row[kind+'_amount'],row),targetAmount:targets[kind],versionNo:target&&target.version_no,targetLabel:year+' Q'+this.data.metricQuarter+(this.properties.profileScope==='team'?' 团队目标':' 个人目标')};});
     },
     editOwnTarget(){const component=this.selectComponent&&this.selectComponent('#fdeQuarterTarget');if(component)component.show();},
     targetsSaved(){return this.loadMetrics();},
     selectHistory(e){
       const code=e?e.currentTarget.dataset.code:this.data.historyCode||(this.data.dimensions[0]||{}).code;
       const dimension=this.data.dimensions.find(row=>row.code===code);if(!dimension)return;
-      const points=(this.data.history||[]).map(row=>({date:String(row.date||'').slice(0,10),score:present.numeric((row.dimensions||[]).find(v=>v.code===code)?.score)}));
+      const points=growth.historyPoints(this.data.history,code,true).map(row=>({...row,unit:code==='record_quality'?'分':'%'}));
       this.setData({historyCode:code,historyName:dimension.name,historyPoints:points});
       if(this.properties.chartsHidden || typeof this.createSelectorQuery!=='function')return;
       const draw=()=>this.createSelectorQuery().select('.history-canvas').boundingClientRect(rect=>{if(!rect||this.closed||this.visible===false||this.properties.chartsHidden||this.data.activeTab!=='profile')return;require('../../utils/fdeHistory').draw(wx.createCanvasContext('fdeHistory',this),rect.width,rect.height,points);}).exec();
@@ -156,6 +165,7 @@ Component({
         if(!current()) return;
         if(result.data_source!=='database' || !result.summary) throw Error('协作数据暂未加载完成');
         const row=result.summary;this._targetActuals=row;
+        const recognized=finance.aggregate(row,'recognized'),collection=finance.aggregate(row,'collection');
         const count=value=>present.numeric(value)===null?'—':String(present.numeric(value));
         this.setData({metricsLoading:false,
           performanceBoard:this.buildTargetBoard(row,metricYear,targets),
@@ -167,15 +177,15 @@ Component({
             {name:'参与商机',value:count(row.opportunities),unit:'个',note:'当前协助项目'},
             {name:'在推商机',value:count(row.open_opportunities),unit:'个',note:'当前进行中的项目'},
             {name:'在推金额',value:present.money(row.open_acv),unit:'万',note:'协助项目整体金额'},
-            {name:'确收金额',value:present.money(row.recognized_amount),unit:'万',note:'当季度 · 协助项目'},
-            {name:'回款金额',value:present.money(row.collection_amount),unit:'万',note:'当季度 · 协助项目'},
+            {name:'确收金额（不含税）',value:recognized.amountText,unit:'',note:['当季度 · 协助项目',...recognized.qualityHints].join('；')},
+            {name:'回款金额',value:collection.amountText,unit:'',note:['当季度 · 协助项目',...collection.qualityHints].join('；')},
             {name:'参与客户',value:count(row.customers),unit:'家',note:'当前协助客户'}],
           collaborationMetrics:[
             {name:'归档跟进',value:count(row.period_visits),unit:'条',note:this.properties.profileScope==='team'?'当季度团队归档记录':this.properties.selectedMemberName?'当季度该成员归档记录':'当季度本人归档记录'},
             {name:'跟进客户',value:count(row.period_customers),unit:'家',note:'当季度覆盖客户'},
             {name:'已完成任务',value:count(row.completed_tasks),unit:'项',note:'当季度统计'},
-            {name:'待完成任务',value:count(row.pending_tasks),unit:'项',note:'当季度统计'},
-            {name:'逾期任务',value:count(row.overdue_tasks),unit:'项',note:'当季度统计'}],
+            {name:'待完成任务',value:count(row.pending_tasks),unit:'项',note:'当前未完成，不限季度'},
+            {name:'逾期任务',value:count(row.overdue_tasks),unit:'项',note:'当前逾期，不限季度'}],
           stages:present.visibleStageBars(result.stages||[]),rhythmSource:result.rhythm||[],rhythmWeeks:result.rhythm_weeks||[],rhythm:present.progressBars(this.data.rhythmMode==='week'?(result.rhythm_weeks||[]):(result.rhythm||[]),this.data.rhythmMode)});
       } catch(error) {if(current()) this.setData({metricsLoading:false,metricsError:error.message||'协作数据加载失败，请重试'});}
     },

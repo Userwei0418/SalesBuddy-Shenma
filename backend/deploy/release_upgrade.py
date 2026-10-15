@@ -22,7 +22,7 @@ def version_number(value: str) -> int:
     return int(value[1:])
 
 
-def verify_migration_plan(plan, prior, registered, source, target):
+def verify_migration_plan(plan, prior, registered, source, target, *, release_contract=None):
     start, end = version_number(source), version_number(target)
     if end < start:
         raise ReleaseError("Schema downgrade is not supported")
@@ -44,7 +44,21 @@ def verify_migration_plan(plan, prior, registered, source, target):
     if any(key.startswith("V") and key not in registered for key in prior):
         raise ReleaseError("Checksum ledger and registered migrations differ")
     pending = [row["key"] for row in plan if row["key"] not in prior]
-    if any(not key.startswith("V") or not start < version_number(key) <= end for key in pending):
+    if release_contract is not None:
+        from release121_contract import CONTRACT_ID, validate_migrations
+        if release_contract != CONTRACT_ID:
+            raise ReleaseError("Unknown exact migration contract")
+
+        def require(condition, message):
+            if not condition:
+                raise ReleaseError(message)
+
+        def digest(value):
+            return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+        validate_migrations(plan, prior, registered, source, target, pending, digest=digest, require=require)
+    elif any(not key.startswith("V") or not start < version_number(key) <= end for key in pending):
         raise ReleaseError("Upgrade contains an unreviewed baseline, seed or historical migration")
     return pending
 

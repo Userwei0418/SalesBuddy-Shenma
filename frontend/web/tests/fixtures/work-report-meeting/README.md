@@ -1,0 +1,1 @@
+Pure synthetic contract fixtures from Backend 5643b4497dec05c5a6290eaba005be1465e3cd53, docs/collaboration/backend/meeting-report-v1. No live account, HTTP, database or model evidence. UUIDs and hashes are examples.

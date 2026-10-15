@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
+from uuid import UUID
 from typing import Any
 
 import asyncpg
 
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.domain.agent import ActorContext
 from sales_backend.job_context import JobLeaseLost, current_job_lease
 
@@ -33,6 +36,87 @@ class JobRepository:
             "SELECT * FROM ops.claim_job($1, $2, $3::text[], $4)",
             worker_id, lock_seconds, list(job_types) if job_types is not None else None, exclude_types,
         )
+        return self._claimed(row)
+
+    async def claim_exact_import(
+        self, connection: asyncpg.Connection, *, worker_id: str, lock_seconds: int,
+        job_id: str, workspace_id: str, import_id: str, user_id: str, content_sha256: str,
+    ) -> ClaimedJob | None:
+        """Lease only this fresh uploaded import; no general queue maintenance."""
+        identifiers = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, import_id, user_id))
+        if any(UUID(value).int == 0 for value in identifiers):
+            raise ValueError("exact import identifiers must be nonzero UUIDs")
+        if not isinstance(content_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", content_sha256):
+            raise ValueError("exact import requires a lowercase SHA-256")
+        row = await connection.fetchrow(
+            "SELECT * FROM ops.claim_exact_visit_import($1,$2,$3::uuid,$4::uuid,$5::uuid,$6::uuid,$7)",
+            worker_id, lock_seconds, *identifiers, content_sha256,
+        )
+        return self._claimed(row)
+
+    async def claim_exact_agent_run(
+        self, connection: asyncpg.Connection, *, worker_id: str, lock_seconds: int,
+        job_id: str, workspace_id: str, run_id: str, user_id: str, visit_stage: str, input_sha256: str,
+    ) -> ClaimedJob | None:
+        """Lease this fresh visit_flow structure/quality run; never scan/retry the queue."""
+        identifiers = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, run_id, user_id))
+        if any(UUID(value).int == 0 for value in identifiers):
+            raise ValueError("exact agent identifiers must be nonzero UUIDs")
+        if visit_stage not in ("structure", "quality"):
+            raise ValueError("exact agent claim requires a visit structure/quality stage")
+        if not isinstance(input_sha256, str) or not re.fullmatch(r"[0-9a-f]{64}", input_sha256):
+            raise ValueError("exact agent claim requires a lowercase input SHA-256")
+        row = await connection.fetchrow(
+            "SELECT * FROM ops.claim_exact_visit_agent_run($1,$2,$3::uuid,$4::uuid,$5::uuid,$6::uuid,$7,$8)",
+            worker_id, lock_seconds, *identifiers, visit_stage, input_sha256,
+        )
+        return self._claimed(row)
+
+    async def claim_exact_competency_review(
+        self, connection: asyncpg.Connection, *, worker_id: str, lock_seconds: int,
+        job_id: str, workspace_id: str, review_id: str, user_id: str, generation_no: int,
+        input_fingerprint: str, input_snapshot: dict[str, Any], trigger_type: str,
+        trigger_id: str | None = None, trigger_version: int | None = None,
+    ) -> ClaimedJob | None:
+        """Lease only this approved new frozen generation; no queue scan or retry."""
+        from sales_backend.repositories.competency_lifecycle import validate_snapshot
+
+        identifiers = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, review_id, user_id))
+        if any(UUID(value).int == 0 for value in identifiers):
+            raise ValueError("exact competency identifiers must be nonzero UUIDs")
+        if type(generation_no) is not int or not 1 <= generation_no <= 2147483647:
+            raise ValueError("exact competency requires a positive generation")
+        if not isinstance(input_fingerprint, str) or not re.fullmatch(r"[0-9a-f]{64}", input_fingerprint):
+            raise ValueError("exact competency requires a lowercase input fingerprint")
+        if not isinstance(input_snapshot, dict) or {"score_summary", "inference_route"} & input_snapshot.keys():
+            raise ValueError("exact competency requires an unprocessed frozen input object")
+        snapshot = validate_snapshot(input_snapshot, input_fingerprint)
+        scope = snapshot["facts"].get("scope")
+        if not isinstance(scope, dict) or (
+            (scope.get("workspace_id"), scope.get("user_id")) != (identifiers[1], identifiers[3])
+            or snapshot["facts"].get("subject_user_ref_id") != identifiers[3]
+            or scope.get("role") not in {"sales", "supervisor"}
+        ):
+            raise ValueError("exact competency frozen identity does not match")
+        if trigger_type == "manual":
+            if trigger_id is not None or trigger_version is not None:
+                raise ValueError("manual competency cannot have a visit trigger")
+        elif trigger_type in {"visit.archived", "visit.supplemented"}:
+            trigger_id = str(UUID(str(trigger_id)))
+            if not UUID(trigger_id).int or type(trigger_version) is not int or not 1 <= trigger_version <= 2147483647:
+                raise ValueError("exact competency requires a visit and positive trigger version")
+        else:
+            raise ValueError("invalid exact competency trigger")
+        row = await connection.fetchrow(
+            "SELECT * FROM ops.claim_exact_competency_review("
+            "$1,$2,$3::uuid,$4::uuid,$5::uuid,$6::uuid,$7,$8,$9::jsonb,$10,$11::uuid,$12)",
+            worker_id, lock_seconds, *identifiers, generation_no, input_fingerprint, snapshot,
+            trigger_type, trigger_id, trigger_version,
+        )
+        return self._claimed(row)
+
+    @staticmethod
+    def _claimed(row) -> ClaimedJob | None:
         if not row:
             return None
         return ClaimedJob(
@@ -132,6 +216,8 @@ async def enqueue_battle_map_review(
     trigger_type: str,
     trigger_id: str,
 ) -> None:
+    if not await customer_analysis_applies(connection, customer_id):
+        return
     # Cross-customer follow-up is allowed, but sharing its broader analysis remains
     # unconfirmed. Preserve the existing analysis scope without granting membership.
     if not await connection.fetchval("SELECT security.has_customer_access($1::uuid)", customer_id):

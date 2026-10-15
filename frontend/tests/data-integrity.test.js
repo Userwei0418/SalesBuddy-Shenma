@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const tick = () => new Promise(resolve => setImmediate(resolve));
+const taskDirectory=items=>({teams:[{id:'t',name:'测试团队'}],defaults:{team_id:'t'},items:items.map(item=>({...item,account_code:item.account_code||item.id,team_ids:['t']}))});
 
 function load(name, api = {}, saved = {}) {
   const file = path.resolve(__dirname, `../miniprogram/pages/${name}/index.js`);
@@ -74,12 +75,12 @@ test('商机分页失败或缺少集合时显示局部错误，总览不使用�
 
 test('商机工作台再次进入时复用新鲜数据，过期后后台刷新也不清空界面', async () => {
   let requestCount=0,resolveRefresh;
-  const {page}=load('workbench',{getOpportunityOverview:async()=>({metrics:{won:0,total:0,active:0,newCount:0,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}}),listOpportunities:()=>{
-    requestCount+=1;if(requestCount===1)return Promise.resolve(pageResponse([]));return new Promise(resolve=>{resolveRefresh=resolve;});
+  const {page}=load('workbench',{listOpportunities:options=>{
+    requestCount+=1;if(requestCount===1)return Promise.resolve(pageResponse([],options));return new Promise(resolve=>{resolveRefresh=()=>resolve(pageResponse([],options));});
   }});
   await page.loadData();assert.equal(page.data.dataReady,true);page.onShow();assert.equal(requestCount,1);
   page.workbenchLoadedAt=Date.now()-31000;page.onShow();assert.equal(requestCount,2);assert.equal(page.data.dataReady,true);assert.equal(page.data.loading,false);
-  resolveRefresh(pageResponse([]));await tick();
+  resolveRefresh();await tick();
 });
 
 test('商机总览按所选季度统计新增，使用包含关闭商机的完整数据', async () => {
@@ -88,29 +89,28 @@ test('商机总览按所选季度统计新增，使用包含关闭商机的完�
     {id:'older',created_at:'2026-01-02',expected_close_date:'2026-04-01',status:'open'},
     {id:'unknown',status:'won',closed_at:'2026-04-30'},
   ];
-  const response = {summary:{},members:[],customers:[],tasks:[],risks:[],opportunities:items.filter(item=>item.status==='open')};
-  const {page} = load('workbench',{getOpportunityOverview:async()=>({metrics:{won:1,total:1,active:1,newCount:1,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}}),getWorkbench:async()=>response,listOpportunities:async options=>pageResponse(items,options)});
+  const {page} = load('workbench',{listOpportunities:async options=>pageResponse(items,options)});
   await page.loadData(); await tick();
   page.data.summaryQuarter = require('../miniprogram/utils/opportunityQuarter').quarterSelection(2026);
   page.toggleQuarter({currentTarget:{dataset:{scope:'summary',value:2}}});
   await tick();
-  assert.equal(page.data.opportunityBoard.total,1);
+  // 全部商机是当前存量，不随统计季度变化；季度只约束成单、活跃、新增指标。
+  assert.equal(page.data.opportunityBoard.total,3);
   assert.equal(page.data.opportunityBoard.won,1);
   assert.equal(page.data.opportunityBoard.newCount,1);
 });
 
 test('商机经营补齐含关闭商机的列表后同步总览完整统计', async () => {
-  const active = {id:'active',customer_id:'c1',customer_name:'客户一',status:'open',probability:30,amount:500000,owner_name:'销售',team_name:'南区'};
+  const active = {id:'active',customer_id:'c1',customer_name:'客户一',status:'open',active:true,probability:30,amount:500000,owner_name:'销售',team_name:'南区'};
   const closed = {id:'closed',customer_id:'c2',customer_name:'客户二',status:'lost',amount:100000,owner_name:'销售',team_name:'南区'};
-  const response = {summary:{},members:[],customers:[],tasks:[],risks:[],opportunities:[active]};
-  const {page} = load('workbench',{getOpportunityOverview:async()=>({metrics:{won:1,total:2,active:1,newCount:2,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}}),getWorkbench:async()=>response,listOpportunities:async options=>pageResponse([active,closed],options)});
+  const {page} = load('workbench',{listOpportunities:async options=>pageResponse([active,closed],options)});
   await page.loadData(); await tick();
   assert.equal(page.data.opportunityBoard.total,2);
   assert.equal(page.data.opportunityBoard.active,1);
   assert.deepEqual(Array.from(page.data.filteredOpportunities,item=>item.id),['active','closed']);
 });
 
-test('列表团队筛选和重置不改变商机总览', async () => {
+test('列表团队筛选和重置同步商机总览', async () => {
   const {page} = load('workbench',{listOpportunities:async options=>pageResponse(page.baseOpportunities.map(row=>({...row,team_name:row.team,owner_name:row.owner})),options)});
   page.data.role = 'manager'; page.data.canViewTeam = true;
   page.data.executionTeamOptions = [{value:'all',label:'全部团队'},{value:'南区',label:'南区'},{value:'东区',label:'东区'}];
@@ -126,7 +126,7 @@ test('列表团队筛选和重置不改变商机总览', async () => {
   page.changeExecutionTeam({detail:{value:2}});await tick();
   assert.equal(page.data.executionTeamLabel,'东区');
   assert.deepEqual(Array.from(page.data.filteredOpportunities,item=>item.id),['east']);
-  assert.equal(page.data.opportunityBoard.total,2);
+  assert.equal(page.data.opportunityBoard.total,1);
   assert.equal(page.data.opportunityFilterActive,true);
   page.resetOpportunityFilters();await tick();
   assert.deepEqual(Array.from(page.data.filteredOpportunities,item=>item.id),['south','east']);
@@ -175,9 +175,10 @@ test('旧建档下发表单迁移到约定客户字段，缺角色不能提交�
   assert.equal(page.data.fields.length,12);
   assert.equal(page.data.fields.find(f=>f.key==='industry').required,false);
   assert.equal(page.data.fields.find(f=>f.key==='partner_name').required,false);
-  assert.equal(page.data.fields.find(f=>f.key==='lead_source').value,'销售线索');
+  assert.equal(page.data.fields.find(f=>f.key==='lead_source').value,'公司分配');
+  assert.match(page.data.fields.find(f=>f.key==='lead_source').validationError,/重新选择/);
   page.confirmArchive(); await tick(); assert.equal(creates.length,0);
-  page.refresh(page.data.fields.map(f=>f.key==='contact_role'?{...f,value:'决策者'}:f.key==='level_code'?{...f,value:'Tier-1'}:f));
+  page.refresh(page.data.fields.map(f=>f.key==='contact_role'?{...f,value:'决策者'}:f.key==='level_code'?{...f,value:'Tier-1'}:f.key==='lead_source'?{...f,value:'销售线索'}:f));
   page.confirmArchive(); await tick();
   assert.equal(creates.length,1); assert.equal(creates[0].contact_role,'决策者'); assert.equal(creates[0].customer_type,'潜在客户'); assert.equal(creates[0].level_code,'Tier-1');
   for (const key of ['opportunity_name','estimated_amount','demand_summary','next_action']) assert.equal(Object.hasOwn(creates[0],key),false);
@@ -203,7 +204,7 @@ test('拒绝后重发草稿按账号隔离，并按用户ID选回同名接收人
   original.page.onLoad({id:task.id});original.page.loadTask();await tick();original.page.retryTask();
   assert.equal(original.storage.has('retryTaskDraft'),false);
   assert.equal(original.storage.get('retryTaskDraft:w1:u1').assigneeId,'u2');
-  const api={getTaskPositions:async()=>({items:[]}),listTaskRecipients:async()=>({items:[{id:'u3',name:'同名',role:'sales'},{id:'u2',name:'同名',role:'sales'}]})};
+  const api={getTaskPositions:async()=>({items:[]}),listTaskRecipients:async()=>taskDirectory([{id:'u3',name:'同名',role:'sales'},{id:'u2',name:'同名',role:'sales'}])};
   const create=load('management-task-create',api,Object.fromEntries(original.storage));
   create.page.onLoad({retry:1});await tick();
   assert.equal(create.page.data.selectedMembers[0].id,'u2');
@@ -214,7 +215,7 @@ test('拒绝后重发草稿按账号隔离，并按用户ID选回同名接收人
 });
 
 test('负责人来自全员目录，切换负责人保留表单内容', async () => {
-  const api={listTaskRecipients:async()=>({items:[{id:'ops',name:'运营',account_code:'OPS001',role:'operations'},{id:'fde',name:'技术同事',account_code:'FDE001',role:'fde'}]})};
+  const api={listTaskRecipients:async()=>taskDirectory([{id:'ops',name:'运营',account_code:'OPS001',role:'operations'},{id:'fde',name:'技术同事',account_code:'FDE001',role:'fde'}])};
   const {page}=load('management-task-create',api);
   page.onLoad({});await tick();
   page.toggleRecipient({currentTarget:{dataset:{id:'ops'}}});assert.equal(page.data.selectedMembers[0].id,'ops');
@@ -238,7 +239,7 @@ test('待领取候选可以响应，其他人领取后只能查看且不能代�
 
 test('采纳建议从后台回查并允许人工修改，原生保存带建议版本和业务关联', async () => {
   let decision;
-  const api={listTaskRecipients:async()=>({items:[{id:'u1',name:'同名',account_code:'XS001',role:'sales'}]}),
+  const api={listTaskRecipients:async()=>taskDirectory([{id:'u1',name:'同名',account_code:'XS001',role:'sales'}]),
     getCustomerReference:async()=>({id:'c1',name:'客户'}),listTaskOpportunities:async()=>({items:[{id:'o1',customer_id:'c1',name:'商机'}]}),
     getBusinessAdvice:async()=>({id:'advice1',status:'succeeded',customer_id:'c1',opportunity_id:'o1',suggestions:[{id:'s1',version_no:3,title:'试点范围',action:'建议联系客户核对试点范围',decision:'pending'}]}),
     decideSuggestion:async(id,body)=>{decision={id,body};return {task:{id:'t1'}};},
@@ -257,7 +258,7 @@ test('采纳建议从后台回查并允许人工修改，原生保存带建议�
 
 test('过期建议阻止建任务；离开页面后慢返回不再覆盖表单', async () => {
   let resolveAdvice;
-  const api={getTaskPositions:async()=>({items:[]}),listTaskRecipients:async()=>({items:[]}),
+  const api={getTaskPositions:async()=>({items:[]}),listTaskRecipients:async()=>taskDirectory([]),
     getBusinessAdvice:()=>new Promise(resolve=>{resolveAdvice=resolve;})};
   const {page}=load('management-task-create',api);
   page.onLoad({adviceId:'advice1',suggestionId:'s1'});
@@ -266,6 +267,9 @@ test('过期建议阻止建任务；离开页面后慢返回不再覆盖表单',
   const departed=load('management-task-create',api);departed.page.onLoad({adviceId:'advice1',suggestionId:'s1'});
   departed.page.isUnloading=true;departed.page.setData=()=>{throw Error('已离开页面不得更新');};
   resolveAdvice({status:'succeeded',suggestions:[]});await tick();
+  const unloaded=load('management-task-create',api);unloaded.page.onLoad({adviceId:'advice1',suggestionId:'s1'});
+  unloaded.page.onUnload();unloaded.page.setData=()=>{throw Error('真实 onUnload 后不得更新');};
+  resolveAdvice({status:'succeeded',subject_kind:'visit',suggestions:[{id:'s1',decision:'pending',version_no:1,action:'离页后不应填入的建议'}]});await tick();
 });
 
 test('客户六维画像只绘制后端指标，缺失不按前端记录数猜分', () => {

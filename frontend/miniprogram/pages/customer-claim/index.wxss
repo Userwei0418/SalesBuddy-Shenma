@@ -6,6 +6,9 @@ page{background:var(--ui-background)}
 .claim-search{padding-bottom:8rpx;border-bottom:1px solid var(--ui-line);background:var(--ui-surface)}
 .claim-title{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600}
 .claim-subtitle{margin-top:8rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}
+.claim-create-entry{display:flex;align-items:center;justify-content:space-between;gap:16rpx;padding:8rpx 32rpx 16rpx;background:var(--ui-surface);font-size:14px;color:var(--ui-secondary)}
+.claim-create-entry button{flex:0 0 auto;display:flex;align-items:center;justify-content:center;min-height:var(--ui-touch-target);margin:0;padding:12rpx 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-primary);font-size:14px;font-weight:600;line-height:1.4}
+.claim-create-entry button::after{border:0}
 
 .claim-main{padding:24rpx 32rpx 32rpx}
 .claim-result{margin-bottom:24rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}
@@ -37,9 +40,5 @@ page{background:var(--ui-background)}
 .claim-page-error{display:block;color:var(--ui-warning);font-size:var(--ui-text-small);line-height:1.5}
 .claim-list-end{padding:24rpx 0 8rpx;text-align:center;color:var(--ui-muted);font-size:var(--ui-text-small)}
 
-/* Server-backed claim filters remain available in the new controls. */
-.claim-filters{display:flex;gap:14rpx;margin-top:16rpx}
-.claim-filter{flex:1;min-width:0}
-.claim-filter-message,.claim-filter-error{margin:12rpx 4rpx;font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}
-.claim-filter-error{color:var(--ui-ink)}
-.claim-filter-reset{display:flex;align-items:center;justify-content:flex-end;min-height:var(--ui-touch-target);margin-top:14rpx;color:var(--ui-primary);font-size:var(--ui-text-small);padding:6rpx 0}
+/* New business controls; existing layout and palette preserved. */
+.claim-search-hint,.claim-filter-error,.claim-filter-reset{margin:16rpx 0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}.claim-filters{display:flex;gap:16rpx;margin:16rpx 0}.claim-filter{flex:1;min-width:0}.claim-filter>view{display:flex;align-items:center;justify-content:space-between;min-height:var(--ui-touch-target);padding:0 20rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);font-size:14px;color:var(--ui-ink)}.claim-filter-error{color:var(--ui-danger)}.claim-filter-reset{display:flex;align-items:center;min-height:var(--ui-touch-target);color:var(--ui-primary)}

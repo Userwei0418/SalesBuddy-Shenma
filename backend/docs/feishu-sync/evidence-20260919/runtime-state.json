@@ -1,0 +1,18 @@
+{
+  "runtime_commit": "a133628707f9228eb320f0993b565a88702dd1b2",
+  "release": "feishu-sync-20260919-a133628",
+  "schema": "V105",
+  "backup_bytes": 32836353,
+  "api_worker_health": "verified",
+  "feishu_worker": {
+    "state": "active",
+    "substate": "running",
+    "restarts": 0
+  },
+  "configured_company": "sensetime-ecosystem",
+  "object_count": 10,
+  "enabled": false,
+  "notifications": false,
+  "has_app_secret": false,
+  "external_e2e": "pending"
+}

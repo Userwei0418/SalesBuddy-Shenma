@@ -1,0 +1,42 @@
+{
+  "baseline_commit": "a71bae303d09384955fd5914b53d0ead8a35c259",
+  "database_version": "V094",
+  "postgres": {
+    "passed": 35,
+    "deselected_verified_old_failure": 1,
+    "log": "/tmp/sales-actions-postgres-results.log"
+  },
+  "backend_pure": {
+    "passed": 38,
+    "deselected_verified_old_failures": 4
+  },
+  "migration_unit": {
+    "passed": 5
+  },
+  "frontend_combined": {
+    "tests": 163,
+    "passed": 160,
+    "failed_verified_old": 3,
+    "baseline_same_file": {
+      "tests": 19,
+      "passed": 15,
+      "failed": 4
+    },
+    "log": "/tmp/home-fde-final-frontend.log",
+    "baseline_log": "/tmp/fde-identity-baseline-a71bae30.log"
+  },
+  "frontend_structure": {
+    "pages": 26,
+    "json_files": 47,
+    "files": 346,
+    "node_syntax_check": true
+  },
+  "official_local_compile": {
+    "wxml": 4,
+    "wxss": 1
+  },
+  "independent_reviews": [
+    "frontend_layout",
+    "frontend_permissions_and_V094"
+  ]
+}

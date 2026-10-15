@@ -52,3 +52,37 @@ test('a page created before metadata arrives refreshes its visible stage and gra
  page.acceptPage({items:[],summary:{total:0,open_amount:0},has_more:false,team_options:[],facets:{owners:[]}},false);
  assert.equal(page.data.stageOptions[0].label,'服务端阶段名');assert.equal(page.data.gradeOptions[1].label,'服务端等级名');
 });
+
+test('creation choices are separate stable arrays, missing or malformed sections never widen them to history choices',()=>{
+ catalog.install(fixture);const ref=catalog.customerCreation.source;
+ assert.deepEqual(ref,fixture.customer_creation.source);assert.equal(catalog.isCustomerCreationReady(),true);
+ assert.ok(catalog.customer.source.includes('公司分配'));assert.ok(!ref.includes('公司分配'));
+ const old=structuredClone(fixture);delete old.customer_creation;
+ const malformed=structuredClone(fixture);malformed.customer_creation.source=['销售自拓','销售自拓'];
+ for(const value of [old,malformed]){
+  catalog.install(value);assert.equal(catalog.isReady(),true);assert.equal(catalog.isCustomerCreationReady(),false);
+  assert.equal(catalog.customerCreation.source,ref);assert.deepEqual(ref,[]);
+  assert.ok(catalog.customer.source.includes('公司分配'));
+ }
+ catalog.install(fixture);assert.equal(catalog.customerCreation.source,ref);assert.equal(ref.length,6);
+ catalog.clear();assert.equal(catalog.isCustomerCreationReady(),false);assert.equal(ref.length,0);
+});
+
+test('explicit metadata refresh bypasses the cached old response and recovers the new creation catalog',async()=>{
+ const {api,requests}=client();const old=structuredClone(fixture);delete old.customer_creation;
+ const first=api.getBusinessOptions();await tick();requests[0].success({statusCode:200,data:old});await first;
+ await api.getBusinessOptions();assert.equal(requests.length,1);assert.equal(catalog.isCustomerCreationReady(),false);
+ const refreshed=api.getBusinessOptions({fresh:true});await tick();assert.equal(requests.length,2);
+ requests[1].success({statusCode:200,data:fixture});await refreshed;
+ assert.equal(catalog.isCustomerCreationReady(),true);assert.deepEqual(catalog.customerCreation.source,fixture.customer_creation.source);
+ await api.getBusinessOptions();assert.equal(requests.length,2);
+});
+
+test('a superseded metadata response cannot overwrite an explicit same-identity refresh',async()=>{
+ const {api,requests}=client();const old=api.getBusinessOptions();await tick();const rejection=assert.rejects(old,/目录已刷新/);
+ const refreshed=api.getBusinessOptions({fresh:true});await tick();assert.equal(requests.length,2);
+ requests[1].success({statusCode:200,data:fixture});await refreshed;
+ const oldBody=structuredClone(fixture);delete oldBody.customer_creation;
+ requests[0].success({statusCode:200,data:oldBody});await rejection;
+ assert.equal(catalog.isCustomerCreationReady(),true);
+});

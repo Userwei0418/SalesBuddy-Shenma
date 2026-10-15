@@ -1,0 +1,28 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<sb-state-panel wx:if="{{loading}}" state="loading" title="正在读取报告…" />
+<sb-state-panel wx:if="{{error}}" state="error" title="报告加载失败" description="{{error}}" retryNote="" bind:retry="loadReport" />
+<view wx:if="{{detail}}" class="report-page">
+  <view class="report-hero">
+    <view class="report-name">{{detail.reportTitle}}</view>
+    <view class="report-meta"><text>{{detail.scope}}</text><text>{{detail.period}}</text></view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-kicker">{{detail.sectionTitle}}</view>
+    <view class="section-description">{{detail.sectionSubtitle}}</view>
+    <view class="detail-title">{{detail.title}}</view>
+    <view class="detail-copy">{{detail.detail}}</view>
+    <view wx:if="{{detail.isAttention}}" class="recommendation-block">
+      <view class="recommendation-head"><sb-ai-badge state="advice" /></view>
+      <view class="recommendation-title">{{detail.recommendationTitle || '针对该客户的下一步建议'}}</view>
+      <view class="recommendation-copy">{{detail.recommendationDetail || '当前尚未形成可执行建议，请重新生成即时总结。'}}</view>
+    </view>
+  </view>
+
+  <view class="source-card">
+    <text>AI 基于权限范围内的业务数据分析</text><label>生成于 {{detail.generatedAt}}</label>
+  </view>
+</view>
+
+</block>

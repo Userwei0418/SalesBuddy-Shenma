@@ -1,0 +1,105 @@
+{
+  "started_at": "2026-09-11T17:54:29.592617+00:00",
+  "scenario": "blocked",
+  "checks": [
+    {
+      "name": "XS001 POST /auth/session",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "XS001 sales/self identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "XS002 sales/self identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations",
+      "passed": true,
+      "http_status": 201
+    },
+    {
+      "name": "XS001 POST /conversations/7e7503e9-04a6-4859-87f7-b748e91aae0d/messages",
+      "passed": true,
+      "http_status": 202
+    },
+    {
+      "name": "XS001 POST /conversations/7e7503e9-04a6-4859-87f7-b748e91aae0d/messages",
+      "passed": true,
+      "http_status": 202
+    },
+    {
+      "name": "acknowledged replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/7e7503e9-04a6-4859-87f7-b748e91aae0d/messages",
+      "passed": true,
+      "http_status": 409
+    },
+    {
+      "name": "real business run succeeded",
+      "passed": true
+    },
+    {
+      "name": "public result contract",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays private",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /conversations/7e7503e9-04a6-4859-87f7-b748e91aae0d/messages",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "one user and one final assistant message",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/01073648-5fbd-4a32-8035-f1947f228117",
+      "passed": true,
+      "http_status": 404
+    },
+    {
+      "name": "XS002 GET /conversations/7e7503e9-04a6-4859-87f7-b748e91aae0d/messages",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "other sales user cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "XS001 test session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 test session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "7e7503e9-04a6-4859-87f7-b748e91aae0d",
+    "run_id": "01073648-5fbd-4a32-8035-f1947f228117"
+  },
+  "mode": "chatbi",
+  "status": "succeeded",
+  "elapsed_ms": 2035,
+  "api_verified": true,
+  "provider_audit": "pending server-side run audit; API success alone does not identify provider",
+  "test_sessions_revoked": {
+    "XS001": true,
+    "XS002": true
+  },
+  "finished_at": "2026-09-11T17:54:31.731950+00:00"
+}

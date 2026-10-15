@@ -1,0 +1,6 @@
+.sb-ai { display: inline-flex; align-items: center; gap: 6px; padding: 0 var(--ui-space-2); border-radius: 4px; font-size: var(--ui-text-small); line-height: 20px; white-space: nowrap; font-weight: 400; }
+.sb-ai-mark { font-weight: 600; padding: 0 4px; border-radius: 3px; background: var(--ui-primary); color: var(--ui-on-primary); font-size: var(--ui-text-small); line-height: 16px; }
+.sb-ai-generating { background: var(--ui-selected); color: var(--ui-primary); }
+.sb-ai-pending { background: var(--ui-warning-soft); color: var(--ui-warning); }
+.sb-ai-confirmed { background: var(--ui-neutral-soft); color: var(--ui-neutral); }
+.sb-ai-advice { background: var(--ui-selected); color: var(--ui-primary); }

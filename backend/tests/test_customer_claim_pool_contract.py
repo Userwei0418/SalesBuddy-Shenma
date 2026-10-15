@@ -52,7 +52,7 @@ def test_static_claim_pool_route_wins_over_uuid_detail_and_preserves_empty_page_
     result = client.get("/api/v1/customers/claim-pool", params={"q": "  客户  ", "page_size": 50, "offset": 150})
     assert result.status_code == 200, result.text
     assert result.json() == {"items": [], "total": 137, "has_more": False, "next_offset": None}
-    assert database.calls == [("SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[])", ("客户", 50, 150, None, None, []))]
+    assert database.calls == [("SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[],$7)", ("客户", 50, 150, None, None, [], "all"))]
 
 
 @pytest.mark.parametrize("params", [
@@ -84,7 +84,7 @@ def test_options_are_reference_authorized_and_filters_pass_through(boundary):
     assert options.json()["industries"] == [{"value": "", "label": "全部行业"}, {"value": "软件", "label": "软件"}]
     result = client.get("/api/v1/customers/claim-pool", params={"q": "客户", "industry": "软件", "claim_status": "pending"})
     assert result.status_code == 200
-    assert database.calls[-1][1] == ("客户", 50, 0, "软件", "pending", [])
+    assert database.calls[-1][1] == ("客户", 50, 0, "软件", "pending", [], "all")
     count = len(database.calls)
     identity.grants.pop("customer.claim_directory")
     assert client.get("/api/v1/customers/claim-pool/options").status_code == 403

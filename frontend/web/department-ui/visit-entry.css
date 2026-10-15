@@ -1,0 +1,40 @@
+/* 记录拜访：左栏选客户，右栏原文与录入方式，底部一个动作 */
+.department-ui[data-department-page="pages/visit-entry/index"] { height: 100%; }
+.department-ui .ds-ventry { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-ve-side { padding: var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-3); min-height: 0; overflow: auto; }
+.department-ui .ds-ve-h { margin: 0; font-size: var(--ui-text-body); font-weight: 600; display: flex; align-items: baseline; gap: var(--ui-space-2); }
+.department-ui .ds-ve-h small { font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-ve-required { color: var(--ui-danger); }
+.department-ui .ds-ve-hint { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-ve-results { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+/* 列表滚动承接多客户，不能让 flex 压缩按钮并裁掉名称；空态也保留完整内容。 */
+.department-ui .ds-ve-results > * { flex-shrink: 0; }
+.department-ui .ds-ve-side > :not(.ds-ve-results) { flex-shrink: 0; }
+.department-ui .ds-ve-selected { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3); border: 1px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); }
+.department-ui .ds-ve-mark { flex: none; width: 36px; height: 36px; border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-primary); display: grid; place-items: center; font-weight: 600; }
+.department-ui .ds-ve-selected-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-ve-selected-main b { font-weight: 600; overflow-wrap: anywhere; } .department-ui .ds-ve-selected-main span { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-first { display: flex; gap: var(--ui-space-2); align-items: flex-start; padding-top: var(--ui-space-3); border-top: 1px solid var(--ui-line); cursor: pointer; }
+.department-ui .ds-ve-first span { display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-ve-first b { font-weight: 600; } .department-ui .ds-ve-first small { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-main { display: flex; flex-direction: column; gap: var(--ui-space-3); padding: var(--ui-space-4) var(--ui-space-4) 0; min-height: 0; }
+.department-ui .ds-ve-note-head { display: flex; align-items: center; gap: var(--ui-space-3); } .department-ui .ds-ve-count { margin-left: auto; font-size: var(--ui-text-small); font-variant-numeric: tabular-nums; }
+.department-ui .ds-ve-textarea { flex: 1; min-height: 160px; resize: none; }
+.department-ui .ds-ve-status { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); font-size: var(--ui-text-small); flex-wrap: wrap; }
+.department-ui .ds-ve-state { color: var(--ui-secondary); margin-left: auto; } .department-ui .ds-ve-state.is-error, .department-ui .ds-ve-error { color: var(--ui-danger); }
+.department-ui .ds-ve-capture { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--ui-space-4); padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.department-ui .ds-ve-capture.is-recording { border-color: var(--ui-danger); }
+.department-ui .ds-ve-capture-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-ve-capture-copy b { font-weight: 600; } .department-ui .ds-ve-capture-copy small { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-file { display: flex; flex-direction: column; gap: var(--ui-space-2); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); }
+.department-ui .ds-ve-file-line { display: flex; justify-content: space-between; gap: var(--ui-space-3); font-size: var(--ui-text-small); } .department-ui .ds-ve-file-line b { font-weight: 600; overflow-wrap: anywhere; }
+.department-ui .ds-ve-file-actions { display: flex; gap: var(--ui-space-2); }
+.department-ui .ds-ve-bar { margin: auto calc(-1 * var(--ui-space-4)) 0; border-top: 1px solid var(--ui-line); }
+@media (max-width: 1100px) { .department-ui[data-department-page="pages/visit-entry/index"] { height: auto; } .department-ui .ds-ventry { grid-template-columns: minmax(0, 1fr); height: auto; } .department-ui .ds-ve-capture { grid-template-columns: minmax(0, 1fr); } }
+/* 单列时限制候选列表高度，避免大量客户把原文录入区推到页面很远处。 */
+@media (max-width: 1100px) { .department-ui .ds-ve-results { flex: none; max-height: 320px; } }
+
+/* 录入要点（PC 视觉 2.0） */
+.department-ui .ds-ve-checklist { margin-top: var(--ui-space-3); padding: 10px 12px; border-radius: var(--ui-radius-control); background: var(--ui-surface-subtle); border: 1px dashed var(--ui-line-strong); }
+.department-ui .ds-ve-checklist > b { display: block; font-size: var(--ui-text-caption); font-weight: 600; color: var(--ui-ink); margin-bottom: 6px; }
+.department-ui .ds-ve-checklist ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px var(--ui-space-4); }
+.department-ui .ds-ve-checklist li { font-size: var(--ui-text-small); color: var(--ui-secondary); line-height: 20px; }
+.department-ui .ds-ve-checklist li span { display: inline-block; min-width: 72px; margin-right: 6px; color: var(--ui-primary); font-weight: 500; }
+@media (max-width: 1100px) { .department-ui .ds-ve-checklist ul { grid-template-columns: minmax(0, 1fr); } }

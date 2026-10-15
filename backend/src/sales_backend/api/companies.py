@@ -3,12 +3,14 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from sales_backend.api.dependencies import RequestIdentity, get_database
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_management_identity, get_system_identity
 from sales_backend.db import Database
+from sales_backend.domain.role_presentation import BusinessRoleLabels
+from sales_backend.repositories.companies import CompanyRepository
 from sales_backend.services.companies import CompanyService
 from sales_backend.services.operations import management_write
 
@@ -22,6 +24,35 @@ class CompanySelection(BaseModel):
 class CompanyName(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     version_no: int = Field(ge=1)
+
+
+class CompanyRoleLabels(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    labels: BusinessRoleLabels
+    version_no: int = Field(ge=1)
+
+
+@router.get("/role-labels", response_model=CompanyRoleLabels,
+            description="当前已授权公司的业务岗位显示名称；不改变岗位代码、权限或统计口径。")
+async def get_role_labels(
+    identity: RequestIdentity = Depends(get_management_identity), database: Database = Depends(get_database),
+):
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await CompanyRepository().role_labels(connection, identity.actor.workspace_id)
+
+
+@router.put("/role-labels", response_model=CompanyRoleLabels,
+            description="需本公司 company.update 权限；使用公司版本号防止覆盖并发修改，并记录审计。")
+async def set_role_labels(
+    body: CompanyRoleLabels, idempotency_key: MutationKey = None,
+    identity: RequestIdentity = Depends(get_system_identity), database: Database = Depends(get_database),
+):
+    return await management_write(
+        database, identity.actor, idempotency_key, "company.role_labels", body.model_dump(),
+        lambda connection: CompanyService().set_role_labels(
+            connection, identity.actor, body.labels.model_dump(), body.version_no,
+        ),
+    )
 
 
 @router.get("")

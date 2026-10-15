@@ -1,0 +1,55 @@
+{
+  "release": "/www/wwwroot/salegent/releases/agent-today-20260912-163707d",
+  "commit": "163707d275d7fff7c0d47d029e6ceeac80332644",
+  "verified_files": 401,
+  "mismatches": [],
+  "rollout": {
+    "00000000-0000-0000-0000-000000000001": {
+      "capabilities": {
+        "battle_map_review": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "opportunity_draft": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "personal_risks": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "visit_entry": {
+          "enabled": true,
+          "rollout": "production"
+        },
+        "today_tasks": {
+          "enabled": true,
+          "rollout": "production"
+        }
+      }
+    }
+  },
+  "scope_limit_explicitly_disabled": true,
+  "services": {
+    "sales-api.service": {
+      "active": true,
+      "cwd_matches_release": true
+    },
+    "sales-worker.service": {
+      "active": true,
+      "cwd_matches_release": true
+    }
+  },
+  "health_ready": true,
+  "dedicated_credential_mode": "0600 root",
+  "worker_environment_file_count": 6,
+  "backup_bytes": 2842635,
+  "backup_archive_list_verified": true,
+  "backup_timer_active": true,
+  "backup_last_result": "success",
+  "runtime_and_schema_files_equal_tested_9beec5b": 169,
+  "runtime_python_files": 133,
+  "rollback_release": "/www/wwwroot/salegent/releases/agent-visit-20260912-bf5bd29",
+  "frontend_changed": false,
+  "checked_at": "2026-09-12T06:59:14.918187+00:00"
+}

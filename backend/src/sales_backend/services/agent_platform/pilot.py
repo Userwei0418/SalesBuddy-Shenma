@@ -50,6 +50,10 @@ def competency_review_pilot_policy(settings, actor, *, now=None):
     return _pilot_policy(settings, actor, "competency_review", now=now)
 
 
+def task_import_pilot_policy(settings, actor, *, now=None):
+    return _pilot_policy(settings, actor, "task_import", now=now)
+
+
 def business_advice_pilot_policy(settings, actor, capability, *, now=None):
     from sales_backend.domain.advice import ADVICE_LABELS
 
@@ -90,6 +94,7 @@ def _pilot_policy(settings, actor, capability, *, now=None):
             "opportunity_advice",
             "visit_advice",
             "competency_review",
+            "task_import",
         }:
             rollout = config.get("rollout", "pilot")
             if rollout == "production":

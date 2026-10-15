@@ -1,0 +1,36 @@
+{
+  "approval_status": "pending",
+  "preflight_only": true,
+  "real_business_verified": false,
+  "model_called": false,
+  "application_sessions_created": 0,
+  "business_writes": 0,
+  "account": "XS001",
+  "actor_id": "02000000-0000-0000-0000-000000000004",
+  "workspace_id": "00000000-0000-0000-0000-000000000001",
+  "data_as_of": "2026-09-12T05:19:29.997540+00:00",
+  "active_task_count": 29,
+  "active_management_task_count": 13,
+  "current_candidate_count": 17,
+  "all_remaining_source_count": 24,
+  "hypothetical_new_tasks_in_rounds": 23,
+  "new_notifications_by_existing_materializer": 0,
+  "own_task_count": 51,
+  "own_tasks_fingerprint": "46bd87a693a21aca32f26d8b6eefede5b38a33451cd97e3b22fd0d3482706ec3",
+  "input_bytes": 28784,
+  "limitations": [
+    "Successive rounds may surface older eligible visits beyond today's first candidate list.",
+    "Date and priority depend on provider output and the existing future_due normalization.",
+    "Inventory can change with user activity; repeat and compare before any authorized live run."
+  ],
+  "successive_round_counts": [
+    17,
+    3,
+    2,
+    1
+  ],
+  "test_marked_sources": 18,
+  "non_test_marked_sources": 6,
+  "source_ids_and_business_text_omitted": true,
+  "scope_approved": false
+}

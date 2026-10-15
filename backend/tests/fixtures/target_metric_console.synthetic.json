@@ -1,0 +1,181 @@
+{
+  "provenance": {
+    "source_receipt_sha256": "778a47e6cbe0f00b7131c9a58b015a52d1439175b527ff27b30455933343e56c",
+    "script_sha256": "4db403535df6dcc66a7a8580e70d49073e0eed82c3616d236af3349ce76dbe1e",
+    "boundary": "Private synthetic PostgreSQL V240, exact API runtime grants and actual ASGI routes; synthetic trusted identity, no external model, browser UI or production claim."
+  },
+  "response_samples": {
+    "console_batches": {
+      "items": [
+        {
+          "id": "b5fde691-aa8f-4196-b920-276f1f4420bf",
+          "workspace_id": "4a5f1107-c57f-45e3-9c46-5993f204c904",
+          "scope_type": "person",
+          "user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "team_id": null,
+          "department_code": "sales",
+          "period_type": "quarter",
+          "period_start": "2026-10-01",
+          "period_end": "2026-12-31",
+          "applicant_user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "reason": "Synthetic custom-only history",
+          "items": [
+            {
+              "kind": "custom_x_count",
+              "previous_amount": 1.2,
+              "proposed_amount": 2.4,
+              "previous_amount_text": "1.20",
+              "proposed_amount_text": "2.40"
+            }
+          ],
+          "status": "rejected",
+          "created_at": "2026-10-14T10:53:28.984062+00:00",
+          "reviewed_at": null,
+          "reviewer_user_ref_id": null,
+          "decision_reason": "",
+          "applicant_name": "sales426d64c7",
+          "account_code": "sales426d64c7",
+          "user_name": "sales426d64c7",
+          "team_name": null,
+          "reviewer_name": null
+        },
+        {
+          "id": "0c1b6e36-d970-4ffc-a58d-7bd414b806ea",
+          "workspace_id": "4a5f1107-c57f-45e3-9c46-5993f204c904",
+          "scope_type": "person",
+          "user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "team_id": null,
+          "department_code": "sales",
+          "period_type": "quarter",
+          "period_start": "2026-10-01",
+          "period_end": "2026-12-31",
+          "applicant_user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "reason": "Synthetic exact display",
+          "items": [
+            {
+              "kind": "collection",
+              "target_id": "230667b0-eb8e-485f-b05c-66eaf007a312",
+              "base_version": 1,
+              "previous_amount": 1e+16,
+              "proposed_amount": 1e+16,
+              "previous_amount_text": "9999999999999999.99",
+              "proposed_amount_text": "9999999999999999.98"
+            },
+            {
+              "kind": "custom_x_count",
+              "target_id": "4013d32f-94dc-4feb-8393-ad397450f5fc",
+              "base_version": 1,
+              "previous_amount": 4.5,
+              "proposed_amount": 12.3,
+              "previous_amount_text": "4.50",
+              "proposed_amount_text": "12.30"
+            }
+          ],
+          "status": "pending",
+          "created_at": "2026-10-14T10:53:28.981352+00:00",
+          "reviewed_at": null,
+          "reviewer_user_ref_id": null,
+          "decision_reason": "",
+          "applicant_name": "sales426d64c7",
+          "account_code": "sales426d64c7",
+          "user_name": "sales426d64c7",
+          "team_name": null,
+          "reviewer_name": null
+        }
+      ],
+      "total": 2,
+      "limit": 50,
+      "offset": 0,
+      "data_source": "database"
+    },
+    "console_requests": {
+      "items": [
+        {
+          "id": "d188480a-1e26-495a-956e-9d266c2a53d5",
+          "workspace_id": "4a5f1107-c57f-45e3-9c46-5993f204c904",
+          "target_id": "4013d32f-94dc-4feb-8393-ad397450f5fc",
+          "applicant_user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "base_version": 1,
+          "previous_amount": 5.4,
+          "proposed_amount": 9.7,
+          "status": "pending",
+          "created_at": "2026-10-14T10:53:28.991153+00:00",
+          "reviewed_at": null,
+          "reviewer_user_ref_id": null,
+          "decision_reason": "",
+          "kind": "custom_x_count",
+          "scope_type": "person",
+          "period_type": "quarter",
+          "period_start": "2026-10-01",
+          "period_end": "2026-12-31",
+          "effective_amount": 100.0,
+          "effective_version": 1,
+          "applicant_name": "sales426d64c7",
+          "account_code": "sales426d64c7",
+          "reviewer_name": null,
+          "previous_amount_text": "5.40",
+          "proposed_amount_text": "9.70"
+        },
+        {
+          "id": "8e760229-463e-486b-b7b2-7d57af10e315",
+          "workspace_id": "4a5f1107-c57f-45e3-9c46-5993f204c904",
+          "target_id": "230667b0-eb8e-485f-b05c-66eaf007a312",
+          "applicant_user_ref_id": "426d64c7-9557-4c51-8c8e-9fdbf424030f",
+          "base_version": 1,
+          "previous_amount": 1e+16,
+          "proposed_amount": 1e+16,
+          "status": "pending",
+          "created_at": "2026-10-14T10:53:28.985842+00:00",
+          "reviewed_at": null,
+          "reviewer_user_ref_id": null,
+          "decision_reason": "",
+          "kind": "collection",
+          "scope_type": "person",
+          "period_type": "quarter",
+          "period_start": "2026-10-01",
+          "period_end": "2026-12-31",
+          "effective_amount": 100.0,
+          "effective_version": 1,
+          "applicant_name": "sales426d64c7",
+          "account_code": "sales426d64c7",
+          "reviewer_name": null,
+          "previous_amount_text": "9999999999999999.99",
+          "proposed_amount_text": "9999999999999999.98"
+        }
+      ],
+      "total": 2,
+      "limit": 50,
+      "offset": 0,
+      "data_source": "database"
+    },
+    "custom_dictionary_entry": {
+      "workspace_id": "4a5f1107-c57f-45e3-9c46-5993f204c904",
+      "code": "custom_x_count",
+      "name": "合成转化计数",
+      "unit": "次",
+      "decimal_places": 2,
+      "definition": "合成审批精度验证，允许两位小数",
+      "source_kind": "manual",
+      "definition_version": 1,
+      "active": true,
+      "version_no": 1,
+      "target_kind": "custom_x_count",
+      "goal_selectable": true,
+      "system_defined": false,
+      "updated_by_user_ref_id": "0fbecd17-e460-48e6-a61d-205daa883e98",
+      "updated_at": "2026-10-14T10:53:28.972516+00:00"
+    },
+    "sql_exact_text": [
+      {
+        "kind": "collection",
+        "previous_amount_text": "9999999999999999.99",
+        "proposed_amount_text": "9999999999999999.98"
+      },
+      {
+        "kind": "custom_x_count",
+        "previous_amount_text": "4.50",
+        "proposed_amount_text": "12.30"
+      }
+    ]
+  }
+}

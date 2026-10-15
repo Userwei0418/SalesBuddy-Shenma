@@ -1,8 +1,6 @@
 """Real identity/facts/RLS/persistence with synthetic HTTP on each provider."""
 
-import asyncio
 import json
-from contextlib import asynccontextmanager
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -21,6 +19,7 @@ from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.agent_run import handler as business
 from sales_backend.services.agent_run.contract import INSTANT_SUMMARY_CONTRACT
 from sales_backend.services.tasks import TaskService
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.test_fde_facts_runtime import Chunks, frame
 from tests.test_operating_report_platform import answer, configured
 
@@ -53,15 +52,7 @@ async def test_report_role_scoped_facts_and_one_card_without_business_writes(
         agent_inference_total_seconds=5,
     )
 
-    class Pool:
-        lock = asyncio.Lock()
-
-        @asynccontextmanager
-        async def acquire(self):
-            async with self.lock:
-                yield connection
-
-    database = Database(settings, pool=Pool())
+    database = Database(settings, pool=FixtureConnectionPool(connection))
     valid = answer(role)
     valid["action_plan"] = [
         {"title": "按已有任务推进", "detail": "只是建议", "task_id": task["id"], "status": "completed"}

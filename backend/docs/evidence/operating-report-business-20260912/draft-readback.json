@@ -1,0 +1,13 @@
+{
+  "id": "01a09022-d0ec-7703-b59f-0699150d63a7",
+  "app_id": "cd27388c-88b4-4a1a-89f3-006c53facc55",
+  "name": "销售智助-销售经营即时总结-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": false,
+  "revision": "2bc0a51b90e12816acdca9c387d2126e5a0bf1184bfc4ed8dc3d78abd3d848d5",
+  "snapshot_id": "01a09022-d0ee-722d-a8c5-bccf566e6a01",
+  "url": "https://123.207.235.181/agents/01a09022-d0ec-7703-b59f-0699150d63a7/configure",
+  "model": "senseaudio-s2",
+  "tools_attached": false,
+  "role_output_schemas_match_backend": true
+}

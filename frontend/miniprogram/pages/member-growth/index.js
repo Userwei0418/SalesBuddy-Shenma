@@ -1,6 +1,9 @@
 const apiClient = require("../../utils/apiClient");
+const access = require('../../utils/access');
 
 Page({
+  onGrowthTab(e) { return this.selectGrowthDimension({ currentTarget: { dataset: { code: e.detail.key } } }); },
+
   data: {
     fdeMemberId: '',
     loading: true, ready: false, statusText: "正在读取每日能力复盘",
@@ -10,7 +13,10 @@ Page({
     history: [], visitCount: 0, aiAdvice: [], subjectRoleName: "一线销售",
   },
   onLoad(options = {}) {
+    this._options={...options};this._hidden=false;this._loadSerial=(this._loadSerial||0)+1;clearTimeout(this._backTimer);
+    this.setData({isFde:false,ready:false,accessBlocked:false});
     const session = getApp().globalData.session;
+    this._pageIdentity=access.identity(session);
     this.setData({fdeMemberId:options.member_id||(session && session.userId)||''});
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'member-growth', options)) return;
     if (!getApp().ensureLogin()) return;
@@ -21,18 +27,34 @@ Page({
     }
     if (!session || (session.permissions ? !require("../../utils/access").can(session,"profile.sales_read") : !["supervisor", "manager"].includes(session.role))) {
       wx.showToast({ title: "当前账号没有查看团队画像的权限", icon: "none" });
-      setTimeout(() => wx.navigateBack(), 600);
+      const serial=this._loadSerial,identity=access.identity(session);
+      this._backTimer=setTimeout(() => {if(!this._hidden&&serial===this._loadSerial&&identity===access.identity(getApp().globalData.session))wx.navigateBack();}, 600);
       return;
     }
     this.accountCode = decodeURIComponent(options.account || "");
     if (!this.accountCode) { wx.navigateBack(); return; }
-    this.loadGrowth();
+    return this.loadGrowth();
   },
+  onShow(){
+    if(!this._hidden)return;
+    if(this.data.isFde&&this._pageIdentity===access.identity(getApp().globalData.session)){
+      this._hidden=false;
+      if(getApp().guardPage&&!getApp().guardPage(this,'member-growth',this._options||{}))return;
+      getApp().ensureLogin();return;
+    }
+    return this.onLoad(this._options||{});
+  },
+  onHide(){this._hidden=true;this._loadSerial=(this._loadSerial||0)+1;clearTimeout(this._backTimer);this.setData({ready:false});},
+  onUnload(){this.onHide();},
   // BACKEND-CONTRACT LEGACY-GROWTH: GET /profile/team-members/{account}/sales-growth?days=30。
   // 本独立页直接用latest.overall_score、缺维度分回退0；与profile主页面缺失/重算策略不同。
   // 后续统一前先保留差异，见docs/backend-handoff/登录看板与个人中心详解.md。
   loadGrowth() {
-    apiClient.getMemberSalesGrowth(this.accountCode, 30).then((payload) => {
+    const serial=this._loadSerial=(this._loadSerial||0)+1,account=this.accountCode,identity=access.identity(getApp().globalData.session);
+    const current=()=>!this._hidden&&serial===this._loadSerial&&account===this.accountCode&&identity===access.identity(getApp().globalData.session);
+    this.setData({loading:true,ready:false,statusText:'正在读取每日能力复盘'});
+    return apiClient.getMemberSalesGrowth(account, 30).then((payload) => {
+      if(!current())return;
       if (!payload.latest) {
         const subject = payload.subject || this.data.subject;
         this.setData({ loading: false, ready: false, subject: { ...subject, initial: String(subject.name || "销").substring(0, 1) }, statusText: "该成员尚未形成能力复盘数据" });
@@ -48,26 +70,26 @@ Page({
       const aiAdvice = improvements.length ? improvements.slice(0, 6) : dimensions.map((item) => `${item.name}：${item.coachingAction}`).filter(Boolean).slice(0, 6);
       const subjectRoleName = (payload.subject || {}).role_code === "supervisor" ? "销售主管" : "一线销售";
       this.setData({
-        loading: false, ready: true, statusText: "每日自动复盘 · 数据已同步",
+        loading: false, ready: true, statusText: "最近一次复盘 · 数据已同步",
         subject: { ...(payload.subject || this.data.subject), initial: String((payload.subject || this.data.subject).name || "销").substring(0, 1) },
         overallScore: Number(payload.latest.overall_score || 0).toFixed(1),
-        reviewDate: String(payload.latest.review_date || ""), reviewSummary: payload.latest.summary || "已完成今日六维能力复盘",
+        reviewDate: String(payload.latest.review_date || ""), reviewSummary: payload.latest.summary || "已完成六维能力复盘",
         dimensions, growthOptions: [{ code: "overall", name: "综合" }].concat(dimensions.map((item) => ({ code: item.code, name: item.shortName }))),
         history: payload.history || [], visitCount: Number((payload.latest.input_snapshot || {}).visit_count || 0), aiAdvice, subjectRoleName,
-      }, () => { this.drawRadar(); this.drawGrowthLine(); });
-    }).catch((error) => this.setData({ loading: false, ready: false, statusText: error.message || "能力数据加载失败" }));
+      }, () => { if(current()){this.drawRadar(); this.drawGrowthLine();} });
+    }).catch((error) => {if(current())this.setData({ loading: false, ready: false, statusText: error.message || "能力数据加载失败" });});
   },
-  onGrowthTab(e) { return this.selectGrowthDimension({ currentTarget: { dataset: { code: e.detail.key } } }); },
   selectGrowthDimension(e) {
     const code = e.currentTarget.dataset.code;
     const option = this.data.growthOptions.find((item) => item.code === code);
     this.setData({ selectedGrowthCode: code, selectedGrowthName: option ? option.name : "综合评分" }, () => this.drawGrowthLine());
   },
   drawRadar() {
+    const serial=this._loadSerial,identity=access.identity(getApp().globalData.session);
     const dimensions = this.data.dimensions;
     if (dimensions.length !== 6) return;
     this.createSelectorQuery().select(".radar-canvas").boundingClientRect((rect) => {
-      if (!rect) return;
+      if (!rect || this._hidden || serial!==this._loadSerial || identity!==access.identity(getApp().globalData.session)) return;
       const ctx = wx.createCanvasContext("memberAbilityRadar", this);
       const width = rect.width, height = rect.height, cx = width / 2, cy = height / 2 + 3, radius = Math.min(width, height) * 0.31;
       const point = (index, scale) => { const angle = -Math.PI / 2 + index * Math.PI / 3; return [cx + Math.cos(angle) * radius * scale, cy + Math.sin(angle) * radius * scale]; };
@@ -79,11 +101,12 @@ Page({
     }).exec();
   },
   drawGrowthLine() {
+    const serial=this._loadSerial,identity=access.identity(getApp().globalData.session);
     const history = this.data.history;
     if (!history.length) return;
     const code = this.data.selectedGrowthCode;
     this.createSelectorQuery().select(".growth-canvas").boundingClientRect((rect) => {
-      if (!rect) return;
+      if (!rect || this._hidden || serial!==this._loadSerial || code!==this.data.selectedGrowthCode || identity!==access.identity(getApp().globalData.session)) return;
       const ctx = wx.createCanvasContext("memberGrowthLine", this);
       const width = rect.width, height = rect.height, left = 34, right = 12, top = 18, bottom = 28;
       const valueOf = (item) => code === "overall" ? Number(item.overall_score || 0) : Number(((item.dimension_scores || {})[code] || {}).score || 0);

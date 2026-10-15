@@ -1,0 +1,68 @@
+{
+  "capability": "visit_entry",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:18:24.837467+00:00",
+  "same_input_sha256": "6421f9ac3b99286895ad9da99da7eaa1939ec9ebc251fd6fe9f845f342e1096b",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "raw_result": {
+    "sha256": "1498f0fdc195cade683aa96806b1578864c03e0ebc72690a188e8704492d1355",
+    "bytes": 1451,
+    "fields": {
+      "fields": {
+        "type": "dict",
+        "count": 18
+      },
+      "summary": {
+        "type": "str"
+      },
+      "quality_review": {
+        "type": "dict",
+        "count": 3
+      }
+    }
+  },
+  "accepted": true,
+  "result": {
+    "sha256": "3265296dc91f194b13e0f844e7de512ec4ba624d5f805ecb6f550f2a49bb9b07",
+    "bytes": 1527,
+    "fields": {
+      "fields": {
+        "type": "dict",
+        "count": 18
+      },
+      "summary": {
+        "type": "str"
+      },
+      "quality_review": {
+        "type": "dict",
+        "count": 4
+      },
+      "prompt_version": {
+        "type": "str"
+      },
+      "missing_fields": {
+        "type": "list",
+        "count": 0
+      }
+    }
+  },
+  "elapsed_ms": 27486,
+  "ids": {
+    "task_id": "9ccaa155-c093-4bb2-8c23-1ee523c6c3c0",
+    "message_id": "8501273e-0c8f-4498-9bac-dbc6bd50156f",
+    "conversation_id": "b8ba7264-8da6-4f74-aa7b-6b0a29364216"
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10609,
+    "first_body_byte_ms": 10609,
+    "first_data_event_ms": 17620,
+    "first_text_ms": 17621,
+    "stream_completed_ms": 27472
+  },
+  "error_code": null,
+  "answer_chars": 897
+}

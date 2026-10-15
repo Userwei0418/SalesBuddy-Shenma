@@ -67,6 +67,22 @@ async def consume_review(connection, actor, customer_id, fields):
         next_review_passed = False
     if not next_review_passed:
         raise ValueError("服务端下一步审核未通过")
+    mutation = fields.get("_opportunity_mutation")
+    if mutation:
+        from sales_backend.contracts.models import OpportunityCreate
+        from sales_backend.domain.concurrency import require_version
+        from sales_backend.repositories.opportunity_mutations import lock_opportunity
+        from sales_backend.services.opportunities import require_amount_confirmation
+
+        data = OpportunityCreate.model_validate(mutation).model_dump()
+        before = None
+        if data["action"] == "update":
+            before = await lock_opportunity(connection, data.get("opportunity_id"), customer_id)
+            if not before:
+                raise LookupError("商机不存在或不属于此客户")
+            require_version(before["version_no"], data.get("version_no"))
+        # Validate before consuming the review or writing the opportunity/visit.
+        await require_amount_confirmation(connection, data, before)
     trusted_fields = {
         **fields,
         "_follow_up_quality_score": score,

@@ -1,0 +1,134 @@
+{
+  "verified_at": "2026-09-22T03:54:53.584925+00:00",
+  "release": {
+    "mode": "release",
+    "revision": "f81f8bfb839be80cf32e783fb332efcccccb6c4f",
+    "release": "v4-sync-20260922-f81f8bf",
+    "expected_schema": "V120"
+  },
+  "config_revision": 5,
+  "all_services_match_current": true,
+  "objects": {
+    "task": {
+      "eligible": 1,
+      "matched": 1,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "visit": {
+      "eligible": 114,
+      "matched": 114,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 1,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "actual": {
+      "eligible": 0,
+      "matched": 0,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "member": {
+      "eligible": 17,
+      "matched": 17,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "target": {
+      "eligible": 0,
+      "matched": 0,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "contact": {
+      "eligible": 90,
+      "matched": 90,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 2,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "partner": {
+      "eligible": 0,
+      "matched": 0,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "customer": {
+      "eligible": 267,
+      "matched": 267,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 2,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "forecast": {
+      "eligible": 106,
+      "matched": 106,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "demo_scene": {
+      "eligible": 0,
+      "matched": 0,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 0,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 0
+    },
+    "opportunity": {
+      "eligible": 84,
+      "matched": 84,
+      "missing_count": 0,
+      "mismatched_records": 0,
+      "field_mismatch_counts": {},
+      "retired_source": 2,
+      "duplicate_system_ids": 0,
+      "unmanaged_remote_rows": 1
+    }
+  },
+  "total_matched_records": 679,
+  "comparison": "All configured raw fields and relations; normalize numeric strings; exclude moving synced_at.",
+  "scope": "Existing system production data only; no V3 import; no business calculations.",
+  "notification_receipts_before": 3,
+  "notification_receipts_after": 3,
+  "backfill_batch": {
+    "backfill_cutoff": 91140,
+    "incomplete": 0,
+    "failed": 0
+  },
+  "current_failed_or_dead_letter": 0
+}

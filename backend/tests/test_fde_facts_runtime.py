@@ -318,3 +318,19 @@ def test_new_diagnostics_cannot_become_user_visible_output():
     )}
     result = validate_run_result(SimpleNamespace(mode="chatbi", actor=ACTOR), {**ANSWER, **private}, FACTS)
     assert not private.keys() & result.keys()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('lease_lost', [False, True])
+async def test_quota_or_lease_rejection_is_not_a_provider_outage_or_an_excuse_to_fallback(lease_lost):
+    from sales_backend.services.model_calls import CallQuotaExceeded
+    from sales_backend.job_context import JobLeaseLost
+    test = setup()
+    error = JobLeaseLost if lease_lost else CallQuotaExceeded
+    observer = SimpleNamespace(start=AsyncMock(side_effect=error()), finish=AsyncMock())
+    test.runtime.observer_factory = lambda *a, **kw: observer
+    with pytest.raises(error):
+        await evaluate(test)
+    assert not test.requests
+    test.direct.chat_json.assert_not_called()
+    observer.finish.assert_not_called()

@@ -1,0 +1,41 @@
+/* Overview and list filters retain their independent business scopes.
+   Desktop follows the task page: one frame, a full-height context rail, and one list surface. */
+.web-workbench-columns,.web-workbench-overview{display:contents}
+@media(min-width:1180px){
+ body:not(.web-login)[data-route=workbench] #page-root .web-workbench-columns{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:stretch;gap:0;flex:1;min-height:0;height:100%;min-width:0;overflow:hidden;border:1px solid var(--ui-line);border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+ body:not(.web-login)[data-route=workbench] #page-root .web-workbench-overview{display:flex;flex-direction:column;align-self:stretch;gap:16px;min-width:0;min-height:0;padding:20px 18px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;border-right:1px solid var(--ui-line);background:var(--ui-surface-subtle)}
+ body:not(.web-login)[data-route=workbench] #page-root .web-workbench-overview .page-head{display:flex;flex-direction:column;align-items:stretch;gap:20px;margin:0}
+ body:not(.web-login)[data-route=workbench] #page-root .web-workbench-overview .head-side{display:block;width:100%}
+ body:not(.web-login)[data-route=workbench] #page-root .web-workbench-overview .head-create-opportunity{display:flex;justify-content:center;width:100%;height:36px;padding:0 12px;border-radius:6px;box-shadow:none}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-card{padding:16px 0 0;border:0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent;box-shadow:none;overflow-wrap:anywhere}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-head{flex-wrap:wrap;gap:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .web-summary-title-group{gap:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary{display:block;margin-top:10px;padding:10px 0}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-head{justify-content:space-between;gap:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-options{display:grid;grid-template-columns:1.7fr repeat(4,1fr);gap:4px;width:100%;margin-top:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-option{padding:6px 2px;min-width:0;text-align:center}
+ body:not(.web-login)[data-route=workbench] #page-root .quarter-filter-summary .quarter-filter-foot{margin:8px 0 0;line-height:18px;font-size:12px}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-metrics{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:8px 0 0}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-metric{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border:0;border-bottom:1px solid var(--ui-line);min-width:0}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-metric:last-child{border-bottom:0}
+ body:not(.web-login)[data-route=workbench] #page-root .opportunity-summary-value{font-size:22px;line-height:28px;white-space:nowrap;margin:0}
+ body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-results{display:block;height:100%;min-width:0;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:var(--ui-surface);overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scrollbar-width:thin;container-type:inline-size}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-tools{position:sticky;top:0;z-index:8;max-height:none;overflow:visible;background:var(--ui-surface);border-bottom:1px solid var(--ui-line)}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-tools:has(.quarter-filter-list,.workbench-stage-panel){position:relative}
+ body:not(.web-login)[data-route=workbench] #page-root .web-opportunity-results-scroll{display:block;height:auto;min-height:0;overflow:visible;scrollbar-gutter:auto}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-card{grid-template-columns:minmax(0,1.05fr) minmax(100px,.55fr) minmax(260px,1.4fr);gap:8px 16px;min-width:0;padding:12px;border-radius:6px;border:1px solid var(--ui-line);box-shadow:none}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-card-top{min-width:0;gap:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-card-top>view{min-width:0}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-title{overflow-wrap:anywhere}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-meta{gap:8px;min-width:0}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-owner{min-width:0;gap:8px;flex-wrap:wrap}
+}
+/* Keep commercial facts readable when the right column becomes narrower. */
+@container (max-width:760px){
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-card{grid-template-columns:minmax(0,1fr) minmax(130px,.7fr)}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-card-top{grid-column:1;grid-row:1/3}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-stage{grid-column:2;grid-row:1}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-status{grid-column:2;grid-row:2}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-meta{grid-column:1/-1;grid-row:3;border-top:1px solid var(--ui-line);padding-top:8px}
+ body:not(.web-login)[data-route=workbench] #page-root .workbench-opportunity-owner{grid-column:1/-1;grid-row:4}
+}

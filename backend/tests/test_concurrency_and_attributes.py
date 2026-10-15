@@ -91,3 +91,40 @@ def test_risk_and_visit_overlay_expose_promoted_columns() -> None:
     assert visit["attributes"]["quality_review"]["follow_up_score"] == 88
     assert visit["attributes"]["is_first_visit"] is True
     assert visit["attributes"]["sourceRow"] == 12
+
+
+@pytest.mark.parametrize("overlay,column,key,empty", [
+    (overlay_customer_attributes, "next_action", "next_action", ""),
+    (overlay_customer_attributes, "cooperation_years", "cooperation_years", None),
+    (overlay_task_attributes, "rejection_comment", "rejection_comment", None),
+    (overlay_risk_attributes, "suggested_action", "suggested_action", ""),
+    (overlay_visit_attributes, "quality_review", "quality_review", {}),
+])
+def test_explicitly_empty_column_does_not_resurrect_legacy_attribute(overlay, column, key, empty):
+    original = {key: "历史值", "sourceRow": 12}
+    result = overlay({"attributes": {key: "更旧的值"}, "import_meta": original, column: empty})
+    assert key not in result["attributes"]
+    assert result["attributes"]["sourceRow"] == 12
+    assert original == {key: "历史值", "sourceRow": 12}
+    # A partial projection which did not select the formal column keeps compatibility.
+    assert overlay({"attributes": {}, "import_meta": original})["attributes"][key] == "历史值"
+
+
+@pytest.mark.parametrize("value", [0, False])
+def test_zero_and_false_are_present_values_in_attribute_projection(value):
+    result = overlay_visit_attributes({"attributes": {"is_first_visit": True}, "is_first_visit": value})
+    assert result["attributes"]["is_first_visit"] == value
+
+
+@pytest.mark.parametrize("assignees,expected", [
+    ([{"responsibility": "owner", "account_code": "CURRENT"}], "CURRENT"),
+    ([{"responsibility": "owner", "account_code": None}], None),
+    ([{"responsibility": "collaborator", "account_code": "OTHER"}], None),
+    ([], None),
+])
+def test_task_compatibility_account_tracks_current_owner(assignees, expected):
+    original = {"assignee_account_code": "ORIGINAL"}
+    row = overlay_task_attributes({"attributes": {}, "import_meta": original, "assignees": assignees})
+    assert row["attributes"].get("assignee_account_code") == expected
+    assert original == {"assignee_account_code": "ORIGINAL"}
+    assert overlay_task_attributes({"import_meta": original})["attributes"]["assignee_account_code"] == "ORIGINAL"

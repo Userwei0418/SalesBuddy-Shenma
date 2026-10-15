@@ -1,0 +1,48 @@
+{
+  "agent_configuration_unchanged": true,
+  "backup_verified_bytes": 9193943,
+  "credential_runtime_verified": true,
+  "database_after": {
+    "pending": [],
+    "running_jobs": 0,
+    "runtime_bypass_rls": false,
+    "source_schema": "V090",
+    "target_schema": "V090",
+    "verified_checksums": 58
+  },
+  "database_before": {
+    "pending": [
+      "V090"
+    ],
+    "running_jobs": 0,
+    "runtime_bypass_rls": false,
+    "source_schema": "V089",
+    "target_schema": "V090",
+    "verified_checksums": 57
+  },
+  "health": {
+    "live": "ok",
+    "ready": "ok"
+  },
+  "migration_applied": [
+    "V090"
+  ],
+  "migration_replay_unchanged": true,
+  "release": "dashboard-subject-20260915-4bcabf1",
+  "revision": "4bcabf1dad65a56892b52bcabe41e10c0334fa0d",
+  "services": {
+    "sales-api": {
+      "active": true,
+      "release_cwd_verified": true
+    },
+    "sales-worker": {
+      "active": true,
+      "release_cwd_verified": true
+    }
+  },
+  "source_verification": {
+    "commit": "4bcabf1dad65a56892b52bcabe41e10c0334fa0d",
+    "verified_source_files": 801
+  },
+  "verified_at": "2026-09-15T04:45:08.473324+00:00"
+}

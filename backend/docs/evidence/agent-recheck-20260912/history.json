@@ -1,0 +1,448 @@
+[
+  {
+    "source_file": "battle_map_review-diagnostic.json",
+    "capability": "battle_map_review",
+    "ids": {
+      "task_id": "8c207dcf-d520-4fe5-8ce2-0a19acfb12e8",
+      "message_id": "b70f21b3-17cb-44f1-a2d3-e672fc2d473c",
+      "conversation_id": "7dc3b481-44d9-4b95-8495-695ef8f7d1e1"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 911,
+    "answer_sha256": "8e9a5c2d12ff0085bb8f25fb008794c4138904c6998767b6a48bc438e8fd047d",
+    "parsed_answer": {
+      "sha256": "8e9a5c2d12ff0085bb8f25fb008794c4138904c6998767b6a48bc438e8fd047d",
+      "bytes": 1749,
+      "fields": {
+        "potential_score": {
+          "type": "int"
+        },
+        "relationship_score": {
+          "type": "int"
+        },
+        "summary": {
+          "type": "str"
+        },
+        "rationale": {
+          "type": "dict",
+          "count": 2
+        },
+        "evidence": {
+          "type": "list",
+          "count": 3
+        }
+      }
+    }
+  },
+  {
+    "source_file": "battle_map_review-normal.json",
+    "capability": "battle_map_review",
+    "ids": {
+      "task_id": "d4daedb6-d324-4e8f-a931-675ea137ce4f",
+      "message_id": "e4f865ce-513c-4066-9af4-a5cb9b40a764",
+      "conversation_id": "cff54a5f-8de1-40cd-8b6b-a1122b605d47"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 0,
+    "answer_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "parse_error": "history_answer_unavailable"
+  },
+  {
+    "source_file": "chatbi-diagnostic.json",
+    "capability": "chatbi",
+    "ids": {
+      "task_id": "dd451969-8e48-4e46-8736-de99c98f741b",
+      "message_id": "d7210629-9c4f-4a91-b32a-e9d8f86eea3a",
+      "conversation_id": "6dbd1403-0330-4df8-9719-5d6fc0840222"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 607,
+    "answer_sha256": "2a34ce51d548455254515bb185ec610f843effd057fafd5729770929f723bb74",
+    "parsed_answer": {
+      "sha256": "2a34ce51d548455254515bb185ec610f843effd057fafd5729770929f723bb74",
+      "bytes": 913,
+      "fields": {
+        "title": {
+          "type": "str"
+        },
+        "summary": {
+          "type": "str"
+        },
+        "metrics": {
+          "type": "list",
+          "count": 4
+        },
+        "rows": {
+          "type": "list",
+          "count": 2
+        },
+        "scope": {
+          "type": "dict",
+          "count": 3
+        },
+        "data_as_of": {
+          "type": "str"
+        }
+      }
+    }
+  },
+  {
+    "source_file": "operating_report-diagnostic.json",
+    "capability": "operating_report",
+    "ids": {
+      "task_id": "d3210756-466a-4785-aa72-c557ecfd24d2",
+      "message_id": "72aa58d4-8c43-4ded-8464-7460f9df13de",
+      "conversation_id": "5977819b-61a7-4ba2-a18d-444cc48f83be"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 3274,
+    "answer_sha256": "39ce3fa3946d8ce4ffc9d206ed57e587b7c7e976b837265a86c47c68f98b41c9",
+    "parsed_answer": {
+      "sha256": "39ce3fa3946d8ce4ffc9d206ed57e587b7c7e976b837265a86c47c68f98b41c9",
+      "bytes": 7637,
+      "fields": {
+        "title": {
+          "type": "str"
+        },
+        "period": {
+          "type": "str"
+        },
+        "scope": {
+          "type": "str"
+        },
+        "summary": {
+          "type": "str"
+        },
+        "safe_customers": {
+          "type": "list",
+          "count": 3,
+          "display_item_types": [
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            }
+          ]
+        },
+        "attention_customers": {
+          "type": "list",
+          "count": 10,
+          "display_item_types": [
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            }
+          ]
+        },
+        "action_plan": {
+          "type": "list",
+          "count": 9,
+          "display_item_types": [
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            },
+            {
+              "item_type": "dict",
+              "title": {
+                "type": "str",
+                "nonempty_text": true
+              },
+              "detail": {
+                "type": "str",
+                "nonempty_text": true
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "source_file": "personal_risks-diagnostic.json",
+    "capability": "personal_risks",
+    "ids": {
+      "task_id": "af6626ef-8560-4f10-8497-7f7631345149",
+      "message_id": "07a1f25a-2bca-4280-857c-35203e2bbc8f",
+      "conversation_id": "ca13c8f7-87a5-4a44-bdc2-e32b3a644c6f"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 0,
+    "answer_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "parse_error": "history_answer_unavailable"
+  },
+  {
+    "source_file": "personal_risks-normal.json",
+    "capability": "personal_risks",
+    "ids": {
+      "task_id": "a1f5f47b-d138-4a5c-9599-458b9a4f475c",
+      "message_id": "b640ae23-e109-4fac-8e7e-41baa9a4003d",
+      "conversation_id": "871a32d3-2c1e-4081-80a7-83e1c3cdbebc"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 0,
+    "answer_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "parse_error": "history_answer_unavailable"
+  },
+  {
+    "source_file": "visit_entry-diagnostic.json",
+    "capability": "visit_entry",
+    "ids": {
+      "task_id": "9ccaa155-c093-4bb2-8c23-1ee523c6c3c0",
+      "message_id": "8501273e-0c8f-4498-9bac-dbc6bd50156f",
+      "conversation_id": "b8ba7264-8da6-4f74-aa7b-6b0a29364216"
+    },
+    "matched": true,
+    "status": "normal",
+    "error_present": false,
+    "answer_chars": 897,
+    "answer_sha256": "1498f0fdc195cade683aa96806b1578864c03e0ebc72690a188e8704492d1355",
+    "parsed_answer": {
+      "sha256": "1498f0fdc195cade683aa96806b1578864c03e0ebc72690a188e8704492d1355",
+      "bytes": 1451,
+      "fields": {
+        "fields": {
+          "type": "dict",
+          "count": 18
+        },
+        "summary": {
+          "type": "str"
+        },
+        "quality_review": {
+          "type": "dict",
+          "count": 3
+        }
+      }
+    }
+  }
+]

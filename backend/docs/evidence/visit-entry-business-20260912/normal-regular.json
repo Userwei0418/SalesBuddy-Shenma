@@ -1,0 +1,216 @@
+{
+  "scenario": "normal",
+  "case": "regular",
+  "checks": [
+    {
+      "name": "restricted role without RLS bypass",
+      "passed": true
+    },
+    {
+      "name": "scoped sales identity",
+      "passed": true
+    },
+    {
+      "name": "scoped synthetic customer",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS001 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "XS002 session belongs to own actor",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations expected 201, actual 201",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9fd0b43d-2dc7-4e0a-b9f6-8fdf1defb00b/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9fd0b43d-2dc7-4e0a-b9f6-8fdf1defb00b/messages expected 202, actual 202",
+      "passed": true
+    },
+    {
+      "name": "same message returns one run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/9fd0b43d-2dc7-4e0a-b9f6-8fdf1defb00b/messages expected 409, actual 409",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "run polling readable",
+      "passed": true
+    },
+    {
+      "name": "visit remains awaiting human confirmation",
+      "passed": true
+    },
+    {
+      "name": "current structured review contract",
+      "passed": true
+    },
+    {
+      "name": "concrete visit has usable review",
+      "passed": true
+    },
+    {
+      "name": "explicit customer and contact preserved",
+      "passed": true
+    },
+    {
+      "name": "formal visits CRM and notifications unchanged",
+      "passed": true
+    },
+    {
+      "name": "provider metadata stays private",
+      "passed": true
+    },
+    {
+      "name": "one pending visit artifact",
+      "passed": true
+    },
+    {
+      "name": "no human confirmation created",
+      "passed": true
+    },
+    {
+      "name": "one completed worker job without replay",
+      "passed": true
+    },
+    {
+      "name": "one receipt and answer",
+      "passed": true
+    },
+    {
+      "name": "one operation and real final provider success",
+      "passed": true
+    },
+    {
+      "name": "artifact records actual provider",
+      "passed": true
+    },
+    {
+      "name": "real platform request dispatched",
+      "passed": true
+    },
+    {
+      "name": "platform result or validated fallback",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/b8ba89cf-b9aa-4f04-9a5d-ed8f70b15932 expected 404, actual 404",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /conversations/9fd0b43d-2dc7-4e0a-b9f6-8fdf1defb00b/messages expected 200, actual 200",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "other sales cannot read artifact",
+      "passed": true
+    },
+    {
+      "name": "XS001 own session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 own session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "9fd0b43d-2dc7-4e0a-b9f6-8fdf1defb00b",
+    "run_id": "b8ba89cf-b9aa-4f04-9a5d-ed8f70b15932",
+    "artifact_id": "a748e625-eb41-429b-9fd8-5df1b4336c03",
+    "job_id": "d966b42c-2082-477a-b6d2-c50de4d54d7d"
+  },
+  "preflight_only": false,
+  "started_at": "2026-09-12T04:43:44.147147+00:00",
+  "formal_before_fingerprint": "857628dcaf4a6b7e91ceb101c67914e1ab44ecbf6145d8aa7874aa91f43113d2",
+  "input_fingerprint": "4dfc1031f957ac463442c9fe5f1b5e77ac94973843fdd461729781fd53ddbd9f",
+  "submitted_at": "2026-09-12T04:43:44.311763+00:00",
+  "elapsed_ms": 5061,
+  "status": "waiting_human",
+  "inference_route": {
+    "provider": "agent_platform",
+    "model_ref": "agent-platform:01a09022-c06d-7ac3-b863-8a1345b069ae",
+    "elapsed_ms": 3920,
+    "operation_id": "d72ae3b5-d3bd-4fb9-b1b1-6fdd809ed24a",
+    "platform_run": {
+      "ids": {
+        "task_id": "10ad241d-96da-4798-aa37-d2f7199eae2f",
+        "message_id": "9626e17f-b081-4af3-974a-5d4f8558542c",
+        "conversation_id": "5e1e13e5-1ef7-468a-aa5b-53d3b3cee63a"
+      },
+      "transport": {
+        "http_status": 200,
+        "first_text_ms": 2035,
+        "first_body_byte_ms": 2035,
+        "request_started_ms": 0,
+        "first_data_event_ms": 2035,
+        "headers_received_ms": 2035,
+        "stream_completed_ms": 3889
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "execution_mode": "filtered_facts",
+      "actual_snapshot_id": null,
+      "test_fault_injected": false,
+      "expected_snapshot_id": "01a093e9-eb31-7c35-a3e8-4409a374b967",
+      "tool_authority_issued": false,
+      "runtime_snapshot_verified": false,
+      "network_dispatch_suppressed": false
+    },
+    "fallback_reason": null
+  },
+  "attempts": [
+    {
+      "provider_code": "agent_platform",
+      "status": "succeeded",
+      "http_status": 200,
+      "error_code": null,
+      "operation_id": "d72ae3b5-d3bd-4fb9-b1b1-6fdd809ed24a",
+      "dispatch_suppressed": "false"
+    }
+  ],
+  "platform_accepted": true,
+  "passed": true,
+  "finished_at": "2026-09-12T04:43:49.428563+00:00"
+}

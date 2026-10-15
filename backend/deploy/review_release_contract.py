@@ -1,0 +1,214 @@
+"""Finite, reviewed Review/OKR production increments above the V239 ledger.
+
+An unfrozen stage is deliberately inadmissible. Each stage is frozen only after
+Backend supplies its final SQL, complete ledger and exact runtime-role policy.
+This contract grants no execution authority and never reads the database.
+"""
+
+from identity_release_contract import TARGET_LEDGER as BASE_LEDGER
+from identity_release_contract import TARGET_REGISTERED as BASE_REGISTERED
+
+RELEASE_SCOPE = ["review_okr_1.2.1"]
+STAGES = {
+    "V240": {
+        "count": 204,
+        "ledger": "a1e512a43c5eb8f201a3c1f3811e3db1781a793923ab5a19cf3dc1691a89b6e2",
+        "registered_count": 235,
+        "registered": "9d1796635f081b9cf68d30099e504bad8213a6686bbd96884b0da1e1bf79ce96",
+        "sql": (
+            "migrations/V240__review_metric_dictionary.sql",
+            "58f4de04d5da4fb455bdbcb8d2e231079714eee5e044e1aae3b48725d084e4c2",
+        ),
+        "services": "68dd095b4150a75a890b8e491aed631fcd4f0dd3bc058c25bdd20a72ac09c7f3",
+        "policy": "9e26677f2fb9bea322f3d690c533b8e43631a19cf32b2780dfca4d9bb1e2daf4",
+    },
+    "V241": {
+        "count": 205,
+        "ledger": "7f2fecd82c3cd78241e74de3633083985b4cf9c10337eafef1440d0b18739477",
+        "registered_count": 236,
+        "registered": "05c16c1bc36a7c2019867c7e629e481457541d33294f7499c5993e2150696684",
+        "sql": (
+            "migrations/V241__review_okr.sql",
+            "a8384262a44721dd2f744761e2d5db7a5334a2575aff719c6bd9801420fe4327",
+        ),
+        "services": "9198ad7d314bef21bf6b37c02685670da2caa6a16aaea302017fdc42d17a94f4",
+        "policy": "11a17e958f9aaf2f6113b4031e3dc05e3031da79e368a20f4e579a2a4bfe7b8d",
+    },
+    "V242": {
+        "count": 206,
+        "ledger": "6ab7a851eea498654204bfd780af5247738b661137796277059a59561687c08c",
+        "registered_count": 237,
+        "registered": "b30466cb17b58d9bf1904edd70a0a9a65a2ba48ebf097e2891a52de4bd14d569",
+        "sql": (
+            "migrations/V242__task_metric_alignment.sql",
+            "431e9e5d89ff3d854c58f36e11bf14111142c35dbcf1b010db5719f981d01221",
+        ),
+        "services": "0fc30e384ac93ecebd5c1da4bb81a55d938ff0ed6755548748e090c8f6b6fd9b",
+        "policy": "f9497f8498c6f8451a4446970be4280ddb3e13fdfb94b40eedfdeb1a7714948f",
+    },
+    "V243": {
+        "count": 207,
+        "ledger": "93cde594e52ac93e7bc6392d341efeb5b69b0dedd553abe2bd77794de3ce71e7",
+        "registered_count": 238,
+        "registered": "800bd1b4e97054bba279f90a4d4219ef1f78a9683468e3e7ec256fd0e4916dcf",
+        "sql": (
+            "migrations/V243__review_count_metric_definitions.sql",
+            "8f6bbf86ec464a4792d5c1e9c056d24f31c6d911d3b4b8e2324cb20d72b43a53",
+        ),
+        "services": "0fc30e384ac93ecebd5c1da4bb81a55d938ff0ed6755548748e090c8f6b6fd9b",
+        "policy": "4b8f5ad6fa1e80cfa7d1ea84a05a439f7e60e342b46401a6f21029bc56651ae7",
+    },
+    "V244": {
+        "count": 208,
+        "ledger": "bc695fc1788ed21db32b001fb91b7531ddbdf1a0080bd86195d3c03f468a2d7a",
+        "registered_count": 239,
+        "registered": "6b7c8a8b8a9b124366a393abed45ab30307a8e2347e813a5ebd11c2288593054",
+        "sql": (
+            "migrations/V244__task_alignment_object_basis.sql",
+            "5f60cca782015a27a78274aff0872a3e92a82cbae2bfcf2f8f01543ffbb7ff42",
+        ),
+        "services": "0fc30e384ac93ecebd5c1da4bb81a55d938ff0ed6755548748e090c8f6b6fd9b",
+        "policy": "0e10456890742e325543b34fc3bd68fad4ea88fff7b5e56f885be35a9d69b759",
+    },
+    "V245": {
+        "count": 209,
+        "ledger": "eb90275d89a84f96c5a7ea67c1eff3b39bee837d5ce0f64616a76e6dafbef082",
+        "registered_count": 240,
+        "registered": "056efce1f859c1e6eb865f5d8e9f6921b9efc05bf45abad918c22865b3e2f4c7",
+        "sql": (
+            "migrations/V245__work_report_review_freeze.sql",
+            "36cab1055618b765dc822bdd69fa15f8b73e262316d31481969728adea06d19b",
+        ),
+        # V245 grants the review-access helper to the existing API/Worker
+        # principals.  The policy is the normalized V244 candidate with the
+        # V245 ledger and post-V244 RLS fingerprint bound to this stage.
+        "services": "5210aaca64e37cb682357a29c2bcdb4f8f21380162a18a2a8242a182ace3f2c5",
+        "policy": "4831e4e2fc96fe56f60a15d6a7a8810be7fa50a215b287b8da59a02ca4560b03",
+    },
+    "V246": {
+        "count": 210,
+        "ledger": "18955760424d87851ff4df2decb6c07cef9e978d6807c4575a902eeb3fa22a6e",
+        "registered_count": 241,
+        "registered": "94bdc85a3a103855b4d77bbc19a842419ba3674e3803e535b5f599cab0db9691",
+        "sql": (
+            "migrations/V246__review_worker_fact_reads.sql",
+            "947f157f37bf721bef5b0e8bbae5e28cb223a4a82b07fb6db81c3a3f07611d33",
+        ),
+        # V246 adds only the five Worker fact-table reads and four helper
+        # executes.  This policy is the normalized V245 candidate with the
+        # complete V246 ledger and post-V244 RLS fingerprint bound to it.
+        "services": "83c998a5dac7ef2b64b748ba0cbae7619f26c2b69774aa8a05c17e95e773a41e",
+        "policy": "b62f675ccde31b5520051f8ad33de934d0db6b00a392368754c004faa5f2717d",
+    },
+}
+GATE_FILES = (
+    "review_release_contract.py",
+    "identity_release_contract.py",
+    "release121_contract.py",
+    "release_upgrade.py",
+    "release_forward_bundle.py",
+    "release120_production_acl.py",
+)
+
+
+def frozen_stage(schema, *, require):
+    require(schema in STAGES and isinstance(STAGES[schema], dict), "Review release stage is not frozen")
+    stage = STAGES[schema]
+    number = int(schema[1:])
+    require(
+        all(isinstance(STAGES[f"V{n}"], dict) for n in range(240, number + 1)),
+        "Review release prefix is not completely frozen",
+    )
+    require(
+        set(stage) == {"count", "ledger", "registered_count", "registered", "sql", "services", "policy"}
+        and stage["count"] == 203 + number - 239
+        and stage["registered_count"] == 234 + number - 239,
+        "Review release stage metadata differs",
+    )
+    return stage
+
+
+def ledger_contract(schema, *, require):
+    if schema == "V239":
+        return dict(count=203, ledger=BASE_LEDGER, registered_count=234, registered=BASE_REGISTERED)
+    return frozen_stage(schema, require=require)
+
+
+def validate_migrations(migrations, prior, registered, source, target, pending, *, digest, require):
+    final = frozen_stage(target, require=require)
+    before = ledger_contract(source, require=require)
+    require(int(source[1:]) <= int(target[1:]), "Review schema downgrade is forbidden")
+    after = {row["key"]: row["sha256"] for row in migrations}
+    sql = {f"V{n}": frozen_stage(f"V{n}", require=require)["sql"] for n in range(240, int(target[1:]) + 1)}
+    require(
+        len(migrations) == len(after) == final["count"]
+        and digest(after) == final["ledger"]
+        and {row["key"]: (row.get("file"), row["sha256"]) for row in migrations if row["key"] in sql} == sql,
+        "Review release requires the exact complete ledger and SQL paths",
+    )
+    registered = list(registered)
+    require(
+        len(registered) == len(set(registered)) == before["registered_count"]
+        and digest(sorted(registered)) == before["registered"]
+        and len(prior) == before["count"]
+        and digest(prior) == before["ledger"],
+        "Review release source ledger or registrations differ",
+    )
+    expected_pending = [f"V{n}" for n in range(int(source[1:]) + 1, int(target[1:]) + 1)]
+    require(
+        pending == expected_pending
+        and set(after) == set(prior) | set(expected_pending)
+        and all(after[key] == value for key, value in prior.items()),
+        "Review release requires only its exact unchanged-prefix increment",
+    )
+
+
+def validate(plan, migrations, *, digest, require):
+    require(
+        plan.get("product_version") == "1.2.1"
+        and plan.get("release_scope") == RELEASE_SCOPE
+        and bool(plan["pending"])
+        and plan.get("agent_stage") is None
+        and plan.get("prepared_configuration_delta") is None,
+        "Review release requires fixed scope and unchanged Agent configuration",
+    )
+    validate_migrations(
+        migrations,
+        plan["expected_ledger"]["checksums"],
+        plan["expected_ledger"]["registered"],
+        plan["source_schema"],
+        plan["target_schema"],
+        plan["pending"],
+        digest=digest,
+        require=require,
+    )
+
+
+def schema_contract(plan, *, digest, require):
+    versions = plan.get("expected_registered_versions")
+    require(
+        plan.get("release_scope") == RELEASE_SCOPE
+        and isinstance(versions, list)
+        and bool(versions)
+        and all(isinstance(v, str) and v.startswith("V") and v[1:].isdigit() for v in versions)
+        and versions == sorted(set(versions)),
+        "Review ACL registrations must be exact",
+    )
+    schema = max(versions, key=lambda value: int(value[1:]))
+    stage = frozen_stage(schema, require=require)
+    require(
+        len(versions) == stage["registered_count"] and digest(versions) == stage["registered"],
+        "Review ACL requires the exact registered ledger",
+    )
+    return schema, stage
+
+
+def validate_acl(plan, policy, *, digest, require):
+    schema, stage = schema_contract(plan, digest=digest, require=require)
+    require(
+        policy.get("schema") == schema
+        and policy.get("migration_fingerprint") == stage["ledger"]
+        and digest(policy.get("services")) == stage["services"]
+        and digest(policy) == stage["policy"],
+        "Review ACL requires the exact frozen service and RLS policy",
+    )

@@ -1,0 +1,50 @@
+{
+  "id": "aae03fa1-7b09-474e-b374-4e4f8a79c1f9",
+  "status": "failed",
+  "outcome": "unknown",
+  "risk_count": 0,
+  "job_status": "dead_letter",
+  "attempts": 1,
+  "effect_committed": false,
+  "coverage": {
+    "visits": {
+      "eligible_count": 9,
+      "included_count": 9,
+      "has_more": false,
+      "text_truncated": false
+    },
+    "contacts": {
+      "eligible_count": 1,
+      "included_count": 1,
+      "has_more": false,
+      "text_truncated": false
+    },
+    "opportunities": {
+      "eligible_count": 2,
+      "included_count": 2,
+      "has_more": false,
+      "text_truncated": false
+    }
+  },
+  "coverage_complete": true,
+  "facts_still_current": true,
+  "provider": null,
+  "fallback_reason": null,
+  "profile_legacy_overview_equal": true,
+  "profile_contract_shape_checked": true,
+  "profile_coverage": 6,
+  "persisted_risks": 0,
+  "inference_audit_status": "failed",
+  "risk_items_matched": 0,
+  "closed_risks_preserved": 0,
+  "failed_inference_linked": true,
+  "full_successful_assessment_verified": false,
+  "runtime_commit": "ee9bd61b42e33b4a2c37411c4013082fc2a9b312",
+  "source": "existing_demo_customer",
+  "customer_business_text_saved": false,
+  "idempotent_replay": {
+    "same_assessment": true,
+    "same_job": true,
+    "status_remains_failed": true
+  }
+}

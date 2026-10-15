@@ -1,0 +1,32 @@
+{
+  "source_commit": "ac4ffacae99b112bb2e9e060efe79ff0af10d887",
+  "deployment_script_followup_commit": "6ddcb6e",
+  "non_database_tests": {
+    "passed": 567,
+    "database_skipped": 113,
+    "seconds": 3.55
+  },
+  "isolated_postgres": {
+    "previous_passed": 113,
+    "source_commit": "9beec5b",
+    "rerun_this_step": false,
+    "runtime_and_database_identical_to_previously_tested_source": true
+  },
+  "additional_plan_tests": 8,
+  "ruff": "passed",
+  "shell_syntax": "passed",
+  "openapi": "unchanged",
+  "remote_source_hashes_matched": 393,
+  "readonly_cases_passed": 4,
+  "maximum_future_authorized_new_tasks": 4,
+  "current_new_tasks": 0,
+  "current_model_calls": 0,
+  "current_application_sessions": 0,
+  "publication_authorization": "requested_pending",
+  "business_rule": "user_confirmed_auto_own_pending_execution_backend_future_due",
+  "current_production_release": "agent-visit-20260912-bf5bd29",
+  "api_worker_cwd": "verified_same_release",
+  "deployment_executed": false,
+  "real_business_verified": false,
+  "rollback_executed": false
+}

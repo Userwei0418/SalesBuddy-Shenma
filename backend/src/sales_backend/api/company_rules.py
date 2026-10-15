@@ -13,13 +13,16 @@ from sales_backend.domain.agent_management import management_metadata
 from sales_backend.domain.company_rules import (
     TECHNICAL_CAPABILITIES,
     TECHNICAL_RULES,
+    RULE_LABELS,
     FdeCapabilitiesPolicy,
+    OpportunityAmountPolicy,
     QuadrantPolicy,
     TaskSchedulePolicy,
     VisitAdmissionPolicy,
     policy_snapshot,
     validate_policy,
 )
+from sales_backend.repositories.collaboration import fde_directory
 from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.services.authorization import require_permission
@@ -57,7 +60,8 @@ class PolicyCatalog(BaseModel):
         description=(
             "公司规则或能力卡片；包含管理职责、接口进程已加载的公司绑定配置及中台链接。"
             "management.validation_status 仅表示绑定配置状态，不代表实际调用、执行快照或业务验收结论；"
-            "实际调用以运行审计为准。能力卡片附带业务指引草稿与版本。"
+            "实际调用以运行审计为准。能力卡片附带业务指引草稿与版本；"
+            "fde_capabilities.member_options 仅返回当前公司有效 FDE 的 id/name，供个人覆盖配置，不包含组织账号详情。"
         )
     )
     can_publish: bool
@@ -79,6 +83,10 @@ async def catalog(
         items = await repository.catalog(connection)
         for item in items:
             item["management"] = management_metadata(item["code"], bindings)
+            if item["code"] == "fde_capabilities":
+                # Rule editors need only active FDE identities, never the organization/account record.
+                item["member_options"] = [{"id": row["id"], "name": row["name"]}
+                                          for row in await fde_directory(connection)]
         return {
             "items": items,
             "can_publish": permissions.allows("rule.publish"),
@@ -124,7 +132,8 @@ async def execution_catalog(
         }
     return {"items": items, "can_publish": permissions.allows("rule.publish"),
             "management": {"workspace_id": str(identity.actor.workspace_id),
-                           "rule_count": 8, "capability_count": len(items)}}
+                           "rule_count": sum(not code.startswith(("agent_execution.", "agent_business."))
+                                             for code in RULE_LABELS), "capability_count": len(items)}}
 
 
 @router.post("/console/company-rules/{code}/drafts")
@@ -217,6 +226,19 @@ async def preview(
         raise HTTPException(422, str(exc)) from exc
     async with database.transaction(identity.actor, readonly=True) as connection:
         current = await repository.active(connection, code)
+    if code == "opportunity_amount":
+        before, after = OpportunityAmountPolicy(**current["definition"]), OpportunityAmountPolicy(**definition)
+        amounts = sorted({before.warning_threshold_wan - 1, before.warning_threshold_wan,
+                          after.warning_threshold_wan - 1, after.warning_threshold_wan})
+        return {
+            "current": current, "columns": ["商机金额", "当前提醒规则", "草稿提醒规则"],
+            "samples": [{"label": f"{amount:,} 万元",
+                         "before": "需要确认" if amount >= before.warning_threshold_wan else "不提醒",
+                         "after": "需要确认" if amount >= after.warning_threshold_wan else "不提醒"}
+                        for amount in amounts if amount > 0],
+            "note": "仅新增或实际变更金额达到阈值时提醒；确认后仍可保存。阈值配置范围不是商机金额上限，"
+                    "不自动缩放金额，不修改历史数据；未变更金额的历史大额商机不重复提醒。",
+        }
     if code.startswith("agent_business."):
         return {
             "current": current,
@@ -360,5 +382,5 @@ async def presentation(identity: RequestIdentity = Depends(get_identity), databa
     async with database.transaction(identity.actor, readonly=True) as connection:
         return {
             code: await repository.active(connection, code)
-            for code in ("customer_quadrant", "visit_admission", "home_display")
+            for code in ("customer_quadrant", "visit_admission", "home_display", "opportunity_amount")
         }

@@ -2,6 +2,7 @@
 
 from sales_backend.domain.route_permissions import AGENT_PERMISSIONS
 from sales_backend.repositories.capabilities import CapabilityRepository
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.services.capabilities import require_capability
 from sales_backend.services.visit_access import require_visit_recording_scope
 from sales_backend.services.authorization import require_permission
@@ -23,6 +24,9 @@ async def require_agent_access(
     repo = CapabilityRepository()
     if customer_id and mode not in {'visit_entry','opportunity_draft','customer_create'}:
         await require_permission(connection, AGENT_PERMISSIONS[mode], customer_id=customer_id)
+    if customer_id and mode in {'customer_chatbi', 'opportunity_draft'}:
+        if not await customer_analysis_applies(connection, customer_id):
+            raise ValueError("纯合作伙伴不适用客户经营分析或新建商机，请先添加客户身份")
     if permission_version is not None:
         current = await repo.analysis_identity(connection, actor)
         if current.get("permission_version") != permission_version:

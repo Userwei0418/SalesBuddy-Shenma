@@ -105,6 +105,7 @@ async def main():
         workspace, user = uuid.uuid4(), uuid.uuid4()
         await conn.execute("INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,$2,'隔离故障测试')",
                            workspace, str(workspace))
+        await conn.execute("UPDATE control.tenant_module SET enabled=true WHERE workspace_id=$1 AND module_code='ai'",workspace)
         await conn.execute('CREATE TABLE ops.probe_result(job_id uuid); CREATE TABLE ops.probe_started(job_id uuid); '
                            'CREATE TABLE ops.probe_stopped(job_id uuid)')
         payload = json.dumps({'user_id': str(user), 'role': 'manager', 'data_scope': 'workspace', 'team_ids': []})

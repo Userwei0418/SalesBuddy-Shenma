@@ -76,7 +76,6 @@ class FdeConfig:
     # stream fixture, never silently guess on a mixed stream.
     text_protocol: TextProtocol
     timeout_seconds: float = 12.0
-    # Optional private instance trust, scoped to this client. Never disables TLS checks.
     ca_bundle_path: str = ""
 
     def __post_init__(self):
@@ -322,8 +321,8 @@ class FdeClient:
             timeout=config.timeout_seconds,
             follow_redirects=False,
             trust_env=False,
-            verify=verify,
             transport=transport,
+            verify=verify,
         )
 
     async def __aenter__(self):
@@ -341,9 +340,6 @@ class FdeClient:
             raise FdeError("http_error", status=response.status_code)
         if response.headers.get("content-type", "").split(";", 1)[0].strip().lower() != expected:
             raise FdeError("unexpected_content_type", status=response.status_code)
-
-    async def info(self) -> dict[str, Any]:
-        return await self._json_request("GET", "info")
 
     async def parameters(self) -> dict[str, Any]:
         """Read variable definitions; does not infer variables from the prompt."""

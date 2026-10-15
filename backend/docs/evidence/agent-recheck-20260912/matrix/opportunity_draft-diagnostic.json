@@ -1,0 +1,29 @@
+{
+  "capability": "opportunity_draft",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:15:34.241716+00:00",
+  "same_input_sha256": "16a81a2b556e826e7c38497f3418da58f7b8118157863f42f85b6276c53c32f3",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "accepted": false,
+  "error_type": "TimeoutError",
+  "error": "",
+  "elapsed_ms": 60018,
+  "ids": {
+    "task_id": null,
+    "message_id": null,
+    "conversation_id": null
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10653,
+    "first_body_byte_ms": 10653,
+    "first_data_event_ms": null,
+    "first_text_ms": null,
+    "stream_completed_ms": null
+  },
+  "error_code": null,
+  "answer_chars": 0
+}

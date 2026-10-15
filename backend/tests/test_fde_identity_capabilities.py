@@ -160,6 +160,8 @@ async def test_fde_agent_modes_block_sales_materialization_and_changed_snapshots
             return args[0] in enabled
         if "authorization_visit_target" in sql:
             return "visit.create" in enabled
+        if "ANY(business_identities)" in sql:
+            return True
         raise AssertionError(sql)
     connection.fetchval.side_effect = fetchval
     for mode in ["today_tasks", "personal_risks", "opportunity_draft", "customer_create", "management_task"]:

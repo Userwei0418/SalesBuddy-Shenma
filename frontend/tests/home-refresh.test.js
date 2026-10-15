@@ -64,6 +64,11 @@ function taskCards(page, count) {
     template_code: 'task_assigned', body: '合成任务', payload: {},
   }, { scope: '仅本人' }));
 }
+test('首页跟随服务端的公司岗位称呼而不改变销售身份',async()=>{
+ const {page,app}=loadHome();app.globalData.session.roleName='客户经理';
+ await page.syncRole();assert.equal(page.data.roleName,'客户经理');assert.equal(page.data.role,'sales');
+ app.globalData.session.roleName='产品销售';await page.syncRole();assert.equal(page.data.roleName,'产品销售');
+});
 const pendingValue = page => page.data.overviewMetrics.find(item => item.key === 'all_pending')?.value;
 const taskValues = page => page.data.messages.filter(message => message.id.startsWith('remote_task-note-'))
   .map(message => message.card.metrics.find(metric => metric.label === '任务状态').value);
@@ -72,7 +77,7 @@ test('认领通过和驳回进入专用通知卡，显示后已读、重复刷�
   const items = ['客户认领已通过', '客户认领未通过'].map((title, index) => ({
     id: 'claim-' + index, template_code: 'customer_claim', title, status: 'pending',
     object_type: 'customer', object_id: 'customer-' + index, created_at: '2026-09-15T01:00:00Z',
-    payload: { customer_name: '合成认领客户' + index }, body: index ? '公司编号需重新核实' : '运营已确认认领申请',
+    payload: { customer_name: '合成认领客户' + index }, body: index ? '客户名称需重新核实' : '运营已确认认领申请',
   }));
   const taskRequests = [];
   const { page, marked, renderCallbacks } = loadHome({
@@ -86,7 +91,7 @@ test('认领通过和驳回进入专用通知卡，显示后已读、重复刷�
   assert.equal(approved.eyebrow, '客户认领'); assert.equal(approved.subtitle, '合成认领客户0');
   assert.equal(approved.metrics[0].value, '已通过'); assert.equal(approved.tone, 'green');
   assert.equal(approved.action.code, 'open_assigned_customer'); assert.equal(approved.action.customerId, 'customer-0');
-  assert.equal(rejected.rows[0].title, '驳回原因'); assert.equal(rejected.rows[0].meta, '公司编号需重新核实');
+  assert.equal(rejected.rows[0].title, '驳回原因'); assert.equal(rejected.rows[0].meta, '客户名称需重新核实');
   assert.equal(rejected.action.code, 'open_customer_claim'); assert.equal(rejected.action.customerId, undefined);
   assert.ok(taskRequests.every(ids => !ids || !ids.length));
   assert.deepEqual(marked, []);
@@ -110,7 +115,7 @@ test('释放回执返回名单，待审批和未知认领事件不冒充审批�
   }
 });
 
-test('FDE主管总览使用服务端完整计数，不自动取完团队任务', async () => {
+test('FDE主管待办汇总使用task.read完整授权计数及标签，不自动取完任务', async () => {
   let fullListReads = 0;
   const { page, app } = loadHome({
     getAssistantHome: async () => ({ archived_visits: [], team_summary: { overdue: 4, claim: 23, handover: 2 } }),
@@ -122,6 +127,16 @@ test('FDE主管总览使用服务端完整计数，不自动取完团队任务',
   await page.syncRole();
   assert.equal(fullListReads, 0);
   assert.deepEqual({ ...page.data.fdeTeamSummary }, { overdue: 4, claim: 23, handover: 2 });
+  assert.equal(page.data.fdeTeamSummaryScope,'当前授权范围');
+  app.globalData.session.permissions={'task.read':true};
+  for(const [scope_code,label] of [['teams','已授权部门'],['workspace','公司全部部门'],['self','仅本人']]){
+    app.globalData.session.permissionGrants=[{permission_code:'task.read',scope_code,effect:'allow',team_ids:['t1']}];
+    // No page department filter is sent to /assistant/home.
+    page.data.selectedTeam='page-only-filter';
+    await page.syncRole();assert.equal(page.data.fdeTeamSummaryScope,label);
+    assert.deepEqual({...page.data.fdeTeamSummary},{overdue:4,claim:23,handover:2});
+  }
+  assert.equal(fullListReads,0);
   app.globalData.role = app.globalData.session.role = 'sales';
   await page.syncRole();
   assert.equal(page.data.fdeTeamSummary, null);

@@ -1,0 +1,25 @@
+{
+  "source_sha256": "9ba2fdd48c1486fb32eecf42b0b5cdecebfb8820681f45c54187407971dbc40b",
+  "original_characters": 29247,
+  "original_utf8_bytes": 40999,
+  "visits": 12,
+  "existing_open_risks": 24,
+  "duplicate_suggested_action_count": 24,
+  "offline_projection_only": true,
+  "projection_removed_fields": [
+    "attributes",
+    "import_meta",
+    "source_code",
+    "agent_key",
+    "source_run_id"
+  ],
+  "projection_characters": 19241,
+  "projection_utf8_bytes": 28875,
+  "projection_reduction_percent": 29.6,
+  "record_count_unchanged": true,
+  "production_payload_changed": false,
+  "production_timeout_changed": false,
+  "platform_conversation_id": "c718a817-7e60-48bc-8d24-85dc90d734ba",
+  "matched_business_run_id": "375926e5-6e09-4160-b593-289c3e9c18d9",
+  "existing_business_evidence": "personal-risk-business-20260912/production.json"
+}

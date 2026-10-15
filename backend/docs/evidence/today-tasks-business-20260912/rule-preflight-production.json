@@ -1,0 +1,39 @@
+{
+  "scenario": "production",
+  "preflight_only": true,
+  "started_at": "2026-09-12T06:16:59.726179+00:00",
+  "checks": [
+    {
+      "name": "database role obeys RLS",
+      "passed": true
+    },
+    {
+      "name": "exact authorized sales actor",
+      "passed": true
+    },
+    {
+      "name": "exactly one unchanged authorized demo source",
+      "passed": true
+    },
+    {
+      "name": "approved demo customer name",
+      "passed": true
+    }
+  ],
+  "ids": {},
+  "active_tasks_before": 29,
+  "candidate_count": 1,
+  "source_fingerprint": "b60107a95a8b2071276ff2ff15c41318aab646ba80a1eeed7a2c144f78de9e29",
+  "tasks_before_fingerprint": "530fbe1a231746b8dec84c3bf876003e5cfda1168cf404fe3b390b6b3ac39903",
+  "protected_before": {
+    "SELECT * FROM crm.customer ORDER BY id": "1452d85ed3a315861a733c47987ee8364b45d3cee176fb64eb8f22c3f3d8f3ee",
+    "SELECT * FROM crm.opportunity ORDER BY id": "34f607069dd963047a72f36cd0b631c3628da81610a1ebaa73fb262169d1152b",
+    "SELECT * FROM activity.visit ORDER BY id": "e5c3daec5c8d7a47fb684673d4604c39e29e50a907b2476121524d02342b3887",
+    "SELECT * FROM workflow.notification ORDER BY id": "1b712d5a91713bf686848ff73e662a7e01d320982304f5079e5242b52da35803"
+  },
+  "preflight_passed": true,
+  "application_sessions_created": 0,
+  "model_calls": 0,
+  "business_writes": 0,
+  "finished_at": "2026-09-12T06:16:59.843619+00:00"
+}

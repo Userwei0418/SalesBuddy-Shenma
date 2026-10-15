@@ -15,6 +15,7 @@ from sales_backend.services.agent_run.materialize import (
     task_card,
 )
 from sales_backend.services.agent_run.models import RunInput
+from sales_backend.services.agent_run.personal_risk_sources import recheck_personal_risk_sources
 from sales_backend.services.agent_run.today_scope import (
     TodayScopeChanged,
     load_today_scope,
@@ -70,6 +71,7 @@ class AgentRunStore:
                     await recheck_follow_up_sources(connection, run.actor, facts.get("follow_up_candidates", []))
                 result = await self._materialize_today_tasks(connection, run, result, facts)
             elif run.mode == "personal_risks":
+                await recheck_personal_risk_sources(connection, run.actor, facts.get("visits", []))
                 result = await self._materialize_personal_risks(
                     connection, run, result, facts,
                     model_ref=inference_trace["model_ref"] if inference_trace is not None else self.settings.llm_model,
@@ -181,8 +183,8 @@ class AgentRunStore:
                   agent_key = EXCLUDED.agent_key,
                   source_run_id = EXCLUDED.source_run_id,
                   version_no = insight.risk.version_no + 1
-                WHERE insight.risk.status NOT IN ('resolved', 'accepted')
-                RETURNING id::text, status, (xmax = 0) AS inserted
+                WHERE insight.risk.status <> 'resolved'
+                RETURNING id::text, status, version_no, (xmax = 0) AS inserted
                 """,
                 run.actor.workspace_id,
                 visit.get("customer_id"),
@@ -233,7 +235,8 @@ class AgentRunStore:
                 "detected" if row["inserted"] else "reanalyzed",
                 row["status"],
                 run.actor.user_id,
-                {"run_id": run.run_id, "source_visit_id": draft.source_visit_id},
+                {"run_id": run.run_id, "source_visit_id": draft.source_visit_id,
+                 "risk_version_no": row["version_no"]},
             )
             written_keys.append(draft.key)
 
@@ -248,7 +251,7 @@ class AgentRunStore:
               LEFT JOIN crm.customer c ON c.id = r.customer_id
              WHERE r.deleted_at IS NULL
                AND r.owner_user_ref_id = $1::uuid
-               AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+               AND r.status <> 'resolved'
              ORDER BY CASE r.severity_code
                         WHEN 'critical' THEN 1 WHEN 'high' THEN 2
                         WHEN 'medium' THEN 3 ELSE 4 END,
@@ -288,7 +291,9 @@ class AgentRunStore:
         for draft in follow_up_task_drafts(model_result, candidates, schedule_policy=facts.get("company_policy")):
             candidate = draft.candidate
             source_id = draft.source_visit_id
-            await validate_task_links(connection, run.actor, candidate.get("customer_id"), candidate.get("opportunity_id"), "customer")
+            await validate_task_links(
+                connection, run.actor, candidate.get("customer_id"), candidate.get("opportunity_id"), "customer",
+            )
             inserted_id = await connection.fetchval(
                 """
                 INSERT INTO workflow.task (

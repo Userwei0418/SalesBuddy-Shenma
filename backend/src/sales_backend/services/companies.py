@@ -1,6 +1,7 @@
 """Company selection and naming preserve explicit grants and optimistic versions."""
 
 from sales_backend.domain.concurrency import VersionConflict
+from sales_backend.domain.role_presentation import BusinessRoleLabels
 from sales_backend.repositories.companies import CompanyRepository
 
 
@@ -10,6 +11,17 @@ class CompanyService:
 
     async def directory(self, connection):
         return await self.repository.directory(connection)
+
+    async def set_role_labels(self, connection, actor, labels, version_no):
+        labels = BusinessRoleLabels.model_validate(labels).model_dump()
+        await self.repository.lock(connection, actor.workspace_id)
+        before = await self.repository.role_labels(connection, actor.workspace_id)
+        row = await self.repository.update_role_labels(connection, actor.workspace_id, labels, version_no)
+        if row is None:
+            raise VersionConflict("公司信息已变化，请刷新后重试")
+        after = {"labels": labels, "version_no": row["version_no"]}
+        await self.repository.record_role_labels(connection, actor, before, after)
+        return after
 
     async def select(self, connection, actor, company_id):
         companies = await self.repository.directory(connection)

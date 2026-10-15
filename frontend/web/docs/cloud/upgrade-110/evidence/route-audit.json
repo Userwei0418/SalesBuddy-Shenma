@@ -1,0 +1,765 @@
+{
+  "rows": [
+    {
+      "role": "manager",
+      "expected": "pages/index/index",
+      "actual": "pages/index/index",
+      "text": "早上好，陈国栋\n6\n今日待办\n22\n全部待办\n5\n今日已完成\n2\n需关注\n业务动态\n已加载 7 条\n全部7\n需关注2\n客户1\n商机3\n任务0\n拜访与跟进3\n2026年9月29日\n访\n星河智能制造（广州）有限公司 · 2026年9月29日 · 线上会议\n10:00\n查看客户档案 →\n商\n星河智能制造（广州）有限公司 · 客户服务项目\n预计关单：2026-09-09 → 2026-09-30\n● 转差\n09:30\n查看商机 →\n2026年9月28日\n访\n星河智能制造（广州）有限公司 · 2026年9月28日 · 线上会议\n10:00\n查看客户档案 →\n商\n远山科技（深圳）有限公司 · 知识助理项目\n关系评分：83 → 71\n● 需关注\n",
+      "errors": [],
+      "state": {
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customers/index",
+      "actual": "pages/customers/index",
+      "text": "本年\n历年\n9\n客户资产总数\n完整授权范围\n2,481\n年度合同额 · 万元\n200\n确收 · 万元\n152\n回款 · 万元\n象限\n全部\n计划\n全部\n优先级\n全部\n金额\n全部\n团队\n全部\n成员\n全部\n作战地图\n当年有正式跟进 · 点越大，在推金额越高\n客户资产\n潜力大 · 关系深\n主攻区\n潜力大 · 关系浅\n客户资源\n潜力小 · 关系深\n见单打单\n潜力小 · 关系浅\n小\n大\n客户潜力\n浅\n深\n关系深度\n活跃客户 8\n客户认领\n\t客户 / 负责人\t当前状态\t最近沟通\t操作\n\n \n\t\n客户 / 负责人\n\t\n当前状态\n\t\n最近沟通\n\t\n操作\n\n\t\n星河智能制造（广州）有限公司\n渠道销售-南区 · 王新源 · Tier-1\n\t\n● 向好\n·",
+      "errors": [],
+      "state": {
+        "acvLoading": false,
+        "acvError": "",
+        "mapError": "",
+        "mapLoading": false,
+        "assetLoading": false,
+        "assetError": "",
+        "directoryLoading": false,
+        "directoryError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/workbench/index",
+      "actual": "pages/workbench/index",
+      "text": "2025年\n2026年\n2027年\n全年\nQ1\nQ2\nQ3\nQ4\n32\n总商机\n24\n活跃商机\n4\n已成单\n32\n新增商机\n团队\n全部\n负责人\n全部\n阶段\n全部\n预计关单\n全部\n等级\n全部\n新增商机\n共 32 条\n2026年 · Q4 5 条\n\t商机 / 客户\t阶段\t状态\t确收 / 回款\t预计关单\t操作\n\n \n\t\n商机 / 客户\n\t\n阶段\n\t\n状态\n\t\n确收 / 回款\n\t\n预计关单\n\t\n操作\n\n\t\n经营分析项目\nC级\n星河智能制造（广州）有限公司\n\t客户签约 · 90%\t● 向好\t未登记 / 未登记\t2026-12-25\t\n编辑\n\n\t\n经营分析项目\nB级\n青禾零售集团有限公司\n\t客户签约 · 90%\t● 向好\t未登记 / 未登记\t2",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadError": "",
+        "opportunityLoadingMore": false,
+        "opportunityMoreError": "",
+        "opportunityDataError": "",
+        "opportunityListLoading": false,
+        "opportunityOverviewLoading": false,
+        "opportunityListError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/bi/index",
+      "actual": "pages/bi/index",
+      "text": "团队\n个人\n全部团队\n2026年\nQ1\nQ2\nQ3\nQ4\n部门合计 · 全部团队 · 2026 Q1+Q2+Q3 · 数据库实时统计 · 更新至 2026-09-29 10:27\n200\n万元\n已登记确收\n8 笔已确认记录\n152\n万元\n已登记回款\n8 笔已确认记录\n691.53\n万元\n预测含税确收\n20 条已填预测 · 非实际发生\n493.95\n万元\n预测回款\n20 条已填预测 · 非实际发生\n2313\n万元\n总商机 ACV\n20 个预计关单的在推商机\n987.9\n万元\n加权预测 ACV\n在推商机金额 × 阶段概率（含10%）\n495\n万元\n高概率 ACV\n70% 及以上商机\n20\n预计关单数\n2026 Q1+Q2+Q3 预计成交",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadError": "",
+        "optionsLoading": false,
+        "optionsError": "",
+        "rankingLoading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/profile/index",
+      "actual": "pages/profile/index",
+      "text": "陈\n陈国栋\n销售总经理 · 渠道销售-南区\n● 已登录\n退出登录 / 切换账号\n营销成熟度\n营销效率\n销售画像\n部门\n团队\n个人\n当前：部门汇总\n部门汇总 · 经营事实\n--\n分\n待评估 · 总分 / 100 ⓘ\n2026 Q3 · 季度目标\n目标由本人与负责人商定，调整走运营审批\n回款\n目标待设置\n当季度已登记\n¥500,000\n2026 Q3 部门目标 未设置\n确收\n目标待设置\n当季度已登记\n¥620,000\n2026 Q3 部门目标 未设置\n¥24,810,000\n在推商机 ACV\n当前进行中的商机金额\n¥2,100,000\n已赢单金额\n已赢单商机累计金额，非确收\n待计算\n客户保有率\n去年暂无已登记收入，暂不能计算",
+      "errors": [],
+      "state": {
+        "fdeMembersError": "",
+        "growthLoading": false,
+        "directoryLoading": false,
+        "directoryError": "",
+        "performanceLoading": false,
+        "performanceError": "",
+        "organizationLoading": false,
+        "accessBlocked": false,
+        "organizationError": ""
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/member-growth/index",
+      "actual": "pages/member-growth/index",
+      "text": "王\n王新源\n一线销售 · 渠道销售-南区\n每日复盘\n0.0\n综合得分\n六维能力画像\n基于近 30 天拜访记录 · 8 次拜访 · 2026-09-29\n\n画像待 Agent 复盘后生成。\n\n能力\t得分\t提升方法\n需求理解\t\n0\n\t继续积累拜访证据\n客户关系\t\n0\n\t继续积累拜访证据\n方案推进\t\n0\n\t继续积累拜访证据\n协作执行\t\n0\n\t继续积累拜访证据\n风险识别\t\n0\n\t继续积累拜访证据\n复盘成长\t\n0\n\t继续积累拜访证据\nAI\nAI 生成 · 销售教练建议\n围绕六项能力给出提升方法，只读\n补全业务记录后运行 Agent 复盘。\n成长趋势\n0 个快照\n综合\n需求理解\n客户关系\n方案推进\n协作执行\n风险识别\n复盘成长\n\n完成两轮以上每",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/visit-entry/index",
+      "actual": "pages/visit-entry/index",
+      "text": "选择客户\n必填\n\n可搜索公司全部客户，选中后再填写拜访内容\n\n星河智能制造（广州）有限公司\n渠道销售-南区\n远山科技（深圳）有限公司\n渠道销售-南区\n青禾零售集团有限公司\n渠道销售-南区\n云帆物流股份有限公司\n渠道销售-南区\n晨光新能源科技有限公司\n渠道销售-南区\n长桥智造（东莞）有限公司\n渠道销售-南区\n湖畔教育科技有限公司\n渠道销售-南区\n蓝田企业服务有限公司\n渠道销售-南区\n南海精工机械有限公司\n渠道销售-南区\n首次拜访\n会多出主营业务、需求、预算、联系人角色四项，确认页提示补充\n拜访原始记录\n键盘输入或语音转写\n0 / 50000\n先记录事实，稍后确认客户与商机\n语音录入\n文件录入\n说说这次拜访\n每次最长 10 分钟，结束后",
+      "errors": [],
+      "state": {
+        "draftSaveError": "",
+        "fileSaveErrorCode": "",
+        "customerSearchError": "",
+        "errorText": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/visit-confirm/index",
+      "actual": "pages/visit-confirm/index",
+      "text": "1\n核对内容\n2\nAI 质检\n3\n确认保存\n客户类型\n类型\n客户\n客户名称\n\n点击匹配结果，确认本次跟进的客户\n\n星河智能制造（广州）有限公司\n渠道销售-南区\n远山科技（深圳）有限公司\n渠道销售-南区\n青禾零售集团有限公司\n渠道销售-南区\n云帆物流股份有限公司\n渠道销售-南区\n晨光新能源科技有限公司\n渠道销售-南区\n长桥智造（东莞）有限公司\n渠道销售-南区\n湖畔教育科技有限公司\n渠道销售-南区\n蓝田企业服务有限公司\n渠道销售-南区\n南海精工机械有限公司\n渠道销售-南区\n伙伴名称 选填\n跟进日期\n是 · 系统按跟进日期判断最近七天，含今天\n对接人\n沟通内容\n下一步计划\n创建时间\n跟进人\n陈国栋\n协同人 选填\n选择参与本次拜访的同事\n选",
+      "errors": [],
+      "state": {
+        "adviceError": "",
+        "opportunityLoading": false,
+        "opportunityError": "",
+        "opportunityResolveError": "",
+        "errorText": "",
+        "accessBlocked": false,
+        "catalogError": ""
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/visit-detail/index",
+      "actual": "pages/visit-detail/index",
+      "text": "● 暂无质检结果\n只读\n智能质检试点\n\n2026年9月29日 · 线上会议 · 客户跟进\n\n本次实际协助 FDE：周思远、赵文博\n\n客户类型\n商机客户\n客户名称\n星河智能制造（广州）有限公司\n商机名称\n智能质检试点\n伙伴名称\n直销\n跟进日期\n2026年9月29日\n创建时间\n2026年9月29日\n对接人\n张晓静\n跟进人\n赵文博\n协同人\n未选择\n是否七天内\n是\n拜访方式\n线上会议\n拜访时长\n45分钟\n拜访地点\n待确认\n是否首次拜访\n否\n查看商机详情\n拜访内容\n拜访目标\n确认试点边界\n沟通内容\n已介绍试点方案，下一次会议将确认验收范围和参与人员。\n达成结果\n达成100%\n下一步计划\n\n整理试点清单，预约下一次方案沟通。\n\nAI\nAI 生成",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "error": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-detail/index",
+      "actual": "pages/customer-detail/index",
+      "text": "星\n星河智能制造（广州）有限公司\n\n制造业 · 商机客户 · 渠道销售-南区\n\nTier-1级客户\n主攻区\n● 向好\n· 暂无重大风险\n\n负责人 王新源 · 更新于 2026-09-29\n\n记录拜访\n创建任务\n经营实绩\n象限判断依据\n\n潜力大 · 关系不熟，建议重点投入，建立关键关系\n\n客户潜力\n87\n潜力评分：87\n关系深度\n48\n关系评分：48\n已识别 2 位联系人\n\n象限由事实数据自动计算；修改客户事实后，系统重新评估。\n\n经营概览\n拜访记录\n商机进展\n298万\n在推商机 ACV\n128万\n当前商机 ACV\n0年\n合作时间\nAI\nAI 生成 · 经营建议\n基于最新客户事实生成\n\n整理试点清单，预约下一次方案沟通。\n\n创建下一步",
+      "errors": [],
+      "state": {
+        "accessBlocked": false,
+        "detailFocusError": ""
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-create/index",
+      "actual": "pages/customer-create/index",
+      "text": "必填 1 / 8\n还有 7 项待补充\n客户资料\n客户名称\n必填\n所属行业\n选填\n请选择所属行业\n客户类型\n必填\n潜在客户\n客户优先级\n必填\n请选择客户优先级\n客户来源\n必填\n请选择客户来源\n客户归属团队\n必填\n请选择客户归属团队\n合作伙伴\n选填\n联系人信息\n首要联系人\n必填\n联系人职位\n必填\n联系人角色\n必填\n请选择联系人角色\n保存草稿\n创建后进入待分配客户池\n创建客户",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-edit/index",
+      "actual": "pages/customer-edit/index",
+      "text": "AI\nAgent 计算 · 只读\n星河智能制造（广州）有限公司\n\n保存后 Agent 会重新评估客户画像与作战地图位置\n\n作战象限\n主攻区\n客户潜力\n87\n关系深度\n48\n当前风险\n暂无重大风险\n人工维护字段\n修改后成为 Agent 的新分析依据\n客户名称\n星河智能制造（广州）有限公司\n不可修改\n所属行业\n行业\n制造业\n客户类型\n类型\n商机客户\n客户优先级\n优先级\nTier-1\n客户 / 线索来源\n来源\n销售自拓\n合作伙伴\n首要联系人\n角色仅限决策者、影响者、使用者\n联系人姓名\n联系人职位\n联系人角色\n角色\n决策者\n保存后触发 Agent 重评\n保存修改",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/opportunity-create/index",
+      "actual": "pages/opportunity-create/index",
+      "text": "选择所属客户\n商机归档到所选客户名下\n2\n完善商机信息\n名称、阶段、金额、关单日期必填\n客\n关联客户\n星河智能制造（广州）有限公司\n新增商机\n星河智能制造（广州）有限公司\n商机名称\n商机阶段\n阶段\n请选择阶段\nACV（万元）\n输入后显示完整元金额\n预计关单日期\n所属伙伴\n直销\n合作伙伴\n协助 FDE 选填\n暂未选择\n选 择\n商机协助人员，可搜索并选择多位 FDE\n季度回款与确收 选填\n填写\n更多信息 选填\n补充\n请确认商机名称、阶段、金额和预计关单日期\n确认保存商机",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "error": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/opportunities/index",
+      "actual": "pages/opportunities/index",
+      "text": "团队\n全部\n人员\n全部\n阶段\n全部\n关单日期\n全部\n等级\n全部\n共 32 条\n新增商机\n2026年 · Q4 5 条\n商机 / 客户\t阶段\t状态\t确收 / 回款\t预计关单\t产品线\t负责人\n\n商机 / 客户\n\t\n阶段\n\t\n状态\n\t\n确收 / 回款\n\t\n预计关单\n\t\n产品线\n\t\n负责人\n\n\n经营分析项目\n星河智能制造（广州）有限公司\n\t客户签约 · 90%\t● 健康\t未登记 / 未登记\t2026-12-25\t经营分析\t\n王新源\n渠道销售-南区\n\n\n经营分析项目\n青禾零售集团有限公司\n\t客户签约 · 90%\t● 健康\t未登记 / 未登记\t2026-12-25\t经营分析\t\n王新源\n渠道销售-南区\n\n\n经营分析项目\n晨光新能源科技有限公司\n\t",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadingMore": false,
+        "loadError": "",
+        "moreError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/management-task-create/index",
+      "actual": "pages/management-task-create/index",
+      "text": "任务内容\n任务类型\n日常工作任务\n客户任务\n任务描述\n0 / 500\n语音录入\n执行设置\n任务负责人\n选择任务负责人，可多选\n优先级\n中\n截止时间\n下发任务",
+      "errors": [],
+      "state": {
+        "recipientLoading": false,
+        "recipientError": "",
+        "linkLoading": false,
+        "linkError": "",
+        "selectorLoading": false,
+        "selectorError": "",
+        "adviceLoading": false,
+        "adviceError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/tasks/index",
+      "actual": "pages/tasks/index",
+      "text": "待处理0\n已完成0\n已结束0\n全部0\n共 0 项\n排序\n最早到期优先\n展开说明\n\t任务 / 关联对象\t任务状态\t负责人\t时间\t优先级\t操作\n\n展开说明\n\t\n任务 / 关联对象\n\t\n任务状态\n\t\n负责人\n\t\n时间\n\t\n优先级\n\t\n操作\n\n\n没有待处理的任务\n\n换一个条件试试，或清除全部条件。",
+      "errors": [],
+      "state": {
+        "loadingMore": false,
+        "moreError": "",
+        "loading": false,
+        "accessBlocked": false,
+        "loadError": ""
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/task-detail/index",
+      "actual": "pages/task-detail/index",
+      "text": "● 告警 · 待接受\n高优先级\n确认试点范围与验收标准\n\n星河智能制造（广州）有限公司 · 渠道销售-南区\n\n等待接收方接受或拒绝\n\n任务类别\n客户任务\n关联商机\n智能质检试点\n负责人\n王新源\n下发人\n李明哲\n任务来源\n李明哲下发\n截止时间\n2026年9月28日 17:00\n创建时间\n2026年9月28日 10:00\n相关方\n李明哲\n取消任务\n协调任务\n任务要求\n\n确认试点范围与验收标准\n\n该任务由 王新源 负责完成\n\n你可以查看最新状态。",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "coordinateLoading": false,
+        "coordinateDirectoryError": "",
+        "coordinateError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/risks/index",
+      "actual": "pages/risks/index",
+      "text": "待解除2\n已解除1\n全部3\n风险\t状态\t等级\t负责人\t时间\t关联商机\n\n验收范围尚未书面确认\n星河智能制造（广州）有限公司 · 渠道销售-南区\n\t● 提醒 · 待解除\t高风险\t王新源\t识别 9月23日\t\n客户服务项目\n\n\n两周无高层动作\n远山科技（深圳）有限公司 · 渠道销售-南区\n\t● 提醒 · 待解除\t中风险\t王新源\t识别 9月26日\t\n知识助理项目",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/risk-detail/index",
+      "actual": "pages/risk-detail/index",
+      "text": "● 提醒 · 待解除\n高风险\n\n星河智能制造（广州）有限公司\n\n验收范围尚未书面确认\n\n王新源 · 渠道销售-南区\n\n识别时间\n2026年9月23日 10:00\n风险说明\n\n试点已交付两周，客户仍未书面确认验收范围，存在延期确收的可能。\n\n判断依据\n最近一次拜访记录：客户提出补充交付清单。\n预计关单日期在 30 天内，但未登记验收里程碑。\n建议下一步\n\n本周内约信息化部负责人确认验收清单和时间，并登记为拜访下一步。\n\n解除风险\n\n请填写已消除风险的事实依据，便于管理者和后续跟进人员追溯。\n\n解除依据\n0 / 500\n至少 5 个字\n解除记录会保留处理人、时间和依据\n确认解除风险",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/report-detail/index",
+      "actual": "pages/report-detail/index",
+      "text": "AI\nAI 生成 · 即时总结\n合成授权范围 · 当前实时状态 · 生成于 2026/9/29 10:27:25\n合成经营报告\n\n部门 · 安全客户 · 部门内推进健康、下一步明确且风险可控的客户\n\n合成客户回顾\n\n用于验证报告详情展示，不代表真实经营结论。\n\nAI 基于权限范围内的业务数据分析，结论供参考。",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "error": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-assign-confirm/index",
+      "actual": "pages/customer-assign-confirm/index",
+      "text": "新客户建档\n必填 3 / 10 · 销售总经理 · 创建人 陈国栋\nAI\nAI 生成 · 待核对\n核对客户名称、联系人角色和负责销售；确认后完成客户建档、负责人绑定和销售端提醒。\n\n还有 7 个关键字段待补充，完成后才能正式建档下发。\n\n客户名称\n必填\n待补充\n补充\n所属行业\n选填\n待补充\n编辑\n客户类型\n必填\n潜在客户\n编辑\n客户优先级\n必填\n待补充\n补充\n客户来源\n必填\n待补充\n补充\n合作伙伴\n选填\n待补充\n编辑\n首要联系人\n必填\n待补充\n补充\n联系人职位\n必填\n待补充\n补充\n联系人角色\n必填\n待补充\n补充\n下发给销售\n必填\n王新源\n编辑\n所属团队\n必填\n渠道销售-南区\n自动匹配\n首次跟进要求\n必填\n待补充\n补充\n保存草稿\n确认",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-claim/index",
+      "actual": "pages/customer-claim/index",
+      "text": "已加载 9 / 共 9 家\n行业\n全部行业\n认领状态\n全部状态\n刷新名单\n\t客户名称\t等级\t负责销售\t认领状态\n\t\n星河智能制造（广州）有限公司\n行业待补充 · 渠道销售-南区\n\tTier-1\t王新源\t● 已被认领\n\t\n远山科技（深圳）有限公司\n行业待补充 · 渠道销售-南区\n\tTier-1\t王新源\t● 已被认领\n\t\n青禾零售集团有限公司\n行业待补充 · 渠道销售-南区\n\tTier-2\t王新源\t● 已被认领\n\t\n云帆物流股份有限公司\n行业待补充 · 渠道销售-南区\n\tTier-3\t王新源\t● 已被认领\n\t\n晨光新能源科技有限公司\n行业待补充 · 渠道销售-南区\n\tTier-1\t王新源\t● 已被认领\n\t\n长桥智造（东莞）有限公司\n行业",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadingMore": false,
+        "optionsLoading": false,
+        "optionsError": "",
+        "loadError": "",
+        "loadMoreError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/customer-assets/index",
+      "actual": "pages/customer-assets/index",
+      "text": "星河智能制造（广州）有限公司\n\n智能质检试点\n商机等级 A\n● 告警 · 推进中\n编辑商机\n客户档案\n客户全部实绩\nACV（商机金额）\n128万\n当前阶段\n方案沟通－50%\n预计签约\n2026-03-25\n负责人\n王新源 · 渠道销售-南区\n商机概览\n待办事项\n跟进记录\n商机进展\nAI\nAI 生成 · 销售专家建议\n智能质检试点 · 商机概览\n检查更新\n\nAgent 中台暂未接入，暂无经营建议。\n\n基于当前商机关联资料生成 · 建议供参考\n\n商机完整信息\n商机名称\n智能质检试点\n商机阶段\n方案沟通－50%\n阶段概率\n50%\nACV（商机金额）\n128万\n预计签约\n2026-03-25\n所属伙伴\n直销\n产品线\n智能质检\n负责人\n王新源",
+      "errors": [],
+      "state": {
+        "demosLoading": false,
+        "demoError": "",
+        "loading": false,
+        "error": "",
+        "formError": "",
+        "quarterActualLoading": false,
+        "quarterActualError": "",
+        "fdeOwnLoading": false,
+        "fdeOwnError": "",
+        "opportunityLoading": false,
+        "opportunityError": "",
+        "accessBlocked": false,
+        "fdeRelationError": ""
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/fde-records/index",
+      "actual": "pages/fde-records/index",
+      "text": "此功能暂不可用\n当前身份未开放此项操作。权限可能已调整，请返回重新查看。",
+      "errors": [],
+      "state": {
+        "accessBlocked": true
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/demo-create/index",
+      "actual": "pages/demo-create/index",
+      "text": "智能质检试点\n创建 Demo 场景\n每个场景计 1 个 Demo，自动关联当前商机\n场景 1\n场景名称\n场景描述\n0 / 2000\n语音录入\n转写后追加到描述，可继续编辑\n添加 Demo 场景\n保存后同步到当前商机，并计入登记数量\n保存 1 个场景",
+      "errors": [],
+      "state": {
+        "demoError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "manager",
+      "expected": "pages/weekly-report/index",
+      "actual": "pages/weekly-report/index",
+      "text": "周报 Demo\n\n从更新记录到本周总结\n\n陈国栋 · 本人\n近 7 天（含今天）\n2026-09-23 — 2026-09-29\n更新记录\n0\n拜访与跟进 · 本人上传\n刷 新\n这个周期还没有更新记录\n\n可切换周期，或先在「拜访与跟进」中保存记录。\n\n一键生成周报\n选择更新记录后生成\n周报草稿\n生成后可编辑、复制\n复制周报\n把一周的进展，整理成周报\n\n选择左侧记录，一键生成结构化草稿。\n\n本周概览\n客户与商机进展\n后续行动\n等待生成\nDemo · 规则整理，未接入 AI",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "error": ""
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/customers/index",
+      "actual": "pages/customers/index",
+      "text": "本年\n历年\n6\n客户资产总数\n完整授权范围\n1,880\n年度合同额 · 万元\n138\n确收 · 万元\n102\n回款 · 万元\n象限\n全部\n计划\n全部\n优先级\n全部\n金额\n全部\n作战地图\n当年有正式跟进 · 点越大，在推金额越高\n客户资产\n潜力大 · 关系深\n主攻区\n潜力大 · 关系浅\n客户资源\n潜力小 · 关系深\n见单打单\n潜力小 · 关系浅\n小\n大\n客户潜力\n浅\n深\n关系深度\n活跃客户 6\n客户认领\n\t客户 / 负责人\t当前状态\t最近沟通\t操作\n\n \n\t\n客户 / 负责人\n\t\n当前状态\n\t\n最近沟通\n\t\n操作\n\n\t\n星河智能制造（广州）有限公司\n渠道销售-南区 · 王新源 · Tier-1\n\t\n● 向好\n· 当前未发现风险\n\t20",
+      "errors": [],
+      "state": {
+        "acvLoading": false,
+        "acvError": "",
+        "mapError": "",
+        "mapLoading": false,
+        "assetLoading": false,
+        "assetError": "",
+        "directoryLoading": false,
+        "directoryError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/management-task-create/index",
+      "actual": "pages/management-task-create/index",
+      "text": "任务内容\n任务类型\n日常工作任务\n客户任务\n任务描述\n0 / 500\n语音录入\n执行设置\n任务负责人\n选择任务负责人，可多选\n优先级\n中\n截止时间\n下发任务",
+      "errors": [],
+      "state": {
+        "recipientLoading": false,
+        "recipientError": "",
+        "linkLoading": false,
+        "linkError": "",
+        "selectorLoading": false,
+        "selectorError": "",
+        "adviceLoading": false,
+        "adviceError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/tasks/index",
+      "actual": "pages/tasks/index",
+      "text": "待处理18\n已完成4\n已结束0\n全部22\n共 18 项\n排序\n最早到期优先\n展开说明\n\t任务 / 关联对象\t任务状态\t负责人\t时间\t优先级\t操作\n\n展开说明\n\t\n任务 / 关联对象\n\t\n任务状态\n\t\n负责人\n\t\n时间\n\t\n优先级\n\t\n操作\n\n\t\n确认试点范围与验收标准\n星河智能制造（广州）有限公司\n智能质检试点 ↗\n\t\n待接受\n● 转差\n\t\n王新源\n渠道销售-南区\n\t\n已逾期 17 小时\n9月28日 17:00\n\t高\t\n去确认\n取消\n\n\t\n确认试点范围与验收标准\n远山科技（深圳）有限公司\n知识助理项目 ↗\n\t\n待接受\n● 转差\n\t\n王新源\n渠道销售-南区\n\t\n已逾期 17 小时\n9月28日 17:00\n\t中\t\n去确认\n取消\n\n\t\n确",
+      "errors": [],
+      "state": {
+        "loadingMore": false,
+        "moreError": "",
+        "loading": false,
+        "accessBlocked": false,
+        "loadError": ""
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/profile/index",
+      "actual": "pages/profile/index",
+      "text": "王\n王新源\n一线销售 · 渠道销售-南区\n● 已登录\n退出登录 / 切换账号\n营销成熟度\n营销效率\n销售画像\n经营事实\n--\n分\n待评估 · 总分 / 100 ⓘ\n2026 Q3 · 季度目标\n目标由本人与负责人商定，调整走运营审批\n回款\n目标待设置\n当季度已登记\n¥0\n2026 Q3 个人目标 未设置\n确收\n目标待设置\n当季度已登记\n¥0\n2026 Q3 个人目标 未设置\n¥18,800,000\n在推商机 ACV\n当前进行中的商机金额\n¥1,420,000\n已赢单金额\n已赢单商机累计金额，非确收\n待计算\n客户保有率\n去年暂无已登记收入，暂不能计算",
+      "errors": [],
+      "state": {
+        "fdeMembersError": "",
+        "growthLoading": false,
+        "directoryLoading": false,
+        "directoryError": "",
+        "performanceLoading": false,
+        "performanceError": "",
+        "organizationLoading": false,
+        "accessBlocked": false,
+        "organizationError": ""
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/bi/index",
+      "actual": "pages/bi/index",
+      "text": "2026年\nQ1\nQ2\nQ3\nQ4\n王新源 · 2026 Q1+Q2+Q3 · 数据库实时统计 · 更新至 2026-09-29 10:27\n138\n万元\n已登记确收\n6 笔已确认记录\n102\n万元\n已登记回款\n6 笔已确认记录\n532.56\n万元\n预测含税确收\n15 条已填预测 · 非实际发生\n380.4\n万元\n预测回款\n15 条已填预测 · 非实际发生\n1738\n万元\n总商机 ACV\n15 个预计关单的在推商机\n760.8\n万元\n加权预测 ACV\n在推商机金额 × 阶段概率（含10%）\n399\n万元\n高概率 ACV\n70% 及以上商机\n15\n预计关单数\n2026 Q1+Q2+Q3 预计成交\n距离 2026 Q3 结束还剩 1 天",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadError": "",
+        "optionsLoading": false,
+        "optionsError": "",
+        "rankingLoading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/workbench/index",
+      "actual": "pages/workbench/index",
+      "text": "2025年\n2026年\n2027年\n全年\nQ1\nQ2\nQ3\nQ4\n24\n总商机\n18\n活跃商机\n3\n已成单\n24\n新增商机\n阶段\n全部\n预计关单\n全部\n等级\n全部\n新增商机\n共 24 条\n2026年 · Q4 5 条\n\t商机 / 客户\t阶段\t状态\t确收 / 回款\t预计关单\t操作\n\n \n\t\n商机 / 客户\n\t\n阶段\n\t\n状态\n\t\n确收 / 回款\n\t\n预计关单\n\t\n操作\n\n\t\n经营分析项目\nC级\n星河智能制造（广州）有限公司\n\t客户签约 · 90%\t● 向好\t未登记 / 未登记\t2026-12-25\t\n编辑\n\n\t\n经营分析项目\nB级\n青禾零售集团有限公司\n\t客户签约 · 90%\t● 向好\t未登记 / 未登记\t2026-12-25\t\n编辑",
+      "errors": [],
+      "state": {
+        "loading": false,
+        "loadError": "",
+        "opportunityLoadingMore": false,
+        "opportunityMoreError": "",
+        "opportunityDataError": "",
+        "opportunityListLoading": false,
+        "opportunityOverviewLoading": false,
+        "opportunityListError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/visit-entry/index",
+      "actual": "pages/visit-entry/index",
+      "text": "选择客户\n必填\n\n可搜索公司全部客户，选中后再填写拜访内容\n\n星河智能制造（广州）有限公司\n渠道销售-南区\n远山科技（深圳）有限公司\n渠道销售-南区\n青禾零售集团有限公司\n渠道销售-南区\n云帆物流股份有限公司\n渠道销售-南区\n晨光新能源科技有限公司\n渠道销售-南区\n长桥智造（东莞）有限公司\n渠道销售-南区\n首次拜访\n会多出主营业务、需求、预算、联系人角色四项，确认页提示补充\n拜访原始记录\n键盘输入或语音转写\n0 / 50000\n先记录事实，稍后确认客户与商机\n语音录入\n文件录入\n说说这次拜访\n每次最长 10 分钟，结束后自动转写，转写后可以修改\n开始录音\n语音识别失败不影响手工录入；点「提交结构化」后才进入字段确认页\n请先选择客户",
+      "errors": [],
+      "state": {
+        "draftSaveError": "",
+        "fileSaveErrorCode": "",
+        "customerSearchError": "",
+        "errorText": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/fde-records/index",
+      "actual": "pages/fde-records/index",
+      "text": "此功能暂不可用\n当前身份未开放此项操作。权限可能已调整，请返回重新查看。",
+      "errors": [],
+      "state": {
+        "accessBlocked": true
+      }
+    },
+    {
+      "role": "sales",
+      "expected": "pages/demo-create/index",
+      "actual": "pages/demo-create/index",
+      "text": "智能质检试点\n创建 Demo 场景\n每个场景计 1 个 Demo，自动关联当前商机\n场景 1\n场景名称\n场景描述\n0 / 2000\n语音录入\n转写后追加到描述，可继续编辑\n添加 Demo 场景\n保存后同步到当前商机，并计入登记数量\n保存 1 个场景",
+      "errors": [],
+      "state": {
+        "demoError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/customers/index",
+      "actual": "pages/customers/index",
+      "text": "本年\n历年\n8\n客户资产总数\n完整授权范围\n2,481\n年度合同额 · 万元\n200\n确收 · 万元\n152\n回款 · 万元\n象限\n全部\n计划\n全部\n优先级\n全部\n金额\n全部\n协助成员\n全部\n作战地图\n当年有正式跟进 · 点越大，在推金额越高\n客户资产\n潜力大 · 关系深\n主攻区\n潜力大 · 关系浅\n客户资源\n潜力小 · 关系深\n见单打单\n潜力小 · 关系浅\n小\n大\n客户潜力\n浅\n深\n关系深度\n活跃客户 8\n\t客户 / 负责人\t当前状态\t最近沟通\t操作\n\n \n\t\n客户 / 负责人\n\t\n当前状态\n\t\n最近沟通\n\t\n操作\n\n\t\n星河智能制造（广州）有限公司\n渠道销售-南区 · 王新源 · Tier-1\n\t\n● 向好\n· 当前未发现风险\n",
+      "errors": [],
+      "state": {
+        "acvLoading": false,
+        "acvError": "",
+        "mapError": "",
+        "mapLoading": false,
+        "assetLoading": false,
+        "assetError": "",
+        "directoryLoading": false,
+        "directoryError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/management-task-create/index",
+      "actual": "pages/management-task-create/index",
+      "text": "任务内容\n任务类型\n日常工作任务\n客户任务\n任务描述\n0 / 500\n语音录入\n执行设置\n任务负责人\n选择任务负责人，可多选\n优先级\n中\n截止时间\n下发任务",
+      "errors": [],
+      "state": {
+        "recipientLoading": false,
+        "recipientError": "",
+        "linkLoading": false,
+        "linkError": "",
+        "selectorLoading": false,
+        "selectorError": "",
+        "adviceLoading": false,
+        "adviceError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/tasks/index",
+      "actual": "pages/tasks/index",
+      "text": "本人任务\n团队任务\n待处理0\n已完成0\n已结束0\n全部0\n共 0 项\n排序\n最早到期优先\n展开说明\n\t任务 / 关联对象\t任务状态\t负责人\t时间\t优先级\t操作\n\n展开说明\n\t\n任务 / 关联对象\n\t\n任务状态\n\t\n负责人\n\t\n时间\n\t\n优先级\n\t\n操作\n\n\n没有待处理的任务\n\n换一个条件试试，或清除全部条件。",
+      "errors": [],
+      "state": {
+        "loadingMore": false,
+        "moreError": "",
+        "loading": false,
+        "accessBlocked": false,
+        "loadError": ""
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/profile/index",
+      "actual": "pages/profile/index",
+      "text": "赵\n赵文博\nFDE主管 · 渠道销售-南区\n● 已登录\n退出登录 / 切换账号\n项目成效\n协作效率\nFDE 画像\n团队\n个人\n成员\n赵文博（本人）（渠道销售-南区）\n当前：赵文博（本人）\n我 · 项目成效\n—\n分\n待评估 · 总分 / 100\n回款\n目标待设置\n当季度已登记\n¥240,000\n2026 Q3 个人目标 未设置\n确收\n目标待设置\n当季度已登记\n¥300,000\n2026 Q3 个人目标 未设置\n¥8,460,000\n在推商机 ACV\n当前进行中的商机金额\n未登记\n已赢单金额\n已赢单商机累计金额，非确收",
+      "errors": [],
+      "state": {
+        "fdeMembersError": "",
+        "growthLoading": false,
+        "directoryLoading": false,
+        "directoryError": "",
+        "performanceLoading": false,
+        "performanceError": "",
+        "organizationLoading": false,
+        "accessBlocked": false,
+        "organizationError": ""
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/bi/index",
+      "actual": "pages/bi/index",
+      "text": "协作看板\nFDE 团队 · 2026年 · 全年 · 2026/09/29 10:27\n团队\n个人\n2026年 · 全年 更改\n经营数据 FDE 团队 · 当前协助商机\n32\n协助商机\n个，点进项目\n8\n协助客户\n个\n24\n在推商机\n个\n2,481 万\n在推商机金额\n当前参与项目\n6 条\n跟进记录\n2 人填报 · 查看记录\n200 万\n确收金额\n所选周期 · 协助项目\n0 个\nDemo 数量\n所选周期 · 场景登记\n任务进展 2026年 · 全年\n1\n已完成\n4\n待完成\n1\n已逾期\n需处理\n商机阶段\n当前参与商机 · 按数量\n全部\n个\n意向沟通\n商机确认\n方案沟通\n商务谈判\n客户签约\n赢单\n丢单\n0\n2\n4\n6\n8\n4\n4\n8\n4\n",
+      "errors": [],
+      "state": {
+        "loading": true,
+        "loadError": "",
+        "optionsLoading": false,
+        "optionsError": "",
+        "rankingLoading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/workbench/index",
+      "actual": "pages/workbench/index",
+      "text": "商机总览\n团队 · 只筛总览，不影响下方列表\n年份\n2026年\n全部\nQ1\nQ2\nQ3\nQ4\n4\n已成单商机\n32\n总商机\n24\n活跃商机\n0\nDemo 场景\n人员\n全部成员\n阶段\n全部\n关单年份\n2026年\n关单季度\n全部\n等级\n全部\n产品线\n全部\n\n有效协助商机，按项目去重 · 32 个\n在推项目 ACV 2,481 万元\n\n商机 / 客户\t阶段\t状态\t确收 / 回款\t预计关单\t协助 FDE\n\n商机 / 客户\n\t\n阶段\n\t\n状态\n\t\n确收 / 回款\n\t\n预计关单\n\t\n协助 FDE\n\n\n智能质检试点A级\n星河智能制造（广州）有限公司\n\t方案沟通 · 50%\t● 转差\t18万 / 12万\t2026-03-25\t周思远、赵文博\n\n知识",
+      "errors": [],
+      "state": {
+        "loading": true,
+        "loadError": "",
+        "opportunityLoadingMore": false,
+        "opportunityMoreError": "",
+        "opportunityDataError": "",
+        "opportunityListLoading": false,
+        "opportunityOverviewLoading": false,
+        "opportunityListError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/visit-entry/index",
+      "actual": "pages/visit-entry/index",
+      "text": "选择客户\n必填\n\n选择客户后，仅可录入本人参与的商机\n\n星河智能制造（广州）有限公司\n渠道销售-南区\n远山科技（深圳）有限公司\n渠道销售-南区\n青禾零售集团有限公司\n渠道销售-南区\n云帆物流股份有限公司\n渠道销售-南区\n晨光新能源科技有限公司\n渠道销售-南区\n长桥智造（东莞）有限公司\n渠道销售-南区\n湖畔教育科技有限公司\n渠道销售-南区\n蓝田企业服务有限公司\n渠道销售-南区\n拜访原始记录\n键盘输入或语音转写\n0 / 50000\n先记录事实，稍后确认客户与商机\n语音录入\n文件录入\n说说这次拜访\n每次最长 10 分钟，结束后自动转写，转写后可以修改\n开始录音\n语音识别失败不影响手工录入；点「提交结构化」后才进入字段确认页\n请先选择客户",
+      "errors": [],
+      "state": {
+        "draftSaveError": "",
+        "fileSaveErrorCode": "",
+        "customerSearchError": "",
+        "errorText": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/fde-records/index",
+      "actual": "pages/fde-records/index",
+      "text": "记录参数无效，请返回重试\n\n网络或服务暂时不可用。\n\n重试不会清除已选条件",
+      "errors": [],
+      "state": {
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde_lead",
+      "expected": "pages/demo-create/index",
+      "actual": "pages/demo-create/index",
+      "text": "智能质检试点\n创建 Demo 场景\n每个场景计 1 个 Demo，自动关联当前商机\n场景 1\n场景名称\n场景描述\n0 / 2000\n语音录入\n转写后追加到描述，可继续编辑\n添加 Demo 场景\n保存后同步到当前商机，并计入登记数量\n保存 1 个场景",
+      "errors": [],
+      "state": {
+        "demoError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/customers/index",
+      "actual": "pages/customers/index",
+      "text": "本年\n历年\n8\n客户资产总数\n完整授权范围\n2,481\n年度合同额 · 万元\n200\n确收 · 万元\n152\n回款 · 万元\n象限\n全部\n计划\n全部\n优先级\n全部\n金额\n全部\n作战地图\n当年有正式跟进 · 点越大，在推金额越高\n客户资产\n潜力大 · 关系深\n主攻区\n潜力大 · 关系浅\n客户资源\n潜力小 · 关系深\n见单打单\n潜力小 · 关系浅\n小\n大\n客户潜力\n浅\n深\n关系深度\n活跃客户 8\n\t客户 / 负责人\t当前状态\t最近沟通\t操作\n\n \n\t\n客户 / 负责人\n\t\n当前状态\n\t\n最近沟通\n\t\n操作\n\n\t\n星河智能制造（广州）有限公司\n渠道销售-南区 · 王新源 · Tier-1\n\t\n● 向好\n· 当前未发现风险\n\t2026-09",
+      "errors": [],
+      "state": {
+        "acvLoading": false,
+        "acvError": "",
+        "mapError": "",
+        "mapLoading": false,
+        "assetLoading": false,
+        "assetError": "",
+        "directoryLoading": false,
+        "directoryError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/management-task-create/index",
+      "actual": "pages/management-task-create/index",
+      "text": "任务内容\n任务类型\n日常工作任务\n客户任务\n任务描述\n0 / 500\n语音录入\n执行设置\n任务负责人\n选择任务负责人，可多选\n优先级\n中\n截止时间\n下发任务",
+      "errors": [],
+      "state": {
+        "recipientLoading": false,
+        "recipientError": "",
+        "linkLoading": false,
+        "linkError": "",
+        "selectorLoading": false,
+        "selectorError": "",
+        "adviceLoading": false,
+        "adviceError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/tasks/index",
+      "actual": "pages/tasks/index",
+      "text": "待处理4\n已完成1\n已结束0\n全部5\n共 4 项\n排序\n最早到期优先\n展开说明\n\t任务 / 关联对象\t任务状态\t负责人\t时间\t优先级\t操作\n\n展开说明\n\t\n任务 / 关联对象\n\t\n任务状态\n\t\n负责人\n\t\n时间\n\t\n优先级\n\t\n操作\n\n\t\n确认试点范围与验收标准\n湖畔教育科技有限公司\n知识助理项目 ↗\n\t\n待接受\n● 转差\n\t\n周思远\n渠道销售-南区\n\t\n已逾期 17 小时\n9月28日 17:00\n\t中\t\n去确认\n取消\n\n\t\n补充客户需求清单\n湖畔教育科技有限公司\n客户服务项目 ↗\n\t\n已接受\n● 需关注\n\t\n周思远\n渠道销售-南区\n\t\n今天 17:00\n今天截止\n\t中\t\n查看任务\n取消\n\n\t\n整理方案会议材料\n长桥智造（东莞）有限",
+      "errors": [],
+      "state": {
+        "loadingMore": false,
+        "moreError": "",
+        "loading": false,
+        "accessBlocked": false,
+        "loadError": ""
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/profile/index",
+      "actual": "pages/profile/index",
+      "text": "周\n周思远\nFDE · 渠道销售-南区\n● 已登录\n退出登录 / 切换账号\n项目成效\n协作效率\nFDE 画像\n我 · 项目成效\n—\n分\n待评估 · 总分 / 100\n回款\n目标待设置\n当季度已登记\n¥500,000\n2026 Q3 个人目标 未设置\n确收\n目标待设置\n当季度已登记\n¥620,000\n2026 Q3 个人目标 未设置\n¥24,810,000\n在推商机 ACV\n当前进行中的商机金额\n未登记\n已赢单金额\n已赢单商机累计金额，非确收",
+      "errors": [],
+      "state": {
+        "fdeMembersError": "",
+        "growthLoading": false,
+        "directoryLoading": false,
+        "directoryError": "",
+        "performanceLoading": false,
+        "performanceError": "",
+        "organizationLoading": false,
+        "accessBlocked": false,
+        "organizationError": ""
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/bi/index",
+      "actual": "pages/bi/index",
+      "text": "协作看板\n本人协作 · 2026年 · 全年 · 2026/09/29 10:27\n2026年 · 全年 更改\n经营数据 本人协作 · 当前协助商机\n32\n协助商机\n个，点进项目\n8\n协助客户\n个\n24\n在推商机\n个\n2,481 万\n在推商机金额\n当前参与项目\n3 条\n跟进记录\n1 人填报 · 查看记录\n200 万\n确收金额\n所选周期 · 协助项目\n0 个\nDemo 数量\n所选周期 · 场景登记\n任务进展 2026年 · 全年\n1\n已完成\n4\n待完成\n1\n已逾期\n需处理\n商机阶段\n当前参与商机 · 按数量\n全部\n个\n意向沟通\n商机确认\n方案沟通\n商务谈判\n客户签约\n赢单\n丢单\n0\n2\n4\n6\n8\n4\n4\n8\n4\n4\n4\n4\n拜访节奏",
+      "errors": [],
+      "state": {
+        "loading": true,
+        "loadError": "",
+        "optionsLoading": false,
+        "optionsError": "",
+        "rankingLoading": false,
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/workbench/index",
+      "actual": "pages/workbench/index",
+      "text": "商机总览\n本人 · 只筛总览，不影响下方列表\n年份\n2026年\n全部\nQ1\nQ2\nQ3\nQ4\n4\n已成单商机\n32\n总商机\n24\n活跃商机\n0\nDemo 场景\n阶段\n全部\n关单年份\n2026年\n关单季度\n全部\n等级\n全部\n产品线\n全部\n\n有效协助商机，按项目去重 · 32 个\n在推项目 ACV 2,481 万元\n\n商机 / 客户\t阶段\t状态\t确收 / 回款\t预计关单\t协助 FDE\n\n商机 / 客户\n\t\n阶段\n\t\n状态\n\t\n确收 / 回款\n\t\n预计关单\n\t\n协助 FDE\n\n\n智能质检试点A级\n星河智能制造（广州）有限公司\n\t方案沟通 · 50%\t● 转差\t18万 / 12万\t2026-03-25\t周思远、赵文博\n\n知识助理项目C级\n星",
+      "errors": [],
+      "state": {
+        "loading": true,
+        "loadError": "",
+        "opportunityLoadingMore": false,
+        "opportunityMoreError": "",
+        "opportunityDataError": "",
+        "opportunityListLoading": false,
+        "opportunityOverviewLoading": false,
+        "opportunityListError": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/visit-entry/index",
+      "actual": "pages/visit-entry/index",
+      "text": "选择客户\n必填\n\n选择客户后，仅可录入本人参与的商机\n\n星河智能制造（广州）有限公司\n渠道销售-南区\n远山科技（深圳）有限公司\n渠道销售-南区\n青禾零售集团有限公司\n渠道销售-南区\n云帆物流股份有限公司\n渠道销售-南区\n晨光新能源科技有限公司\n渠道销售-南区\n长桥智造（东莞）有限公司\n渠道销售-南区\n湖畔教育科技有限公司\n渠道销售-南区\n蓝田企业服务有限公司\n渠道销售-南区\n拜访原始记录\n键盘输入或语音转写\n0 / 50000\n先记录事实，稍后确认客户与商机\n语音录入\n文件录入\n说说这次拜访\n每次最长 10 分钟，结束后自动转写，转写后可以修改\n开始录音\n语音识别失败不影响手工录入；点「提交结构化」后才进入字段确认页\n请先选择客户",
+      "errors": [],
+      "state": {
+        "draftSaveError": "",
+        "fileSaveErrorCode": "",
+        "customerSearchError": "",
+        "errorText": "",
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/fde-records/index",
+      "actual": "pages/fde-records/index",
+      "text": "记录参数无效，请返回重试\n\n网络或服务暂时不可用。\n\n重试不会清除已选条件",
+      "errors": [],
+      "state": {
+        "accessBlocked": false
+      }
+    },
+    {
+      "role": "fde",
+      "expected": "pages/demo-create/index",
+      "actual": "pages/demo-create/index",
+      "text": "智能质检试点\n创建 Demo 场景\n每个场景计 1 个 Demo，自动关联当前商机\n场景 1\n场景名称\n场景描述\n0 / 2000\n语音录入\n转写后追加到描述，可继续编辑\n添加 Demo 场景\n保存后同步到当前商机，并计入登记数量\n保存 1 个场景",
+      "errors": [],
+      "state": {
+        "demoError": "",
+        "accessBlocked": false
+      }
+    }
+  ],
+  "issues": []
+}

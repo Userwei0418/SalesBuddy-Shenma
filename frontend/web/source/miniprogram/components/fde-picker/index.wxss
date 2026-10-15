@@ -1,0 +1,21 @@
+.field{margin:24rpx 0}.heading{font-size:14px;color:var(--ui-ink);font-weight:400;display:flex;gap:12rpx}.heading .fde-picker-label,.hint{font-size:var(--ui-text-small);color:var(--ui-secondary);font-weight:400}.chosen{min-height:var(--ui-field-height);box-sizing:border-box;padding:12rpx 24rpx;margin-top:16rpx;display:flex;align-items:center;justify-content:space-between;gap:16rpx;border:1px solid var(--ui-line);background:var(--ui-surface);border-radius:var(--ui-radius-control);font-size:14px;color:var(--ui-muted)}.chosen-pressed{background:var(--ui-neutral-soft)}.chosen>.fde-picker-label{display:flex;align-items:center;flex-shrink:0;color:var(--ui-primary);white-space:nowrap}.tags{display:flex;flex-wrap:wrap;gap:8rpx}.tags .fde-picker-text{height:20px;background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-small);line-height:20px;padding:0 var(--ui-space-2);border-radius:4px}.hint{margin-top:8rpx;line-height:1.5}
+/* 选择弹层（sb-sheet）：顶部固定搜索与已选胶囊，正文是 t-checkbox 列表（B-44～B-47） */
+.picker-header{display:flex;flex-direction:column;gap:8rpx}
+.selected{white-space:nowrap}
+.selected-tags{display:inline-flex;flex-wrap:nowrap;gap:var(--ui-space-2);white-space:nowrap}
+.selected-chip{flex:0 0 auto;display:flex;align-items:center;min-height:var(--ui-touch-target)}
+.selected-chip-body{display:flex;align-items:center;gap:8rpx;height:56rpx;padding:0 16rpx 0 20rpx;border-radius:var(--ui-radius-control);background:var(--ui-selected);color:var(--ui-primary);font-size:14px}
+.selected-chip.locked .selected-chip-body{padding-right:20rpx;background:var(--ui-neutral-soft);color:var(--ui-neutral)}
+.chip-pressed .selected-chip-body{opacity:.7}
+.results{--td-checkbox-title-disabled-color:var(--ui-muted);--td-checkbox-description-disabled-color:var(--ui-muted);margin:0 calc(-1 * var(--ui-page-gutter))}
+.status{display:flex;align-items:center;justify-content:center;box-sizing:border-box;min-height:var(--ui-touch-target);padding:24rpx 32rpx;text-align:center;color:var(--ui-secondary);font-size:14px}.error{color:var(--ui-danger)}.status-pressed{opacity:.7}.disabled{opacity:.6}
+
+/* Match opportunity-form fields without shrinking the member selection sheet. */
+.compact-form.field{margin:16rpx 0}
+.compact-form .heading{align-items:center;gap:0;font-size:14px;font-weight:400;line-height:1.4;color:var(--ui-ink)}
+.compact-form .heading .fde-picker-label{display:inline-flex;align-items:center;height:20px;margin-left:8rpx;padding:0 var(--ui-space-2);border-radius:4px;font-size:var(--ui-text-small);font-weight:400;line-height:20px;color:var(--ui-neutral);background:var(--ui-neutral-soft)}
+.compact-form .chosen{box-sizing:border-box;width:100%;min-height:var(--ui-field-height);margin-top:16rpx;padding:12rpx 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink);font-size:14px;line-height:1.5;gap:12rpx}
+.compact-form .chosen>.fde-picker-label{flex-shrink:0;color:var(--ui-primary);font-size:14px;font-weight:400}
+.compact-form .chosen .tags{min-width:0;flex:1;gap:8rpx}
+.compact-form .chosen .tags .fde-picker-text{height:20px;padding:0 var(--ui-space-2);border-radius:4px;font-size:var(--ui-text-small);line-height:20px}
+.compact-form .hint{margin-top:8rpx;font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-secondary)}

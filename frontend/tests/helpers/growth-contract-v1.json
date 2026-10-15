@@ -1,0 +1,683 @@
+{
+  "fixture_kind": "design_examples_not_runtime_response",
+  "contract_version": "sales.growth.v2",
+  "scope": "minimal_consumer_examples",
+  "examples": {
+    "self_without_material": {
+      "contract_version": "sales.growth.v2",
+      "assessment_kind": "sales_competency",
+      "can_review": true,
+      "current_review": {
+        "id": "00000000-0000-4000-8000-000000000011",
+        "status": "succeeded",
+        "generation_no": 1,
+        "trigger_type": "manual",
+        "requested_at": "2026-10-09T18:00:00+08:00"
+      },
+      "latest": {
+        "id": "00000000-0000-4000-8000-000000000011",
+        "review_date": "2026-10-09",
+        "reviewed_at": "2026-10-09T18:00:00+08:00",
+        "generation_no": 1,
+        "evaluation_state": "insufficient_data",
+        "overall_score": null,
+        "score_summary": {
+          "value": null,
+          "text": "--",
+          "count": 0,
+          "total": 6,
+          "coverage_percent": 0,
+          "inputs": [
+            {
+              "code": "needs_discovery",
+              "name": "需求洞察",
+              "raw_value": null,
+              "value": null,
+              "weight": 18
+            },
+            {
+              "code": "stakeholder_navigation",
+              "name": "决策链经营",
+              "raw_value": null,
+              "value": null,
+              "weight": 16
+            },
+            {
+              "code": "solution_communication",
+              "name": "方案沟通",
+              "raw_value": null,
+              "value": null,
+              "weight": 18
+            },
+            {
+              "code": "opportunity_advancement",
+              "name": "商机推进",
+              "raw_value": null,
+              "value": null,
+              "weight": 20
+            },
+            {
+              "code": "relationship_management",
+              "name": "客户关系",
+              "raw_value": null,
+              "value": null,
+              "weight": 14
+            },
+            {
+              "code": "followup_discipline",
+              "name": "跟进执行",
+              "raw_value": null,
+              "value": null,
+              "weight": 14
+            }
+          ],
+          "explanation": "当前没有可评估的正式材料",
+          "rule": {
+            "id": null,
+            "code": "score.competency",
+            "version": 0,
+            "definition": {
+              "schema_version": 1,
+              "needs_discovery": 18,
+              "stakeholder_navigation": 16,
+              "solution_communication": 18,
+              "opportunity_advancement": 20,
+              "relationship_management": 14,
+              "followup_discipline": 14
+            },
+            "source": "baseline"
+          },
+          "calculation": "sales_competency_frozen_complete_v2"
+        },
+        "dimension_scores": {
+          "needs_discovery": {
+            "name": "需求洞察",
+            "short_name": "需求洞察",
+            "score": null,
+            "weight": 18,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          },
+          "stakeholder_navigation": {
+            "name": "决策链经营",
+            "short_name": "决策链经营",
+            "score": null,
+            "weight": 16,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          },
+          "solution_communication": {
+            "name": "方案沟通",
+            "short_name": "方案沟通",
+            "score": null,
+            "weight": 18,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          },
+          "opportunity_advancement": {
+            "name": "商机推进",
+            "short_name": "商机推进",
+            "score": null,
+            "weight": 20,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          },
+          "relationship_management": {
+            "name": "客户关系",
+            "short_name": "客户关系",
+            "score": null,
+            "weight": 14,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          },
+          "followup_discipline": {
+            "name": "跟进执行",
+            "short_name": "跟进执行",
+            "score": null,
+            "weight": 14,
+            "evaluation_state": "insufficient_data",
+            "assessment": "材料不足，尚未评估",
+            "coaching_action": "补充正式跟进记录后可再次请求评估"
+          }
+        },
+        "summary": "当前没有可评估的正式材料",
+        "strengths": [],
+        "improvements": [
+          "需求洞察：补充相关正式跟进事实后再评估",
+          "决策链经营：补充相关正式跟进事实后再评估",
+          "方案沟通：补充相关正式跟进事实后再评估",
+          "商机推进：补充相关正式跟进事实后再评估",
+          "客户关系：补充相关正式跟进事实后再评估",
+          "跟进执行：补充相关正式跟进事实后再评估"
+        ],
+        "score_basis": {
+          "basis_id": "6c49a4cc4467d8f624b070a40bf5aedc275aa7f4062d6a68958315191dfe26ab",
+          "framework_version": 1,
+          "framework_hash": "602fe3f6df635f0e3d07ef8b877efbd3fb0d93a993898da718d468a40dfbe6be",
+          "framework_snapshot": {
+            "version_no": 1,
+            "display_name": "企业销售六维能力模型",
+            "dimensions": [
+              {
+                "code": "needs_discovery",
+                "name": "需求洞察",
+                "short_name": "需求洞察",
+                "weight": 18
+              },
+              {
+                "code": "stakeholder_navigation",
+                "name": "决策链经营",
+                "short_name": "决策链经营",
+                "weight": 16
+              },
+              {
+                "code": "solution_communication",
+                "name": "方案沟通",
+                "short_name": "方案沟通",
+                "weight": 18
+              },
+              {
+                "code": "opportunity_advancement",
+                "name": "商机推进",
+                "short_name": "商机推进",
+                "weight": 20
+              },
+              {
+                "code": "relationship_management",
+                "name": "客户关系",
+                "short_name": "客户关系",
+                "weight": 14
+              },
+              {
+                "code": "followup_discipline",
+                "name": "跟进执行",
+                "short_name": "跟进执行",
+                "weight": 14
+              }
+            ],
+            "scoring_rules": {
+              "minimum_visit_count": 1,
+              "evidence_required": true,
+              "review_window_days": 30
+            }
+          },
+          "score_policy": {
+            "id": null,
+            "code": "score.competency",
+            "version": 0,
+            "definition": {
+              "schema_version": 1,
+              "needs_discovery": 18,
+              "stakeholder_navigation": 16,
+              "solution_communication": 18,
+              "opportunity_advancement": 20,
+              "relationship_management": 14,
+              "followup_discipline": 14
+            },
+            "source": "baseline"
+          },
+          "calculation_version": "sales_competency_frozen_complete_v2",
+          "snapshot_status": "frozen"
+        },
+        "evidence_coverage": {
+          "status": "known",
+          "window_start": "2026-09-10T00:00:00+08:00",
+          "window_end_exclusive": "2026-10-10T00:00:00+08:00",
+          "business_timezone": "Asia/Shanghai",
+          "total_eligible_visits": 0,
+          "used_visits": 0,
+          "limit": 80,
+          "truncated": false,
+          "selection": "interaction_at_desc_created_at_desc_id_desc"
+        },
+        "input_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111",
+        "data_as_of": "2026-10-09T18:00:00+08:00"
+      },
+      "history": [
+        {
+          "id": "00000000-0000-4000-8000-000000000011",
+          "review_date": "2026-10-09",
+          "reviewed_at": "2026-10-09T18:00:00+08:00",
+          "generation_no": 1,
+          "evaluation_state": "insufficient_data",
+          "overall_score": null,
+          "score_summary": {
+            "value": null,
+            "text": "--",
+            "count": 0,
+            "total": 6,
+            "coverage_percent": 0,
+            "inputs": [
+              {
+                "code": "needs_discovery",
+                "name": "需求洞察",
+                "raw_value": null,
+                "value": null,
+                "weight": 18
+              },
+              {
+                "code": "stakeholder_navigation",
+                "name": "决策链经营",
+                "raw_value": null,
+                "value": null,
+                "weight": 16
+              },
+              {
+                "code": "solution_communication",
+                "name": "方案沟通",
+                "raw_value": null,
+                "value": null,
+                "weight": 18
+              },
+              {
+                "code": "opportunity_advancement",
+                "name": "商机推进",
+                "raw_value": null,
+                "value": null,
+                "weight": 20
+              },
+              {
+                "code": "relationship_management",
+                "name": "客户关系",
+                "raw_value": null,
+                "value": null,
+                "weight": 14
+              },
+              {
+                "code": "followup_discipline",
+                "name": "跟进执行",
+                "raw_value": null,
+                "value": null,
+                "weight": 14
+              }
+            ],
+            "explanation": "当前没有可评估的正式材料",
+            "rule": {
+              "id": null,
+              "code": "score.competency",
+              "version": 0,
+              "definition": {
+                "schema_version": 1,
+                "needs_discovery": 18,
+                "stakeholder_navigation": 16,
+                "solution_communication": 18,
+                "opportunity_advancement": 20,
+                "relationship_management": 14,
+                "followup_discipline": 14
+              },
+              "source": "baseline"
+            },
+            "calculation": "sales_competency_frozen_complete_v2"
+          },
+          "dimension_scores": {
+            "needs_discovery": {
+              "name": "需求洞察",
+              "short_name": "需求洞察",
+              "score": null,
+              "weight": 18,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            },
+            "stakeholder_navigation": {
+              "name": "决策链经营",
+              "short_name": "决策链经营",
+              "score": null,
+              "weight": 16,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            },
+            "solution_communication": {
+              "name": "方案沟通",
+              "short_name": "方案沟通",
+              "score": null,
+              "weight": 18,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            },
+            "opportunity_advancement": {
+              "name": "商机推进",
+              "short_name": "商机推进",
+              "score": null,
+              "weight": 20,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            },
+            "relationship_management": {
+              "name": "客户关系",
+              "short_name": "客户关系",
+              "score": null,
+              "weight": 14,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            },
+            "followup_discipline": {
+              "name": "跟进执行",
+              "short_name": "跟进执行",
+              "score": null,
+              "weight": 14,
+              "evaluation_state": "insufficient_data",
+              "assessment": "材料不足，尚未评估",
+              "coaching_action": "补充正式跟进记录后可再次请求评估"
+            }
+          },
+          "summary": "当前没有可评估的正式材料",
+          "strengths": [],
+          "improvements": [
+            "需求洞察：补充相关正式跟进事实后再评估",
+            "决策链经营：补充相关正式跟进事实后再评估",
+            "方案沟通：补充相关正式跟进事实后再评估",
+            "商机推进：补充相关正式跟进事实后再评估",
+            "客户关系：补充相关正式跟进事实后再评估",
+            "跟进执行：补充相关正式跟进事实后再评估"
+          ],
+          "score_basis": {
+            "basis_id": "6c49a4cc4467d8f624b070a40bf5aedc275aa7f4062d6a68958315191dfe26ab",
+            "framework_version": 1,
+            "framework_hash": "602fe3f6df635f0e3d07ef8b877efbd3fb0d93a993898da718d468a40dfbe6be",
+            "framework_snapshot": {
+              "version_no": 1,
+              "display_name": "企业销售六维能力模型",
+              "dimensions": [
+                {
+                  "code": "needs_discovery",
+                  "name": "需求洞察",
+                  "short_name": "需求洞察",
+                  "weight": 18
+                },
+                {
+                  "code": "stakeholder_navigation",
+                  "name": "决策链经营",
+                  "short_name": "决策链经营",
+                  "weight": 16
+                },
+                {
+                  "code": "solution_communication",
+                  "name": "方案沟通",
+                  "short_name": "方案沟通",
+                  "weight": 18
+                },
+                {
+                  "code": "opportunity_advancement",
+                  "name": "商机推进",
+                  "short_name": "商机推进",
+                  "weight": 20
+                },
+                {
+                  "code": "relationship_management",
+                  "name": "客户关系",
+                  "short_name": "客户关系",
+                  "weight": 14
+                },
+                {
+                  "code": "followup_discipline",
+                  "name": "跟进执行",
+                  "short_name": "跟进执行",
+                  "weight": 14
+                }
+              ],
+              "scoring_rules": {
+                "minimum_visit_count": 1,
+                "evidence_required": true,
+                "review_window_days": 30
+              }
+            },
+            "score_policy": {
+              "id": null,
+              "code": "score.competency",
+              "version": 0,
+              "definition": {
+                "schema_version": 1,
+                "needs_discovery": 18,
+                "stakeholder_navigation": 16,
+                "solution_communication": 18,
+                "opportunity_advancement": 20,
+                "relationship_management": 14,
+                "followup_discipline": 14
+              },
+              "source": "baseline"
+            },
+            "calculation_version": "sales_competency_frozen_complete_v2",
+            "snapshot_status": "frozen"
+          },
+          "evidence_coverage": {
+            "status": "known",
+            "window_start": "2026-09-10T00:00:00+08:00",
+            "window_end_exclusive": "2026-10-10T00:00:00+08:00",
+            "business_timezone": "Asia/Shanghai",
+            "total_eligible_visits": 0,
+            "used_visits": 0,
+            "limit": 80,
+            "truncated": false,
+            "selection": "interaction_at_desc_created_at_desc_id_desc"
+          },
+          "input_fingerprint": "1111111111111111111111111111111111111111111111111111111111111111",
+          "data_as_of": "2026-10-09T18:00:00+08:00"
+        }
+      ],
+      "today_status": "succeeded",
+      "projection": "person",
+      "framework": {
+        "version_no": 1,
+        "display_name": "企业销售六维能力模型",
+        "dimensions": [
+          {
+            "code": "needs_discovery",
+            "name": "需求洞察",
+            "short_name": "需求洞察",
+            "weight": 18
+          },
+          {
+            "code": "stakeholder_navigation",
+            "name": "决策链经营",
+            "short_name": "决策链经营",
+            "weight": 16
+          },
+          {
+            "code": "solution_communication",
+            "name": "方案沟通",
+            "short_name": "方案沟通",
+            "weight": 18
+          },
+          {
+            "code": "opportunity_advancement",
+            "name": "商机推进",
+            "short_name": "商机推进",
+            "weight": 20
+          },
+          {
+            "code": "relationship_management",
+            "name": "客户关系",
+            "short_name": "客户关系",
+            "weight": 14
+          },
+          {
+            "code": "followup_discipline",
+            "name": "跟进执行",
+            "short_name": "跟进执行",
+            "weight": 14
+          }
+        ],
+        "scoring_rules": {
+          "minimum_visit_count": 1,
+          "evidence_required": true,
+          "review_window_days": 30
+        }
+      }
+    },
+    "coverage_81_uses_latest_80": {
+      "status": "known",
+      "window_start": "2026-09-10T00:00:00+08:00",
+      "window_end_exclusive": "2026-10-10T00:00:00+08:00",
+      "business_timezone": "Asia/Shanghai",
+      "total_eligible_visits": 81,
+      "used_visits": 80,
+      "limit": 80,
+      "truncated": true,
+      "selection": "interaction_at_desc_created_at_desc_id_desc"
+    },
+    "review_evidence_unavailable": {
+      "contract_version": "sales.growth.v2",
+      "assessment_kind": "sales_competency",
+      "subject": {
+        "id": "00000000-0000-4000-8000-000000000021",
+        "name": "合成成员",
+        "account_code": "SYNTHETIC"
+      },
+      "review": {
+        "id": "00000000-0000-4000-8000-000000000011",
+        "review_date": "2026-10-09",
+        "reviewed_at": "2026-10-09T18:00:00+08:00",
+        "generation_no": 1,
+        "evaluation_state": "legacy_unknown",
+        "overall_score": 70,
+        "score_summary": null,
+        "dimension_scores": {
+          "needs_discovery": {
+            "name": "需求洞察",
+            "short_name": "需求洞察",
+            "score": 70,
+            "weight": 18,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          },
+          "stakeholder_navigation": {
+            "name": "决策链经营",
+            "short_name": "决策链经营",
+            "score": 70,
+            "weight": 16,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          },
+          "solution_communication": {
+            "name": "方案沟通",
+            "short_name": "方案沟通",
+            "score": 70,
+            "weight": 18,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          },
+          "opportunity_advancement": {
+            "name": "商机推进",
+            "short_name": "商机推进",
+            "score": 70,
+            "weight": 20,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          },
+          "relationship_management": {
+            "name": "客户关系",
+            "short_name": "客户关系",
+            "score": 70,
+            "weight": 14,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          },
+          "followup_discipline": {
+            "name": "跟进执行",
+            "short_name": "跟进执行",
+            "score": 70,
+            "weight": 14,
+            "evaluation_state": "legacy_unknown",
+            "assessment": "历史原评分，完整证据状态待核",
+            "coaching_action": "历史原建议"
+          }
+        },
+        "summary": "历史评估原文摘要",
+        "strengths": [],
+        "improvements": [],
+        "score_basis": {
+          "basis_id": null,
+          "framework_version": 1,
+          "framework_hash": null,
+          "framework_snapshot": null,
+          "score_policy": null,
+          "calculation_version": null,
+          "snapshot_status": "legacy_unknown"
+        },
+        "evidence_coverage": {
+          "status": "legacy_unknown",
+          "window_start": "2026-09-10T00:00:00+08:00",
+          "window_end_exclusive": "2026-10-10T00:00:00+08:00",
+          "business_timezone": "Asia/Shanghai",
+          "total_eligible_visits": null,
+          "used_visits": null,
+          "limit": 80,
+          "truncated": null,
+          "selection": "interaction_at_desc_created_at_desc_id_desc"
+        },
+        "input_fingerprint": null,
+        "data_as_of": "2026-10-09T18:00:00+08:00"
+      },
+      "evidence": [
+        {
+          "visit_id": null,
+          "visit_version": null,
+          "dimension_codes": [
+            "needs_discovery"
+          ],
+          "detail": null,
+          "readable": false
+        }
+      ],
+      "evidence_summary": {
+        "total": 1,
+        "readable": 0,
+        "unavailable": 1
+      },
+      "can_review": false
+    },
+    "manual_receipt": {
+      "review_id": "00000000-0000-4000-8000-000000000012",
+      "status": "queued",
+      "generation_no": 2,
+      "input_fingerprint": "2222222222222222222222222222222222222222222222222222222222222222",
+      "reused": false,
+      "trigger_type": "manual"
+    },
+    "mixed_group": {
+      "contract_version": "sales.growth.v2",
+      "assessment_kind": "sales_competency",
+      "projection": "current_group",
+      "latest": null,
+      "history": [],
+      "can_review": false,
+      "comparison_status": "mixed_basis",
+      "comparison_basis_id": null,
+      "coverage": {
+        "reviewed_members": 3,
+        "eligible_members": 5,
+        "assessed_members": 2,
+        "partially_assessed_members": 1,
+        "unassessed_members": 2,
+        "legacy_unknown_members": 0
+      }
+    },
+    "fde_history_metadata": {
+      "run_id": "00000000-0000-4000-8000-000000000031",
+      "date": "2026-10-08T12:00:00+08:00",
+      "reviewed_at": "2026-10-08T12:00:00+08:00",
+      "overall_score": null,
+      "score_basis": {
+        "basis_id": null,
+        "calculation_version": null,
+        "snapshot_status": "legacy_unknown"
+      },
+      "evidence_coverage": null
+    }
+  }
+}

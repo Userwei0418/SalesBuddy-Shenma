@@ -1,0 +1,530 @@
+[
+  {
+    "case": "budget-risk",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T01:44:34.082891+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户财务负责人明确表示本季度项目预算尚未获批，采购审批因此暂停。",
+          "next_action": "销售将在2026年9月18日与客户财务负责人核实预算审批进展。"
+        },
+        {
+          "id": "SYN-FDE-01",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "FDE与客户技术负责人完成全部约定测试，技术指标全部通过，没有未处理的技术问题。",
+          "next_action": "FDE将在2026年9月18日向销售提供测试结果。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "result": {
+      "version": "customer-risk.v1",
+      "schema": {
+        "$defs": {
+          "CustomerRiskItem": {
+            "additionalProperties": false,
+            "properties": {
+              "source_visit_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "title": "Source Visit Id",
+                "type": "string"
+              },
+              "risk_type": {
+                "enum": [
+                  "expectation_gap",
+                  "engagement_stalled",
+                  "decision_maker_gap",
+                  "budget_risk",
+                  "competition_risk",
+                  "commercial_process_risk",
+                  "schedule_risk",
+                  "technical_validation_risk",
+                  "relationship_risk"
+                ],
+                "title": "Risk Type",
+                "type": "string"
+              },
+              "title": {
+                "maxLength": 200,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              },
+              "description": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "title": "Description",
+                "type": "string"
+              },
+              "severity": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "title": "Severity",
+                "type": "string"
+              },
+              "suggested_action": {
+                "maxLength": 1000,
+                "minLength": 1,
+                "title": "Suggested Action",
+                "type": "string"
+              },
+              "evidence_detail": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "title": "Evidence Detail",
+                "type": "string"
+              },
+              "due_at": {
+                "anyOf": [
+                  {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Due At"
+              }
+            },
+            "required": [
+              "source_visit_id",
+              "risk_type",
+              "title",
+              "description",
+              "severity",
+              "suggested_action",
+              "evidence_detail",
+              "due_at"
+            ],
+            "title": "CustomerRiskItem",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "enum": [
+              "risk_found",
+              "no_risk_identified",
+              "insufficient_evidence"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reviewed_visit_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Reviewed Visit Ids",
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/$defs/CustomerRiskItem"
+            },
+            "maxItems": 8,
+            "title": "Risks",
+            "type": "array"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "reviewed_visit_ids",
+          "risks",
+          "reason"
+        ],
+        "title": "CustomerRiskResult",
+        "type": "object"
+      },
+      "evidence_fields": [
+        "follow_up_record",
+        "content",
+        "discussion_timeline",
+        "next_action"
+      ],
+      "constraints": [
+        "reviewed_visit_ids must contain every input visit ID exactly once and no other ID",
+        "evidence_detail must be an exact nonblank substring of a source visit evidence field",
+        "no_risk_identified requires coverage.complete=true and nonempty complete visit bodies",
+        "customer, opportunity, owner and workflow status are backend-owned, never output fields"
+      ],
+      "outcome": "risk_found",
+      "reviewed_visit_ids": [
+        "SYN-SALES-01",
+        "SYN-FDE-01"
+      ],
+      "risks": [
+        {
+          "source_visit_id": "SYN-SALES-01",
+          "risk_type": "budget_risk",
+          "title": "项目预算未获批导致采购暂停",
+          "description": "客户财务负责人明确表示本季度项目预算尚未获批，直接导致采购审批流程暂停，存在明显的预算风险。",
+          "severity": "high",
+          "suggested_action": "跟进财务负责人的预算审批进展，确认预计获批时间。",
+          "evidence_detail": "客户财务负责人明确表示本季度项目预算尚未获批，采购审批因此暂停。",
+          "due_at": null
+        }
+      ],
+      "reason": "拜访 SYN-SALES-01 中明确记录了预算未获批导致采购暂停的事实，构成预算风险；拜访 SYN-FDE-01 技术测试通过且无遗留问题，未发现技术或进度风险。"
+    },
+    "contract_passed": false,
+    "error_type": "ValidationError",
+    "http_status": null,
+    "validation_errors": [
+      {
+        "loc": [
+          "version"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "schema"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "evidence_fields"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "constraints"
+        ],
+        "type": "extra_forbidden"
+      }
+    ],
+    "elapsed_ms": 5895,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "succeeded",
+        "http_status": 200,
+        "error_type": null
+      }
+    ]
+  },
+  {
+    "case": "explicit-healthy",
+    "surface": "customer_risk",
+    "provider": "original_api",
+    "model": "senseaudio-s2-lite",
+    "business_writes": false,
+    "source": "synthetic_only",
+    "input_facts": {
+      "contract_version": "customer-risk.v1",
+      "data_as_of": "2026-09-16T01:44:34.082891+00:00",
+      "customer": {
+        "id": "SYN-CUSTOMER-ONLY",
+        "name": "纯合成客户",
+        "version_no": 1
+      },
+      "coverage": {
+        "complete": true
+      },
+      "opportunities": [],
+      "contacts": [],
+      "visits": [
+        {
+          "id": "SYN-SALES-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户决策者、财务负责人和采购负责人共同确认：预算已批准，合同已签署，款项已收齐，全部商务审批已完成，进度按期；没有竞争变更、关系异议或未解决的经营风险。",
+          "next_action": "销售将在2026年9月18日向客户发送本次确认纪要。"
+        },
+        {
+          "id": "SYN-FDE-02",
+          "customer_id": "SYN-CUSTOMER-ONLY",
+          "version_no": 1,
+          "follow_up_record": "客户技术负责人已签字确认全部技术指标、验收标准与交付成果通过，双方预期一致，没有待处理问题、延期或技术障碍。",
+          "next_action": "FDE将在2026年9月18日归档验收记录。"
+        }
+      ],
+      "agent_business_policy": {
+        "id": "373b7650-b4a9-4193-ba49-cb3d61b1317e",
+        "code": "agent_business.personal_risks",
+        "version": 1,
+        "definition": {
+          "schema_version": 1,
+          "guidance": "",
+          "calibration_examples": ""
+        },
+        "source": "baseline"
+      }
+    },
+    "contract_version": "customer-risk.v1",
+    "binding_snapshot_id": "01a0a584-29ae-7d95-bbac-35adbf8360da",
+    "runtime_snapshot_verified": false,
+    "actual_version_receipt": null,
+    "total_budget_seconds": 45.0,
+    "remaining_fallback_budget_seconds": 33.0,
+    "full_queue_lifecycle_exercised": false,
+    "result": {
+      "version": "customer-risk.v1",
+      "schema": {
+        "$defs": {
+          "CustomerRiskItem": {
+            "additionalProperties": false,
+            "properties": {
+              "source_visit_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "title": "Source Visit Id",
+                "type": "string"
+              },
+              "risk_type": {
+                "enum": [
+                  "expectation_gap",
+                  "engagement_stalled",
+                  "decision_maker_gap",
+                  "budget_risk",
+                  "competition_risk",
+                  "commercial_process_risk",
+                  "schedule_risk",
+                  "technical_validation_risk",
+                  "relationship_risk"
+                ],
+                "title": "Risk Type",
+                "type": "string"
+              },
+              "title": {
+                "maxLength": 200,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              },
+              "description": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "title": "Description",
+                "type": "string"
+              },
+              "severity": {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "title": "Severity",
+                "type": "string"
+              },
+              "suggested_action": {
+                "maxLength": 1000,
+                "minLength": 1,
+                "title": "Suggested Action",
+                "type": "string"
+              },
+              "evidence_detail": {
+                "maxLength": 2000,
+                "minLength": 1,
+                "title": "Evidence Detail",
+                "type": "string"
+              },
+              "due_at": {
+                "anyOf": [
+                  {
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Due At"
+              }
+            },
+            "required": [
+              "source_visit_id",
+              "risk_type",
+              "title",
+              "description",
+              "severity",
+              "suggested_action",
+              "evidence_detail",
+              "due_at"
+            ],
+            "title": "CustomerRiskItem",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "enum": [
+              "risk_found",
+              "no_risk_identified",
+              "insufficient_evidence"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reviewed_visit_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Reviewed Visit Ids",
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/$defs/CustomerRiskItem"
+            },
+            "maxItems": 8,
+            "title": "Risks",
+            "type": "array"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "reviewed_visit_ids",
+          "risks",
+          "reason"
+        ],
+        "title": "CustomerRiskResult",
+        "type": "object"
+      },
+      "evidence_fields": [
+        "follow_up_record",
+        "content",
+        "discussion_timeline",
+        "next_action"
+      ],
+      "constraints": [
+        "reviewed_visit_ids must contain every input visit ID exactly once and no other ID",
+        "evidence_detail must be an exact nonblank substring of a source visit evidence field",
+        "no_risk_identified requires coverage.complete=true and nonempty complete visit bodies",
+        "customer, opportunity, owner and workflow status are backend-owned, never output fields"
+      ]
+    },
+    "contract_passed": false,
+    "error_type": "ValidationError",
+    "http_status": null,
+    "validation_errors": [
+      {
+        "loc": [
+          "outcome"
+        ],
+        "type": "missing"
+      },
+      {
+        "loc": [
+          "reviewed_visit_ids"
+        ],
+        "type": "missing"
+      },
+      {
+        "loc": [
+          "risks"
+        ],
+        "type": "missing"
+      },
+      {
+        "loc": [
+          "reason"
+        ],
+        "type": "missing"
+      },
+      {
+        "loc": [
+          "version"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "schema"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "evidence_fields"
+        ],
+        "type": "extra_forbidden"
+      },
+      {
+        "loc": [
+          "constraints"
+        ],
+        "type": "extra_forbidden"
+      }
+    ],
+    "elapsed_ms": 4838,
+    "attempts": [
+      {
+        "provider": "senseaudio",
+        "model": "senseaudio-s2-lite",
+        "attempt": 1,
+        "status": "succeeded",
+        "http_status": 200,
+        "error_type": null
+      }
+    ]
+  }
+]

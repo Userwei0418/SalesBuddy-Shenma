@@ -1,6 +1,5 @@
 from sales_backend.repositories.authorization import AuthorizationRepository
 
-
 LEGACY_ACTIONS = {
     "customer.read": ("customer.read",), "customer.create": ("customer.create",), "customer.edit": ("customer.update",),
     "customer.claim": ("customer.claim",), "opportunity.read": ("opportunity.read",),
@@ -13,6 +12,16 @@ LEGACY_ACTIONS = {
 }
 
 
+def client_export_permissions(effective):
+    """Whole client-generated exports require explicit workspace export scope.
+
+    Narrow grants need a server export implementation with per-object checks;
+    clients must not invent scope unions or filter protected historical records.
+    """
+    return {code: any(g.scope == "workspace" for g in effective.for_permission(code))
+            for code in ("visit.export", "report.export")}
+
+
 async def capability_snapshot(connection, actor):
     snapshot = await AuthorizationRepository().snapshot(connection)
     effective = AuthorizationRepository.from_snapshot(snapshot)
@@ -21,7 +30,14 @@ async def capability_snapshot(connection, actor):
     capabilities["team.view"] = any(grant.scope in {"teams", "workspace"}
         for code in ("dashboard.read", "profile.sales_read", "profile.fde_read", "battle_map.read", "task.read")
         for grant in effective.for_permission(code))
+    read_grants = effective.for_permission("overview.read")
+    scopes = {grant.scope for grant in read_grants}
+    scope_name = ("全公司" if "workspace" in scopes else "本部门" if scopes == {"teams"}
+                  else "仅本人" if scopes == {"self"} else "关联业务" if scopes == {"assigned"}
+                  else "已授权业务范围" if scopes else "无业务读取权限")
     return {
+        "scope_name": scope_name,
+        "client_export_permissions": client_export_permissions(effective),
         "capabilities": capabilities,
         "permissions": permissions,
         "permission_grants": snapshot["grants"],

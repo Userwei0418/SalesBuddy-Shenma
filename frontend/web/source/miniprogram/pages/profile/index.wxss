@@ -1,0 +1,134 @@
+/* Native tab bar is outside the page viewport. Short pages fill that viewport;
+   long pages grow naturally, keeping the footer after the content. */
+.page-shell.profile-page { display:flex; flex-direction:column; box-sizing:border-box; padding:32rpx 32rpx 64rpx; }
+.profile-content, .profile-footer { flex-shrink:0; }
+.profile-footer { margin-top:auto; }
+
+/* 身份卡：白卡，头像淡主色底 */
+.profile-card{display:flex;align-items:center;gap:24rpx;padding:16px}
+.avatar{width:88rpx;height:88rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:var(--ui-selected);color:var(--ui-primary);font-size:20px;font-weight:600}
+.profile-main{flex:1;min-width:0}
+.name{color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4}
+.meta{margin-top:4rpx;color:var(--ui-secondary);font-size:14px}
+.status{flex-shrink:0;color:var(--ui-muted);font-size:var(--ui-text-small)}
+
+/* 三个页签：sb-segmented block，撑满一行 */
+.profile-insight-tabs{margin-top:16px}
+.profile-subject-controls{margin:16px 0 0}
+
+/* 状态行：卡内一行的加载、失败用 sb-state-panel size=compact；查看范围那一块保持原结构（测试逐字断言） */
+.profile-directory-state{margin-top:16px;padding:4px 16px}
+.profile-directory-loading{display:flex;align-items:center;min-height:44px;font-size:14px;line-height:1.5;color:var(--ui-secondary)}
+.profile-directory-retry{display:flex;align-items:center;width:100%;margin:0;padding:0;min-height:44px;line-height:1.5;text-align:left;font-size:14px;font-weight:400;color:var(--ui-danger);background:transparent;border:0}
+.profile-directory-retry::after{border:0}
+.state-line{margin-top:16px;padding:0 16px}
+
+/* 三张主卡：标题 16，右侧分数 + 状态小标签 */
+.maturity-card,.efficiency-card,.capability-card,.growth-card{margin-top:16px;padding:16px}
+.insight-card-top,.capability-top{display:flex;align-items:flex-start;justify-content:space-between;gap:24rpx}
+.insight-card-top>view:first-child,.capability-top>view:first-child{min-width:0;flex:1}
+.capability-title{color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600;line-height:1.4}
+.overall-score{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0}
+.module-total>view{display:flex;align-items:baseline;gap:4px}
+.module-total>view>text{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.module-total>view>label{color:var(--ui-secondary);font-size:14px}
+.score-caption{display:flex;align-items:center;gap:12rpx;margin-top:8rpx}
+.score-caption>label{color:var(--ui-muted);font-size:var(--ui-text-small);white-space:nowrap}
+.score-info{display:inline-flex;margin-left:-4rpx;color:var(--ui-muted)}
+.score-pressed{opacity:.7}
+
+/* 营销效率 */
+.metric-switch{margin-top:16px}
+.period-switch{margin-top:8px}
+.efficiency-ratio-card{margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.ratio-title{font-size:14px;color:var(--ui-secondary)}
+.ratio-value{margin-top:8rpx;color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.3;font-variant-numeric:tabular-nums}
+.ratio-track{height:8rpx;margin-top:16rpx;background:var(--ui-background);border-radius:var(--ui-radius-control);overflow:hidden}
+.ratio-track>view{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.ratio-details{display:flex;flex-direction:column;gap:8rpx;margin-top:16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.ratio-coverage{color:var(--ui-warning)}
+.efficiency-summary{display:flex;align-items:center;justify-content:space-between;gap:24rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.efficiency-summary-label{display:flex;align-items:baseline;gap:12rpx;flex-wrap:wrap;min-width:0}
+.efficiency-summary-label>text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.efficiency-summary-label>label{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.efficiency-summary-value{display:flex;align-items:baseline;gap:4px;flex-shrink:0}
+.efficiency-summary-value>text{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.efficiency-summary-value>label{color:var(--ui-secondary);font-size:14px}
+.followup-quality{display:flex;justify-content:space-between;padding:16px 0 0;font-size:14px;color:var(--ui-secondary)}
+.followup-quality>text:last-child{font-weight:600;color:var(--ui-ink)}
+.ranking-list{margin-top:8px}
+.ranking-item{display:flex;align-items:center;gap:16rpx;padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.ranking-item:last-child{border-bottom:0}
+.ranking-item.self .ranking-person text{color:var(--ui-primary)} /* 所选成员不整行铺色，名字用主色标出（飞书：不整块涂色） */
+.ranking-position{width:40rpx;height:40rpx;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:50%;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);font-weight:600}
+.ranking-person{flex:1;min-width:0}
+.ranking-person>view:first-child{display:flex;align-items:baseline;gap:8rpx}
+.ranking-person text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.ranking-person label{overflow:hidden;color:var(--ui-secondary);font-size:var(--ui-text-small);text-overflow:ellipsis;white-space:nowrap}
+.ranking-track{height:8rpx;margin-top:8rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.ranking-track view{height:100%;border-radius:inherit;background:var(--ui-chart-1)}
+.ranking-value{width:96rpx;text-align:right}
+.ranking-value text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.ranking-value label{margin-left:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.efficiency-window{margin-top:16px;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.7}
+
+/* 销售画像：卡内不再套小卡 */
+.profile-empty{padding:48rpx 24rpx;text-align:center;color:var(--ui-secondary);font-size:14px;line-height:1.7}
+.radar-canvas{width:100%;height:430rpx;margin-top:8rpx}
+.review-summary{color:var(--ui-ink);font-size:14px;line-height:1.6}
+.review-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16rpx;row-gap:4px;margin-top:8px;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.review-meta label{color:var(--ui-muted);white-space:nowrap}
+.dimension-grid{display:grid;grid-template-columns:1fr 1fr;gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.dimension-item{min-width:0}
+.dimension-item>view:first-child{display:flex;justify-content:space-between;gap:8rpx}
+.dimension-item>view text{color:var(--ui-ink);font-size:14px;font-weight:600}
+.dimension-item>view label{color:var(--ui-ink);font-size:var(--ui-text-small);white-space:nowrap}
+.dimension-item>text{display:-webkit-box;margin-top:8rpx;overflow:hidden;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.score-track{height:8rpx;margin-top:8rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.score-track view{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.capability-heading{display:flex;align-items:center;justify-content:space-between;margin:24px 0 0}
+.capability-heading>text{color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600}
+.capability-heading label{color:var(--ui-secondary);font-size:var(--ui-text-small);font-weight:400}
+.growth-card{margin-top:8px;padding-top:8px}
+.growth-chart-head{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+.growth-chart-head view{color:var(--ui-ink);font-size:14px;font-weight:600}
+.growth-chart-head text{color:var(--ui-muted);font-size:var(--ui-text-small)}
+.growth-canvas{width:100%;height:300rpx;margin-top:4rpx}
+.growth-empty{display:flex;align-items:center;justify-content:center;height:220rpx;color:var(--ui-secondary);font-size:14px}
+
+/* AI 建议：卡内一段，上方一条分隔线，不再套淡蓝小卡；标识统一用 sb-ai-badge（覆盖 app.wxss 的 .ai-advice-card，公共样式由主控清理） */
+.profile-page .ai-advice-card{margin-top:16px;padding:16px 0 0;border:0;border-top:1px solid var(--ui-line);border-radius:0;background:transparent}
+.ai-advice-top{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 16rpx}
+.ai-advice-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.ai-advice-note{display:block;margin-top:4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.profile-page .ai-advice-list{margin-top:8px}
+.profile-page .ai-advice-row{gap:16rpx;padding:20rpx 0;border-top:0;border-bottom:1px solid var(--ui-line)}
+.profile-page .ai-advice-row:last-child{border-bottom:0}
+.profile-page .ai-advice-index{width:36rpx;height:36rpx;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);font-weight:600}
+.profile-page .ai-advice-text{color:var(--ui-ink);font-size:14px;line-height:1.6}
+
+/* 页脚：次按钮样式，文字用危险色表明是退出 */
+.logout-button{display:flex;align-items:center;justify-content:center;height:44px;margin-top:32rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-danger);font-size:var(--ui-text-body);font-weight:400}
+.logout-button::after{border:0}
+.version{margin-top:32rpx;text-align:center;color:var(--ui-muted);font-size:var(--ui-text-small)}
+
+/* Palette only: original geometry is preserved. */
+.profile-card { background:var(--sb-hero-bg); }
+.profile-card .name { color:var(--sb-hero-ink); }
+.profile-card .meta,.profile-card .status { color:var(--sb-hero-muted); }
+.profile-card .avatar { color:var(--sb-hero-ink); background:rgba(255,255,255,.12); }
+/* Score magnitude uses the same blue as opportunity progress; status text keeps its signal color. */
+.profile-page .dimension-grid .score-track view { background:var(--ui-primary)!important; }
+
+/* New business controls; existing layout and palette preserved. */
+.permission-perspectives{display:flex;flex-wrap:wrap;gap:16rpx;margin:24rpx 28rpx}.permission-perspectives button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px;line-height:var(--ui-touch-target)}.permission-perspectives button.selected{border-color:var(--ui-primary);color:var(--ui-primary);background:var(--ui-selected)}
+
+.growth-controls,.growth-evidence-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12rpx}
+.growth-action{margin:8rpx 0;padding:12rpx 20rpx;min-height:44px;font-size:14px;line-height:1.5;color:var(--ui-primary);background:var(--ui-surface);white-space:normal}
+.growth-note{padding:10rpx 0;color:var(--ui-secondary);font-size:13px;line-height:1.6;overflow-wrap:anywhere;word-break:break-word}
+.growth-error{padding:12rpx 0;color:var(--ui-danger);font-size:14px;line-height:1.6}
+.growth-assessment{display:block;margin-top:12rpx;white-space:pre-wrap}
+.growth-history-row{margin:12rpx 0;padding:16rpx 20rpx;text-align:left;font-size:13px;line-height:1.7;white-space:normal;overflow-wrap:anywhere;color:var(--ui-primary);background:var(--ui-surface)}
+.growth-evidence{margin:24rpx;padding:24rpx;min-width:0}
+.growth-evidence-head{font-weight:600}
+.growth-evidence-row{padding:20rpx 0;border-bottom:1px solid var(--ui-line);font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}

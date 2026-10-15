@@ -2,14 +2,22 @@
 <block wx:else>
 <view class="risk-page">
   <view class="risk-hero">
-    <sb-summary-card appearance="hero" title="{{opportunityOnly ? '商机风险' : '风险中心'}}" subtitle="{{opportunityOnly ? '风险项均绑定商机，可直接返回查看商机卡片' : '查看识别依据、处理建议与风险解除记录'}}" scope="{{scope}}" metrics="{{[{label:'待解除',value:openCount},{label:'已解除',value:resolvedCount},{label:'全部风险',value:risks.length}]}}" />
+    <sb-summary-card appearance="hero" title="{{opportunityOnly ? '商机风险' : '风险中心'}}" subtitle="{{opportunityOnly ? '风险项均绑定商机，可直接返回查看商机卡片' : '查看识别依据、处理建议与风险解除记录'}}" scope="{{scope}}" metrics="{{[{label:'待解除',value:openCount === null ? '—' : openCount},{label:'已解除',value:resolvedCount === null ? '—' : resolvedCount},{label:'全部风险',value:summary ? summary.total : '—'}]}}" />
   </view>
 
+  <view class="risk-filters">
+    <view class="risk-scope-options"><button wx:for="{{scopeOptions}}" wx:key="value" class="risk-scope {{scopeMode === item.value ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="chooseScope">{{item.label}}</button></view>
+    <picker wx:if="{{scopeMode === 'team'}}" range="{{teamOptions}}" range-key="name" value="{{teamIndex}}" bindchange="chooseTeam" disabled="{{directoryLoading || directoryError || !teamOptions.length}}"><view class="risk-filter-select">{{teamLabel}}<t-icon name="chevron-down" size="28rpx" /></view></picker>
+    <button wx:if="{{scopeMode === 'person'}}" class="risk-filter-select" bindtap="openMemberPicker">{{memberLabel}}<t-icon name="chevron-down" size="28rpx" /></button>
+    <view wx:if="{{directoryError}}" class="risk-filter-error">{{directoryError}}<button bindtap="loadDirectory">重试目录</button></view>
+  </view>
   <view class="risk-tabs"><sb-tabs items="{{[{key:tabs[0].key,label:tabs[0].label,count:openCount},{key:tabs[1].key,label:tabs[1].label},{key:tabs[2].key,label:tabs[2].label}]}}" activeKey="{{activeTab}}" bind:change="onTabChange" /></view>
 
-  <view wx:if="{{filteredRisks.length}}" class="risk-list">
-    <view wx:for="{{filteredRisks}}" wx:key="id" class="risk-card status-{{item.status}} traffic-{{item.signal.tone}}" hover-class="risk-card-pressed" data-id="{{item.id}}" bindtap="openRisk">
-      <view class="risk-top"><sb-status-tag class="risk-state" tone="{{item.signal.tone === 'red' ? 'bad' : item.signal.tone === 'yellow' ? 'watch' : item.signal.tone === 'green' ? 'good' : 'pending'}}" label="{{item.signal.label}} · {{item.statusLabel}}" /><view class="risk-level">{{item.severity}}风险</view></view>
+  <view wx:if="{{loading}}" class="risk-state-panel">正在加载风险…</view>
+  <view wx:elif="{{loadError}}" class="risk-state-panel"><text>{{loadError}}</text><button bindtap="loadRisks">重新加载</button></view>
+  <view wx:elif="{{filteredRisks.length}}" class="risk-list">
+    <view wx:for="{{filteredRisks}}" wx:key="id" class="risk-card status-{{item.statusGroup}} traffic-{{item.signal.tone}}" hover-class="risk-card-pressed" data-id="{{item.id}}" bindtap="openRisk">
+      <view class="risk-top"><sb-status-tag class="risk-state" tone="{{item.signal.tone === 'red' ? 'bad' : item.signal.tone === 'yellow' ? 'watch' : item.signal.tone === 'green' ? 'good' : 'pending'}}" label="{{item.statusLabel}}" /><view class="risk-level">{{item.severity}}风险</view></view>
       <view class="risk-customer">{{item.customerName}}</view>
       <view class="risk-title">{{item.title}}</view>
       <view class="risk-description">{{item.description}}</view>
@@ -19,6 +27,7 @@
     </view>
   </view>
   <view wx:else class="risk-state-panel empty-state"><sb-state-panel state="empty" title="{{activeTab === 'open' ? '当前没有待解除风险' : '暂无对应风险记录'}}" description="新识别的风险会自动进入这里" /></view>
+  <view wx:if="{{!loading && !loadError && total > 0}}" class="risk-pagination"><button disabled="{{page <= 1}}" bindtap="previousPage">上一页</button><text>{{page}} / {{pageCount}} · 共{{total}}项</text><button disabled="{{!hasMore}}" bindtap="nextPage">下一页</button></view>
 </view>
-
+<person-picker open="{{memberPickerOpen}}" title="选择风险负责人" members="{{memberOptions}}" teams="{{teamOptions}}" default-team-id="{{defaultTeamId}}" selected="{{memberSelected}}" loading="{{directoryLoading}}" error="{{directoryError}}" bind:confirm="confirmMember" bind:close="closeMemberPicker" bind:retry="loadDirectory" />
 </block>

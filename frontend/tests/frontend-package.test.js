@@ -62,7 +62,9 @@ with zipfile.ZipFile(sys.argv[1]) as z:
             digest,name=line.split('  ',1)
             assert hashlib.sha256(z.read(prefix+base+name)).hexdigest()==digest
     print(json.dumps({'names':[n[len(prefix):] for n in names],
-        'version':json.loads(z.read(prefix+'frontend/VERSION.json'))}))
+        'version':json.loads(z.read(prefix+'frontend/VERSION.json')),
+        'buildInfo':json.loads(z.read(prefix+'frontend/miniprogram/buildInfo.json')),
+        'buildModule':z.read(prefix+'frontend/miniprogram/buildInfo.js').decode()}))
 `, filename], {encoding:'utf8'}));
 }
 
@@ -77,6 +79,9 @@ test('交付来自最终提交，包含可导入项目及版本；本地缓存�
   const output = JSON.parse(result.stdout);
   const inspected = inspectZip(output.zip);
   assert.equal(inspected.version.frontend_revision, head);
+  assert.deepEqual(inspected.buildInfo, {schemaVersion:1,environment:'online',sourceRevision:head});
+  const scope={module:{exports:{}}};require('node:vm').runInNewContext(inspected.buildModule,scope);
+  assert.equal(JSON.stringify(scope.module.exports),JSON.stringify(inspected.buildInfo));
   assert.equal(inspected.version.backend_revision, f.deployed);
   assert.equal(inspected.version.api_base_url, 'https://example.invalid/api/v1');
   assert.equal(inspected.version.artifact_kind, 'frontend_handoff');

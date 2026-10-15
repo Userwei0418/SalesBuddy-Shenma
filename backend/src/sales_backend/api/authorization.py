@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_password_identity
-from sales_backend.contracts.authorization import AccountAuthorizationSave, RoleSave
+from sales_backend.contracts.authorization import AccountAuthorizationSave, DelegationSave, RoleSave
 from sales_backend.db import Database
 from sales_backend.domain.permission_catalog import PERMISSIONS
 from sales_backend.repositories.authorization import AuthorizationRepository
@@ -43,7 +43,9 @@ async def own_permissions(identity: RequestIdentity = Depends(get_identity), dat
     async with database.transaction(identity.actor, readonly=True) as connection:
         snapshot = await repository.snapshot(connection)
         effective = repository.from_snapshot(snapshot)
-    return {**snapshot, "permissions": effective.capabilities()}
+    from sales_backend.services.capabilities import client_export_permissions
+    return {**snapshot, "permissions": effective.capabilities(),
+            "client_export_permissions": client_export_permissions(effective)}
 
 
 @router.get("/console/permissions/catalog")
@@ -74,7 +76,7 @@ async def create_role(
     identity: RequestIdentity = Depends(manage_roles), database: Database = Depends(get_database),
 ):
     return await management_write(database, identity.actor, idempotency_key, "authorization.role.create",
-        body.model_dump(mode="json"), lambda c: repository.save_role(c, None, body.model_dump(mode="json")))
+        authorization_body(body), lambda c: repository.save_role(c, None, authorization_body(body)))
 
 
 @router.put("/console/permissions/roles/{role_id}")
@@ -83,7 +85,7 @@ async def update_role(
     identity: RequestIdentity = Depends(manage_roles), database: Database = Depends(get_database),
 ):
     return await management_write(database, identity.actor, idempotency_key, f"authorization.role.update:{role_id}",
-        body.model_dump(mode="json"), lambda c: repository.save_role(c, role_id, body.model_dump(mode="json")))
+        authorization_body(body), lambda c: repository.save_role(c, role_id, authorization_body(body)))
 
 
 @router.get("/console/permissions/accounts/{user_id}")
@@ -107,7 +109,7 @@ async def update_account(
     if is_key_operator(get_settings(), user_id):
         raise HTTPException(403, "此账号为专用运维身份，请通过运维维护")
     return await management_write(database, identity.actor, idempotency_key, f"authorization.account.update:{user_id}",
-        body.model_dump(mode="json"), lambda c: repository.save_account(c, user_id, body.model_dump(mode="json")))
+        authorization_body(body), lambda c: repository.save_account(c, user_id, authorization_body(body)))
 
 
 @router.get("/console/permissions/audit")
@@ -115,3 +117,34 @@ async def audit(limit: int = Query(50, ge=1, le=200), identity: RequestIdentity 
                 database: Database = Depends(get_database)):
     async with database.transaction(identity.actor, readonly=True) as connection:
         return {"entries": await repository.audit(connection, limit)}
+
+
+def authorization_body(model):
+    def clean(value):
+        if isinstance(value, dict):
+            return {k: clean(v) for k, v in value.items() if k != "expires_at" or v is not None}
+        if isinstance(value, list):
+            return [clean(v) for v in value]
+        return value
+    return clean(model.model_dump(mode="json"))
+
+
+@router.get('/console/permissions/modules')
+async def available_modules(identity: RequestIdentity = Depends(read_permissions),
+                            database: Database = Depends(get_database)):
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return {"modules": await repository.modules(connection)}
+
+
+@router.get('/console/permissions/delegations')
+async def delegations(identity: RequestIdentity = Depends(read_permissions),
+                      database: Database = Depends(get_database)):
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await repository.delegations(connection)
+
+
+@router.put('/console/permissions/delegations/{user_id}')
+async def save_delegation(user_id: UUID, body: DelegationSave, idempotency_key: MutationKey = None,
+                          identity: RequestIdentity = Depends(manage_accounts), database: Database = Depends(get_database)):
+    return await management_write(database, identity.actor, idempotency_key, f"authorization.delegation:{user_id}",
+        authorization_body(body), lambda c: repository.save_delegation(c, user_id, authorization_body(body)))

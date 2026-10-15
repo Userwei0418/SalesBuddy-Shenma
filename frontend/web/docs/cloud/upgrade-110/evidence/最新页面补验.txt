@@ -1,0 +1,19 @@
+✔ team/name/account picker creates independent tasks; cancelled confirm and failed submission preserve all input (2953.658ms)
+✔ task cancellation requires reason and server version; transfer uses stable candidate and retains event history (4037.8145ms)
+✔ large amount shows exact yuan and company rule; returning does not save, retry keeps input and acknowledgment matches (2099.491875ms)
+✔ company entry shows exact name, switching invalidates old session and requires fresh login (1081.311417ms)
+✔ responsive 1440: map/list, task picker, login and keyboard (2039.976875ms)
+✔ responsive 1366: map/list, task picker, login and keyboard (1974.436708ms)
+✔ responsive 1024: map/list, task picker, login and keyboard (1949.134333ms)
+✔ responsive 390: map/list, task picker, login and keyboard (2750.310833ms)
+✔ map update failure hides incomplete points; retry restores consistent list and ranking expands (1809.561ms)
+✔ visit final archive failure retains reviewed input and retries with the same idempotency key (1974.02575ms)
+✔ pending handover, pending review and revoked cancellation permission remain distinct (1125.335834ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24051.577541

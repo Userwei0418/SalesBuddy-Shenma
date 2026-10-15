@@ -13,14 +13,21 @@ class PartnerRepository:
             *args,
         )
         rows = await connection.fetch(
-            "SELECT id::text,name,status,version_no,created_at,updated_at FROM crm.partner WHERE "
+            "SELECT id::text,name,status,version_no,created_at,updated_at, "
+            "security.partner_enterprise_reference(id) AS enterprise_reference FROM crm.partner WHERE "
             "($1::text IS NULL OR name ILIKE '%'||$1||'%') AND ($2::text IS NULL OR status=$2) "
             "ORDER BY name,id LIMIT $3 OFFSET $4",
             *args,
             limit,
             offset,
         )
-        return {"items": [dict(row) for row in rows], "total": total}
+        from sales_backend.db import json_value
+        items = []
+        for row in rows:
+            item = dict(row)
+            item.update(json_value(item.pop("enterprise_reference")) or {})
+            items.append(item)
+        return {"items": items, "total": total}
 
     async def save(self, connection, actor, data):
         await require_permission(connection, 'partner.manage')
@@ -75,6 +82,12 @@ async def resolve_opportunity_partner(connection, before, data):
     if channel == "direct":
         if partner_id:
             raise ValueError("直销不能关联伙伴")
+        # Legacy clients echo the existing channel on unrelated edits. The API
+        # supplies None for an omitted partner_name; that is not a name edit.
+        if (before and before.get("sales_channel") == "direct"
+                and before.get("partner_id") is None and data.get("partner_name") is None):
+            return {"sales_channel": "direct", "partner_id": None,
+                    "partner_name": before.get("partner_name")}
         return {"sales_channel": "direct", "partner_id": None, "partner_name": "直销"}
     if channel != "partner":
         raise ValueError("请选择直销或合作伙伴")

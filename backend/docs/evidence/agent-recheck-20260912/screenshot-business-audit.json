@@ -1,0 +1,128 @@
+{
+  "checked_at": "2026-09-12T09:21:00.196108+00:00",
+  "readonly": true,
+  "runs": [
+    {
+      "id": "e84ba47b-bd84-4d80-96cf-e627c768d771",
+      "status": "succeeded",
+      "mode": "operating_report",
+      "trace": {
+        "provider": "senseaudio",
+        "model_ref": "senseaudio-s2-lite",
+        "elapsed_ms": 21435,
+        "operation_id": "cb400194-b54c-4f12-81ca-60dc9e285410",
+        "platform_run": {
+          "ids": {
+            "task_id": "a651b4c5-03e5-4f72-9ba4-178dcb8094c7",
+            "message_id": "f6cda6bc-0325-489f-9eed-f6774339df3d",
+            "conversation_id": "9be9e357-cc49-44e1-b073-77a54f95e149"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 5366,
+            "first_body_byte_ms": 5366,
+            "request_started_ms": 0,
+            "first_data_event_ms": 5366,
+            "headers_received_ms": 5366,
+            "stream_completed_ms": null
+          },
+          "error_code": null,
+          "stop_state": "unconfirmed",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a094ae-f0c9-76c0-95a1-9cd8f6188379",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": "TimeoutError"
+      },
+      "error_code": null,
+      "assistant_cards": 1,
+      "jobs": [
+        {
+          "id": "9097d0c8-ea8a-4f86-8fb5-8fba52f43ca0",
+          "status": "succeeded"
+        }
+      ],
+      "attempts": [
+        {
+          "provider_code": "agent_platform",
+          "status": "cancelled",
+          "http_status": 200,
+          "error_code": "CancelledError",
+          "operation_id": "cb400194-b54c-4f12-81ca-60dc9e285410"
+        },
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded",
+          "http_status": 200,
+          "error_code": null,
+          "operation_id": "cb400194-b54c-4f12-81ca-60dc9e285410"
+        }
+      ]
+    },
+    {
+      "id": "77a93333-6207-404b-9392-3e671ea7fdc4",
+      "status": "succeeded",
+      "mode": "today_tasks",
+      "trace": {
+        "provider": "senseaudio",
+        "model_ref": "senseaudio-s2-lite",
+        "elapsed_ms": 16848,
+        "operation_id": "c202bc35-48fe-4a62-948e-0ee843ccff44",
+        "platform_run": {
+          "ids": {
+            "task_id": "ee65bfd3-8bc7-4018-a0b7-42afb0a48382",
+            "message_id": "d697f07d-df2d-4d1e-a1f1-d0a11dadba66",
+            "conversation_id": "4c1bef9f-99da-4919-b552-d518730800e3"
+          },
+          "transport": {
+            "http_status": 200,
+            "first_text_ms": 10172,
+            "first_body_byte_ms": 10172,
+            "request_started_ms": 0,
+            "first_data_event_ms": 10172,
+            "headers_received_ms": 10172,
+            "stream_completed_ms": null
+          },
+          "error_code": null,
+          "stop_state": "unconfirmed",
+          "execution_mode": "filtered_facts",
+          "actual_snapshot_id": null,
+          "test_fault_injected": false,
+          "expected_snapshot_id": "01a0944f-93c3-72f3-b892-d9781aef0bd6",
+          "tool_authority_issued": false,
+          "runtime_snapshot_verified": false,
+          "network_dispatch_suppressed": false
+        },
+        "fallback_reason": "TimeoutError"
+      },
+      "error_code": null,
+      "assistant_cards": 1,
+      "jobs": [
+        {
+          "id": "adfab847-2b26-4a6f-9632-fba354235f31",
+          "status": "succeeded"
+        }
+      ],
+      "attempts": [
+        {
+          "provider_code": "agent_platform",
+          "status": "cancelled",
+          "http_status": 200,
+          "error_code": "CancelledError",
+          "operation_id": "c202bc35-48fe-4a62-948e-0ee843ccff44"
+        },
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded",
+          "http_status": 200,
+          "error_code": null,
+          "operation_id": "c202bc35-48fe-4a62-948e-0ee843ccff44"
+        }
+      ]
+    }
+  ]
+}

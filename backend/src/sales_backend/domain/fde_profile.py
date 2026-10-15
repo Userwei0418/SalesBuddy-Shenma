@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from sales_backend.domain.fde_coaching import COACHING_CONTRACT_VERSION
 
 CONTRACT_VERSION = "fde.profile.v1"
+CALCULATION_VERSION = "fde_portrait_ratios_v1"
 PORTRAIT_PROMPT_VERSION = "fde.profile.coaching.v3"
 TZ = ZoneInfo("Asia/Shanghai")
 DIMENSIONS = (
@@ -118,6 +119,7 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
                 "evidence_count": denominator,
                 "numerator": numerator,
                 "denominator": denominator,
+                "percent": percent,
             }
         )
     period = {"days": days, "start": start.isoformat(), "end": end.isoformat()}
@@ -125,6 +127,7 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
     # source versions so repeated GETs remain stable until business facts change.
     sources = {
         "contract_version": CONTRACT_VERSION,
+        "calculation_version": CALCULATION_VERSION,
         "actor": actor.model_dump(mode="json"),
         "permission_version": permission_version,
         "period": period,
@@ -162,4 +165,16 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
         "facts_fingerprint": fingerprint,
         "configuration": configuration or {},
         "coaching_inputs": sources["coaching_inputs"],
+        "coaching_versions": sources["coaching_versions"],
+        "score_basis": {
+            "basis_id": hashlib.sha256(CALCULATION_VERSION.encode()).hexdigest(),
+            "calculation_version": CALCULATION_VERSION,
+            "snapshot_status": "frozen",
+        },
+        "coaching_coverage": {
+            "status": "known", "visit_limit": 12, "task_limit": 20,
+            "selected_visits": sum(s.get("source_type") == "visit" for s in sources["coaching_inputs"]["sources"]),
+            "selected_tasks": sum(s.get("source_type") == "task" for s in sources["coaching_inputs"]["sources"]),
+            "truncated_text_sources": sum(bool(s.get("truncated")) for s in sources["coaching_inputs"]["sources"]),
+        },
     }

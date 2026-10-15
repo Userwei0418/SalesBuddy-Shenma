@@ -1,0 +1,32 @@
+{
+  "customer_advice": {
+    "id": "01a09684-1692-78ec-b1e7-07838158bb36",
+    "app_id": "998072f8-19aa-43a1-a5df-910473365287",
+    "name": "销售智助-客户经营建议-V1",
+    "published": true,
+    "snapshot_id": "01a0969c-392e-7e9f-b44d-ad5ab95c6478",
+    "revision": "76411dc89639ee6dc9f5266ef206f1e9d83f7af0d81401637a0c0592fb326708",
+    "model": "senseaudio-s2",
+    "tools": []
+  },
+  "opportunity_advice": {
+    "id": "01a09684-1968-77da-bfd0-e5e0ab59f015",
+    "app_id": "37c7bab1-868c-419d-bd0b-c935c528d5e5",
+    "name": "销售智助-商机经营建议-V1",
+    "published": true,
+    "snapshot_id": "01a0969c-3ca7-7d80-80e6-a1fbf862a393",
+    "revision": "015751f000e82e1e14c11bf845f5e80690e2a0cdfc929b08673c289b62b39b26",
+    "model": "senseaudio-s2",
+    "tools": []
+  },
+  "visit_advice": {
+    "id": "01a09684-1c0b-763f-b70c-84ea7d2dac08",
+    "app_id": "fd29ac04-27ff-4594-a4db-9fb39bfa60c7",
+    "name": "销售智助-单次拜访建议-V1",
+    "published": true,
+    "snapshot_id": "01a0969c-407d-7558-9ba4-4cbed2fc3588",
+    "revision": "ae0669febb0f61359760e873b3e53cafeb26b5cd78d14441a0b93db1288174f6",
+    "model": "senseaudio-s2",
+    "tools": []
+  }
+}

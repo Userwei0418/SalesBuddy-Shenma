@@ -1,0 +1,42 @@
+{
+  "approval_status": "pending",
+  "activated": false,
+  "data_as_of": "2026-09-12T05:41:09.615480+00:00",
+  "account": "XS001",
+  "non_test_sources_in_proposal": 0,
+  "maximum_new_tasks_if_auto_materialized": 4,
+  "created_sessions": 0,
+  "provider_calls": 0,
+  "business_writes": 0,
+  "cases": [
+    {
+      "scenario": "normal",
+      "expected_candidate_count": 1,
+      "new_task_limit_if_auto_materialized": 1,
+      "source_and_text_omitted": true
+    },
+    {
+      "scenario": "off",
+      "expected_candidate_count": 1,
+      "new_task_limit_if_auto_materialized": 1,
+      "source_and_text_omitted": true
+    },
+    {
+      "scenario": "blocked",
+      "expected_candidate_count": 1,
+      "new_task_limit_if_auto_materialized": 1,
+      "source_and_text_omitted": true
+    },
+    {
+      "scenario": "production",
+      "expected_candidate_count": 1,
+      "new_task_limit_if_auto_materialized": 1,
+      "source_and_text_omitted": true
+    }
+  ],
+  "limitations": [
+    "Business rule decision and specific publication/API/live-test authorization still pending.",
+    "Each full proposal has pending approval and no expiry and cannot be activated by the runtime.",
+    "Narrowing was exercised by read-only production SELECTs only; the runtime remains the fifth release."
+  ]
+}

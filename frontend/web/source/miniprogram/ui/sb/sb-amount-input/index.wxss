@@ -1,0 +1,13 @@
+.sb-amount { display: flex; align-items: center; gap: var(--ui-space-2); min-height: var(--ui-field-height); padding: var(--ui-space-2) var(--ui-page-gutter); background: var(--ui-surface); }
+.sb-amount-label { flex: 0 0 auto; font-size: var(--ui-text-body); color: var(--ui-secondary); }
+.sb-req { color: var(--ui-danger); }
+.sb-amount-control { --td-input-vertical-padding: 0; --td-input-bg-color: transparent; flex: 1; display: flex; align-items: center; gap: var(--ui-space-1); min-width: 0; }
+.sb-amount-input { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+.sb-amount-unit { flex: 0 0 auto; font-size: var(--ui-text-body); color: var(--ui-secondary); }
+
+/* stacked：标签在上 14px，下面控件框高 var(--ui-field-height)（小程序 44px）、一圈细线、控件圆角（和页面手写表单一致）；plain：不带白底与页边距 */
+.sb-amount.is-plain { padding: var(--ui-space-2) 0; background: transparent; }
+.sb-amount.is-stacked { flex-direction: column; align-items: stretch; gap: var(--ui-space-2); }
+.sb-amount.is-stacked .sb-amount-label { font-size: 14px; font-weight: 400; color: var(--ui-ink); } /* 飞书表单标签：常规字重、正文色、下方 8px */
+.sb-amount.is-stacked .sb-amount-control { min-height: var(--ui-field-height); padding: 0 var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); }
+.sb-amount.disabled .sb-amount-unit { color: var(--ui-muted); }

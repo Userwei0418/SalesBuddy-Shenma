@@ -1,0 +1,8 @@
+<root-portal wx:if="{{open}}">
+  <sb-sheet visible="{{open}}" title="取消任务" description="误建或无需继续的任务可在此取消，任务和操作记录会保留。" cancelLabel="返回" confirmLabel="取消任务" confirmLoading="{{submitting}}" confirmDisabled="{{loading || submitting || confirming || !canSubmit || needsRefresh}}" bind:confirm="submit" bind:close="close">
+    <sb-state-panel wx:if="{{loading}}" size="compact" state="loading" title="正在读取任务最新状态…"/>
+    <block wx:else><view wx:if="{{task}}" class="cancel-task-title">{{task.title || task.description}}</view><sb-textarea layout="stacked" plain label="取消原因" required value="{{note}}" maxlength="{{500}}" disabled="{{submitting || confirming}}" placeholder="请说明误建或无需继续的原因" bind:change="inputNote"/></block>
+    <view wx:if="{{error}}" class="cancel-error">{{error}}</view>
+    <view wx:if="{{needsRefresh}}" class="cancel-refresh"><t-button variant="outline" size="small" disabled="{{loading || submitting || confirming}}" bind:tap="refresh">刷新任务状态</t-button></view>
+  </sb-sheet>
+</root-portal>

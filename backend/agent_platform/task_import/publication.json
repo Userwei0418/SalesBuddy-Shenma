@@ -1,0 +1,38 @@
+{
+  "id": "01a0e770-93f7-74ce-84a7-1265283a54f8",
+  "app_id": "741e4dd0-4b6f-42ba-a8ec-c496f956b5de",
+  "name": "Raccoon SalesBuddy-周会任务整理-V1",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "9bcbcffdaabf2338af5ad38ea784ff60106dc3eb1545da1e24f7a59a95cb3ec6",
+  "snapshot_id": "01a0e770-d4c0-7152-bd07-67c1e5f66e36",
+  "url": "https://123.207.235.181/agents/01a0e770-93f7-74ce-84a7-1265283a54f8/configure",
+  "model": "senseaudio-s2-lite",
+  "prompt_sha256": "884b38ec6aec86ba17a04f9e08c8e680f551b3b9d3bcf47550621000d4d5989b",
+  "business_policy_protocol": "v1",
+  "runtime_snapshot_verified": false,
+  "metadata_verified_at": "2026-09-28",
+  "metadata_verified_account": "zhouwei5@sensetime.com",
+  "tool_counts": {
+    "dify_tools": 0,
+    "cli_tools": 0
+  },
+  "isolated_acceptance": {
+    "status": "passed",
+    "scope": "published Agent using approved 21-item meeting text; no SalesBuddy task writes, not deployed integration",
+    "candidate_count": 21,
+    "output_count": 21,
+    "owner_group_counts": [
+      4,
+      6,
+      4,
+      4,
+      2,
+      1
+    ],
+    "elapsed_seconds": 3.478,
+    "content_check": "all action text retained; only repeated spaces normalized",
+    "input_transport": "one complete description per source line, no duplicate full source",
+    "verified_at": "2026-09-28"
+  }
+}

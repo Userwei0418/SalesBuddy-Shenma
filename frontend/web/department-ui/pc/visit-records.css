@@ -1,0 +1,33 @@
+/* 拜访与跟进 · 跟进记录 */
+.pc-records .pc-panel-head { position: sticky; top: 0; z-index: 3; background: var(--ui-surface); border-top-left-radius: var(--ui-radius-panel); border-top-right-radius: var(--ui-radius-panel); }
+.pc-records .pc-panel-body { min-height: 360px; }
+.pc-records-caliber { margin: 0; font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-records .pc-vr-search { padding: 0 0 var(--ui-space-3); }
+.pc-records .is-flush .pc-vr-search { padding: var(--ui-space-3); }
+.pc-records .pc-vr-filter-context { font-size: var(--ui-text-small); overflow-wrap: anywhere; }
+.pc-vr-split { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--ui-space-4); min-height: 420px; }
+.pc-vr-people { list-style: none; margin: 0; padding: 0 var(--ui-space-3) 0 0; border-right: 1px solid var(--ui-line); display: flex; flex-direction: column; gap: 2px; max-height: 68vh; overflow: auto; }
+.pc-vr-people button { width: 100%; display: flex; align-items: center; gap: var(--ui-space-2); padding: 8px; border: 0; border-radius: var(--ui-radius-control); background: transparent; text-align: left; cursor: pointer; color: var(--ui-ink); font: inherit; }
+.pc-vr-people button:hover { background: var(--ui-hover); }
+.pc-vr-people button.is-active { background: var(--ui-selected); }
+.pc-vr-people .ant-avatar { background: var(--ui-selected-strong); color: var(--ui-primary); flex: none; font-size: var(--ui-text-small); }
+.pc-vr-people-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pc-vr-people-main b { display: flex; align-items: center; gap: 6px; font-weight: 500; font-size: var(--ui-text-body); }
+.pc-vr-people-main small { font-size: var(--ui-text-small); color: var(--ui-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-vr-count { flex: none; min-width: 28px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ui-primary); }
+.pc-vr-count.is-zero { color: var(--ui-warning); }
+.pc-vr-detail { min-width: 0; }
+.pc-vr-detail > header { display: flex; align-items: baseline; gap: var(--ui-space-3); padding-bottom: var(--ui-space-2); border-bottom: 1px solid var(--ui-line); }
+.pc-vr-detail > header b { font-size: var(--ui-text-section); font-weight: 600; }
+.pc-vr-detail > header span { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-vr-group-title { display: flex; flex-direction: column; min-width: 0; }
+.pc-vr-group-title small { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-vr-names { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ui-secondary); }
+.pc-vr-expanded { padding: 0 var(--ui-space-4); background: var(--ui-surface-subtle); border-radius: var(--ui-radius-control); }
+.pc-vr-expanded .pc-fu-day { background: var(--ui-surface-subtle); }
+.pc-vr-recorder { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.pc-vr-sub.pc-link { color: var(--ui-secondary); }
+.pc-vr-sub.pc-link:hover { color: var(--ui-primary); }
+.pc-records .ant-table-wrapper { padding: 0 var(--ui-space-3); }
+.pc-records .ant-table-cell .pc-clamp-2 { font-size: var(--ui-text-caption); line-height: 20px; }
+@media (max-width: 900px) { .pc-vr-split { grid-template-columns: minmax(0, 1fr); } .pc-vr-people { border-right: 0; max-height: 240px; } }

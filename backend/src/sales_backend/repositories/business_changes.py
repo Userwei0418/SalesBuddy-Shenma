@@ -3,6 +3,8 @@
 import json
 from uuid import uuid4
 
+from sales_backend.repositories.opportunity_product_lines import snapshot_intent_changes
+
 
 async def record_change(
     connection,
@@ -16,8 +18,11 @@ async def record_change(
     title="客户信息已更新",
     name="",
     assess_change=False,
+    notify=True,
 ):
     event_id = str(uuid4())
+    if opportunity_id:
+        changes = await snapshot_intent_changes(connection, changes)
     changes = json.loads(json.dumps(changes, ensure_ascii=False, default=str))
     await connection.execute(
         """INSERT INTO crm.business_change
@@ -31,6 +36,8 @@ async def record_change(
         version,
         changes,
     )
+    if not notify:
+        return event_id
     actor_name = await connection.fetchval(
         "SELECT display_name FROM platform.user_ref WHERE id=$1::uuid", actor.user_id
     )

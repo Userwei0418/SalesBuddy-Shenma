@@ -1,0 +1,176 @@
+{
+  "environment": "disposable PostgreSQL workspace; non-bypass runtime role; native HTTP and Worker; real provider calls",
+  "production_application_changed": false,
+  "production_database_changed": false,
+  "results": [
+    {
+      "case": "native_password_login_and_first_change",
+      "passed": true,
+      "isolated_database": true,
+      "rls_bypass": false
+    },
+    {
+      "case": "customer_normal",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "agent_platform",
+          "status": "succeeded"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "agent_platform",
+      "elapsed_ms": 5594,
+      "operation_id": "887f54dd-bf7b-4b1d-adfd-ad25608f0c51",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "opportunity_normal",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "agent_platform",
+          "status": "succeeded"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "agent_platform",
+      "elapsed_ms": 3648,
+      "operation_id": "d774852c-68ea-43a3-bc3e-0b45be63b77b",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "visit_normal",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "agent_platform",
+          "status": "succeeded"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "agent_platform",
+      "elapsed_ms": 8653,
+      "operation_id": "1676232e-cbb1-4480-83f3-191c17a035ec",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "customer_blocked",
+      "status": "succeeded",
+      "suggestion_count": 2,
+      "calls": [
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded"
+        },
+        {
+          "provider_code": "agent_platform",
+          "status": "failed"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "senseaudio",
+      "elapsed_ms": 1690,
+      "operation_id": "9b4215e3-f576-4d47-a3bc-b196092b0777",
+      "fallback_reason": "ControlledPlatformBlock",
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "opportunity_blocked",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded"
+        },
+        {
+          "provider_code": "agent_platform",
+          "status": "failed"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "senseaudio",
+      "elapsed_ms": 2123,
+      "operation_id": "fa021ec1-8de8-49eb-9265-22e26b86ba83",
+      "fallback_reason": "ControlledPlatformBlock",
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "visit_blocked",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded"
+        },
+        {
+          "provider_code": "agent_platform",
+          "status": "failed"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "senseaudio",
+      "elapsed_ms": 1671,
+      "operation_id": "d51f65be-6556-40a1-945c-a8c21ed1af01",
+      "fallback_reason": "ControlledPlatformBlock",
+      "runtime_snapshot_verified": false
+    },
+    {
+      "case": "visit_off",
+      "status": "succeeded",
+      "suggestion_count": 3,
+      "calls": [
+        {
+          "provider_code": "senseaudio",
+          "status": "succeeded"
+        }
+      ],
+      "job": {
+        "status": "succeeded",
+        "effect": true
+      },
+      "provider": "senseaudio",
+      "elapsed_ms": 1743,
+      "operation_id": "52e5dbdb-e618-4693-9436-f11c9aed38b9",
+      "fallback_reason": null,
+      "runtime_snapshot_verified": null
+    },
+    {
+      "case": "human_adoption_and_idempotent_task",
+      "passed": true,
+      "task_id": "166b3501-81b4-4d92-b620-a31e8ed20965",
+      "suggestion_id": "459001bb-5e7f-42d6-b7f3-b1bdeff931a8"
+    },
+    {
+      "case": "complete",
+      "passed": true,
+      "production_writes": 0
+    }
+  ]
+}

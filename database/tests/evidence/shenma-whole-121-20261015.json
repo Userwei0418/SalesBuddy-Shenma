@@ -1,0 +1,57 @@
+{
+  "passed": 14,
+  "checks": [
+    "V159_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
+    "actual_python_feishu_worker_startup_guard_passes_only_dedicated_role",
+    "V159_runtime_nobypassrls_scoped_permissions_private_credentials_and_worker_denied",
+    "synthetic_customer_and_opportunity_excluded_unpublished_legacy_weekly_not_exported",
+    "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
+    "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
+    "V161_to_V399_all_original_identity_business_config_quota_ledger_values_preserved_repeat_noop",
+    "actual_python_feishu_worker_startup_guard_passes_only_dedicated_role",
+    "V161_runtime_nobypassrls_scoped_permissions_private_credentials_and_worker_denied",
+    "synthetic_customer_and_opportunity_excluded_unpublished_legacy_weekly_not_exported",
+    "existing_S2_pending_request_and_S3_private_view_retained_reviewer_column_update_works",
+    "work_report_explicit_freeze_idempotency_owner_version_synthetic_aggregate_guards_and_narrow_worker_projection",
+    "65_production_and_7_demo_limits_independent_overflow_denied_new_synthetic_insert_never_queues",
+    "fresh_V399_exact_runtime_grants_bootstrap_secure_password_login_empty_business_and_overwrite_denial"
+  ],
+  "date": "2026-10-15",
+  "source_revision": "e40a8029d94a03fc45448e00d536e5a5b9120831",
+  "expected_schema": "V399",
+  "postgresql_version": "16.15 (Homebrew)",
+  "execution": "real local PostgreSQL; separate randomized databases, removed after testing",
+  "remaining_task_test_databases": 0,
+  "upgrade_migration_counts": {
+    "V159_to_V399": 96,
+    "V161_to_V399": 94
+  },
+  "unit_tests": {
+    "passed": 8
+  },
+  "lint_compile_and_shell_syntax": "passed",
+  "command": "python deployment/check-whole-upgrade-ci.py --socket /tmp/shenma-acceptance-20261015 --port 55465",
+  "files": {
+    "database/shenma_whole_121_manifest.json": "1a9e68ea4eb9caa8b4d002ac2c0ed1f531c0b5058d0e17b95ff2522fbee1e2dd",
+    "database/tests/verify_shenma_whole_121_postgres.py": "7df2b01fad72c7ee3ec658dc41db08c53a336ca92e7c312d44a48a4ffcc05f2c",
+    "database/migrations/V299__shenma_whole_121_compatibility_prelude.sql": "e3aaa402c6836030bdd976b4905b2c3e6f6248e0b08c3b407a11bf2b6d4a8318",
+    "database/migrations/V399__shenma_whole_121_delivery_guards.sql": "ee43b1155ad1465e06e08de583490453e77b2bbacb648adeb76b9b15c6c345c4"
+  },
+  "not_performed": [
+    "production database mutation",
+    "Feishu/network delivery",
+    "real model invocation"
+  ],
+  "static_mount_smoke": {
+    "passed": 6,
+    "scope": "ASGI TestClient without lifespan/DB/model calls",
+    "paths": [
+      "/workspace/?mode=live",
+      "/workspace/theme.js",
+      "/workspace/department-ui/app.js",
+      "/workspace/department-ui/app.css",
+      "/web/",
+      "/workspace?mode=live -> 307 query preserved"
+    ]
+  }
+}

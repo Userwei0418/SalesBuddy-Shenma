@@ -1,0 +1,31 @@
+<view class="sb-summary {{size === 'small' ? 'small' : ''}} {{bordered ? 'is-bordered' : ''}} {{tone === 'bad' || tone === 'watch' || tone === 'brand' ? 'tone-' + tone : ''}}">
+  <view class="sb-summary-head">
+    <view wx:if="{{markText}}" class="sb-summary-mark" aria-hidden="true">{{markText}}</view>
+    <view class="sb-summary-main">
+      <view class="sb-summary-titlerow">
+        <view class="sb-summary-title" aria-role="heading">{{title}}</view>
+        <text wx:if="{{scope}}" class="sb-summary-scope">{{scope}}</text>
+        <view wx:else class="sb-summary-side"><slot name="side"></slot></view>
+      </view>
+      <text wx:if="{{subtitle}}" class="sb-summary-sub">{{subtitle}}</text>
+      <text wx:if="{{meta}}" class="sb-summary-sub">{{meta}}</text>
+    </view>
+  </view>
+  <view wx:if="{{tagList.length}}" class="sb-summary-tags">
+    <block wx:for="{{tagList}}" wx:key="label">
+      <sb-status-tag wx:if="{{item.status}}" tone="{{item.tone}}" label="{{item.label}}" />
+      <text wx:else class="sb-summary-tag">{{item.label}}</text>
+    </block>
+  </view>
+  <view wx:if="{{metricList.length}}" class="sb-summary-metrics">
+    <view wx:for="{{metricList}}" wx:key="label" class="sb-summary-metric" hover-class="{{metricsTappable ? 'sb-pressed' : 'none'}}" data-index="{{index}}" bind:tap="onMetric">
+      <view class="sb-summary-value {{item.missing ? 'is-missing' : ''}}">{{item.missing ? (item.missingText || '未登记') : item.text}}<text wx:if="{{!item.missing && !loading && item.unit}}" class="sb-summary-unit">{{item.unit}}</text></view>
+      <text class="sb-summary-label">{{item.label}}</text>
+    </view>
+  </view>
+  <view wx:if="{{hasProgress}}" class="sb-summary-progress" aria-role="progressbar" aria-valuenow="{{percent}}">
+    <view class="sb-summary-track"><view class="sb-summary-fill" style="width: {{percent}}%"></view></view>
+    <text class="sb-summary-label">{{progressLabel || percent + '%'}}</text>
+  </view>
+  <slot></slot>
+</view>

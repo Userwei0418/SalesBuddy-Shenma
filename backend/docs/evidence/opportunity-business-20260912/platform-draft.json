@@ -1,0 +1,15 @@
+{
+  "id": "01a09022-b58f-7214-85eb-29d035ea6f2c",
+  "app_id": "ed592015-f3a7-4df2-9588-9ac93e862c4b",
+  "name": "销售智助-商机新建更新判断-BETA",
+  "published": false,
+  "revision": "71f6b210b3d49eee199b3907d544a949442848eeb4374436aa6ba54c4038778a",
+  "snapshot_id": "01a09022-b591-76bb-8877-188b5287e1b3",
+  "url": "https://123.207.235.181/agents/01a09022-b58f-7214-85eb-29d035ea6f2c/configure",
+  "account_email": "zhouwei5@sensetime.com",
+  "workspace": "FDE Workspace",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "1fac31cac9513d7f073f074ed273113277ca5d3b14f92ab34747e84148fde2cb",
+  "publish_dry_run_validated": true,
+  "platform_write_performed": false
+}

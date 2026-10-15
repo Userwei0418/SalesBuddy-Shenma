@@ -143,7 +143,9 @@ test('看板成员钻取固定team上下文，周期选择确定前不请求', a
   instance.properties = {memberId: 'u2'}; instance.setData({scope: 'self', year: 2026, yearOptions: [2025, 2026], yearIndex: 1});
   await instance.load(); assert.equal(requests[0].scope, 'team'); assert.equal(requests[0].member_id, 'u2');
   instance.scope({currentTarget: {dataset: {scope: 'self'}}}); assert.equal(requests.length, 1);
-  instance.toggleFilter(); instance.quarter({currentTarget: {dataset: {q: 1}}}); instance.year({detail: {value: 0}}); assert.equal(requests.length, 1);
+  instance.toggleFilter();
+  // 选择年份会清空草稿季度；按真实交互先选年份，再选季度，确定前仍不发请求。
+  instance.year({detail: {value: 0}}); instance.quarter({currentTarget: {dataset: {q: 1}}}); assert.equal(requests.length, 1);
   instance.applyPeriod(); await new Promise(done => setImmediate(done)); assert.equal(requests.length, 2); assert.equal(requests[1].year, 2025); assert.deepEqual(Array.from(requests[1].quarters), [1]);
 });
 
@@ -229,7 +231,7 @@ test('FDE项目成效与协作效率读取本人看板，缺失指标不冒充�
   await instance.loadMetrics();
   assert.equal(calls[0].scope,'self');
   assert.equal(instance.data.projectMetrics.find(x=>x.name==='参与商机').value,'4');
-  assert.equal(instance.data.projectMetrics.find(x=>x.name==='确收金额').value,'1.2');
+  assert.equal(instance.data.projectMetrics.find(x=>x.name==='确收金额（不含税）').value,'1.2万');
   assert.equal(instance.data.projectMetrics.find(x=>x.name==='回款金额').value,'未登记');
   assert.equal(instance.data.collaborationMetrics.find(x=>x.name==='归档跟进').value,'6');
   assert.equal(instance.data.metricsLoading,false);
@@ -256,4 +258,25 @@ test('FDE主管选择器遮挡期间停止两张画布，关闭后仅重绘已�
  instance.properties.chartsHidden=false;instance.observers.chartsHidden.call(instance,false);
  callbacks.splice(0).forEach(fn=>fn({width:300,height:200}));
  assert.deepEqual(created,['fdeAbilityRadar','fdeHistory']);
+});
+
+const partialFinance={recognized_amount:null,recognized_confirmed_subtotal:'70',recognized_complete:false,recognized_incomplete_period_count:1,recognized_missing_material_count:1,recognized_tax_unknown_period_count:1,recognized_conflict_period_count:1,collection_amount:'0',collection_confirmed_subtotal:'0',collection_complete:true,collection_count:0,period_precision_warning:'not_allocated_to_days',unallocated_period_count:1,period_only_recognized_amount:'20'};
+test('MINI-R02 FDE看板和排名卡展示同一小计与质量，金额单位不重复',async()=>{
+ const {instance}=component('components/fde-dashboard/index.js',{getFdeDashboard:async()=>({data_source:'database',summary:partialFinance,ranking:[],recent_visits:[],members:[]})});
+ instance.setData({year:2026,quarters:[1]});await instance.load();
+ assert.equal(instance.data.ready,true);assert.equal(instance.data.summary.recognizedText,'已登记小计 70元');assert.equal(instance.data.summary.collectionText,'0元');assert.equal(instance.data.summary.recognizedFinancial.valueText,'70元');assert.equal(instance.data.summary.recognizedFinancial.isSubtotal,true);
+ for(const text of ['物料','税口径','来源待运营核对','无法分配到所选日期'])assert.ok(instance.data.summary.financialHints.join('').includes(text));
+ instance.setData({rankingSelection:{personal:true,member_id:'u1'},companyRankingReady:true,recognizedRanking:[{user_id:'u1',name:'甲',value:'已登记小计 70元',rank:'—',width:0,financialHints:['实际尚未完整']}],followupRanking:[],demoRanking:[]});
+ instance.rebuildCompanyCards();const card=instance.data.companyCards.find(x=>x.key==='recognizedRanking');
+ assert.equal(card.rows[0].displayValue,'已登记小计 70元');assert.equal(card.rows[0].rank,'—');assert.equal(card.rows[0].width,'0%');assert.match(card.rows[0].meta,/实际尚未完整/);
+});
+test('MINI-R02 FDE个人业绩不以小计计算完成率；另一项完整零仍可计算',async()=>{
+ const {instance}=component('components/fde-profile/index.js',{
+  getFdeDashboard:async()=>({data_source:'database',summary:partialFinance,stages:[],rhythm:[]}),
+  getTargets:async()=>({items:[{kind:'recognized',amount:'100'},{kind:'collection',amount:'100'}],editable:false})
+ });
+ await instance.loadMetrics();assert.equal(instance.data.metricsError,'');
+ const metric=instance.data.projectMetrics.find(x=>x.name==='确收金额（不含税）');assert.equal(metric.value,'已登记小计 70元');assert.equal(metric.unit,'');assert.match(metric.note,/税口径/);assert.match(metric.note,/无法分配/);
+ const recognized=instance.data.performanceBoard.find(x=>x.kind==='recognized');assert.equal(recognized.completedText,'已登记小计 ¥70');assert.equal(recognized.rateText,'实绩未完整，暂不计算完成率');assert.equal(recognized.progress,0);assert.match(recognized.financialHints.join(''),/物料/);
+ const collection=instance.data.performanceBoard.find(x=>x.kind==='collection');assert.equal(collection.completedText,'¥0');assert.equal(collection.rateText,'完成率 0.0%');
 });

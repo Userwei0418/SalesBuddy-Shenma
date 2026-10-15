@@ -131,6 +131,7 @@ async def test_unlock_roles_null_reason_missing_target_and_private_table_boundar
                 json={"version_no": target["version_no"], "reason": "不应允许"},
             )
             assert response.status_code == 403
+        await sign_in(ops, "ADMIN001")  # Company administrator owns account security.
         target = accounts["XS001"]
         response = await ops.post(
             f"/api/v1/console/accounts/{target['id']}/unlock-login",

@@ -1,0 +1,26 @@
+/* PC 视觉 2.0 · 全局密度：对原有页面统一收紧留白与字号，修正截断。只用 --ui-* 变量。 */
+.department-ui { padding: var(--ui-page-gutter); font-size: var(--ui-text-body); line-height: 1.6; }
+.department-ui .ds-panel { border-radius: var(--ui-radius-panel); box-shadow: var(--ui-shadow-card); }
+.department-ui .sb-pagehead h1 { font-weight: 600; }
+.department-ui .ant-table { font-size: var(--ui-text-caption); }
+.department-ui .ant-table-thead > tr > th { font-weight: 500; color: var(--ui-secondary); }
+.department-ui .ant-tabs-tab { font-size: var(--ui-text-body); }
+.department-ui .ant-btn { font-size: var(--ui-text-body); }
+.department-ui .ant-btn-sm { font-size: var(--ui-text-caption); }
+
+/* 需求清单第 6 条：指标标签（如「年度合同额 · 万元」）不再被截断，放不下就换行 */
+.department-ui .sb-metric span { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.4; }
+.department-ui .sb-mstrip-flat .sb-metric { min-height: 56px; padding: var(--ui-space-2) var(--ui-space-4); }
+
+/* 需求清单第 15 条：选择客户时显示客户全称，长名称换行而不是省略 */
+.department-ui .sb-row-name { white-space: normal; overflow-wrap: anywhere; }
+
+/* 工作台里嵌入的原「业务动态」：与新面板同一密度 */
+.department-home-activity.is-embedded .department-home-activity-heading { padding: 12px var(--ui-card-padding) 4px; }
+.department-home-activity.is-embedded .department-home-activity h2 { font-size: var(--ui-text-section); font-weight: 600; }
+.department-home-activity.is-embedded .department-home-toolbar { padding: 0 var(--ui-card-padding); }
+.department-home-activity.is-embedded .department-home-date { background: var(--ui-surface-subtle); padding: 4px var(--ui-card-padding); }
+.department-home-activity.is-embedded .department-home-event-open { padding: 10px 0 10px var(--ui-card-padding); gap: var(--ui-space-2); }
+.department-home-activity.is-embedded .department-home-event-icon { width: 28px; height: 28px; flex-basis: 28px; font-size: var(--ui-text-small); }
+.department-home-activity.is-embedded .department-home-event-copy > strong { font-weight: 500; }
+.department-home-activity.is-embedded .department-home-event-actions { flex-basis: 128px; padding-right: var(--ui-card-padding); }

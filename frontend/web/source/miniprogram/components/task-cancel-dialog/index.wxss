@@ -1,0 +1,1 @@
+.cancel-task-title{margin-bottom:var(--ui-space-3);color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.5}.cancel-error{padding:var(--ui-space-2) 0;color:var(--ui-danger);font-size:14px;line-height:1.6}.cancel-refresh{padding:var(--ui-space-3) 0}

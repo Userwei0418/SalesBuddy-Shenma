@@ -23,7 +23,7 @@ async def fde_analysis_facts(connection, actor, *, personal=False, permission="a
     risks = await connection.fetch(
         "SELECT id::text,opportunity_id::text,title,description,status,severity_code FROM insight.risk "
         "WHERE opportunity_id=ANY($1::uuid[]) AND deleted_at IS NULL "
-        "AND status IN ('new','pending','in_progress','escalated') ORDER BY opened_at DESC LIMIT 100",
+        "AND status <> 'resolved' ORDER BY opened_at DESC LIMIT 100",
         ids,
     )
     tasks = await TaskRepository().list(connection, status=None, customer_id=None, limit=100, fde_view="self" if personal else None)

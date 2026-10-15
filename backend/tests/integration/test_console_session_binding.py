@@ -1,3 +1,4 @@
+from tests.integration.feishu_fixtures import seed_execute
 """Console cookie ordering and logout against real HTTP, PostgreSQL and RLS.
 
 The application and repositories are not mocked. A delayed response is represented
@@ -376,7 +377,7 @@ async def test_disabled_account_can_revoke_its_signed_session_and_keeps_audit_ac
         login = await sign_in(client)
         actor, _ = session_identity(login)
         await set_request_context(connection, actor)
-        await connection.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1::uuid", actor.user_id)
+        await seed_execute(connection,"UPDATE platform.user_ref SET status='inactive' WHERE id=$1::uuid", actor.user_id)
         client.headers.pop("Authorization")
         result = await client.post(AUTH_PATH + "/logout", headers=cookie_header({
             BINDING_COOKIE: cookie_values(login)[BINDING_COOKIE],

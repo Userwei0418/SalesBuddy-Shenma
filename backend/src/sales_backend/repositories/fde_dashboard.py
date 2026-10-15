@@ -5,6 +5,8 @@ from datetime import datetime
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
+from sales_backend.db import json_value
+from sales_backend.domain.finance_totals import actual_totals
 from sales_backend.domain.reporting_period import reporting_period, rhythm_axes
 from sales_backend.repositories.collaboration import scope_members, scoped_opportunity_ids
 
@@ -228,23 +230,9 @@ async def fde_dashboard(
         connection, ids if team_id else report_ids, year=year, quarters=quarters, now=now, selected=selected
     )
     task_by_person = task_statistics.pop("by_person")
-    ledger = (
-        await connection.fetch(
-            """SELECT kind,COALESCE(sum(amount),0) AS amount FROM crm.customer_actual
-        WHERE voided_at IS NULL AND opportunity_id=ANY($1::uuid[])
-        AND occurred_on<=timezone('Asia/Shanghai',clock_timestamp())::date
-        AND occurred_on BETWEEN $2 AND $3
-        AND ($4::int[] IS NULL OR extract(quarter FROM occurred_on)::int=ANY($4::int[]))
-        GROUP BY kind""",
-            opp_ids,
-            selected.start,
-            selected.end,
-            list(selected.quarters) or None,
-        )
-        if opp_ids
-        else []
-    )
-    money = {r["kind"]: r["amount"] for r in ledger}
+    money = json_value(await connection.fetchval(
+        'SELECT security.finance_window_totals($1::uuid[],$2,$3,$4::integer[])',
+        opp_ids,selected.start,selected.end,list(selected.quarters) or None))
     relations = (
         await connection.fetch(
             """SELECT opportunity_id::text,user_ref_id::text FROM crm.opportunity_participant
@@ -261,25 +249,12 @@ async def fde_dashboard(
     # Aggregate member metrics once; joint projects deliberately contribute to each
     # participant row, while the headline ledger above counts the union only once.
     person_money = {
-        r["user_id"]: dict(r)
-        for r in await connection.fetch(
-            """WITH relation AS (SELECT DISTINCT opportunity_id,user_ref_id FROM crm.opportunity_participant
+        r['user_id']:json_value(r['actuals']) for r in await connection.fetch("""WITH relation AS (
+          SELECT DISTINCT opportunity_id,user_ref_id FROM crm.opportunity_participant
           WHERE opportunity_id=ANY($1::uuid[]) AND user_ref_id=ANY($2::uuid[]) AND participant_role='fde'
-            AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to)
-        SELECT r.user_ref_id::text AS user_id,
-          COALESCE(sum(a.amount) FILTER(WHERE a.kind='recognized'),0) AS recognized_amount,
-          COALESCE(sum(a.amount) FILTER(WHERE a.kind='collection'),0) AS collection_amount
-        FROM relation r JOIN crm.customer_actual a ON a.opportunity_id=r.opportunity_id
-        WHERE a.voided_at IS NULL AND a.occurred_on BETWEEN $3 AND $4
-          AND a.occurred_on<=timezone('Asia/Shanghai',clock_timestamp())::date
-          AND ($5::int[] IS NULL OR extract(quarter FROM a.occurred_on)::int=ANY($5::int[]))
-        GROUP BY r.user_ref_id""",
-            opp_ids,
-            ids,
-            selected.start,
-            selected.end,
-            list(selected.quarters) or None,
-        )
+           AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to)
+          SELECT user_ref_id::text AS user_id,security.finance_window_totals(array_agg(opportunity_id),$3,$4,$5::integer[]) AS actuals
+          FROM relation GROUP BY user_ref_id""",opp_ids,ids,selected.start,selected.end,list(selected.quarters) or None)
     }
     demos = await connection.fetchval(
         "SELECT security.fde_demo_statistics($1::uuid[],$2::uuid[],$3,$4,$5::int[])",
@@ -320,8 +295,7 @@ async def fde_dashboard(
                 "followup_count": history["by_person"].get(uid, 0),
                 "period_opportunities": history["projects_by_person"].get(uid, 0),
                 "demo_scene_count": demos["by_person"].get(uid, 0),
-                "recognized_amount": person_money.get(uid, {}).get("recognized_amount", 0),
-                "collection_amount": person_money.get(uid, {}).get("collection_amount", 0),
+                **person_money.get(uid, actual_totals([])),
                 **task_by_person.get(uid, {"completed_tasks": 0, "pending_tasks": 0, "overdue_tasks": 0}),
             }
         )
@@ -367,8 +341,7 @@ async def fde_dashboard(
             "own_demo_scene_count": demos["own_count"],
             "won_amount": sum((o["amount"] or Decimal(0) for o in opportunities if o["status"] == "won"), Decimal(0)),
             **task_statistics,
-            "recognized_amount": money.get("recognized", 0),
-            "collection_amount": money.get("collection", 0),
+            **money,
         },
         "stages": sorted(stages.values(), key=lambda r: r["probability"] or 0),
         "rhythm": rhythm,

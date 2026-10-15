@@ -1,119 +1,128 @@
-/**
- * BACKEND-CONTRACT 风险列表：GET /risks + GET /opportunities?page_size=300&include_closed=true 补充商机名称；后端负责权限与数据完整性。
- * 前端将 resolved/accepted 都归入“已解除”分组，但 accepted 标签为“已接受”，健康灯仍为提醒；两者不能在后端等同消除风险。
- * riskLight 当前只将 resolved 标绿，其余标黄，未按 severity_code 自动升红；严重程度文本和健康灯是两套现有规则。
- * 此页只读列表；解除写操作在 risk-detail，没有风险新建或重新打开入口。
- */
-const { riskLight } = require('../../utils/statusLight');
-const apiClient = require("../../utils/apiClient");
-
-function formatDate(value) {
-  if (!value) return "待确认";
-  const date = new Date(typeof value === "number" ? value : String(value));
-  if (Number.isNaN(date.getTime())) return String(value);
-  return `${date.getMonth() + 1}月${date.getDate()}日`;
-}
-
-function normalizeRisk(item) {
-  const status = ["resolved", "accepted"].includes(item.status) ? "resolved" : "open";
-  const severityMap = { critical: "严重", high: "高", medium: "中", low: "低" };
-  const severity = severityMap[item.severity_code] || item.severity || "中";
-  const severityClassMap = { 严重: "critical", 高: "high", 中: "medium", 低: "low" };
-  return {
-    ...item,
-    signal:riskLight(item),
-    customerName: item.customer_name || item.customerName || "关联客户待确认",
-    owner: item.owner_name || item.owner || "待确认",
-    team: item.team_name || item.team || "",
-    title: item.title || "客户经营风险",
-    status,
-    statusLabel: item.status === "accepted" ? "已接受" : status === "resolved" ? "已解除" : "待解除",
-    severity,
-    severityClass: item.severity_code || severityClassMap[severity] || "medium",
-    openedLabel: formatDate(item.opened_at || item.openedAt),
-    resolvedLabel: formatDate(item.resolved_at || item.resolvedAt),
-    remote: Boolean(item.opened_at || item.risk_type_code),
-    opportunityId: item.opportunity_id || item.opportunityId || "",
-    opportunityName: item.opportunity_name || item.opportunityName || "",
-    customerId: item.customer_id || item.customerId || "",
-  };
-}
+// RISK001: the server owns UUID scope, ordering, pagination and complete summary.
+const apiClient = require('../../utils/apiClient');
+const access = require('../../utils/access');
+const {normalizeRisk} = require('../../utils/riskDisplay');
+const {assertPersonDirectory, normalizeTeams, normalizeMembers, candidateTeam} = require('../../utils/personPicker');
+const uuid = value => /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value || '');
+const count = value => Number.isInteger(value) && value >= 0;
 
 Page({
-  data: {
-    tabs: [{ key: "open", label: "待解除" }, { key: "resolved", label: "已解除" }, { key: "all", label: "全部" }],
-    activeTab: "open",
-    risks: [],
-    filteredRisks: [],
-    openCount: 0,
-    resolvedCount: 0,
-    scope: "",
-    loading: false,
-    opportunityOnly: false,
+  data:{
+    tabs:[{key:'open',label:'待解除'},{key:'resolved',label:'已解除'},{key:'all',label:'全部'}], activeTab:'open',
+    risks:[], filteredRisks:[], summary:null, total:0, openCount:null, resolvedCount:null, scope:'',
+    offset:0, pageSize:50, page:1, pageCount:1, hasMore:false, loading:false, loadError:'', opportunityOnly:false,
+    scopeMode:'all', scopeOptions:[{value:'all',label:'授权范围'},{value:'self',label:'本人'},{value:'team',label:'团队'},{value:'person',label:'成员'}],
+    selectedTeamId:'', selectedMemberId:'', teamOptions:[], memberOptions:[], defaultTeamId:'',
+    memberPickerOpen:false, memberSelected:[], memberLabel:'选择成员', teamLabel:'请选择团队', directoryLoading:false, directoryError:'', teamIndex:0,
   },
-
-  onLoad(options = {}) {
-    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'risks', options)) return;
-    this.teamFilter = decodeURIComponent(options.team || "all");
-    this.memberFilter = decodeURIComponent(options.member || "all");
-    const opportunityOnly = options.opportunity === "1";
-    this.setData({ opportunityOnly });
-    if (opportunityOnly) wx.setNavigationBarTitle({ title: "商机风险" });
+  onLoad(options={}) {
+    if (getApp().guardPage && !getApp().guardPage(this,'risks',options)) return;
+    const memberId=options.member_id || '', teamId=options.team_id || '';
+    this._legacyFilter=Boolean((options.member && options.member !== 'all') || (options.team && options.team !== 'all') ||
+      (memberId && !uuid(memberId)) || (teamId && !uuid(teamId)));
+    this.setData({opportunityOnly:options.opportunity === '1',
+      scopeMode:uuid(memberId) ? 'person' : uuid(teamId) ? 'team' : 'all',
+      selectedMemberId:uuid(memberId) ? memberId : '', selectedTeamId:uuid(teamId) ? teamId : ''});
+    if (this.data.opportunityOnly) wx.setNavigationBarTitle({title:'商机风险'});
   },
-
   onShow() {
-    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'risks')) return;
+    this._hidden=false;
+    if (getApp().guardPage && !getApp().guardPage(this,'risks')) return;
     if (!getApp().ensureLogin()) return;
-    this.loadRisks();
+    this.checkIdentity();
+    return Promise.all([this.loadDirectory(),this.loadRisks()]);
   },
-
-  loadRisks() {
-    const session = getApp().globalData.session;
-    this.setData({ scope: session.scope });
-    this.setData({ loading: true });
-    apiClient.listRisks().then((response) => {
-      const risks = (response.items || []).map(normalizeRisk);
-      this.setRisks(risks);
-    }).catch((error) => {
-      this.setRisks([]);
-      wx.showToast({ title: error.message || "风险加载失败", icon: "none" });
-    }).finally(() => this.setData({ loading: false }));
+  checkIdentity() {
+    const identity=access.identity(getApp().globalData.session);
+    if (this._riskIdentity && this._riskIdentity !== identity) {
+      this.setData({...access.readStateReset('risks'),memberSelected:[],memberLabel:'选择成员',teamLabel:'请选择团队',defaultTeamId:'',directoryError:''});
+      this._legacyFilter=false;
+    }
+    this._riskIdentity=identity;
+    return identity;
   },
-
-  setRisks(risks) {
-    const sorted = risks.filter((item) => !this.data.opportunityOnly || item.opportunityId).slice().sort((a, b) => {
-      if (a.status !== b.status) return a.status === "open" ? -1 : 1;
-      const order = { 严重: 4, 高: 3, 中: 2, 低: 1 };
-      return (order[b.severity] || 0) - (order[a.severity] || 0);
-    });
-    this.setData({
-      risks: sorted,
-      openCount: sorted.filter((item) => item.status === "open").length,
-      resolvedCount: sorted.filter((item) => item.status === "resolved").length,
-    }, () => this.applyFilter());
+  async loadDirectory() {
+    const identity=this.checkIdentity(), serial=this._directorySerial=(this._directorySerial || 0)+1;
+    const current=()=>!this._hidden && serial===this._directorySerial && identity===access.identity(getApp().globalData.session);
+    this.setData({directoryLoading:true,directoryError:''});
+    try {
+      const result=await apiClient.getDirectoryMembers({permission:'risk.read'});
+      if (!current()) return;
+      assertPersonDirectory(result.items,result.teams,result.defaults);
+      const teams=normalizeTeams(result.teams), members=normalizeMembers(result.items,teams);
+      if (teams.some(row=>!uuid(row.id)) || members.some(row=>!uuid(row.id))) throw Error('风险目录缺少有效成员或团队标识');
+      this.setData({teamOptions:teams,memberOptions:members,defaultTeamId:candidateTeam(teams,result.defaults.team_id),
+        teamLabel:(teams.find(row=>row.id===this.data.selectedTeamId) || {}).name || '请选择团队',
+        memberLabel:(members.find(row=>row.id===this.data.selectedMemberId) || {}).name || '选择成员',
+        teamIndex:Math.max(0,teams.findIndex(row=>row.id===this.data.selectedTeamId))});
+    } catch(error) {
+      if(current())this.setData({teamOptions:[],memberOptions:[],directoryError:error.message || '目录加载失败'});
+    } finally { if(current())this.setData({directoryLoading:false}); }
   },
-
-  applyFilter() {
-    const key = this.data.activeTab;
-    const scoped = this.data.risks.filter((item) => (this.teamFilter === "all" || item.team === this.teamFilter) && (this.memberFilter === "all" || item.owner === this.memberFilter));
-    this.setData({ filteredRisks: key === "all" ? scoped : scoped.filter((item) => item.status === key) });
+  query() {
+    if(this._legacyFilter)throw Error('此筛选链接已过期，请重新选择范围');
+    const {scopeMode,selectedTeamId,selectedMemberId,activeTab,offset,pageSize,opportunityOnly}=this.data;
+    if(scopeMode==='team' && !uuid(selectedTeamId))throw Error('请选择团队后查看风险');
+    if(scopeMode==='person' && !uuid(selectedMemberId))throw Error('请选择成员后查看风险');
+    return {scope:scopeMode,status:activeTab==='all' ? undefined : activeTab,
+      team_id:scopeMode==='team' ? selectedTeamId : undefined, member_id:scopeMode==='person' ? selectedMemberId : undefined,
+      opportunity_only:opportunityOnly,page_size:pageSize,offset};
   },
-
-  selectTab(e) {
-    this.setData({ activeTab: e.currentTarget.dataset.key }, () => this.applyFilter());
+  async loadRisks() {
+    const identity=this.checkIdentity(), serial=this._loadSerial=(this._loadSerial || 0)+1;
+    const current=()=>!this._hidden && serial===this._loadSerial && identity===access.identity(getApp().globalData.session);
+    this.setData({loading:true,loadError:'',risks:[],filteredRisks:[],summary:null,openCount:null,resolvedCount:null,total:0,hasMore:false,
+      scope:access.scopeLabel(getApp().globalData.session,'risk.read')});
+    try {
+      const query=this.query(), response=await apiClient.listRisks(query);
+      if(!current())return;
+      const summary=response.summary;
+      if(!Array.isArray(response.items) || !count(response.total) || !summary ||
+        !['total','open_count','resolved_count','overdue_count'].every(key=>count(summary[key])) ||
+        summary.open_count+summary.resolved_count!==summary.total || summary.overdue_count>summary.open_count ||
+        response.offset!==query.offset || response.page_size!==query.page_size || typeof response.has_more!=='boolean' ||
+        response.items.length>query.page_size || response.items.length>response.total ||
+        response.has_more!==(query.offset+response.items.length<response.total) ||
+        response.total!==(query.status==='open' ? summary.open_count : query.status==='resolved' ? summary.resolved_count : summary.total) ||
+        (response.has_more ? response.next_offset!==query.offset+query.page_size : response.next_offset!==null))throw Error('风险统计或分页字段不完整，请更新配套后端后重试');
+      if(query.offset>0 && query.offset>=response.total) {
+        this.setData({offset:Math.max(0,Math.ceil(response.total/query.page_size)-1)*query.page_size});
+        return this.loadRisks();
+      }
+      const risks=response.items.map(item=>normalizeRisk(item,getApp().globalData.session));
+      this.setData({risks,filteredRisks:risks,summary,total:response.total,openCount:summary.open_count,resolvedCount:summary.resolved_count,
+        scope:query.scope==='self' ? '本人' : query.scope==='person' ? `成员 · ${this.data.memberLabel}` : query.scope==='team' ? `团队 · ${this.data.teamLabel}` : access.scopeLabel(getApp().globalData.session,'risk.read'),
+        hasMore:response.has_more,page:Math.floor(query.offset/query.page_size)+1,pageCount:Math.max(1,Math.ceil(response.total/query.page_size))});
+    } catch(error) { if(current())this.setData({loadError:error.message || '风险加载失败'}); }
+    finally { if(current())this.setData({loading:false}); }
   },
-
-  onTabChange(e) { this.selectTab({ currentTarget: { dataset: { key: e.detail.key } } }); },
-
-  openRisk(e) {
-    wx.navigateTo({ url: `/pages/risk-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}` });
+  onHide(){this._hidden=true;this._loadSerial=(this._loadSerial || 0)+1;this._directorySerial=(this._directorySerial || 0)+1;this.closeMemberPicker();},
+  onUnload(){this.onHide();},
+  onTabChange(e){return this.selectTab({currentTarget:{dataset:{key:e.detail.key}}});},
+  selectTab(e){const key=e.currentTarget.dataset.key;if(!['all','open','resolved'].includes(key))return;this.setData({activeTab:key,offset:0});return this.loadRisks();},
+  changeScope(e){
+    const mode=e.detail.value;if(!this.data.scopeOptions.some(row=>row.value===mode))return;
+    this._legacyFilter=false;
+    const team=mode==='team' ? candidateTeam(this.data.teamOptions,this.data.selectedTeamId || this.data.defaultTeamId) : this.data.selectedTeamId;
+    this.setData({scopeMode:mode,offset:0,selectedTeamId:team,teamLabel:(this.data.teamOptions.find(row=>row.id===team) || {}).name || '请选择团队',teamIndex:Math.max(0,this.data.teamOptions.findIndex(row=>row.id===team))});
+    return this.loadRisks();
   },
-  openOpportunity(e) {
-    const customerId = e.currentTarget.dataset.customerId;
-    const opportunityId = e.currentTarget.dataset.opportunityId;
-    if (!customerId || !opportunityId) return;
-    wx.setStorageSync("pendingOpenCustomerId", customerId);
-    wx.setStorageSync("pendingOpenOpportunityId", opportunityId);
-    wx.switchTab({ url: "/pages/customers/index" });
+  chooseScope(e){return this.changeScope({detail:{value:e.currentTarget.dataset.value}});},
+  selectRiskTeam(e){const id=String(e.detail.value || ''),team=this.data.teamOptions.find(row=>row.id===id);if(!team)return;this._legacyFilter=false;this.setData({selectedTeamId:id,teamLabel:team.name,teamIndex:this.data.teamOptions.indexOf(team),scopeMode:'team',offset:0});return this.loadRisks();},
+  chooseTeam(e){const team=this.data.teamOptions[Number(e.detail.value)];if(team){this.setData({teamIndex:Number(e.detail.value)});return this.selectRiskTeam({detail:{value:team.id}});}},
+  selectRiskMember(e){
+    const id=String(e.detail.value || ''), member=this.data.memberOptions.find(row=>row.id===id);if(!member)return;
+    this._legacyFilter=false;this.setData({selectedMemberId:id,memberSelected:[id],memberLabel:member.name,scopeMode:'person',offset:0,memberPickerOpen:false});return this.loadRisks();
+  },
+  openMemberPicker(){this.setData({memberPickerOpen:true});},
+  closeMemberPicker(){this.setData({memberPickerOpen:false});},
+  confirmMember(e){return this.selectRiskMember({detail:{value:(e.detail.ids || [])[0]}});},
+  changePage(e){const page=Number(e.detail.current);if(!Number.isInteger(page) || page<1 || page>this.data.pageCount || this.data.loading)return;this.setData({offset:(page-1)*this.data.pageSize});return this.loadRisks();},
+  previousPage(){return this.changePage({detail:{current:this.data.page-1}});},
+  nextPage(){if(this.data.hasMore)return this.changePage({detail:{current:this.data.page+1}});},
+  openRisk(e){wx.navigateTo({url:`/pages/risk-detail/index?id=${encodeURIComponent(e.currentTarget.dataset.id)}`});},
+  openOpportunity(e){
+    const {customerId,opportunityId}=e.currentTarget.dataset;if(!customerId || !opportunityId)return;
+    wx.setStorageSync('pendingOpenCustomerId',customerId);wx.setStorageSync('pendingOpenOpportunityId',opportunityId);wx.switchTab({url:'/pages/customers/index'});
   },
 });

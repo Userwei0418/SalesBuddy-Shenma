@@ -1,6 +1,7 @@
 """Explicit source-to-business projection. No caller-supplied expressions or SQL."""
 from datetime import UTC, date, datetime
 from zoneinfo import ZoneInfo
+from sales_backend.domain.opportunity_finance import financial_projection
 
 ALIASES = {
     "customer": {"industry": "industry_code", "customer_type": "customer_type_code", "priority": "level_code",
@@ -23,6 +24,7 @@ RELATIONS = {"customer_ids": "customer", "associated_partner_ids": "partner",
              "customer_id": "customer", "opportunity_id": "opportunity", "partner_id": "partner",
              "opportunity_ids": "opportunity", "manager_user_ref_id": "member", "channel_manager_user_ref_id": "member",
              "owner_id": "member", "recorder_id": "member", "creator_id": "member",
+             "original_owner_id": "member", "original_dispatcher_id": "member",
              "updated_by": "member", "confirmed_by": "member", "user_id": "member"}
 
 
@@ -56,15 +58,41 @@ def project(kind, raw, field_names):
         # free-text snapshot. Prefer that linked name, retaining old snapshots.
         values["partner_name"] = raw.get("partner_name") or raw.get("partner_name_snapshot")
     if kind == "opportunity":
+        if "finance_actuals" in raw:
+            values.update({key: value for key, value in financial_projection(raw, field_names).items() if key in field_names})
         amount = raw.get("amount")
         values["grade"] = None if amount is None or float(amount) < 0 else next(
             grade for minimum, grade in ((1000000, "A"), (500000, "B"), (100000, "C"), (0, "D"))
             if float(amount) >= minimum)
+    if kind == "task":
+        # Per-record measures aggregate correctly by current owner or batch.
+        # Overdue is deliberately a destination NOW() formula: elapsed time
+        # alone does not emit a source-change event.
+        included = not (raw.get("status") == "cancelled" or raw.get("deleted_at") or raw.get("deleted"))
+        completed = included and raw.get("status") == "completed"
+        completed_at, due_at = _timestamp(raw.get("completed_at")), _timestamp(raw.get("due_at"))
+        measures = {
+            "active_count": int(included),
+            "completed_count": int(completed),
+            "pending_review_count": int(included and raw.get("status") == "pending_review"),
+            "ontime_completed_count": int(bool(completed and completed_at and due_at and completed_at <= due_at)),
+        }
+        values.update({key: value for key, value in measures.items() if key in field_names})
     values["source_version"] = raw.get("version_no")
     values["synced_at"] = datetime.now(UTC).isoformat()
     values.update(system_id=str(raw["id"]), record_status=status,
                   source_created_at=raw.get("created_at"), source_updated_at=raw.get("updated_at"))
     return values
+
+
+def _timestamp(value):
+    if value is None:
+        return None
+    if isinstance(value, str):
+        value = datetime.fromisoformat(value)
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=ZoneInfo("Asia/Shanghai"))
+    return value
 
 
 def date_milliseconds(value):

@@ -18,10 +18,11 @@ module.exports={idx:idx,rest:rest,pick:pick};
       <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="false">
         <view class="filter-row">
           <view wx:if="{{canViewTeam}}" class="filter-item filter-team"><sb-labeled-select size="small" label="团队" placeholder="全部团队" options="{{opt.rest(teamOptions,'label')}}" value="{{opt.pick(teamIndex)}}" bindchange="changeTeam"/></view>
-          <view wx:if="{{canViewTeam}}" class="filter-item filter-owner"><sb-labeled-select size="small" label="{{role === 'supervisor' ? '直属成员' : '人员'}}" placeholder="{{ownerOptions[0].label}}" options="{{opt.rest(ownerOptions,'label')}}" value="{{opt.pick(ownerIndex)}}" data-key="owner" bindchange="changeFilter"/></view>
+          <view wx:if="{{canViewTeam}}" class="filter-item filter-owner"><view class="filter-control" hover-class="filter-item-pressed" bindtap="openOwnerPicker"><text class="filter-value">{{ownerOptions[ownerIndex].label || '人员'}}</text><t-icon name="chevron-down" size="32rpx" class="chevron"/></view></view>
           <view class="filter-item filter-stage {{selectedStages.length ? 'active' : ''}} filter-trigger" hover-class="filter-item-pressed" bindtap="toggleStageFilter"><view class="filter-control"><text wx:if="{{!selectedStages.length}}" class="filter-value">商机阶段</text><text wx:else class="filter-value">{{stageLabel}}</text><t-icon wx:if="{{showStageFilter}}" name="chevron-up" size="32rpx" class="chevron"/><t-icon wx:else name="chevron-down" size="32rpx" class="chevron"/></view></view>
           <view class="filter-item filter-close"><sb-labeled-select size="small" useLabelSlot label="关单日期" title="关单日期" placeholder="{{closeOptions[0].label}}" options="{{opt.rest(closeOptions,'label')}}" value="{{opt.pick(closeIndex)}}" data-key="close" bindchange="changeFilter"><text slot="label">关单日期</text></sb-labeled-select></view>
           <view class="filter-item filter-grade"><sb-labeled-select size="small" useLabelSlot label="商机等级" title="商机等级" placeholder="{{gradeOptions[0].label}}" options="{{opt.rest(gradeOptions,'label')}}" value="{{opt.pick(gradeIndex)}}" data-key="grade" bindchange="changeFilter"><text slot="label">商机等级</text></sb-labeled-select></view>
+          <view class="filter-item filter-activity"><sb-labeled-select size="small" useLabelSlot label="跟进时间" title="跟进时间" placeholder="{{activityWindowOptions[0].label}}" options="{{opt.rest(activityWindowOptions,'label')}}" value="{{opt.pick(activityWindowIndex)}}" data-key="activityWindow" bindchange="changeFilter"><text slot="label">跟进时间</text></sb-labeled-select></view>
         </view>
       </scroll-view>
       <text wx:if="{{filterActive}}" class="filter-reset" hover-class="filter-reset-pressed" bindtap="resetFilters">重置</text>
@@ -42,3 +43,5 @@ module.exports={idx:idx,rest:rest,pick:pick};
 
 </block>
 </block>
+
+<person-picker id="personPicker" open="{{ownerPickerOpen}}" title="选择成员" members="{{ownerPickerMembers}}" teams="{{ownerPickerTeams}}" default-team-id="{{ownerPickerDefaultTeamId}}" selected="{{ownerPickerSelected}}" allow-all="{{true}}" all-label="全部成员" loading="{{loading}}" error="{{loadError}}" bind:confirm="confirmOwnerPicker" bind:close="closeOwnerPicker" bind:retry="loadPage"/>

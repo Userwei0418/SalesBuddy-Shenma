@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "销售能力详情",
+  "usingComponents": {
+    "fde-dashboard": "../../components/fde-dashboard/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-tabs": "/ui/sb/sb-tabs/index",
+    "sb-ai-badge": "/ui/sb/sb-ai-badge/index"
+  },
+  "homeButton": true
+}

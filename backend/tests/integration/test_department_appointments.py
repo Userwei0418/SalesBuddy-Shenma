@@ -174,7 +174,7 @@ async def test_product_supervisor_title_is_returned_by_real_password_login(conne
     from tests.integration.test_operations_api import client_for, sign_in
 
     async with await client_for(connection) as admin, await client_for(connection) as native:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         department = await admin.post(
             "/api/v1/console/departments",
             headers={"Idempotency-Key": str(uuid4())},

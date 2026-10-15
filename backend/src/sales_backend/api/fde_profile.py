@@ -6,9 +6,9 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
-from sales_backend.contracts.fde_profile import FdeProfileResponse
+from sales_backend.contracts.fde_profile import FdeProfileResponse, FdeProfileReviewDetail
 from sales_backend.db import Database
-from sales_backend.services.fde_profile import get_profile, request_review
+from sales_backend.services.fde_profile import get_profile, request_review, review_detail
 
 router = APIRouter(prefix="/api/v1/fde/profile", tags=["FDE collaboration"])
 
@@ -45,3 +45,18 @@ async def review(
         raise HTTPException(403, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@router.get("/reviews/{run_id}", response_model=FdeProfileReviewDetail)
+async def profile_review_detail(
+    run_id: UUID,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+):
+    try:
+        async with database.transaction(identity.actor, readonly=True, isolation="repeatable_read") as connection:
+            return await review_detail(connection, identity.actor, run_id)
+    except PermissionError as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc

@@ -52,6 +52,46 @@ def switch(root, name, target):
 
 CORE_SERVICES = ("shenma-api", "shenma-worker")
 FEISHU_SERVICE = "shenma-feishu-worker.service"
+PRESERVED_TABLES = (
+    "platform.workspace", "platform.user_ref", "platform.password_credential",
+    "platform.role_binding", "platform.team", "platform.team_membership",
+    "config.account_authorization", "config.account_permission_override", "config.account_permission_role",
+    "crm.customer", "crm.customer_ownership", "crm.customer_sales_member", "crm.contact",
+    "crm.opportunity", "crm.opportunity_participant", "activity.visit", "activity.visit_opportunity",
+    "workflow.task", "workflow.task_assignee", "insight.weekly_report", "insight.weekly_report_revision",
+    "config.feishu_connection", "security.feishu_credential", "ops.feishu_record_map",
+    "security.deployment_account_quota", "security.isolated_demo_account_quota",
+)
+
+
+def preserved_snapshot(database, columns=None):
+    """Compare original columns; legitimate new columns must not hide old-row changes."""
+    if columns is None:
+        columns = {}
+        for table in PRESERVED_TABLES:
+            schema, name = table.split(".")
+            names = sql(database, "SELECT string_agg(quote_ident(column_name),',' ORDER BY ordinal_position) "
+                        "FROM information_schema.columns WHERE table_schema='" + schema + "' AND table_name='" + name + "'")
+            if names:
+                columns[table] = names
+    rows = {}
+    for table, fields in columns.items():
+        query = ("SELECT md5(coalesce(string_agg(to_jsonb(t)::text,E'\\n' ORDER BY to_jsonb(t)::text),'')) "
+                 f"FROM (SELECT {fields} FROM {table}) t")
+        rows[table] = {"digest": sql(database, query), "count": sql(database, f"SELECT count(*) FROM {table}")}
+    return {"columns": columns, "rows": rows}
+
+
+def validate_preflight(path, args):
+    if not path or not path.is_file():
+        raise RuntimeError("V399 requires a successful server database-clone preflight receipt")
+    receipt = json.loads(path.read_text())
+    for name in ("revision", "expected_current", "expected_schema", "target_schema", "archive_sha256", "wheels_sha256"):
+        if receipt.get(name) != getattr(args, name):
+            raise RuntimeError("Preflight receipt mismatch: " + name)
+    if receipt.get("status") != "passed" or not receipt.get("existing_rows_unchanged") or not receipt.get("migration_repeat_unchanged"):
+        raise RuntimeError("Preflight verification did not pass")
+    return receipt
 
 
 def existing_services():
@@ -93,8 +133,9 @@ def main():
         parser.add_argument("--" + name + "-sha256", required=True)
     parser.add_argument("--revision", required=True)
     parser.add_argument("--expected-current", required=True)
-    parser.add_argument("--expected-schema", default="V125", choices=("V125", "V151", "V152", "V153", "V154", "V155", "V156", "V157", "V158", "V159"))
-    parser.add_argument("--target-schema", default="V159", choices=("V151", "V152", "V153", "V154", "V155", "V156", "V157", "V158", "V159"))
+    parser.add_argument("--expected-schema", default="V159", choices=("V125", "V151", "V152", "V153", "V154", "V155", "V156", "V157", "V158", "V159", "V160", "V161"))
+    parser.add_argument("--target-schema", default="V399", choices=("V151", "V152", "V153", "V154", "V155", "V156", "V157", "V158", "V159", "V399"))
+    parser.add_argument("--preflight-receipt", type=Path)
     args = parser.parse_args()
     if int(args.target_schema[1:]) < int(args.expected_schema[1:]):
         parser.error("Schema downgrade is not supported; target must be at least the current schema")
@@ -107,12 +148,16 @@ def main():
     assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == args.expected_schema
     for name in ("archive", "wheels"):
         assert hashlib.sha256(getattr(args, name).read_bytes()).hexdigest() == getattr(args, name + "_sha256")
+    if args.target_schema == "V399":
+        validate_preflight(args.preflight_receipt, args)
     new = root / "releases" / args.revision
-    assert not new.exists()
-    new.mkdir(mode=0o755)
-    unpack(args.archive, new, "SalesBuddy-Shenma-source-" + args.revision[:12] + "/")
+    if args.target_schema != "V399":
+        assert not new.exists()
+    if not new.exists():
+        new.mkdir(mode=0o755)
+        unpack(args.archive, new, "SalesBuddy-Shenma-source-" + args.revision[:12] + "/")
     run(["sha256sum", "-c", "SHA256SUMS"], cwd=new, stdout=subprocess.DEVNULL)
-    for file in (old / "database").rglob("*.sql"):
+    for file in [*(old / "database").glob("*.sql"), *(old / "database/migrations").glob("*.sql")]:
         assert file.read_bytes() == (new / file.relative_to(old)).read_bytes(), "Historical SQL changed"
     assert (new / "REVISION").read_text().strip() == args.revision
     assert json.loads((new / "frontend/project.config.json").read_text())["appid"] == "wx2824bdeb58528fd8"
@@ -123,7 +168,8 @@ def main():
     run(["sha256sum", "-c", "SHA256SUMS"], cwd=wheels, stdout=subprocess.DEVNULL)
     uv = "/opt/shenma-tools/uv-x86_64-unknown-linux-gnu/uv"
     python = new / "backend/.venv/bin/python"
-    run([uv, "venv", "--python", str((old / "backend/.venv/bin/python").resolve()), str(python.parent.parent)])
+    if not python.exists():
+        run([uv, "venv", "--python", str((old / "backend/.venv/bin/python").resolve()), str(python.parent.parent)])
     run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
          "-r", str(new / "deployment/runtime-requirements.txt")])
     run([uv, "pip", "install", "--python", str(python), "--no-index", "--find-links", str(wheels),
@@ -167,17 +213,25 @@ def main():
             run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert sql("shenma_sales", "SELECT max(version) FROM ops.schema_migration") == args.target_schema
-        # Identity/password/appointment/ownership rows must be exactly preserved.
-        for table in ("platform.user_ref", "platform.password_credential", "platform.role_binding", "platform.team_membership", "crm.customer", "crm.customer_ownership"):
-            query = f"SELECT md5(coalesce(string_agg(to_jsonb(t)::text, E'\\n' ORDER BY to_jsonb(t)::text),'')) FROM {table} t"
-            assert sql("shenma_sales", query) == sql(restored, query), "Existing rows changed: " + table
+        # Fingerprint only columns that existed before this upgrade, retaining
+        # identity hashes, ownership, authored content and customer connections.
+        before = preserved_snapshot(restored)
+        after = preserved_snapshot("shenma_sales", before["columns"])
+        assert before == after, "Existing identity, business or customer configuration rows changed"
         with (backup / "migration-repeat.json").open("w") as stream:
             run(["sudo", "-u", "postgres", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert all(item["status"] == "unchanged" for item in json.loads((backup / "migration-repeat.json").read_text()))
         switch(root, "current", new)
         switched = True
-        run(["systemctl", "start", *start_services])
+        # Do not consume a queue or send notifications until the new API and
+        # migrated schema are confirmed healthy. A failed API can still roll
+        # back before workers create irreversible external side effects.
+        run(["systemctl", "start", "shenma-api"])
+        healthy(args.revision, ("shenma-api",))
+        workers = tuple(service for service in start_services if service != "shenma-api")
+        if workers:
+            run(["systemctl", "start", *workers])
         version = healthy(args.revision, start_services)
         switch(root, "previous", old)
         receipt = {"revision": args.revision, "previous": args.expected_current, "database": args.target_schema,

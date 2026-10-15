@@ -1,0 +1,705 @@
+{
+  "capability": "operating_report",
+  "case": "off",
+  "started_at": "2026-09-12T09:24:05.061726+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "fe93dec54a23b56eeb9db7c917c3896a94414564ae0bedeb557d29d0ed23a2e4",
+    "bytes": 102442,
+    "fields": {
+      "scope": {
+        "type": "dict",
+        "count": 5
+      },
+      "windows": {
+        "type": "dict",
+        "count": 3
+      },
+      "visits": {
+        "type": "list",
+        "count": 41
+      },
+      "tasks": {
+        "type": "list",
+        "count": 40
+      },
+      "risks": {
+        "type": "list",
+        "count": 24
+      },
+      "opportunities": {
+        "type": "list",
+        "count": 46
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "49af62d1-bf75-4040-927a-2a50b10a0008",
+    "provider": "senseaudio",
+    "fallback_reason": null,
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 7599
+  },
+  "result": {
+    "sha256": "64fa89c015f473d7c6248a2f8702981e11c0eb324f96602f92a95dce3ca40b52",
+    "bytes": 3996,
+    "fields": {
+      "safe_customers": {
+        "type": "list",
+        "count": 2,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "attention_customers": {
+        "type": "list",
+        "count": 7,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "action_plan": {
+        "type": "list",
+        "count": 7,
+        "display_item_types": [
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          },
+          {
+            "item_type": "dict",
+            "title": {
+              "type": "str",
+              "nonempty_text": true
+            },
+            "detail": {
+              "type": "str",
+              "nonempty_text": true
+            }
+          }
+        ]
+      },
+      "title": {
+        "type": "str"
+      },
+      "period": {
+        "type": "str"
+      },
+      "scope": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 7603,
+  "validation": [
+    {
+      "input": {
+        "sha256": "07255c55fd7e6efbd393916dd1960de4831a0eccebc91f8adcfb37b66d6bebe6",
+        "bytes": 4009,
+        "fields": {
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "safe_customers": {
+            "type": "list",
+            "count": 2,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 7,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 7,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "64fa89c015f473d7c6248a2f8702981e11c0eb324f96602f92a95dce3ca40b52",
+        "bytes": 3996,
+        "fields": {
+          "safe_customers": {
+            "type": "list",
+            "count": 2,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "attention_customers": {
+            "type": "list",
+            "count": 7,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "action_plan": {
+            "type": "list",
+            "count": 7,
+            "display_item_types": [
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              },
+              {
+                "item_type": "dict",
+                "title": {
+                  "type": "str",
+                  "nonempty_text": true
+                },
+                "detail": {
+                  "type": "str",
+                  "nonempty_text": true
+                }
+              }
+            ]
+          },
+          "title": {
+            "type": "str"
+          },
+          "period": {
+            "type": "str"
+          },
+          "scope": {
+            "type": "str"
+          },
+          "summary": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "ad7a53b4-8fe9-43de-92c2-73522319921e",
+      "provider": "senseaudio",
+      "operation_id": "49af62d1-bf75-4040-927a-2a50b10a0008",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:24:05.087559+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:24:12.662687+00:00"
+    }
+  ]
+}

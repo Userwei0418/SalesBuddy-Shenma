@@ -1,3 +1,4 @@
+require('./helpers/business-options');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -11,6 +12,7 @@ const {
 } = require('../miniprogram/utils/opportunityQuarter');
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
+function deferred() {let resolve,reject;const promise=new Promise((yes,no)=>{resolve=yes;reject=no;});return {promise,resolve,reject};}
 const snapshot = value => JSON.parse(JSON.stringify(value));
 const ids = page => Array.from(page.data.filteredOpportunities, item => item.id);
 const quarterEvent = (scope, value) => ({ currentTarget: { dataset: { scope, value } } });
@@ -22,7 +24,7 @@ function pageWith(api = {}, role = 'manager') {
     ensureLogin: () => true,
     globalData: {
       role,
-      session: { userId: 'quarter-test-user', workspaceId: 'quarter-test-workspace', role },
+      session: { userId: 'quarter-test-user', workspaceId: 'quarter-test-workspace', role, capabilities:{'team.view':true} },
       roles: {
         sales: { name: '一线销售', scope: '仅本人' },
         supervisor: { name: '销售主管', scope: '团队' },
@@ -54,7 +56,7 @@ function pageWith(api = {}, role = 'manager') {
 
 function fixtures(year) {
   return [
-    { id: 'open-q1', status: 'open', probability: 30, expected_close_date: `${year}-03-12`, created_at: `${year}-01-02T10:00:00+08:00`, owner_name: '销售甲', team_name: '南区', amount: 100000 },
+    { id: 'open-q1', status: 'open', probability: 30, expected_close_date: `${year}-03-12`, created_at: `${year}-01-02T10:00:00+08:00`, owner_name: '销售甲', team_name: '南区', amount: 100000, visits: [{status:'confirmed',interaction_at:`${year}-01-20T10:00:00+08:00`}] },
     { id: 'open-q2', status: 'open', probability: 70, expected_close_date: `${year}-05-12`, created_at: `${year}-04-02T10:00:00+08:00`, owner_name: '销售乙', team_name: '北区', amount: 200000 },
     { id: 'won-q1', status: 'won', probability: 100, expected_close_date: `${year}-06-12`, closed_at: `${year}-02-02T10:00:00+08:00`, created_at: `${year}-04-03T10:00:00+08:00`, owner_name: '销售乙', team_name: '北区', amount: 300000 },
     { id: 'lost-q2', status: 'lost', probability: null, expected_close_date: `${year}-05-22`, closed_at: `${year}-05-01T10:00:00+08:00`, created_at: `${year}-02-03T10:00:00+08:00`, owner_name: '销售甲', team_name: '南区', amount: 400000 },
@@ -89,6 +91,16 @@ async function loadedPage(items, listResult = { items }) {
   await page.loadData();
   await tick();
   return { page, calls };
+}
+
+function joinedOverviewResponse(options, metrics) {
+  const quarters=[...new Set((options.overviewQuarters||[]).map(Number))].sort((a,b)=>a-b);
+  return {
+    items:[],has_more:false,next_offset:null,
+    summary:{total:metrics.total,open_count:0,open_amount:0,unknown_open_amount_count:0},
+    owner_options:[],team_options:[],facets:{years:[options.overviewYear]},
+    overview:{metrics:{...metrics,demo_scene_count:metrics.demo_scene_count||0},year:Number(options.overviewYear),quarters,definition_version:'opportunity_filtered_overview_v1'},
+  };
 }
 
 test('商机季度按北京时间切分，跨季和跨年时间戳归入正确季度', () => {
@@ -128,13 +140,13 @@ test('总览独立读取服务端指标，绝不从商机列表推导', async ()
   assert.equal(page.data.opportunityBoard.won, 1);
   assert.equal(page.data.opportunityBoard.total, 5);
   assert.equal(page.data.opportunityBoard.active, 1);
-  assert.equal(page.data.opportunityBoard.newCount, 5);
+  assert.equal(page.data.opportunityBoard.newCount, 4);
   assert.equal(page.data.summaryQuarter.year, year);
-  assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), []);
+  assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), [1, 2, 3, 4]);
   assert.deepEqual(Array.from(page.data.listQuarter.quarters), []);
 });
 
-test('总览季度与列表季度、阶段和经理团队筛选彼此独立', async () => {
+test('统计时间独立，列表季度、阶段和经理团队筛选共同刷新总览', async () => {
   const year = beijingDateParts(new Date()).year;
   const { page } = await loadedPage(fixtures(year));
   const initialList = ids(page);
@@ -149,16 +161,16 @@ test('总览季度与列表季度、阶段和经理团队筛选彼此独立', as
 
   page.toggleQuarter(quarterEvent('list', 2));
   await tick();
-  assert.deepEqual(ids(page), ['won-q1', 'open-q2', 'lost-q2']);
-  assert.deepEqual(snapshot(page.data.opportunityBoard), summary);
+  assert.deepEqual(ids(page), ['open-q2', 'won-q1', 'lost-q2']);
+  assert.deepEqual(snapshot(page.data.opportunityBoard), {total:3,won:1,active:0,newCount:1,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0,demo_scene_count:0});
   page.changeExecutionTeam({ detail: { value: page.data.executionTeamOptions.findIndex(item => item.value === '南区') } });
   await tick();
   assert.deepEqual(ids(page), ['lost-q2']);
-  assert.deepEqual(snapshot(page.data.opportunityBoard), summary);
+  assert.deepEqual(snapshot(page.data.opportunityBoard), {total:1,won:0,active:0,newCount:1,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0,demo_scene_count:0});
   page.toggleOpportunityStage({ currentTarget: { dataset: { value: 'won' } } });
   await tick();
   assert.deepEqual(ids(page), []);
-  assert.deepEqual(snapshot(page.data.opportunityBoard), summary);
+  assert.equal(page.data.opportunityBoard.total,0);
 });
 
 test('两组季度可独立多选，列表重置和总览重置只清理各自筛选', async () => {
@@ -170,24 +182,24 @@ test('两组季度可独立多选，列表重置和总览重置只清理各自�
   await tick();
   page.toggleQuarter(quarterEvent('list', 2));
   await tick();
-  assert.deepEqual(ids(page), ['open-q1', 'won-q1', 'open-q2', 'lost-q2']);
+  assert.deepEqual(ids(page), ['open-q1', 'open-q2', 'won-q1', 'lost-q2']);
   const summary = snapshot(page.data.opportunityBoard);
   page.resetOpportunityFilters();
   await tick();
   assert.equal(ids(page).length, 5);
   assert.deepEqual(Array.from(page.data.listQuarter.quarters), []);
   assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), [1]);
-  assert.deepEqual(snapshot(page.data.opportunityBoard), summary);
+  assert.deepEqual(snapshot(page.data.opportunityBoard), {total:5,won:1,active:1,newCount:2,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0,demo_scene_count:0});
 
   page.toggleQuarter(quarterEvent('list', 2));
   await tick();
   const filteredList = ids(page);
   page.resetSummaryQuarter();
   await tick();
-  assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), []);
+  assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), [1, 2, 3, 4]);
   assert.deepEqual(Array.from(page.data.listQuarter.quarters), [2]);
   assert.deepEqual(ids(page), filteredList);
-  assert.equal(page.data.opportunityBoard.total, 5);
+  assert.equal(page.data.opportunityBoard.total, 3);
 });
 
 test('切换总览年份明确进入全年，全部存量不变且不改变列表筛选', async () => {
@@ -198,26 +210,26 @@ test('切换总览年份明确进入全年，全部存量不变且不改变列�
   page.toggleQuarter(quarterEvent('list', 2));
   await tick();
   const before = ids(page);
-  const yearIndex = page.data.quarterYearOptions.findIndex(item => Number(item.value) === year - 1);
+  const yearIndex = page.data.summaryYearOptions.findIndex(item => Number(item.value) === year - 1);
   assert.ok(yearIndex >= 0, '存在历史商机时应可选择其年份');
   page.changeQuarterYear({ currentTarget: { dataset: { scope: 'summary' } }, detail: { value: yearIndex } });
   await tick();
   assert.equal(page.data.summaryQuarter.year, year - 1);
   assert.deepEqual(Array.from(page.data.summaryQuarter.quarters), [1, 2, 3, 4]);
   assert.equal(page.data.summaryQuarter.label, `${year - 1}年 全年`);
-  assert.equal(page.data.opportunityBoard.total, 5);
-  assert.equal(page.data.opportunityBoard.active, 1);
+  assert.equal(page.data.opportunityBoard.total, 3);
+  assert.equal(page.data.opportunityBoard.active, 0);
   assert.equal(page.data.opportunityBoard.won, 0);
   assert.equal(page.data.listQuarter.year, year);
   assert.deepEqual(ids(page), before);
 });
 
-test('列表失败或超过300条不影响独立总览', async () => {
+test('列表与总览使用同一筛选响应，失败时不会显示伪造统计', async () => {
   const { page: empty } = await loadedPage([]);
   assert.equal(empty.data.opportunityDataReady, true);
   assert.equal(empty.data.opportunityBoard.total, 0);
   const { page: failed } = await loadedPage([], new Error('网络中断'));
-  assert.equal(failed.data.opportunityDataReady, true);
+  assert.equal(failed.data.opportunityDataReady, false);
   assert.ok(failed.data.opportunityListError);
   const rows = Array.from({ length: 301 }, (_, index) => ({ id: `opportunity-${index}`, status: 'open', probability: 30, amount: 100 }));
   const { page: complete } = await loadedPage(rows);
@@ -225,24 +237,24 @@ test('列表失败或超过300条不影响独立总览', async () => {
   assert.equal(complete.data.filteredOpportunities.length, 20);
   assert.equal(complete.data.opportunityTotal,301);
   assert.equal(complete.data.opportunityHasMore,true);
-  assert.equal(complete.data.opportunityBoard.total, 5); // Deliberately different server scope; no local recount.
+  assert.equal(complete.data.opportunityBoard.total, 301); // The joined overview covers the same filtered population.
 });
 
 test('全部时间转年份请求全年四季，统计说明区分存量、原建单日期与关单筛选', async () => {
   const requests=[];
-  const page=pageWith({getOpportunityOverview:async params=>{
-    requests.push(snapshot(params));return {metrics:{won:14,total:258,active:176,newCount:params.quarters.length ? 251 : 258,
-      missingCloseDates:0,missingWonDates:14,missingCreatedDates:0}};
+  const page=pageWith({listOpportunities:async params=>{
+    requests.push(snapshot(params));
+    return joinedOverviewResponse(params,{won:14,total:258,active:176,newCount:params.overviewQuarters.length ? 251 : 258,missingCloseDates:0,missingWonDates:14,missingCreatedDates:0});
   }});
-  page.setData({summaryQuarter:quarterSelection(2026),quarterYearOptions:[{value:2025},{value:2026}]});
-  page.changeQuarterYear({currentTarget:{dataset:{scope:'summary'}},detail:{value:1}});await tick();
-  assert.deepEqual(requests[0].quarters,[1,2,3,4]);assert.equal(requests[0].year,2026);
+  page.setData({summaryQuarter:quarterSelection(2026),summaryYearOptions:[{value:'all'},{value:2025},{value:2026}]});
+  page.changeQuarterYear({currentTarget:{dataset:{scope:'summary'}},detail:{value:2}});await tick();
+  assert.deepEqual(requests[0].overviewQuarters,[1,2,3,4]);assert.equal(requests[0].overviewYear,2026);
   assert.equal(page.data.opportunityBoard.total,258);assert.equal(page.data.opportunityBoard.newCount,251);
-  page.toggleQuarter(quarterEvent('summary','all'));await tick();
-  assert.deepEqual(requests[1].quarters,[]);assert.match(page.data.summaryQuarter.label,/跨年/);
+  page.changeQuarterYear({currentTarget:{dataset:{scope:'summary'}},detail:{value:0}});await tick();
+  assert.deepEqual(requests[1].overviewQuarters,[]);assert.match(page.data.summaryQuarter.label,/全部年份/);
   assert.equal(page.data.opportunityBoard.newCount,258);
   page.showOpportunityMetricHelp();assert.equal(page.fixtureModals[0].content,OPPORTUNITY_OVERVIEW_HELP);
-  assert.match(OPPORTUNITY_OVERVIEW_HELP,/季度筛选不改变当前存量/);
+  assert.match(OPPORTUNITY_OVERVIEW_HELP,/统计时间不改变商机范围/);
   assert.match(OPPORTUNITY_OVERVIEW_HELP,/原始建单日期/);assert.match(OPPORTUNITY_OVERVIEW_HELP,/不按导入时间补算/);
   const wxml=fs.readFileSync(path.resolve(__dirname,'../miniprogram/pages/workbench/index.wxml'),'utf8');
   assert.match(wxml,/>全部商机</);assert.match(wxml,/选择年份/);
@@ -251,21 +263,23 @@ test('全部时间转年份请求全年四季，统计说明区分存量、原�
 });
 
 test('总览失败、慢响应及离开页面不会显示错误季度的旧指标', async () => {
-  let resolveFirst;
-  const page = pageWith({ getOpportunityOverview: selection => selection.year === 2025
-    ? new Promise(resolve => { resolveFirst = resolve; }) : Promise.reject(new Error('稍后重试')) });
+  const pending=[];
+  const page = pageWith({listOpportunities: options => {const request=deferred();pending.push({options,...request});return request.promise;}});
   page.data.summaryQuarter = quarterSelection(2025, [1]);
   const first = page.applyOpportunitySummary();
+  assert.equal(pending.length,1);
   page.data.summaryQuarter = quarterSelection(2026, [2]);
-  await page.applyOpportunitySummary();
+  const second = page.applyOpportunitySummary();
+  pending[1].reject(new Error('稍后重试'));await second;
   assert.equal(page.data.opportunityDataReady, false);
   assert.equal(page.data.opportunityDataError, '稍后重试');
-  resolveFirst({ metrics: { won: 9, total: 9, active: 9, newCount: 9, missingCloseDates: 0, missingWonDates: 0, missingCreatedDates: 0 } });
+  pending[0].resolve(joinedOverviewResponse(pending[0].options,{won:9,total:9,active:9,newCount:9,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}));
   await first;
   assert.equal(page.data.opportunityDataReady, false);
   page.data.summaryQuarter = quarterSelection(2025, [1]);
-  const pending = page.applyOpportunitySummary();
-  page.onUnload(); resolveFirst({ metrics: {} }); await pending;
+  const thirdLoad = page.applyOpportunitySummary();
+  const thirdRequest = pending[2];
+  page.onUnload(); thirdRequest.resolve(joinedOverviewResponse(thirdRequest.options,{won:1,total:1,active:1,newCount:1,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0})); await thirdLoad;
   assert.equal(page.data.opportunityDataReady, false);
 });
 
@@ -323,7 +337,7 @@ for (const role of ['supervisor', 'manager']) {
 }
 
 
-test('默认按年份季度排列、季度内阶段降序，日期待完善的商机置底', async () => {
+test('原生保持季度分组、组内在推优先，再按阶段降序，日期待完善的商机置底', async () => {
   const rows = [
     {id:'q2-high',status:'open',probability:90,expected_close_date:'2026-04-01'},
     {id:'q1-low',status:'open',probability:30,expected_close_date:'2026-01-01'},
@@ -336,7 +350,9 @@ test('默认按年份季度排列、季度内阶段降序，日期待完善的�
   const originalIds = rows.map(item => item.id);
   const {page} = await loadedPage(rows);
   assert.deepEqual(Array.from(page.data.opportunityGroups,group=>group.label),['2025年 · Q4','2026年 · Q1','2026年 · Q2','待确认季度']);
-  assert.deepEqual(ids(page),['prior','q1-won','q1-low','q1-low-2','q1-lost','q2-high','undated-won']);
+  assert.deepEqual(ids(page),['prior','q1-low','q1-low-2','q1-won','q1-lost','q2-high','undated-won']);
+  // Mini preserves each quarter as a contiguous group: this is not PC global open-first.
+  assert.ok(ids(page).indexOf('q1-won') < ids(page).indexOf('q2-high'));
   assert.deepEqual(rows.map(item=>item.id),originalIds);
 });
 
@@ -358,12 +374,12 @@ test('关单时间单入口支持季度多选，快捷时间与自选季度互�
   page.toggleQuarter(quarterEvent('list',2));
   await tick();
   assert.equal(page.data.opportunityCloseIndex,0);
-  assert.deepEqual(ids(page),['open-q1','won-q1','open-q2','lost-q2']);
+  assert.deepEqual(ids(page),['open-q1','open-q2','won-q1','lost-q2']);
   const selected=ids(page);
   page.toggleOpportunityQuarterFilter();
   assert.equal(page.data.showOpportunityQuarterFilter,false);
   assert.deepEqual(ids(page),selected);
-  assert.deepEqual(snapshot(page.data.opportunityBoard),summary);
+  assert.deepEqual(snapshot(page.data.opportunityBoard),{total:4,won:1,active:1,newCount:4,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0,demo_scene_count:0});
   page.selectOpportunityClosePeriod({currentTarget:{dataset:{index:3}}});
   await tick();
   assert.deepEqual(Array.from(page.data.listQuarter.quarters),[]);
@@ -390,22 +406,22 @@ test('商机首屏缓存按账号和权限隔离，旧复合工作台接口不�
 });
 
 test('商机第一页先呈现，不等待慢总览，也不读取旧复合工作台',async()=>{
- let resolveOverview,legacyReads=0;
+  let legacyReads=0;
  const rows=fixtures(2026);
  const page=pageWith({listOpportunities:async options=>pageResponse(rows,options),
   getOpportunityOverview:()=>new Promise(resolve=>{resolveOverview=resolve;}),
   getWorkbench:()=>{legacyReads++;throw Error('旧接口不可用');}});
- const pending=page.loadData();await tick();
- assert.equal(page.data.dataReady,true);assert.equal(page.data.opportunityListLoading,false);
- assert.equal(page.data.filteredOpportunities.length,5);assert.equal(page.data.opportunityOverviewLoading,true);
- assert.equal(page.data.opportunityDataReady,false);assert.equal(legacyReads,0);
- resolveOverview({metrics:{won:1,total:4,active:2,newCount:3,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}});
- await pending;assert.equal(page.data.opportunityBoard.total,4);
+  const pending=page.loadData();await tick();
+  assert.equal(page.data.dataReady,true);assert.equal(page.data.opportunityListLoading,false);
+  assert.equal(page.data.filteredOpportunities.length,5);assert.equal(page.data.opportunityOverviewLoading,false);
+  assert.equal(page.data.opportunityDataReady,true);assert.equal(legacyReads,0);
+  await pending;assert.equal(page.data.opportunityBoard.total,5);
 });
 
 test('总览团队目录独立于商机数据，空团队可选并使用团队ID请求',()=>{
- const p=pageWith();p.data.role='manager';p.data.executionTeamKey='empty';
- p.acceptOpportunityPage(pageResponse([], {directoryTeams:[{id:'empty',name:'空业务组'},{id:'renamed',name:'更名后的团队'}]}),false);
+ const p=pageWith();p.data.role='manager';p.data.canViewTeam=true;p.data.executionScope='team';p.data.executionTeamKey='empty';
+ const options={...p.opportunityParams(),directoryTeams:[{id:'empty',name:'空业务组'},{id:'renamed',name:'更名后的团队'}]};
+ p.acceptOpportunityPage(pageResponse([], {...options,includeOverview:true,overviewYear:Number(options.overviewYear),overviewQuarters:[1,2,3,4]}),false);
  assert.deepEqual(Array.from(p.data.executionTeamOptions,row=>row.value),['all','empty','renamed']);
  assert.equal(p.data.executionTeamIndex,1);assert.equal(p.data.executionTeamLabel,'空业务组');
  assert.equal(p.data.opportunityTotal,0);assert.equal(p.opportunityParams().teamId,'empty');

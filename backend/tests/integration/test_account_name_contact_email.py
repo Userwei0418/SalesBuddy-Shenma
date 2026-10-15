@@ -12,7 +12,7 @@ pytestmark=pytest.mark.asyncio
 
 async def test_account_name_and_phone_share_identity_but_contact_email_is_not_a_login(connection):
     async with await client_for(connection) as admin,await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         name='Member_'+uuid4().hex[:8]
         body,created=await create(admin,account=name)
         uid=created.json()['id']

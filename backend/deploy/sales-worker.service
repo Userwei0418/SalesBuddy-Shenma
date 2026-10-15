@@ -1,0 +1,27 @@
+[Unit]
+Description=Sales Assistant Background Worker
+After=network-online.target postgresql.service sales-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sales-backend
+Group=sales-backend
+EnvironmentFile=/etc/sales-backend.env
+# Defaults: import=1, interactive=2, review=1; Worker uses its own pool (max=8).
+# Override WORKER_*_CONCURRENCY / WORKER_DATABASE_MAX_POOL_SIZE in EnvironmentFile.
+# SIGTERM cancels handlers and heartbeats together; interrupted leases are recovered
+# by ops.claim_job after their deadline, using the existing completion receipt fence.
+TimeoutStopSec=30
+WorkingDirectory=/www/wwwroot/salegent/current
+ExecStart=/www/wwwroot/salegent/current/.venv/bin/python -m sales_backend.worker
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/sales-backend
+
+[Install]
+WantedBy=multi-user.target

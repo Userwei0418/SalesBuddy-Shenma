@@ -24,9 +24,12 @@
     </view>
     <view class="search-shell">
       <t-icon name="search" size="40rpx" class="search-icon"/>
-      <input class="search" placeholder="搜索客户名称" placeholder-class="search-placeholder" value="{{query}}" confirm-type="search" bindinput="inputCustomer"/>
+      <input class="search" placeholder="搜索公司客户名称" placeholder-class="search-placeholder" value="{{query}}" maxlength="100" confirm-type="search" bindinput="inputCustomer" disabled="{{busy || saveStatus === 'unknown' || saveStatus === 'checking' || saveStatus === 'succeeded'}}"/>
     </view>
-    <view wx:if="{{query && !customers.length}}" class="empty-hint">输入客户名称后，从搜索结果中选择</view>
+    <view wx:if="{{customerSearchLoading}}" class="empty-hint">正在搜索公司客户…</view>
+    <view wx:elif="{{customerSearchError}}" class="error-card customer-search-error" aria-role="alert"><text>{{customerSearchError}}</text><button class="search-retry" size="mini" bindtap="retryCustomerSearch">重新搜索</button></view>
+    <view wx:elif="{{customerSearchDone && !customers.length}}" class="empty-hint">未找到匹配的公司客户，请调整关键词</view>
+    <view wx:elif="{{!customers.length}}" class="empty-hint">输入客户名称，从有权引用的公司客户中选择</view>
     <view wx:for="{{customers}}" wx:key="id" class="customer" hover-class="customer-pressed" data-id="{{item.id}}" bindtap="selectCustomer">
       <view class="customer-result-name">{{item.name}}</view>
       <t-icon name="chevron-right" size="36rpx" class="customer-arrow"/>
@@ -43,14 +46,21 @@
       </view>
       <view class="step-chip">第 2 步</view>
     </view>
-    <opportunity-form id="opportunityForm" customer-id="{{customerId}}" existing="{{existing}}" disabled="{{busy}}"/>
+    <opportunity-form id="opportunityForm" customer-id="{{customerId}}" existing="{{existing}}" disabled="{{busy || saveStatus === 'unknown' || saveStatus === 'checking' || saveStatus === 'succeeded'}}"/>
   </view>
 
   <view wx:if="{{error}}" class="error-card" aria-role="alert">{{error}}</view>
+  <view wx:if="{{saveRecoveryMessage}}" class="error-card" aria-role="alert">{{saveRecoveryMessage}}</view>
 
   <view wx:if="{{customerName}}" class="footer">
     <view class="footer-hint">请确认商机名称、阶段、金额和预计关单日期</view>
-    <button class="submit {{busy ? 'submit-disabled' : ''}}" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">{{busy ? '正在保存' : '确认保存商机'}}</button>
+    <block wx:if="{{saveStatus === 'unknown' || saveStatus === 'checking'}}">
+      <button class="submit" loading="{{busy}}" disabled="{{busy}}" bindtap="checkSaveResult">{{busy ? (saveRecoveryAction === 'cancel' ? '正在结束未完成的提交' : '正在查询保存结果') : '查询保存结果'}}</button>
+      <button wx:if="{{canRetrySave}}" disabled="{{busy}}" bindtap="retrySave">按原内容重试提交</button>
+      <button disabled="{{busy}}" bindtap="cancelSave">结束未完成的提交</button>
+    </block>
+    <button wx:elif="{{saveStatus === 'succeeded'}}" class="submit" bindtap="openSavedOpportunity">打开已保存商机</button>
+    <button wx:else class="submit {{busy ? 'submit-disabled' : ''}}" loading="{{busy}}" disabled="{{busy}}" bindtap="submit">{{busy ? '正在保存' : '确认保存商机'}}</button>
   </view>
 </view>
 

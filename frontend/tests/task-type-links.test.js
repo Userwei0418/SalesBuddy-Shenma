@@ -1,8 +1,13 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const file=path.resolve(__dirname,'../miniprogram/pages/management-task-create/index.js');
+// Existing scenario fixtures focus on task behavior; supply the directory metadata contract.
+const directoryPage=page=>({...page,teams:[{id:'north',name:'北区'},{id:'south',name:'南区'}],defaults:{team_id:'south'},
+ items:page.items.map(item=>({...item,account_code:item.account_code||item.id,team_ids:item.team==='北区'?['north']:['south']}))});
+
 function setup(extra={}){
  let page;const sent=[],modals=[],session={userId:'u',workspaceId:'w',role:'sales'};
  const api={listTaskRecipients:async()=>({items:[]}),getTaskPositions:async()=>({items:[]}),createTask:async value=>{sent.push(value);return{id:'t'};},...extra};
+ const readRecipients=api.listTaskRecipients;api.listTaskRecipients=async options=>directoryPage(await readRecipients(options));
  vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:v=>page=v,getApp:()=>({ensureLogin:()=>true,globalData:{session,roles:{sales:{name:"销售",scope:"本人"}}}}),setTimeout(){},clearTimeout(){},require:n=>n.includes('apiClient')?api:require(path.resolve(path.dirname(file),n)),wx:{showToast(){},showModal:v=>modals.push(v),setStorageSync(){},navigateBack(){}}});
  page.data=JSON.parse(JSON.stringify(page.data));page.setData=(v,cb)=>{Object.assign(page.data,v);if(cb)cb();};
  page.getSelectedDueAt=()=>Date.now()+86400000;

@@ -1,3 +1,4 @@
+from sales_backend.domain.customer_identity import BusinessIdentityFilter, legacy_compatible_payload
 from typing import Literal
 from uuid import UUID
 
@@ -9,25 +10,63 @@ from sales_backend.api.exports import csv_response
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_management_identity
 from sales_backend.contracts.customer_profile import CustomerProfileUpdate
-from sales_backend.contracts.customer_creation import (
-    CustomerCreationRequestDecision, CustomerCreationRequestPage, CustomerCreationRequestResult,
-)
 from sales_backend.contracts.detail_reads import OperationsCustomerHistory, OperationsCustomerOverview
 from sales_backend.db import Database
+from sales_backend.contracts.management_options import CustomerCreateOptions
 from sales_backend.repositories.customer_mutations import CustomerMutationRepository
 from sales_backend.repositories.customer_creation_requests import CustomerCreationRequestRepository
+from sales_backend.contracts.customer_creation import CustomerCreationRequestDecision, CustomerCreationRequestPage
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.operations_customers import OperationsCustomerRepository
 from sales_backend.services.operations import management_write
 
 router = APIRouter(prefix="/api/v1/console", tags=["Operations customers"])
 repository = OperationsCustomerRepository()
-creation_repository = CustomerCreationRequestRepository()
+creation_requests = CustomerCreationRequestRepository()
 
 
 class ClaimDecision(BaseModel):
     decision: Literal["approved", "rejected"]
     reason: str = Field(default="", max_length=2000)
+
+
+@router.get("/customer-creation-requests", response_model=CustomerCreationRequestPage)
+async def customer_creation_requests(
+    request_status: Literal["all", "pending", "approved", "rejected", "cancelled"] | None = Query(default="pending", alias="status"),
+    q: str | None = Query(default=None, max_length=100),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    identity: RequestIdentity = Depends(get_management_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await creation_requests.queue(connection, identity.actor, status=request_status, q=q, limit=limit, offset=offset)
+
+
+@router.post("/customer-creation-requests/{request_id}/decision")
+async def review_customer_creation_request(
+    request_id: UUID,
+    body: CustomerCreationRequestDecision,
+    idempotency_key: MutationKey = None,
+    identity: RequestIdentity = Depends(get_management_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    fingerprint = body.model_dump(mode="json", exclude_none=True)
+    approved_payload = None
+    if body.approved_payload is not None:
+        approved_payload = legacy_compatible_payload(body.approved_payload, mode="json")
+        # Omitted identity fields preserve the locked request. Explicit null IDs
+        # clear a selection, so they must remain distinct in the mutation digest.
+        fingerprint["approved_payload"] = {k: v for k, v in approved_payload.items()
+            if v is not None or k in {"business_identities", "partner_profile_id", "partner_id"}}
+    return await management_write(
+        database, identity.actor, idempotency_key, f"customer.creation_request:{request_id}",
+        fingerprint, lambda c: creation_requests.decide(
+            c, identity.actor, str(request_id), body.decision, body.reason,
+            approved_payload=approved_payload,
+            expected_version=body.version_no,
+        ),
+    )
 
 
 class OwnershipRelease(BaseModel):
@@ -37,42 +76,6 @@ class OwnershipRelease(BaseModel):
 
 class LegacyResolution(OwnershipRelease):
     owner_user_ref_id: UUID
-
-
-@router.get("/customer-creation-requests", response_model=CustomerCreationRequestPage,
-            description="运营查看客户建档申请队列。")
-async def creation_requests(
-    status: Literal["pending", "approved", "rejected", "cancelled", "all"] = "pending",
-    q: str | None = Query(default=None, max_length=100),
-    limit: int = Query(default=50, ge=1, le=100),
-    offset: int = Query(default=0, ge=0, le=100000),
-    identity: RequestIdentity = Depends(get_management_identity),
-    database: Database = Depends(get_database),
-) -> dict:
-    async with database.transaction(identity.actor, readonly=True) as connection:
-        return await creation_repository.queue(
-            connection, identity.actor, status=status, q=q, limit=limit, offset=offset
-        )
-
-
-@router.post("/customer-creation-requests/{request_id}/decision", response_model=CustomerCreationRequestResult)
-async def decide_creation_request(
-    request_id: UUID,
-    body: CustomerCreationRequestDecision,
-    idempotency_key: MutationKey = None,
-    identity: RequestIdentity = Depends(get_management_identity),
-    database: Database = Depends(get_database),
-):
-    return await management_write(
-        database,
-        identity.actor,
-        idempotency_key,
-        f"customer_creation_request.decide:{request_id}",
-        body.model_dump(),
-        lambda connection: creation_repository.decide(
-            connection, identity.actor, str(request_id), body.decision, body.reason
-        ),
-    )
 
 
 @router.get("/summary")
@@ -87,13 +90,12 @@ async def summary(
 @router.get("/customers/export")
 async def customers(
     request: Request,
+    business_identity: BusinessIdentityFilter = "all",
     q: str | None = Query(None, max_length=100),
     industry: str | None = Query(None, max_length=100),
     level: str | None = Query(None, max_length=20),
     state: Literal["unclaimed", "claimed", "legacy_review"] | None = None,
     owner: UUID | None = None,
-    data_kind: Literal['production', 'demo', 'test'] | None = None,
-    trial_batch: str | None = Query(None, min_length=1, max_length=120),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0, le=100000),
     identity: RequestIdentity = Depends(get_management_identity),
@@ -104,14 +106,14 @@ async def customers(
         result = await repository.list(
             connection,
             q=q,
+            business_identity=business_identity,
             industry=industry,
             level=level,
             state=state,
             owner=owner,
-            data_kind=data_kind,
-            trial_batch=trial_batch,
             limit=10001 if exporting else limit,
             offset=0 if exporting else offset,
+            include_actions=not exporting,
         )
     if exporting:
         return csv_response(
@@ -128,13 +130,23 @@ async def customers(
                 ("lifecycle_status", "客户状态"),
                 ("team_name", "部门"),
                 ("company_reference", "公司建档编号"),
-                ("data_kind", "数据用途代码"),
-                ("synthetic_trial_batch_id", "试用数据批次"),
                 ("created_at", "创建时间"),
             ],
             "customers",
         )
     return result
+
+
+@router.get("/customers/create-options", response_model=CustomerCreateOptions)
+async def create_options(
+    identity: RequestIdentity = Depends(get_management_identity), database: Database = Depends(get_database),
+) -> dict:
+    """Only teams accepted by customer creation; no organization/account directory."""
+    from sales_backend.repositories.team_directory import selectable_teams
+
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        teams = await selectable_teams(connection, identity.actor, "assignment", permission="customer.create")
+        return {"teams": [{"id": team["id"], "name": team["name"]} for team in teams]}
 
 
 @router.get("/customers/{customer_id}")
@@ -206,7 +218,7 @@ async def customer_history(
 
 @router.get("/claims")
 async def claims(
-    status: Literal["pending", "approved", "rejected", "cancelled"] | None = None,
+    status: Literal["all", "pending", "approved", "rejected", "cancelled"] | None = None,
     q: str | None = Query(None, max_length=100),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0, le=100000),

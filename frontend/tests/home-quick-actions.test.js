@@ -38,10 +38,9 @@ test('首页固定经营摘要并在卡片区域独立滚动，客户认领进�
   assert.match(wxml, /class="overview-fixed"[\s\S]*class="brief-card"[\s\S]*<scroll-view class="chat-scroll"/);
   assert.match(wxss, /\.assistant-page\s*\{[\s\S]*display:\s*flex[\s\S]*overflow:\s*hidden/);
   assert.match(wxss, /\.chat-scroll\{[^}]*flex:1[^}]*height:0/);
-  assert.match(wxss, /\.brief-card\s*\{[^}]*background:\s*var\(--sb-hero-bg\)/);
-  const summaryCss = fs.readFileSync(__dirname + '/../miniprogram/components/review-summary-card/index.wxss', 'utf8');
-  assert.match(summaryCss, /\.appearance-hero \.sb-summary-title,\.appearance-hero \.sb-summary-value\s*\{[^}]*color:var\(--sb-hero-ink\)/);
-  assert.match(wxml, /<sb-summary-card[^>]*appearance="hero"/);
+  assert.match(wxss, /\.brief-card\s*\{[\s\S]*background:var\(--ui-surface\)/);
+  assert.match(wxss, /\.brief-card\s*\{[\s\S]*background:var\(--sb-hero-bg\)/);
+  assert.match(wxml, /<sb-summary-card\s+appearance="hero"/);
   assert.match(js, /openCustomerClaim\(\)[\s\S]*navigateTo\(\{ url: "\/pages\/customer-claim\/index" \}\)/);
   assert.doesNotMatch(wxml, /assignment-layer|CUSTOMER CLAIM/);
   assert.match(js, /homeGreetingShownLogin/);

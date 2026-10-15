@@ -1,54 +1,64 @@
-// Explicit opt-in credentials, scoped to account and API on this device.
-// Local storage is not a secure vault. Never log or export these records.
-const KEY = 'salesRememberedLoginV1';
+// Device history contains company/account labels only. Authentication uses the
+// revocable server session in apiClient; passwords never enter this store.
+const KEY = 'salesAccountHistoryV3';
+const LEGACY_KEY = 'salesRememberedLoginV1';
 const normalizeAccount = value => String(value || '').trim().toUpperCase();
-function valid(value) {
-  return value && typeof value.baseUrl === 'string' && value.baseUrl &&
-    typeof value.account === 'string' && normalizeAccount(value.account) &&
-    typeof value.password === 'string' && value.password && value.password.length <= 128;
+const company = value => String(value || '').trim().toLowerCase();
+function sanitize(value) {
+  if (!value || typeof value.baseUrl !== 'string' || !value.baseUrl || typeof value.account !== 'string') return null;
+  const account=normalizeAccount(value.account);
+  if (!account || account.length>128) return null;
+  const resolvedAccount=normalizeAccount(value.resolvedAccount);
+  return {baseUrl:value.baseUrl,workspace:company(value.workspace),account,
+    ...(['auto','phone','account'].includes(value.loginType)?{loginType:value.loginType}:{}),
+    ...(resolvedAccount && resolvedAccount.length<=128?{resolvedAccount}:{})};
 }
 function records() {
-  const value = wx.getStorageSync(KEY);
-  if (!value) return [];
-  // Read the previous single-account format without losing its opted-in entry.
-  if (value.version === 1) return valid(value) ? [value] : [];
-  if (value.version !== 2 || !Array.isArray(value.entries)) return [];
-  return value.entries.filter(valid);
+  // Remove first, before writing migrated labels. A failed write must not retain a password.
+  const legacy=wx.getStorageSync(LEGACY_KEY);
+  if (legacy) wx.removeStorageSync(LEGACY_KEY);
+  const current=wx.getStorageSync(KEY);
+  const old=legacy?.version===1?[legacy]:legacy?.version===2&&Array.isArray(legacy.entries)?legacy.entries:[];
+  const source=current?.version===3&&Array.isArray(current.entries)?current.entries:[];
+  const entries=[];
+  for (const item of [...old,...source]) {
+    const v=sanitize(item);if(!v)continue;
+    const index=entries.findIndex(e=>matches(e,v.baseUrl,v.account,v.workspace));
+    if(index>=0)entries.splice(index,1);
+    entries.push(v);
+  }
+  const clean=entries.slice(-20);
+  // Re-encode labels, even if a malformed prior V3 record contains extra fields.
+  if (legacy || current) wx.setStorageSync(KEY,{version:3,entries:clean});
+  return clean;
 }
-function matches(value, baseUrl, account) {
-  return value.baseUrl === baseUrl && normalizeAccount(value.account) === normalizeAccount(account);
+function matches(value,baseUrl,account,workspace='') {
+  return value.baseUrl===baseUrl && value.account===normalizeAccount(account) && value.workspace===company(workspace);
 }
-function read(baseUrl, account) {
+function cleanup() { records(); }
+function read(baseUrl,account,workspace) {
   try {
-    const entries = records().filter(value => value.baseUrl === baseUrl &&
-      (account === undefined || matches(value,baseUrl,account)));
-    const value = entries[entries.length - 1];
-    return value ? {account:value.account,password:value.password} : null;
-  } catch (_) { return null; }
+    const entries=records().filter(v=>v.baseUrl===baseUrl && (workspace===undefined||v.workspace===company(workspace)) &&
+      (account===undefined||v.account===normalizeAccount(account)));
+    const v=entries[entries.length-1];return v?{account:v.account,workspace:v.workspace,
+      ...(v.loginType?{loginType:v.loginType}:{}),...(v.resolvedAccount?{resolvedAccount:v.resolvedAccount}:{})}:null;
+  } catch (_) {return null;}
 }
-function suggest(baseUrl, prefix) {
-  const query = normalizeAccount(prefix);
-  if (!query) return [];
-  try {
-    const seen = new Set();
-    return records().slice().reverse().filter(value => {
-      const account = normalizeAccount(value.account);
-      if (value.baseUrl !== baseUrl || account === query || !account.startsWith(query) || seen.has(account)) return false;
-      seen.add(account); return true;
-    }).slice(0,5).map(value => value.account);
-  } catch (_) { return []; }
+function suggest(baseUrl,prefix,workspace) {
+  const query=normalizeAccount(prefix);if(!query)return [];
+  try {return [...new Set(records().slice().reverse().filter(v=>v.baseUrl===baseUrl&&(workspace===undefined||v.workspace===company(workspace))&&v.account!==query&&v.account.startsWith(query)).map(v=>v.account))].slice(0,5);}
+  catch (_) {return [];}
 }
-function clear(baseUrl, account) {
-  const entries = records().filter(value => !matches(value,baseUrl,account));
-  if (entries.length) wx.setStorageSync(KEY,{version:2,entries});
-  else wx.removeStorageSync(KEY);
+function clear(baseUrl,account,workspace='') {
+  const entries=records().filter(v=>!matches(v,baseUrl,account,workspace));
+  if(entries.length)wx.setStorageSync(KEY,{version:3,entries});else wx.removeStorageSync(KEY);
 }
-function save(baseUrl, account, password) {
-  const value = {baseUrl,account:account.trim(),password};
-  if (!valid(value)) return;
-  const entries = records().filter(item => !matches(item,baseUrl,account));
-  // Most recently saved account is the default when opening a fresh login page.
-  entries.push(value);
-  wx.setStorageSync(KEY,{version:2,entries});
+function save(baseUrl,account,workspace='',metadata={}) {
+  const value=sanitize({baseUrl,account,workspace,...metadata});if(!value)return;
+  // A formerly company-less unique account now has a server-confirmed company.
+  // Replace its ambiguous legacy label, retaining every explicit other company.
+  const entries=records().filter(v=>!matches(v,baseUrl,account,workspace) &&
+    !(workspace && matches(v,baseUrl,account,'')));
+  wx.setStorageSync(KEY,{version:3,entries:[...entries,value].slice(-20)});
 }
-module.exports = {read, clear, save, suggest, normalizeAccount};
+module.exports={read,clear,save,suggest,cleanup,normalizeAccount};

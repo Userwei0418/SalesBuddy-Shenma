@@ -1,0 +1,55 @@
+/* Web weekly report: records and editable result share one work surface. */
+.department-ui[data-department-page="pages/weekly-report/index"] { height: 100%; }
+.department-ui .ds-weekly { display: flex; flex-direction: column; gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-weekly-heading, .department-ui .ds-weekly-period, .department-ui .ds-weekly-panel-head, .department-ui .ds-weekly-selection { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); }
+.department-ui .ds-weekly-heading h1 { font-size: var(--ui-text-page); margin: 0 0 var(--ui-space-1); }
+.department-ui .ds-weekly-heading .ant-tag { vertical-align: middle; font-weight: 400; }
+.department-ui .ds-weekly-period { flex-wrap: wrap; justify-content: flex-end; }
+.department-ui .ds-weekly-period .ant-select { width: 174px; }
+.department-ui .ds-weekly-columns { display: grid; grid-template-columns: minmax(300px, 0.85fr) minmax(360px, 1.15fr); gap: var(--ui-space-4); flex: 1; min-height: 0; }
+.department-ui .ds-weekly-records, .department-ui .ds-weekly-output { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+.department-ui .ds-weekly-panel-head { padding: var(--ui-space-4) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); flex-shrink: 0; }
+.department-ui .ds-weekly-panel-head h2 { display: flex; gap: var(--ui-space-2); align-items: center; margin-bottom: var(--ui-space-1); }
+.department-ui .ds-weekly-count { font-size: var(--ui-text-small); background: var(--ui-surface-subtle); border-radius: var(--ui-radius-control); padding: 0 var(--ui-space-2); color: var(--ui-secondary); }
+.department-ui .ds-weekly-record-tools { padding: var(--ui-space-4) var(--ui-space-4) var(--ui-space-3); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-weekly-selection { margin-top: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-weekly-record-list { flex: 1; min-height: 0; overflow-y: auto; }
+.department-ui .ds-weekly-record { padding: var(--ui-space-4) var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-weekly-record:last-child { border-bottom: 0; }
+.department-ui .ds-weekly-record-title { display: flex; gap: var(--ui-space-3); align-items: flex-start; }
+.department-ui .ds-weekly-record-title > div { flex: 1; min-width: 0; }
+.department-ui .ds-weekly-record-title strong { font-weight: 600; overflow-wrap: anywhere; }
+.department-ui .ds-weekly-record-title span:not(.ant-checkbox):not(.ant-checkbox-inner) { color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-weekly-record-title > div > span { display: block; }
+.department-ui .ds-weekly-record-title time { color: var(--ui-muted); font-size: var(--ui-text-small); white-space: nowrap; }
+.department-ui .ds-weekly-excerpt { margin: var(--ui-space-2) 0 0 28px; color: var(--ui-secondary); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.department-ui .ds-weekly-record .ant-collapse { margin: var(--ui-space-1) 0 0 22px; }
+.department-ui .ds-weekly-record .ant-collapse-header { padding: var(--ui-space-1) !important; font-size: var(--ui-text-small); color: var(--ui-primary); }
+.department-ui .ds-weekly-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--ui-text-small); }
+.department-ui .ds-weekly-source dt { color: var(--ui-muted); margin-top: var(--ui-space-2); }
+.department-ui .ds-weekly-source dd { margin: 0; }
+.department-ui .ds-weekly-generate { padding: var(--ui-space-4) var(--ui-space-4); border-top: 1px solid var(--ui-line); text-align: center; margin-top: auto; flex-shrink: 0; }
+.department-ui .ds-weekly-generate > span { display: block; margin-top: var(--ui-space-2); }
+.department-ui .ds-weekly-paper { padding: var(--ui-space-4) var(--ui-space-6); display: flex; flex-direction: column; flex: 1; min-height: 150px; }
+.department-ui .ds-weekly-paper > h3 { margin-bottom: var(--ui-space-1); }
+.department-ui .ds-weekly-editor-label { font-size: var(--ui-text-small); color: var(--ui-muted); margin: var(--ui-space-4) 0 var(--ui-space-1); }
+.department-ui .ds-weekly-paper textarea.ant-input { flex: 1; min-height: 120px; resize: none; padding: var(--ui-space-3); line-height: 1.9; background: var(--ui-surface); color: var(--ui-ink); }
+.department-ui .ds-weekly-citations { padding: 0 var(--ui-space-6) var(--ui-space-3); max-height: 120px; overflow-y: auto; font-size: var(--ui-text-small); color: var(--ui-muted); }
+.department-ui .ds-weekly-citations summary { cursor: pointer; }
+.department-ui .ds-weekly-citations ol { list-style: none; padding: 0; }
+.department-ui .ds-weekly-output-foot { display: flex; justify-content: space-between; gap: var(--ui-space-2); flex-wrap: wrap; padding: var(--ui-space-3) var(--ui-space-4); border-top: 1px solid var(--ui-line); color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-weekly-note { padding: var(--ui-space-2) var(--ui-space-4); background: var(--ui-selected); color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .ds-weekly-empty { flex: 1; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: var(--ui-space-6); text-align: center; }
+.department-ui .ds-weekly-empty svg { width: 64px; height: 64px; fill: var(--ui-selected); stroke: var(--ui-primary); stroke-width: 1.5; margin-bottom: var(--ui-space-4); }
+.department-ui .ds-weekly-empty p { margin-top: var(--ui-space-2); color: var(--ui-muted); }
+.department-ui .ds-weekly-empty > div { display: flex; gap: var(--ui-space-2); flex-wrap: wrap; justify-content: center; margin-top: var(--ui-space-4); }
+.department-ui .ds-weekly-empty > div span { background: var(--ui-surface-subtle); color: var(--ui-muted); padding: var(--ui-space-1) var(--ui-space-2); font-size: var(--ui-text-small); border-radius: var(--ui-radius-control); }
+@media (max-width: 1100px) { .department-ui .ds-weekly-heading { align-items: flex-start; } .department-ui .ds-weekly-period { max-width: 300px; } .department-ui .ds-weekly-columns { grid-template-columns: minmax(280px, 0.85fr) minmax(310px, 1.15fr); } }
+@media (max-width: 900px) {
+  body.department-design[data-route="weekly-report"] .web-sidebar { display: none; }
+  .department-ui[data-department-page="pages/weekly-report/index"], .department-ui .ds-weekly { height: auto; }
+  .department-ui .ds-weekly-columns { grid-template-columns: minmax(0, 1fr); }
+  .department-ui .ds-weekly-record-list { max-height: 420px; }
+  .department-ui .ds-weekly-paper textarea.ant-input { min-height: 400px; }
+}
+@media (max-width: 600px) { .department-ui .ds-weekly-heading { align-items: stretch; flex-direction: column; } .department-ui .ds-weekly-period { max-width: none; justify-content: flex-start; } .department-ui .ds-weekly-paper { padding: var(--ui-space-4); } }

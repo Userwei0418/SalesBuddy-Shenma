@@ -52,10 +52,10 @@ def provision(path, *, role, database, socket, port, runner=subprocess.run):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--environment-file', default='/etc/shenma-sales/feishu-sync.env')
-    parser.add_argument('--role', default='shenma_feishu_sync')
-    parser.add_argument('--database', default='shenma_sales')
-    parser.add_argument('--socket', default='/var/run/postgresql')  # noqa: S108 - existing PostgreSQL Unix socket, not a file
+    parser.add_argument('--environment-file', default='/etc/sales-feishu-sync.env')
+    parser.add_argument('--role', default='sales_feishu_sync')
+    parser.add_argument('--database', default='sales_saas')
+    parser.add_argument('--socket', default='/tmp')  # noqa: S108 - existing PostgreSQL Unix socket, not a file
     parser.add_argument('--port', type=int, default=5432)
     args = parser.parse_args()
     try:

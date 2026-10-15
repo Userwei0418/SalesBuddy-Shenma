@@ -11,6 +11,12 @@ export const state = {
   filters: {},
   refresh: async () => {},
 };
+// Display roles describe business identity; actions use effective permissions.
+// Missing permissions fail closed until the authenticated directory is loaded.
+export const hasPermission = (permission) => state.permissions?.[permission] === true;
+export function requirePermission(permission) {
+  if (!hasPermission(permission)) throw Error('当前账号未获此功能的授权，请联系本公司管理员。');
+}
 export const $ = (s, root = document) => root.querySelector(s);
 export const esc = (value) =>
   String(value ?? "").replace(
@@ -297,6 +303,29 @@ export const field = (
   } = {},
 ) =>
   `<label class="field ${full ? "full" : ""}"><b>${esc(label)}${required ? ' <span class="req">*</span>' : ""}</b>${select !== null ? `<select name="${esc(name)}" ${required ? "required" : ""} ${disabled ? "disabled" : ""}>${select}</select>` : type === "textarea" ? `<textarea name="${esc(name)}" ${required ? "required" : ""} placeholder="${esc(placeholder)}">${esc(value)}</textarea>` : `<input name="${esc(name)}" type="${esc(type)}" value="${esc(value)}" ${required ? "required" : ""} ${disabled ? "disabled" : ""} ${min !== "" ? `min="${esc(min)}"` : ""} ${max !== "" ? `max="${esc(max)}"` : ""} ${step !== "" ? `step="${esc(step)}"` : ""} placeholder="${esc(placeholder)}" ${type === "password" ? 'autocomplete="new-password"' : ""}>`}${help ? `<small>${esc(help)}</small>` : ""}</label>`;
+let dialogGeneration = 0;
+// Capture before a dialog's asynchronous reads, not after they finish. Latest
+// click wins, including when another module has opened a different dialog.
+export function dialogIntent({liveForm=false} = {}) {
+  const serial = ++dialogGeneration, session = sessionGeneration, company = companyGeneration;
+  const page = state.page, actor = JSON.stringify(state.actor);
+  const d = $('#dialog'), content = d?.innerHTML, open = d?.open, form = $('#dialog-form');
+  const root = $('#content'), first = root?.firstElementChild;
+  return () => serial === dialogGeneration && session === sessionGeneration && company === companyGeneration
+    && page === state.page && actor === JSON.stringify(state.actor)
+    && d === $('#dialog') && (liveForm ? form === $('#dialog-form') : content === d?.innerHTML) && open === d?.open
+    && root === $('#content') && first === root?.firstElementChild;
+}
+export async function readForDialog(pathOrLoad) {
+  const current = dialogIntent();
+  try {
+    const data = await (typeof pathOrLoad === 'function' ? pathOrLoad() : api(pathOrLoad));
+    return current() ? data : null;
+  } catch (error) {
+    if (current()) throw error;
+    return null;
+  }
+}
 export function dialog(
   title,
   body,
@@ -308,6 +337,8 @@ export function dialog(
     afterRender = null,
   } = {},
 ) {
+  dialogGeneration += 1;
+  const session = sessionGeneration, company = companyGeneration, page = state.page, identity = actorIdentity(state.actor);
   const d = $("#dialog");
   d.removeAttribute?.("aria-busy");
   d.className = wide ? "wide" : "";
@@ -327,6 +358,9 @@ export function dialog(
   d.oncancel=event=>{event.preventDefault();requestClose();};
   const markDirty=()=>{dirty=true;};
   const currentForm=$('#dialog-form');
+  const current = () => $('#dialog-form') === currentForm && d.open !== false
+    && session === sessionGeneration && company === companyGeneration && page === state.page
+    && identity === actorIdentity(state.actor);
   if(onSubmit){currentForm?.addEventListener?.('input',markDirty);currentForm?.addEventListener?.('change',markDirty);}
   const key = crypto.randomUUID();
   if (onSubmit)
@@ -335,22 +369,24 @@ export function dialog(
       const f = e.currentTarget;
       const btn = $("button[type=submit]", f);
       if(busy) return;
+      if (!current()) return;
       busy=true;btn.disabled = true;
+      f.inert = true;
       d.setAttribute?.('aria-busy','true');
       const label=btn.textContent;btn.textContent='正在保存…';
       $(".form-error", f).innerHTML = "";
       try {
         await onSubmit(new FormData(f), key, f);
-        if($('#dialog-form')!==f)return;
+        if(!current())return;
         dirty=false;d.close();
         await state.refresh();
       } catch (error) {
-        if($('#dialog-form')===f){
+        if(current()){
           $(".form-error", f).innerHTML = `<div class="error-box">${esc(error.message)}</div>`;
           $('.form-error',f).scrollIntoView?.({block:'nearest'});
         }
       } finally {
-        busy=false;btn.disabled = false;btn.textContent=label;
+        busy=false;btn.disabled = false;btn.textContent=label;f.inert = false;
         if($('#dialog-form')===f)d.removeAttribute?.('aria-busy');
       }
     };
@@ -378,19 +414,21 @@ export const filters = (inner) =>
   `<form class="toolbar" id="filters">${inner}<button type="submit">查询</button><button type="button" data-action="reset" class="link">重置</button></form>`;
 export const search = (ph = "搜索名称或关键词") =>
   `<input type="search" name="q" placeholder="${esc(ph)}" aria-label="${esc(ph)}" value="${esc(state.filters.q || "")}">`;
-export async function download(path, name) {
+export async function download(path, name, requestOptions = {}, extension = "csv") {
+  const sessionEpoch = sessionGeneration;
   const companyEpoch = companyGeneration;
   try {
-    const r = await api(path, { raw: true });
+    const r = await api(path, { ...requestOptions, raw: true });
     const blob = await r.blob();
-    assertCompany(companyEpoch);
+    assertSession(sessionEpoch); assertCompany(companyEpoch);
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = name + ".csv";
+    a.download = name + "." + extension;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     toast("导出完成");
   } catch (e) {
+    if(requestOptions.throwOnError) throw e;
     toast(e.message);
   }
 }

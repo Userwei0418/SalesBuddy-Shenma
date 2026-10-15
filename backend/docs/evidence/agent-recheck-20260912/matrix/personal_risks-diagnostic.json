@@ -1,0 +1,30 @@
+{
+  "capability": "personal_risks",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:17:04.716745+00:00",
+  "same_input_sha256": "8816e5508559ad447ce3dd390c1ecf4311a0d97cbee9521882b207a773d7bfe7",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "accepted": false,
+  "error_type": "TimeoutError",
+  "error": "",
+  "elapsed_ms": 60015,
+  "ids": {
+    "task_id": "af6626ef-8560-4f10-8497-7f7631345149",
+    "message_id": "07a1f25a-2bca-4280-857c-35203e2bbc8f",
+    "conversation_id": "ca13c8f7-87a5-4a44-bdc2-e32b3a644c6f"
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10955,
+    "first_body_byte_ms": 10955,
+    "first_data_event_ms": 48284,
+    "first_text_ms": 48284,
+    "stream_completed_ms": null
+  },
+  "error_code": null,
+  "answer_chars": 0,
+  "stop_state": "acknowledged"
+}

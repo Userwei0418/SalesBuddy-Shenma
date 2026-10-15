@@ -1,0 +1,34 @@
+{
+  "00000000-0000-0000-0000-000000000001": {
+    "chatbi": {
+      "enabled": true,
+      "execution_mode": "filtered_facts",
+      "agent_id": "01a09022-c5ff-7562-bd7d-f8d6c74f5486",
+      "expected_snapshot_id": "01a09063-86f1-72bf-b5c8-25f879b31d7d"
+    },
+    "battle_map_review": {
+      "enabled": true,
+      "execution_mode": "filtered_facts",
+      "agent_id": "01a09021-b848-7e7f-9567-e20859d29bf8",
+      "expected_snapshot_id": "01a091c7-36ca-77e2-9751-8d3b454e8914"
+    },
+    "opportunity_draft": {
+      "enabled": true,
+      "execution_mode": "filtered_facts",
+      "agent_id": "01a09022-b58f-7214-85eb-29d035ea6f2c",
+      "expected_snapshot_id": "01a091f8-9542-7c63-8439-c9f1240669a5"
+    },
+    "personal_risks": {
+      "enabled": true,
+      "execution_mode": "filtered_facts",
+      "agent_id": "01a09022-bb1a-7dab-8481-917e0472c528",
+      "expected_snapshot_id": "01a09217-97c0-7043-adb9-3f46d0bc3c10"
+    },
+    "visit_entry": {
+      "enabled": true,
+      "execution_mode": "filtered_facts",
+      "agent_id": "01a09022-c06d-7ac3-b863-8a1345b069ae",
+      "expected_snapshot_id": "01a093e9-eb31-7c35-a3e8-4409a374b967"
+    }
+  }
+}

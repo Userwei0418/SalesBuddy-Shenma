@@ -1,0 +1,16 @@
+{
+  "id": "01a09021-b848-7e7f-9567-e20859d29bf8",
+  "app_id": "14f18211-5849-4969-ac40-2744828356ca",
+  "name": "销售智助-客户作战地图评估-BETA",
+  "published": true,
+  "revision": "0f8c5a657ee9386654975f9ab00023f35a24b242f06f6d0e93d2e623a72dfea3",
+  "snapshot_id": "01a091c7-36ca-77e2-9751-8d3b454e8914",
+  "url": "https://123.207.235.181/agents/01a09021-b848-7e7f-9567-e20859d29bf8/configure",
+  "account_email": "zhouwei5@sensetime.com",
+  "workspace": "FDE Workspace",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "71d90d01697156fc761ba6752f6c02320180ee212c13c8caa535388abacdbb80",
+  "dedicated_api_key_created": true,
+  "credential_stored_privately": true,
+  "user_authorization": "Publish map Agent and provision dedicated API credential; keep production enabled after business acceptance"
+}

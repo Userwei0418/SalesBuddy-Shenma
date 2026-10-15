@@ -6,14 +6,24 @@ async function ensureOrg() { const [org, policy] = await Promise.all([api('/orga
 const passwordRequirement = () => state.org.password_policy.require_initial_change ? '首次登录或重置密码后需要修改初始密码。' : '首次登录改密要求已关闭，可以直接使用初始或重置密码登录。';
 function passwordPolicyCard() {
   const enabled=state.org.password_policy.require_initial_change;
-  return `<section class="card"><div class="card-head"><h2>登录与密码</h2><span class="badge ${enabled?'amber':'green'}">${enabled?'已开启':'已关闭'}</span></div><div class="card-pad"><p>首次登录需要修改密码</p><p class="help">${passwordRequirement()} 仅对当前公司生效；重新开启后，仍使用初始或重置密码的账号需要改密，已自行修改密码的账号不受影响。</p>${state.actor.role==='administrator'?btn(enabled?'关闭改密要求':'开启改密要求','password-policy','','primary'):'<p class="help">由系统管理员维护此开关。</p>'}</div></section>`;
+  return `<section class="card"><div class="card-head"><h2>登录与密码</h2><span class="badge ${enabled?'amber':'green'}">${enabled?'已开启':'已关闭'}</span></div><div class="card-pad"><p>首次登录需要修改密码</p><p class="help">${passwordRequirement()} 仅对当前公司生效；重新开启后，仍使用初始或重置密码的账号需要改密，已自行修改密码的账号不受影响。</p>${state.org.management?.actions['account.password_policy']?btn(enabled?'关闭改密要求':'开启改密要求','password-policy','','primary'):'<p class="help">由系统管理员维护此开关。</p>'}</div></section>`;
 }
 const kinds = [['sales','区域销售'],['product_sales','产品销售'],['fde','FDE'],['general','综合部门']];
-const departmentRole = (role, team) => role === 'supervisor' && team?.kind === 'product_sales' ? '产品销售主管' : roleLabel(role);
+export const departmentRole = (role, team) => team?.kind === 'product_sales' && ['sales','supervisor'].includes(role)
+  ? (role === 'sales' ? '产品销售' : '产品销售主管') : roleLabel(role);
 export const membershipsOf = row => row.memberships?.length ? row.memberships : row.team_id ? [{team_id:row.team_id,team_name:row.team_name,is_primary:true,roles:row.roles || []}] : [];
-const canMaintainAccount = (row) =>
-  !row.platform_managed && (state.actor.role === "administrator" ||
-  !row.roles.some((role) => ["operations", "administrator"].includes(role)));
+const canMaintainAccount = row => !row.platform_managed && state.org.management?.target_ids.includes(row.id);
+const canAct = action => state.org.management?.actions[action]===true;
+
+
+const permissionScopeLabels = {workspace:'公司',self:'本人',assigned:'参与范围',teams:'指定团队'};
+export const accountHasRole = (row, value) => !value || (value.startsWith('permission:')
+  ? (row.permission_roles || []).some(role => `permission:${role.id}` === value)
+  : (row.roles || []).includes(value));
+export const permissionRoleBadges = row => (row.permission_roles || []).map(role =>
+  `<span class="pill">${esc(role.name)} · ${esc(permissionScopeLabels[role.scope] || role.scope)}</span>`).join('');
+const accountRoleOptions = value => roleOptions(value) + options(
+  (state.org.permission_roles || []).map(role => [`permission:${role.id}`, role.name]), value, null);
 
 function accountLoginRestriction(row) {
   if (!row.login_locked) return '<span class="badge green">未受限</span>';
@@ -64,6 +74,12 @@ function appointmentRow(member, index, assignable) {
   const team = state.org.departments.find(t=>t.id===member.team_id);
   return `<section class="appointment" data-appointment="${index}"><div class="appointment-head">${field('任职部门',`membership:${index}:team`,'',{required:true,select:options(state.org.departments.filter(t=>t.status==='active'||t.id===member.team_id).map(t=>[t.id,t.name]),member.team_id,'请选择部门')})}<button type="button" class="link danger" data-remove-appointment="${index}">移除任职</button></div><fieldset><legend>在此部门的岗位</legend><div class="checks">${assignable.map(r=>`<label class="check"><input type="checkbox" name="membership:${index}:roles" value="${esc(r.code)}" ${member.roles?.includes(r.code)?'checked':''}><span data-role-label="${r.code}">${esc(departmentRole(r.code,team))}</span></label>`).join('')}</div></fieldset><label class="check acting-check"><input type="checkbox" name="membership:${index}:acting" ${member.acting?'checked':''}>代管此部门</label></section>`;
 }
+export function accountNeedsPhone(roles, row={}, policy=state.org?.phone_policy) {
+  if (!policy?.requires_for_new_business_accounts) return false;
+  const businessRoles=policy.business_roles || ['sales','supervisor','manager','fde','fde_lead'];
+  return roles.some(role=>businessRoles.includes(role)) &&
+    (!row.id || !(row.roles || []).some(role=>businessRoles.includes(role)));
+}
 export function accountPayload(form, row={}) {
   const memberships=[];
   for(const [name, value] of form.entries()) {
@@ -78,7 +94,17 @@ export function accountPayload(form, row={}) {
   const team_id=memberships.length?form.get('team_id'):null;
   if(memberships.length && !memberships.some(m=>m.team_id===team_id)) throw Error('请选择任职部门中的一个作为主部门');
   const data={...(form.has('organization_team_id')?{organization_team_id:form.get('organization_team_id')||null}:{}),...(form.has('email')?{email:String(form.get('email')||'').trim()||null}:{}),...(form.has('phone_number')?{phone_number:String(form.get('phone_number')||'').trim()||null}:{}),display_name:form.get('display_name'),team_id,memberships,company_roles,roles:[...new Set([...memberships.flatMap(m=>m.roles),...company_roles])]};
+  if (accountNeedsPhone(data.roles,row) && !data.phone_number) throw Error('新增或首次增加销售、主管、FDE 等业务岗位，请填写本人手机号');
   return row.id ? {...data,account_code:form.get('account_code') || row.account_code,status:form.get('status'),version_no:row.version_no} : {...data,account_code:form.get('account_code'),temporary_password:form.get('temporary_password')};
+}
+export async function completeAccountSave(editedUserId) {
+  if (editedUserId && editedUserId === state.actor?.user_id) {
+    toast('成员资料已保存，请重新登录');
+    document.dispatchEvent(new Event('session-expired'));
+    return;
+  }
+  await ensureOrg();
+  toast(editedUserId ? '成员资料已更新' : '成员账号已开通');
 }
 function accountForm(row = {}) {
   const editing=!!row.id;
@@ -88,14 +114,20 @@ function accountForm(row = {}) {
   const departmentAssignable=assignable.filter(r=>!['operations','administrator'].includes(r.code)||current.some(m=>m.roles.includes(r.code)));
   const companyPermissions=`<fieldset><legend>公司管理权限</legend><p class="help">管理本公司运营端，不需要分配业务部门，也不因此进入销售或 FDE 人员统计。</p><div class="checks">${assignable.filter(r=>['operations','administrator'].includes(r.code)).map(r=>`<label class="check"><input type="checkbox" name="company_roles" value="${esc(r.code)}" ${row.company_roles?.includes(r.code)?'checked':''}>${esc(roleLabel(r.code))}</label>`).join('')}</div></fieldset>`;
   dialog(editing?'编辑成员 · '+row.display_name:'开通成员账号',
-    `<p class="notice">${editing?'岗位或资料修改后，此账号需要重新登录。':passwordRequirement()}</p><div class="form-grid">${field('账号名','account_code',row.account_code||'',{required:true,help:'3–64位字母、数字、点、下划线或短横线，不区分大小写，修改后旧账号名失效，原密码不变'})}${field('姓名','display_name',row.display_name,{required:true})}${field('手机号（选填）','phone_number',row.phone_number||'',{help:'11位手机号；填写后可用手机号和原密码登录。留空仅使用账号名，不发送验证码。'})}${editing?field('账号状态','status','',{select:options([['active','启用'],['inactive','停用']],row.status,null)}):field('初始密码','temporary_password','',{type:'password',required:true,help:'8–128 个字符，不限制字符组合'})}</div>${field('组织归属部门','organization_team_id','',{select:options(state.org.departments.filter(t=>t.status==='active'||t.id===row.organization_team_id).map(t=>[t.id,t.name]),row.organization_team_id,'未单独设置'),help:'只记录组织归属，不授予岗位权限，也不计入业务人员统计。'})}${companyPermissions}<div class="section-title">业务部门与任职</div><p class="help">支持兼任多个部门；主管权限仅作用于设为主管的部门。主部门用于默认业务归属，每份业务只计算一次。</p><div id="appointments">${initial.map((m,i)=>appointmentRow(m,i,departmentAssignable)).join('')}</div><button type="button" id="add-appointment">＋ 添加任职部门</button>${field('主部门','team_id','',{required:initial.length>0,select:options(initial.filter(m=>m.team_id).map(m=>[m.team_id,state.org.departments.find(t=>t.id===m.team_id)?.name||m.team_name]),row.team_id,'请选择主部门')})}`,
+    `<p class="notice">${editing?'岗位或资料修改后，此账号需要重新登录。':passwordRequirement()}</p><div class="form-grid">${field('账号名','account_code',row.account_code||'',{required:true,help:'3–64位字母、数字、点、下划线或短横线，不区分大小写，修改后旧账号名失效，原密码不变'})}${field('姓名','display_name',row.display_name,{required:true})}${field('手机号','phone_number',row.phone_number||'',{help:'11位本人手机号，全平台仅绑定一个账号，由管理员核实；沿用账号密码，不发送验证码。正式公司新增或首次增加销售、主管、FDE 等业务岗位时必填；已有业务账号、纯后台账号及演示公司可暂不填。修改或解除绑定后需重新登录。'})}${editing?field('账号状态','status','',{select:options([['active','启用'],['inactive','停用']],row.status,null)}):field('初始密码','temporary_password','',{type:'password',required:true,help:'8–128 个字符，不限制字符组合'})}</div>${field('组织归属部门','organization_team_id','',{select:options(state.org.departments.filter(t=>t.status==='active'||t.id===row.organization_team_id).map(t=>[t.id,t.name]),row.organization_team_id,'未单独设置'),help:'只记录组织归属，不授予岗位权限，也不计入业务人员统计。'})}${companyPermissions}${row.permission_roles?.length ? `<fieldset><legend>自定义角色</legend>${permissionRoleBadges(row)}<p class="help">在“权限管理 → 账号授权”中维护；保存本页资料不会移除此处的角色。</p></fieldset>` : ''}<div class="section-title">业务部门与任职</div><p class="help">支持兼任多个部门；主管权限仅作用于设为主管的部门。主部门用于默认业务归属，每份业务只计算一次。</p><div id="appointments">${initial.map((m,i)=>appointmentRow(m,i,departmentAssignable)).join('')}</div><button type="button" id="add-appointment">＋ 添加任职部门</button>${field('主部门','team_id','',{required:initial.length>0,select:options(initial.filter(m=>m.team_id).map(m=>[m.team_id,state.org.departments.find(t=>t.id===m.team_id)?.name||m.team_name]),row.team_id,'请选择主部门')})}`,
     {wide:true,submit:editing?'保存成员':'确认开通',onSubmit:async(form,key)=>{
-      await api('/accounts'+(editing?'/'+row.id:''),{method:editing?'PUT':'POST',body:accountPayload(form,row),key});
-      await ensureOrg(); toast(editing?'成员资料已更新':'成员账号已开通');
+      await api('/accounts'+(editing?'/'+row.id:''),{method:editing?'PUT':'POST',body:state.org.management?.company_administrator?accountPayload(form,row):{
+        display_name:form.get('display_name'),account_code:form.get('account_code'),phone_number:String(form.get('phone_number')||'').trim()||null,status:form.get('status'),version_no:row.version_no,
+        roles:row.roles,company_roles:row.company_roles,team_id:row.team_id||null,
+        memberships:membershipsOf(row).map(m=>({team_id:m.team_id,roles:m.roles,acting:!!m.acting})),
+      },key});
+      await completeAccountSave(row.id);
     },afterRender:root=>{
       let index=initial.length;
       const refresh=()=>{
         const primary=root.querySelector('[name="team_id"]'),before=primary.value;
+        const chosen=[...root.querySelectorAll('[name$=":roles"]:checked,[name="company_roles"]:checked')].map(input=>input.value);
+        root.querySelector('[name="phone_number"]').required=accountNeedsPhone(chosen,row);
         const selected=[...root.querySelectorAll('[name^="membership:"][name$=":team"]')].map(input=>input.value).filter(Boolean);
         primary.innerHTML=options([...new Set(selected)].map(id=>[id,state.org.departments.find(t=>t.id===id)?.name||id]),before,'请选择主部门');
         primary.required=root.querySelectorAll('[data-appointment]').length>0;
@@ -111,7 +143,10 @@ function accountForm(row = {}) {
         root.querySelector('#appointments').insertAdjacentHTML('beforeend',appointmentRow({roles:[]},index++,departmentAssignable));refresh();root.querySelector('form').dispatchEvent(new Event('change'));
       };
       refresh();
-      root.querySelector('#appointments').addEventListener('change',refresh);
+      if(!state.org.management?.company_administrator){
+        root.querySelectorAll('[name="organization_team_id"],[name="team_id"],[name="company_roles"],#appointments input,#appointments select,#appointments button,#add-appointment').forEach(n=>n.disabled=true);
+      }
+      root.querySelector('form').addEventListener('change',refresh);
       root.querySelector('#appointments').addEventListener('click',event=>{
         const button=event.target.closest('[data-remove-appointment]');
         if(button) {button.closest('[data-appointment]').remove();refresh();root.querySelector('form').dispatchEvent(new Event('change'));}
@@ -172,7 +207,7 @@ export async function accounts() {
           .toLowerCase()
           .includes(f.q.toLowerCase())) &&
       (!f.team || r.organization_team_id===f.team || membershipsOf(r).some(m=>m.team_id===f.team)) &&
-      (!f.role || r.roles.includes(f.role)) &&
+      accountHasRole(r, f.role) &&
       (!f.status || r.status === f.status),
   );
   const visible = rows.slice(state.offset, state.offset + 50);
@@ -181,11 +216,11 @@ export async function accounts() {
       head(
         "账号与组织",
         "按部门维护任职关系，统一管理账号、主管和登录状态。",
-        btn("新增部门", "department") +
-          btn("＋ 开通账号", "create", "", "primary"),
+        (canAct('organization.manage')?btn("新增部门", "department"):'') +
+          (canAct('account.create')?btn("＋ 开通账号", "create", "", "primary"):''),
       ) +
       passwordPolicyCard() +
-      (state.org.account_quota ? `<section class="card"><div class="card-pad"><strong>体验账号额度：${num(state.org.account_quota.used)} / ${num(state.org.account_quota.limit)}</strong><p class="help">整个部署内所有公司共用，剩余 ${num(state.org.account_quota.remaining)} 个名额。启用账号占用名额，停用后释放；同一账号的多个部门和登录端不重复计数，平台管理身份不占用。额度由部署维护人员设置。</p></div></section>` : '') +
+      (state.org.account_quota ? `<section class="card"><div class="card-pad"><strong>启用账号额度：${num(state.org.account_quota.used)} / ${num(state.org.account_quota.limit)}</strong><p class="help">${state.org.account_quota.scope==='workspace'?'当前隔离演示公司独立计算，不占正式业务名额。':'正式业务账号按部署额度计算，隔离演示公司按其独立额度计算。'} 剩余 ${num(state.org.account_quota.remaining)} 个名额；同一账号的多个岗位和登录端不重复计数。</p></div></section>` : '') +
       stats([
         ["账号总数", num(state.org.accounts.length), "当前公司"],
         [
@@ -213,7 +248,7 @@ export async function accounts() {
               "全部部门",
             ),
           ) +
-          select("role", roleOptions(f.role)) +
+          select("role", accountRoleOptions(f.role)) +
           select(
             "status",
             options(
@@ -230,7 +265,7 @@ export async function accounts() {
         ["成员", "部门", "角色", "状态", "登录方式", "登录限制", "操作"],
         visible,
         (r) =>
-          `<tr><td class="title">${esc(r.display_name)}<small>${esc(r.account_code)}</small>${r.phone_number?`<small>${esc(r.phone_number)}</small>`:""}</td><td>${r.organization_team_id?`<div class="member-team">${esc(r.organization_team_name || state.org.departments.find(t=>t.id===r.organization_team_id)?.name || "未找到部门")}<span class="mini-label">组织归属</span></div>`:""}${membershipsOf(r).map(m=>`<div class="member-team">${esc(m.team_name || state.org.departments.find(t=>t.id===m.team_id)?.name)}${m.acting?'<span class="mini-label">代管</span>':''}${m.is_primary?'<span class="mini-label">主部门</span>':''}</div>`).join('') || (r.organization_team_id?'':r.company_roles?.length?'公司级管理（无业务任职）':'未分配')}</td><td>${(r.company_roles||[]).map(x=>`<span class="pill">${esc(roleLabel(x))} · 公司</span>`).join('')}${membershipsOf(r).map(m=>`<div class="member-team">${m.roles.map(x=>`<span class="pill">${esc(departmentRole(x,m))}</span>`).join('')}</div>`).join('')}</td><td>${badge(r.status)}</td><td>${r.platform_managed ? "平台管理授权" : r.has_password ? (r.phone_number ? "账号名 / 手机号 + 密码" : "账号名 + 密码") : "待设置密码"}</td><td>${accountLoginRestriction(r)}</td><td>${canMaintainAccount(r) ? btn("编辑", "edit", r.id, "link") + btn(r.has_password ? "重置密码" : "设置密码", "password", r.id, "link") + (r.login_locked ? btn("解除账号限制", "unlock-login", r.id, "link") : "") : r.platform_managed ? "平台管理身份" : "由系统管理员维护"}</td></tr>`,
+          `<tr><td class="title">${esc(r.display_name)}<small>${esc(r.account_code)}</small>${r.phone_number?`<small>${esc(r.phone_number)}</small>`:""}</td><td>${r.organization_team_id?`<div class="member-team">${esc(r.organization_team_name || state.org.departments.find(t=>t.id===r.organization_team_id)?.name || "未找到部门")}<span class="mini-label">组织归属</span></div>`:""}${membershipsOf(r).map(m=>`<div class="member-team">${esc(m.team_name || state.org.departments.find(t=>t.id===m.team_id)?.name)}${m.acting?'<span class="mini-label">代管</span>':''}${m.is_primary?'<span class="mini-label">主部门</span>':''}</div>`).join('') || (r.organization_team_id?'':r.company_roles?.length?'公司级管理（无业务任职）':'未分配')}</td><td>${(r.company_roles||[]).map(x=>`<span class="pill">${esc(roleLabel(x))} · 公司</span>`).join('')}${permissionRoleBadges(r)}${membershipsOf(r).map(m=>`<div class="member-team">${m.roles.map(x=>`<span class="pill">${esc(departmentRole(x,m))}</span>`).join('')}</div>`).join('')}</td><td>${badge(r.status)}</td><td>${r.platform_managed ? "平台管理授权" : r.has_password ? (r.phone_number ? "账号名 / 手机号 + 密码" : "账号名 + 密码") : "待设置密码"}</td><td>${accountLoginRestriction(r)}</td><td>${canMaintainAccount(r) ? (canAct('account.update')?btn("编辑", "edit", r.id, "link"):'') + (canAct('account.reset_password')?btn(r.has_password ? "重置密码" : "设置密码", "password", r.id, "link"):'') + (r.login_locked&&canAct('account.unlock') ? btn("解除账号限制", "unlock-login", r.id, "link") : "") : r.platform_managed ? "平台管理身份" : "由系统管理员维护"}</td></tr>`,
       ) +
       pager(rows.length) +
       `</div><div class="card" ${f.view!=='departments'?'hidden':''}><div class="card-head"><h2>部门管理</h2><small>停用前需迁移有效成员和子部门</small></div>` +
@@ -238,7 +273,7 @@ export async function accounts() {
         ["部门 / 类型", "负责人", "成员 / 代管", "上级部门", "状态", "操作"],
         state.org.departments,
         (t) =>
-          `<tr><td><strong>${esc(t.name)}</strong><small>${esc(kinds.find(k=>k[0]===t.kind)?.[1] || '综合部门')} · ${esc(t.code)}</small></td><td>${state.org.accounts.filter(u=>u.status==='active'&&membershipsOf(u).some(m=>m.team_id===t.id&&m.roles.some(r=>['supervisor','fde_lead','manager'].includes(r)))).map(u=>esc(u.display_name)+(membershipsOf(u).find(m=>m.team_id===t.id)?.acting?'（代管）':'')).join('、') || '暂未设置'}</td><td>${state.org.accounts.filter(u=>u.status==='active'&&(u.organization_team_id===t.id||membershipsOf(u).some(m=>m.team_id===t.id&&!m.acting))).length} 人 / ${state.org.accounts.filter(u=>u.status==='active'&&membershipsOf(u).some(m=>m.team_id===t.id&&m.acting)).length} 代管</td><td>${esc(state.org.departments.find((x) => x.id === t.parent_team_id)?.name || "—")}</td><td>${badge(t.status)}</td><td>${btn("编辑", "edit-department", t.id, "link")}</td></tr>`,
+          `<tr><td><strong>${esc(t.name)}</strong><small>${esc(kinds.find(k=>k[0]===t.kind)?.[1] || '综合部门')} · ${esc(t.code)}</small></td><td>${state.org.accounts.filter(u=>u.status==='active'&&membershipsOf(u).some(m=>m.team_id===t.id&&m.roles.some(r=>['supervisor','fde_lead','manager'].includes(r)))).map(u=>esc(u.display_name)+(membershipsOf(u).find(m=>m.team_id===t.id)?.acting?'（代管）':'')).join('、') || '暂未设置'}</td><td>${state.org.accounts.filter(u=>u.status==='active'&&(u.organization_team_id===t.id||membershipsOf(u).some(m=>m.team_id===t.id&&!m.acting))).length} 人 / ${state.org.accounts.filter(u=>u.status==='active'&&membershipsOf(u).some(m=>m.team_id===t.id&&m.acting)).length} 代管</td><td>${esc(state.org.departments.find((x) => x.id === t.parent_team_id)?.name || "—")}</td><td>${badge(t.status)}</td><td>${canAct("organization.manage")?btn("编辑", "edit-department", t.id, "link"):"由公司管理员维护"}</td></tr>`,
       ) +
       `</div>`,
     bind: (root) => {

@@ -1,0 +1,51 @@
+{
+  "release": "fde-review-20260915-537623c",
+  "revision": "537623c6cfba3b859a0f78122c5c29b7f6c2ae3d",
+  "verified_at": "2026-09-15T07:41:17.871163+00:00",
+  "backup_verified_bytes": 9453016,
+  "source_verification": {
+    "commit": "537623c6cfba3b859a0f78122c5c29b7f6c2ae3d",
+    "verified_source_files": 1321
+  },
+  "database_before": {
+    "source_schema": "V092",
+    "target_schema": "V093",
+    "pending": [
+      "V093"
+    ],
+    "verified_checksums": 60,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "database_after": {
+    "source_schema": "V093",
+    "target_schema": "V093",
+    "pending": [],
+    "verified_checksums": 61,
+    "running_jobs": 0,
+    "runtime_bypass_rls": false
+  },
+  "services": {
+    "sales-api": {
+      "active": true,
+      "release_cwd_verified": true
+    },
+    "sales-worker": {
+      "active": true,
+      "release_cwd_verified": true
+    }
+  },
+  "environment_and_agent_bindings_unchanged": true,
+  "migration": {
+    "applied": [
+      "V093"
+    ],
+    "previous_unchanged": 59,
+    "replay_unchanged": true,
+    "replay_count": 60
+  },
+  "health": {
+    "live": "ok",
+    "ready": "ok"
+  }
+}

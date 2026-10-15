@@ -13,13 +13,13 @@ function harness(relative,api={}){
  const instance={...definition,...definition.methods,data:JSON.parse(JSON.stringify(definition.data)),properties:{},visible:true,active:true,setData(data,done){Object.assign(this.data,data);if(done)done();},triggerEvent(){}};
  return {instance,app,toasts};
 }
-function performance(extra={}){return {data_source:'database',editable:true,targets:{collection:1000000,recognized:2000000},actuals:{collection:250000,recognized:800000},target_period:{type:'quarter',year,quarter},supplementals:{customers:60,opportunities:40,followup:88},scores:{maturity:{value:35,text:'35'},efficiency:{value:70,text:'70'}},efficiency:{customers:{numerator:12,denominator:20,evaluated_count:15,pending_count:5,rate:60,status:'partial'},opportunities:{numerator:4,denominator:10,evaluated_count:10,pending_count:0,rate:40,status:'ready'},followup:{count:7,customer_count:3,average_score:88}},windows:{structure:{period:'current'},followup:{start:'2026-09-14',end:'2026-09-20'}},...extra};}
+function performance(extra={}){return {data_source:'database',editable:true,targets:{collection:1000000,recognized:2000000},actuals:{collection_amount:250000,recognized_amount:800000,collection_complete:true,recognized_complete:true},target_period:{type:'quarter',year,quarter},supplementals:{customers:60,opportunities:40,followup:88},scores:{maturity:{value:35,text:'35'},efficiency:{value:70,text:'70'}},efficiency:{customers:{numerator:12,denominator:20,evaluated_count:15,pending_count:5,rate:60,status:'partial'},opportunities:{numerator:4,denominator:10,evaluated_count:10,pending_count:0,rate:40,status:'ready'},followup:{count:7,customer_count:3,average_score:88}},windows:{structure:{period:'current'},followup:{start:'2026-09-14',end:'2026-09-20'}},...extra};}
 function page(api={}){const h=harness('pages/profile/index.js',api);Object.assign(h.instance.data,{role:'sales',targetYear:year,targetQuarter:quarter,profileScopeLabel:'本人'});return h;}
 
 test('团队完全遵循后端目录，名称不触发隐藏，失效ID不能继续查询',async()=>{
  const teams=[{id:'leaf',name:'生态渠道'},{id:'north',name:'北区'},{id:'empty',name:'新业务组'}];
  for(const [current,visible,expected] of [['leaf',teams,'leaf'],['gone',teams,'north'],['leaf',[], '']]){
-  const {instance:p}=page({getProfileScopeOptions:async()=>({data_source:'database',teams:visible,members:[{id:'self-id',name:'本人',team_ids:['leaf','north']}],allowed_scopes:['self','team','department'],defaults:{scope:'team',team_id:'north',member_id:'self-id'}})});
+  const {instance:p}=page({getProfileScopeOptions:async()=>({data_source:'database',teams:visible,members:[{id:'self-id',name:'本人',team_ids:visible.filter(row=>['leaf','north'].includes(row.id)).map(row=>row.id)}],allowed_scopes:['self','team','department'],defaults:{scope:'team',team_id:visible.some(row=>row.id==='north')?'north':null,member_id:'self-id'}})});
   Object.assign(p.data,{role:'manager',profileTeamId:current,profileScopeMode:'team'});let selected;
   p.refreshProfileScope=()=>selected=p.data.profileTeamId;
   await p.loadProfileDirectory();assert.equal(p.data.directoryError,'');assert.equal(selected,expected);
@@ -62,7 +62,7 @@ test('成员和团队使用真实ID，选择他人后即使editable错误也不�
 
 test('慢响应在切人、切账号和隐藏页面后都不能污染新状态',async()=>{
  const pending=[];const {instance:p,app}=page({getProfilePerformance:()=>new Promise(resolve=>pending.push(resolve))});
- Object.assign(p.data,{role:'supervisor',profileScopeMode:'person',profileSelectedMemberId:'member-a'});const old=p.loadProfilePerformance();p.data.profileSelectedMemberId='member-b';const latest=p.loadProfilePerformance();pending[1](performance({actuals:{collection:222,recognized:333}}));await latest;pending[0](performance());await old;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
+ Object.assign(p.data,{role:'supervisor',profileScopeMode:'person',profileSelectedMemberId:'member-a'});const old=p.loadProfilePerformance();p.data.profileSelectedMemberId='member-b';const latest=p.loadProfilePerformance();pending[1](performance({actuals:{collection_amount:222,recognized_amount:333,collection_complete:true,recognized_complete:true}}));await latest;pending[0](performance());await old;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
  const swapped=p.loadProfilePerformance();app.globalData.session.userId='other-login';pending[2](performance());await swapped;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
  const hidden=p.loadProfilePerformance();p.onHide();pending[3](performance());await hidden;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
 });
@@ -100,8 +100,10 @@ test('表单打开后切账号或主体，旧表单不能提交',async()=>{
  let calls=0;const {instance:c,app}=target({getTargets:async()=>({items:rows,editable:true}),saveTargetBatch:async()=>{calls++;}});await c.load();c.show();c.data.reason='说明';app.globalData.session.userId='other';await c.save();assert.equal(calls,0);app.globalData.session.userId='self-id';c.properties.contextKey='new-subject';await c.save();assert.equal(calls,0);
 });
 
-test('主体选择器只返回目录中的ID，搜索与团队分组不产生全员个人选项',()=>{
- const {instance:c}=harness('components/profile-scope-picker/index.js');const events=[];c.triggerEvent=(name,event)=>events.push(event);c.properties={mode:'person',modes:[{value:'person'}],members:[{id:'1',name:'张三',team_ids:['a']},{id:'2',name:'李四',team_ids:['b']}],teams:[]};c.setData({selecting:'person'});c.select({currentTarget:{dataset:{id:'forged'}}});assert.equal(events.length,0);c.teamFilter({currentTarget:{dataset:{id:'a'}}});assert.equal(c.data.visibleMembers.length,1);c.search({detail:{value:'李'}});assert.equal(c.data.visibleMembers.length,0);c.select({currentTarget:{dataset:{id:'1'}}});assert.equal(events[0].id,'1');
+test('主体选择器只接受共享选人弹层确认的有效单个ID',()=>{
+ const {instance:c}=harness('components/profile-scope-picker/index.js');const events=[];c.triggerEvent=(name,event)=>events.push({name,event});c.properties={mode:'person',modes:[{value:'person'}],members:[{id:'1',name:'张三',team_ids:['a']},{id:'2',name:'李四',team_ids:['b']}],teams:[]};c.show();events.length=0;
+ c.confirmPerson({detail:{ids:['forged']}});c.confirmPerson({detail:{ids:[]}});c.confirmPerson({detail:{ids:['1','2']}});assert.equal(events.length,0);
+ c.confirmPerson({detail:{ids:['1'],teamId:'a'}});assert.equal(events.at(-1).event.id,'1');assert.equal(events.at(-1).event.kind,'person');
 });
 
 test('主管从团队切个人，经选择器选择成员后经营数据与画像同时查询该成员UUID',async()=>{
@@ -112,7 +114,7 @@ test('主管从团队切个人，经选择器选择成员后经营数据与画�
  c.properties={modes:p.data.profileScopeOptions,mode:p.data.profileScopeMode,members:p.data.scopeMembers,teams:p.data.scopeTeams};
  c.triggerEvent=(name,detail)=>name==='modechange'?p.selectProfileScope({detail}):p.changeProfileSubject({detail});
  c.switchMode({currentTarget:{dataset:{mode:'person'}}});await tick();assert.equal(p.data.profileScopeMode,'person');assert.equal(queries.at(-1).member_id,'self-id');
- c.properties.mode=p.data.profileScopeMode;c.show();assert.equal(c.data.open,true);assert.equal(c.data.selecting,'person');assert.equal(c.data.visibleMembers.length,2);
+ c.properties.mode=p.data.profileScopeMode;c.show();assert.equal(c.data.open,true);assert.equal(c.data.selecting,'person');assert.equal(c.properties.members.length,2);
  c.select({currentTarget:{dataset:{id:memberId}}});await tick();assert.equal(c.data.open,false);assert.equal(p.data.profileSelectedMemberId,memberId);assert.equal(p.data.profileScopeLabel,'王新源');assert.equal(queries.at(-1).member_id,memberId);assert.equal(growth.at(-1).member_id,memberId);assert.equal(queries.at(-1).account_code,undefined);assert.equal(p.data.canEditSalesTarget,false);
  for(const tab of ['maturity','efficiency','profile']){p.selectProfileTab({currentTarget:{dataset:{tab}}});assert.equal(p.data.profileSelectedMemberId,memberId);assert.equal(p.data.targetQueryMemberId,memberId);}
  const before=queries.length;c.switchMode({currentTarget:{dataset:{mode:'department'}}});c.select({currentTarget:{dataset:{id:'not-in-directory'}}});assert.equal(queries.length,before);assert.equal(p.data.profileScopeMode,'person');assert.equal(p.data.profileSelectedMemberId,memberId);
@@ -186,7 +188,7 @@ test('FDE已显示画像在身份属性变化后立即清空，等待新账号�
 });
 
 test('一线销售目录请求失败显示统一重试状态，重试成功后恢复本人数据',async()=>{
- let rejectDirectory,calls=0;const {instance:p,app}=page({getProfileScopeOptions:()=>{calls++;return calls===1?new Promise((resolve,reject)=>{rejectDirectory=reject;}):Promise.resolve({data_source:'database',allowed_scopes:['self'],members:[{id:'self-id',display_name:'本人',role:'sales',team_ids:[]}],teams:[],defaults:{scope:'self',member_id:'self-id'}});},getProfilePerformance:async()=>performance(),ensureSalesGrowthReview:async()=>({}),getSalesGrowth:async()=>({today_status:'failed'})});
+ let rejectDirectory,calls=0;const {instance:p,app}=page({getProfileScopeOptions:()=>{calls++;return calls===1?new Promise((resolve,reject)=>{rejectDirectory=reject;}):Promise.resolve({data_source:'database',allowed_scopes:['self'],members:[{id:'self-id',display_name:'本人',role:'sales',team_ids:[]}],teams:[],defaults:{scope:'self',member_id:'self-id',team_id:null}});},getProfilePerformance:async()=>performance(),ensureSalesGrowthReview:async()=>({}),getSalesGrowth:async()=>({today_status:'failed'})});
  app.globalData.session.role='sales';p.sync();const first=p.loadProfileDirectory();assert.equal(p.data.directoryLoading,true);rejectDirectory(Error('查看范围暂不可用'));await first;assert.equal(p.data.directoryLoading,false);assert.equal(p.data.directoryError,'查看范围暂不可用');assert.equal(p.data.organizationReady,false);await p.loadProfileDirectory();await tick();assert.equal(calls,2);assert.equal(p.data.directoryError,'');assert.equal(p.data.profileScopeMode,'self');assert.equal(p.data.organizationReady,true);
  const markup=fs.readFileSync(path.resolve(__dirname,'../miniprogram/pages/profile/index.wxml'),'utf8');assert.match(markup,/<view wx:if="\{\{!isFde && \(directoryLoading \|\| directoryError\)\}\}" class="profile-directory-state surface">/);assert.match(markup,/<button wx:else class="profile-directory-retry" bindtap="loadProfileDirectory"/);assert.equal((markup.match(/bindtap="loadProfileDirectory"/g)||[]).length,1);assert.match(markup,/!directoryLoading && !directoryError && activeProfileTab === 'maturity'/);
 });

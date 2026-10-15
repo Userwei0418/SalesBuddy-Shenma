@@ -1,0 +1,12 @@
+{
+  "id": "01a09022-bb1a-7dab-8481-917e0472c528",
+  "app_id": "211eace9-c1d3-43a2-b7f0-d0fa27f05e7b",
+  "name": "销售智助-个人客户风险识别-BETA",
+  "workspace_id": "a06dcd4a-af4b-4a91-85e6-109e6e7e5720",
+  "published": true,
+  "revision": "e0e1bb791f337cd427b26ebc3b497624149fe6cdfd1f3972ee50aec0087bc27c",
+  "snapshot_id": "01a09217-97c0-7043-adb9-3f46d0bc3c10",
+  "url": "https://123.207.235.181/agents/01a09022-bb1a-7dab-8481-917e0472c528/configure",
+  "model": "senseaudio-s2",
+  "prompt_sha256": "d4837bb4cfa7898371d4d9669e99f032da951da1a044cdff368d54d7fab0f0ae"
+}

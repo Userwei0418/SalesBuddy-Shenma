@@ -1,0 +1,80 @@
+{
+  "capability": "chatbi",
+  "case": "platform_only_diagnostic",
+  "diagnostic_seconds": 60.0,
+  "started_at": "2026-09-12T09:22:14.785568+00:00",
+  "same_input_sha256": "03289fd2a75581ce8debe0a312c1a66f0c6022778067e85c99e6b248ccdc0d86",
+  "business_writes": false,
+  "production_settings_changed": false,
+  "raw_result": {
+    "sha256": "2a34ce51d548455254515bb185ec610f843effd057fafd5729770929f723bb74",
+    "bytes": 913,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "metrics": {
+        "type": "list",
+        "count": 4
+      },
+      "rows": {
+        "type": "list",
+        "count": 2
+      },
+      "scope": {
+        "type": "dict",
+        "count": 3
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "result": {
+    "sha256": "a97c36eacac720fdaa13a55f6572a3dcca174ae7e20a9237d7092e79473ce87a",
+    "bytes": 805,
+    "fields": {
+      "title": {
+        "type": "str"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "metrics": {
+        "type": "list",
+        "count": 4
+      },
+      "rows": {
+        "type": "list",
+        "count": 2
+      },
+      "scope": {
+        "type": "str"
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 56767,
+  "ids": {
+    "task_id": "dd451969-8e48-4e46-8736-de99c98f741b",
+    "message_id": "d7210629-9c4f-4a91-b32a-e9d8f86eea3a",
+    "conversation_id": "6dbd1403-0330-4df8-9719-5d6fc0840222"
+  },
+  "transport": {
+    "http_status": 200,
+    "request_started_ms": 0,
+    "headers_received_ms": 10625,
+    "first_body_byte_ms": 10625,
+    "first_data_event_ms": 54211,
+    "first_text_ms": 54211,
+    "stream_completed_ms": 56753
+  },
+  "error_code": null,
+  "answer_chars": 607
+}

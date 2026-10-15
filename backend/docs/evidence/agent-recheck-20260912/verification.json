@@ -1,0 +1,37 @@
+{
+  "checked_at": "2026-09-12 17:29 Asia/Shanghai",
+  "local_commit_before_recheck": "b630af6",
+  "runtime_release": "agent-report-20260912-7b2c6b9",
+  "unit_tests": {
+    "passed": 622,
+    "database_tests_skipped_locally": 131,
+    "warnings": 2,
+    "elapsed_seconds": 3.96,
+    "command": "backend/.venv/bin/python -m pytest backend/tests -q -p no:cacheprovider"
+  },
+  "isolated_postgres_tests": {
+    "passed": 131,
+    "elapsed_seconds": 8.43,
+    "runner": "backend/tests/system/run_integration_postgres.py",
+    "providers": "synthetic HTTP responses; separate from real-provider matrix"
+  },
+  "production_services": {
+    "sales-api": "active",
+    "sales-worker": "active",
+    "readiness": "ok"
+  },
+  "production_enabled_capabilities": [
+    "battle_map_review",
+    "opportunity_draft",
+    "personal_risks",
+    "visit_entry",
+    "today_tasks",
+    "operating_report"
+  ],
+  "chatbi_enabled": false,
+  "production_config_or_runtime_changed": false,
+  "business_database_read_only": true,
+  "diagnostic_services_finished": true,
+  "schema_changed": false,
+  "frontend_changed": false
+}

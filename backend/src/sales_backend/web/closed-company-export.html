@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Raccoon SalesBuddy · 关闭公司资料导出</title>
+  <link rel="icon" href="/admin/assets/brand-square.png" type="image/png">
+  <link rel="stylesheet" href="/admin/assets/closed-company-export.css">
+  <script type="module" src="/admin/assets/closed-company-export.js"></script>
+</head>
+<body>
+  <header><img src="/admin/assets/brand-white.svg" alt="Raccoon SalesBuddy"><span>公司资料导出</span><button id="logout" type="button" hidden>退出登录</button></header>
+  <main>
+    <div class="page-heading"><p class="eyebrow">RACCOON SALESBUDDY</p><h1>关闭公司资料导出</h1><p>公司关闭后停止业务使用，历史资料继续保留。获授权的公司管理员可在此导出本公司资料，操作会留下审计记录。</p></div>
+    <p id="notice" role="status" aria-live="polite">正在检查导出会话…</p>
+    <section id="login-panel" class="card login-card" hidden>
+      <h2>验证公司管理员身份</h2>
+      <p class="muted">使用原公司的公司码和管理员账号。此次登录仅用于关闭公司的资料导出，有效期 15 分钟。</p>
+      <form id="login-form">
+        <label>公司码<input name="company_code" required maxlength="128" autocomplete="organization" placeholder="请输入公司码"></label>
+        <label>账号名或已绑定手机号<input name="account_code" required maxlength="64" autocomplete="username" placeholder="请输入账号名或手机号"></label>
+        <label>密码<input id="login-password" name="password" type="password" required maxlength="128" autocomplete="current-password"></label>
+        <button id="login-submit" class="primary" type="submit">登录资料导出</button>
+      </form>
+      <p class="help">忘记公司码或密码，请联系管理员。<a href="/admin">返回普通后台登录</a></p>
+    </section>
+    <section id="export-panel" class="card" hidden>
+      <div class="company-heading"><div><span class="closed-badge">公司已关闭</span><h2 id="company-name"></h2><p id="company-code" class="muted"></p></div><div><p id="account-name"></p><p id="session-expiry" class="muted"></p></div></div>
+      <p id="export-note" class="muted"></p>
+      <p id="capacity" class="capacity"></p>
+      <button id="retry-options" type="button" hidden>重新加载导出选项</button>
+      <form id="export-form" hidden>
+        <fieldset id="export-fields">
+          <legend>选择资料分类</legend>
+          <div id="sections" class="sections"></div>
+          <label class="original-choice"><input id="include-originals" name="include_originals" type="checkbox">包含已确认跟进的录音 / 文件原件</label>
+          <p id="originals-note" class="help">原件需与跟进记录一起导出。</p>
+          <label>导出用途<textarea name="reason" required minlength="3" maxlength="200" rows="3" placeholder="请说明用途，例如：公司历史资料归档"></textarea></label>
+          <p class="help">超出容量、记录数限制，或原件不可用时，整包导出会失败。可减少分类后重试。</p>
+          <button id="export-submit" class="primary" type="submit">生成并下载资料包</button>
+        </fieldset>
+      </form>
+      <p class="help">导出包含所选业务记录，不含密码、集成密钥或系统配置，不能用于整库恢复。请妥善保管下载的资料。</p>
+    </section>
+  </main>
+  <footer>Raccoon SalesBuddy · 公司资料导出</footer>
+</body>
+</html>

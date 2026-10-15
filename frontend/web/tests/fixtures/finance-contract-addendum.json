@@ -1,0 +1,27 @@
+{
+  "name": "SB120-FINANCE-001 effective actual basis",
+  "source_revision": "90d7ada1275ee2a404094a66e481c7b11234733e",
+  "source_file": "backend/src/sales_backend/api/customer_assets.py",
+  "source_sha256": "169d1952ec72b3797c166ab3835d987eb88533e9e429ee34593a1b34fa641662",
+  "parameters": [
+    {
+      "method": "GET",
+      "path": "/api/v1/customer-assets",
+      "parameter": {
+        "name": "basis",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "effective",
+            "entries",
+            "historical",
+            "auto"
+          ],
+          "default": "effective"
+        }
+      }
+    }
+  ]
+}

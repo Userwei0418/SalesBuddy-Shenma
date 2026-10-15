@@ -1,0 +1,1678 @@
+{
+  "checked_at": "2026-09-29T10:27:58.603431",
+  "original_archives_unchanged": {
+    "/Users/yeyuan/Documents/FDE Agent/Codex/销售管理项目/03-前端交付/20260924-创建客户与周报UI优化/SalesBuddy-Web-v10-UI优化-20260924.zip": "6ff6c69628b8e4e7e3a5f92e53d65411e252b0b420e7a571e0c736b61c493276",
+    "/Users/yeyuan/Downloads/SalesBuddy-frontend-1_1_0-20260928-5f022c5.zip": "b9772b0a70b0074029db256568465742613d0d23c0323b237cd5659117edb240"
+  },
+  "frozen_files_verified": 272,
+  "native_difference": [
+    "config.js: API_BASE_URL=/api/v1 only"
+  ],
+  "dependency_graph_unchanged": true,
+  "concurrency_check": "Each write reread current bytes, compared baseline, backed up latest contents with timestamp, verified backup and current bytes, then wrote and reread result. No detected conflicting external changes. Unsaved editor buffers were not inspected.",
+  "changed_existing_files": [
+    {
+      "path": "shell.js",
+      "initial_sha256": "ca6d53243fb48bb2f1868fe6c33252924aaa418ed322d78cd0dbd033c5e12cfc",
+      "current_sha256": "e8f7abd0710b2116fb1355cdf6981befcd881e5c435e31522f7f3de56a3e3624"
+    },
+    {
+      "path": "VERSION.json",
+      "initial_sha256": "e999bfb05868c3ca3089a76eb06a30c9e6f216441e9fabe86be7a738deb2dde3",
+      "current_sha256": "05fc2f66ed4095a221c6880ee949d5918c6ff62a5b2ed5c66342c67a5b5569fc"
+    },
+    {
+      "path": "runtime.js",
+      "initial_sha256": "d1541ca5429e691e400f27ea30f2190b9ef17645134f3e7e5a8a5619e81b266a",
+      "current_sha256": "45e5e49bcc988bcd91779795ea444929c8d423f513266493f006e11ad66dcf80"
+    },
+    {
+      "path": "browser-platform.js",
+      "initial_sha256": "7c66923d576936e85d259b272dbc52793627a7d8a8b0e6d3e4c3d70139713f19",
+      "current_sha256": "8e3dc5809f02277223b55a39211f799cdb45bd53e28f0f4d803c146a0d173c00"
+    },
+    {
+      "path": "README.md",
+      "initial_sha256": "bcde42ca0509136d7be47f7a1faf1f224558a3d529f875f38a60d6b01aa8e90a",
+      "current_sha256": "1fb4800b5d51d86898f2dacd52f9fbd01ba2c319a23823f057dd4eeae27bfe75"
+    },
+    {
+      "path": "package-lock.json",
+      "initial_sha256": "50d000dd5b25c04644f09ee441040319544d7558c05de6f0c158c7331516cc09",
+      "current_sha256": "68eec388c66eb97917d21bb7666c5bf4e1853487d58a2503e4eed9acb20e3510"
+    },
+    {
+      "path": "package.json",
+      "initial_sha256": "e1d09d53f4e0f935628fc638ce81bbacf19af56302a2225ab527635b90f04b86",
+      "current_sha256": "b91065a4b542b15137bb03d238b11345a0273962cb51758dae649caba28e1c07"
+    },
+    {
+      "path": "connection.config.json",
+      "initial_sha256": "8b9c48cecd3533685455f6ef37afb29c9de4a355016f3de4a0c0cce1c3908c54",
+      "current_sha256": "52299d6934e0c6480e69dfaa23a95ada1ea74ffd2b327b8311f64907f9b4c54b"
+    },
+    {
+      "path": "task-workspace.wxml",
+      "initial_sha256": "6c01ff5b54f670ccfe18105649b92244d419f51651475176fc70e96f2f1d1f5f",
+      "current_sha256": "bdbbcd1f13e25ca291e0035490a0703fcd7acd616d8cf3b216c27726e28b56ae"
+    },
+    {
+      "path": "preview-api.js",
+      "initial_sha256": "bcf666bb1ac76953789769f01b75923512bef68cec2d206f236281b21bb355fb",
+      "current_sha256": "46dbad5dbd8276978d3cef2c67610fed21a4694796fa1d2aaf5660783588d49f"
+    },
+    {
+      "path": "CLAUDE.md",
+      "initial_sha256": "bd491071ce41b612933fcd88c72ccb60e43554386fb611d17433877627d60986",
+      "current_sha256": "16a966dc8936ecd8d42f3d1e8ad6558d134b89b47cfca078cb30deb2ddb60371"
+    },
+    {
+      "path": "source/manifest.json",
+      "initial_sha256": "4df40867c9b11f91f2f44fbe95fc2eabbf90b5dfec134f252904049e29a8a174",
+      "current_sha256": "9a70f89cecc0861f29bffd05e5dab18762ab8d0276955d32401aebab71f98bc1"
+    },
+    {
+      "path": "source/miniprogram/app.json",
+      "initial_sha256": "a0fdaa396828399844591bff26722a27828f838dee952a455b6b1ca7bb84ae75",
+      "current_sha256": "c9f9b2c2f1ffe0ad88e4d61d1b9969eb934d48dce03cb93ea94d9ddcc5584fbb"
+    },
+    {
+      "path": "source/miniprogram/app.js",
+      "initial_sha256": "b7da162f372bea4860758f58a17d9fe9763b57ab4179fab33ac4c8e51130b40a",
+      "current_sha256": "4c36149c7b8ebe7f41b5c1d283df5df1e1559b723dae28993c347c982217806b"
+    },
+    {
+      "path": "source/miniprogram/utils/visitOpportunityAI.js",
+      "initial_sha256": "87844c23fb9ff3de40afc66218a6f8c236dee4b58f3c81e0cf0c773e35548e23",
+      "current_sha256": "8b049b94b388b6fa49a27bef1957394c1a5ee40c9ca7ff311cd55a72dd5f68c0"
+    },
+    {
+      "path": "source/miniprogram/utils/apiClient.js",
+      "initial_sha256": "9a9f596d982f5e27ec43a89a75ea16df67b80748113169c1e94df3a4893a3b83",
+      "current_sha256": "b960c4722d3fad0f0f4ce575b08b7acbb057ac294855ee60e837730cb56bd417"
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityListCard.js",
+      "initial_sha256": "2ce1ba9a6ccd212a4f33029d0c26b8ea863eaba20f76b728d45a6e66a438ee6a",
+      "current_sha256": "4347972c6c6bcf9f3b43a8823ddfb136be1454784775f5f4e719ec281e8d21fb"
+    },
+    {
+      "path": "source/miniprogram/utils/access.js",
+      "initial_sha256": "b57068b2716d8cafe85a7d490c0c4f1bc6683ceb7018b26aa42c043253af0137",
+      "current_sha256": "87eb6ac0c6492fc8ed2e3eab5860473c22bbbdf45c40c7eb15baad5201251359"
+    },
+    {
+      "path": "source/miniprogram/utils/visitSnapshot.js",
+      "initial_sha256": "7bf975210ba3fef0fc02bfaf9e7f296e78fffcf5bc256b6e9b63dfd8cb2dc0ac",
+      "current_sha256": "2f2c7c5f6d4e67987ccfd4ba3faeb8a72082077f8543a940a843b83db5e3a594"
+    },
+    {
+      "path": "source/miniprogram/utils/rankingDisplay.js",
+      "initial_sha256": "9b6f3b952da8f4afe11e3ae890de307d39cfc2e0bc1371fde7fcd6ade8a124c1",
+      "current_sha256": "b0f0eda8f9cd5688becf74d8800b4221a53708f4ca38f3e854530c5000df8385"
+    },
+    {
+      "path": "source/miniprogram/utils/visitDates.js",
+      "initial_sha256": "3ad43dd7401d6b56c84e0a27e6f7d61b03950a858e4ee31a86358ea4c4014642",
+      "current_sha256": "11bdd95903797a28442d402cbf0bd89a3e98d60ce1c5bb6cb885b7f01ff41042"
+    },
+    {
+      "path": "source/miniprogram/utils/requestIdentity.js",
+      "initial_sha256": "ae702a5a687aae9980933250a2dcd9694cd9aa125789e92ca16d15ce5b1103b6",
+      "current_sha256": "d359a82148f27b954786c5980c92f9ce583d53ac2e3d55f3480614a8ca5c676b"
+    },
+    {
+      "path": "source/miniprogram/utils/visitFlow.js",
+      "initial_sha256": "613f92c38b4a13059fe9714311a43ef85cb773660348f528a2e78574f4c5df98",
+      "current_sha256": "9e33fcac8af19f7d72f62268ae26d6b73e8c9d80e5e5414dea83f683ceac2413"
+    },
+    {
+      "path": "source/miniprogram/utils/customerDetail.js",
+      "initial_sha256": "a0e8fd4abaaebad708aaf8aec089ff50cec5c33c86a7dbac54602da02a025f80",
+      "current_sha256": "078fcd27265c32abaf54e9894d69c854288886e24be6e8e45898e2f00fbc30d3"
+    },
+    {
+      "path": "source/miniprogram/utils/taskRecipients.js",
+      "initial_sha256": "9873b71874665ee7ba1fabf8de14f79bc39883a3d1e45f8bbef55b328c14cc4e",
+      "current_sha256": "b4c3d234de806e519466f603ac566215c5e4aacc431fb3fd451b5a2e796a0cdc"
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityQuarter.js",
+      "initial_sha256": "2d8f560b71e6fdd2813f6ca81bd17c88205bf8bdb9f7109924098eb6e45436a5",
+      "current_sha256": "5068e7941d955a3f2329e3254181ed8448743718c52f89fb26744a395c72404c"
+    },
+    {
+      "path": "source/miniprogram/utils/opportunityAdvice.js",
+      "initial_sha256": "97e9bb4428c700df18dbf2bd647538a3e636be5cadb3aca74948dff620ade483",
+      "current_sha256": "4fdc290a9d7c1a2d4d00d8558d07629f5e493dfe74727410c083df0abf69520b"
+    },
+    {
+      "path": "source/miniprogram/utils/customerSignals.js",
+      "initial_sha256": "50b1d8838932088e24389d4d5e2dc2c353bd811d53e8b093fd17af402080a4d9",
+      "current_sha256": "cc6fd203c4b94072a07a975af751962b48bedd2c5b353fb3951fed8b5c36d029"
+    },
+    {
+      "path": "source/miniprogram/utils/rememberedLogin.js",
+      "initial_sha256": "6c890b1a7a54cc3eb19c5239512da1628d04f1705287a763aaa039976c7df3cd",
+      "current_sha256": "fc42ce1645bf1b9d7f09ac558082873d05bf443747466fd7da77d23f344eaf25"
+    },
+    {
+      "path": "source/miniprogram/utils/customerMap.js",
+      "initial_sha256": "ad06044d7d04438dbe8c3a536bbfa91237868293f986f473291f1318be0a0540",
+      "current_sha256": "9c914524b72a25d607bcdd0dc7219503df28255ac5fb7bbab8553c2ba8bafac5"
+    },
+    {
+      "path": "source/miniprogram/utils/opportunity.js",
+      "initial_sha256": "6848f268f1d2508fd0aac74a346a69e301997166e3c99679b90ce93fb64940ae",
+      "current_sha256": "b4eeeda3cec106317c5d73a48e8e067515de6094cb2642cc238bb92e19294aea"
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.wxml",
+      "initial_sha256": "297f5de38e3d0055b50986a121df554934399c5913c0d91354219b6828231e2e",
+      "current_sha256": "3facf9ad212a6277fbc043c383d12959c6717daef9c9c60807b3d307128c2a83"
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.js",
+      "initial_sha256": "221984c8db66196fcedc5ccf074e008a89e8e781092f128e655ddcb86317d657",
+      "current_sha256": "cca9233b47a42ccf00b2cd5a223cbc9c06ac00fbef3de52449710138a9748aa1"
+    },
+    {
+      "path": "source/miniprogram/components/profile-scope-picker/index.json",
+      "initial_sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "current_sha256": "a157733970e50e0848eea8389f7c99354d66563a1d70cc36f1b26d246098d518"
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.wxml",
+      "initial_sha256": "a09d3ef9f7dfa8140dac877d35943354eee97205b4692f838fb258fe2517d857",
+      "current_sha256": "93652a7872d9fef3bb41ecc4551c011352f4c81c501f9351f4d8ac90ac1638cc"
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.js",
+      "initial_sha256": "2fdb89707e3c0a6ab7063e9880759b6a666c994997e3c255063836ee9cf7a4f5",
+      "current_sha256": "3ecbbf21eb45176bac0cb92ef7aaeb7d6c0c11f1087061956fe70124ad572f41"
+    },
+    {
+      "path": "source/miniprogram/components/advice-actions/index.wxss",
+      "initial_sha256": "99c62b40bb5288b973baf6418140cebb28f9bc2c410aada146f16df1223a35ef",
+      "current_sha256": "db7dc58f53c61f1460b61e58806dd40ae3b442f7434413b7ca3844985ffae6b1"
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.wxml",
+      "initial_sha256": "4af2600d8d17dcc22157cf1969c80337f5747b60fec3bb278f5e0ddf94c0a908",
+      "current_sha256": "e77206ce3fe7efb77382082a11b175ae1f17b5cf4b3fb8d1b5f7a36c7c6dbf3d"
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.js",
+      "initial_sha256": "a538f9a4d5e8b7166a0fc2a5ba37f6ea02e10b95b857c18c1fe9b23cc77659b1",
+      "current_sha256": "699d6635aa26d372c07bc331650188a3a585c1124f516013fdeb54eaa7731d18"
+    },
+    {
+      "path": "source/miniprogram/components/dashboard-ranking/index.wxss",
+      "initial_sha256": "010c9dd0661d16277feae4b1c236285d4560b81c45bab2680ef02798b3f5a2d9",
+      "current_sha256": "995da8eecd5da260d2057c202a749e4b096462800acd47a20ef568273c483bd1"
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.wxml",
+      "initial_sha256": "ed19d3ae53550c161b0a8b2b6f36b332c819384108c44ba91c4049166d01399d",
+      "current_sha256": "c6d5b363ba9b9256ddb8bd0915d7a3f5ea1e67ce29d7f2e70e9485d0a5e807e5"
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.js",
+      "initial_sha256": "24b3010121da98fe6659c15f93ae8aa2ef0e87803366ba912dbce32aab2db23a",
+      "current_sha256": "56d1be2e4f391a6d6d97fde21e71b235a9b3c361727107946759d23315bb1607"
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.wxss",
+      "initial_sha256": "9558321a11bdfb0267551610296928344362a8ea6ae26ffcae356febef8deb6b",
+      "current_sha256": "015a39c896ff423081a57c4e449fcd27b36342e8f4bdb9d2bee893fa47b83203"
+    },
+    {
+      "path": "source/miniprogram/components/fde-dashboard/index.json",
+      "initial_sha256": "4c7b785665e74004268825bf23891c44e5b3f001b6022b1546e795728f030a3a",
+      "current_sha256": "1da9638ee17d949368da80c71a7c48b84580b2e38d67968f1e82cae099683a65"
+    },
+    {
+      "path": "source/miniprogram/components/quarter-target/index.js",
+      "initial_sha256": "d4f35a4a86426944a23674f63b9f2e125556334f986fc2efe88b29cae1cefcfc",
+      "current_sha256": "a8a1dac62a77583cf7221fddc2ae4d40961841c27c34f855536185a22349b956"
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.wxml",
+      "initial_sha256": "9ddd8f064165c3d71c1dc0ccc91a3ea3190fab985421051f4fef7434dbb45eb6",
+      "current_sha256": "d65dc3723eeccafdaa29e2d9e06791e55977bce44f17deba0c19f35871a83f08"
+    },
+    {
+      "path": "source/miniprogram/components/fde-profile/index.js",
+      "initial_sha256": "4caab6e290a0fa697922b0e9625dadb20fe597380ebed63d68fbf23e98672cde",
+      "current_sha256": "ac0c1e440736b732aa51c95449e3964c9f43e74441768e74ded188320ae1d2a6"
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.wxml",
+      "initial_sha256": "80994529e585d2855044aae00c565b60713acdf3213e00fa92896d369eeaa98d",
+      "current_sha256": "a715d5fee086cf1a4b79ac1012aa8013a459b3127ecd0896414b2b540f6035b4"
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.js",
+      "initial_sha256": "b5249f1b967154fcf34a73ce172061131ab5cce4e2ac01f53282ce4dcab78fb6",
+      "current_sha256": "643c24015521ffda05629d29b7d7cf4de4a8ce5144594b8713ab047f850ad182"
+    },
+    {
+      "path": "source/miniprogram/components/opportunity-form/index.wxss",
+      "initial_sha256": "f9e18beebe03e60b323397725d0e7ce03b2869c33b800cf1093854b52b1dbcb3",
+      "current_sha256": "64b6aa6999a9471d4a078fa16187f64ca6975d5ffb330cdbcbb69de267cea4bb"
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.wxml",
+      "initial_sha256": "7f0647d25724025aca4b388b090cc628a6151c3d3b6c37ba9531040cc8c9c504",
+      "current_sha256": "9c472833c30e0245f32bd62b7ddf9c990ea7fcbbb4323ff75d8f0741587a6e20"
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.js",
+      "initial_sha256": "398bfdbd24b756ff2e234aa94fb7e262cb5538816e0b8c10502bd7173c522ee9",
+      "current_sha256": "780c0c2db6e4f89ff3c1ba08a260e0f82a168d2bc2674e21bc7d09cfada4c9e4"
+    },
+    {
+      "path": "source/miniprogram/components/fde-projects/index.json",
+      "initial_sha256": "737a135c40cea03d88880b45015c8281eebdeec520bac65994512543148b7313",
+      "current_sha256": "d792e942e9db03b14691ef3e1498eeaf4b18444f88237d7dc5e950fad13954ce"
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.wxml",
+      "initial_sha256": "83547576a5ae10a8fb2fbbcebd231741f79449c7c3ff815e2267894a204e4752",
+      "current_sha256": "ea898bb9de88f71514b94fa303b9fb5d7c77984d3d90357906ca1f53b05b5d1a"
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.js",
+      "initial_sha256": "d0f6c38b948c5145e7930fe540814a0b065779d4350548d75e6ee699392c4646",
+      "current_sha256": "e26c890b1a7efc24044a9093f190da69d83156c0da327924e83328b6605d03d8"
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.wxss",
+      "initial_sha256": "bdaee4808ead0a3cae19e4c5b5712cd5a4e9f16bba7e5040c393e85c52c95d9e",
+      "current_sha256": "05ac0eca3ee828913f060ab7e0285c2b163f13e9c86e92897707dd65eab59a71"
+    },
+    {
+      "path": "source/miniprogram/pages/customers/index.json",
+      "initial_sha256": "cfa1fb7b6f04005588d0b5065bddab202fda766782bf1e7a6098ab60fe168373",
+      "current_sha256": "344df70246db5d9a65f826d7ef790cb01698e3670c3889c1556c1cfc7147b359"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.wxml",
+      "initial_sha256": "26c8f951f85bb80a8ab8720f96bb088c0dcbe2da48298c6f002b85840a467b4e",
+      "current_sha256": "3e2e9d7021d237d8955dbf3c591ef936436d06843ace1618de0253a64b58e504"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-create/index.js",
+      "initial_sha256": "45da6aada512a7126734f6eb5ad40f68a82564f794ee44d247f921d62d7c6fb8",
+      "current_sha256": "88f0290e608dd6a916d076bb69bf6a7e0bb5570d266a44c1f0377d3e101314cc"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.wxml",
+      "initial_sha256": "46519dfb6d6f39c802695204c55b6c3e789b8fd52cbb34b582f2249f4df3559b",
+      "current_sha256": "ffad851f3a9243761ef281a828d9d9d134c50ca8044027599fa25d0bbd4b6958"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.js",
+      "initial_sha256": "042cc09e1905ae945a148151dd9fb638acfd0367b26fdb3a9f1f9a8ffa50d36f",
+      "current_sha256": "ec37479ff606deb03d2498134b8b7918b4ccc700ba20c77be6dc5ea53ab504e0"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assets/index.wxss",
+      "initial_sha256": "5486a8376af5f43c19ba9d1ad54039e561262fed4280950c445467daa6d8f09e",
+      "current_sha256": "ccb48d47a9c0c9f42dcaadfb2d218a2f54b048f4508209a59ee8acebf608f93a"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.wxml",
+      "initial_sha256": "da49bf48d41221e7d48693bfb6541bcd912e50a2abda5bf7e0a4fdf98f1ea531",
+      "current_sha256": "a1e0a69cfb057ed0b38d82a313b52dc224acc5a3b5af0fdfa9526e2b16058616"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-confirm/index.js",
+      "initial_sha256": "23991cb2db5e459d41f0d0873770852ac1e8b25002784e003da219b3b29aa5ad",
+      "current_sha256": "3544a4d8cd419a9245da369b58562239b3837f3e5262873102b9621fe46aecdf"
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.wxml",
+      "initial_sha256": "2a7090ddc207044c6dff5840ce6bc586a69afe77608c6399cd0f612621e9f897",
+      "current_sha256": "b56046e41eca075bc7c072e5c0dd45c0b88d3b31d6b3c36fa64b388f1578385b"
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.js",
+      "initial_sha256": "1a01c521c3d903eae5ac316ce2810bf93922aba2446e73177a1b900c3389e096",
+      "current_sha256": "beda3b8149de55c7fddf8f7e39094880fe5e0a4c54aae73e6829d43f814dddbe"
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.wxss",
+      "initial_sha256": "76451a8ec6540f7636ffd5509dd7cf211a995d47c502cfab22ac1f35f43d7885",
+      "current_sha256": "5091baa2ef471dc4c68fdb1e05aa8c3695b7ccad3788d5bdc7dd5ec36afd9d52"
+    },
+    {
+      "path": "source/miniprogram/pages/tasks/index.json",
+      "initial_sha256": "00b05d1b3be96505c00b2c0b6f99514ff4f8a0cca048d75751eeba07cb9d9da8",
+      "current_sha256": "2373fcda0e163f672972ecbc32dc796563f6162d09d5d1867b80cf7c5e239a87"
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.wxml",
+      "initial_sha256": "39c70a301f2f8087e41f929416675cd78fd18d12475a3ce561463cd3228ee1b6",
+      "current_sha256": "3ad1bac31a98062608915034e78ce8f6a6a8b10b1304279accd00438888c83eb"
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.js",
+      "initial_sha256": "76be38468def05ec90cfb365485ca75aa7684a14aa93d7927356b65f83e3a55e",
+      "current_sha256": "03c816d820844755c58c310ccc98b8ab11547c979e648ef31a21f85e1aadf46c"
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.wxss",
+      "initial_sha256": "780054b268128c922873f0bcd3b3d2abf99f0ebbbe33862cb0a0a839b8d5b089",
+      "current_sha256": "d6d630162c87b90d42c18d079ec7badf527182c638599b702fbcf349ae35e899"
+    },
+    {
+      "path": "source/miniprogram/pages/management-task-create/index.json",
+      "initial_sha256": "80e788e39ee900aaa03457d981209931a476616bef6c1da2d6bdd7ee121719b4",
+      "current_sha256": "4ca731588fe30ab8e410897da13a018c1b9bfa2cec0d94ab77cc41229fac82d2"
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.wxml",
+      "initial_sha256": "47f15c0225befe4568b1acb6f8aa0023272a9ddcc05b1e646dc03516983a79bd",
+      "current_sha256": "56fc7fa1542a26841824482ffbc3e1e17dfca4bc2aee2a7828792739071f25a7"
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.js",
+      "initial_sha256": "2632347c0e272d4d86b3d129e544c790b49cd7bcff356ac24b9372ddada87e97",
+      "current_sha256": "0722367c6772c25c91cce6a6ddfcf25f2cd20fe8fed16eebaf9c641cff6522e7"
+    },
+    {
+      "path": "source/miniprogram/pages/opportunities/index.json",
+      "initial_sha256": "0bada951547e5ed7be621c3a90d49c2f9cfcd65ad1ab6a6d749c510f79b8cbf2",
+      "current_sha256": "a3f054ae654f1c9ebdc9b997def53dec8088bc721ac361028821f78dfa4e7da4"
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.wxml",
+      "initial_sha256": "f51fa3e611f5f4b26be739ad5f4d83f7b7fed721f5aabe2f3094172d5766f983",
+      "current_sha256": "79c29e680d26f23a74b9f6363a1cf1a557fb8c73aa1aba0ee25ffefc6a6f10cf"
+    },
+    {
+      "path": "source/miniprogram/pages/demo-create/index.js",
+      "initial_sha256": "f7138b6c1c7e8e2605e40e9d3c34512cb3017f0bdfcc788283fbcbd9bdc18b28",
+      "current_sha256": "fb7daef80b103c3835599877a195db1f4130ee3cbcad713f2e4f137b748cb0af"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.wxml",
+      "initial_sha256": "b0327a473a0efc73f25044ff4834ac240825f79a71e4451431aafe57621b3baf",
+      "current_sha256": "9de6ea09f4cb8daead42397015b0b2261bfebe08f9660e80da145fdab76647f6"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-detail/index.js",
+      "initial_sha256": "21432cc655153a802ba3c763093680df6eb24e641c556d130e94786b07928d69",
+      "current_sha256": "533879a3805f6ab78f5cc5f14b454d31c687c52d15e67e5e7629cf22e34cb488"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.wxml",
+      "initial_sha256": "20266569e679e71aef0953beb483b2c5ee3a999b9886612f08ed345b41a9fbdf",
+      "current_sha256": "37265ddd0c618f822a90755227d3551f4c24d501f79f58e9c8d6e217310a2099"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.js",
+      "initial_sha256": "d16758a41236cdd5ee54b50b09b1fe835ba938a797dc382c56ef135ae3f3176a",
+      "current_sha256": "d950defbc0176ad5bf2876d6a722988b3467613d95e4cb938bdcfc694154ff32"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-detail/index.wxss",
+      "initial_sha256": "7174c75113814e774a5a4be1cdd011a87f0dec843dd2de28a14eb1b02eab0e88",
+      "current_sha256": "52df51c11ac085f7fa8d384b10671951775af0db86fbafb55fb5d7c19a998209"
+    },
+    {
+      "path": "source/miniprogram/pages/report-detail/index.js",
+      "initial_sha256": "607072e14fb566e6342953098240f6e2c4200453dc8d76b986cb5dba2682deb6",
+      "current_sha256": "9ea2c129d4ff0bc14fc1d914a62f44b16ae912dae32b744a70387f3a0eb2542e"
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.wxml",
+      "initial_sha256": "ce6f0b27432c191afb1f1f6e4720e6cf550577fdf63f2f0030c7170ca39cb73d",
+      "current_sha256": "408be27a37a0e38ccce59ccb8fddbdf3b2beb646db5a1c28aaceba2e6f405e34"
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.js",
+      "initial_sha256": "7ec9dd21ab13e0d5dab44754cce57d84f24d12938e92918d438824af4a943b92",
+      "current_sha256": "2ecb4f6f0a6f2f71581d73d43c828209d6aeb96f9bef0e1296750b1d0baa52cc"
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.wxss",
+      "initial_sha256": "59037b498a5bbb1baf268980d4ebec1ca3ecea1b29dc9f65359d76f81aef3d4a",
+      "current_sha256": "a1c84596f7b8dff91cbb7942be86a7e9e2a3afadffb7b9d6495bab4dba66f65d"
+    },
+    {
+      "path": "source/miniprogram/pages/task-detail/index.json",
+      "initial_sha256": "f41806d5b20a0cf8e87bcc0574b3958881f2449671f827390b36e8f271e70c69",
+      "current_sha256": "6d62f6b485379793f4e0781fbf58367cfb11ac8362c2b279c35ef34360253bbc"
+    },
+    {
+      "path": "source/miniprogram/pages/fde-records/index.js",
+      "initial_sha256": "42c4bcbddb4c09471ad96e4a68c5790d743dccb29a12c07594e3eb154268c86d",
+      "current_sha256": "7d979ce7e9b6fda08921ee396e7cc626b908ebdb34760af9ad7cc62745efacb8"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-assign-confirm/index.js",
+      "initial_sha256": "96fe75f6d4611878a1343be738f25dd1d73f5bb4333ca83f5f084cd1d0c8aacc",
+      "current_sha256": "85a8df61a911e74a35043b17443aefffac55f204a16048e47e9b65f057ec4532"
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.wxml",
+      "initial_sha256": "754b60434c4c8ce84321924e70a56e6fa50b0259868b84b3c387bbdcb7c2ba4f",
+      "current_sha256": "2db229664e6389d36af0c7902efd75aa8adabf71d8047b7dc80b58f5d01663e9"
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.js",
+      "initial_sha256": "f2360b83fe9b9571652873f2ad363a0938a516c347b0a4ea0fd97037b8ce9380",
+      "current_sha256": "5ae6c4cf9ae1f7bc4bc50edad0fa29fc2c1f6a9ec1d1a85c19430be186879270"
+    },
+    {
+      "path": "source/miniprogram/pages/profile/index.wxss",
+      "initial_sha256": "02e2cf5b2395f82683a62fb08f144a74591fc0b97c6a8ffab543e7ba0da9e2e3",
+      "current_sha256": "810f816f82d901a14f1497bf040c60b8f5d82453681bc462df630d4e29a6dcde"
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.wxml",
+      "initial_sha256": "5c5dfd4c893b1600cc51e616d5fae0cbae45231b00faf2b76f6e006ab6917ae8",
+      "current_sha256": "71af9076a958c48b22337a00a6e0006927c60a3ac373ae5ce7f78ed9cd861897"
+    },
+    {
+      "path": "source/miniprogram/pages/workbench/index.js",
+      "initial_sha256": "17a5435e0a3a07ab4fa3e4e3d5e1824b8ed36905c330df7e6d82f9d41820118c",
+      "current_sha256": "329da41c17eed01b5f566b383c6412b3adab907c4faa0e0fbf0fc8c2c9cd5bba"
+    },
+    {
+      "path": "source/miniprogram/pages/risks/index.js",
+      "initial_sha256": "6dad7dc1182b4baa0dd778f8be11022063ee89d8a410e749537555fe63f3af37",
+      "current_sha256": "358e94fcc5f146662624fe2b4f9e15c841cffbe746ad9e6fdb034cc883a9cb8b"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.wxml",
+      "initial_sha256": "29351f32774e27063143dfcdfb128f2f8d14e14682bee6637ee0f492ade85af7",
+      "current_sha256": "391ea88f1a47ffc17076fa04835c779b770bb030638f61da3c05c7ac750c46ef"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.js",
+      "initial_sha256": "b329384e9dc4f22c7d2ac2283effece381648059025a5dca5127e67ff36f13a3",
+      "current_sha256": "e43a39358133b041a0819fead3b77da02744db83d7f83763a054ed5f101e5a17"
+    },
+    {
+      "path": "source/miniprogram/pages/visit-entry/index.wxss",
+      "initial_sha256": "8c144314048a4c60c4b2a13aad6886ccc40e31af31efab6d74a4f81d3b46fdcb",
+      "current_sha256": "4c298ad33c4e0f6c69fa4546631a6b08965a7d8d7535e0c3b87df0dd9036fa12"
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.wxml",
+      "initial_sha256": "981a461f0fbb16d6cb5dad6e13aa9a819dfbe6d61286cc9a9d4d23b0936a4deb",
+      "current_sha256": "0223d39d948ff5090bd638d9c1651d832c9e261ac106acac26bf35f2e6e1c1b2"
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.js",
+      "initial_sha256": "40fdae4e4f41053197131f05ff4e07e2cab79ab74ae14fa1976f5161228bb60f",
+      "current_sha256": "21abd696faadd0993d65d0a4978a102ea38e080c3cb8328f875e85acca01937b"
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.wxss",
+      "initial_sha256": "a6d488211d64d4bb530f09520b624ba6d3f551f5134792d1ea0d97f55d5b7789",
+      "current_sha256": "2942b44fa1a4ca5b0aa0f010fe113564e4a10e915523771764731657367617ad"
+    },
+    {
+      "path": "source/miniprogram/pages/bi/index.json",
+      "initial_sha256": "bcce44dd5dc3cfbcb66ee128521e1fc72723a37dc8365e1fe329efc9d6ed60c4",
+      "current_sha256": "5d7af1b500f58b2d233687f002a70a6a8fb36cf1e3b746886b76600d46c328d2"
+    },
+    {
+      "path": "source/miniprogram/pages/index/index.js",
+      "initial_sha256": "a7b425af1f2850797b8b20c4280fddf45a5172bcf6f9c73bfe927b4f8497b153",
+      "current_sha256": "c2857ad44a4eca6adc796a6d98af013832df82f5ea37118020df64291fdff434"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-edit/index.js",
+      "initial_sha256": "c8f19e99592a97e181d6b7968ec5545fa217ac1462432ae1e72b3b7d5669d73f",
+      "current_sha256": "5347b4e1373036431569a213bdaa230b2a625bf2a4d5b3a754ce6547b664ae49"
+    },
+    {
+      "path": "source/miniprogram/pages/member-growth/index.js",
+      "initial_sha256": "a61a420aa52fcfd2a649c36a3cbbf0b6fe504e7d2068f80a947658b0f0fb4f7c",
+      "current_sha256": "d957874d4571e6547ed4934734fc63b8f3ec901416ee634ca1efefed7c3e9fb0"
+    },
+    {
+      "path": "source/miniprogram/pages/opportunity-create/index.js",
+      "initial_sha256": "61a14feacda62296a0eb4d19df64697e81354961ebe8455e08a74dde27ba9233",
+      "current_sha256": "a181ba23e7d90b9f16b4453981b76e94b243170f5a4288191e87328ff9d0f391"
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.wxml",
+      "initial_sha256": "3b23ec6cb0746d983c69a2be91b17a69c99b249e4cb121926db4a9a548fe81d5",
+      "current_sha256": "de6d225a9fbca4f40a376196fcf8f5d5d3b03d01c614dcf4292bbdfaac897079"
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.js",
+      "initial_sha256": "9042179bee94cdad54378db8a4a3352a406ed21b58bdfc2b9c5aa110fcc3d2ab",
+      "current_sha256": "8676532ae400f52f7543bc6393154bd5925c5a2c8782280eaae7797d170627a4"
+    },
+    {
+      "path": "source/miniprogram/pages/login/index.wxss",
+      "initial_sha256": "48bfd0e3ac4de161dbce2df8674937b19538004485aedb3ff3ecd51fd27edf06",
+      "current_sha256": "c97037af342639ad7cd2c91686833fd04068b45dcd7e71df3526bcabaace78ff"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.wxml",
+      "initial_sha256": "e58decab96af2db903d01b462cbb4cd8a0cac33425f161794e9df731665a0013",
+      "current_sha256": "400e2062ef1f0e6b6328b094826d1b1ebfd066324cc4ffc5584e1b42548b3e9f"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.js",
+      "initial_sha256": "e8b684252fede70a825121dc47b6dd85cf425d4a5616f29a49812e2a088df782",
+      "current_sha256": "f5369f7c3bef33670f812e361a01e41370b9c5cc17218544e10f8351f1c7fd65"
+    },
+    {
+      "path": "source/miniprogram/pages/customer-claim/index.wxss",
+      "initial_sha256": "2079744ae58a429f1236a4616ad930ee9ff99606debe55166e7d04c8d3bd7010",
+      "current_sha256": "ea4e2e747bec56aef553ec8673b9efeb7672de996eb507a6e09ccc217f0c8575"
+    },
+    {
+      "path": "source/miniprogram/pages/risk-detail/index.js",
+      "initial_sha256": "b9fcd41ec3a022247e77b687006ecb92e29c740e40e1a6b85fbc19d673901227",
+      "current_sha256": "bbc3bbaf29a96484f1ff5737b5661af0088ad38aa2258f421b0670971c26ec91"
+    },
+    {
+      "path": "tests/account-boundary.test.mjs",
+      "initial_sha256": "2c9402094d82e52b6abccb36053b98a9210dcf3d5603a3bdb3358f0a31456467",
+      "current_sha256": "8e8d7e5e431b923f3166dd394c0a436c01bf9a89f8a7b7cbbca9201bef8d5202"
+    },
+    {
+      "path": "tests/preview.test.mjs",
+      "initial_sha256": "3efe48db679c7c2870048ccb57ada4cde3935b37826cc499541387ad3e28471b",
+      "current_sha256": "eab955e32be239c4439f8808b764338c2b84b0aefa1f36748516552f9b8f7d23"
+    },
+    {
+      "path": "tests/v3-contract.test.mjs",
+      "initial_sha256": "ea9dedb34835f9e6740f16b392df455a8536c21178caffdf2c0acf2a0a0ce684",
+      "current_sha256": "439508b677bef5ca511adcc066fd189cc93b8fada8aaf98765ab57d9e3d0f959"
+    },
+    {
+      "path": "tests/account-session.browser.mjs",
+      "initial_sha256": "261b751bb8443ad10afe339629ca1744952026495405d60ff23af86272a56794",
+      "current_sha256": "c1c52acb68f151d76d9b9f6d58a83d16eeffc007218446c52dcbde56f6f9b24c"
+    },
+    {
+      "path": "tests/v106-visits.browser.mjs",
+      "initial_sha256": "17c271e8263ecb38fa7f43ad6aa180b29ea62d3adafb734fdd087a9c9c81c855",
+      "current_sha256": "9a07de47477f1d947fd27a483c40fa64e681604247ec2144a695f00e2f63b81c"
+    },
+    {
+      "path": "tests/v106-auth-tasks.test.mjs",
+      "initial_sha256": "4da38bf1f4bc320f3251a2a992202c5ef43925bc8462833d67de6681ee1310ff",
+      "current_sha256": "ee6d62785721f677ced6b409b5f27a99a97fba62b8a53f28af55a167834296dc"
+    },
+    {
+      "path": "tests/build.test.mjs",
+      "initial_sha256": "1ecbb87abf8665dacebb54942ec0f33556ec6a9f631949ed9f1920f6b61d60a2",
+      "current_sha256": "42d4a14b86fd36488dba146b59e0f2e7509f455ea719e50025a403d786efcae8"
+    },
+    {
+      "path": "tests/fixtures/v3-contract.json",
+      "initial_sha256": "72b009e07f72baba8c1ddf2b8aa2e991b628d787b0cf071e6315c8ae195ad7e0",
+      "current_sha256": "fde7798550160cd4988414243c49eef243bedea9538f71b83844c23c979d25e6"
+    },
+    {
+      "path": "docs/cloud/delivery-readme.md",
+      "initial_sha256": "5cc20b3f43bb798e7d8be735511758747ee8b9ce56c988102d052329276e0b09",
+      "current_sha256": "c004debb022dc45bc00dc7b09d8dce6fc04aae3a76a8232e48fc4bfbf528e64f"
+    },
+    {
+      "path": "department-ui/Customers.jsx",
+      "initial_sha256": "9ae3dc0a4d1a4f808a8ebaa1dcf3426d00e336d8633f483d17388e40746a700b",
+      "current_sha256": "4b27732fa7d8075461f26152aed7e614b73c32bf1c2353bcf49072873999ed8a"
+    },
+    {
+      "path": "department-ui/login.css",
+      "initial_sha256": "300909c64381ba353134645ace1f3f6031fd4ae725d566fd081b994b17d2b50f",
+      "current_sha256": "7634e2ab66703ebeb9f8c4880e9289f298c0aefaa3e325b5a40fee3dcfbf84b0"
+    },
+    {
+      "path": "department-ui/TaskCreate.jsx",
+      "initial_sha256": "50761834b367b6030c4668ec70a052e8750661ce5809b4d931a1c637664788ab",
+      "current_sha256": "d0533d90cd92ad94a848ba983e111021852cc3a41fc58a9f49b17071993d041c"
+    },
+    {
+      "path": "department-ui/OpportunityCreate.jsx",
+      "initial_sha256": "30de5665cd7c514bb3cfcde9fb1f7267f310cf7bb9c303b38b7594bdf81944f8",
+      "current_sha256": "9ddedc30c8d2c0dbaf814219d1c8fbe7328d5773e1f545aeaa02988ca43a0fe1"
+    },
+    {
+      "path": "department-ui/Bi.jsx",
+      "initial_sha256": "b842ea4a1bded30b4119c9df23582fa6c06534831e7741f03f1261fe04f5baef",
+      "current_sha256": "381feb03cc1834a64a7a3e3dfa499028cde6657b83a6b3037603017ece94e9a4"
+    },
+    {
+      "path": "department-ui/frame.css",
+      "initial_sha256": "97c8ee2fe78e20e3ff6315ee89a8c7b30e6994f1f35b82c89c73b210f97f2dc1",
+      "current_sha256": "7419d71e6b99e51498c1d491789347c4c8fadbe2e776287cb4baa312a71084e1"
+    },
+    {
+      "path": "department-ui/Login.jsx",
+      "initial_sha256": "8c9bd3f137ba99f40264e0a8e167c83a333a12c390d49aee3e4928d82d20faba",
+      "current_sha256": "3acbe024ec4e092e147fa458508dccfdc47dd0caca5228ab87673a6186678ad0"
+    },
+    {
+      "path": "department-ui/customers.css",
+      "initial_sha256": "95147fb7b0fdd0ca316cd5382d879b4c2930776824074f17d94e32339bfde9af",
+      "current_sha256": "f9405027656e3764c94e1fefecdef28cf7cb25003ca92a7697be408c5193f760"
+    },
+    {
+      "path": "department-ui/index.jsx",
+      "initial_sha256": "a7dae3d3a75da33795f4ceebbf339a9210610310cefc14154238f9cfe3cd28cb",
+      "current_sha256": "717ee368e8d2779bc0e1b59506c7308edb77590efc4c2d991e346a2d2fcc7b10"
+    },
+    {
+      "path": "department-ui/VisitConfirm.jsx",
+      "initial_sha256": "80c5b04e48834f9c21ca99449d458dc991fccb3ebb50d392b900eb989df3e71d",
+      "current_sha256": "eff545990dc45a1467871a7f7a5585b5db407e2fe38cc8dc794691ae6406d0b5"
+    },
+    {
+      "path": "department-ui/Tasks.jsx",
+      "initial_sha256": "d7eb6ecbf5344f9b05741a22b7e0ca0eec70aeee921232b9f564a7d8c36741e1",
+      "current_sha256": "7bdc00ef7881fc04583ed664937456eeeee00211b75f73dd2654a581995246d9"
+    },
+    {
+      "path": "department-ui/TaskDetail.jsx",
+      "initial_sha256": "71b98712870a78b938addd12735edc4419121710bcd7f24ed3172507c79a8ae1",
+      "current_sha256": "0dbf76f51cb27873b7942c72a3f30cf7adbc675d86266e403a1b92bb7f467fba"
+    },
+    {
+      "path": "department-ui/SmallPages.jsx",
+      "initial_sha256": "84e51eecfb4f6718dc5b866bc06ccc191b2c669c7f7e3014df8afd6d31dc26ad",
+      "current_sha256": "387e624f7107ecd2b831bb6b51b903ffeb29c86ede30d58bb355269a90c8c855"
+    },
+    {
+      "path": "scripts/web_insights_layout.py",
+      "initial_sha256": "839db32c0797897228b1c4a98b3bd3f64526d067d152708fd0f5d2936e8f9af2",
+      "current_sha256": "c6592045f1e52da10528c3374c55d7413c700ff548cf213554b3cc9927ff7d9d"
+    },
+    {
+      "path": "scripts/check-v3-contract.mjs",
+      "initial_sha256": "6b05c1b2a30d1f35e105daea068f6b0ad3bceec8efcf5565ce180e86a2adcf0c",
+      "current_sha256": "9212e8c2cea82c57aec7f7c3679586ab46a73149b7d3a2248b1014c8ba3bdfd9"
+    },
+    {
+      "path": "scripts/package_department.py",
+      "initial_sha256": "07f0c69098bbdc02b36b7fe9dc4a38370783d583c724fb02895c08e94f5e2aae",
+      "current_sha256": "0cb164b1807b103800a5cb209646688ede9af542c609494edf96e2891c7075b0"
+    },
+    {
+      "path": "scripts/web_claim_layout.py",
+      "initial_sha256": "dd518d7da8ecd788004f5826cd8ae34cfa6036f7c7ce7fcdbf71465843743e01",
+      "current_sha256": "d37bffec85e09c27db343f38e67c33d5ebf14005787429995c0f1406aa653a1f"
+    },
+    {
+      "path": "scripts/web_collection_columns_layout.py",
+      "initial_sha256": "e72076595b6ce0fa77d27ae3a6524a126121425332b8bdb31b2bee06be21455b",
+      "current_sha256": "22632cbabd7a4ebf37599de2ccfb5a428a922a53b045929770ab506dd82c7157"
+    }
+  ],
+  "backup_count": 192,
+  "backups": [
+    {
+      "path": "20260929-095652788963/source/miniprogram/pages/member-growth/index.js",
+      "sha256": "a61a420aa52fcfd2a649c36a3cbbf0b6fe504e7d2068f80a947658b0f0fb4f7c",
+      "bytes": 8229
+    },
+    {
+      "path": "20260929-101021266585/tests/upgrade110.browser.mjs",
+      "sha256": "6b70551cd65cb3e2996e5eaeaacf1e068c2b7d4ccc8ca817d9e92e15f4921d5f",
+      "bytes": 11384
+    },
+    {
+      "path": "20260929-100620628345/department-ui/upgrade-110.css",
+      "sha256": "2abc1c10026b84684ae01a2232a6b824898e2fc154d0955fbb65731be1d8a5d3",
+      "bytes": 1713
+    },
+    {
+      "path": "20260929-101232650952/department-ui/NativeDialogs.jsx",
+      "sha256": "14fa6412c29dfb04e9f30915a79b13680a74fde67c3ad427ade4a99131eaa1bd",
+      "bytes": 3644
+    },
+    {
+      "path": "20260929-095652795877/source/miniprogram/pages/customer-claim/index.js",
+      "sha256": "e8b684252fede70a825121dc47b6dd85cf425d4a5616f29a49812e2a088df782",
+      "bytes": 9030
+    },
+    {
+      "path": "20260929-095652726358/source/miniprogram/components/fde-projects/index.js",
+      "sha256": "398bfdbd24b756ff2e234aa94fb7e262cb5538816e0b8c10502bd7173c522ee9",
+      "bytes": 13198
+    },
+    {
+      "path": "20260929-101232657582/preview-api.js",
+      "sha256": "e51310cf47d301d4b895e8f849cc51f2dccaa990ef3d9729deb1b9fd777f60ec",
+      "bytes": 121602
+    },
+    {
+      "path": "20260929-095652748123/source/miniprogram/pages/management-task-create/index.json",
+      "sha256": "80e788e39ee900aaa03457d981209931a476616bef6c1da2d6bdd7ee121719b4",
+      "bytes": 151
+    },
+    {
+      "path": "20260929-101941918225/tests/upgrade110.browser.mjs",
+      "sha256": "142677c6b44a2e9d92aa455594f4dd9fa1668e67b79100ba135cbf32753b945b",
+      "bytes": 11979
+    },
+    {
+      "path": "20260929-095652780553/source/miniprogram/pages/visit-entry/index.wxss",
+      "sha256": "8c144314048a4c60c4b2a13aad6886ccc40e31af31efab6d74a4f81d3b46fdcb",
+      "bytes": 12672
+    },
+    {
+      "path": "20260929-095925307821/department-ui/customers.css",
+      "sha256": "95147fb7b0fdd0ca316cd5382d879b4c2930776824074f17d94e32339bfde9af",
+      "bytes": 6302
+    },
+    {
+      "path": "20260929-095652722106/source/miniprogram/components/opportunity-form/index.wxml",
+      "sha256": "80994529e585d2855044aae00c565b60713acdf3213e00fa92896d369eeaa98d",
+      "bytes": 6170
+    },
+    {
+      "path": "20260929-095652689132/source/miniprogram/utils/visitDates.js",
+      "sha256": "3ad43dd7401d6b56c84e0a27e6f7d61b03950a858e4ee31a86358ea4c4014642",
+      "bytes": 1254
+    },
+    {
+      "path": "20260929-095652685131/source/miniprogram/utils/opportunityListCard.js",
+      "sha256": "2ce1ba9a6ccd212a4f33029d0c26b8ea863eaba20f76b728d45a6e66a438ee6a",
+      "bytes": 1734
+    },
+    {
+      "path": "20260929-095652791676/source/miniprogram/pages/login/index.wxml",
+      "sha256": "3b23ec6cb0746d983c69a2be91b17a69c99b249e4cb121926db4a9a548fe81d5",
+      "bytes": 4180
+    },
+    {
+      "path": "20260929-100620632017/department-ui/TaskDetail.jsx",
+      "sha256": "3f2fdd514ff1f2a8deb2cbc42f4663c34a5c56ad069a04b9687829784b966aa4",
+      "bytes": 9877
+    },
+    {
+      "path": "20260929-095652736100/source/miniprogram/pages/customer-assets/index.js",
+      "sha256": "042cc09e1905ae945a148151dd9fb638acfd0367b26fdb3a9f1f9a8ffa50d36f",
+      "bytes": 31379
+    },
+    {
+      "path": "20260929-102402265158/tests/upgrade110.browser.mjs",
+      "sha256": "4ebc2ee7d9824c0db5c375114350bbdee2f9ece72d86dfaf778763e90515e6f9",
+      "bytes": 15702
+    },
+    {
+      "path": "20260929-095652727416/source/miniprogram/components/fde-projects/index.json",
+      "sha256": "737a135c40cea03d88880b45015c8281eebdeec520bac65994512543148b7313",
+      "bytes": 119
+    },
+    {
+      "path": "20260929-095652785081/source/miniprogram/pages/bi/index.json",
+      "sha256": "bcce44dd5dc3cfbcb66ee128521e1fc72723a37dc8365e1fe329efc9d6ed60c4",
+      "bytes": 265
+    },
+    {
+      "path": "20260929-095652711001/source/miniprogram/components/dashboard-ranking/index.js",
+      "sha256": "a538f9a4d5e8b7166a0fc2a5ba37f6ea02e10b95b857c18c1fe9b23cc77659b1",
+      "bytes": 1127
+    },
+    {
+      "path": "20260929-100305934594/department-ui/Bi.jsx",
+      "sha256": "b842ea4a1bded30b4119c9df23582fa6c06534831e7741f03f1261fe04f5baef",
+      "bytes": 8854
+    },
+    {
+      "path": "20260929-095652729290/source/miniprogram/pages/customers/index.wxml",
+      "sha256": "83547576a5ae10a8fb2fbbcebd231741f79449c7c3ff815e2267894a204e4752",
+      "bytes": 29352
+    },
+    {
+      "path": "20260929-095652794847/source/miniprogram/pages/customer-claim/index.wxml",
+      "sha256": "e58decab96af2db903d01b462cbb4cd8a0cac33425f161794e9df731665a0013",
+      "bytes": 3157
+    },
+    {
+      "path": "20260929-095652763883/source/miniprogram/pages/task-detail/index.wxml",
+      "sha256": "ce6f0b27432c191afb1f1f6e4720e6cf550577fdf63f2f0030c7170ca39cb73d",
+      "bytes": 9556
+    },
+    {
+      "path": "20260929-095652731408/source/miniprogram/pages/customers/index.wxss",
+      "sha256": "bdaee4808ead0a3cae19e4c5b5712cd5a4e9f16bba7e5040c393e85c52c95d9e",
+      "bytes": 30508
+    },
+    {
+      "path": "20260929-095652732215/source/miniprogram/pages/customers/index.json",
+      "sha256": "cfa1fb7b6f04005588d0b5065bddab202fda766782bf1e7a6098ab60fe168373",
+      "bytes": 269
+    },
+    {
+      "path": "20260929-102307532347/CLAUDE.md",
+      "sha256": "bd491071ce41b612933fcd88c72ccb60e43554386fb611d17433877627d60986",
+      "bytes": 3731
+    },
+    {
+      "path": "20260929-095652787667/source/miniprogram/pages/customer-edit/index.js",
+      "sha256": "c8f19e99592a97e181d6b7968ec5545fa217ac1462432ae1e72b3b7d5669d73f",
+      "bytes": 7012
+    },
+    {
+      "path": "20260929-095925303907/department-ui/TaskDetail.jsx",
+      "sha256": "07b84a3d591eec232570b9a30bd7103ff5a0e58eb9840404551d18946ca89bba",
+      "bytes": 8966
+    },
+    {
+      "path": "20260929-101525001362/tests/account-session.browser.mjs",
+      "sha256": "261b751bb8443ad10afe339629ca1744952026495405d60ff23af86272a56794",
+      "bytes": 12735
+    },
+    {
+      "path": "20260929-095652744834/source/miniprogram/pages/management-task-create/index.wxml",
+      "sha256": "39c70a301f2f8087e41f929416675cd78fd18d12475a3ce561463cd3228ee1b6",
+      "bytes": 9621
+    },
+    {
+      "path": "20260929-101525002719/tests/v106-visits.browser.mjs",
+      "sha256": "17c271e8263ecb38fa7f43ad6aa180b29ea62d3adafb734fdd087a9c9c81c855",
+      "bytes": 8292
+    },
+    {
+      "path": "20260929-095652690196/source/miniprogram/utils/requestIdentity.js",
+      "sha256": "ae702a5a687aae9980933250a2dcd9694cd9aa125789e92ca16d15ce5b1103b6",
+      "bytes": 4303
+    },
+    {
+      "path": "20260929-095652778458/source/miniprogram/pages/visit-entry/index.js",
+      "sha256": "b329384e9dc4f22c7d2ac2283effece381648059025a5dca5127e67ff36f13a3",
+      "bytes": 31970
+    },
+    {
+      "path": "20260929-095652716043/source/miniprogram/components/fde-dashboard/index.wxss",
+      "sha256": "9558321a11bdfb0267551610296928344362a8ea6ae26ffcae356febef8deb6b",
+      "bytes": 15731
+    },
+    {
+      "path": "20260929-095652756109/source/miniprogram/pages/visit-detail/index.js",
+      "sha256": "21432cc655153a802ba3c763093680df6eb24e641c556d130e94786b07928d69",
+      "bytes": 3371
+    },
+    {
+      "path": "20260929-102133037937/tests/v3-contract.test.mjs",
+      "sha256": "ea9dedb34835f9e6740f16b392df455a8536c21178caffdf2c0acf2a0a0ce684",
+      "bytes": 9478
+    },
+    {
+      "path": "20260929-095652711892/source/miniprogram/components/dashboard-ranking/index.wxss",
+      "sha256": "010c9dd0661d16277feae4b1c236285d4560b81c45bab2680ef02798b3f5a2d9",
+      "bytes": 3686
+    },
+    {
+      "path": "20260929-095925301899/department-ui/TaskDetail.jsx",
+      "sha256": "71b98712870a78b938addd12735edc4419121710bcd7f24ed3172507c79a8ae1",
+      "bytes": 8912
+    },
+    {
+      "path": "20260929-095652718124/source/miniprogram/components/quarter-target/index.js",
+      "sha256": "d4f35a4a86426944a23674f63b9f2e125556334f986fc2efe88b29cae1cefcfc",
+      "bytes": 6586
+    },
+    {
+      "path": "20260929-095652714983/source/miniprogram/components/fde-dashboard/index.js",
+      "sha256": "24b3010121da98fe6659c15f93ae8aa2ef0e87803366ba912dbce32aab2db23a",
+      "bytes": 14992
+    },
+    {
+      "path": "20260929-102307487069/department-ui/customers.css",
+      "sha256": "11d05090d7debfdf0289e8c38c4f84319163d98a86e8362e7d5c0d0b5ba0282c",
+      "bytes": 6352
+    },
+    {
+      "path": "20260929-095652686013/source/miniprogram/utils/access.js",
+      "sha256": "b57068b2716d8cafe85a7d490c0c4f1bc6683ceb7018b26aa42c043253af0137",
+      "bytes": 4210
+    },
+    {
+      "path": "20260929-101021267735/shell.js",
+      "sha256": "867c0f50d9c1d7d30ae6d5a0a13fadc1ca42640d3b745e5fac35018f57ecff14",
+      "bytes": 31924
+    },
+    {
+      "path": "20260929-095652708367/source/miniprogram/components/advice-actions/index.wxss",
+      "sha256": "99c62b40bb5288b973baf6418140cebb28f9bc2c410aada146f16df1223a35ef",
+      "bytes": 526
+    },
+    {
+      "path": "20260929-101131749033/department-ui/frame.css",
+      "sha256": "97c8ee2fe78e20e3ff6315ee89a8c7b30e6994f1f35b82c89c73b210f97f2dc1",
+      "bytes": 1095
+    },
+    {
+      "path": "20260929-102307529979/VERSION.json",
+      "sha256": "e999bfb05868c3ca3089a76eb06a30c9e6f216441e9fabe86be7a738deb2dde3",
+      "bytes": 3503
+    },
+    {
+      "path": "20260929-095652753461/source/miniprogram/pages/demo-create/index.js",
+      "sha256": "f7138b6c1c7e8e2605e40e9d3c34512cb3017f0bdfcc788283fbcbd9bdc18b28",
+      "bytes": 9611
+    },
+    {
+      "path": "20260929-100919291891/tests/upgrade110-smoke.browser.mjs",
+      "sha256": "59ee7644acf3c7090f469bfd955a15daa151aa67aa4d919080ef5293d7963f4c",
+      "bytes": 3275
+    },
+    {
+      "path": "20260929-095652687331/source/miniprogram/utils/visitSnapshot.js",
+      "sha256": "7bf975210ba3fef0fc02bfaf9e7f296e78fffcf5bc256b6e9b63dfd8cb2dc0ac",
+      "bytes": 1360
+    },
+    {
+      "path": "20260929-095652710104/source/miniprogram/components/dashboard-ranking/index.wxml",
+      "sha256": "4af2600d8d17dcc22157cf1969c80337f5747b60fec3bb278f5e0ddf94c0a908",
+      "bytes": 2409
+    },
+    {
+      "path": "20260929-095652723114/source/miniprogram/components/opportunity-form/index.js",
+      "sha256": "b5249f1b967154fcf34a73ce172061131ab5cce4e2ac01f53282ce4dcab78fb6",
+      "bytes": 11301
+    },
+    {
+      "path": "20260929-095652741558/source/miniprogram/pages/tasks/index.js",
+      "sha256": "1a01c521c3d903eae5ac316ce2810bf93922aba2446e73177a1b900c3389e096",
+      "bytes": 10032
+    },
+    {
+      "path": "20260929-095652800525/source/manifest.json",
+      "sha256": "4df40867c9b11f91f2f44fbe95fc2eabbf90b5dfec134f252904049e29a8a174",
+      "bytes": 27242
+    },
+    {
+      "path": "20260929-095925305241/department-ui/TaskDetail.jsx",
+      "sha256": "be6a96c03fcbde09a7551f04577efd1b2ffa2b62be551476f4bd7cfb936fefc5",
+      "bytes": 10059
+    },
+    {
+      "path": "20260929-095925290783/tests/build.test.mjs",
+      "sha256": "1ecbb87abf8665dacebb54942ec0f33556ec6a9f631949ed9f1920f6b61d60a2",
+      "bytes": 4024
+    },
+    {
+      "path": "20260929-095925298945/department-ui/TaskCreate.jsx",
+      "sha256": "7703c5a3919f8ef0bb71ce84b5cc32cd6a7e100743beaf1853f9cb012f237501",
+      "bytes": 10538
+    },
+    {
+      "path": "20260929-102626943130/department-ui/customers.css",
+      "sha256": "4162da05bfbb1b3ced7a1123bd9e1ceac130a7463dd1cc5161f2bf85a8543975",
+      "bytes": 6512
+    },
+    {
+      "path": "20260929-095652701811/source/miniprogram/components/profile-scope-picker/index.wxml",
+      "sha256": "297f5de38e3d0055b50986a121df554934399c5913c0d91354219b6828231e2e",
+      "bytes": 2316
+    },
+    {
+      "path": "20260929-102307533275/scripts/package_department.py",
+      "sha256": "07f0c69098bbdc02b36b7fe9dc4a38370783d583c724fb02895c08e94f5e2aae",
+      "bytes": 13676
+    },
+    {
+      "path": "20260929-102133034759/tests/fixtures/v3-contract.json",
+      "sha256": "72b009e07f72baba8c1ddf2b8aa2e991b628d787b0cf071e6315c8ae195ad7e0",
+      "bytes": 499071
+    },
+    {
+      "path": "20260929-100146740665/department-ui/TaskDetail.jsx",
+      "sha256": "f55657191de70684ccee84d9a2ee3e18a99715e50b8911c839cad171731935f8",
+      "bytes": 10569
+    },
+    {
+      "path": "20260929-095652719247/source/miniprogram/components/fde-profile/index.wxml",
+      "sha256": "9ddd8f064165c3d71c1dc0ccc91a3ea3190fab985421051f4fef7434dbb45eb6",
+      "bytes": 14278
+    },
+    {
+      "path": "20260929-102530157942/tests/upgrade110.browser.mjs",
+      "sha256": "72834d0cc54307af7ebdfbbbf634d9d105ad40197baf4f8720b8ac4436e56a10",
+      "bytes": 17225
+    },
+    {
+      "path": "20260929-095652790432/source/miniprogram/pages/opportunity-create/index.js",
+      "sha256": "61a14feacda62296a0eb4d19df64697e81354961ebe8455e08a74dde27ba9233",
+      "bytes": 4245
+    },
+    {
+      "path": "20260929-100403318707/preview-api.js",
+      "sha256": "bcf666bb1ac76953789769f01b75923512bef68cec2d206f236281b21bb355fb",
+      "bytes": 117616
+    },
+    {
+      "path": "20260929-100620627495/tests/upgrade110-smoke.browser.mjs",
+      "sha256": "9a7bd01787a5b6cec8800acd1675478c4294de7a6e083d316a8ae8dc943197e6",
+      "bytes": 3265
+    },
+    {
+      "path": "20260929-095925294384/runtime.js",
+      "sha256": "d1541ca5429e691e400f27ea30f2190b9ef17645134f3e7e5a8a5619e81b266a",
+      "bytes": 66534
+    },
+    {
+      "path": "20260929-095652786308/source/miniprogram/pages/index/index.js",
+      "sha256": "a7b425af1f2850797b8b20c4280fddf45a5172bcf6f9c73bfe927b4f8497b153",
+      "bytes": 68632
+    },
+    {
+      "path": "20260929-101021268980/department-ui/login.css",
+      "sha256": "300909c64381ba353134645ace1f3f6031fd4ae725d566fd081b994b17d2b50f",
+      "bytes": 2221
+    },
+    {
+      "path": "20260929-100919286289/shell.js",
+      "sha256": "ca6d53243fb48bb2f1868fe6c33252924aaa418ed322d78cd0dbd033c5e12cfc",
+      "bytes": 31897
+    },
+    {
+      "path": "20260929-102146864733/tests/v3-contract.test.mjs",
+      "sha256": "dd0c7f5a3338de8fc40211de79553748bf5595c1ea30eac94f84e0999fef907c",
+      "bytes": 9478
+    },
+    {
+      "path": "20260929-102133036922/scripts/check-v3-contract.mjs",
+      "sha256": "6b05c1b2a30d1f35e105daea068f6b0ad3bceec8efcf5565ce180e86a2adcf0c",
+      "bytes": 19920
+    },
+    {
+      "path": "20260929-095652793797/source/miniprogram/pages/login/index.wxss",
+      "sha256": "48bfd0e3ac4de161dbce2df8674937b19538004485aedb3ff3ecd51fd27edf06",
+      "bytes": 6184
+    },
+    {
+      "path": "20260929-095652692365/source/miniprogram/utils/customerDetail.js",
+      "sha256": "a0e8fd4abaaebad708aaf8aec089ff50cec5c33c86a7dbac54602da02a025f80",
+      "bytes": 19652
+    },
+    {
+      "path": "20260929-095652734012/source/miniprogram/pages/customer-create/index.js",
+      "sha256": "45da6aada512a7126734f6eb5ad40f68a82564f794ee44d247f921d62d7c6fb8",
+      "bytes": 16043
+    },
+    {
+      "path": "20260929-095652792680/source/miniprogram/pages/login/index.js",
+      "sha256": "9042179bee94cdad54378db8a4a3352a406ed21b58bdfc2b9c5aa110fcc3d2ab",
+      "bytes": 7513
+    },
+    {
+      "path": "20260929-095652743910/source/miniprogram/pages/tasks/index.json",
+      "sha256": "00b05d1b3be96505c00b2c0b6f99514ff4f8a0cca048d75751eeba07cb9d9da8",
+      "bytes": 151
+    },
+    {
+      "path": "20260929-095652759214/source/miniprogram/pages/customer-detail/index.js",
+      "sha256": "d16758a41236cdd5ee54b50b09b1fe835ba938a797dc382c56ef135ae3f3176a",
+      "bytes": 8032
+    },
+    {
+      "path": "20260929-095652695789/source/miniprogram/utils/opportunityAdvice.js",
+      "sha256": "97e9bb4428c700df18dbf2bd647538a3e636be5cadb3aca74948dff620ade483",
+      "bytes": 1727
+    },
+    {
+      "path": "20260929-095925303233/department-ui/TaskDetail.jsx",
+      "sha256": "1ec4ba0d447b28c5f15e2a1b5cd9a0392b2058534ce58779a5ab2a2ef219f5df",
+      "bytes": 8979
+    },
+    {
+      "path": "20260929-095652757717/source/miniprogram/pages/customer-detail/index.wxml",
+      "sha256": "20266569e679e71aef0953beb483b2c5ee3a999b9886612f08ed345b41a9fbdf",
+      "bytes": 11438
+    },
+    {
+      "path": "20260929-095925298206/department-ui/TaskCreate.jsx",
+      "sha256": "1527318a0303d5dfdbac2f365536c5a6348eb68ca2b398cf07f143bd35a455f6",
+      "bytes": 10303
+    },
+    {
+      "path": "20260929-101021270091/department-ui/upgrade-110.css",
+      "sha256": "8c7dd56a845de0615f90d4da67808a776750c6eac694229b9b9f804a1943819d",
+      "bytes": 1694
+    },
+    {
+      "path": "20260929-095652733094/source/miniprogram/pages/customer-create/index.wxml",
+      "sha256": "26c8f951f85bb80a8ab8720f96bb088c0dcbe2da48298c6f002b85840a467b4e",
+      "bytes": 4990
+    },
+    {
+      "path": "20260929-100620631041/department-ui/VisitConfirm.jsx",
+      "sha256": "80c5b04e48834f9c21ca99449d458dc991fccb3ebb50d392b900eb989df3e71d",
+      "bytes": 17209
+    },
+    {
+      "path": "20260929-101941915518/preview-api.js",
+      "sha256": "000f6a4868cb7d525fe3e68e04ec5542538caedc1bd34c4c900a3cc5291abba4",
+      "bytes": 121960
+    },
+    {
+      "path": "20260929-101232659296/tests/upgrade110.browser.mjs",
+      "sha256": "9549692fa87e33cdea21c805c00898100d13e1ec06b1fb22a8c6293992788ffd",
+      "bytes": 11894
+    },
+    {
+      "path": "20260929-100457303508/browser-platform.js",
+      "sha256": "7c66923d576936e85d259b272dbc52793627a7d8a8b0e6d3e4c3d70139713f19",
+      "bytes": 20381
+    },
+    {
+      "path": "20260929-095925296106/department-ui/TaskCreate.jsx",
+      "sha256": "f11cb16bb70b83e65f67bea12f2ca2da28e9fb4c93ee89bf70316528ac5b8f9d",
+      "bytes": 10910
+    },
+    {
+      "path": "20260929-102307525237/package.json",
+      "sha256": "e1d09d53f4e0f935628fc638ce81bbacf19af56302a2225ab527635b90f04b86",
+      "bytes": 1109
+    },
+    {
+      "path": "20260929-095652775085/source/miniprogram/pages/workbench/index.js",
+      "sha256": "17a5435e0a3a07ab4fa3e4e3d5e1824b8ed36905c330df7e6d82f9d41820118c",
+      "bytes": 21077
+    },
+    {
+      "path": "20260929-100919288436/preview-api.js",
+      "sha256": "a3aeb61877b75fd7672613e3106364908ae7041008b4ee598ced783edde9064f",
+      "bytes": 121551
+    },
+    {
+      "path": "20260929-095652747178/source/miniprogram/pages/management-task-create/index.wxss",
+      "sha256": "780054b268128c922873f0bcd3b3d2abf99f0ebbbe33862cb0a0a839b8d5b089",
+      "bytes": 15481
+    },
+    {
+      "path": "20260929-095925299729/department-ui/Tasks.jsx",
+      "sha256": "d7eb6ecbf5344f9b05741a22b7e0ca0eec70aeee921232b9f564a7d8c36741e1",
+      "bytes": 6992
+    },
+    {
+      "path": "20260929-102233239792/tests/upgrade110.browser.mjs",
+      "sha256": "c4a0e00a5385598510b5fd68850087668b0eca5352d1225fe359fdfafe6331b1",
+      "bytes": 15374
+    },
+    {
+      "path": "20260929-095652749045/source/miniprogram/pages/opportunities/index.wxml",
+      "sha256": "47f15c0225befe4568b1acb6f8aa0023272a9ddcc05b1e646dc03516983a79bd",
+      "bytes": 5442
+    },
+    {
+      "path": "20260929-095652707402/source/miniprogram/components/advice-actions/index.js",
+      "sha256": "2fdb89707e3c0a6ab7063e9880759b6a666c994997e3c255063836ee9cf7a4f5",
+      "bytes": 2134
+    },
+    {
+      "path": "20260929-095652736989/source/miniprogram/pages/customer-assets/index.wxss",
+      "sha256": "5486a8376af5f43c19ba9d1ad54039e561262fed4280950c445467daa6d8f09e",
+      "bytes": 16386
+    },
+    {
+      "path": "20260929-095652698649/source/miniprogram/utils/customerMap.js",
+      "sha256": "ad06044d7d04438dbe8c3a536bbfa91237868293f986f473291f1318be0a0540",
+      "bytes": 3278
+    },
+    {
+      "path": "20260929-095925295304/department-ui/TaskCreate.jsx",
+      "sha256": "50761834b367b6030c4668ec70a052e8750661ce5809b4d931a1c637664788ab",
+      "bytes": 10854
+    },
+    {
+      "path": "20260929-095652782890/source/miniprogram/pages/bi/index.js",
+      "sha256": "40fdae4e4f41053197131f05ff4e07e2cab79ab74ae14fa1976f5161228bb60f",
+      "bytes": 26706
+    },
+    {
+      "path": "20260929-095925301120/department-ui/Tasks.jsx",
+      "sha256": "f7886a155ed3e7d49ae46445e9a88b9139af8ac45af537e7637f4e8142850115",
+      "bytes": 7289
+    },
+    {
+      "path": "20260929-100213850077/scripts/web_claim_layout.py",
+      "sha256": "dd518d7da8ecd788004f5826cd8ae34cfa6036f7c7ce7fcdbf71465843743e01",
+      "bytes": 4571
+    },
+    {
+      "path": "20260929-095925292971/department-ui/Login.jsx",
+      "sha256": "8c9bd3f137ba99f40264e0a8e167c83a333a12c390d49aee3e4928d82d20faba",
+      "bytes": 4012
+    },
+    {
+      "path": "20260929-095652755093/source/miniprogram/pages/visit-detail/index.wxml",
+      "sha256": "b0327a473a0efc73f25044ff4834ac240825f79a71e4451431aafe57621b3baf",
+      "bytes": 4715
+    },
+    {
+      "path": "20260929-095652773763/source/miniprogram/pages/workbench/index.wxml",
+      "sha256": "5c5dfd4c893b1600cc51e616d5fae0cbae45231b00faf2b76f6e006ab6917ae8",
+      "bytes": 11549
+    },
+    {
+      "path": "20260929-095652751201/source/miniprogram/pages/opportunities/index.json",
+      "sha256": "0bada951547e5ed7be621c3a90d49c2f9cfcd65ad1ab6a6d749c510f79b8cbf2",
+      "bytes": 155
+    },
+    {
+      "path": "20260929-095652766226/source/miniprogram/pages/task-detail/index.wxss",
+      "sha256": "59037b498a5bbb1baf268980d4ebec1ca3ecea1b29dc9f65359d76f81aef3d4a",
+      "bytes": 10941
+    },
+    {
+      "path": "20260929-095652706301/source/miniprogram/components/advice-actions/index.wxml",
+      "sha256": "a09d3ef9f7dfa8140dac877d35943354eee97205b4692f838fb258fe2517d857",
+      "bytes": 888
+    },
+    {
+      "path": "20260929-095652724069/source/miniprogram/components/opportunity-form/index.wxss",
+      "sha256": "f9e18beebe03e60b323397725d0e7ce03b2869c33b800cf1093854b52b1dbcb3",
+      "bytes": 2804
+    },
+    {
+      "path": "20260929-101524998829/department-ui/login.css",
+      "sha256": "5e3d0d3c922f8635153f140291ab8bfc8f519b05101629ed5265632f8750f389",
+      "bytes": 2385
+    },
+    {
+      "path": "20260929-100213851398/department-ui/Customers.jsx",
+      "sha256": "dd6fd0ad57c6c4fe83daa321d8abdb7e9ccbca6515d62a0837a9172e13949052",
+      "bytes": 13454
+    },
+    {
+      "path": "20260929-095652691133/source/miniprogram/utils/visitFlow.js",
+      "sha256": "613f92c38b4a13059fe9714311a43ef85cb773660348f528a2e78574f4c5df98",
+      "bytes": 8040
+    },
+    {
+      "path": "20260929-101525000199/department-ui/frame.css",
+      "sha256": "5af29b5b1a5c75edbfcfc39b2b59c43605a2f7fcf839fe7c4ff09173e4145675",
+      "bytes": 1189
+    },
+    {
+      "path": "20260929-095652742826/source/miniprogram/pages/tasks/index.wxss",
+      "sha256": "76451a8ec6540f7636ffd5509dd7cf211a995d47c502cfab22ac1f35f43d7885",
+      "bytes": 5898
+    },
+    {
+      "path": "20260929-095652784047/source/miniprogram/pages/bi/index.wxss",
+      "sha256": "a6d488211d64d4bb530f09520b624ba6d3f551f5134792d1ea0d97f55d5b7789",
+      "bytes": 18794
+    },
+    {
+      "path": "20260929-102048662427/department-ui/upgrade-110.css",
+      "sha256": "3388dc198d6c80e972518ea4ac71397d3a0c9e2db43af3cae4e6559a1fd7be9a",
+      "bytes": 1775
+    },
+    {
+      "path": "20260929-100457306518/department-ui/SmallPages.jsx",
+      "sha256": "84e51eecfb4f6718dc5b866bc06ccc191b2c669c7f7e3014df8afd6d31dc26ad",
+      "bytes": 28908
+    },
+    {
+      "path": "20260929-095652713737/source/miniprogram/components/fde-dashboard/index.wxml",
+      "sha256": "ed19d3ae53550c161b0a8b2b6f36b332c819384108c44ba91c4049166d01399d",
+      "bytes": 11697
+    },
+    {
+      "path": "20260929-095652772736/source/miniprogram/pages/profile/index.wxss",
+      "sha256": "02e2cf5b2395f82683a62fb08f144a74591fc0b97c6a8ffab543e7ba0da9e2e3",
+      "bytes": 20339
+    },
+    {
+      "path": "20260929-095652740432/source/miniprogram/pages/tasks/index.wxml",
+      "sha256": "2a7090ddc207044c6dff5840ce6bc586a69afe77608c6399cd0f612621e9f897",
+      "bytes": 4837
+    },
+    {
+      "path": "20260929-095652762194/source/miniprogram/pages/report-detail/index.js",
+      "sha256": "607072e14fb566e6342953098240f6e2c4200453dc8d76b986cb5dba2682deb6",
+      "bytes": 1927
+    },
+    {
+      "path": "20260929-095652771745/source/miniprogram/pages/profile/index.js",
+      "sha256": "f2360b83fe9b9571652873f2ad363a0938a516c347b0a4ea0fd97037b8ce9380",
+      "bytes": 39399
+    },
+    {
+      "path": "20260929-095652797067/source/miniprogram/pages/customer-claim/index.wxss",
+      "sha256": "2079744ae58a429f1236a4616ad930ee9ff99606debe55166e7d04c8d3bd7010",
+      "bytes": 4778
+    },
+    {
+      "path": "20260929-102307528021/package-lock.json",
+      "sha256": "50d000dd5b25c04644f09ee441040319544d7558c05de6f0c158c7331516cc09",
+      "bytes": 67055
+    },
+    {
+      "path": "20260929-102048660572/tests/upgrade110-smoke.browser.mjs",
+      "sha256": "85337b8880d4d247ca81a01c59beeb1a99baf6598ac239a7bfdfdae2c2028438",
+      "bytes": 3948
+    },
+    {
+      "path": "20260929-095925289874/task-workspace.wxml",
+      "sha256": "6c01ff5b54f670ccfe18105649b92244d419f51651475176fc70e96f2f1d1f5f",
+      "bytes": 5427
+    },
+    {
+      "path": "20260929-095652760468/source/miniprogram/pages/customer-detail/index.wxss",
+      "sha256": "7174c75113814e774a5a4be1cdd011a87f0dec843dd2de28a14eb1b02eab0e88",
+      "bytes": 12043
+    },
+    {
+      "path": "20260929-095652769378/source/miniprogram/pages/customer-assign-confirm/index.js",
+      "sha256": "96fe75f6d4611878a1343be738f25dd1d73f5bb4333ca83f5f084cd1d0c8aacc",
+      "bytes": 12083
+    },
+    {
+      "path": "20260929-095652750004/source/miniprogram/pages/opportunities/index.js",
+      "sha256": "2632347c0e272d4d86b3d129e544c790b49cd7bcff356ac24b9372ddada87e97",
+      "bytes": 11691
+    },
+    {
+      "path": "20260929-102307529197/connection.config.json",
+      "sha256": "8b9c48cecd3533685455f6ef37afb29c9de4a355016f3de4a0c0cce1c3908c54",
+      "bytes": 259
+    },
+    {
+      "path": "20260929-095652682654/source/miniprogram/utils/visitOpportunityAI.js",
+      "sha256": "87844c23fb9ff3de40afc66218a6f8c236dee4b58f3c81e0cf0c773e35548e23",
+      "bytes": 3840
+    },
+    {
+      "path": "20260929-100146739473/scripts/web_collection_columns_layout.py",
+      "sha256": "e4bd4148ff735d866ed4a12e64a4660c02bee11b7bb727302ff5079e4e7408fa",
+      "bytes": 2249
+    },
+    {
+      "path": "20260929-100232236863/scripts/web_insights_layout.py",
+      "sha256": "839db32c0797897228b1c4a98b3bd3f64526d067d152708fd0f5d2936e8f9af2",
+      "bytes": 4520
+    },
+    {
+      "path": "20260929-095652675865/source/miniprogram/app.json",
+      "sha256": "a0fdaa396828399844591bff26722a27828f838dee952a455b6b1ca7bb84ae75",
+      "bytes": 2372
+    },
+    {
+      "path": "20260929-095652720571/source/miniprogram/components/fde-profile/index.js",
+      "sha256": "4caab6e290a0fa697922b0e9625dadb20fe597380ebed63d68fbf23e98672cde",
+      "bytes": 19609
+    },
+    {
+      "path": "20260929-100232238332/department-ui/upgrade-110.css",
+      "sha256": "415bc191281f0f8e025052fb483085667f81409258d74585e0e77e2f73bd30b3",
+      "bytes": 1505
+    },
+    {
+      "path": "20260929-102307531560/docs/cloud/delivery-readme.md",
+      "sha256": "5cc20b3f43bb798e7d8be735511758747ee8b9ce56c988102d052329276e0b09",
+      "bytes": 4974
+    },
+    {
+      "path": "20260929-095925304594/department-ui/TaskDetail.jsx",
+      "sha256": "fd2e17fede1ac7fe337a88121430729df9bf3c8c904a7b7649f5f57bd637dd71",
+      "bytes": 9194
+    },
+    {
+      "path": "20260929-102617709409/tests/upgrade110.browser.mjs",
+      "sha256": "43ad506cccf5e80ab32d21b141397a778fd6921374205179fffdb4191180c0fd",
+      "bytes": 17234
+    },
+    {
+      "path": "20260929-095652730509/source/miniprogram/pages/customers/index.js",
+      "sha256": "d0f6c38b948c5145e7930fe540814a0b065779d4350548d75e6ee699392c4646",
+      "bytes": 35260
+    },
+    {
+      "path": "20260929-101405129803/department-ui/NativeDialogs.jsx",
+      "sha256": "af77aa99d476963662f728188ae2e2f734159623a4734765b38000c4cfbbafc2",
+      "bytes": 3695
+    },
+    {
+      "path": "20260929-101627428951/tests/v106-visits.browser.mjs",
+      "sha256": "42b9015bfa6a06c93a12fd54f410433896b27404f3941921d2e1b01a41d58475",
+      "bytes": 8387
+    },
+    {
+      "path": "20260929-100919290314/tests/preview.test.mjs",
+      "sha256": "3efe48db679c7c2870048ccb57ada4cde3935b37826cc499541387ad3e28471b",
+      "bytes": 26163
+    },
+    {
+      "path": "20260929-095652699837/source/miniprogram/utils/opportunity.js",
+      "sha256": "6848f268f1d2508fd0aac74a346a69e301997166e3c99679b90ce93fb64940ae",
+      "bytes": 10055
+    },
+    {
+      "path": "20260929-102617707701/department-ui/Customers.jsx",
+      "sha256": "f2bc6ae5c10b221b85f3e4984de55160f93963c9750b3140d25f464fea46a793",
+      "bytes": 13584
+    },
+    {
+      "path": "20260929-095925306056/department-ui/OpportunityCreate.jsx",
+      "sha256": "30de5665cd7c514bb3cfcde9fb1f7267f310cf7bb9c303b38b7594bdf81944f8",
+      "bytes": 14488
+    },
+    {
+      "path": "20260929-095652738150/source/miniprogram/pages/visit-confirm/index.wxml",
+      "sha256": "da49bf48d41221e7d48693bfb6541bcd912e50a2abda5bf7e0a4fdf98f1ea531",
+      "bytes": 16760
+    },
+    {
+      "path": "20260929-095652765164/source/miniprogram/pages/task-detail/index.js",
+      "sha256": "7ec9dd21ab13e0d5dab44754cce57d84f24d12938e92918d438824af4a943b92",
+      "bytes": 13423
+    },
+    {
+      "path": "20260929-100305935663/department-ui/upgrade-110.css",
+      "sha256": "d14050ecf47f5dd450602fa13810bdaf15173ffe94bb90124676468fc28785f2",
+      "bytes": 1589
+    },
+    {
+      "path": "20260929-095925292077/department-ui/index.jsx",
+      "sha256": "a7dae3d3a75da33795f4ceebbf339a9210610310cefc14154238f9cfe3cd28cb",
+      "bytes": 9306
+    },
+    {
+      "path": "20260929-095652683995/source/miniprogram/utils/apiClient.js",
+      "sha256": "9a9f596d982f5e27ec43a89a75ea16df67b80748113169c1e94df3a4893a3b83",
+      "bytes": 41869
+    },
+    {
+      "path": "20260929-095925288581/scripts/web_collection_columns_layout.py",
+      "sha256": "e72076595b6ce0fa77d27ae3a6524a126121425332b8bdb31b2bee06be21455b",
+      "bytes": 2146
+    },
+    {
+      "path": "20260929-101627427141/preview-api.js",
+      "sha256": "701a095f8de43ba57157331cc3a679d1780fb61b3599a6a11a719103b35c9a69",
+      "bytes": 121594
+    },
+    {
+      "path": "20260929-102011410553/tests/upgrade110.browser.mjs",
+      "sha256": "4700126e00b6095324afbca2623158636d88723948b43ee53ccaf1702b079de0",
+      "bytes": 15373
+    },
+    {
+      "path": "20260929-101021263955/department-ui/NativeDialogs.jsx",
+      "sha256": "d7b94690e57863cff857a4aaa174ce4f05949a4342048a88d8bbe8b9b4eff54d",
+      "bytes": 3639
+    },
+    {
+      "path": "20260929-095652677268/source/miniprogram/app.js",
+      "sha256": "b7da162f372bea4860758f58a17d9fe9763b57ab4179fab33ac4c8e51130b40a",
+      "bytes": 6482
+    },
+    {
+      "path": "20260929-102233238479/department-ui/customers.css",
+      "sha256": "1e2e3ca80e3e380d437c06c1c139df98d5bbe6e7fce0a9a48d63f5fee19710d3",
+      "bytes": 6244
+    },
+    {
+      "path": "20260929-101627430425/tests/upgrade110-smoke.browser.mjs",
+      "sha256": "7b29c8cda67ec609526f67d0742ed11af55736ce890829047dd9beaa112b9e94",
+      "bytes": 3352
+    },
+    {
+      "path": "20260929-095925300479/department-ui/Tasks.jsx",
+      "sha256": "216e8efc039388945d02ca339651948b18c33e8fd6a485f6abb7a1afe5f98243",
+      "bytes": 7052
+    },
+    {
+      "path": "20260929-095925296737/department-ui/TaskCreate.jsx",
+      "sha256": "e955a270f1349361e87e6775c6f0bec602d22657516487e7db67fd6dcc097a5f",
+      "bytes": 10979
+    },
+    {
+      "path": "20260929-095652694232/source/miniprogram/utils/opportunityQuarter.js",
+      "sha256": "2d8f560b71e6fdd2813f6ca81bd17c88205bf8bdb9f7109924098eb6e45436a5",
+      "bytes": 2694
+    },
+    {
+      "path": "20260929-095652746064/source/miniprogram/pages/management-task-create/index.js",
+      "sha256": "76be38468def05ec90cfb365485ca75aa7684a14aa93d7927356b65f83e3a55e",
+      "bytes": 21082
+    },
+    {
+      "path": "20260929-095925297470/department-ui/TaskCreate.jsx",
+      "sha256": "d4437533b85dac08fe226caabd81b86ecac88236c37917f2cca2fef8e7ccdded",
+      "bytes": 10572
+    },
+    {
+      "path": "20260929-095652798176/source/miniprogram/pages/risk-detail/index.js",
+      "sha256": "b9fcd41ec3a022247e77b687006ecb92e29c740e40e1a6b85fbc19d673901227",
+      "bytes": 4787
+    },
+    {
+      "path": "20260929-095652725155/source/miniprogram/components/fde-projects/index.wxml",
+      "sha256": "7f0647d25724025aca4b388b090cc628a6151c3d3b6c37ba9531040cc8c9c504",
+      "bytes": 9502
+    },
+    {
+      "path": "20260929-095925306986/department-ui/Customers.jsx",
+      "sha256": "9ae3dc0a4d1a4f808a8ebaa1dcf3426d00e336d8633f483d17388e40746a700b",
+      "bytes": 13175
+    },
+    {
+      "path": "20260929-095652739151/source/miniprogram/pages/visit-confirm/index.js",
+      "sha256": "23991cb2db5e459d41f0d0873770852ac1e8b25002784e003da219b3b29aa5ad",
+      "bytes": 39478
+    },
+    {
+      "path": "20260929-095652735137/source/miniprogram/pages/customer-assets/index.wxml",
+      "sha256": "46519dfb6d6f39c802695204c55b6c3e789b8fd52cbb34b582f2249f4df3559b",
+      "bytes": 23946
+    },
+    {
+      "path": "20260929-095652703693/source/miniprogram/components/profile-scope-picker/index.json",
+      "sha256": "5f0c700cc36dc094e14d245415390f4661d744ddd561090b64fcfcca416536db",
+      "bytes": 18
+    },
+    {
+      "path": "20260929-095652688253/source/miniprogram/utils/rankingDisplay.js",
+      "sha256": "9b6f3b952da8f4afe11e3ae890de307d39cfc2e0bc1371fde7fcd6ade8a124c1",
+      "bytes": 1276
+    },
+    {
+      "path": "20260929-095652693429/source/miniprogram/utils/taskRecipients.js",
+      "sha256": "9873b71874665ee7ba1fabf8de14f79bc39883a3d1e45f8bbef55b328c14cc4e",
+      "bytes": 918
+    },
+    {
+      "path": "20260929-095652776268/source/miniprogram/pages/risks/index.js",
+      "sha256": "6dad7dc1182b4baa0dd778f8be11022063ee89d8a410e749537555fe63f3af37",
+      "bytes": 5220
+    },
+    {
+      "path": "20260929-095652781660/source/miniprogram/pages/bi/index.wxml",
+      "sha256": "981a461f0fbb16d6cb5dad6e13aa9a819dfbe6d61286cc9a9d4d23b0936a4deb",
+      "bytes": 8067
+    },
+    {
+      "path": "20260929-095652752258/source/miniprogram/pages/demo-create/index.wxml",
+      "sha256": "f51fa3e611f5f4b26be739ad5f4d83f7b7fed721f5aabe2f3094172d5766f983",
+      "bytes": 4184
+    },
+    {
+      "path": "20260929-095925302584/department-ui/TaskDetail.jsx",
+      "sha256": "0d6dc9aa6026877b393db772e2ba4d74f874f40a8ca8db656c050756e39ce2af",
+      "bytes": 8991
+    },
+    {
+      "path": "20260929-100620629621/preview-api.js",
+      "sha256": "fd87c8ab2157a100139ecb0d0881c82edbc3ce02eb30a3330b024183b9c7a9a2",
+      "bytes": 121373
+    },
+    {
+      "path": "20260929-100457307754/tests/account-boundary.test.mjs",
+      "sha256": "2c9402094d82e52b6abccb36053b98a9210dcf3d5603a3bdb3358f0a31456467",
+      "bytes": 8647
+    },
+    {
+      "path": "20260929-095652696760/source/miniprogram/utils/customerSignals.js",
+      "sha256": "50b1d8838932088e24389d4d5e2dc2c353bd811d53e8b093fd17af402080a4d9",
+      "bytes": 4697
+    },
+    {
+      "path": "20260929-095652768300/source/miniprogram/pages/fde-records/index.js",
+      "sha256": "42c4bcbddb4c09471ad96e4a68c5790d743dccb29a12c07594e3eb154268c86d",
+      "bytes": 523
+    },
+    {
+      "path": "20260929-095652770596/source/miniprogram/pages/profile/index.wxml",
+      "sha256": "754b60434c4c8ce84321924e70a56e6fa50b0259868b84b3c387bbdcb7c2ba4f",
+      "bytes": 11844
+    },
+    {
+      "path": "20260929-102307530746/README.md",
+      "sha256": "bcde42ca0509136d7be47f7a1faf1f224558a3d529f875f38a60d6b01aa8e90a",
+      "bytes": 3843
+    },
+    {
+      "path": "20260929-095652702713/source/miniprogram/components/profile-scope-picker/index.js",
+      "sha256": "221984c8db66196fcedc5ccf074e008a89e8e781092f128e655ddcb86317d657",
+      "bytes": 1482
+    },
+    {
+      "path": "20260929-095652767324/source/miniprogram/pages/task-detail/index.json",
+      "sha256": "f41806d5b20a0cf8e87bcc0574b3958881f2449671f827390b36e8f271e70c69",
+      "bytes": 151
+    },
+    {
+      "path": "20260929-095652717053/source/miniprogram/components/fde-dashboard/index.json",
+      "sha256": "4c7b785665e74004268825bf23891c44e5b3f001b6022b1546e795728f030a3a",
+      "bytes": 159
+    },
+    {
+      "path": "20260929-101131750467/tests/upgrade110.browser.mjs",
+      "sha256": "edaf5520597ff54a8f16f25132328198809909b55f9bce9219427660cc453887",
+      "bytes": 11384
+    },
+    {
+      "path": "20260929-095652697847/source/miniprogram/utils/rememberedLogin.js",
+      "sha256": "6c890b1a7a54cc3eb19c5239512da1628d04f1705287a763aaa039976c7df3cd",
+      "bytes": 2482
+    },
+    {
+      "path": "20260929-100620626292/tests/v106-auth-tasks.test.mjs",
+      "sha256": "4da38bf1f4bc320f3251a2a992202c5ef43925bc8462833d67de6681ee1310ff",
+      "bytes": 11529
+    },
+    {
+      "path": "20260929-101855992452/tests/upgrade110.browser.mjs",
+      "sha256": "1418d4336ba10e8baa93dbee1d3cc03ed73d9e6934dc4768a98c098c27d8b969",
+      "bytes": 11887
+    },
+    {
+      "path": "20260929-095652777379/source/miniprogram/pages/visit-entry/index.wxml",
+      "sha256": "29351f32774e27063143dfcdfb128f2f8d14e14682bee6637ee0f492ade85af7",
+      "bytes": 9188
+    }
+  ]
+}

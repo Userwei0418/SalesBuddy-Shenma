@@ -1,0 +1,17 @@
+{
+  "status": "candidate_verified_not_deployed",
+  "baseline": "a275b73ccd32386abdfed96e8131019fe09f1559",
+  "source_files_verified_against_production": 894,
+  "baseline_reproductions": {
+    "account_self_privilege_failures": 1,
+    "task_grouping_failures": 5
+  },
+  "integration_passed": 93,
+  "backend_unit_passed": 3173,
+  "interaction_passed": 25,
+  "production_readonly_preview_passed": true,
+  "runtime_role_superuser": false,
+  "production_mutations": false,
+  "database_migrations": false,
+  "mini_program_uploaded": false
+}

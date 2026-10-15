@@ -1,8 +1,10 @@
 """Full authorized fact fingerprints, with explicit bounded model context."""
 
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.db import json_value
 from sales_backend.domain.advice import FDE_ADVICE_PERSPECTIVE, AdviceError, fingerprint, require_advice_subject
 from sales_backend.domain.business_time import BUSINESS_TIMEZONE, business_json_default, localize_business_times
+from sales_backend.services.agent_platform.authorization_snapshot import attach, capture
 
 MODEL_RECORD_LIMIT = 50
 
@@ -18,6 +20,7 @@ class AdviceFactsRepository:
             raise AdviceError("记录不存在或无权查看", 404) from exc
         # Scope all fact queries to the requested analysis feature, even in workers.
         await connection.execute("SELECT set_config('app.authorized_feature',$1,true)", 'advice.' + kind)
+        read_scope = await capture(connection, actor)
         if kind == "customer":
             subject = await connection.fetchrow(
                 "SELECT id::text,name,industry_code,customer_type_code,level_code,main_business,demand_summary,"
@@ -47,6 +50,8 @@ class AdviceFactsRepository:
             raise AdviceError("记录不存在或无权查看", 404)
         subject = dict(subject)
         customer_id = subject_id if kind == "customer" else subject["customer_id"]
+        if kind == "customer" and not await customer_analysis_applies(connection, customer_id):
+            raise AdviceError("纯合作伙伴不适用客户经营建议", 422)
         customer = json_value(await connection.fetchval("SELECT security.customer_reference($1::uuid)", customer_id))
         if not customer:
             raise AdviceError("客户不存在或无权查看", 404)
@@ -123,14 +128,11 @@ class AdviceFactsRepository:
                     subject_id,
                 )
             ]
-            subject["actuals"] = dict(
-                await connection.fetchrow(
-                    "SELECT sum(amount) FILTER(WHERE kind='recognized') AS recognized_amount,"
-                    "sum(amount) FILTER(WHERE kind='collection') AS collection_amount FROM crm.customer_actual "
-                    "WHERE opportunity_id=$1::uuid AND voided_at IS NULL",
-                    subject_id,
-                )
-            )
+            from sales_backend.domain.finance_totals import actual_totals
+            current_actuals = [dict(r) for r in await connection.fetch('SELECT * FROM crm.effective_actual WHERE opportunity_id=$1::uuid',subject_id)]
+            subject['actuals'] = actual_totals(current_actuals)
+            subject['effective_actuals'] = current_actuals
+            subject['finance_evidence_note'] = 'Historical snapshots are reference evidence, never add them to effective actuals; recognized amounts exclude tax.'
             if actor.role.value in {"fde", "fde_lead"}:
                 subject["sales_owner_name"] = await connection.fetchval(
                     "SELECT display_name FROM platform.user_ref WHERE id=$1::uuid AND workspace_id=$2::uuid",
@@ -172,6 +174,7 @@ class AdviceFactsRepository:
                 full["actor_context"]["direct_participant"] = any(
                     member["user_id"] == actor.user_id for member in subject["fde_members"]
                 )
+        full = attach(full, read_scope)
         digest = fingerprint(full)
         counts = {
             key: {"total": len(value), "included": min(len(value), MODEL_RECORD_LIMIT)}

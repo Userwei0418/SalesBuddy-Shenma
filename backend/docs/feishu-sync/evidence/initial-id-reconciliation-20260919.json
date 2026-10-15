@@ -1,0 +1,112 @@
+[
+  {
+    "kind": "target",
+    "remote_rows": 0,
+    "mapped_rows": 0,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "demo_scene",
+    "remote_rows": 0,
+    "mapped_rows": 0,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "member",
+    "remote_rows": 16,
+    "mapped_rows": 16,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "contact",
+    "remote_rows": 90,
+    "mapped_rows": 90,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "opportunity",
+    "remote_rows": 85,
+    "mapped_rows": 84,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 1,
+    "complete": true
+  },
+  {
+    "kind": "actual",
+    "remote_rows": 0,
+    "mapped_rows": 0,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "customer",
+    "remote_rows": 267,
+    "mapped_rows": 267,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "task",
+    "remote_rows": 1,
+    "mapped_rows": 1,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "visit",
+    "remote_rows": 114,
+    "mapped_rows": 114,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  },
+  {
+    "kind": "partner",
+    "remote_rows": 0,
+    "mapped_rows": 0,
+    "missing": 0,
+    "unexpected": 0,
+    "duplicate_system_ids": 0,
+    "remote_ids_match": true,
+    "unmanaged_blank_rows": 0,
+    "complete": true
+  }
+]

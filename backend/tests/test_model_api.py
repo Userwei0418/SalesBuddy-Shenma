@@ -127,7 +127,7 @@ async def test_redirect_and_wrong_purpose_not_followed(settings):
 class FakeDB:
     @asynccontextmanager
     async def transaction(self, *args, **kwargs):
-        yield SimpleNamespace()
+        yield SimpleNamespace(fetchval=AsyncMock(return_value={"shared_enabled": True}))
 
 
 def service(settings):
@@ -209,7 +209,9 @@ async def test_unpublishable_receipt(settings, changes):
 
 
 @pytest.mark.asyncio
-async def test_host_change_without_new_key_rejected_before_request(settings):
+async def test_host_change_without_new_key_rejected_before_request(settings, monkeypatch):
+    from sales_backend.repositories.admin import AgentRuntimeConfigRepository
+    monkeypatch.setattr(AgentRuntimeConfigRepository, "current", AsyncMock(return_value={"enabled": True, "has_api_key": True, "provider_base_url": "https://old.example", "llm_model": "old"}))
     svc = service(settings)
     svc._legacy = AsyncMock(return_value=({"endpoint_url": "https://old.example/v1"}, SECRET))
     with pytest.raises(ModelApiError, match="重新填写"):
@@ -297,3 +299,27 @@ async def test_disabling_direct_fallback_does_not_block_platform_client_construc
             await client.chat_json(messages=[ChatMessage(role="user", content="fixture")])
     finally:
         await client.close()
+
+
+@pytest.mark.asyncio
+async def test_custom_cannot_copy_platform_key_without_explicit_company_secret(settings, monkeypatch):
+    from sales_backend.repositories.admin import AgentRuntimeConfigRepository
+    monkeypatch.setattr(AgentRuntimeConfigRepository, 'current', AsyncMock(return_value=None))
+    svc = service(settings)
+    body = ConnectionTest(request_id=uuid4(), expected_version=0, configuration=config())
+    with pytest.raises(ModelApiError, match='不能复制平台共享密钥'):
+        await svc.test(ACTOR, 'text', body)
+    svc.repo.reserve.assert_not_awaited()
+    svc.probe.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_historical_inherited_custom_key_cannot_be_laundered_into_owned_release(settings):
+    svc = service(settings)
+    svc.repo.current.return_value = {'version_no': 1, 'config_snapshot': config(),
+                                    'api_key_ciphertext': b'synthetic', 'source_guard': 'inherited'}
+    body = ConnectionTest(request_id=uuid4(), expected_version=1, configuration=config())
+    with pytest.raises(ModelApiError, match='明确填写本公司的接口密钥'):
+        await svc.test(ACTOR, 'text', body)
+    svc.repo.reserve.assert_not_awaited()
+    svc.probe.assert_not_awaited()

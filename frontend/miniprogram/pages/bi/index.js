@@ -1,24 +1,21 @@
 const access = require('../../utils/access');
+const {normalizeMembers, normalizeTeams, candidateTeam, assertPersonDirectory} = require('../../utils/personPicker');
 const { defaultQuarterKeys, selectedQuarters, matchesSelectedQuarter } = require('../../utils/dashboardQuarters');
 const { beijingDateParts } = require('../../utils/opportunityQuarter');
 const apiClient = require("../../utils/apiClient");
 const { opportunityProbability } = require("../../utils/customerDetail");
 const { rankingDisplay } = require("../../utils/rankingDisplay");
-const { recentVisits } = require("../../utils/followupRanking");
+const { recentVisits, sevenDayVisits } = require("../../utils/followupRanking");
+const { metricDetails } = require("../../utils/dashboardMetricDetails");
 
 const stages = () => require('../../utils/opportunity').STAGES.filter(s => s.status === 'open').map((s, tone) => ({probability:s.probability,name:s.label,tone})).sort((a, b) => b.probability - a.probability);
-const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
 function number(value) { return Number(value || 0); }
-function money(value) { return `¥${Math.round(number(value)).toLocaleString("zh-CN")}`; }
+function money(value) { return `¥${number(value).toLocaleString("zh-CN", { maximumFractionDigits: 2 })}`; }
 function percent(value) { return Math.max(0, Math.min(100, Math.round(number(value)))); }
 function dateValue(value) {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
-}
-function dateKey(value) {
-  const date = dateValue(value);
-  return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` : "";
 }
 function quarterOf(value) {
   const date = beijingDateParts(value);
@@ -79,20 +76,6 @@ function buildQuarterOptions(opportunities, forecasts = []) {
   }));
   return Object.keys(map).map((key) => map[key]).sort((a, b) => a.year - b.year || a.quarter - b.quarter);
 }
-function sevenDayVisits(visits) {
-  const rows = [];
-  const counts = {};
-  visits.forEach((item) => { const key = dateKey(item.interaction_at); if (key) counts[key] = (counts[key] || 0) + 1; });
-  for (let offset = 6; offset >= 0; offset -= 1) {
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() - offset);
-    const key = dateKey(date);
-    rows.push({ key, weekday: `周${WEEKDAYS[date.getDay()]}`, count: counts[key] || 0, isToday: offset === 0 });
-  }
-  const max = Math.max(...rows.map((item) => item.count), 1);
-  return rows.map((item) => ({ ...item, height: `${Math.max(item.count ? 22 : 5, Math.round(item.count / max * 100))}%` }));
-}
 function quarterTimeline(opportunities, selected) {
   const rows = selected.quarters.flatMap(quarter => [0,1,2].map(offset => {
     const month=(quarter-1)*3+offset;
@@ -103,8 +86,7 @@ function quarterTimeline(opportunities, selected) {
   const total=rows.reduce((sum,item)=>sum+item.value,0);
   return rows.map(item=>({...item,share:total?Math.round(item.value/total*100):0}));
 }
-// BACKEND-CONTRACT BI: /dashboard金额单位元；quarter_actuals按笔数区分未登记与0。
-// quarter_forecasts 区分原始计划与 weighted_* 概率预测；页面只展示服务端计算的预测值。
+// FINANCE001 contract4: latest sales input and adopted operations actuals are independent.
 function financialMetrics(raw,selected,opportunities) {
     const total = opportunities.reduce((sum, item) => sum + number(item.amount), 0);
     const weighted = opportunities.filter(item=>opportunityProbability(item)>=10 && item.status!=='lost').reduce((sum, item) => sum + number(item.amount) * opportunityProbability(item) / 100, 0);
@@ -114,42 +96,66 @@ function financialMetrics(raw,selected,opportunities) {
       const filled=quarterRows.filter(q => q[key] !== null && q[key] !== undefined);
       return {kind:'value',label,value:filled.length ? money(filled.reduce((sum,q)=>sum+number(q[key]),0)) : '未填写',sub:filled.length ? `${filled.length} 条已填预测 · 非实际发生` : '在商机季度预测中填写',tone:color,compact:false};
     };
-    const actual = (raw.quarter_actuals || []).filter(q=>matchesSelectedQuarter(q,selected)).reduce((sum,row)=>{['recognized_amount','collection_amount','recognized_count','collection_count'].forEach(key=>{sum[key]=(sum[key]||0)+number(row[key]);});return sum;},{});
-    const actualMetric = (key, countKey, label, tone) => ({
-      kind: "value", label, value: Number(actual[countKey]) > 0 ? money(actual[key]) : "未登记",
-      sub: Number(actual[countKey]) > 0 ? `${actual[countKey]} 笔已确认记录` : "确认登记后计入所选季度", tone,
-    });
+    const actualRows=(raw.quarter_actuals||[]).filter(q=>matchesSelectedQuarter(q,selected));
+    const actual={};
+    const actualMetric=(key,countKey,label,tone)=>{
+      const finance=require('../../utils/financialDisplay'),kind=key.replace('_amount','');
+      const buckets=actualRows.map(row=>finance.aggregate(row,kind));
+      const filled=buckets.filter(row=>finance.number(row.amount)!==null||finance.number(row.confirmed_subtotal)!==null);
+      const partial=buckets.some(row=>row.complete===false||finance.number(row.amount)===null);
+      const quality=[...new Set(buckets.flatMap(row=>row.qualityHints))];
+      const subtotal=filled.length?filled.reduce((sum,row)=>sum+Number(row.amount==null?row.confirmed_subtotal:row.amount),0):null;
+      actual[key]=partial?null:subtotal;
+      actual[countKey]=actualRows.reduce((sum,row)=>sum+number(row[countKey]),0);
+      return {kind:'value',label:partial&&subtotal!==null?label+'（已登记小计）':label,value:subtotal===null?'未登记':money(subtotal),tone,
+        sub:quality.join('；')||(partial?'尚未完整登记':filled.length?'当前采用的期间实际':'运营确认后计入所选季度')};
+    };
     const kpis = [
-      actualMetric("recognized_amount", "recognized_count", "已登记确收", "blue"),
+      actualMetric("recognized_amount", "recognized_count", "实际不含税确收", "blue"),
       actualMetric("collection_amount", "collection_count", "已登记回款", "mint"),
-      forecastMetric("weighted_recognized_amount","预测含税确收","orange"),
-      forecastMetric("weighted_collection_amount","预测回款","mint"),
+      forecastMetric("recognized_amount","预测含税确收","orange"),
+      forecastMetric("collection_amount","预测回款","mint"),
       { kind: "value", label: "总商机 ACV", value: money(total), sub: `${opportunities.length} 个预计关单的在推商机`, tone: "blue", compact: money(total).length > 11 },
       { kind: "value", label: "加权预测 ACV", value: money(weighted), sub: "在推商机金额 × 阶段概率（含10%）", tone: "violet", compact: money(weighted).length > 11 },
       { kind: "value", label: "高概率 ACV", value: money(highProbability), sub: "70% 及以上商机", tone: "amber", compact: money(highProbability).length > 11 },
       { kind: "value", label: "预计关单数", value: String(opportunities.length), sub: `${selected.label} 预计成交`, tone: "mint", compact: false },
     ];
 
-    return {total,kpis,quarterRows,actual};
+    return {total,kpis,quarterRows,actual,actualRows};
 }
 
 Page({
   onViewSegment(e){return this.changeView({currentTarget:{dataset:{mode:e.detail.value}}});},
+
   data: {
+    viewModeOptions:[{value:'team',label:'团队'},{value:'personal',label:'个人'}],
     loading:true,loadError:'',role:'sales',viewMode:'personal',isFde:false,
-    selectedMemberId:'',selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
-    memberOptions:[],teamOptions:[],optionsLoading:false,optionsError:'',memberLabel:'本人',teamLabel:'部门合计',
+    selectedMemberId:'',memberSelected:[],selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
+    memberPickerOpen:false,memberPickerTeams:[],memberPickerDefaultTeamId:'',memberOptions:[],teamOptions:[],optionsLoading:false,optionsError:'',memberLabel:'本人',teamLabel:'部门合计',
     quarterIndex:0,quarterOptions:[],selectedQuarterKeys:[],quarterFilterDirty:false,showQuarterFilter:false,
     quarterYears:[],quarterYearIndex:0,quarterChoices:[],selectedQuarter:{label:'--'},
     countdown:{days:'--',hours:'--',minutes:'--',sentence:'季度计划'},
     kpis:[],totalAcv:'—',opportunityCount:0,activeOpportunityCount:null,quarterEmpty:false,
+    metricDetails:{},metricDetail:null,metricDetailVisible:false,metricDefinitions:[],metricDefinitionsVisible:false,
+    periodNote:'财务与商机按所选季度；跟进节奏及跟进排名固定为北京时间近7天（含今天）。',
+    activeOpportunityNote:'所选季度有已确认跟进的商机去重，含仍有跟进的已成单商机，排除已丢单；无完整统计时显示未统计。',
     funnel:[],visitDays:[],weeklyVisitCount:0,timeline:[],sourceDate:'--',dataModeLabel:'实时数据',
     rankingLoading:false,rankingMessage:'',rankingCards:[],ownIds:[],ownRegionCodes:[],cohortLabel:'',
-    viewModeOptions:[{value:'team',label:'团队'},{value:'personal',label:'个人'}],
   },
   identityKey(){return access.identity(getApp().globalData.session);},
-  onUnload(){this._loadId=(this._loadId||0)+1;this._rankingLoadId=(this._rankingLoadId||0)+1;this._optionsLoadId=(this._optionsLoadId||0)+1;},
+  onHide(){this.closeMemberPicker();this.clearMetricDetails();this._loadId=(this._loadId||0)+1;this._rankingLoadId=(this._rankingLoadId||0)+1;},
+  onUnload(){this.onHide();this._optionsLoadId=(this._optionsLoadId||0)+1;},
+  metricContext(){return JSON.stringify([this.identityKey(),this.factsQuery(),this.data.selectedQuarterKeys,this.data.presentation]);},
+  clearMetricDetails(){this._metricOwner=null;this.setData({metricDetails:{},metricDefinitions:[],metricDetail:null,metricDetailVisible:false,metricDefinitionsVisible:false});},
+  openMetricDetail(e){
+    const detail=this.data.metricDetails[e.currentTarget.dataset.key];
+    if(!detail||this._metricOwner!==this.metricContext()||this.data.loading||this.data.loadError||!access.can(getApp().globalData.session,'dashboard.read'))return;
+    this.setData({metricDetail:detail,metricDetailVisible:true});
+  },
+  closeMetricDetail(){this.setData({metricDetail:null,metricDetailVisible:false});},
+  toggleMetricDefinitions(){if(this._metricOwner===this.metricContext())this.setData({metricDefinitionsVisible:!this.data.metricDefinitionsVisible});},
   onShow(){
+    this.clearMetricDetails();
     const app=getApp();
     if(app.guardPage&&!app.guardPage(this,'bi'))return;
     const options=access.presentationOptions(app.globalData.session,'bi');
@@ -161,13 +167,15 @@ Page({
   },
   changePresentation(e){const choice=e.currentTarget.dataset.kind;if(!this.data.presentationOptions.some(row=>row.value===choice))return;this.setData({presentation:choice});return this.onShow();},
   loadData(){
+    this.clearMetricDetails();
     const app=getApp(),role=app.globalData.role,context=this.identityKey();
     this.setData({canViewTeam:access.canViewTeam(app.globalData.session,'dashboard.read')});
     if(context!==this._context){
       this.onUnload();this._context=context;
-      this.setData({role,viewMode:access.canViewTeam(app.globalData.session,'dashboard.read')&&role==='manager'?'team':'personal',selectedMemberId:'',selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
-        memberOptions:[],teamOptions:[],memberLabel:app.globalData.session.userName||'本人',teamLabel:'部门合计',
-        selectedQuarterKeys:defaultQuarterKeys(),quarterFilterDirty:false,showQuarterFilter:false,rankingCards:[]});
+      this.setData({role,viewMode:access.canViewTeam(app.globalData.session,'dashboard.read')&&role==='manager'?'team':'personal',selectedMemberId:'',memberSelected:[],selectedTeamGroups:[],selectedTeamChoice:'all',teamPickerSelected:['all'],
+        memberPickerOpen:false,memberPickerTeams:[],memberPickerDefaultTeamId:'',memberOptions:[],teamOptions:[],memberLabel:app.globalData.session.userName||'本人',teamLabel:'部门合计',
+        selectedQuarterKeys:defaultQuarterKeys(),quarterOptions:[],quarterYears:[],quarterChoices:[],quarterYearIndex:0,
+        quarterFilterDirty:false,showQuarterFilter:false,rankingCards:[],loading:true,kpis:[],totalAcv:'—'});
     }
     this._nativeRankings=null;this._nativeRankingKey=null;this._rankingPending=null;this._rankingPendingKey=null;
     this._rankingLoadId=(this._rankingLoadId||0)+1;
@@ -183,12 +191,12 @@ Page({
     team_groups:this.data.viewMode==='team'&&this.data.canViewTeam?this.data.selectedTeamGroups.slice().sort():[]};},
   loadFacts(){
     const query=this.factsQuery(),key=JSON.stringify(query),context=this.identityKey(),serial=this._loadId=(this._loadId||0)+1;
-    this._raw=null;this.setData({loading:true,loadError:'',kpis:[],totalAcv:'—',sourceDate:'--',funnel:[],visitDays:[],timeline:[]});
+    this.clearMetricDetails();this._raw=null;this.setData({loading:true,loadError:'',kpis:[],totalAcv:'—',sourceDate:'--',funnel:[],visitDays:[],timeline:[]});
     this.updateActiveCount();
     wx.showNavigationBarLoading();
     return apiClient.getDashboard(query.personal,{member_id:query.member_id,team_groups:query.team_groups}).then(response=>{
       if(serial!==this._loadId||context!==this.identityKey()||key!==JSON.stringify(this.factsQuery()))return;
-      if(!response||response.data_source!=='database'||!Array.isArray(response.opportunities)||!Array.isArray(response.quarter_forecasts)||!Array.isArray(response.quarter_actuals))throw Error('看板数据格式异常，请重试');
+      if(!response||response.contract_version!==4||response.forecast_basis!=='latest_sales_input'||response.data_source!=='database'||!Array.isArray(response.opportunities)||!Array.isArray(response.quarter_forecasts)||!Array.isArray(response.quarter_actuals))throw Error('看板数据格式异常，请重试');
       const selfId=String(getApp().globalData.session.userId||''),target=query.member_id||selfId;
       if(!selfId)throw Error('登录身份缺失，请重新登录');
       const selected=response.selection;
@@ -198,7 +206,8 @@ Page({
       }else{
         const dynamicTeams=query.team_groups.length>0&&query.team_groups.every(code=>code.startsWith('team:'));
         const allowed=this.data.role==='manager'&&query.team_groups.length!==1&&!dynamicTeams?['workspace','all','department']:['workspace','all','department','team'];
-        if(!allowed.includes(response.scope))throw Error('未取得所选团队范围的数据');
+        if(!allowed.includes(response.scope)&&response.scope!=='authorized')throw Error('未取得所选团队范围的数据');
+        if(response.scope==='authorized'&&(!selected||selected.personal!==false))throw Error('返回授权范围与当前团队选择不一致');
         if(query.team_groups.length&&(!selected||JSON.stringify((selected.team_groups||[]).slice().sort())!==JSON.stringify(query.team_groups)))throw Error('返回团队与当前选择不一致');
       }
       // Defense in depth for personal facts; aggregate peer ranks are handled separately.
@@ -218,15 +227,20 @@ Page({
     return apiClient.getDashboardOptions().then(response=>{
       if(serial!==this._optionsLoadId||context!==this.identityKey())return;
       if(!response||!Array.isArray(response.members)||!Array.isArray(response.team_groups))throw Error('可选范围加载失败');
+      assertPersonDirectory(response.members,response.teams,response.defaults);
       const selfId=getApp().globalData.session.userId;
-      const memberOptions=response.members.map(row=>({...row,group:row.team||'未分组',name:row.name+(row.id===selfId?'（本人）':''),meta:row.account_code||''}));
+      const memberPickerTeams=normalizeTeams(response.teams || []);
+      const memberOptions=normalizeMembers(response.members,memberPickerTeams).map(row=>({...row,group:row.teamLabel||'未分组',name:row.name+(row.id===selfId?'（本人）':''),meta:row.account_code||''}));
+      const memberPickerDefaultTeamId=candidateTeam(memberPickerTeams,(response.defaults||{}).team_id);
+      const previousMember=this.data.selectedMemberId;
+      const selectedMemberId=memberOptions.some(row=>row.id===previousMember)?previousMember:'';
       const teams=response.team_groups.map(row=>({id:row.code,name:row.name,kind:row.kind||''}));
       const teamOptions=[{id:'all',name:'全部团队'},...teams];
       const previousTeams=this.data.selectedTeamGroups.slice();
       const selectedTeamChoice=teams.some(row=>row.id===this.data.selectedTeamChoice)?this.data.selectedTeamChoice:'all';
       const nextTeams=selectedTeamChoice==='all'?teams.map(row=>row.id):[selectedTeamChoice];
-      this.setData({optionsLoading:false,memberOptions,teamOptions,selectedTeamChoice,selectedTeamGroups:nextTeams});this.updateSelectionLabels();
-      if(reload&&this.data.canViewTeam&&this.data.viewMode==='team'&&JSON.stringify(nextTeams)!==JSON.stringify(previousTeams)){
+      this.setData({optionsLoading:false,memberOptions,memberPickerTeams,memberPickerDefaultTeamId,selectedMemberId,teamOptions,selectedTeamChoice,selectedTeamGroups:nextTeams});this.updateSelectionLabels();
+      if(reload&&this.data.canViewTeam&&((this.data.viewMode==='team'&&JSON.stringify(nextTeams)!==JSON.stringify(previousTeams))||(this.data.viewMode==='personal'&&previousMember!==selectedMemberId))){
         return Promise.all([this.loadFacts(),this.loadRankingData()]);
       }
     }).catch(error=>{if(serial===this._optionsLoadId&&context===this.identityKey())this.setData({optionsLoading:false,optionsError:error.message||'可选范围加载失败'});});
@@ -237,8 +251,14 @@ Page({
     this.setData({memberLabel:member?member.name:this.data.selectedMemberId?'所选成员':'本人',
       memberSelected:[id],teamPickerSelected:[this.data.selectedTeamChoice],teamLabel:this.data.selectedTeamChoice==='all'?'部门合计 · 全部团队':(this.data.teamOptions.find(row=>row.id===this.data.selectedTeamChoice)||{}).name||'所选团队'});
   },
+  memberPickerVisibility(event){const open=!!event.detail.open;if(open){if(wx.hideTabBar)wx.hideTabBar({animation:false});}else if(wx.showTabBar)wx.showTabBar({animation:false});},
+  openMemberPicker(){if(!access.canViewTeam(getApp().globalData.session,'dashboard.read')||!this.data.canViewTeam||this.data.viewMode!=='personal'||this.data.isFde)return;this._memberPickerIdentity=this.identityKey();this.setData({memberPickerOpen:true});this.memberPickerVisibility({detail:{open:true}});},
+  closeMemberPicker(){this._memberPickerIdentity=null;if(!this.data.memberPickerOpen)return;this.setData({memberPickerOpen:false});this.memberPickerVisibility({detail:{open:false}});},
+  confirmMember(event){if(!this.data.memberPickerOpen||this._memberPickerIdentity!==this.identityKey()||this.data.viewMode!=='personal'||this.data.isFde||!access.canViewTeam(getApp().globalData.session,'dashboard.read'))return;return this.selectMember(event);},
   selectMember(event){
-    const id=event.detail.ids[0];if(!this.data.memberOptions.some(row=>row.id===id))return;
+    const ids=event.detail.ids;if(!Array.isArray(ids)||ids.length!==1||!this.data.canViewTeam||this.data.optionsLoading||this.data.optionsError)return;
+    const id=ids[0];if(!this.data.memberOptions.some(row=>row.id===id))return;
+    this.closeMemberPicker();
     this.setData({selectedMemberId:id===getApp().globalData.session.userId?'':id});this.updateSelectionLabels();return Promise.all([this.loadFacts(),this.loadRankingData()]);
   },
   selectTeams(event){
@@ -251,7 +271,7 @@ Page({
   changeView(event){
     const mode=event.currentTarget.dataset.mode;
     if(!['personal','team'].includes(mode)||mode===this.data.viewMode||!this.data.canViewTeam)return;
-    this.setData({viewMode:mode});this.updateSelectionLabels();return Promise.all([this.loadFacts(),this.loadRankingData()]);
+    this.closeMemberPicker();this.setData({viewMode:mode});this.updateSelectionLabels();return Promise.all([this.loadFacts(),this.loadRankingData()]);
   },
   rankingQuery(){const quarter=selectedQuarters(this.data.quarterOptions,this.data.selectedQuarterKeys);return quarter?{year:quarter.year,quarters:quarter.quarters,...this.factsQuery()}:null;},
   reloadRankings(){return this.loadRankingData(true);},
@@ -275,6 +295,7 @@ Page({
       const selected=payload&&payload.selection,target=query.member_id||getApp().globalData.session.userId;
       if(!payload||payload.contract_version!==2||payload.data_source!=='database'||payload.scope!==(query.personal?'peer':'company_teams')||!selected||selected.personal!==query.personal)throw Error('排名范围与当前选择不一致');
       if(query.personal&&selected.member_id!==target)throw Error('排名成员与当前选择不一致');
+      if(payload.year!==query.year||!Array.isArray(payload.quarters)||JSON.stringify(payload.quarters.slice().sort())!==JSON.stringify(query.quarters.slice().sort()))throw Error('排名期间与当前选择不一致');
       if(!query.personal&&query.team_groups.length&&JSON.stringify(selected.team_groups.slice().sort())!==JSON.stringify(query.team_groups))throw Error('排名团队与当前选择不一致');
       if(!query.personal&&(!payload.followup||payload.followup.calculation!=='team_followup_per_capita_v1'))throw Error('当前后端尚未提供人均跟进排名，请在配套版本上线后重试');
       rankingDisplay(payload.opportunity_acv);rankingDisplay(payload.followup);rankingDisplay(payload.region);
@@ -313,25 +334,32 @@ Page({
   },
   updateActiveCount(){
     const payload=this._nativeRankings,active=payload&&payload.active_opportunities;
-    if(!active||!Array.isArray(active.rows)){this.setData({activeOpportunityCount:null});return;}
+    if(!active||!Array.isArray(active.rows)||this._nativeRankingKey!==JSON.stringify(this.rankingQuery())){this.setData({activeOpportunityCount:null});return;}
     let rows;
     if(this.data.viewMode==='personal'){const id=this.data.selectedMemberId||getApp().globalData.session.userId;rows=active.rows.filter(row=>row.user_id===id);}
     else if(this.data.canViewTeam&&this.data.selectedTeamGroups.length)rows=(active.groups||[]).filter(row=>this.data.selectedTeamGroups.includes(row.code));
     else rows=active.rows;
-    this.setData({activeOpportunityCount:rows.reduce((sum,row)=>sum+Number(row.value),0)});
+    const complete=this.data.viewMode==='personal'?rows.length===1:!this.data.selectedTeamGroups.length||this.data.selectedTeamGroups.every(code=>rows.filter(row=>row.code===code).length===1);
+    const valid=complete&&rows.length>0&&rows.every(row=>row.value!==null&&row.value!==undefined&&typeof row.value!=='boolean'&&String(row.value).trim()!==''&&Number.isInteger(Number(row.value))&&Number(row.value)>=0);
+    this.setData({activeOpportunityCount:valid?rows.reduce((sum,row)=>sum+Number(row.value),0):null});
   },
   rebuild(){this.rebuildFacts();return this.loadRankingData();},
   rebuildFacts(){
     const raw=this._raw,selected=selectedQuarters(this.data.quarterOptions,this.data.selectedQuarterKeys);
     if(!raw||!selected||this.data.loading||this.data.loadError)return;
     const opportunities=raw.opportunities.filter(item=>!['won','lost'].includes(item.status)&&matchesSelectedQuarter(quarterOf(item.expected_close_date),selected));
-    const {total,kpis,quarterRows,actual}=financialMetrics(raw,selected,opportunities);
+    const {total,kpis,quarterRows,actualRows}=financialMetrics(raw,selected,opportunities);
+    this.closeMetricDetail();
+    const details=metricDetails({kpis,opportunities,quarterRows,actualRows,actualDetails:raw.actual_details,
+      actualCoverage:raw.detail_coverage&&raw.detail_coverage.actuals,actualOpportunities:raw.opportunities,
+      selected,scopeLabel:this.data.viewMode==='personal'?this.data.memberLabel:this.data.teamLabel});
+    this._metricOwner=this.metricContext();
     const funnel=stages().map(stage=>{const items=opportunities.filter(item=>opportunityProbability(item)===stage.probability),value=items.reduce((sum,item)=>sum+number(item.amount),0);return {...stage,value,amount:money(value),count:items.length};});
     const max=Math.max(1,...funnel.map(row=>row.value));
     funnel.forEach(row=>{row.width=`${Math.max(row.value?36:24,Math.round(row.value/max*88))}%`;});
     const visits=recentVisits(raw.recent_visits||[]);
-    this.setData({kpis,totalAcv:money(total),opportunityCount:opportunities.length,
-      quarterEmpty:!opportunities.length&&!quarterRows.length&&!actual.recognized_count&&!actual.collection_count,
+    this.setData({kpis,metricDetails:details,metricDefinitions:Object.values(details).map(({title,definition})=>({title,definition})),totalAcv:money(total),opportunityCount:opportunities.length,
+      quarterEmpty:!opportunities.length&&!quarterRows.length&&!actualRows.length,
       funnel,visitDays:sevenDayVisits(visits),weeklyVisitCount:visits.length,timeline:quarterTimeline(opportunities,selected),
       sourceDate:sourceTime((raw.summary||{}).source_date),dataModeLabel:'数据库实时统计'});
   },
@@ -341,21 +369,25 @@ Page({
     const years=[...new Set(this.data.quarterOptions.map(item=>item.year))].sort((a,b)=>b-a);
     this.setData({selectedQuarter:selected,countdown:quarterCountdown({...selected,label:`${selected.year} Q${selected.quarter}`}),quarterIndex:this.data.quarterOptions.findIndex(item=>item.key===selected.key),
       quarterYears:years,quarterYearIndex:years.indexOf(selected.year),
-      quarterChoices:this.data.quarterOptions.filter(item=>item.year===selected.year).map(item=>({...item,selected:this.data.selectedQuarterKeys.includes(item.key)}))});
+      quarterChoices:this.data.quarterOptions.filter(item=>item.year===selected.year).map(item=>({...item,selected:!selected.isFullYear&&this.data.selectedQuarterKeys.includes(item.key)}))});
   },
   toggleQuarterFilter(){this.setData({showQuarterFilter:!this.data.showQuarterFilter});},
   closeQuarterFilter(){this.setData({showQuarterFilter:false});},
   toggleQuarter(event){
     const key=event.currentTarget.dataset.key;
+    if(key==='all')return this.selectFullYear();
     if(!this.data.quarterChoices.some(item=>item.key===key))return;
-    const keys=this.data.selectedQuarterKeys.slice();const index=keys.indexOf(key);
-    if(index>=0){if(keys.length===1){wx.showToast({title:'请至少选择一个季度',icon:'none'});return;}keys.splice(index,1);}else keys.push(key);
+    const keys=this.data.selectedQuarter.isFullYear?[]:this.data.selectedQuarterKeys.slice();const index=keys.indexOf(key);
+    if(index>=0){if(keys.length===1)return this.selectFullYear();keys.splice(index,1);}else keys.push(key);
     this.setData({selectedQuarterKeys:keys,quarterFilterDirty:true});this.syncQuarterFilter();this.rebuild();
+  },
+  selectFullYear(){
+    const year=this.data.selectedQuarter.year;if(!year)return;
+    this.setData({selectedQuarterKeys:[1,2,3,4].map(q=>`${year}-Q${q}`),quarterFilterDirty:true});this.syncQuarterFilter();return this.rebuild();
   },
   changeQuarterYear(event){
     const year=this.data.quarterYears[Number(event.detail.value)];if(!year)return;
-    const current=currentQuarter();
-    const keys=year===current.year?defaultQuarterKeys():[1,2,3,4].map(q=>`${year}-Q${q}`);
+    const keys=[1,2,3,4].map(q=>`${year}-Q${q}`);
     this.setData({selectedQuarterKeys:keys,quarterFilterDirty:true});this.syncQuarterFilter();this.rebuild();
   },
   resetQuarters(){this.setData({selectedQuarterKeys:defaultQuarterKeys(),quarterFilterDirty:false});this.syncQuarterFilter();this.rebuild();},

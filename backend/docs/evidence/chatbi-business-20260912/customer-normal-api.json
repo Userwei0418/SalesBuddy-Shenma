@@ -1,0 +1,114 @@
+{
+  "started_at": "2026-09-11T17:54:32.321468+00:00",
+  "scenario": "normal",
+  "checks": [
+    {
+      "name": "XS001 POST /auth/session",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "XS001 sales/self identity",
+      "passed": true
+    },
+    {
+      "name": "XS002 POST /auth/session",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "XS002 sales/self identity",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /customers",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "owned customer exists",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations",
+      "passed": true,
+      "http_status": 201
+    },
+    {
+      "name": "XS001 POST /conversations/7d48d273-e883-4419-91f9-489f788cfb96/messages",
+      "passed": true,
+      "http_status": 202
+    },
+    {
+      "name": "XS001 POST /conversations/7d48d273-e883-4419-91f9-489f788cfb96/messages",
+      "passed": true,
+      "http_status": 202
+    },
+    {
+      "name": "acknowledged replay returns same run",
+      "passed": true
+    },
+    {
+      "name": "XS001 POST /conversations/7d48d273-e883-4419-91f9-489f788cfb96/messages",
+      "passed": true,
+      "http_status": 409
+    },
+    {
+      "name": "real business run succeeded",
+      "passed": true
+    },
+    {
+      "name": "public result contract",
+      "passed": true
+    },
+    {
+      "name": "route metadata stays private",
+      "passed": true
+    },
+    {
+      "name": "XS001 GET /conversations/7d48d273-e883-4419-91f9-489f788cfb96/messages",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "one user and one final assistant message",
+      "passed": true
+    },
+    {
+      "name": "XS002 GET /agent/runs/3f3eefd2-d56f-4d69-979c-1015cade4fa1",
+      "passed": true,
+      "http_status": 404
+    },
+    {
+      "name": "XS002 GET /conversations/7d48d273-e883-4419-91f9-489f788cfb96/messages",
+      "passed": true,
+      "http_status": 200
+    },
+    {
+      "name": "other sales user cannot read messages",
+      "passed": true
+    },
+    {
+      "name": "XS001 test session revoked",
+      "passed": true
+    },
+    {
+      "name": "XS002 test session revoked",
+      "passed": true
+    }
+  ],
+  "ids": {
+    "conversation_id": "7d48d273-e883-4419-91f9-489f788cfb96",
+    "run_id": "3f3eefd2-d56f-4d69-979c-1015cade4fa1"
+  },
+  "mode": "customer_chatbi",
+  "status": "succeeded",
+  "elapsed_ms": 14108,
+  "api_verified": true,
+  "provider_audit": "pending server-side run audit; API success alone does not identify provider",
+  "test_sessions_revoked": {
+    "XS001": true,
+    "XS002": true
+  },
+  "finished_at": "2026-09-11T17:54:46.607820+00:00"
+}

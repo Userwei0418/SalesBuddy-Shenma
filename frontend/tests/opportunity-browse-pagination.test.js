@@ -15,7 +15,7 @@ const definitions=[
 function setup(spec, clock={setTimeout,clearTimeout}){
  let definition;
  const filename=path.resolve(__dirname,'../miniprogram',spec.file),requests=[];
- const app={globalData:{role:spec.component?'fde':'sales',session:{workspaceId:'w',userId:'u',role:spec.component?'fde':'sales',loginAt:'first',permissionVersion:'one',capabilities:{}}}};
+ const app={ensureLogin:()=>true,globalData:{roles:{sales:{name:'销售',scope:'本人'}},role:spec.component?'fde':'sales',session:{workspaceId:'w',userId:'u',role:spec.component?'fde':'sales',loginAt:'first',permissionVersion:'one',capabilities:{}}}};
  const api={listOpportunities:params=>{const pending={...deferred(),params};requests.push(pending);return pending.promise;}};
  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{Page:d=>{definition=d;},Component:d=>{definition=d;},require:name=>name.endsWith('apiClient')?api:require(path.resolve(path.dirname(filename),name)),getApp:()=>app,Date,Set,Map,...clock,wx:{}});
  const page={...definition,...(definition.methods||{}),data:JSON.parse(JSON.stringify(definition.data)),properties:{customerId:'',memberId:'',initialScope:''},setData(values,callback){Object.assign(this.data,values);if(callback)callback();}};
@@ -114,5 +114,79 @@ test('销售搜索防抖不会在卸载或身份变化后发送请求',()=>{
   page.searchOpportunities({detail:{value:'客户'}});
   if(change==='unload')page.onUnload();else app.globalData.session.permissionVersion='changed';
   clock.flush();assert.equal(requests.length,0);
+ }
+});
+
+test('WEB004 阶段整组原子提交一次请求，非法值不部分生效，原生toggle兼容',async()=>{
+ const {page,requests}=setup(salesWorkbench);
+ const pending=page.setOpportunityStages({detail:{value:['won','identified','won','solution']}});
+ assert.equal(requests.length,1);assert.deepEqual(Array.from(requests[0].params.stages),['identified','solution','won']);assert.equal(page.data.opportunityStageLabel,'已选3项');
+ const before=JSON.stringify(page.data);assert.equal(page.setOpportunityStages({detail:{value:['lost','bad']}}),false);assert.equal(JSON.stringify(page.data),before);assert.equal(requests.length,1);
+ requests[0].resolve(pageResponse([],requests[0].params));await pending;
+ const toggled=page.toggleOpportunityStage({currentTarget:{dataset:{value:'solution'}}});assert.equal(requests.length,2);assert.deepEqual(Array.from(requests[1].params.stages),['identified','won']);requests[1].resolve(pageResponse([],requests[1].params));await toggled;
+ const clear=page.setOpportunityStages({detail:{value:[]}});assert.equal(requests.length,3);assert.equal(requests[2].params.stages.length,0);assert.equal(page.data.opportunityFilterActive,false);requests[2].resolve(pageResponse([],requests[2].params));await clear;
+});
+
+test('WEB004 季度整组一次请求，统计与列表独立，指定年空季度代表全年',async()=>{
+ const {page,requests}=setup(salesWorkbench);
+ page.data.opportunityCloseIndex=1;
+ const stats=page.setOpportunityQuarterSelection({dataset:{scope:'summary'},detail:{year:2025,quarters:[3,1,3]}});
+ assert.equal(requests.length,1);assert.deepEqual(Array.from(requests[0].params.overviewQuarters),[1,3]);assert.equal(requests[0].params.overviewYear,2025);assert.equal(requests[0].params.closePeriod,'month');assert.equal(requests[0].params.quarters.length,0);
+ requests[0].resolve(pageResponse([],requests[0].params));await stats;
+ const list=page.setOpportunityQuarterSelection({currentTarget:{dataset:{scope:'list'}},detail:{year:2024,quarters:[2,4]}});
+ assert.equal(requests.length,2);assert.equal(requests[1].params.closePeriod,'all');assert.deepEqual(Array.from(requests[1].params.quarters),[2,4]);assert.equal(requests[1].params.year,2024);assert.deepEqual(Array.from(requests[1].params.overviewQuarters),[1,3]);
+ assert.equal(page.data.summaryYearOptions[page.data.listYearIndex].value,2024);assert.equal(page.data.summaryYearOptions[page.data.summaryYearIndex].value,2025);
+ requests[1].resolve(pageResponse([],requests[1].params));await list;
+ const full=page.setOpportunityQuarterSelection({dataset:{scope:'list'},detail:{year:2024,quarters:[]}});assert.deepEqual(Array.from(requests[2].params.quarters),[1,2,3,4]);requests[2].resolve(pageResponse([],requests[2].params));await full;
+ const all=page.setOpportunityQuarterSelection({dataset:{scope:'list'},detail:{year:'all',quarters:[]}});assert.equal(requests[3].params.quarters.length,0);assert.equal(page.data.listYearIndex,0);assert.equal(page.data.summaryYearOptions[page.data.summaryYearIndex].value,2025);requests[3].resolve(pageResponse([],requests[3].params));await all;
+ const before=JSON.stringify(page.data);
+ for(const detail of [{year:'all',quarters:[1]},{year:2026,quarters:[5]},{year:2026,quarters:['1']},{year:1999,quarters:[]},{year:'2026',quarters:[]}])assert.equal(page.setOpportunityQuarterSelection({dataset:{scope:'list'},detail}),false);
+ assert.equal(requests.length,4);assert.equal(JSON.stringify(page.data),before);
+});
+
+test('WEB004 快速整组筛选每次仅一请求，后到旧结果不覆盖新阶段或季度',async()=>{
+ const {page,requests}=setup(salesWorkbench),rows=fixtures(80);
+ const first=page.setOpportunityStages({detail:{value:['identified','qualified']}});
+ const second=page.setOpportunityStages({detail:{value:['won','lost']}});
+ const third=page.setOpportunityQuarterSelection({dataset:{scope:'summary'},detail:{year:2026,quarters:[2,3]}});
+ assert.equal(requests.length,3);requests[2].resolve(pageResponse([],requests[2].params));await third;
+ const accepted=JSON.stringify(page.data);requests[1].resolve(pageResponse(rows,requests[1].params));requests[0].resolve(pageResponse(rows,requests[0].params));await Promise.all([first,second]);assert.equal(JSON.stringify(page.data),accepted);
+});
+
+async function loadWorkbenchRows(count=40){
+ const context=setup(salesWorkbench),{page,requests}=context,rows=fixtures(180);
+ const first=page.loadData();requests[0].resolve(pageResponse(rows,requests[0].params));await first;
+ while(page.data.filteredOpportunities.length<count){const more=page.loadMoreOpportunities(),request=requests.at(-1);request.resolve(pageResponse(rows,request.params));await more;}
+ return {...context,rows};
+}
+test('WEB004 详情返回过期刷新保留已加载40条，继续翻页仍20且offset正确',async()=>{
+ const {page,requests,rows}=await loadWorkbenchRows();page.onHide();page.workbenchLoadedAt=Date.now()-31000;
+ const pending=page.onShow();assert.equal(requests.length,3);assert.equal(requests[2].params.pageSize,40);assert.equal(requests[2].params.offset,0);assert.equal(page.data.filteredOpportunities.length,40);
+ requests[2].resolve(pageResponse(rows,requests[2].params));await pending;
+ assert.equal(page.data.filteredOpportunities.length,40);assert.equal(page.data.opportunityNextOffset,40);
+ const more=page.loadMoreOpportunities();assert.equal(requests[3].params.pageSize,20);assert.equal(requests[3].params.offset,40);requests[3].resolve(pageResponse(rows,requests[3].params));await more;assert.equal(page.data.filteredOpportunities.length,60);
+});
+test('WEB004 恢复超过100条按有限窗口重读，中间结果不覆盖完整可见范围',async()=>{
+ const {page,requests,rows}=await loadWorkbenchRows(140),start=requests.length;
+ const pending=page.loadAllOpportunities();assert.equal(requests[start].params.pageSize,100);requests[start].resolve(pageResponse(rows,requests[start].params));await tick();
+ assert.equal(page.data.filteredOpportunities.length,140);assert.equal(requests[start+1].params.pageSize,40);assert.equal(requests[start+1].params.offset,100);assert.equal(requests[start+1].params.includeOverview,false);
+ requests[start+1].resolve(pageResponse(rows,requests[start+1].params));await pending;assert.equal(page.data.filteredOpportunities.length,140);assert.equal(page.data.opportunityNextOffset,140);assert.equal(requests.length,start+2);
+});
+test('WEB004 恢复期间权限变化拒收旧窗口，范围改变从首20重读',async()=>{
+ const {page,requests,rows,app}=await loadWorkbenchRows(140),start=requests.length;
+ const old=page.loadAllOpportunities();requests[start].resolve(pageResponse(rows,requests[start].params));await tick();
+ app.globalData.session.permissionVersion='changed';const fresh=page.loadData();assert.equal(requests[start+2].params.pageSize,20);assert.equal(page.data.filteredOpportunities.length,0);
+ requests[start+2].resolve(pageResponse(rows,requests[start+2].params));await fresh;const accepted=JSON.stringify(page.data);
+ requests[start+1].resolve(pageResponse(rows,requests[start+1].params));await old;assert.equal(JSON.stringify(page.data),accepted);
+ const filter=page.setOpportunityStages({detail:{value:['lost']}});assert.equal(requests.at(-1).params.pageSize,20);assert.equal(page.data.filteredOpportunities.length,0);requests.at(-1).resolve(pageResponse(rows,requests.at(-1).params));await filter;assert.equal(page.data.opportunityTotal,0);
+});
+test('WEB004 恢复窗口失败或快照变化不伪装旧值为最新，重试回首20',async()=>{
+ for(const failure of ['offline','total','duplicate','offset']){
+  const {page,requests,rows}=await loadWorkbenchRows(140),start=requests.length;
+  const pending=page.loadAllOpportunities();requests[start].resolve(pageResponse(rows,requests[start].params));await tick();const next=requests[start+1];
+  if(failure==='offline')next.reject(Error('恢复失败'));
+  else{const response=pageResponse(rows,next.params);if(failure==='total')response.summary.total++;if(failure==='duplicate')response.items[0]={...rows[0]};if(failure==='offset')response.next_offset=100;next.resolve(response);}
+  await pending;assert.equal(page.data.opportunityDataReady,false);assert.ok(page.data.opportunityListError);assert.equal(page.data.filteredOpportunities.length,0);assert.equal(page.listOpportunities.length,0);assert.equal(page.data.opportunityNextOffset,null);
+  const retry=page.loadAllOpportunities();assert.equal(requests.at(-1).params.pageSize,20);requests.at(-1).resolve(pageResponse(rows,requests.at(-1).params));await retry;assert.equal(page.data.filteredOpportunities.length,20);
  }
 });

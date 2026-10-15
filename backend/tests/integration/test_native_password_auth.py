@@ -18,7 +18,7 @@ async def test_native_password_first_login_change_refresh_and_role_boundary(
     connection, initial_password, new_password
 ):
     async with await client_for(connection) as admin, await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         team = (await admin.get("/api/v1/console/organization")).json()["departments"][0]["id"]
         account = "NATIVE" + uuid4().hex[:10]
         created = await admin.post(

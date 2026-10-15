@@ -13,6 +13,6 @@
     "sb-search": "/ui/sb/sb-search/index",
     "t-cell": "/ui/tdesign/cell/cell",
     "t-icon": "/ui/tdesign/icon/icon",
-    "t-checkbox": "/ui/tdesign/checkbox/checkbox"
+    "person-picker": "/components/person-picker/index"
   }
 }

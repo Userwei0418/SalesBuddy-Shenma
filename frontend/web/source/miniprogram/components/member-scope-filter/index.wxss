@@ -1,0 +1,16 @@
+/* 触发片照 sb-labeled-select size="small"（高 32px，px 不随屏宽缩放）：灰底无边框，未选只显示标签，选中浅蓝底主色字显示人数（B-43） */
+.member-trigger{position:relative;display:flex;align-items:center;gap:8rpx;width:var(--member-trigger-width,104px);max-width:100%;min-width:0;height:var(--member-trigger-height,32px);box-sizing:border-box;padding:0 var(--ui-space-2) 0 var(--ui-space-3);border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-ink);font-size:14px;line-height:1.3;white-space:nowrap}
+.member-trigger-label,.member-trigger-value{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--ui-ink);font-size:14px;font-weight:400}
+.member-trigger-caret{flex:0 0 auto;display:inline-flex;color:var(--ui-muted)}
+.member-trigger.member-trigger-selected{background:var(--ui-selected)}
+.member-trigger-selected .member-trigger-value{color:var(--ui-primary);font-weight:600}
+.member-trigger.member-trigger-disabled .member-trigger-label{color:var(--ui-muted)}
+.member-trigger-pressed{opacity:.7}
+/* 看起来 32px，点击区用 ::after 上下扩到 44px（和 sb-labeled-select small 一致） */
+.member-trigger::after{content:"";position:absolute;left:0;right:0;top:calc(50% - 22px);bottom:calc(50% - 22px)}
+/* 弹层正文：t-checkbox 列表贴满弹层宽度，行左右各 16px */
+.member-options{margin:0 calc(-1 * var(--ui-page-gutter))}
+.member-empty{padding:40rpx;text-align:center;color:var(--ui-secondary);font-size:14px}
+
+/* Palette only: original geometry is preserved. */
+.member-trigger-selected .member-trigger-caret { color:var(--ui-primary); }

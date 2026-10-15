@@ -6,7 +6,8 @@
     "sb-state-panel": "/ui/sb/sb-state-panel/index",
     "sb-pagination": "/ui/sb/sb-pagination/index",
     "sb-labeled-select": "/ui/sb/sb-labeled-select/index",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "/components/person-picker/index"
   },
   "homeButton": true
 }

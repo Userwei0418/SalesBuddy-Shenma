@@ -110,8 +110,27 @@ page{background:var(--ui-background);color:var(--ui-ink)}
 /* Palette only: original geometry is preserved. */
 .countdown-foot,.countdown-foot text { color:var(--sb-hero-muted); }
 
-/* Capability-driven sales/FDE view switch. */
-.permission-perspectives{display:flex;gap:16rpx;padding:16rpx 32rpx}
-.permission-perspectives button{display:flex;align-items:center;justify-content:center;flex:1;min-height:var(--ui-touch-target);line-height:1.5;padding:8rpx 16rpx;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-neutral-soft);color:var(--ui-ink)}
-.permission-perspectives button::after{border:0}
-.permission-perspectives .selected{background:var(--ui-primary);color:var(--ui-on-primary)}
+/* New business controls; existing layout and palette preserved. */
+.permission-perspectives{display:flex;flex-wrap:wrap;gap:16rpx;margin:24rpx 28rpx}.permission-perspectives button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px;line-height:var(--ui-touch-target)}.permission-perspectives button.selected{border-color:var(--ui-primary);color:var(--ui-primary);background:var(--ui-selected)}
+
+/* New business controls; existing layout and palette preserved. */
+.upgrade-person-trigger{display:flex;align-items:center;gap:8rpx;min-height:var(--ui-touch-target);padding:0 16rpx;border-radius:var(--ui-radius-control);color:var(--ui-primary);background:var(--ui-selected);font-size:14px}
+
+.metrics-period-note{margin:16rpx 0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;overflow-wrap:anywhere}
+.metric-trigger{min-width:0;display:flex;flex-direction:column;cursor:pointer}
+.metric-trigger .kpi-tile{flex:1}
+.metric-detail-link,.metric-rules-toggle{color:var(--ui-primary);font-size:var(--ui-text-small);line-height:var(--ui-touch-target)}
+.metric-detail-link{padding:0 16rpx}
+.metric-detail-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx;font-weight:600;color:var(--ui-ink)}
+.metric-detail-head>text{min-width:0;overflow-wrap:anywhere}
+.metric-detail-head button{flex-shrink:0;margin:0;min-height:var(--ui-touch-target);line-height:var(--ui-touch-target);background:var(--ui-surface);color:var(--ui-primary)}
+.metric-detail-context,.metric-detail-definition{margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;overflow-wrap:anywhere}
+.metric-detail-summary{margin-top:16rpx;color:var(--ui-ink);line-height:1.6;overflow-wrap:anywhere}
+.metric-detail-rows{height:560rpx;margin-top:16rpx}
+.metric-detail-row{padding:16rpx 0;border-top:1px solid var(--ui-line)}
+.metric-detail-row>view{display:flex;gap:16rpx;align-items:flex-start;font-size:var(--ui-text-small);line-height:1.6}
+.metric-detail-row text{flex:0 0 130rpx;color:var(--ui-muted)}
+.metric-detail-row label{min-width:0;flex:1;color:var(--ui-ink);overflow-wrap:anywhere}
+.metric-definitions>view+view{margin-top:20rpx}
+.metric-definitions text{display:block;color:var(--ui-ink);font-weight:600}
+.metric-definitions label{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}

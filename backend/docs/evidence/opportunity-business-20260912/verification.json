@@ -1,0 +1,13 @@
+{
+  "source_files": 319,
+  "mismatches": [],
+  "commit": "d71a7ccc20067271030e6b2b8d522ea21f4ea38e",
+  "non_database_tests": 464,
+  "isolated_postgres_tests": 75,
+  "provider_http": "synthetic",
+  "real_business_verified": false,
+  "production_deployed": false,
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "openapi_synced": true
+}

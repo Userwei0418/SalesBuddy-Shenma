@@ -20,7 +20,7 @@ function setup() {
   const timers = new Map(); let timerId = 0;
   const api = {
     listOpportunities(params, cancelled) {const request={...deferred(),params,cancelled:()=>page.serial!==request.serial||page.projectIdentity!==require('../miniprogram/utils/access').identity(app.globalData.session)};request.serial=page.serial;const original=request.resolve;request.resolve=value=>original(value&&Array.isArray(value.items)&&!value.summary?pageResponse(value.items,params):value);projects.push(request);return request.promise;},
-    getDirectoryMembers() {const request={...deferred(),params:{}};const resolve=request.resolve;request.resolve=value=>resolve(value&&value.members?{items:value.members.map(row=>({role:'fde',...row}))}:value);directories.push(request);return request.promise;},
+    getDirectoryMembers() {const request={...deferred(),params:{}};const resolve=request.resolve;request.resolve=value=>resolve(value&&value.members?{teams:[],defaults:{team_id:null},items:value.members.map(row=>({role:'fde',team_ids:[],...row}))}:value);directories.push(request);return request.promise;},
     getOpportunityOverview:async params=>{overviews.push(JSON.parse(JSON.stringify(params)));return {metrics:{won:0,total:1,active:1,newCount:1,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0}};},
   };
   let definition;
@@ -42,15 +42,15 @@ function setup() {
 const ids = rows => Array.from(rows, row => row.id);
 
 test('FDE总览选择年份进入全年且与销售共用存量和历史日期说明，列表筛选仍独立', async () => {
-  const {page,overviews,modals}=setup();
-  const {quarterSelection,OPPORTUNITY_OVERVIEW_HELP}=require('../miniprogram/utils/opportunityQuarter');
-  page.setData({years:[2025,2026],year:2025,quarters:[3],summaryQuarter:quarterSelection(2025)});
-  page.summaryYear({detail:{value:1}});await flush();
-  assert.deepEqual(overviews[0].quarters,[1,2,3,4]);assert.equal(overviews[0].year,2026);
+  const {page,projects,modals}=setup();
+  const {summaryQuarterSelection,OPPORTUNITY_OVERVIEW_HELP}=require('../miniprogram/utils/opportunityQuarter');
+  page.setData({years:[2025,2026],year:2025,quarters:[3],summaryYears:[{value:'all',label:'全部年份'},{value:2025,label:'2025年'},{value:2026,label:'2026年'}],summaryQuarter:summaryQuarterSelection(2025)});
+  page.summaryYear({detail:{value:2}});await flush();
+  assert.deepEqual(projects[0].params.overviewQuarters,[1,2,3,4]);assert.equal(projects[0].params.overviewYear,2026);
   assert.equal(page.data.summaryQuarter.label,'2026年 全年');assert.equal(page.data.year,2025);
   assert.deepEqual(Array.from(page.data.quarters),[3]);
-  page.summaryQuarterChange({currentTarget:{dataset:{q:0}}});await flush();
-  assert.deepEqual(overviews[1].quarters,[]);assert.match(page.data.summaryQuarter.label,/跨年/);
+  page.summaryYear({detail:{value:0}});await flush();
+  assert.deepEqual(projects[1].params.overviewQuarters,[]);assert.match(page.data.summaryQuarter.label,/全部年份/);
   page.showOpportunityMetricHelp();assert.equal(modals[0].content,OPPORTUNITY_OVERVIEW_HELP);
   const wxml=fs.readFileSync(path.resolve(__dirname,'../miniprogram/components/fde-projects/index.wxml'),'utf8');
   assert.match(wxml,/>全部商机</);assert.match(wxml,/全部商机不随季度变化/);
@@ -59,11 +59,12 @@ test('FDE总览选择年份进入全年且与销售共用存量和历史日期�
 
 test('FDE列表从跨年全部切年份会查询全年，保留显式季度且不改变总览', () => {
   const {page}=setup();const requests=[];page.filter=()=>requests.push(JSON.parse(JSON.stringify(page.pageParams())));
-  const {quarterSelection}=require('../miniprogram/utils/opportunityQuarter');
-  page.setData({years:[2025,2026],summaryQuarter:quarterSelection(2026,[3]),quarters:[]});
-  page.year({detail:{value:0}});assert.equal(requests[0].year,2025);assert.deepEqual(requests[0].quarters,[1,2,3,4]);
-  assert.ok(page.data.quarterOptions.every(item=>item.selected));
-  page.setData({quarters:[2]});page.year({detail:{value:1}});
+  const {summaryQuarterSelection}=require('../miniprogram/utils/opportunityQuarter');
+  page.setData({years:[2025,2026],summaryYears:[{value:'all',label:'全部年份'},{value:2025,label:'2025年'},{value:2026,label:'2026年'}],summaryYearIndex:2,summaryQuarter:summaryQuarterSelection(2026,[3]),quarters:[]});
+  page.year({detail:{value:1}});assert.equal(requests[0].year,2025);assert.deepEqual(requests[0].quarters,[1,2,3,4]);
+  assert.equal(page.data.listQuarter.isFullYear,true);
+  assert.ok(page.data.quarterOptions.every(item=>!item.selected));
+  page.setListPeriod(summaryQuarterSelection(2025,[2]));page.filter();
   assert.deepEqual(requests[1].quarters,[2]);assert.deepEqual(Array.from(page.data.summaryQuarter.quarters),[3]);
 });
 
@@ -227,7 +228,9 @@ test('连续五次输入只发最终关键词一次查询，目录在途结果�
   assert.equal(projects.length,2);assert.equal(projects[1].params.query,'sales');
   assert.equal(directories.length,1,'最终查询也复用该身份的在途目录');
   directories[0].resolve({members:[{id:'member-a',name:'成员甲'}]});
-  projects[1].resolve({items:[project],summary:{total:85,open_amount:900000},has_more:true,next_offset:20});
+  const fullPage=pageResponse(Array.from({length:85},(_,index)=>({...project,id:index===0?'op1':`op-${index}`,name:'sales project'})),projects[1].params);
+  fullPage.items=[project];fullPage.summary={...fullPage.summary,total:85,open_amount:900000};fullPage.has_more=true;fullPage.next_offset=20;
+  projects[1].resolve(fullPage);
   await flush();
   assert.deepEqual(ids(page.data.members),['','member-a']);assert.equal(page.data.membersLoading,false);
   assert.equal(page.data.count,85);assert.equal(page.data.acv,'90');
@@ -282,24 +285,21 @@ test('FDE卡片与销售共享字段格式，实绩零值和未登记值不会�
 });
 
 test('FDE总览与列表季度独立，切成员后迟到的旧总览不能覆盖新范围', async () => {
-  const {page,app,projects,directories} = setup();
-  const pending=[];
-  // Replace the component's API through a dedicated VM so both endpoints are observed.
-  const api={getOpportunityOverview(params){const r={...deferred(),params};pending.push(r);return r.promise;}};
-  let definition;
-  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{Component:v=>definition=v,getApp:()=>app,Date,Set,setTimeout,clearTimeout,require:name=>name.endsWith('apiClient')?api:require(path.resolve(path.dirname(filename),name))});
-  const view={...definition.methods,properties:{customerId:'',memberId:''},data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}};
-  view.setData({scope:'team',summaryQuarter:require('../miniprogram/utils/opportunityQuarter').quarterSelection(2026,[1]),quarters:[3],members:[{id:'a'},{id:'b'}],memberIds:['a']});
-  const first=view.loadOverview();
-  assert.equal(JSON.stringify(pending[0].params.memberIds),'["a"]');
-  assert.equal(JSON.stringify(pending[0].params.quarters),'[1]');
-  view.setData({memberIds:['b']});const second=view.loadOverview();
-  const metrics={won:1,total:4,active:3,newCount:2,missingCloseDates:0,missingWonDates:0,missingCreatedDates:0};
-  pending[1].resolve({metrics});await second;
-  pending[0].resolve({metrics:{...metrics,total:99}});await first;
-  assert.equal(view.data.overview.total,4);
-  assert.equal(JSON.stringify(view.data.quarters),'[3]');
-  const third=view.loadOverview();app.globalData.session={...app.globalData.session,permissionVersion:'v2'};
-  pending[2].resolve({metrics:{...metrics,total:100}});await third;
-  assert.equal(view.data.overview.total,4);
+  const {page,app,projects}=setup();
+  const {summaryQuarterSelection}=require('../miniprogram/utils/opportunityQuarter');
+  page.setData({scope:'team',canViewTeam:false,summaryQuarter:summaryQuarterSelection(2026,[1]),quarters:[3],members:[{id:'a'},{id:'b'}],memberIds:['a']});
+  const rows=Array.from({length:4},(_,index)=>({...project,id:`op-${index}`,expected_close_date:'2026-07-10'}));
+  const first=page.load();
+  assert.equal(JSON.stringify(projects[0].params.memberIds),'["a"]');
+  assert.deepEqual(projects[0].params.overviewQuarters,[1]);
+  page.setData({memberIds:['b']});const second=page.load();
+  const current=pageResponse(rows,projects[1].params);projects[1].resolve(current);await second;
+  const stale=pageResponse(Array.from({length:99},(_,index)=>({...project,id:`stale-${index}`})),projects[0].params);projects[0].resolve(stale);await first;
+  assert.equal(page.data.overview.total,4);
+  assert.deepEqual(Array.from(page.data.quarters),[3]);
+  const third=page.load();app.globalData.session={...app.globalData.session,permissionVersion:'v2'};
+  projects[2].resolve(pageResponse(Array.from({length:100},(_,index)=>({...project,id:`new-${index}`})),projects[2].params));await third;
+  assert.notEqual(page.data.overview.total,100);
+  const fresh=page.load();projects[3].resolve(pageResponse(rows,projects[3].params));await fresh;
+  assert.equal(page.data.overview.total,4);
 });

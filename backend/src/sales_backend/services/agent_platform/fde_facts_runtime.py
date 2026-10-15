@@ -14,11 +14,13 @@ from dataclasses import asdict
 
 import httpx
 
+from sales_backend.integrations.model_observer import finish_observed, prepare_observed
 from sales_backend.integrations.supreme_fde import FdeClient, FdeConfig
+from sales_backend.job_context import JobLeaseLost
 from sales_backend.services.agent_platform.fde_invocation import FdeJsonInvocation
 from sales_backend.services.agent_platform.inference import PlatformOperation, PlatformRequest
 from sales_backend.services.agent_platform.routing import ControlledPlatformBlock, ProviderUnavailable, WriteState
-from sales_backend.services.model_calls import DatabaseModelObserver
+from sales_backend.services.model_calls import CallQuotaExceeded, DatabaseModelObserver
 
 logger = logging.getLogger(__name__)
 FACT_MODES = {
@@ -34,6 +36,9 @@ FACT_MODES = {
     "opportunity_advice": {"opportunity_advice"},
     "visit_advice": {"visit_advice"},
     "competency_review": {"competency_review"},
+    "task_import": {"task_import"},
+    "work_report": {"work_report"},
+    "finance_assistant": {"finance_assistant"},
 }
 
 
@@ -55,7 +60,15 @@ def filtered_facts_runtime(database, settings, *, block_requests=False, capabili
         agent_id, api_key = settings.agent_fde_today_tasks_id, settings.agent_fde_today_tasks_api_key
     elif capability == "operating_report":
         agent_id, api_key = settings.agent_fde_operating_report_id, settings.agent_fde_operating_report_api_key
-    elif capability in {"customer_advice", "opportunity_advice", "visit_advice", "competency_review"}:
+    elif capability == "work_report":
+        # Backend owns the settings/worker integration. Older settings without
+        # this new capability must leave its platform transport unavailable.
+        agent_id = getattr(settings, "agent_fde_work_report_id", None)
+        api_key = getattr(settings, "agent_fde_work_report_api_key", None)
+    elif capability == "finance_assistant":
+        agent_id = getattr(settings, "agent_fde_finance_assistant_id", None)
+        api_key = getattr(settings, "agent_fde_finance_assistant_api_key", None)
+    elif capability in {"customer_advice", "opportunity_advice", "visit_advice", "competency_review", "task_import"}:
         agent_id = getattr(settings, "agent_fde_" + capability + "_id")
         api_key = getattr(settings, "agent_fde_" + capability + "_api_key")
     else:
@@ -68,7 +81,7 @@ def filtered_facts_runtime(database, settings, *, block_requests=False, capabili
             api_key,
             "agent_final",
             timeout_seconds=settings.agent_inference_platform_seconds,
-            ca_bundle_path=getattr(settings, "agent_fde_ca_bundle", ""),
+            ca_bundle_path=settings.agent_fde_ca_bundle,
         )
     except (TypeError, ValueError):
         logger.warning("FDE filtered-facts configuration is invalid; keeping direct AI")
@@ -133,7 +146,7 @@ class _FactsOperation:
         observer = self.runtime.observer_factory(
             self.runtime.database,
             request.actor,
-            request.capability,
+            request.input['mode'],
             operation_id=request.operation_id,
             run_id=request.run_id,
             provider="agent_platform",
@@ -156,14 +169,19 @@ class _FactsOperation:
                 },
                 1,
             )
+        except (CallQuotaExceeded, JobLeaseLost):
+            raise
         except Exception:
             raise ProviderUnavailable("FDE attempt accounting unavailable") from None
         error = None
+        network_sent = False
         try:
             if self.sealed:
                 raise ProviderUnavailable("FDE operation closed before dispatch")
             if self.runtime.block_requests:
                 raise ControlledPlatformBlock("operator-scoped request block before network dispatch")
+            await prepare_observed(observer, invocation_id)
+            network_sent = True
             result = await self.invocation()
             if self.sealed:
                 raise ProviderUnavailable("FDE operation closed before result acceptance")
@@ -192,10 +210,12 @@ class _FactsOperation:
             )
             try:
                 async with asyncio.timeout(1):
-                    await observer.finish(
+                    await finish_observed(
+                        observer,
                         invocation_id,
                         response,
                         error,
+                        network_sent=network_sent,
                         response_metadata={"transport": asdict(self.invocation.transport)},
                     )
             except (Exception, asyncio.CancelledError):

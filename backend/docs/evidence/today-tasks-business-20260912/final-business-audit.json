@@ -1,0 +1,26 @@
+{
+  "database_version": "V054",
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "authorized_tasks": [
+    "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd",
+    "a8b3eeb4-6b1b-4ee8-b908-1550c4bfb81d",
+    "155ea69d-80f4-474e-9129-5945031d3c2b",
+    "f5318956-e5a9-4606-87a4-3d74dd243a27"
+  ],
+  "authorized_task_count": 4,
+  "original_tasks_crm_visits_unchanged": true,
+  "existing_notifications_unchanged": true,
+  "new_own_monitor_reminders": [
+    {
+      "id": "b2f3ea95-9883-4792-b153-a272574c5bb9",
+      "task_id": "d3e9f0ba-54b6-463f-967d-15e0ecd7cafd",
+      "channel": "in_app",
+      "template": "priority_task_due",
+      "recipient_user_id": "02000000-0000-0000-0000-000000000004",
+      "created_at": "2026-09-12T06:34:10.936288+00:00"
+    }
+  ],
+  "external_delivery_attempts": 0,
+  "checked_at": "2026-09-12T06:59:16.314907+00:00"
+}

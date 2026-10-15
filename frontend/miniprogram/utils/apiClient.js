@@ -10,14 +10,18 @@ const BASE_URL_STORAGE_KEY = "salesApiBaseUrl";
 const { API_BASE_URL } = require("../config");
 const DEFAULT_BASE_URL = API_BASE_URL;
 const requestIdentity = require('./requestIdentity');
+const visitUploadIntent = require('./visitUploadIntent');
+const access = require('./access');
 const { notificationDisplayResponse, timelineDisplayResponse } = require('./demoDisplay');
 const mutationsInFlight = new Map();
+const opportunityRetryPayloads = new Map(); // Memory only; never persist draft fields.
 const readsInFlight = new Map();
 let readGeneration = 0;
 let authGeneration = 0;
 let refreshing = null;
 let optionsFlight = null;
 const businessOptions = require('./businessOptions');
+const encryptedCredentials = require('./encryptedCredentials');
 
 // BACKEND-CONTRACT：本地 salesApiBaseUrl 可覆盖配置地址；发布/解压联调需核对实际地址。
 function getBaseUrl() {
@@ -39,6 +43,7 @@ function invalidateReads() {
 }
 
 function invalidateSession() {
+  encryptedCredentials.invalidate();
   authGeneration += 1;
   optionsFlight=null;businessOptions.clear();
   invalidateReads();
@@ -67,8 +72,18 @@ function assertCurrentSession(session) {
 }
 
 // BACKEND-CONTRACT：JSON 请求 15 秒超时，Bearer 鉴权；2xx 直接返回响应本体。
-// 非 2xx 只保留 HTTP 状态及 message/detail 文案（目前不透传业务错误 code/details）。
+// 422 字段校验仅保留安全的 loc/type，不将输入值、ctx 或原始校验消息带入页面。
 // 这里不暴露 RequestTask.abort；页面忽略迟到结果不等于取消后台事务。
+function validationLocations(detail) {
+  if (!Array.isArray(detail)) return [];
+  return detail.slice(0, 50).filter(item => item && Array.isArray(item.loc) &&
+    item.loc.length > 0 && item.loc.length <= 8 && item.loc.every(part =>
+      (typeof part === 'string' && /^[A-Za-z_][A-Za-z0-9_]{0,99}$/.test(part)) ||
+      (Number.isSafeInteger(part) && part >= 0)) &&
+    typeof item.type === 'string' && /^[a-z][a-z0-9_]{0,79}$/.test(item.type))
+    .map(item => ({loc:item.loc.slice(), type:item.type}));
+}
+
 function requestRaw({ path, method = "GET", data, token, idempotencyKey, baseUrl = getBaseUrl() }) {
   if (!baseUrl) return Promise.reject(Object.assign(new Error("API 尚未配置"), { code: "API_DISABLED" }));
   return new Promise((resolve, reject) => {
@@ -85,8 +100,13 @@ function requestRaw({ path, method = "GET", data, token, idempotencyKey, baseUrl
           return;
         }
         const detail = response.data && (response.data.message || response.data.detail);
-        const message = Array.isArray(detail) ? detail.map(item=>String(item.msg || "字段格式不正确").replace(/^Value error, /, "")).join("；") : detail;
-        reject(Object.assign(new Error(message || `API 请求失败（${response.statusCode}）`), { code: `HTTP_${response.statusCode}`, statusCode: response.statusCode }));
+        const validation = response.statusCode === 422 && Array.isArray(response.data && response.data.detail);
+        const message = validation ? '请求字段不符合要求，请检查填写内容'
+          : Array.isArray(detail) ? detail.map(item=>String(item.msg || "字段格式不正确").replace(/^Value error, /, "")).join("；") : detail;
+        const serverCode=response.data&&response.data.code;
+        reject(Object.assign(new Error(message || `API 请求失败（${response.statusCode}）`), { code: `HTTP_${response.statusCode}`, statusCode: response.statusCode,
+          ...(validation ? {validationErrors:validationLocations(response.data.detail)} : {}),
+          serverCode:typeof serverCode==='string'&&/^[A-Z][A-Z0-9_]{0,99}$/.test(serverCode)?serverCode:'' }));
       },
       fail: (error) => reject(Object.assign(new Error(error.errMsg || "网络连接失败"), { code: "NETWORK_ERROR" })),
     });
@@ -132,14 +152,16 @@ function requestAttempt(options, session) {
     baseUrl: session.baseUrl }), session);
 }
 
-// BACKEND-CONTRACT：仅 requestIdentity.supports 命中的 POST/PATCH 自动加 Idempotency-Key。
+// BACKEND-CONTRACT：仅 requestIdentity.supports 明确命中的写方法自动加 Idempotency-Key。
 // 同一登录会话内，同租户/用户/地址 + 同 method/path/body 共用进行中 Promise。
 // 超时/5xx 或切换账号后的迟到响应保留 key；同账号重新登录可安全重试未确定的提交。
 // 这不是全局写接口幂等；Agent、导入重试、风险解除等未在白名单，详见契约清单。
 function request(options) {
   const session = currentSession();
   const auth = getAuth();
+  const opportunitySave = options.method === 'POST' && /^\/customers\/([^/?]+)\/opportunities$/.exec(options.path);
   if ((options.method || 'GET').toUpperCase() === 'GET') {
+    if (options.fresh === true) return requestAttempt(options, session);
     const key = JSON.stringify([session.generation, session.baseUrl, readGeneration, options.path, options.data]);
     let shared = readsInFlight.get(key);
     if (!shared) {
@@ -152,21 +174,53 @@ function request(options) {
     return shared.then(value => value === undefined ? value : JSON.parse(JSON.stringify(value)));
   }
   invalidateReads();
+  if (opportunitySave && (!auth || !auth.actor)) return Promise.reject(Object.assign(new Error('登录已失效'), {code:'AUTH_REQUIRED',opportunitySaveUnknown:false}));
   if (!requestIdentity.supports(options) || !auth || !auth.actor) {
     return requestAttempt(options, session).finally(invalidateReads);
   }
-  let identity;
+  let identity, flightKey, opportunityIntent, recovering = false;
   try {
-    identity = requestIdentity.begin([getBaseUrl(),auth.actor.workspace_id,auth.actor.user_id],options);
-  } catch (error) { return Promise.reject(new Error('暂时无法保存提交标识，请稍后重试')); }
-  const flightKey = `${session.generation}:${identity.fingerprint}`;
-  if (mutationsInFlight.has(flightKey)) return mutationsInFlight.get(flightKey);
-  const promise = requestAttempt({...options,idempotencyKey:identity.key}, session)
-    .then(result => { requestIdentity.finish(identity);return result; })
+    const scope = [getBaseUrl(),auth.actor.workspace_id,auth.actor.user_id];
+    flightKey = `${session.generation}:${requestIdentity.fingerprint(scope,options)}`;
+    // Check before persisting a fresh intent, so double clicks cannot replace an in-flight receipt.
+    if (mutationsInFlight.has(flightKey)) return mutationsInFlight.get(flightKey);
+    if (opportunitySave) {
+      const previous = requestIdentity.pendingOpportunity(scope, options.data.action === 'update' ? options.data.opportunity_id : '');
+      if (previous) {
+        recovering = options.opportunityRetryKey === previous.key && requestIdentity.fingerprint(scope, options) === previous.fingerprint;
+        if (!recovering) throw Object.assign(new Error('原保存结果待确认，请先查询保存结果，勿重复创建'), {code:'OPPORTUNITY_SAVE_UNRESOLVED',opportunitySaveUnknown:true});
+      }
+    }
+    identity = requestIdentity.begin(scope,options);
+    if (opportunitySave) {
+      opportunityIntent = requestIdentity.rememberOpportunity(scope, decodeURIComponent(opportunitySave[1]), options.data, identity);
+      opportunityRetryPayloads.set(identity.key, {path:options.path, method:options.method, data:JSON.parse(JSON.stringify(options.data))});
+    }
+  } catch (error) {
+    if (error.code) return Promise.reject(error);
+    return Promise.reject(Object.assign(new Error('暂时无法保存提交标识，请稍后重试'), {opportunitySaveUnknown:false}));
+  }
+  const payload = options.method === 'POST' && /^\/risks\/[^/?]+\/decision$/.test(options.path)
+    ? {...options.data, request_id:identity.key} : options.data;
+  const promise = requestAttempt({...options,data:payload,idempotencyKey:identity.key}, session)
+    .then(result => {
+      if (opportunityIntent) {
+        assertCurrentSession(session);
+        if (!requestIdentity.validOpportunityReceipt(result, opportunityIntent)) throw Object.assign(new Error('未收到完整保存回执，请查询原保存结果，勿重复创建'), {code:'OPPORTUNITY_RECEIPT_INVALID'});
+        requestIdentity.finishOpportunity(opportunityIntent);
+        opportunityRetryPayloads.delete(identity.key);
+      } else requestIdentity.finish(identity);
+      return result;
+    })
     .catch(error => {
       // A timeout, 5xx or auth refresh failure may follow a committed request.
       // Keep its key across pages and app restarts; deterministic rejections can be corrected.
-      if ([400,403,404,409,422].includes(error.statusCode)) requestIdentity.finish(identity);
+      const rejected = !recovering && [400,403,404,409,422].includes(error.statusCode) &&
+        !(opportunityIntent && ['IDEMPOTENCY_CONFLICT','IDEMPOTENCY_IN_PROGRESS','IDEMPOTENCY_UNRESOLVED'].includes(error.serverCode));
+      if (opportunityIntent) {
+        error.opportunitySaveUnknown = !rejected;
+        if (rejected) { requestIdentity.finishOpportunity(opportunityIntent); opportunityRetryPayloads.delete(identity.key); }
+      } else if (rejected) requestIdentity.finish(identity);
       throw error;
     }).finally(() => { mutationsInFlight.delete(flightKey); invalidateReads(); });
   mutationsInFlight.set(flightKey,promise);
@@ -174,18 +228,27 @@ function request(options) {
 }
 
 // Native login verifies the password on the server and returns a real bearer session.
-function loginWithAccount(accountCode, password, role) {
+function loginWithAccount(accountCode, password, role, workspace, loginType='auto') {
   invalidateSession();
   const session = currentSession();
   return requestRaw({path: "/auth/password/login", method: "POST",
-    data: {account_code: accountCode, password, role}, baseUrl: session.baseUrl,
+    data: {account_code: accountCode, password, role, login_type:loginType, ...(workspace ? {workspace} : {})}, baseUrl: session.baseUrl,
   }).then((auth) => { assertCurrentSession(session); saveAuth(auth); return auth; });
 }
 function changePassword(oldPassword, newPassword) {
   const session = currentSession();
-  return request({path: "/auth/password", method: "POST", data: {old_password:oldPassword,new_password:newPassword}})
+  const actor=getAuth()?.actor;
+  return encryptedCredentials.clear({baseUrl:session.baseUrl,workspace:actor?.company_code,account:actor?.account_code})
+    .then(()=>{assertCurrentSession(session);return request({path: "/auth/password", method: "POST", data: {old_password:oldPassword,new_password:newPassword}});})
     .then(result => { assertCurrentSession(session); const auth=getAuth();
       if(auth)writeAuth({...auth,must_change_password:false});return result; });
+}
+function getCompanyEntry(companyCode) {
+  const session = currentSession();
+  // Public exact lookup, never a company directory or authenticated request.
+  return requestRaw({path:'/auth/company-entry?company_code='+encodeURIComponent(companyCode),baseUrl:session.baseUrl})
+    .then(result => { assertCurrentSession(session); return result; })
+    .catch(error => { assertCurrentSession(session); throw error; });
 }
 
 // BACKEND-CONTRACT：先清本地 auth，再异步 POST /auth/logout 撤销服务端会话；失败被吞掉。
@@ -227,7 +290,7 @@ function waitForRun(runId, options = {}) {
     const poll = () => {
       getRun(runId).then((run) => {
         if (["succeeded", "waiting_human"].includes(run.status)) { resolve(run); return; }
-        if (["failed", "cancelled"].includes(run.status)) { reject(Object.assign(new Error(run.error_detail || "Agent 处理失败"), { code: run.error_code || "RUN_FAILED" })); return; }
+        if (["failed", "cancelled"].includes(run.status)) { reject(Object.assign(new Error(run.error_detail || "Agent 处理失败"), { code: run.error_code || "RUN_FAILED", runStatus: run.status })); return; }
         if (Date.now() - startedAt >= timeout) { reject(Object.assign(new Error("Agent 处理超时，请稍后查看"), { code: "RUN_TIMEOUT" })); return; }
         setTimeout(poll, interval);
       }).catch(reject);
@@ -273,7 +336,8 @@ function getAssistantHome() {
 }
 
 function ensureSalesGrowthReview() {
-  return request({ path: "/profile/sales-growth/review", method: "POST" });
+  // Explicit user action only. requestIdentity persists one key for uncertain retries.
+  return request({ path: "/profile/sales-growth/review", method: "POST", data:{} });
 }
 
 function getSalesGrowth(days = 30) {
@@ -300,6 +364,7 @@ function getMemberSalesGrowth(accountCode, days = 30) {
 function listCustomers(options = {}) {
   const params = [];
   if (options.q) params.push(`q=${encodeURIComponent(options.q)}`);
+  if (options.businessIdentity) params.push(`business_identity=${encodeURIComponent(options.businessIdentity)}`);
   if (options.level) params.push(`level=${encodeURIComponent(options.level)}`);
   if (options.scope) params.push(`scope=${encodeURIComponent(options.scope)}`);
   if (typeof options.unassigned === "boolean") params.push(`unassigned=${options.unassigned ? "true" : "false"}`);
@@ -309,10 +374,17 @@ function listCustomers(options = {}) {
 
 // Company reference directory only; total includes every matching claim state.
 // Legacy listCustomers callers keep their first-page contract and scope rules.
-function listCustomerClaimPool({ q = '', pageSize = 50, offset = 0, industry = '', claimStatus = '' } = {}) {
+function listCustomerClaimPool({ q = '', pageSize = 50, offset = 0, industry = '', claimStatus = '', businessIdentity = '' } = {}) {
   const filters = (industry ? `&industry=${encodeURIComponent(industry)}` : '')
-    + (claimStatus ? `&claim_status=${encodeURIComponent(claimStatus)}` : '');
+    + (claimStatus ? `&claim_status=${encodeURIComponent(claimStatus)}` : '')
+    + (businessIdentity ? `&business_identity=${encodeURIComponent(businessIdentity)}` : '');
   return request({ path: `/customers/claim-pool?q=${encodeURIComponent(q)}&page_size=${Number(pageSize)}&offset=${Number(offset)}${filters}` });
+}
+
+// Opportunity selection uses the authorized company directory, not customer.read.
+// Directory denial stays explicit; selecting a row still requires customer.reference.
+function listOpportunityCustomerReferences({ q = '', pageSize = 20 } = {}) {
+  return listCustomerClaimPool({ q, pageSize, offset: 0, businessIdentity: 'customer' });
 }
 
 function listCustomerClaimOptions() {
@@ -325,8 +397,9 @@ function getCustomer(customerId) {
   return request({ path: `/customers/${encodeURIComponent(customerId)}` });
 }
 
-function getDirectoryMembers() {
-  return request({ path: "/directory/members" });
+function getDirectoryMembers(options = {}) {
+  const params=assetQuery({permission:options.permission,include_stats:options.include_stats});
+  return request({ path: "/directory/members"+(params?'?'+params:'') });
 }
 
 function getTaskAssignees(options = {}) {
@@ -344,16 +417,17 @@ function createCustomer(data) {
   return request({ path: "/customers", method: "POST", data });
 }
 
-function submitCustomerCreationRequest(data) {
+function createCustomerCreationRequest(data) {
   return request({ path: "/customers/creation-requests", method: "POST", data });
 }
 
-function listCustomerCreationRequests({offset = 0, limit = 20} = {}) {
-  return request({ path: `/customers/creation-requests?offset=${offset}&limit=${limit}` });
-}
-
-function withdrawCustomerCreationRequest(id) {
-  return request({ path: `/customers/creation-requests/${encodeURIComponent(id)}/withdraw`, method: "POST", data: {} });
+// 客户新建申请只读列表；服务端按当前登录人和工作空间隔离结果。
+function listCustomerCreationRequests({ status = '', limit = 20, offset = 0 } = {}) {
+  const params = [];
+  if (status) params.push(`status=${encodeURIComponent(status)}`);
+  params.push(`limit=${Math.min(100, Math.max(1, Number(limit || 20)))}`);
+  params.push(`offset=${Math.max(0, Number(offset || 0))}`);
+  return request({ path: `/customers/creation-requests/mine?${params.join('&')}` });
 }
 
 function updateCustomer(customerId, data) {
@@ -377,7 +451,7 @@ function claimCustomer(customerId) {
 }
 
 // BACKEND-CONTRACT：新建商机金额为元；季度输入持久化为 quarterly_forecasts 原始计划额。
-// 直销当前以 partner_name="直销" 表达，partner_mode 仅本地状态，专用渠道/伙伴 ID 合同待确认。
+// 销售渠道使用 sales_channel/partner_id；交易关系与物料行独立保存，均沿用商机版本和幂等写入。
 // 新增/编辑均可经本 POST 的 action/create/update 与 opportunity_id/version_no；另有拜访内嵌变更入口。
 // 保存页要求 changed:boolean、version_no；changed=true 还需 event_id，缺少回执应先读回核对。
 function createOpportunity(customerId, data) {
@@ -386,6 +460,51 @@ function createOpportunity(customerId, data) {
     method: "POST",
     data,
   });
+}
+
+function getPendingOpportunitySave(customerId, opportunityId = '') {
+  const auth = getAuth();
+  if (!auth || !auth.actor) return null;
+  return requestIdentity.pendingOpportunity([getBaseUrl(),auth.actor.workspace_id,auth.actor.user_id], opportunityId);
+}
+function canRetryOpportunitySave(customerId, opportunityId = '') {
+  try {
+    const intent = getPendingOpportunitySave(customerId, opportunityId);
+    return !!intent && opportunityRetryPayloads.has(intent.key);
+  } catch (_) { return false; }
+}
+function retryOpportunitySave(customerId, opportunityId = '') {
+  const intent = getPendingOpportunitySave(customerId, opportunityId), original = intent && opportunityRetryPayloads.get(intent.key);
+  if (!original) return Promise.reject(Object.assign(new Error('原提交内容已不在本机内存中，请继续查询结果或联系管理员核对'), {code:'OPPORTUNITY_RETRY_UNAVAILABLE',opportunitySaveUnknown:true}));
+  return request({...original, data:JSON.parse(JSON.stringify(original.data)), idempotencyKey:intent.key, opportunityRetryKey:intent.key});
+}
+async function checkOpportunitySaveResult(customerId, opportunityId = '') {
+  const session = currentSession();
+  const intent = getPendingOpportunitySave(customerId, opportunityId);
+  if (!intent) throw new Error('未找到原保存标识，请联系管理员核对，勿重复创建');
+  const response = await request({path:`/customers/${encodeURIComponent(intent.customerId)}/opportunities/save-requests/${encodeURIComponent(intent.key)}`,fresh:true});
+  assertCurrentSession(session);
+  return resolveOpportunitySaveResult(intent,response);
+}
+async function cancelOpportunitySave(customerId, opportunityId = '') {
+  const session = currentSession();
+  const intent = getPendingOpportunitySave(customerId, opportunityId);
+  if (!intent) throw new Error('未找到原保存标识，请联系管理员核对，勿重复创建');
+  const response = await request({path:`/customers/${encodeURIComponent(intent.customerId)}/opportunities/save-requests/${encodeURIComponent(intent.key)}/cancel`,method:'POST'});
+  assertCurrentSession(session);
+  return resolveOpportunitySaveResult(intent,response);
+}
+function resolveOpportunitySaveResult(intent, response) {
+  if (!response || response.request_key !== intent.key || !['committed','unresolved','cancelled'].includes(response.status)) throw new Error('保存结果查询回执不完整，请稍后再查');
+  if (response.status === 'committed') {
+    if (!requestIdentity.validOpportunityReceipt(response.result, {...intent,recovered:true})) throw new Error('保存结果查询回执不完整，请稍后再查');
+    requestIdentity.finishOpportunity(intent);
+    opportunityRetryPayloads.delete(intent.key);
+  } else {
+    if (response.result !== null) throw new Error('保存结果查询回执不完整，请稍后再查');
+    if (response.status === 'cancelled') { requestIdentity.finishOpportunity(intent); opportunityRetryPayloads.delete(intent.key); }
+  }
+  return response;
 }
 
 function checkOpportunityName(customerId, name, excludeId) {
@@ -409,9 +528,18 @@ function listOpportunities(options = {}) {
   if (options.memberId) params.push(`member_id=${encodeURIComponent(options.memberId)}`);
   if (options.includeClosed) params.push("include_closed=true");
   if (options.customerId) params.push(`customer_id=${encodeURIComponent(options.customerId)}`);
+  if (options.ownerId) params.push(`owner_id=${encodeURIComponent(options.ownerId)}`);
   if (options.owner && options.owner !== 'all') params.push(`owner=${encodeURIComponent(options.owner)}`);
   if (options.probability) params.push(`probability=${Number(options.probability)}`);
   if (options.stage) params.push(`stage=${encodeURIComponent(options.stage)}`);
+  // Activity is a server-side read filter.  Accept the camelCase spelling used
+  // by pages as well as the wire spelling so callers cannot accidentally show
+  // an unfiltered list while only updating their local picker.
+  const activityWindow = options.activityWindow || options.activity_window;
+  if (activityWindow && activityWindow !== 'all') params.push(`activity_window=${encodeURIComponent(activityWindow)}`);
+  if (options.includeOverview) params.push('include_overview=true');
+  if (options.overviewYear) params.push(`overview_year=${Number(options.overviewYear)}`);
+  (options.overviewQuarters || []).forEach(quarter => params.push(`overview_quarters=${Number(quarter)}`));
   if (options.closeFrom) params.push(`close_from=${encodeURIComponent(options.closeFrom)}`);
   if (options.closeTo) params.push(`close_to=${encodeURIComponent(options.closeTo)}`);
   params.push(`page_size=${Number(options.pageSize || 100)}`);
@@ -424,10 +552,19 @@ function listAllOpportunities(options = {}, cancelled) {
 }
 
 function getOpportunityOverview(selection) {
-  const params = [`year=${Number(selection.year)}`, ...selection.quarters.map(q => `quarters=${Number(q)}`)];
+  // The existing API requires a numeric year, but ignores it for an empty quarter list.
+  const allYears = selection.isAllYears || selection.year === 'all';
+  const year = allYears ? require('./opportunityQuarter').beijingDateParts(new Date()).year : Number(selection.year);
+  const quarters = allYears ? [] : selection.quarters;
+  const params = [`year=${year}`, ...quarters.map(q => `quarters=${Number(q)}`)];
   if(selection.scope) params.push(`scope=${encodeURIComponent(selection.scope)}`);
   (selection.memberIds || []).forEach(id=>params.push(`member_ids=${encodeURIComponent(id)}`));
   if(selection.memberId) params.push(`member_id=${encodeURIComponent(selection.memberId)}`);
+  const activityWindow = selection.activityWindow || selection.activity_window;
+  if (activityWindow && activityWindow !== 'all') params.push(`activity_window=${encodeURIComponent(activityWindow)}`);
+  if (selection.teamId && selection.teamId !== 'all') params.push(`team_id=${encodeURIComponent(selection.teamId)}`);
+  if (selection.ownerId) params.push(`owner_id=${encodeURIComponent(selection.ownerId)}`);
+  if (selection.owner && selection.owner !== 'all') params.push(`owner=${encodeURIComponent(selection.owner)}`);
   return request({ path: `/opportunities/overview?${params.join('&')}` });
 }
 
@@ -542,37 +679,62 @@ function markNotificationRead(notificationId) {
   return request({ path: `/notifications/${encodeURIComponent(notificationId)}/read`, method: "POST" });
 }
 
-// BACKEND-CONTRACT：风险解除 POST 输入 resolution_note，返回更新对象；当前未接入幂等白名单。
-function listRisks(status) {
-  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+// RISK001: server UUID scope, full summary and pagination; decision and closure are separate writes.
+function listRisks(options = {}) {
+  const params = typeof options === 'string' ? {status:options} : options;
+  const encoded = assetQuery(params), query = encoded ? `?${encoded}` : '';
   return request({ path: `/risks${query}` });
 }
 
-function getRisk(riskId) {
-  return request({ path: `/risks/${encodeURIComponent(riskId)}` });
+function getRisk(riskId, options = {}) {
+  return request({ path: `/risks/${encodeURIComponent(riskId)}`, fresh:options.fresh === true });
 }
 
-function resolveRisk(riskId, note) {
+function resolveRisk(riskId, note, version) {
+  if (!Number.isInteger(version) || version < 1) return Promise.reject(new Error('风险版本缺失，请刷新后重试'));
   return request({
     path: `/risks/${encodeURIComponent(riskId)}/resolve`,
     method: "POST",
-    data: { resolution_note: String(note || "").trim() },
+    data: { resolution_note: String(note || "").trim(), version_no:version },
   });
+}
+
+function decideRisk(riskId, data, options = {}) {
+  const auth = getAuth();
+  if (!auth || !auth.actor) return Promise.reject(new Error('请重新登录后提交'));
+  const note = String(data.note || '').trim();
+  if (!['adopt','defer'].includes(data.decision) || !note || note.length > 2000 || !Number.isInteger(data.version_no) || data.version_no < 1) {
+    return Promise.reject(new Error('请确认建议选项、说明与风险版本'));
+  }
+  return request({path:`/risks/${encodeURIComponent(riskId)}/decision`, method:'POST', freshIntent:options.freshIntent === true,
+    data:{decision:data.decision,note,version_no:data.version_no}});
 }
 
 // BACKEND-CONTRACT：multipart POST /visit-imports，file + original_filename；120秒上传超时。
 // 返回 id/status 后页面用 GET /visit-imports/{id} 每2秒查询；retry 为另一个 POST。
 // 离页停止页面轮询，不取消服务端队列；removeFile 仅移除本地引用，没有删除导入接口。
-function uploadVisitFile(filePath, filename, onProgress) {
+function uploadVisitFile(filePath, filename, onProgress, intentKey) {
+  if(intentKey&&!visitUploadIntent.UUID.test(intentKey))return Promise.reject(Error('上传标识无效，请保留文件并重新打开草稿'));
   const session = currentSession();
   const send = (auth) => new Promise((resolve,reject) => {
     const task=wx.uploadFile({url: `${session.baseUrl}/visit-imports`,filePath,name:'file',
       formData:{original_filename:filename},timeout:120000,
-      header:{Authorization:`Bearer ${auth.access_token}`},
+      header:{Authorization:`Bearer ${auth.access_token}`,...(intentKey?{'Idempotency-Key':intentKey}:{})},
       success(response) {
-        let data;try {data=JSON.parse(response.data);} catch(e) {reject(new Error('文件上传响应异常'));return;}
-        if(response.statusCode>=200&&response.statusCode<300) resolve(data);
-        else reject(Object.assign(new Error(data.detail||'文件上传失败'),{statusCode:response.statusCode}));
+        let data;try {data=JSON.parse(response.data);} catch(e) {data=null;}
+        if(response.statusCode>=200&&response.statusCode<300) {
+          if(intentKey){try{resolve(visitUploadIntent.validate(data,intentKey));}catch(error){reject(error);}return;}
+          if(!data || typeof data.id!=='string' || !data.id.trim() || !['queued','processing','succeeded','failed'].includes(data.status)) {
+            reject(Object.assign(new Error('未收到完整上传回执，本地文件已保留，请稍后重试'),{code:'UPLOAD_RECEIPT_INVALID',statusCode:response.statusCode}));return;
+          }
+          resolve(data);return;
+        }
+        const detail=data&&(data.message||(typeof data.detail==='string'?data.detail:data.detail&&data.detail.message));
+        const requestId=data&&typeof data.request_id==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(data.request_id)?data.request_id:'';
+        const suppliedCode=data&&(data.code||data.detail);
+        const code=typeof suppliedCode==='string'&&/^[A-Z][A-Z0-9_]{0,99}$/.test(suppliedCode)?suppliedCode:`HTTP_${response.statusCode}`;
+        const message=detail==='INTERNAL_ERROR'?'文件上传暂时失败，本地文件已保留':typeof detail==='string'?detail:`文件上传失败（${response.statusCode}），本地文件已保留`;
+        reject(Object.assign(new Error(message+(requestId?`（错误编号：${requestId}）`:'')),{statusCode:response.statusCode,code,requestId}));
       },fail:e=>reject(new Error(e.errMsg||'上传失败'))});
     if(onProgress&&task.onProgressUpdate) task.onProgressUpdate(progress => {
       if (isCurrentSession(session)) onProgress(progress);
@@ -584,6 +746,8 @@ function uploadVisitFile(filePath, filename, onProgress) {
 
 module.exports = {
   uploadVisitFile,
+  getVisitUploadIntent:key=>request({path:`/visit-imports/requests/${encodeURIComponent(key)}`,fresh:true}).then(receipt=>visitUploadIntent.validate(receipt,key)),
+  retryVisitImport:(id,key)=>request({path:`/visit-imports/${encodeURIComponent(id)}/retry`,method:'POST',idempotencyKey:key}),
   BASE_URL_STORAGE_KEY,
   DEFAULT_BASE_URL,
   isEnabled: () => Boolean(getBaseUrl()),
@@ -592,6 +756,8 @@ module.exports = {
   saveAuth,
   request,
   loginWithAccount,
+  cancelPendingLogin: invalidateSession,
+  getCompanyEntry,
   logout,
   queryChatBI,
   queryTodayTasks,
@@ -607,6 +773,7 @@ module.exports = {
   getMemberSalesGrowth,
   listCustomers,
   listCustomerClaimPool,
+  listOpportunityCustomerReferences,
   listCustomerClaimOptions,
   getCustomer,
   getDirectoryMembers,
@@ -614,13 +781,17 @@ module.exports = {
   getTaskPositions: (options={}) => request({path:'/directory/task-positions'+(Object.keys(options).length?'?'+assetQuery(options):'')}),
   getWorkbench,
   createCustomer,
-  submitCustomerCreationRequest,
+  createCustomerCreationRequest,
   listCustomerCreationRequests,
-  withdrawCustomerCreationRequest,
   updateCustomer,
   assignCustomer,
   claimCustomer,
   createOpportunity,
+  getPendingOpportunitySave,
+  canRetryOpportunitySave,
+  retryOpportunitySave,
+  checkOpportunitySaveResult,
+  cancelOpportunitySave,
   checkOpportunityName,
   listOpportunities,
   listAllOpportunities,
@@ -641,6 +812,7 @@ module.exports = {
   listRisks,
   getRisk,
   resolveRisk,
+  decideRisk,
 };
 
 // BACKEND-CONTRACT：以下资产/画像查询原样编码非空 options；合法参数白名单由调用方及后端确认。
@@ -649,12 +821,18 @@ module.exports = {
 function assetQuery(options = {}) {
   return Object.keys(options).filter(k=>options[k] !== null && options[k] !== undefined && options[k] !== '').flatMap(k=>(Array.isArray(options[k])?options[k]:[options[k]]).map(value=>`${encodeURIComponent(k)}=${encodeURIComponent(value)}`)).join('&');
 }
+// 作战地图 scope 仅支持 self/person/team；department 是画像/目标语义，后端地图授权不接受。
 module.exports.getCustomerMap = (options={}) => request({path:'/customer-assets/map'+(Object.keys(options).length?'?'+assetQuery(options):'')});
-module.exports.getCustomerAssets = options => request({path:`/customer-assets?${assetQuery(options)}`});
-// BACKEND-CONTRACT：实绩登记 amount 为元字符串，带 request_id、source_ref、confirmed=true；作废保留原记录。
-// 实绩 request_id 是业务提交标识；并行存在自动传输 Idempotency-Key，二者不可混同。
-module.exports.createCustomerActual = data => request({path:'/customer-assets',method:'POST',data});
-module.exports.voidCustomerActual = (id,reason) => request({path:`/customer-assets/${encodeURIComponent(id)}/void`,method:'POST',data:{reason,confirmed:true}});
+module.exports.refreshCustomerMap = (options={}) => request({path:'/customer-assets/map/refresh'+(Object.keys(options).length?'?'+assetQuery(options):''),method:'POST'});
+module.exports.getCustomerAssets = options => request({path:`/customer-assets?${assetQuery({...options,basis:'effective'})}`});
+// FINANCE001: sales clients only read the adopted actual projection. Operations writes live in console.
+module.exports.getOpportunityFinancialOverview = (id,options={}) => request({path:`/opportunities/${encodeURIComponent(id)}/financial-overview${Object.keys(options).length?'?'+assetQuery(options):''}`});
+module.exports.getOpportunityMaterials = id => request({path:`/opportunities/${encodeURIComponent(id)}/materials`});
+module.exports.listMaterials = (options={}) => request({path:'/materials?'+assetQuery(options)});
+module.exports.getMaterialProductLines = () => request({path:'/material-product-lines'});
+module.exports.previewOpportunityMaterials = (id,data) => request({path:`/opportunities/${encodeURIComponent(id)}/material-forecast-preview`,method:'POST',data});
+module.exports.previewMaterialDraft = data => request({path:'/material-forecast-preview',method:'POST',data});
+module.exports.listUpstreamOpportunities = (options={}) => request({path:'/opportunities?'+assetQuery({purpose:'upstream',q:options.q,trade_relation:'distributor',include_closed:true,page_size:options.limit||30,offset:options.offset||0,exclude_customer_id:options.customer_id,exclude_opportunity_id:options.opportunity_id})}).then(result=>({...result,total:result.summary&&result.summary.total}));
 
 // BACKEND-CONTRACT：personal=true 要求 scope=self；false 由角色决定可见部门/团队。
 // 响应必须含 data_source=database、opportunities、quarter_forecasts、quarter_actuals；排名还需 recent_visits。
@@ -682,8 +860,28 @@ module.exports.getCustomerReference = id => request({path:`/customers/${encodeUR
 
 module.exports.getDashboardRankings = ({year,quarters,personal,member_id='',team_groups=[]}) => request({path:`/dashboard/rankings?year=${encodeURIComponent(year)}&personal=${!!personal}&${quarters.map(q=>`quarters=${encodeURIComponent(q)}`).join('&')}${member_id?'&member_id='+encodeURIComponent(member_id):''}${team_groups.map(g=>'&team_groups='+encodeURIComponent(g)).join('')}`});
 
-module.exports.getBusinessAdvice = id => request({path:`/advice/${encodeURIComponent(id)}`});
+module.exports.getBusinessAdvice = id => request({path:`/advice/${encodeURIComponent(id)}`,fresh:true});
+module.exports.getLatestBusinessAdvice = async (subjectKind,subjectId,section='overview') => {
+  const result=await request({path:`/advice/latest?${assetQuery({subject_kind:subjectKind,subject_id:subjectId,section})}`,fresh:true});
+  if(result && result.state==='none' && result.analysis===null)return null;
+  const analysis=result && result.analysis;
+  const state=analysis && (analysis.stale || analysis.status==='superseded' ? 'stale' : analysis.status);
+  if(!result || !['queued','running','succeeded','failed','stale'].includes(result.state) || result.state!==state ||
+    !analysis.id || analysis.subject_kind!==subjectKind || String(analysis.subject_id)!==String(subjectId) || analysis.section!==section){
+    throw Object.assign(Error('建议读取响应不完整，请重试'),{code:'ADVICE_CONTEXT_MISMATCH'});
+  }
+  return analysis;
+};
+// Preserve the returned queued/running ID. Reading status never creates a new job.
+module.exports.requestBusinessAdvice = (subjectKind,subjectId,section='overview',retry=false) =>
+  request({path:'/advice',method:'POST',data:{subject_kind:subjectKind,subject_id:subjectId,section,retry}});
 module.exports.getOpportunityDetail = id => request({path:`/opportunities/${encodeURIComponent(id)}/detail`});
+module.exports.getOpportunityViewOptions = () => request({path:'/opportunity-views/options',fresh:true});
+module.exports.listOpportunityViews = (options={}) => request({path:`/opportunity-views?limit=${Number(options.limit)||100}&offset=${Number(options.offset)||0}`,fresh:true});
+module.exports.getOpportunityView = id => request({path:`/opportunity-views/${encodeURIComponent(id)}`,fresh:true});
+module.exports.createOpportunityView = data => request({path:'/opportunity-views',method:'POST',data});
+module.exports.updateOpportunityView = (id,data) => request({path:`/opportunity-views/${encodeURIComponent(id)}`,method:'PUT',data});
+module.exports.deleteOpportunityView = (id,versionNo) => request({path:`/opportunity-views/${encodeURIComponent(id)}`,method:'DELETE',data:{version_no:versionNo}});
 module.exports.getVisit = id => request({path:`/visits/${encodeURIComponent(id)}`});
 module.exports.queryBusinessAdvice = async (subjectKind,subjectId,section='overview',retry=false) => {
   const identity=()=>{const a=getAuth();return a&&a.actor?`${a.actor.workspace_id}:${a.actor.user_id}:${a.actor.role}`:'';};
@@ -703,7 +901,12 @@ module.exports.decideSuggestion = (id,data)=>request({path:`/advice/suggestions/
 module.exports.getAdviceStatistics = ()=>request({path:'/advice/statistics'});
 
 module.exports.getCurrentActor = () => request({path:'/auth/me'});
-module.exports.updateActor = actor => {const auth=getAuth();if(auth){if((auth.actor||{}).permission_version!==actor.permission_version)invalidateSession();writeAuth({...auth,actor});}};
+function actorIdentity(actor={}) {
+  return access.identity({workspaceId:actor.workspace_id,userId:actor.user_id,role:actor.role,
+    permissions:actor.permissions,permissionGrants:actor.permission_grants,permissionVersion:actor.permission_version,
+    capabilities:actor.capabilities,clientExportPermissions:actor.client_export_permissions,teamIds:actor.team_ids});
+}
+module.exports.updateActor = actor => {const auth=getAuth();if(auth){if(actorIdentity(auth.actor)!==actorIdentity(actor))invalidateSession();writeAuth({...auth,actor});}};
 module.exports.listFdeMembers = (options={}) => request({path:`/directory/fde-members?${assetQuery({q:options.q||'',limit:options.limit||50,offset:options.offset||0})}`});
 module.exports.updateFdeMembers = (id,memberIds,versionNo) => request({path:`/opportunities/${encodeURIComponent(id)}/fde-members`,method:'PUT',data:{member_ids:memberIds,version_no:versionNo}});
 module.exports.getFdeDashboard = (options={}) => request({path:`/fde/dashboard?${fdeQuery(options)}`});
@@ -715,6 +918,8 @@ module.exports.coordinateTask=(id,data)=>request({path:`/tasks/${encodeURICompon
 
 module.exports.listFdeVisitOpportunities = (options={}) => request({path:`/fde/visit-opportunities?${assetQuery(options)}`});
 module.exports.getFdeProfile = (options=30) => request({path:`/fde/profile?${assetQuery(typeof options==='number'?{days:options}:options)}`});
+module.exports.getSalesGrowthReview = id => request({path:`/profile/sales-growth/reviews/${encodeURIComponent(id)}`,fresh:true});
+module.exports.getFdeProfileReview = id => request({path:`/fde/profile/reviews/${encodeURIComponent(id)}`,fresh:true});
 module.exports.reviewFdeProfile = (options=30) => request({path:`/fde/profile/review?${assetQuery(typeof options==='number'?{days:options}:options)}`,method:'POST',data:{}});
 
 // PERF-06 detail read models: bounded pages; overview summaries describe all authorized rows.
@@ -732,12 +937,20 @@ module.exports.listVisits = async (options={}) => {
   }
   return result;
 };
+// PC Web 跟进记录范围读取；与逐客户的 GET /visits 并行保留，供新 Web 页面一次读取日期/人员/团队范围。
+module.exports.listVisitRange = (options={}) => request({path:`/visits/range?${assetQuery(options)}`});
 module.exports.listDetailTasks = (options={}) => request({path:`/tasks?${assetQuery(options)}`});
 module.exports.getOpportunityTimeline = (id,options={}) => {
   const workspaceId = ((getAuth() || {}).actor || {}).workspace_id;
   return request({path:`/opportunities/${encodeURIComponent(id)}/timeline?${assetQuery(options)}`})
     .then(response => timelineDisplayResponse(response, workspaceId));
 };
+module.exports.getOpportunityIntentHistory = (id,options={}) => request({
+  path:`/opportunities/${encodeURIComponent(id)}/intent-product-line-history?${assetQuery({limit:options.limit||10,offset:options.offset||0,...(options.expected_history_revision?{expected_history_revision:options.expected_history_revision}:{})})}`,
+}).then(response=>{
+  if(!response||response.schema_version!==1||response.field!=='intent_product_line_ids'||!response.changes)throw Error('历史记录响应不完整，请重试');
+  return {...response.changes,opportunity_id:response.opportunity_id,history_revision:response.history_revision};
+});
 module.exports.getCustomerAssetQuarters = (options={}) => request({path:`/customer-assets/quarters?${assetQuery(options)}`});
 
 module.exports.getCustomerOpportunityOverview = (customerId,opportunityId) => request({path:`/customers/${encodeURIComponent(customerId)}/opportunities/${encodeURIComponent(opportunityId)}/overview`});
@@ -747,6 +960,34 @@ module.exports.listTaskPage = (options={}) => {
   const {completed_quarters=[],...query}=options;
   const params=assetQuery({...query,tab:query.tab||'pending',page_size:Math.min(100,Math.max(1,Number(query.page_size||20)))});
   return request({path:`/tasks?${params}${completed_quarters.map(q=>`&completed_quarters=${encodeURIComponent(q)}`).join('')}`});
+};
+
+// Web 1.2.0 task management read model. Its summary covers the complete
+// filtered scope, including overdue and undated counts; it is kept separate
+// from the legacy task-card endpoint used by the mini-program.
+module.exports.listTaskManagement = (options={}) => {
+  const params = assetQuery({
+    scope: options.scope || 'mine',
+    status: options.status,
+    overdue: options.overdue === true ? true : undefined,
+    member_id: options.member_id,
+    team_id: options.team_id,
+    unassigned: options.unassigned === true ? true : undefined,
+    date_from: options.date_from,
+    date_to: options.date_to,
+    undated: options.undated || 'include',
+    page_size: Math.min(100, Math.max(1, Number(options.page_size || 20))),
+    offset: Number(options.offset || 0),
+  });
+  return request({path:`/tasks/management?${params}`});
+};
+module.exports.listTaskManagementOwners = (options={}) => {
+  const params = assetQuery({
+    scope: options.scope || 'mine', status: options.status, member_id: options.member_id, team_id: options.team_id,
+    date_from: options.date_from, date_to: options.date_to, undated: options.undated || 'include',
+    page_size: Math.min(100, Math.max(1, Number(options.page_size || 100))), offset: Number(options.offset || 0),
+  });
+  return request({path:`/tasks/management/owners?${params}`});
 };
 
 // Authoritative records and effective targets are read from the business API.
@@ -774,16 +1015,16 @@ module.exports.saveTargetBatch=data=>request({path:"/targets/batch",method:"POST
 module.exports.getFdeScopeOptions=()=>request({path:"/fde/scope-options"});
 
 // Organization master data; empty active teams are not inferred from members or business rows.
-module.exports.getTeamDirectory=(purpose="browse")=>request({path:`/directory/teams?purpose=${encodeURIComponent(purpose)}`});
+module.exports.getTeamDirectory=(purpose="browse",options={})=>request({path:`/directory/teams?${assetQuery({purpose,permission:options.permission})}`});
 
 // One metadata flight per authenticated identity and API address. Failures are
 // retryable and never fall back to local business enums or another tenant's data.
-function getBusinessOptions() {
+function getBusinessOptions({fresh=false}={}) {
   const session=currentSession(),key=`${session.generation}:${session.baseUrl}`;
-  if(optionsFlight&&optionsFlight.key===key&&Date.now()-optionsFlight.at<60000)return optionsFlight.promise;
+  if(!fresh&&optionsFlight&&optionsFlight.key===key&&Date.now()-optionsFlight.at<60000)return optionsFlight.promise;
   businessOptions.clear();
   const flight={key,at:Date.now()};
-  flight.promise=request({path:'/metadata/business-options'}).then(value=>{
+  flight.promise=request({path:'/metadata/business-options',fresh}).then(value=>{
     assertCurrentSession(session);if(optionsFlight!==flight)throw Error('业务目录已刷新，请重试');return businessOptions.install(value);
   }).catch(error=>{if(optionsFlight===flight){optionsFlight=null;businessOptions.clear();}throw error;});
   optionsFlight=flight;return flight.promise;
@@ -795,3 +1036,18 @@ const catalogReads=['getWorkbench','getDashboard','listOpportunities','getOpport
 catalogReads.forEach(name=>{const read=module.exports[name];if(read)module.exports[name]=(...args)=>getBusinessOptions().then(()=>read(...args));});
 
 module.exports.getOpportunityCreateOptions=()=>request({path:'/opportunities/create-options'});
+// Saving a new/changed amount must use a fresh policy for the current company.
+module.exports.getCompanyPresentation=()=>request({path:'/company-rules/presentation',fresh:true});
+
+module.exports.getTaskReassignmentOptions=(taskId,options={})=>request({path:`/tasks/${encodeURIComponent(taskId)}/reassignment-options?${assetQuery(options)}`});
+
+// Web history uses a single authorized read model; no client-side per-customer merging.
+module.exports.listCustomerRequestHistory = (options = {}) => request({
+  path: `/customers/requests/history?${assetQuery({
+    scope: options.scope || 'self',
+    team_id: options.scope === 'team' ? options.team_id : undefined,
+    member_id: options.scope === 'team' ? options.member_id : undefined,
+    kind: options.kind || undefined, status: options.status || undefined,
+    q: options.q || undefined, limit: options.limit || 20, offset: options.offset || 0,
+  })}`,
+});

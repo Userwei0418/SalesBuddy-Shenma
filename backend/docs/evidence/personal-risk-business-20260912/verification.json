@@ -1,0 +1,14 @@
+{
+  "base_commit": "086b5aa9e31ac31a86e9bf7fdc43aed11d392db7",
+  "source_files": 335,
+  "mismatches": [],
+  "non_database_tests": 483,
+  "isolated_postgres_tests": 83,
+  "provider_http": "synthetic",
+  "test_fixture_note": "086b5aa runtime; integration fixture now supplies customer_id=None; 83 passed",
+  "temporary_database_count": 0,
+  "temporary_role_count": 0,
+  "openapi_synced": true,
+  "real_business_verified": false,
+  "production_deployed": false
+}

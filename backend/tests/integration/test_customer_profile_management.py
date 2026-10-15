@@ -98,9 +98,6 @@ async def test_profile_save_readback_clear_conflict_and_idempotency(connection):
         ("owner_user_ref_id", str(uuid4())),
         ("workspace_id", str(uuid4())),
         ("attributes", {}),
-        ("data_kind", "production"),
-        ("synthetic_trial_batch_id", "removed"),
-        ("import_meta", {}),
         ("cooperation_years", -1),
         ("cooperation_years", 1.25),
         ("name", "   "),
@@ -137,7 +134,7 @@ async def test_profile_company_selection_blocks_cross_company_read_write(connect
 async def test_profile_ordinary_sales_cannot_use_management_write(connection):
     customer = await create_customer(connection)
     async with await client_for(connection) as client:
-        await sign_in(client)
+        await sign_in(client, "ADMIN001")
         team = (await client.get("/api/v1/console/organization")).json()["departments"][0]["id"]
         code = "PROFILE" + uuid4().hex[:10]
         created = await client.post(

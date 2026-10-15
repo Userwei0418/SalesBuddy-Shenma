@@ -34,7 +34,8 @@ def sha256(content: bytes) -> str:
 
 
 def excluded(path: PurePosixPath) -> bool:
-    return (any(part in EXCLUDED_PARTS for part in path.parts)
+    return (path.parts[:2] == ("frontend", "web")
+            or any(part in EXCLUDED_PARTS for part in path.parts)
             or path.name in EXCLUDED_NAMES or path.name.startswith(".env")
             or path.suffix.lower() in PRIVATE_SUFFIXES)
 
@@ -145,6 +146,10 @@ def build(args: argparse.Namespace) -> dict:
         "source_metadata": source_version,
     }
     files["frontend/VERSION.json"] = json_bytes(version)
+    build_info = json_bytes({"schemaVersion": 1, "environment": "online", "sourceRevision": head})
+    files["frontend/miniprogram/buildInfo.json"] = build_info
+    # WeChat require loads JavaScript modules, not JSON modules.
+    files["frontend/miniprogram/buildInfo.js"] = b"module.exports = " + build_info.rstrip() + b";\n"
     privacy_note = ("\n本包包含经授权提供的演示账号说明，见 [账号登录说明](交付说明/账号登录说明.md)。"
                     "交付包仅发送给指定协作人员，不上传公开仓库或公开 Release。\n"
                     if args.private_accounts_file else "\n本包不含账号密码，登录账号由运营提供。\n")

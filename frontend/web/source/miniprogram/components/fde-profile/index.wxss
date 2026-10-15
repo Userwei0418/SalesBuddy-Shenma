@@ -1,0 +1,153 @@
+/* 与销售「我的」同一套版式（飞书）：白卡放在灰底上不描边，卡内不再套小卡，主色只给操作与选中。只用类选择器。 */
+/* Native buttons keep the card and pill layout while exposing each action to readers. */
+.action-button{margin:0;padding:0;border:0;border-radius:0;background:transparent;color:inherit;font-size:inherit;font-weight:inherit;line-height:inherit;text-align:left;white-space:normal;overflow:visible;box-sizing:border-box}.action-button::after{border:0}.full-button{width:100%}
+.profile-page{padding:32rpx 32rpx 64rpx;color:var(--ui-ink);background:var(--ui-background);min-height:100vh;box-sizing:border-box}
+.embedded-profile{padding:0;min-height:0;background:transparent}
+.surface{border:0;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+
+/* 身份卡与页签（独立使用时） */
+.profile-card{display:flex;align-items:center;gap:24rpx;padding:16px}
+.avatar{width:88rpx;height:88rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:var(--ui-selected);color:var(--ui-primary);font-size:20px;font-weight:600}
+.profile-main{flex:1;min-width:0}
+.name{display:block;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4;word-break:break-all}
+.meta{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5;word-break:break-all}
+.status{display:flex;align-items:center;flex-shrink:0;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.status-dot{display:none}
+.profile-insight-tabs{display:flex;gap:4rpx;margin-top:16px;padding:4px;border:0;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.profile-tab{flex:1;min-width:0;box-sizing:border-box;padding:16rpx 8rpx;border-radius:var(--ui-radius-control);color:var(--ui-secondary);font-size:var(--ui-text-body);text-align:center;white-space:nowrap}
+.profile-tab.active{color:var(--ui-primary);background:var(--ui-surface);font-weight:600;box-shadow:var(--ui-shadow-popup)}
+
+/* 主卡 */
+.capability-card,.records-card,.ai-advice-card{margin-top:16px;padding:16px;background:var(--ui-surface)}
+/* 独立 AI 建议卡（.ai-advice-card.surface，始终带「AI 建议，仅供参考」）顶部 3px 主色条；画像页签里的建议是能力画像卡内一段（.portrait-coaching），不是独立卡片，不加 */
+.ai-advice-card.surface{box-shadow:inset 0 3px 0 var(--ui-primary)}
+.capability-top,.records-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.capability-title{display:block;color:var(--ui-ink);font-size:var(--ui-text-section);font-weight:600;line-height:1.4}
+.records-count{color:var(--ui-secondary);font-size:var(--ui-text-small);flex-shrink:0}
+.records-note{display:block;color:var(--ui-muted);font-size:var(--ui-text-small);margin-top:8rpx;line-height:1.6}
+.state{margin-top:16px;padding:40rpx 20rpx;color:var(--ui-secondary);font-size:14px;line-height:1.7;text-align:center}
+.error{color:var(--ui-danger)}
+.load-more{padding:24rpx 12rpx;text-align:center;color:var(--ui-primary);font-size:14px}
+.state-line{margin-top:16px;padding:0 16px}
+
+/* 项目成效：分数 + 两块指标 + 事实，全部平铺 */
+.project-performance-card .records-head{align-items:flex-start}
+.project-score{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end}
+.project-score-value{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.project-score-unit{color:var(--ui-secondary);font-size:14px;font-weight:400}
+.project-score-note{margin-top:8rpx;color:var(--ui-muted);font-size:var(--ui-text-small);white-space:nowrap}
+.project-performance-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:8px}
+.project-performance-metric{min-width:0;padding:8rpx 24rpx 8rpx 0}
+.project-performance-metric+.project-performance-metric{padding:8rpx 0 8rpx 24rpx;border-left:1px solid var(--ui-line)}
+.project-performance-metric .records-head{flex-wrap:wrap;gap:4rpx 16rpx}
+.project-metric-title{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4}
+.project-rate{flex-shrink:1;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4;white-space:normal}
+.project-value-label{display:block;margin-top:8px;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4}
+.project-completed{display:block;margin-top:4rpx;overflow:hidden;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;white-space:normal;overflow-wrap:anywhere}
+.project-target{display:flex;align-items:center;justify-content:space-between;gap:8rpx;margin-top:8px}
+.project-target-copy{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0;gap:8rpx}
+.project-target .project-value-label{flex:0 0 auto;margin:0;color:var(--ui-muted)}
+.project-target-value{min-width:0;overflow:hidden;color:var(--ui-ink);font-size:var(--ui-text-small);font-weight:600;text-overflow:ellipsis;white-space:nowrap}
+.project-progress-track{height:8rpx;margin-top:8px;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.project-progress-fill{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.fde-target-notice{margin:12rpx 0;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.project-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.project-fact{min-width:0}
+.project-fact-name{color:var(--ui-secondary);font-size:14px;line-height:1.4}
+.project-fact-value{margin:4rpx 0;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;overflow-wrap:break-word}
+.project-fact-note{display:block;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+
+/* 六维能力画像 */
+.sales-layout-portrait .capability-top{align-items:flex-start}
+.sample-badge{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end}
+.sample-count{display:block;color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.portrait-score-unit{color:var(--ui-secondary);font-size:14px;font-weight:400}
+.sample-label{display:block;margin-top:8rpx;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.radar-canvas{display:block;width:100%;height:430rpx;margin-top:8rpx}
+.sample-note{color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}
+.review-summary{margin-top:8rpx;color:var(--ui-ink);font-size:14px;line-height:1.6}
+.review-meta{display:flex;justify-content:space-between;gap:16rpx;flex-wrap:wrap;margin-top:8px;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.6}
+.dimension-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32rpx 48rpx;margin-top:16px;padding-top:16px;border-top:1px solid var(--ui-line)}
+.dimension-item{min-width:0}
+.dimension-top{display:flex;justify-content:space-between;align-items:center;gap:8rpx;flex-wrap:wrap}
+.dimension-name{color:var(--ui-ink);font-size:14px;font-weight:600}
+.dimension-score{color:var(--ui-ink);font-size:var(--ui-text-small);font-weight:600}
+.dimension-score.unassessed{color:var(--ui-muted);font-weight:400}
+.score-track{height:8rpx;margin-top:8rpx;overflow:hidden;border-radius:var(--ui-radius-control);background:var(--ui-background)}
+.score-progress{height:100%;border-radius:inherit;background:var(--ui-primary)}
+.dimension-assessment{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+
+/* AI 建议：卡内一段，靠细线分开；独立时是白卡 */
+.ai-advice-head{display:flex;align-items:center;gap:16rpx}
+.ai-heading{min-width:0;flex:1}
+.advice-title-line{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 16rpx}
+.advice-title{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.advice-subtitle{display:block;margin-top:4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.advice-status{padding:16rpx 0 0;color:var(--ui-secondary);font-size:14px;line-height:1.6}
+.advice-item{display:flex;align-items:flex-start;gap:16rpx;padding:20rpx 0;border-bottom:1px solid var(--ui-line)}
+.advice-item:last-child{border-bottom:0}
+.advice-number{display:flex;align-items:center;justify-content:center;width:36rpx;height:36rpx;flex-shrink:0;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);font-weight:600}
+.advice-copy{flex:1;min-width:0}
+.advice-item-title{display:block;color:var(--ui-ink);font-size:14px;font-weight:600;line-height:1.5}
+.advice-content{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-all}
+.advice-footnote{display:block;margin-top:12rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.6}
+.review-error{margin-top:12rpx;color:var(--ui-danger);font-size:14px;line-height:1.5}
+.portrait-coaching{margin-top:16px;padding:16px 0 0;border-top:1px solid var(--ui-line);background:transparent}
+.entry-arrow{font-size:var(--ui-text-body);color:var(--ui-muted);flex-shrink:0}
+
+/* 成长曲线 */
+.growth-heading{display:flex;justify-content:space-between;align-items:center;margin:24px 0 8px}
+.growth-period{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.portrait-growth{padding:8px 16px 16px}
+.portrait-growth-empty{display:flex;align-items:center;justify-content:center;min-height:220rpx;color:var(--ui-secondary);font-size:14px;line-height:1.7;text-align:center}
+.history-canvas{width:100%;height:320rpx}
+
+/* 任务、跟进记录 */
+.task-metrics{display:flex;margin-top:16px}
+.task-metric{flex:1;text-align:center;border-right:1px solid var(--ui-line)}
+.task-metric:last-child{border-right:0}
+.task-metric-value{display:block;color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.2}
+.task-metric-label{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.visit-row{display:flex;align-items:center;gap:16rpx;padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.visit-row:last-child{border-bottom:0}
+.visit-copy{flex:1;min-width:0}
+.visit-name{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.5;word-break:break-all}
+.visit-project{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5;word-break:break-all}
+.visit-date{display:block;margin-top:4rpx;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.history-pill{display:inline-block;margin-top:8rpx;padding:0 8px;border-radius:4px;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);line-height:20px}
+.text-link.text-link{display:inline-flex;align-items:center;justify-content:flex-start;width:auto;min-width:0;min-height:44px;margin:0;padding:8rpx 0;border:0;border-radius:0;background:transparent;color:var(--ui-primary);font-size:14px;font-weight:400;line-height:1.5;text-align:left;box-sizing:border-box}
+.text-link::after{border:0}.text-link-disabled{color:var(--ui-muted)}
+
+/* 跟进节奏 */
+.rhythm-controls{display:flex;gap:4rpx;padding:4px;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.rhythm-option.rhythm-option{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:48rpx;margin:0;padding:0 16rpx;border-radius:var(--ui-radius-control);background:transparent;color:var(--ui-secondary);font-size:var(--ui-text-small);font-weight:400;line-height:1.3}
+.rhythm-option.chosen{color:var(--ui-primary);background:var(--ui-surface);font-weight:600;box-shadow:var(--ui-shadow-popup)}
+.rhythm-option::after{border:0}
+.fde-rhythm{display:flex;gap:16rpx;padding-top:16px}
+.fde-rhythm-item{flex:0 0 72rpx;display:flex;flex-direction:column;align-items:center;gap:8rpx}
+.fde-bar-track{height:160rpx;width:48rpx;display:flex;align-items:flex-end;border-bottom:1px solid var(--ui-line)}
+.fde-bar{width:100%;background:var(--ui-chart-1);border-radius:var(--ui-radius-control) var(--ui-radius-control) 0 0}
+.fde-date{font-size:var(--ui-text-small);color:var(--ui-secondary)}
+
+/* 账号与退出（独立使用时） */
+.account-card{padding:0 32rpx;margin-top:16px}
+.account-row{display:flex;justify-content:space-between;align-items:flex-start;gap:24rpx;padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.account-row:last-child{border-bottom:0}
+.account-label{color:var(--ui-secondary);font-size:14px;flex-shrink:0}
+.account-value{text-align:right;color:var(--ui-ink);font-size:14px;word-break:break-all;line-height:1.5}
+.logout-button{display:flex;align-items:center;justify-content:center;height:44px;margin-top:32rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-danger);font-size:var(--ui-text-body)}
+.logout-button::after{border:0}
+.version{margin-top:32rpx;text-align:center;color:var(--ui-muted);font-size:var(--ui-text-small)}
+
+/* Palette only: original geometry is preserved. */
+.profile-tab.active,.rhythm-option.chosen { color:var(--ui-primary); background:var(--ui-selected); }
+
+.growth-controls,.growth-evidence-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12rpx}
+.growth-action{margin:8rpx 0;padding:12rpx 20rpx;min-height:44px;font-size:14px;line-height:1.5;color:var(--ui-primary);background:var(--ui-surface);white-space:normal}
+.growth-note{padding:10rpx 0;color:var(--ui-secondary);font-size:13px;line-height:1.6;overflow-wrap:anywhere;word-break:break-word}
+.growth-error{padding:12rpx 0;color:var(--ui-danger);font-size:14px;line-height:1.6}
+.growth-assessment{display:block;margin-top:12rpx;white-space:pre-wrap}
+.growth-history-row{margin:12rpx 0;padding:16rpx 20rpx;text-align:left;font-size:13px;line-height:1.7;white-space:normal;overflow-wrap:anywhere;color:var(--ui-primary);background:var(--ui-surface)}
+.growth-evidence{margin:24rpx;padding:24rpx;min-width:0}
+.growth-evidence-head{font-weight:600}
+.growth-evidence-row{padding:20rpx 0;border-bottom:1px solid var(--ui-line);font-size:14px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}

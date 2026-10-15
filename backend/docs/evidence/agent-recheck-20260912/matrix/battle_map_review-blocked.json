@@ -1,0 +1,225 @@
+{
+  "capability": "battle_map_review",
+  "case": "blocked",
+  "started_at": "2026-09-12T09:15:02.790099+00:00",
+  "test_level": "real_providers_with_current_business_facts_and_contracts_no_persistence",
+  "platform_seconds": 12.0,
+  "total_seconds": 45.0,
+  "facts": {
+    "sha256": "4b6a3d96e6852aa87fbdd527ef55c0bc2f0ec9c1e5666d48d09f8395388cd625",
+    "bytes": 2088,
+    "fields": {
+      "customer": {
+        "type": "dict",
+        "count": 15
+      },
+      "opportunities": {
+        "type": "list",
+        "count": 0
+      },
+      "visits": {
+        "type": "list",
+        "count": 1
+      },
+      "contacts": {
+        "type": "list",
+        "count": 1
+      },
+      "previous_score": {
+        "type": "dict",
+        "count": 4
+      },
+      "data_as_of": {
+        "type": "str"
+      }
+    }
+  },
+  "accepted": true,
+  "trace": {
+    "operation_id": "ce3e94dc-dfdc-4b8a-b603-81d52f80a596",
+    "provider": "senseaudio",
+    "fallback_reason": "ControlledPlatformBlock",
+    "model_ref": "senseaudio-s2-lite",
+    "elapsed_ms": 2371,
+    "platform_run": {
+      "execution_mode": "filtered_facts",
+      "expected_snapshot_id": "01a091c7-36ca-77e2-9751-8d3b454e8914",
+      "actual_snapshot_id": null,
+      "runtime_snapshot_verified": false,
+      "tool_authority_issued": false,
+      "ids": {
+        "task_id": null,
+        "message_id": null,
+        "conversation_id": null
+      },
+      "error_code": null,
+      "stop_state": "not_requested",
+      "test_fault_injected": true,
+      "network_dispatch_suppressed": true,
+      "transport": {
+        "http_status": null,
+        "request_started_ms": null,
+        "headers_received_ms": null,
+        "first_body_byte_ms": null,
+        "first_data_event_ms": null,
+        "first_text_ms": null,
+        "stream_completed_ms": null
+      }
+    }
+  },
+  "result": {
+    "sha256": "9dc73dc3c42147187e2c7c807090c5464fd6d3e9f426f3a6e97d1d3f5ad84e37",
+    "bytes": 1471,
+    "fields": {
+      "potential_score": {
+        "type": "float"
+      },
+      "relationship_score": {
+        "type": "float"
+      },
+      "summary": {
+        "type": "str"
+      },
+      "rationale": {
+        "type": "dict",
+        "count": 2
+      },
+      "evidence": {
+        "type": "list",
+        "count": 3
+      },
+      "evaluation_mode": {
+        "type": "str"
+      }
+    }
+  },
+  "elapsed_ms": 2373,
+  "validation": [
+    {
+      "input": {
+        "sha256": "106e49cf034af564b922a9ba6d894dbc231fccfd781565075a72e5c829924a5e",
+        "bytes": 1441,
+        "fields": {
+          "potential_score": {
+            "type": "int"
+          },
+          "relationship_score": {
+            "type": "int"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "dict",
+            "count": 2
+          },
+          "evidence": {
+            "type": "list",
+            "count": 3
+          }
+        }
+      },
+      "accepted": true,
+      "output": {
+        "sha256": "9dc73dc3c42147187e2c7c807090c5464fd6d3e9f426f3a6e97d1d3f5ad84e37",
+        "bytes": 1471,
+        "fields": {
+          "potential_score": {
+            "type": "float"
+          },
+          "relationship_score": {
+            "type": "float"
+          },
+          "summary": {
+            "type": "str"
+          },
+          "rationale": {
+            "type": "dict",
+            "count": 2
+          },
+          "evidence": {
+            "type": "list",
+            "count": 3
+          },
+          "evaluation_mode": {
+            "type": "str"
+          }
+        }
+      }
+    }
+  ],
+  "attempts": [
+    {
+      "invocation_id": "644a0e0e-8505-49f5-b34f-be29ef89368c",
+      "provider": "agent_platform",
+      "operation_id": "ce3e94dc-dfdc-4b8a-b603-81d52f80a596",
+      "model": "agent:01a09021-b848-7e7f-9567-e20859d29bf8",
+      "attempt": 1,
+      "status": "failed",
+      "started_at": "2026-09-12T09:15:02.804704+00:00",
+      "metadata": {
+        "execution_mode": "filtered_facts",
+        "agent_id": "01a09021-b848-7e7f-9567-e20859d29bf8",
+        "expected_snapshot_id": "01a091c7-36ca-77e2-9751-8d3b454e8914",
+        "runtime_snapshot_verified": false,
+        "tool_authority_issued": false,
+        "input_bytes": 2292,
+        "input_sha256": "5f42026c0f60f815cd9976add731c16a06b0d3ca9eae3afe10bcf12d45ef40bb",
+        "record_semantics": "platform_api_attempt_not_downstream_model_count",
+        "test_fault_injected": true,
+        "network_dispatch_suppressed": true
+      },
+      "error_type": "ControlledPlatformBlock",
+      "http_status": null,
+      "finished_at": "2026-09-12T09:15:02.804750+00:00",
+      "response_metadata": {
+        "transport": {
+          "http_status": null,
+          "request_started_ms": null,
+          "headers_received_ms": null,
+          "first_body_byte_ms": null,
+          "first_data_event_ms": null,
+          "first_text_ms": null,
+          "stream_completed_ms": null
+        }
+      }
+    },
+    {
+      "invocation_id": "d5c2e1d5-4e5a-4be5-b80e-e78be441c880",
+      "provider": "senseaudio",
+      "operation_id": "ce3e94dc-dfdc-4b8a-b603-81d52f80a596",
+      "model": "senseaudio-s2-lite",
+      "attempt": 1,
+      "status": "succeeded",
+      "started_at": "2026-09-12T09:15:02.818187+00:00",
+      "error_type": null,
+      "http_status": 200,
+      "finished_at": "2026-09-12T09:15:05.161406+00:00"
+    }
+  ],
+  "platform": {
+    "execution_mode": "filtered_facts",
+    "expected_snapshot_id": "01a091c7-36ca-77e2-9751-8d3b454e8914",
+    "actual_snapshot_id": null,
+    "runtime_snapshot_verified": false,
+    "tool_authority_issued": false,
+    "ids": {
+      "task_id": null,
+      "message_id": null,
+      "conversation_id": null
+    },
+    "error_code": null,
+    "stop_state": "not_requested",
+    "test_fault_injected": true,
+    "network_dispatch_suppressed": true,
+    "transport": {
+      "http_status": null,
+      "request_started_ms": null,
+      "headers_received_ms": null,
+      "first_body_byte_ms": null,
+      "first_data_event_ms": null,
+      "first_text_ms": null,
+      "stream_completed_ms": null
+    }
+  }
+}

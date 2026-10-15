@@ -1,0 +1,25 @@
+{
+  "passed": 12,
+  "skipped": 0,
+  "checks": [
+    "restricted_runtime_single_snapshot_conflict_and_deep_link",
+    "api_and_worker_share_exact_fingerprint",
+    "confirm_exact_history_id_with_actor_reason_and_idempotent_replay",
+    "changed_intent_cannot_reuse_idempotency_key",
+    "void_invalidates_confirmation_and_stale_post_conflicts",
+    "explicit_reconfirmation_uses_current_fingerprint_and_version",
+    "historical_evidence_must_match_bucket_and_concurrent_confirmation_conflicts",
+    "foreign_tenant_and_missing_object_read_denied",
+    "manager_with_actual_create_cannot_confirm_or_replay_management_receipt",
+    "http_response_contract_and_required_key_forbid_client_money",
+    "http_confirm_replays_receipt_and_reports_stale_version_as_409",
+    "persistent_decision_audit_and_no_finance_group_notification"
+  ],
+  "runtime_restricted": true,
+  "isolated_database_only": true,
+  "unit_contract_console_passed": 23,
+  "feishu_regression_passed": 120,
+  "node_finance_behaviors_passed": 4,
+  "source_base": "60bc0563ebd8bb8f04e4731ff8cc00a5ccb90c89",
+  "production_access": false
+}

@@ -40,11 +40,9 @@ module.exports = { opts: opts };
     </view>
 
     <view class="section-head"><view><text>任务负责人</text><label>可多选，每人各一条待办，独立接受和完成</label></view><text>已选 {{selectedMembers.length}} 人</text></view>
-    <!-- The picker cursor must be valid; a cursor is not a confirmed recipient. -->
     <view class="assignee-select {{selectedMembers.length ? 'selected' : ''}}" hover-class="task-pressed" bindtap="openRecipients">
-      <view class="assignee-avatar">人</view><view class="assignee-copy"><view>{{recipientLoading ? '正在加载公司人员…' : '搜索并选择负责人'}}</view><label>{{selectedMembers.length ? selectedNames : '按姓名、账号或部门搜索'}}</label></view><t-icon class="assignee-chevron" name="chevron-down" size="36rpx" />
-    </view>
-    <view class="selected-recipients"><view wx:for="{{selectedMembers}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleRecipient">{{item.name}} · {{item.account}} ×</view></view>
+      <view class="assignee-avatar">人</view><view class="assignee-copy"><view>{{recipientLoading ? '正在加载公司人员…' : '搜索并选择负责人'}}</view><label>{{selectedMembers.length ? selectedNames : '先选团队，再搜索姓名或账号'}}</label></view><t-icon class="assignee-chevron" name="chevron-down" size="36rpx"/>
+    </view><view class="upgrade-selected-recipients"><view wx:for="{{selectedMembers}}" wx:key="id" data-id="{{item.id}}" bindtap="toggleRecipient">{{item.name}} · {{item.account}} <text>×</text></view></view>
 
     <view wx:if="{{recipientError}}" class="task-link-error" hover-class="task-pressed" bindtap="retryRecipients">{{recipientError}} · 点击重试</view>
 
@@ -71,13 +69,8 @@ module.exports = { opts: opts };
       <view wx:if="{{selectorLoading}}" class="task-selector-state">正在加载…</view><view wx:elif="{{selectorError}}" class="task-selector-state task-link-error" hover-class="task-pressed" bindtap="loadTaskChoices">{{selectorError}} · 重试</view><view wx:elif="{{!selectorRows.length}}" class="task-selector-state">{{selectorKind==='customer'?'暂无可关联商机的客户，请调整关键词或先完成商机登记':'暂无可关联的商机，请调整关键词'}}</view><view wx:elif="{{selectorMore}}" class="task-selector-state task-selector-more" hover-class="task-pressed" bindtap="moreTaskChoices">加载更多</view>
     </view>
   </sb-sheet>
-  <sb-sheet visible="{{recipientOpen}}" title="选择负责人 · 已选 {{selectedMembers.length}} 人" confirmLabel="完成" bind:confirm="closeRecipients" bind:close="closeRecipients">
-    <sb-search slot="header" plain value="{{recipientQuery}}" placeholder="搜索姓名、账号或部门" maxlength="{{100}}" bind:change="searchRecipients" bind:clear="searchRecipients" />
-    <view class="task-selector-list"><t-checkbox wx:for="{{recipientRows}}" wx:key="id" icon="rectangle" data-id="{{item.id}}" checked="{{item.selected}}" label="{{item.name}} · {{item.account}}" content="{{item.team || item.team_name || '未填写部门'}} · {{item.roleLabel}}" bind:change="toggleRecipient" />
-      <view wx:if="{{!recipientRows.length}}" class="task-selector-state">{{recipientError || '没有匹配的负责人，请调整关键词'}}</view>
-    </view><view class="task-link-note">每人生成独立待办；修改搜索条件会保留已选人员。</view>
-  </sb-sheet>
-  <view wx:if="{{submissionPending && !submitting}}" class="submission-notice">发送结果尚未确认。请点击重试，系统会核对原提交，不会重复派发。</view>
+  <person-picker id="personPicker" open="{{recipientOpen}}" members="{{members}}" teams="{{recipientTeams}}" default-team-id="{{recipientDefaultTeamId}}" selected="{{selectedRecipientIds}}" multiple="{{true}}" allow-all="{{false}}" max-selected="{{100}}" title="选择任务负责人" loading="{{recipientLoading}}" error="{{recipientError}}" bind:confirm="confirmRecipients" bind:close="closeRecipients" bind:retry="retryRecipients" />
+  <view wx:if="{{submissionPending && !submitting}}" class="upgrade-submission-notice">发送结果尚未确认。请点击重试，系统会核对原提交，不会重复派发。</view>
   <sb-bottom-bar class="bottom-bar" primaryLabel="{{submissionPending ? '重试确认发送结果' : '发送任务'}}" loading="{{submitting}}" loadingLabel="正在发送" bind:primary="submitTask" note="接收人确认后开始执行，也可说明原因拒绝" inactive="{{!selectedMembers.length || descriptionCount < 5 || isStarting || isRecording || isStopping || isParsing}}" disabledReason="{{isStarting || isRecording || isStopping || isParsing ? '请先完成本次语音录入' : !selectedMembers.length ? '请选择任务负责人' : '请填写任务描述（至少 5 个字）'}}" />
 </view>
 

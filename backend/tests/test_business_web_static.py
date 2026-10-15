@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sales_backend.main import app, BUSINESS_WEB_DIST
 
 
-@pytest.mark.skipif(not BUSINESS_WEB_DIST.is_dir(), reason="Build business-web before static acceptance")
+@pytest.mark.skipif(not BUSINESS_WEB_DIST.is_dir(), reason="Build frontend/web before static acceptance")
 def test_workspace_serves_complete_relative_entry_and_revalidates():
     client = TestClient(app)
     entry = client.get('/workspace/')
@@ -28,10 +28,10 @@ def test_workspace_serves_complete_relative_entry_and_revalidates():
 def test_web_boot_discovery_does_not_expose_runtime_credentials(monkeypatch):
     from sales_backend import main
     async def readiness(response):
-        return {'status':'ok', 'checks':{'database':True}}
+        return {'status':'ok', 'checks':{'database':True,'auth_configured':True,'model_gateway_configured':False}}
     monkeypatch.setattr(main, 'health_ready', readiness)
     client = TestClient(app)
-    assert client.get('/web-capabilities').json() == {'previewOnly':False}
+    assert client.get('/web-capabilities').json() == {'previewOnly':False,'adminUrl':'/admin'}
     response = client.get('/connection-status')
     assert response.status_code == 200
     assert response.json()['apiPrefix'] == '/api/v1'

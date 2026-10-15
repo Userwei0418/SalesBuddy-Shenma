@@ -1,0 +1,4 @@
+.department-ui .opp-history-context { display: flex; flex-wrap: wrap; gap: var(--ui-space-2) var(--ui-space-4); margin-bottom: var(--ui-space-2); }
+.department-ui .opp-history-note { font-size: var(--ui-text-small); margin: 0 0 var(--ui-space-3); }
+.department-ui .opp-history-name { max-width: 100%; height: auto; white-space: normal; text-align: left; padding-inline: 0; overflow-wrap: anywhere; }
+.department-ui .opp-history-name > span { white-space: normal; overflow-wrap: anywhere; }

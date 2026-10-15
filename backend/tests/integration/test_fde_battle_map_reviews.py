@@ -1,7 +1,6 @@
 """Private FDE score persistence under real PostgreSQL RLS; no provider calls."""
 
 import asyncio
-from contextlib import asynccontextmanager
 import json
 import os
 import re
@@ -12,6 +11,7 @@ import pytest
 from sales_backend.config import get_settings
 from sales_backend.db import Database, set_request_context
 from sales_backend.services.battle_map_reviews import BattleMapReviewHandler
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.integration.test_fde_identity_tasks import fde_fixture
 from tests.integration.test_operations_claims_sql import actor
 
@@ -19,13 +19,8 @@ pytestmark = pytest.mark.asyncio
 
 
 def handler_for(connection):
-    class Pool:
-        @asynccontextmanager
-        async def acquire(self):
-            yield connection
-
     settings = get_settings()
-    return BattleMapReviewHandler(Database(settings, pool=Pool()), settings)
+    return BattleMapReviewHandler(Database(settings, pool=FixtureConnectionPool(connection)), settings)
 
 
 def answer(handler, facts, potential=75):
