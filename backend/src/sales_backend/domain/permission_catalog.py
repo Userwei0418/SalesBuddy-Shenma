@@ -35,10 +35,13 @@ PERMISSIONS = (
     *_module("总览与经营", "overview", (("read", "查看总览"),)),
     *_module("客户管理", "customer", (
         ("reference", "搜索与选择客户基本信息"), ("read", "查看客户详情"),
-        ("create", "新建客户"), ("update", "修改客户资料"), ("claim", "申请认领客户"),
+        ("create", "新建客户"),
+        ("update", "修改客户资料"), ("claim", "申请认领客户"),
         ("claim_directory", "查看公司客户认领目录"), ("claim_review", "审批客户认领"), ("release", "释放客户"),
         ("resolve_owner", "核对历史客户归属"), ("export", "导出客户"),
     ), sensitive=("export", "release", "resolve_owner")),
+    PermissionDefinition("customer.create_request", "提交客户新建申请", "客户管理", ("self",)),
+    PermissionDefinition("customer.create_review", "审批客户新建申请", "客户管理", ("workspace",)),
     *_module("作战地图", "battle_map", (("read", "查看客户作战地图"),)),
     *_module("商机管理", "opportunity", (
         ("read", "查看商机"), ("create", "创建商机"), ("update", "修改商机"),

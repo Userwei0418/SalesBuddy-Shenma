@@ -14,6 +14,7 @@ import {
 import {
   customers,
   claims,
+  customerCreationRequests,
   opportunities,
   accounts,
   aiUsage,
@@ -33,6 +34,7 @@ import {feishuSync} from "./feishu-sync.js";
 export const nav = [
   ["customers", "客户管理", "◈"],
   ["claims", "认领审批", "☷"],
+  ["creation_requests", "建档审批", "✎"],
   ["opportunities", "商机管理", "▥"],
   ["partners", "伙伴目录", "◇"],
   ["tasks", "我的待办", "☑"],
@@ -53,6 +55,7 @@ export const nav = [
 const pages = {
   customers,
   claims,
+  creation_requests: customerCreationRequests,
   opportunities,
   partners,
   tasks: taskInbox,
@@ -70,8 +73,8 @@ const pages = {
   activities: businessActivities,
   system: systemLogs,
 };
-const pagePermissions={customers:'customer.read',claims:'customer.claim_review',opportunities:'opportunity.read',partners:'partner.read',tasks:'task.read',targets:'target.read',target_requests:'target.approve',accounts:'organization.read',permissions:'authorization.read',ai:'ai.usage_read',modelApis:'ai.config_read',agentRuns:'ai.run_read',agentExecution:'ai.execution_read',companyRules:'rule.read',feishuSync:'feishu.read',activities:'audit.business_read',audit:'audit.read',system:'audit.events_read'};
-const groups=[['业务运营',['customers','claims','opportunities','partners','tasks']],['组织与目标',['accounts','permissions','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
+const pagePermissions={customers:'customer.read',claims:'customer.claim_review',creation_requests:'customer.create_review',opportunities:'opportunity.read',partners:'partner.read',tasks:'task.read',targets:'target.read',target_requests:'target.approve',accounts:'organization.read',permissions:'authorization.read',ai:'ai.usage_read',modelApis:'ai.config_read',agentRuns:'ai.run_read',agentExecution:'ai.execution_read',companyRules:'rule.read',feishuSync:'feishu.read',activities:'audit.business_read',audit:'audit.read',system:'audit.events_read'};
+const groups=[['业务运营',['customers','claims','creation_requests','opportunities','partners','tasks']],['组织与目标',['accounts','permissions','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
 const iconPaths={customers:'M3 5h18v14H3z M3 10h18 M8 5v14',claims:'M8 5h12v16H4V5h4 M8 3h8v4H8z M8 12l2 2 5-5',opportunities:'M4 20V9h4v11 M10 20V4h4v16 M16 20v-8h4v8',accounts:'M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M17 4a4 4 0 0 1 0 8 M23 21v-2a4 4 0 0 0-4-4',agentRuns:'M12 3a9 9 0 1 0 9 9 M12 7v5l4 2 M17 3h4v4',companyRules:'M4 7h16 M4 17h16 M9 4v6 M15 14v6',tasks:'M5 3h14v18H5z M8 8h8 M8 12h8 M8 16h5'};
 const navIcon=id=>`<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[id]||'M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z'}"/></svg>`;
 let renderId = 0;

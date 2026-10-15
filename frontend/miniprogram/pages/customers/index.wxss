@@ -246,3 +246,5 @@
 
 .customer-page .operating-filters .sb-lselect.small.on.disabled { color:var(--ui-muted); background:var(--ui-neutral-soft); }
 .customer-page .operating-filters .sb-lselect.small.on.disabled .sb-lselect-text,.customer-page .operating-filters .sb-lselect.small.on.disabled .sb-lselect-label,.customer-page .operating-filters .sb-lselect.small.on.disabled .sb-lselect-arrow,.customer-page .operating-filters .sb-lselect.small.on.disabled .sb-lselect-clear { color:var(--ui-muted); }
+
+.customer-create-entry{display:flex;align-items:center;justify-content:space-between;padding:20rpx 24rpx;margin:0 0 20rpx;border-radius:12rpx;color:var(--ui-primary,#1677FF);background:var(--ui-selected,#EDF3FF);font-size:28rpx}

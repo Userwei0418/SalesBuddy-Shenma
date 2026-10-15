@@ -344,6 +344,18 @@ function createCustomer(data) {
   return request({ path: "/customers", method: "POST", data });
 }
 
+function submitCustomerCreationRequest(data) {
+  return request({ path: "/customers/creation-requests", method: "POST", data });
+}
+
+function listCustomerCreationRequests({offset = 0, limit = 20} = {}) {
+  return request({ path: `/customers/creation-requests?offset=${offset}&limit=${limit}` });
+}
+
+function withdrawCustomerCreationRequest(id) {
+  return request({ path: `/customers/creation-requests/${encodeURIComponent(id)}/withdraw`, method: "POST", data: {} });
+}
+
 function updateCustomer(customerId, data) {
   return request({
     path: `/customers/${encodeURIComponent(customerId)}`,
@@ -602,6 +614,9 @@ module.exports = {
   getTaskPositions: (options={}) => request({path:'/directory/task-positions'+(Object.keys(options).length?'?'+assetQuery(options):'')}),
   getWorkbench,
   createCustomer,
+  submitCustomerCreationRequest,
+  listCustomerCreationRequests,
+  withdrawCustomerCreationRequest,
   updateCustomer,
   assignCustomer,
   claimCustomer,

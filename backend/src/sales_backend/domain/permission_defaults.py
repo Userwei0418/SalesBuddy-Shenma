@@ -52,13 +52,15 @@ def default_permissions(role: str) -> list[dict]:
             "account.password_policy", "company.update", "rule.publish", "rule.restore",
             "ai.config_read", "ai.config_test", "ai.config_publish", "ai.config_rollback",
             "feishu.read", "feishu.configure", "feishu.control", "feishu.recover",
+            "customer.create_review",
         }
     elif role == "operations":
-        codes = CONSOLE_COMMON - {"opportunity.create", "opportunity.create_for_others"}
+        codes = (CONSOLE_COMMON - {"opportunity.create", "opportunity.create_for_others"}) | {"customer.create_review"}
     elif role in {"sales", "supervisor", "manager"}:
         codes = SALES_COMMON | ({"agent.today_tasks", "agent.personal_risks"} if role == "sales" else {
             "agent.management_task", "task.coordinate", "actual.create", "actual.void",
         })
+        codes = codes | {"customer.create_request"}
         if role == "manager":
             codes = codes | {"ai.usage_read"}
     elif role in {"fde", "fde_lead"}:

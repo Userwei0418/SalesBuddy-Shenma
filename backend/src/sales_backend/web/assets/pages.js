@@ -429,6 +429,117 @@ export async function claims() {
       }),
   };
 }
+
+export async function customerCreationRequests() {
+  if (!Object.keys(state.filters).length) state.filters = { status: "pending" };
+  const data = await api(
+    "/customer-creation-requests" + query({ limit: 50, offset: state.offset }),
+  );
+  const payload = (row) => row?.payload || {};
+  const customerLabel = (row) => payload(row).name || "未填写客户名称";
+  return {
+    html:
+      head(
+        "客户建档审批",
+        "核对销售提交的客户建档申请。审批通过后才会写入客户主档，并进入待认领客户池。",
+      ) +
+      `<div class="notice">申请在审批前只保存在建档申请队列，不会影响正式客户数据。请先核对公司客户编号 / 审批单号和联系人信息，再决定是否通过。</div><div class="card">` +
+      filters(
+        search("搜索申请人 / 客户 / 公司编号") +
+          select(
+            "status",
+            options(
+              [["all", "全部状态"], ...["pending", "approved", "rejected", "cancelled"].map((s) => [s, statuses[s]])],
+              state.filters.status,
+              null,
+            ),
+          ),
+      ) +
+      table(
+        ["客户申请", "申请人", "公司客户编号 / 审批单号", "申请时间", "状态", "操作"],
+        data.items,
+        (r) => {
+          const p = payload(r);
+          return `<tr><td class="title">${esc(customerLabel(r))}<small>${esc(p.industry || "未填写行业")} · ${esc(p.contact_name || "未填写联系人")}</small></td><td>${esc(r.applicant_name || "—")}</td><td>${esc(p.company_reference || "—")}</td><td>${date(r.requested_at)}</td><td>${badge(r.status)}${r.decision_reason ? `<small>${esc(r.decision_reason)}</small>` : ""}</td><td>${btn("查看申请", "detail", r.id, "link")}${r.status === "pending" ? btn("审核", "review", r.id, "link") : ""}</td></tr>`;
+        },
+      ) +
+      pager(data.total) +
+      `</div>`,
+    bind: (root) =>
+      bindCommon(root, {
+        detail: (id) => {
+          const r = data.items.find((item) => String(item.id) === String(id));
+          if (!r) return;
+          const p = payload(r);
+          dialog(
+            "客户建档申请详情",
+            details([
+              ["客户名称", p.name],
+              ["公司客户编号 / 审批单号", p.company_reference],
+              ["申请人", r.applicant_name],
+              ["申请时间", date(r.requested_at)],
+              ["所属行业", p.industry],
+              ["客户类型", p.customer_type],
+              ["客户优先级", p.level_code],
+              ["客户来源", p.source],
+              ["归属团队", p.target_team],
+              ["联系人", p.contact_name],
+              ["联系人职位", p.contact_title],
+              ["联系人角色", p.contact_role],
+              ["联系电话", p.contact_phone],
+              ["联系邮箱", p.contact_email],
+              ["处理结果", statuses[r.status] || r.status],
+              ["处理意见", r.decision_reason],
+            ]),
+            { wide: true },
+          );
+        },
+        review: (id) => {
+          const r = data.items.find((item) => String(item.id) === String(id));
+          if (!r) return;
+          const p = payload(r);
+          dialog(
+            "审核客户建档申请",
+            details([
+              ["客户", p.name],
+              ["申请人", r.applicant_name],
+              ["公司客户编号 / 审批单号", p.company_reference],
+              ["归属团队", p.target_team],
+              ["联系人", p.contact_name],
+            ]) +
+              field("审核结果", "decision", "approved", {
+                select: options(
+                  [
+                    ["approved", "通过，写入客户主档"],
+                    ["rejected", "驳回申请"],
+                  ],
+                  "approved",
+                  null,
+                ),
+              }) +
+              field("审核意见", "reason", "", {
+                type: "textarea",
+                help: "驳回时必须填写原因；通过时可填写核对说明。",
+              }),
+            {
+              submit: "确认处理",
+              onSubmit: async (fd, key) => {
+                const decision = fd.get("decision");
+                const reason = String(fd.get("reason") || "").trim();
+                if (decision === "rejected" && !reason) throw Error("请填写驳回原因");
+                await api(`/customer-creation-requests/${id}/decision`, {
+                  method: "POST",
+                  key,
+                  body: { decision, reason },
+                });
+                toast(decision === "approved" ? "已通过，客户已进入待认领客户池" : "已驳回客户建档申请");
+              },
+            },
+          );
+        },
+      }),
+  };
+}
 export {accounts} from "./organization.js";
 const stages = [
   [10, "意向沟通 · 10%"],

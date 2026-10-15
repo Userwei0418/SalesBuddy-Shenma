@@ -55,3 +55,22 @@ button::after{border:0}
 .option-item.selected{color:var(--ui-primary);background:var(--ui-selected);font-weight:600}
 .option-list{--td-cell-right-icon-color:var(--ui-primary);margin:0 calc(-1 * var(--ui-page-gutter));border-bottom:1px solid var(--ui-line)}
 .editor-helper{margin-top:24rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}
+
+/* S2 客户建档申请：与既有蓝色主操作及白底面板保持一致。 */
+.creation-tabs{display:flex;margin:24rpx 32rpx 0;border-bottom:1px solid var(--ui-line,#E2E8F0);gap:32rpx}
+.creation-tab{padding:20rpx 4rpx;color:var(--ui-secondary,#5B6C82);font-size:28rpx}
+.creation-tab.selected{color:var(--ui-primary,#1677FF);border-bottom:4rpx solid var(--ui-primary,#1677FF);font-weight:600}
+.creation-requests{padding:24rpx 32rpx}
+.creation-list-head{display:flex;align-items:center;justify-content:space-between;gap:20rpx;font-size:28rpx;margin-bottom:20rpx}
+.creation-list-head>view{color:var(--ui-primary,#1677FF)}
+.creation-state{padding:24rpx;color:var(--ui-secondary,#5B6C82);font-size:28rpx;line-height:1.6}
+.creation-error{color:var(--ui-danger,#A73F38)}
+.creation-request-card{padding:24rpx;margin-bottom:20rpx;border-radius:16rpx;background:var(--ui-surface,#fff);border:1px solid var(--ui-line,#E2E8F0)}
+.creation-request-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx;font-size:30rpx;font-weight:600}
+.creation-request-head>text{flex:1;min-width:0;overflow-wrap:anywhere}
+.creation-status{flex:none;padding:4rpx 12rpx;font-size:24rpx;border-radius:8rpx;color:var(--ui-secondary,#5B6C82);background:var(--ui-neutral-soft,#EEF2F7)}
+.creation-status.status-approved{color:var(--ui-success,#27694C);background:var(--ui-success-soft,#E8F5EE)}
+.creation-status.status-rejected{color:var(--ui-danger,#A73F38);background:var(--ui-danger-soft,#FBE4DF)}
+.creation-request-meta,.creation-request-note{margin-top:12rpx;color:var(--ui-secondary,#5B6C82);font-size:26rpx;line-height:1.6;overflow-wrap:anywhere}
+.creation-request-reason{margin-top:16rpx;font-size:28rpx;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.creation-request-action,.creation-load-more{margin-top:20rpx;font-size:26rpx;color:var(--ui-primary,#1677FF);background:var(--ui-selected,#EDF3FF);line-height:2.8}

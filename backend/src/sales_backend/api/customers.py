@@ -19,6 +19,9 @@ from sales_backend.api.models import (
 from sales_backend.contracts.customer_directory import (
     ClaimDirectoryStatus, CustomerDirectoryOptions, CustomerDirectoryPage,
 )
+from sales_backend.contracts.customer_creation import (
+    CustomerCreationRequestBody, CustomerCreationRequestItem, CustomerCreationRequestPage,
+)
 from sales_backend.contracts.types import UUIDString
 from sales_backend.db import Database
 from sales_backend.repositories.authorization import AuthorizationRepository
@@ -26,13 +29,16 @@ from sales_backend.domain.concurrency import VersionConflict
 from sales_backend.services.authorization import require_permission
 from sales_backend.repositories.customer_members import CustomerMemberRepository
 from sales_backend.repositories.customer_mutations import CustomerMutationRepository
+from sales_backend.repositories.customer_creation_requests import CustomerCreationRequestRepository
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.opportunities import NAME_CONFLICT_MESSAGE, opportunity_name_available
 from sales_backend.services.customer_claims import claim_customer
 from sales_backend.services.idempotency import execute_mutation
 from sales_backend.services.opportunities import save_opportunity
+from sales_backend.services.operations import management_write
 
 router = APIRouter(prefix="/api/v1/customers", tags=["Customers"])
+creation_repository = CustomerCreationRequestRepository()
 
 
 @router.get("/claim-pool", response_model=CustomerDirectoryPage)
@@ -93,6 +99,56 @@ async def list_customers(
             connection, query=q, level=level, unassigned=unassigned, limit=page_size
         )
     return PageResponse(items=items)
+
+
+@router.post("/creation-requests", status_code=201, response_model=CustomerCreationRequestItem,
+             description="销售提交客户建档申请；审批通过前不会写入客户主档。")
+async def submit_creation_request(
+    body: CustomerCreationRequestBody,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+    idempotency_key: MutationKey = None,
+) -> dict:
+    return await management_write(
+        database,
+        identity.actor,
+        idempotency_key,
+        "customer_creation_request.submit",
+        body.model_dump(mode="json"),
+        lambda connection: creation_repository.submit(
+            connection, identity.actor, body.model_dump(mode="json")
+        ),
+    )
+
+
+@router.get("/creation-requests", response_model=CustomerCreationRequestPage,
+            description="返回当前销售本人提交的客户建档申请。")
+async def creation_requests(
+    status: Literal["pending", "approved", "rejected", "cancelled", "all"] = "all",
+    q: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=100000),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await creation_repository.mine(
+            connection, identity.actor, status=status, q=q, limit=limit, offset=offset
+        )
+
+
+@router.post("/creation-requests/{request_id}/withdraw", response_model=CustomerCreationRequestItem)
+async def withdraw_creation_request(
+    request_id: UUID,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+    idempotency_key: MutationKey = None,
+) -> dict:
+    return await management_write(
+        database, identity.actor, idempotency_key,
+        f"customer_creation_request.withdraw:{request_id}", {},
+        lambda connection: creation_repository.withdraw(connection, identity.actor, str(request_id)),
+    )
 
 
 @router.post(

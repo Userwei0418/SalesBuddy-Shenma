@@ -1,7 +1,7 @@
 // Capability checks mirror the server actor; this module never grants FDE a sales role.
 const FDE_ROLES = ['fde', 'fde_lead'];
-const FLAGS = {canReadCustomer:'customer.read',canCreateCustomer:'customer.create',canEditCustomer:'customer.edit',canClaimCustomer:'customer.claim',canEditOpportunity:'opportunity.edit',canManageFde:'fde.members.manage',canRecordVisit:'visit.create',canSupplementVisit:'visit.supplement',canCreateTask:'task.create',canRespondTask:'task.respond',canCoordinateTask:'task.coordinate',canResolveRisk:'risk.resolve',canDecideAdvice:'advice.decide',canManageActual:'actual.manage',canViewTeam:'team.view'};
-const ROUTES = {'customer-create':'customer.create','customer-edit':'customer.edit','customer-claim':'customer.claim','opportunity-create':'opportunity.edit','visit-entry':'visit.create','visit-confirm':'visit.create','management-task-create':'task.create'};
+const FLAGS = {canReadCustomer:'customer.read',canCreateCustomer:['customer.create','customer.create_request'],canRequestCustomer:'customer.create_request',canEditCustomer:'customer.edit',canClaimCustomer:'customer.claim',canEditOpportunity:'opportunity.edit',canManageFde:'fde.members.manage',canRecordVisit:'visit.create',canSupplementVisit:'visit.supplement',canCreateTask:'task.create',canRespondTask:'task.respond',canCoordinateTask:'task.coordinate',canResolveRisk:'risk.resolve',canDecideAdvice:'advice.decide',canManageActual:'actual.manage',canViewTeam:'team.view'};
+const ROUTES = {'customer-create':['customer.create','customer.create_request'],'customer-edit':'customer.edit','customer-claim':'customer.claim','opportunity-create':'opportunity.edit','visit-entry':'visit.create','visit-confirm':'visit.create','management-task-create':'task.create'};
 function isFde(role) { return FDE_ROLES.includes(role); }
 const ALIASES = {
   'customer.edit':['customer.update'], 'opportunity.edit':['opportunity.create','opportunity.update'],
@@ -83,11 +83,11 @@ function pageAllowed(session, route, options={}) {
 function identity(session) { return session ? [session.workspaceId,session.userId,session.role,session.permissionVersion || '',session.loginAt || ''].join(':') : ''; }
 const ACTIONS={
  workbench:{createOpportunity:'opportunity.create',editOpportunity:'opportunity.update'},
- index:{startVisitRecording:'visit.create',submitVisitTranscript:'visit.create',redoVisitRecording:'visit.create',openCustomerClaim:'customer.claim',openCustomerCreate:'customer.create',confirmManagementCustomer:'customer.create',confirmVisit:'visit.create'},
- customers:{openCustomerClaim:'customer.claim',editCustomer:'customer.edit',createOpportunity:'opportunity.create',editOpportunity:'opportunity.update',createTask:'task.create',recordVisit:'visit.create'},
+ index:{startVisitRecording:'visit.create',submitVisitTranscript:'visit.create',redoVisitRecording:'visit.create',openCustomerClaim:'customer.claim',openCustomerCreate:['customer.create','customer.create_request'],confirmManagementCustomer:'customer.create',confirmVisit:'visit.create'},
+ customers:{openCustomerCreate:['customer.create','customer.create_request'],openCustomerClaim:'customer.claim',editCustomer:'customer.edit',createOpportunity:'opportunity.create',editOpportunity:'opportunity.update',createTask:'task.create',recordVisit:'visit.create'},
  'customer-detail':{supplementVisit:'visit.supplement',createOpportunity:'opportunity.create',editOpportunity:'opportunity.update',recordVisit:'visit.create',createTask:'task.create'},
  'customer-assets':{openForm:'actual.create',submit:'actual.create',submitConfirmed:'actual.create',voidEntry:'actual.void',saveFdeMembers:'fde.members.manage',recordFdeVisit:'visit.create'},
- 'opportunity-create':{submit:page=>(page.opportunityId||page.data.opportunityId||page.data.existing)?'opportunity.update':'opportunity.create'},'customer-create':{submit:'customer.create'},'customer-edit':{submit:'customer.edit'},
+ 'opportunity-create':{submit:page=>(page.opportunityId||page.data.opportunityId||page.data.existing)?'opportunity.update':'opportunity.create'},'customer-create':{submitCustomer:page=>page.requestMode?'customer.create_request':'customer.create',withdrawRequest:'customer.create_request'},'customer-edit':{submit:'customer.edit'},
  'visit-entry':{toggleRecording:'visit.transcribe',chooseMaterial:'visit.upload',submitTranscript:'visit.structure',toggleRecord:'visit.transcribe',startRecord:'visit.transcribe',chooseFile:'visit.upload',uploadFile:'visit.upload',retryImport:'visit.retry_import',submit:'visit.create',generate:'visit.create'},
  'visit-confirm':{archive:'visit.create',submitArchive:'visit.create',saveSupplement:'visit.supplement',review:'visit.quality_review'},
  'risk-detail':{resolve:'risk.resolve',submit:'risk.resolve',confirmResolve:'risk.resolve'},

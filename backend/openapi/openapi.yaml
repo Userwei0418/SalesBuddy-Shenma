@@ -1281,6 +1281,290 @@ components:
       - contact_role
       title: CustomerCreate
       type: object
+    CustomerCreationRequestBody:
+      description: 销售提交的客户快照；审批前不写入 crm.customer。
+      properties:
+        company_reference:
+          maxLength: 200
+          minLength: 1
+          title: Company Reference
+          type: string
+        contact_email:
+          default: ''
+          maxLength: 200
+          title: Contact Email
+          type: string
+        contact_name:
+          maxLength: 100
+          minLength: 1
+          title: Contact Name
+          type: string
+        contact_phone:
+          default: ''
+          maxLength: 80
+          title: Contact Phone
+          type: string
+        contact_role:
+          enum:
+          - 使用者
+          - 影响者
+          - 决策者
+          title: Contact Role
+          type: string
+        contact_title:
+          maxLength: 100
+          minLength: 1
+          title: Contact Title
+          type: string
+        customer_type:
+          enum:
+          - 潜在客户
+          - 商机客户
+          - 已成单客户
+          title: Customer Type
+          type: string
+        industry:
+          default: ''
+          maxLength: 100
+          title: Industry
+          type: string
+        level_code:
+          enum:
+          - Tier-1
+          - Tier-2
+          - Tier-3
+          title: Level Code
+          type: string
+        name:
+          maxLength: 200
+          minLength: 1
+          title: Name
+          type: string
+        partner_name:
+          default: ''
+          maxLength: 200
+          title: Partner Name
+          type: string
+        source:
+          enum:
+          - 销售自拓
+          - 客户转介绍
+          - 市场活动
+          - 销售线索
+          - 合作伙伴
+          - 其他
+          title: Source
+          type: string
+        target_team:
+          maxLength: 100
+          minLength: 1
+          title: Target Team
+          type: string
+        target_team_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Target Team Id
+      required:
+      - company_reference
+      - name
+      - customer_type
+      - level_code
+      - source
+      - target_team
+      - contact_name
+      - contact_title
+      - contact_role
+      title: CustomerCreationRequestBody
+      type: object
+    CustomerCreationRequestDecision:
+      properties:
+        decision:
+          enum:
+          - approved
+          - rejected
+          title: Decision
+          type: string
+        reason:
+          default: ''
+          maxLength: 2000
+          title: Reason
+          type: string
+      required:
+      - decision
+      title: CustomerCreationRequestDecision
+      type: object
+    CustomerCreationRequestItem:
+      properties:
+        applicant_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Applicant Name
+        applicant_user_ref_id:
+          format: uuid
+          title: Applicant User Ref Id
+          type: string
+        created_customer_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Created Customer Id
+        decision_reason:
+          default: ''
+          title: Decision Reason
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+        requested_at:
+          format: date-time
+          title: Requested At
+          type: string
+        reviewed_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Reviewed At
+        reviewer_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reviewer Name
+        reviewer_user_ref_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Reviewer User Ref Id
+        status:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - cancelled
+          title: Status
+          type: string
+      required:
+      - id
+      - status
+      - applicant_user_ref_id
+      - payload
+      - requested_at
+      title: CustomerCreationRequestItem
+      type: object
+    CustomerCreationRequestPage:
+      properties:
+        has_more:
+          title: Has More
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/CustomerCreationRequestItem'
+          title: Items
+          type: array
+        limit:
+          title: Limit
+          type: integer
+        next_offset:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Offset
+        offset:
+          title: Offset
+          type: integer
+        total:
+          title: Total
+          type: integer
+      required:
+      - items
+      - total
+      - offset
+      - limit
+      - has_more
+      title: CustomerCreationRequestPage
+      type: object
+    CustomerCreationRequestResult:
+      properties:
+        applicant_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Applicant Name
+        applicant_user_ref_id:
+          format: uuid
+          title: Applicant User Ref Id
+          type: string
+        created_customer_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Created Customer Id
+        customer:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Customer
+        decision_reason:
+          default: ''
+          title: Decision Reason
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+        requested_at:
+          format: date-time
+          title: Requested At
+          type: string
+        reviewed_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Reviewed At
+        reviewer_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reviewer Name
+        reviewer_user_ref_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Reviewer User Ref Id
+        status:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - cancelled
+          title: Status
+          type: string
+      required:
+      - id
+      - status
+      - applicant_user_ref_id
+      - payload
+      - requested_at
+      title: CustomerCreationRequestResult
+      type: object
     CustomerDirectoryItem:
       properties:
         can_claim:
@@ -8232,6 +8516,115 @@ paths:
       summary: Preview
       tags:
       - Company policies
+  /api/v1/console/customer-creation-requests:
+    get:
+      description: 运营查看客户建档申请队列。
+      operationId: creation_requests_api_v1_console_customer_creation_requests_get
+      parameters:
+      - in: query
+        name: status
+        required: false
+        schema:
+          default: pending
+          enum:
+          - pending
+          - approved
+          - rejected
+          - cancelled
+          - all
+          title: Status
+          type: string
+      - in: query
+        name: q
+        required: false
+        schema:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          title: Q
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreationRequestPage'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Creation Requests
+      tags:
+      - Operations customers
+  /api/v1/console/customer-creation-requests/{request_id}/decision:
+    post:
+      operationId: decide_creation_request_api_v1_console_customer_creation_requests__request_id__decision_post
+      parameters:
+      - in: path
+        name: request_id
+        required: true
+        schema:
+          format: uuid
+          title: Request Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreationRequestDecision'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreationRequestResult'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Decide Creation Request
+      tags:
+      - Operations customers
   /api/v1/console/customers:
     get:
       operationId: customers_api_v1_console_customers_get
@@ -10948,6 +11341,148 @@ paths:
       summary: Customer Claim Pool Options
       tags:
       - Customers
+  /api/v1/customers/creation-requests:
+    get:
+      description: 返回当前销售本人提交的客户建档申请。
+      operationId: creation_requests_api_v1_customers_creation_requests_get
+      parameters:
+      - in: query
+        name: status
+        required: false
+        schema:
+          default: all
+          enum:
+          - pending
+          - approved
+          - rejected
+          - cancelled
+          - all
+          title: Status
+          type: string
+      - in: query
+        name: q
+        required: false
+        schema:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          title: Q
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreationRequestPage'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Creation Requests
+      tags:
+      - Customers
+    post:
+      description: 销售提交客户建档申请；审批通过前不会写入客户主档。
+      operationId: submit_creation_request_api_v1_customers_creation_requests_post
+      parameters:
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreationRequestBody'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreationRequestItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Submit Creation Request
+      tags:
+      - Customers
+  /api/v1/customers/creation-requests/{request_id}/withdraw:
+    post:
+      operationId: withdraw_creation_request_api_v1_customers_creation_requests__request_id__withdraw_post
+      parameters:
+      - in: path
+        name: request_id
+        required: true
+        schema:
+          format: uuid
+          title: Request Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerCreationRequestItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Withdraw Creation Request
+      tags:
+      - Customers
   /api/v1/customers/{customer_id}:
     get:
       operationId: customer_detail_api_v1_customers__customer_id__get
@@ -12002,6 +12537,7 @@ paths:
           - profile
           - fde
           - assignment
+          - creation_request
           title: Purpose
           type: string
       responses:

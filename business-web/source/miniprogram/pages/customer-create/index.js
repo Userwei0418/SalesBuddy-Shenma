@@ -5,6 +5,7 @@ const { CUSTOMER_LEVELS } = require("../../utils/customerLevel");
 
 const FIELD_EDITORS = {
   customer_name: { type: "text", placeholder: "请输入客户全称" },
+  company_reference: { type: "text", placeholder: "请输入公司客户编号或审批单号" },
   industry: { type: "select", options: businessOptions.customer.industry },
   customer_type: { type: "select", options: businessOptions.customer.customer_type },
   level_code: { type: "select", options: CUSTOMER_LEVELS },
@@ -15,6 +16,15 @@ const FIELD_EDITORS = {
   contact_title: { type: "text", placeholder: "请输入联系人职位" },
   contact_role: { type: "select", options: businessOptions.customer.contact_role },
 };
+
+function requestTime(value) {
+  if (!value) return "";
+  const time = new Date(value);
+  if (Number.isNaN(time.getTime())) return "";
+  const china = new Date(time.getTime() + 8 * 3600000);
+  const pad = number => String(number).padStart(2, "0");
+  return `${china.getUTCFullYear()}-${pad(china.getUTCMonth() + 1)}-${pad(china.getUTCDate())} ${pad(china.getUTCHours())}:${pad(china.getUTCMinutes())}`;
+}
 
 function fieldMissing(field) {
   return Boolean(field.required) && !String(field.value || "").trim();
@@ -30,6 +40,18 @@ function normalizeFieldValue(key, value) {
 
 Page({
   data: {
+    requestMode: false,
+    canViewRequests: false,
+    canVoiceCreate: false,
+    activeTab: "form",
+    submitting: false,
+    requests: [],
+    requestsLoading: false,
+    requestsError: "",
+    requestsTotal: 0,
+    requestsHasMore: false,
+    requestsNextOffset: 0,
+    withdrawingId: "",
     role: "supervisor",
     roleName: "销售主管",
     creatorName: "",
@@ -56,20 +78,27 @@ Page({
     editorOptions: [],
   },
 
-  async onLoad() {
+  async onLoad(options = {}) {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'customer-create')) return;
     if (!getApp().ensureLogin()) return;
     const app = getApp();
     const session = app.globalData.session;
-    if (!require('../../utils/access').can(session,'customer.create')) {
+    const access = require('../../utils/access');
+    if (!access.can(session,'customer.create') && !access.can(session,'customer.create_request')) {
       wx.showToast({ title: "当前账号没有客户建档权限", icon: "none" });
       setTimeout(() => wx.navigateBack(), 650);
       return;
     }
+    this.requestMode = access.can(session, "customer.create_request") && (["sales", "supervisor", "manager"].includes(session.role) || !access.can(session, "customer.create"));
+    this.setData({ requestMode: this.requestMode, canViewRequests: access.can(session, "customer.create_request"), canVoiceCreate: access.can(session, "customer.create"), canClaimCustomer: access.can(session, "customer.claim") });
+    this.session = session;
+    this.draftKey = `customerCreateDraft:${draftScope(session)}`;
+    if (wx.setNavigationBarTitle) wx.setNavigationBarTitle({ title: this.requestMode ? "客户建档申请" : "创建客户" });
+    if (options.view === "requests" && this.data.canViewRequests) this.showRequests();
     try {await apiClient.getBusinessOptions();} catch(error) {wx.showToast({title:error.message,icon:'none'});return;}
     this.session = session;
     this.teamOptions = [];
-    apiClient.getTeamDirectory("assignment").then((response) => {
+    apiClient.getTeamDirectory(this.requestMode ? "creation_request" : "assignment").then((response) => {
       if (!Array.isArray(response.teams)) throw Error("团队目录不可用");
       this.directoryTeams = response.teams;
       this.teamOptions = response.teams.map(team => team.name);
@@ -86,6 +115,7 @@ Page({
     const defaultTeam = ["sales", "supervisor"].includes(session.role) ? session.team : "";
     const initialFields = [
       { key: "customer_name", label: "客户名称", value: "", required: true },
+      { key: "company_reference", label: "公司客户编号 / 审批单号", value: "", required: true },
       { key: "industry", label: "所属行业", value: "", required: false },
       { key: "customer_type", label: "客户类型", value: "潜在客户", required: true },
       { key: "level_code", label: "客户优先级", value: "", required: true },
@@ -105,13 +135,16 @@ Page({
       role: session.role,
       roleName: session.roleName || "当前身份",
       creatorName: session.userName,
+      requestMode: this.requestMode,
       draftRestored: Boolean(canRestore),
     });
     this.refresh(fields);
-    this.initRecorder();
+    if (this.data.canVoiceCreate) this.initRecorder();
   },
 
   onUnload() {
+    this.disposed = true;
+    this.requestsSerial = (this.requestsSerial || 0) + 1;
     this.clearRecordTimer();
     if (this.data.isRecording && this.recorderManager) this.recorderManager.stop();
   },
@@ -132,6 +165,7 @@ Page({
   },
 
   openEditor(e) {
+    if (this.data.submitting) return;
     const index = Number(e.currentTarget.dataset.index);
     const field = this.data.fields[index];
     if (!field) return;
@@ -210,6 +244,7 @@ Page({
   },
 
   toggleVoice() {
+    if (!this.data.canVoiceCreate || this.data.submitting) return;
     if (this.data.isParsing || this.data.isStarting || this.data.isStopping) return;
     if (this.data.isRecording) {
       this.setData({ isStopping: true });
@@ -293,46 +328,98 @@ Page({
     wx.showToast({ title: "草稿已保存", icon: "success" });
   },
 
-  // BACKEND-CONTRACT POST /api/v1/customers：下方发出的中文枚举需服务端规范化。
-  // sales 负责人必须由会话固定；supervisor/manager 先建档进待分配池，不能仅信任 target_team。
-  // 本页无独立提交锁；apiClient 自动给此写接口加 Idempotency-Key，后端须实现幂等与同名冲突处理。
-  // 字段与幂等适用范围详见 docs/backend-handoff/客户与商机详解.md。
+  showForm() { this.setData({ activeTab: "form" }); },
+  showRequests() {
+    if (!this.data.canViewRequests) return;
+    this.setData({ activeTab: "requests" });
+    return this.loadRequests(false);
+  },
+  loadMoreRequests() { return this.loadRequests(true); },
+  async loadRequests(append = false) {
+    if (!this.data.canViewRequests || this.data.requestsLoading || (append && !this.data.requestsHasMore)) return;
+    const serial = this.requestsSerial = (this.requestsSerial || 0) + 1;
+    const offset = append ? this.data.requestsNextOffset : 0;
+    this.setData({ requestsLoading: true, requestsError: "" });
+    try {
+      const response = await apiClient.listCustomerCreationRequests({ offset, limit: 20 });
+      if (this.disposed || serial !== this.requestsSerial) return;
+      const labels = { pending: "待审批", approved: "已通过", rejected: "已驳回", cancelled: "已撤回" };
+      const items = (response.items || []).map(item => ({ ...item,
+        customerName: (item.payload || {}).name || "未填写名称",
+        companyReference: (item.payload || {}).company_reference || "",
+        statusLabel: labels[item.status] || item.status,
+        requestedLabel: requestTime(item.requested_at),
+        reviewedLabel: requestTime(item.reviewed_at),
+      }));
+      this.setData({ requests: append ? this.data.requests.concat(items) : items,
+        requestsTotal: response.total || 0, requestsHasMore: response.has_more === true,
+        requestsNextOffset: response.next_offset == null ? 0 : response.next_offset });
+    } catch (error) {
+      if (!this.disposed && serial === this.requestsSerial) this.setData({ requestsError: error.message || "申请加载失败，请重试" });
+    } finally {
+      if (!this.disposed && serial === this.requestsSerial) this.setData({ requestsLoading: false });
+    }
+  },
+  withdrawRequest(e) {
+    if (this.data.withdrawingId) return;
+    const id = e.currentTarget.dataset.id;
+    const item = this.data.requests.find(row => row.id === id && row.status === "pending");
+    if (!item) return;
+    this.setData({ withdrawingId: id });
+    wx.showModal({ title: "撤回建档申请？", content: `撤回“${item.customerName}”后运营将不再审批本次申请。`, confirmText: "撤回申请", confirmColor: "#1677FF",
+      success: async result => {
+        if (!result.confirm) { this.setData({ withdrawingId: "" }); return; }
+        try {
+          await apiClient.withdrawCustomerCreationRequest(id);
+          wx.showToast({ title: "申请已撤回", icon: "success" });
+          await this.loadRequests(false);
+        } catch (error) { wx.showToast({ title: error.message || "撤回失败，请刷新后重试", icon: "none" }); }
+        finally { this.setData({ withdrawingId: "" }); }
+      }, fail: () => this.setData({ withdrawingId: "" }),
+    });
+  },
+  openCustomerClaim() { wx.navigateTo({ url: "/pages/customer-claim/index" }); },
+
+  // 申请仅写申请快照；审批通过后的客户仍须单独认领。两种写入均沿用传输幂等键。
   submitCustomer() {
+    if (this.data.submitting) return;
     if (this.data.missingCount) {
       wx.showToast({ title: `还有 ${this.data.missingCount} 个必填项待补充`, icon: "none" });
       return;
     }
     const values = this.data.fields.reduce((result, item) => { result[item.key] = item.value; return result; }, {});
+    const payload = {
+      name: values.customer_name, company_reference: values.company_reference,
+      industry: values.industry, customer_type: values.customer_type, level_code: values.level_code,
+      source: values.lead_source, target_team: values.target_team,
+      target_team_id: (this.data.fields.find(field => field.key === "target_team") || {}).teamId || undefined,
+      partner_name: values.partner_name, contact_name: values.contact_name,
+      contact_title: values.contact_title, contact_role: values.contact_role,
+    };
+    this.setData({ submitting: true });
     wx.showModal({
-      title: "确认创建新客户？",
-      content: this.data.role === "sales"
-        ? `将创建“${values.customer_name}”，客户负责人固定为本人，不进入下发客户池。`
+      title: this.requestMode ? "确认提交建档申请？" : "确认创建新客户？",
+      content: this.requestMode
+        ? `将提交“${values.customer_name}”的建档申请，运营审批通过后进入客户主档，客户归属仍需另行认领。`
         : `将创建“${values.customer_name}”，并放入${values.target_team}的待分配客户池。`,
-      confirmText: "确认创建",
-      confirmColor: "#1677FF",
-      success: (result) => {
-        if (!result.confirm) return;
-        apiClient.createCustomer({
-          name: values.customer_name,
-          industry: values.industry,
-          customer_type: values.customer_type,
-          level_code: values.level_code,
-          source: values.lead_source,
-          target_team: values.target_team,
-          target_team_id: (this.data.fields.find(field=>field.key==="target_team")||{}).teamId || undefined,
-          partner_name: values.partner_name,
-          contact_name: values.contact_name,
-          contact_title: values.contact_title,
-          contact_role: values.contact_role,
-        }).then((customer) => {
-          wx.setStorageSync("lastCreatedCustomer", {id:customer.id, ownerUserId:getApp().globalData.session.userId, workspaceId:getApp().globalData.session.workspaceId});
+      confirmText: this.requestMode ? "提交申请" : "确认创建", confirmColor: "#1677FF",
+      success: async result => {
+        if (!result.confirm) { this.setData({ submitting: false }); return; }
+        try {
+          wx.setStorageSync(this.draftKey, { creator: this.data.creatorName, fields: this.data.fields, savedAt: Date.now() });
+          const saved = await (this.requestMode ? apiClient.submitCustomerCreationRequest(payload) : apiClient.createCustomer(payload));
+          if (!this.requestMode) wx.setStorageSync("lastCreatedCustomer", { id: saved.id, ownerUserId: this.session.userId, workspaceId: this.session.workspaceId });
           wx.removeStorageSync(this.draftKey);
-          wx.showToast({ title: "客户创建成功", icon: "success" });
-          setTimeout(() => wx.navigateBack(), 850);
-        }).catch((error) => {
-          wx.showToast({ title: error.message || "创建失败，请重试", icon: "none" });
-        });
-      },
+          wx.showToast({ title: this.requestMode ? "申请已提交" : "客户创建成功", icon: "success" });
+          if (this.requestMode) {
+            this.refresh(this.data.fields.map(field => ({ ...field, value: field.key === "target_team" ? field.value : "", edited: false, voiceFilled: false })));
+            this.setData({ voiceParsed: false, draftRestored: false });
+            await this.showRequests();
+          } else setTimeout(() => wx.navigateBack(), 850);
+        } catch (error) {
+          wx.showToast({ title: error.message || "提交失败，草稿已保留，请重试", icon: "none" });
+        } finally { this.setData({ submitting: false }); }
+      }, fail: () => this.setData({ submitting: false }),
     });
   },
 });

@@ -7,17 +7,19 @@ options confer no additional permission on any business read or write.
 from typing import Literal
 from sales_backend.repositories.authorization_checks import require_permission
 
-TeamPurpose = Literal['browse', 'dashboard', 'profile', 'fde', 'assignment']
+TeamPurpose = Literal['browse', 'dashboard', 'profile', 'fde', 'assignment', 'creation_request']
 
 
 async def selectable_teams(connection, actor, purpose: TeamPurpose = 'browse', *, permission=None):
     permissions = {
         'browse': 'directory.read', 'dashboard': 'dashboard.read', 'profile': 'profile.sales_read',
-        'fde': 'profile.fde_read', 'assignment': 'customer.create',
+        'fde': 'profile.fde_read', 'assignment': 'customer.create', 'creation_request': 'directory.read',
     }
     permission = permission or permissions.get(purpose)
     if permission is None:
         raise ValueError('未知团队目录用途')
+    if purpose == 'creation_request':
+        await require_permission(connection, 'customer.create_request')
     await require_permission(connection, permission)
     rows = await connection.fetch(
         """SELECT t.id::text,t.name,t.parent_team_id::text AS parent_id

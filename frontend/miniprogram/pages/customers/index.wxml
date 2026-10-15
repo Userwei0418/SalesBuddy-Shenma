@@ -23,6 +23,7 @@ module.exports={idx:idx,rest:rest,pick:pick};
 <block wx:else>
 <view class="page-shell customer-page">
   <view class="asset-page-heading"><view><view class="asset-page-title">客户经营</view><text class="asset-page-sub">管理客户 {{scopeCustomerCount}} 家 · {{selectedMember !== 'all' ? memberLabel : selectedTeam !== 'all' ? teamLabel : scope}}</text></view><view wx:if="{{canClaimCustomer}}" hover-class="is-pressed" class="map-claim-entry" bindtap="openCustomerClaim">客户认领</view></view>
+  <view wx:if="{{canCreateCustomer}}" class="customer-create-entry" bindtap="openCustomerCreate">{{canRequestCustomer ? "客户建档 · 申请与进度" : "创建客户"}} <text>›</text></view>
   <view class="asset-overview">
     <view class="asset-overview-head"><view class="asset-title-row"><text>{{isFde ? "协作客户整体资产" : "客户资产"}}</text></view><view class="asset-period"><sb-segmented class="asset-period-seg" block size="small" emitSame options="{{assetPeriodOptions}}" value="{{assetPeriod}}" bind:change="onAssetPeriodSegment" /></view></view>
     <view class="asset-metrics">

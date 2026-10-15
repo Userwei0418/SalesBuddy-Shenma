@@ -115,10 +115,10 @@
     "pages/customer-claim/index.json": "e1b5a5f7a46b8c8436226c39a1ce797696f3d52ea57f555286c7b852011e1b93",
     "pages/customer-claim/index.wxml": "400e2062ef1f0e6b6328b094826d1b1ebfd066324cc4ffc5584e1b42548b3e9f",
     "pages/customer-claim/index.wxss": "ea4e2e747bec56aef553ec8673b9efeb7672de996eb507a6e09ccc217f0c8575",
-    "pages/customer-create/index.js": "45da6aada512a7126734f6eb5ad40f68a82564f794ee44d247f921d62d7c6fb8",
+    "pages/customer-create/index.js": "0661897a203710c8d9734d52295b6b7ff918a79b1c6a5b10ed4c59215d1bb56f",
     "pages/customer-create/index.json": "f09217fa72866e6a959f7ffdd253b8a3075dfc9b472e88688bbda80a206d6d96",
-    "pages/customer-create/index.wxml": "26c8f951f85bb80a8ab8720f96bb088c0dcbe2da48298c6f002b85840a467b4e",
-    "pages/customer-create/index.wxss": "aefce508ddfa3adabb174b3ee36dc6d356f4526a1a04af1df793705b5cae0cfb",
+    "pages/customer-create/index.wxml": "bc3023b7133e01f39f4eb2fb71a62cee9e63e669620421fb2954979e0992b52f",
+    "pages/customer-create/index.wxss": "fbca38c6f7809e307942a7f1bf00c6ee4cd7c0e5ca44a818e6a1dc35e50e8dc5",
     "pages/customer-detail/index.js": "991a2e2dcb08ef1dbab30984a522efa1379a3f30efd684ce83dd52ac758e1ad0",
     "pages/customer-detail/index.json": "df14d3fdab3e3a4eff2e7612347f4c549e46fe13a4c88b4c385657a86d2476b6",
     "pages/customer-detail/index.wxml": "37265ddd0c618f822a90755227d3551f4c24d501f79f58e9c8d6e217310a2099",
@@ -129,10 +129,10 @@
     "pages/customer-edit/index.wxss": "270f3e73cbb4f5c6b8ce813c5af728c80d702cbf1e29de495949a837b868208f",
     "pages/customers/battle-map.wxss": "ad4a9cbb4a9257897f0b2ba56dfec8f24e99c2851607ca4603f2670e3d7bcc3a",
     "pages/customers/filter-bar.wxss": "c8602c3bcd9f5e393664e18995904f6600fe9c8e57d7312aabcb221c87c8159c",
-    "pages/customers/index.js": "47e94676680952d3b5dad6921c08638944d36f80ceb624f9385db520f91af3cb",
+    "pages/customers/index.js": "2c7d286017b05655331c3863e3cca54dda77a59193333743e462c293ff286493",
     "pages/customers/index.json": "cfa1fb7b6f04005588d0b5065bddab202fda766782bf1e7a6098ab60fe168373",
-    "pages/customers/index.wxml": "6310fc3018e8ccb5edd8fdd4dbe2ecade842a22f6fd3fcd9af59420e5230d247",
-    "pages/customers/index.wxss": "3420902495c4476cb98a958b65bc3f0ef65883e2a5df5a56d7db45fa80fa69b3",
+    "pages/customers/index.wxml": "ef1127a98db3020f04d40c8d1fad414342ee759022497b3d3b0ba6a99c409238",
+    "pages/customers/index.wxss": "ee35ed31f184e86d4ed2fe1158de3206f8dd5014f90f0d3a0b1ef313a687137a",
     "pages/customers/opportunity-actual-link.wxss": "f4c077e5e004ec50b89f00fc691deea1881696dcbc3b8bd92553254072c750fe",
     "pages/demo-create/index.js": "fb7daef80b103c3835599877a195db1f4130ee3cbcad713f2e4f137b748cb0af",
     "pages/demo-create/index.json": "a48b8707f42c3dd206046c14303f1e1b2e7468e83f010aa08765168dd7bfdf21",
@@ -215,9 +215,9 @@
     "styles/opportunity-list-header.wxss": "82d768ed4eddc0db507cb9e4aedae0bdeb73a21b766d0b883b526f03fd0b1f5c",
     "styles/role-controls.wxss": "d427f94bc89ed41c0176fa05edb30c18181445d05c65611741afd9bd1f0802c6",
     "templates/opportunity-list-card.wxml": "8b41be8608b50fae5b7ff79378f7e1e962abd8e4fb356abcf59ee2808aa4c77a",
-    "utils/access.js": "2f52dc286f5fc9b7aaffd78d9b0e2bfabd423b19400cf9b909d708d10f724aac",
+    "utils/access.js": "bcdeafc98d7e8d36c795034c406a018469662371687250cba4f4bbc929016795",
     "utils/advicePool.js": "1faab011c5159802af698d4f3c56ba53a7b145bdc96453af32b6c3461bc68b40",
-    "utils/apiClient.js": "8e2cb910348143032518d39e11e48c25e93e1dd04f4c3a700433493bf8c681b1",
+    "utils/apiClient.js": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
     "utils/businessOptions.js": "a0d3788253aee49d25f341658b135bfc77c20f7c9310ecf995d3d596949c89f1",
     "utils/customerAdvice.js": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
     "utils/customerDetail.js": "078fcd27265c32abaf54e9894d69c854288886e24be6e8e45898e2f00fbc30d3",
@@ -249,7 +249,7 @@
     "utils/quadrant.js": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
     "utils/rankingDisplay.js": "b0f0eda8f9cd5688becf74d8800b4221a53708f4ca38f3e854530c5000df8385",
     "utils/rememberedLogin.js": "6c890b1a7a54cc3eb19c5239512da1628d04f1705287a763aaa039976c7df3cd",
-    "utils/requestIdentity.js": "fd7610af8d854a1fd232c03c5d683894bae9a87133e355e6ab9ad98ce3e61365",
+    "utils/requestIdentity.js": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
     "utils/statusLight.js": "cd71de6a2b3f0f2d08e1286f26b9f5ab371041c97acc03c0a71875271fb9ca43",
     "utils/taskOverview.js": "c3bf26ac5eb483a58eee7883cc17617184ad926e534ff8a492e0d716d90374d5",
     "utils/taskRecipients.js": "9873b71874665ee7ba1fabf8de14f79bc39883a3d1e45f8bbef55b328c14cc4e",
@@ -274,5 +274,77 @@
     "Approved ShenZhou opportunity create button removal",
     "Approved eight-field opportunity appearance presentation"
   ],
-  "source_note": "Imported through scripts/import_source.py from the user-confirmed full 1.0.9 working copy; not a checksum-only bypass."
+  "source_note": "Imported through scripts/import_source.py from the user-confirmed full 1.0.9 working copy; not a checksum-only bypass.",
+  "reviewed_patches": [
+    {
+      "name": "shenma-s2-customer-creation-requests-20261015",
+      "reason": "Reviewed S2 business flow in both Shenma sources; preserve Web blue layout and native component markup differences. Local candidate only; no release version change.",
+      "expected_manifest_sha256": "f16014149df8f97c4fb0715fe17e8e7267b5b326772477b6a90bc72256026a80",
+      "files": [
+        {
+          "path": "pages/customer-create/index.js",
+          "expected_previous_sha256": "45da6aada512a7126734f6eb5ad40f68a82564f794ee44d247f921d62d7c6fb8",
+          "expected_current_sha256": "0661897a203710c8d9734d52295b6b7ff918a79b1c6a5b10ed4c59215d1bb56f",
+          "expected_native_sha256": "bf0457798e4fbb2151a6b0e4c46d112468581d7ee65610e5c9ee5cca6d1d7140",
+          "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        },
+        {
+          "path": "pages/customer-create/index.wxml",
+          "expected_previous_sha256": "26c8f951f85bb80a8ab8720f96bb088c0dcbe2da48298c6f002b85840a467b4e",
+          "expected_current_sha256": "bc3023b7133e01f39f4eb2fb71a62cee9e63e669620421fb2954979e0992b52f",
+          "expected_native_sha256": "b6e7e3dca0f1a76afc8e47ea240fb0465aba5ba78ba9ce5e747f2b89240b5687",
+          "reason": "S2 tabs, application list or entry only. Keep original Web markup/styles and blue theme; native summary/sheet/bottom-bar components were not copied."
+        },
+        {
+          "path": "pages/customer-create/index.wxss",
+          "expected_previous_sha256": "aefce508ddfa3adabb174b3ee36dc6d356f4526a1a04af1df793705b5cae0cfb",
+          "expected_current_sha256": "fbca38c6f7809e307942a7f1bf00c6ee4cd7c0e5ca44a818e6a1dc35e50e8dc5",
+          "expected_native_sha256": "ff7286ecf767bdffeac180822343797aa759091064e72bdd613a6fe629430665",
+          "reason": "S2 tabs, application list or entry only. Keep original Web markup/styles and blue theme; native summary/sheet/bottom-bar components were not copied."
+        },
+        {
+          "path": "pages/customers/index.js",
+          "expected_previous_sha256": "47e94676680952d3b5dad6921c08638944d36f80ceb624f9385db520f91af3cb",
+          "expected_current_sha256": "2c7d286017b05655331c3863e3cca54dda77a59193333743e462c293ff286493",
+          "expected_native_sha256": "23e1366a5ba6294b7620f6a0dbb85416a0569d9fd92596238accccc3a54a74b6",
+          "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        },
+        {
+          "path": "pages/customers/index.wxml",
+          "expected_previous_sha256": "6310fc3018e8ccb5edd8fdd4dbe2ecade842a22f6fd3fcd9af59420e5230d247",
+          "expected_current_sha256": "ef1127a98db3020f04d40c8d1fad414342ee759022497b3d3b0ba6a99c409238",
+          "expected_native_sha256": "ab5049f2ea87339b56a34687e91c3ee6dbbeac6b1173a095f85507ece83a0973",
+          "reason": "S2 tabs, application list or entry only. Keep original Web markup/styles and blue theme; native summary/sheet/bottom-bar components were not copied."
+        },
+        {
+          "path": "pages/customers/index.wxss",
+          "expected_previous_sha256": "3420902495c4476cb98a958b65bc3f0ef65883e2a5df5a56d7db45fa80fa69b3",
+          "expected_current_sha256": "ee35ed31f184e86d4ed2fe1158de3206f8dd5014f90f0d3a0b1ef313a687137a",
+          "expected_native_sha256": "88881cfe7ceaccee1abf796d7565d97a5a0eafa183fcd80dc9033dcbf7988429",
+          "reason": "S2 tabs, application list or entry only. Keep original Web markup/styles and blue theme; native summary/sheet/bottom-bar components were not copied."
+        },
+        {
+          "path": "utils/access.js",
+          "expected_previous_sha256": "2f52dc286f5fc9b7aaffd78d9b0e2bfabd423b19400cf9b909d708d10f724aac",
+          "expected_current_sha256": "bcdeafc98d7e8d36c795034c406a018469662371687250cba4f4bbc929016795",
+          "expected_native_sha256": "bcdeafc98d7e8d36c795034c406a018469662371687250cba4f4bbc929016795",
+          "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        },
+        {
+          "path": "utils/apiClient.js",
+          "expected_previous_sha256": "8e2cb910348143032518d39e11e48c25e93e1dd04f4c3a700433493bf8c681b1",
+          "expected_current_sha256": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
+          "expected_native_sha256": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
+          "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        },
+        {
+          "path": "utils/requestIdentity.js",
+          "expected_previous_sha256": "fd7610af8d854a1fd232c03c5d683894bae9a87133e355e6ab9ad98ce3e61365",
+          "expected_current_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
+          "expected_native_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
+          "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        }
+      ]
+    }
+  ]
 }

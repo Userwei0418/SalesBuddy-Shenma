@@ -16,7 +16,8 @@ from migrate import migrate
 
 
 async def main(serve=None):
-    config = {"host": os.environ.get("PGHOST", "/tmp"), "user": os.environ.get("PGUSER", "postgres")}
+    config = {"host": os.environ.get("PGHOST", "/tmp"), "user": os.environ.get("PGUSER", "postgres"),
+              "port": int(os.environ.get("PGPORT", "5432"))}
     admin = await asyncpg.connect(database="postgres", **config)
     suffix = uuid.uuid4().hex[:12]
     name = "salegent_verify_integration_" + suffix
@@ -24,7 +25,8 @@ async def main(serve=None):
     conn = None
     created_role = False
     try:
-        await admin.execute(f'CREATE DATABASE "{name}" TEMPLATE template0')
+        # Minimal local clusters may use SQL_ASCII; Chinese JSON acceptance needs UTF8.
+        await admin.execute(f'CREATE DATABASE "{name}" TEMPLATE template0 ENCODING \'UTF8\'')
         conn = await asyncpg.connect(database=name, **config)
         await migrate(conn)
         await admin.execute(f'CREATE ROLE "{role}" NOLOGIN NOSUPERUSER NOBYPASSRLS')
@@ -134,7 +136,7 @@ async def main(serve=None):
             return
         env = {
             **os.environ,
-            "SALES_TEST_DATABASE_URL": f"postgresql://{config['user']}@/{name}?host={config['host']}",
+            "SALES_TEST_DATABASE_URL": f"postgresql://{config['user']}@/{name}?host={config['host']}&port={config['port']}",
             "SALES_TEST_ROLE": role,
             "SALES_TEST_WORKSPACE": "demo-sales-workspace",
             "PYTHONDONTWRITEBYTECODE": "1",

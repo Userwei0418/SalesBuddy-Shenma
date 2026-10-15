@@ -162,6 +162,9 @@ Page({
     this.mapLoadSerial = (this.mapLoadSerial || 0) + 1;
     this.assetSerial = (this.assetSerial || 0) + 1;
   },
+  openCustomerCreate() {
+    wx.navigateTo({ url: "/pages/customer-create/index" });
+  },
   openCustomerClaim() {
     wx.navigateTo({ url: "/pages/customer-claim/index" });
   },

@@ -9,15 +9,20 @@ from sales_backend.api.exports import csv_response
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.management_dependencies import get_management_identity
 from sales_backend.contracts.customer_profile import CustomerProfileUpdate
+from sales_backend.contracts.customer_creation import (
+    CustomerCreationRequestDecision, CustomerCreationRequestPage, CustomerCreationRequestResult,
+)
 from sales_backend.contracts.detail_reads import OperationsCustomerHistory, OperationsCustomerOverview
 from sales_backend.db import Database
 from sales_backend.repositories.customer_mutations import CustomerMutationRepository
+from sales_backend.repositories.customer_creation_requests import CustomerCreationRequestRepository
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.operations_customers import OperationsCustomerRepository
 from sales_backend.services.operations import management_write
 
 router = APIRouter(prefix="/api/v1/console", tags=["Operations customers"])
 repository = OperationsCustomerRepository()
+creation_repository = CustomerCreationRequestRepository()
 
 
 class ClaimDecision(BaseModel):
@@ -32,6 +37,42 @@ class OwnershipRelease(BaseModel):
 
 class LegacyResolution(OwnershipRelease):
     owner_user_ref_id: UUID
+
+
+@router.get("/customer-creation-requests", response_model=CustomerCreationRequestPage,
+            description="运营查看客户建档申请队列。")
+async def creation_requests(
+    status: Literal["pending", "approved", "rejected", "cancelled", "all"] = "pending",
+    q: str | None = Query(default=None, max_length=100),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=100000),
+    identity: RequestIdentity = Depends(get_management_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        return await creation_repository.queue(
+            connection, identity.actor, status=status, q=q, limit=limit, offset=offset
+        )
+
+
+@router.post("/customer-creation-requests/{request_id}/decision", response_model=CustomerCreationRequestResult)
+async def decide_creation_request(
+    request_id: UUID,
+    body: CustomerCreationRequestDecision,
+    idempotency_key: MutationKey = None,
+    identity: RequestIdentity = Depends(get_management_identity),
+    database: Database = Depends(get_database),
+):
+    return await management_write(
+        database,
+        identity.actor,
+        idempotency_key,
+        f"customer_creation_request.decide:{request_id}",
+        body.model_dump(),
+        lambda connection: creation_repository.decide(
+            connection, identity.actor, str(request_id), body.decision, body.reason
+        ),
+    )
 
 
 @router.get("/summary")

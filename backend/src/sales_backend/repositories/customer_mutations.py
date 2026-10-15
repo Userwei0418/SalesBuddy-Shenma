@@ -200,6 +200,24 @@ class CustomerMutationRepository:
         if len(matches) != 1:
             raise PermissionError("请选择当前管理范围内的有效业务团队")
         team = matches[0]
+        # Serialize both direct entry and approvals before checking name/reference.
+        # No unique index is imposed on existing customer data during this upgrade.
+        await connection.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended($1||':customer-name:'||"
+            "lower(regexp_replace($2, '\\s+', '', 'g')),0))",
+            actor.workspace_id, data['name'],
+        )
+        await connection.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended($1||':customer-reference:'||lower(btrim($2)),0))",
+            actor.workspace_id, data['company_reference'],
+        )
+        duplicate_reference = await connection.fetchval(
+            "SELECT EXISTS(SELECT 1 FROM crm.customer WHERE workspace_id=$1::uuid AND deleted_at IS NULL "
+            "AND lower(btrim(company_reference))=lower(btrim($2)))",
+            actor.workspace_id, data['company_reference'],
+        )
+        if duplicate_reference:
+            raise FileExistsError("公司客户编号或审批单号已用于其他客户，请核对已有档案")
         duplicate = await connection.fetchval(
             """
             SELECT EXISTS(SELECT 1 FROM crm.customer

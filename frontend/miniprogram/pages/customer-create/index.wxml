@@ -1,14 +1,37 @@
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
 <block wx:else>
 <view class="create-page">
-  <view class="create-hero"><sb-summary-card title="创建新客户" subtitle="{{role === 'sales' ? '手动填写或语音生成草案，创建后仅归属本人' : '手动填写或语音生成草案，确认后进入待分配客户池'}}" meta="{{roleName}} · {{creatorName}}" progress="{{progressPercent}}" progressLabel="必填 {{completedRequiredCount}} / {{requiredCount}}" /></view>
+  <view wx:if="{{canViewRequests}}" class="creation-tabs">
+    <view class="creation-tab {{activeTab === 'form' ? 'selected' : ''}}" bindtap="showForm">填写申请</view>
+    <view class="creation-tab {{activeTab === 'requests' ? 'selected' : ''}}" bindtap="showRequests">我的申请</view>
+  </view>
+  <view wx:if="{{activeTab === 'requests'}}" class="creation-requests">
+    <view class="creation-list-head"><text>我的建档申请 · {{requestsTotal}} 条</text><view bindtap="showRequests">刷新</view></view>
+    <view wx:if="{{requestsError}}" class="creation-state creation-error" bindtap="showRequests">{{requestsError}} · 点击重试</view>
+    <view wx:if="{{requestsLoading}}" class="creation-state">正在加载申请…</view>
+    <view wx:elif="{{!requests.length && !requestsError}}" class="creation-state">暂无建档申请，可在“填写申请”提交新客户。</view>
+    <view wx:for="{{requests}}" wx:key="id" class="creation-request-card">
+      <view class="creation-request-head"><text>{{item.customerName}}</text><label class="creation-status status-{{item.status}}">{{item.statusLabel}}</label></view>
+      <view class="creation-request-meta">编号 / 审批单号：{{item.companyReference || '未填写'}}</view>
+      <view class="creation-request-meta">提交时间：{{item.requestedLabel}}</view>
+      <view wx:if="{{item.reviewedLabel}}" class="creation-request-meta">处理时间：{{item.reviewedLabel}} {{item.reviewer_name || ''}}</view>
+      <view wx:if="{{item.decision_reason}}" class="creation-request-reason">{{item.status === 'rejected' ? '驳回原因' : '处理说明'}}：{{item.decision_reason}}</view>
+      <view wx:if="{{item.status === 'approved'}}" class="creation-request-note">客户已建档。客户归属需另行申请认领，审批通过后生效。</view>
+      <button wx:if="{{item.status === 'approved' && canClaimCustomer}}" class="creation-request-action" bindtap="openCustomerClaim">前往客户认领</button>
+      <button wx:if="{{item.status === 'pending'}}" class="creation-request-action" disabled="{{!!withdrawingId}}" data-id="{{item.id}}" bindtap="withdrawRequest">{{withdrawingId === item.id ? '处理中…' : '撤回申请'}}</button>
+    </view>
+    <button wx:if="{{requestsHasMore}}" class="creation-load-more" loading="{{requestsLoading}}" disabled="{{requestsLoading}}" bindtap="loadMoreRequests">加载更多</button>
+  </view>
+  <block wx:if="{{activeTab === 'form'}}">
+
+  <view class="create-hero"><sb-summary-card title="{{requestMode ? '申请新客户' : '创建新客户'}}" subtitle="{{requestMode ? '手动填写客户资料，提交运营审批后建档' : role === 'sales' ? '手动填写或语音生成草案，创建后仅归属本人' : '手动填写或语音生成草案，确认后进入待分配客户池'}}" meta="{{roleName}} · {{creatorName}}" progress="{{progressPercent}}" progressLabel="必填 {{completedRequiredCount}} / {{requiredCount}}" /></view>
 
   <view class="create-body">
     <view wx:if="{{draftRestored}}" class="notice blue">已恢复你上次保存的建档草稿，可继续编辑。</view>
     <view wx:if="{{voiceParsed}}" class="notice green">语音草案已填入，请重点核对客户名称、客户类型和联系人信息。</view>
     <view wx:elif="{{missingCount}}" class="notice orange">还有 {{missingCount}} 个必填项待补充，所有内容提交前均可修改。</view>
 
-    <view class="voice-card {{isRecording ? 'recording' : ''}} {{isParsing ? 'parsing' : ''}}" hover-class="row-pressed" bindtap="toggleVoice" aria-role="button">
+    <view wx:if="{{canVoiceCreate}}" class="voice-card {{isRecording ? 'recording' : ''}} {{isParsing ? 'parsing' : ''}}" hover-class="row-pressed" bindtap="toggleVoice" aria-role="button">
       <view class="voice-icon"><view class="wave"><text></text><text></text><text></text><text></text><text></text></view></view>
       <view class="voice-copy">
         <view>{{isStarting ? '正在启动录音' : isStopping ? '正在结束录音' : isParsing ? '正在识别并填充字段' : isRecording ? '正在语音录入 ' + recordingTime : voiceParsed ? '重新语音填写客户信息' : '语音填写客户信息'}}</view>
@@ -26,7 +49,7 @@
     </view>
   </view>
 
-  <sb-bottom-bar class="bottom-bar" secondaryLabel="保存草稿" bind:secondary="saveDraft" primaryLabel="创建客户" inactive="{{missingCount > 0}}" disabledReason="还有 {{missingCount}} 个必填项待补充" bind:primary="submitCustomer" />
+  <sb-bottom-bar class="bottom-bar" secondaryLabel="保存草稿" bind:secondary="saveDraft" primaryLabel="{{requestMode ? '提交建档申请' : '创建客户'}}" loading="{{submitting}}" loadingLabel="提交中…" secondaryDisabled="{{submitting}}" inactive="{{missingCount > 0}}" disabledReason="还有 {{missingCount}} 个必填项待补充" bind:primary="submitCustomer" />
 
   <sb-sheet visible="{{editorVisible}}" title="{{editorTitle}}" confirmLabel="保存修改" bind:confirm="saveEditor" bind:close="closeEditor">
     <view class="editor-body">
@@ -36,9 +59,10 @@
         <view wx:if="{{editorOptions.length <= 8}}" class="option-grid"><view wx:for="{{editorOptions}}" wx:key="label" class="option-item {{item.selected ? 'selected' : ''}}" hover-class="is-pressed" data-index="{{index}}" bindtap="selectOption" aria-role="radio" aria-checked="{{!!item.selected}}">{{item.label}}</view></view>
         <view wx:else class="option-list"><t-cell wx:for="{{editorOptions}}" wx:key="label" title="{{item.label}}" hover data-index="{{index}}" right-icon="{{item.selected ? 'check' : ''}}" bind:click="selectOption" /></view>
       </block>
-      <view class="editor-helper">{{role === 'sales' ? '修改只会更新当前草案；创建后客户负责人自动设为本人。' : '修改只会更新当前草案，点击“创建客户”后才会写入待分配客户池。'}}</view>
+      <view class="editor-helper">{{requestMode ? '审批通过后建档，客户归属仍需另行认领。' : '修改只会更新当前草案，点击“创建客户”后才会写入待分配客户池。'}}</view>
     </view>
   </sb-sheet>
+  </block>
 </view>
 
 </block>

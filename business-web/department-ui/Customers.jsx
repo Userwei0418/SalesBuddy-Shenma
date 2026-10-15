@@ -114,7 +114,7 @@ export default function Customers({page, data: d, invoke}) {
           emptyText={d.mapLoading ? '正在加载客户…' : '这个范围还没有客户。先在客户列表登记关系和潜力。'} emptyAction={{label: '清除筛选', onClick: reset}} />
       </aside>
       <section className="ds-customer-list" aria-label="客户列表">
-        <header><h2>活跃客户 <span className="ds-customer-count">{d.mapLoading ? '—' : count}</span></h2><Button size="small" onClick={() => {setShowPending(!showPending);changePage(1);}}>{showPending ? '返回已定位客户' : `待评估 ${unrated} 家`}</Button>{d.canClaimCustomer && <Button type="primary" size="small" onClick={() => invoke('openCustomerClaim')}>客户认领</Button>}</header>
+        <header><h2>活跃客户 <span className="ds-customer-count">{d.mapLoading ? '—' : count}</span></h2><Button size="small" onClick={() => {setShowPending(!showPending);changePage(1);}}>{showPending ? '返回已定位客户' : `待评估 ${unrated} 家`}</Button>{d.canCreateCustomer && <Button size="small" onClick={() => invoke('openCustomerCreate')}>{d.canRequestCustomer ? '客户建档 · 申请与进度' : '创建客户'}</Button>}{d.canClaimCustomer && <Button type="primary" size="small" onClick={() => invoke('openCustomerClaim')}>客户认领</Button>}</header>
         <p className="ds-muted ds-sync-note">近 6 个月有有效跟进 · {showPending ? '未取得完整评分，不绘制地图点' : '仅展示已定位客户'}{d.activitySince ? ` · 起始 ${d.activitySince}` : ''}</p>
         <div className="ds-customer-table-viewport" ref={tableViewport}>
           <SbTable rowKey="id" density="compact" columns={columns} rows={customers.slice((currentPage - 1) * pageSize, currentPage * pageSize)} state={state}

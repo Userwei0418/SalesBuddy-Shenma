@@ -67,6 +67,7 @@ function supports(options) {
   if(options.method==='DELETE' && /^\/demo-scenes\/[^/?]+$/.test(options.path)) return true;
   if(options.method==='PUT' && /^\/opportunities\/[^/?]+\/fde-members$/.test(options.path)) return true;
   return ['POST','PATCH'].includes(options.method) && (
+    /^\/customers\/creation-requests(?:\/[^/?]+\/withdraw)?$/.test(options.path) ||
     /^\/customers(?:\/[^/?]+(?:\/(?:assignments|claims|opportunities))?)?$/.test(options.path) ||
     /^\/tasks(?:\/batch|\/[^/?]+\/events)?$/.test(options.path) ||
     /^\/advice\/suggestions\/[^/?]+\/decision$/.test(options.path) ||
