@@ -3,6 +3,19 @@
   "customer_history": "c991b693",
   "expected_schema": "V399",
   "mapping": "internal version + 148; upstream gaps intentionally retained",
+  "reviewed_service_policy": {
+    "source_revision": "e40a8029d94a03fc45448e00d536e5a5b9120831",
+    "source_path": "tools/installation/runtime_permissions.json",
+    "path": "tests/fixtures/upstream_e40_runtime_permissions.json",
+    "sha256": "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d",
+    "services": [
+      "api",
+      "worker"
+    ],
+    "intentional_exceptions": {
+      "crm.customer_creation_request": "No direct INSERT or table UPDATE; SELECT and UPDATE(reviewed_payload) only."
+    }
+  },
   "preserved_customer_migrations": [
     {
       "path": "V035__visit_closed_loop.sql",
@@ -520,7 +533,7 @@
     },
     {
       "path": "migrations/V399__shenma_whole_121_delivery_guards.sql",
-      "sha256": "ee43b1155ad1465e06e08de583490453e77b2bbacb648adeb76b9b15c6c345c4"
+      "sha256": "e17ea4bb283640eb4cceb2d8be0890f56c0c8ba6c2b2fcbf1c6c85b97b445f9e"
     }
   ],
   "migrations": [

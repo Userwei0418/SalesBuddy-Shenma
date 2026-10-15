@@ -93,15 +93,20 @@ async def test_peer_connect_restores_root_even_when_handshake_fails(monkeypatch,
     from tests.system import shenma_whole_single_job as runner
     calls = []
     identity = {"uid": 0}
+    for key in ("HOME", "USER", "LOGNAME"):
+        monkeypatch.setenv(key, "/root" if key == "HOME" else "root")
     monkeypatch.setattr(runner.os, "getuid", lambda: 0)
     monkeypatch.setattr(runner.os, "geteuid", lambda: identity["uid"])
     def seteuid(uid):
         calls.append(uid)
         identity["uid"] = uid
     monkeypatch.setattr(runner.os, "seteuid", seteuid)
-    monkeypatch.setattr(runner.pwd, "getpwnam", lambda name: SimpleNamespace(pw_uid=123))
+    monkeypatch.setattr(runner.pwd, "getpwnam", lambda name: SimpleNamespace(
+        pw_uid=123, pw_name="postgres", pw_dir="/var/lib/postgresql"))
     async def connect(dsn):
         assert identity["uid"] == 123
+        assert runner.os.environ["HOME"] == "/var/lib/postgresql"
+        assert runner.os.environ["USER"] == runner.os.environ["LOGNAME"] == "postgres"
         if failure:
             raise RuntimeError("synthetic handshake failed")
         return "authenticated-maintenance-connection"
@@ -112,12 +117,18 @@ async def test_peer_connect_restores_root_even_when_handshake_fails(monkeypatch,
     else:
         assert await runner.connect_maintenance("postgresql://private.invalid/db", use_peer=True)
     assert calls == [123, 0] and identity["uid"] == 0
+    assert runner.os.environ["HOME"] == "/root"
+    assert runner.os.environ["USER"] == runner.os.environ["LOGNAME"] == "root"
 
 
 def test_peer_runtime_identity_drop_clears_groups_before_gid_uid(monkeypatch):
     from tests.system import shenma_whole_single_job as runner
     state = {"uid": 0, "gid": 0, "groups": [0, 1]}
     calls = []
+    for key in ("HOME", "USER", "LOGNAME"):
+        monkeypatch.setenv(key, "/root" if key == "HOME" else "root")
+    cwd = []
+    monkeypatch.setattr(runner.os, "chdir", cwd.append)
     for name, field in (("getuid", "uid"), ("geteuid", "uid"),
                         ("getgid", "gid"), ("getegid", "gid"), ("getgroups", "groups")):
         monkeypatch.setattr(runner.os, name, lambda field=field: state[field])
@@ -126,8 +137,43 @@ def test_peer_runtime_identity_drop_clears_groups_before_gid_uid(monkeypatch):
             calls.append((name, value))
             state[field] = value
         monkeypatch.setattr(runner.os, name, update)
-    monkeypatch.setattr(runner.pwd, "getpwnam", lambda name: SimpleNamespace(pw_uid=456, pw_gid=789))
+    monkeypatch.setattr(runner.pwd, "getpwnam", lambda name: SimpleNamespace(pw_uid=456, pw_gid=789,
+        pw_name="shenma-sales", pw_dir="/var/lib/shenma-sales"))
     assert runner.drop_to_runtime() == 456
     assert calls == [("setgroups", []), ("setgid", 789), ("setuid", 456)]
+    assert cwd == [runner.PUBLIC_BACKEND]
+    assert runner.os.environ["HOME"] == "/var/lib/shenma-sales"
+    assert runner.os.environ["USER"] == runner.os.environ["LOGNAME"] == "shenma-sales"
     with pytest.raises(ValueError):
         runner.drop_to_runtime()
+
+
+@pytest.mark.parametrize("path,category", [
+    ("/root/.postgresql/root.crt", "root_home"),
+    ("/var/lib/postgresql/.postgresql/root.crt", "postgres_home_probe"),
+    ("/etc/shenma-sales/private-keyring.json", "runtime_credential_file"),
+    ("/var/lib/shenma-model-key/private.json", "runtime_credential_file"),
+    ("/opt/shenma-sales/releases/opaque/backend/module.py", "candidate_release"),
+    ("/unknown/private-business-name", "other"),
+    (None, "unavailable"),
+])
+def test_exact_runner_permission_diagnostic_never_exposes_path_or_message(path, category):
+    import json
+
+    from tests.system import shenma_whole_single_job as runner
+    runner.stage("runtime_connect")
+    error = PermissionError(13, "synthetic-secret-message", path)
+    result = runner.failure_diagnostic(error)
+    assert result["stage"] == "runtime_connect" and result["errno"] == 13
+    assert result["errno_name"] == "EACCES" and result["path_category"] == category
+    serialized = json.dumps(result)
+    assert "synthetic-secret-message" not in serialized
+    if path is not None:
+        assert path not in serialized
+
+
+def test_identity_environment_rejects_root_home_before_identity_switch():
+    from tests.system import shenma_whole_single_job as runner
+    for path in ("/root", "/root/private", "relative-home"):
+        with pytest.raises(ValueError):
+            runner.identity_environment(SimpleNamespace(pw_name="shenma-sales", pw_dir=path))

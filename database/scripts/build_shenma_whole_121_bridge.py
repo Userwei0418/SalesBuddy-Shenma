@@ -14,7 +14,9 @@ from pathlib import Path
 
 SOURCE_REVISION = "e40a8029d94a03fc45448e00d536e5a5b9120831"
 ROOT = Path(__file__).resolve().parents[1]
+POLICY_SHA256 = "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d"
 MANIFEST = ROOT / "shenma_whole_121_manifest.json"
+SERVICE_POLICY = ROOT / "tests/fixtures/upstream_e40_runtime_permissions.json"
 
 
 def digest(value):
@@ -90,9 +92,14 @@ def main():
     parser.add_argument("--upstream-database", type=Path)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
+    assert digest(SERVICE_POLICY.read_bytes()) == POLICY_SHA256, (
+        "Pinned e40 policy changed"
+    )
     if args.check:
         manifest = json.loads(MANIFEST.read_text())
         assert manifest["source_revision"] == SOURCE_REVISION
+        policy = manifest["reviewed_service_policy"]
+        assert digest((ROOT / policy["path"]).read_bytes()) == policy["sha256"]
         for entry in manifest["migrations"]:
             assert (
                 digest((ROOT / entry["target"]).read_bytes()) == entry["target_sha256"]
@@ -172,6 +179,16 @@ def main():
                 "customer_history": "c991b693",
                 "expected_schema": "V399",
                 "mapping": "internal version + 148; upstream gaps intentionally retained",
+                "reviewed_service_policy": {
+                    "source_revision": SOURCE_REVISION,
+                    "source_path": "tools/installation/runtime_permissions.json",
+                    "path": str(SERVICE_POLICY.relative_to(ROOT)),
+                    "sha256": digest(SERVICE_POLICY.read_bytes()),
+                    "services": ["api", "worker"],
+                    "intentional_exceptions": {
+                        "crm.customer_creation_request": "No direct INSERT or table UPDATE; SELECT and UPDATE(reviewed_payload) only."
+                    },
+                },
                 "preserved_customer_migrations": preserved,
                 "customer_adapters": [
                     {

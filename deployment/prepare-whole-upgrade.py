@@ -89,6 +89,9 @@ def main():
                 upgrade.run(["/usr/sbin/runuser", "-u", "postgres", "--", "env", "DATABASE_URL=postgresql:///" + database + "?host=/var/run/postgresql",
                              str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert upgrade.sql(database, "SELECT max(version) FROM ops.schema_migration") == args.target_schema
+        # pg_dump does not retain planner statistics. Refresh the restored
+        # database before exercising RLS-heavy pages and report snapshots.
+        upgrade.sql(database, "ANALYZE")
         assert upgrade.preserved_snapshot(database, before["columns"]) == before, "Existing customer rows changed"
         assert all(row["status"] == "unchanged" for row in json.loads((backup / "migration-repeat.json").read_text()))
         receipt = {name: getattr(args, name) for name in ("revision", "expected_current", "expected_schema", "target_schema", "archive_sha256", "wheels_sha256")}
@@ -96,6 +99,7 @@ def main():
                        preserved_tables=len(before["rows"]), source_database="shenma_sales",
                        snapshot_sha256=hashlib.sha256((backup / "database.dump").read_bytes()).hexdigest(),
                        production_services_changed=False, validation_database=database if args.keep_verified_clone else None,
+                       statistics_refreshed=True,
                        receipt=str(backup / "preflight.json"))
         (backup / "preservation.json").write_text(json.dumps(before, indent=2) + "\n")
         (backup / "preflight.json").write_text(json.dumps(receipt, indent=2) + "\n")

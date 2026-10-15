@@ -92,6 +92,15 @@ async def generation_material(connection, actor, template, facts, dependencies):
     return scope, prepared
 
 
+async def _require_overview_schema(connection):
+    # Shenma preserves its own ledger and maps the original V236 to V384.
+    # Only the exact feature migration proves the frozen trigger is present.
+    if not await connection.fetchval(
+        "SELECT EXISTS(SELECT 1 FROM ops.schema_migration WHERE version IN ('V236','V384'))"
+    ):
+        raise WorkReportError('WORK_REPORT_INVALID_INPUT', '统一概览冻结数据库版本尚未就绪', status=409)
+
+
 async def read(connection, actor, selection, request_id, settings):
     now = await connection.fetchval('SELECT transaction_timestamp()')
     selection = selection.model_copy(update={'period': PeriodSelection(**{
@@ -117,8 +126,7 @@ async def read(connection, actor, selection, request_id, settings):
         else:
             # The document trigger must understand frozen overview context; do
             # not generate an apparently complete report on the old schema.
-            if not await connection.fetchval("SELECT EXISTS(SELECT 1 FROM ops.schema_migration WHERE version='V236')"):
-                raise WorkReportError('WORK_REPORT_INVALID_INPUT', '统一概览冻结数据库版本尚未就绪', status=409)
+            await _require_overview_schema(connection)
             version = await access.permission_version(connection, actor)
             expiry = now + TTL
             claims = dict(iss=settings.access_token_issuer, aud=settings.access_token_audience + ':' + PURPOSE,

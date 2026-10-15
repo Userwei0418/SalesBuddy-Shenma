@@ -225,6 +225,7 @@ def main():
             run(["/usr/sbin/runuser", "-u", "postgres", "--", "env", "DATABASE_URL=postgresql:///shenma_sales?host=/var/run/postgresql",
                  str(python), str(new / "database/scripts/migrate.py")], stdout=stream)
         assert all(item["status"] == "unchanged" for item in json.loads((backup / "migration-repeat.json").read_text()))
+        sql("shenma_sales", "ANALYZE")
         switch(root, "current", new)
         switched = True
         # Do not consume a queue or send notifications until the new API and

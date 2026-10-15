@@ -58,7 +58,7 @@ class MeetingSQL(SQL):
     async def fetchval(self, sql, *args):
         if "security.work_report_source_access(" in sql:
             return not any(s["record_id"] in self.inaccessible for s in args[0])
-        if "WHERE version='V235'" in sql:
+        if "WHERE version IN ('V235','V383')" in sql:
             return SINCE
         if sql in {
             'SELECT bool_and(COALESCE(security.authorization_customer($1,ident),false)) FROM unnest($2::uuid[]) AS ident',

@@ -36,9 +36,14 @@ async def through(conn, version):
         return await migrate(conn, root)
 
 
-async def seed(conn):
+async def seed(conn, runtime_role=None):
     await through(conn, 68)
     ws, team, sales, customer, visit, _ = await fixture_before_upgrade(conn)
+    if runtime_role is not None:
+        # Production has used its restricted runtime since the V125 bootstrap.
+        # ACL migrations must observe that role, not a post-V159 synthetic role.
+        await through(conn, 125)
+        await runtime(conn, runtime_role)
     await through(conn, 159)
     await conn.execute(
         "INSERT INTO config.account_authorization(workspace_id,user_ref_id) VALUES($1,$2) ON CONFLICT DO NOTHING",
@@ -542,8 +547,7 @@ async def run_case(admin, cfg, pre_s2, results):
     await admin.execute(f'CREATE DATABASE "{name}" TEMPLATE template0')
     try:
         conn = await asyncpg.connect(database=name, **cfg)
-        f = await seed(conn)
-        await runtime(conn, role)
+        f = await seed(conn, role)
         if pre_s2:
             await through(conn, 161)
             await context(conn, f["ws"], f["sales"], "sales", f["team"])
@@ -754,6 +758,19 @@ async def run_case(admin, cfg, pre_s2, results):
             results.append(
                 "existing_S2_pending_request_and_S3_private_view_retained_reviewer_column_update_works"
             )
+        from verify_shenma_runtime_repositories import (
+            actual_repositories,
+            reviewed_policy,
+        )
+
+        await reviewed_policy(conn, role)
+        results.append(
+            "exact_e40_API_and_worker_policy_complete_except_strict_customer_request_mutations"
+        )
+        await actual_repositories(conn, role, f, context)
+        results.append(
+            "actual_restricted_runtime_portfolio_report_scheme_snapshot_documents_and_customer_approval_repositories"
+        )
         await report_checks(conn, role, f, results)
         await quotas_and_capture(conn, f, results)
         print(
@@ -791,6 +808,9 @@ async def fresh_case(admin, cfg, results):
         await migrate(conn, ROOT, through_version=125)
         await runtime(conn, role)
         await migrate(conn, ROOT)
+        from verify_shenma_runtime_repositories import reviewed_policy
+
+        await reviewed_policy(conn, role)
         try:
             await migrate(conn, ROOT, through_version=125)
         except MigrationError:

@@ -59,6 +59,17 @@ def rows(values):
     return result
 
 
+async def _meeting_schema_applied_at(connection):
+    # V383 is Shenma's mapped V235. Preserve the first real feature timestamp,
+    # including an existing source ledger when both representations are present.
+    since = await connection.fetchval(
+        "SELECT min(applied_at) FROM ops.schema_migration WHERE version IN ('V235','V383')"
+    )
+    if since is None:
+        raise WorkReportError("WORK_REPORT_INVALID_INPUT", "会议事实数据库版本尚未就绪", status=409)
+    return since
+
+
 async def collect(connection, actor, *, scope, period, read_only=False, allow_partial_sources=False):
     # Only the read-only Review projection can opt into partial facts. Report
     # generation and all existing callers retain the complete-source gate.
@@ -82,9 +93,7 @@ async def collect(connection, actor, *, scope, period, read_only=False, allow_pa
     ):
         if not await connection.fetchval("SELECT security.authorization_has($1)", permission):
             raise WorkReportError("WORK_REPORT_PERMISSION_CHANGED", "当前缺少会议事实来源权限", status=403)
-    since = await connection.fetchval("SELECT applied_at FROM ops.schema_migration WHERE version='V235'")
-    if since is None:
-        raise WorkReportError("WORK_REPORT_INVALID_INPUT", "会议事实数据库版本尚未就绪", status=409)
+    since = await _meeting_schema_applied_at(connection)
     kind, uid, team = scope.kind, actor.user_id, str(scope.team_id) if scope.team_id else None
     if read_only and kind == 'self':
         uid = str(scope.member_ids[0])

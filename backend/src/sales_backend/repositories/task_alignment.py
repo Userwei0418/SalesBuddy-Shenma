@@ -43,7 +43,10 @@ TASK_ALIGNMENT_READ_SQL = """(
 class TaskAlignmentRepository:
     @staticmethod
     async def supports_v2(connection):
-        return await connection.fetchval("SELECT EXISTS(SELECT 1 FROM ops.schema_migration WHERE version='V244')")
+        # V392 is the same completed feature in the Shenma bridge ledger.
+        return await connection.fetchval(
+            "SELECT EXISTS(SELECT 1 FROM ops.schema_migration WHERE version IN ('V244','V392'))"
+        )
 
     @staticmethod
     async def save(connection, task_id, alignment, expected_version=None):

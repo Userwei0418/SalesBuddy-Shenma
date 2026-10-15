@@ -374,6 +374,37 @@ BEGIN
   WHERE n.nspname='platform' AND c.relname='user_ref' AND a.privilege_type='SELECT' AND a.grantee<>c.relowner
    AND NOT pg_has_role(role.oid,'salegent_feishu_worker','member')
  LOOP
+  -- Exact additive API + business-worker policy from internal e40a8029 / V250.
+  -- These services share the existing Shenma runtime role. Require its existing
+  -- application capabilities as well as SELECT(user_ref); a reporting-only role
+  -- must not acquire write/worker privileges through table-read inference.
+  IF NOT has_function_privilege(r.rolname,'security.submit_customer_creation_request(jsonb)','EXECUTE')
+    OR NOT has_table_privilege(r.rolname,'crm.customer','INSERT') THEN
+   CONTINUE;
+  END IF;
+  EXECUTE format('GRANT EXECUTE ON FUNCTION
+   agent.work_report_source_manifest(jsonb),
+   ops.claim_exact_competency_review(text,integer,uuid,uuid,uuid,uuid,integer,text,jsonb,text,uuid,integer),
+   ops.claim_exact_visit_agent_run(text,integer,uuid,uuid,uuid,uuid,text,text),
+   ops.claim_exact_visit_import(text,integer,uuid,uuid,uuid,uuid,text),
+   ops.claim_exact_work_report(text,integer,uuid,uuid,uuid,uuid,text,text,text,integer,timestamp with time zone,timestamp with time zone),
+   security.company_customer_directory_search(text,integer,integer,text,text,text[],text),
+   security.partner_enterprise_reference(uuid),
+   security.set_customer_business_identity(uuid,text[],uuid),
+   security.work_report_audience_matches(jsonb),
+   security.work_report_history_access(jsonb),
+   security.work_report_review_access(jsonb),
+   security.work_report_source_access(jsonb,jsonb) TO %I',r.rolname);
+  EXECUTE format('GRANT SELECT,INSERT,UPDATE ON
+   agent.work_report_document,agent.work_report_run,agent.work_report_scheme,agent.work_report_snapshot TO %I',r.rolname);
+  EXECUTE format('GRANT SELECT,INSERT ON
+   agent.work_report_event,agent.work_report_revision,agent.work_report_scheme_revision TO %I',r.rolname);
+  EXECUTE format('GRANT SELECT(version,applied_at) ON ops.schema_migration TO %I',r.rolname);
+  EXECUTE format('GRANT DELETE ON activity.visit_field_value,crm.opportunity,crm.opportunity_forecast TO %I',r.rolname);
+  EXECUTE format('GRANT UPDATE,DELETE ON crm.opportunity_quote_reference TO %I',r.rolname);
+  EXECUTE format('GRANT UPDATE ON crm.opportunity_related_partner,platform.workspace TO %I',r.rolname);
+  -- Shenma's approved-request boundary is intentionally stricter than upstream:
+  -- only the reviewed payload is mutable; creation/decision require SECDEF APIs.
   EXECUTE format('REVOKE INSERT,UPDATE,DELETE,TRUNCATE ON crm.customer_creation_request FROM %I',r.rolname);
   EXECUTE format('GRANT SELECT,UPDATE(reviewed_payload) ON crm.customer_creation_request TO %I',r.rolname);
   EXECUTE format('GRANT EXECUTE ON FUNCTION security.publish_work_report_feishu(uuid,integer,uuid,text),security.work_report_feishu_status(uuid) TO %I',r.rolname);

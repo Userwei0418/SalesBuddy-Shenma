@@ -49,3 +49,18 @@ def test_bridge_retains_only_reviewed_overlapping_table_adaptations():
     assert "CREATE TABLE IF NOT EXISTS crm.customer_creation_request" in body
     assert "Existing customer role grants were migrated by V160" in body
     assert "DROP TABLE" not in body
+
+
+def test_reviewed_service_policy_is_fixed_upstream_and_strict_request_exception():
+    policy = MANIFEST["reviewed_service_policy"]
+    assert policy["source_revision"] == MANIFEST["source_revision"]
+    assert policy["source_path"] == "tools/installation/runtime_permissions.json"
+    assert (
+        policy["sha256"]
+        == "31d0a6b3e525cc7ca931cb6744954c793e5321834962d54f01e79906d36a0d4d"
+    )
+    assert (
+        hashlib.sha256((ROOT / policy["path"]).read_bytes()).hexdigest()
+        == policy["sha256"]
+    )
+    assert set(policy["intentional_exceptions"]) == {"crm.customer_creation_request"}

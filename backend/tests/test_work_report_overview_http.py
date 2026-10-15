@@ -49,7 +49,7 @@ class OverviewSQL(MeetingSQL):
             return CLOCK
         if "current_setting('transaction_read_only')" in sql:
             return 'on' if self.readonly else 'off'
-        if "WHERE version='V236'" in sql:
+        if "WHERE version IN ('V236','V384')" in sql:
             return True
         if 'authorization_snapshot' in sql:
             data = await super().fetchval(sql, *args)
