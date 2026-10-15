@@ -7,6 +7,7 @@
 新版 PC UI、神码已有业务适配及只读跟进范围接口已完成本机隔离实现和本批回归。新增跟进页面使用真实后端契约，权限沿用神码 `visit.read` 与数据库 RLS。不是内部全部 1.2.1 能力迁移完成，也不是正式发布回执。
 
 1. 神码源码起点：`20d8dc60cfb6e6b016ef11a6ac5f0f413056e16f`。
+   本批实现已提交为 `e9d09fb1f2d835e2e61fe1779f83f0b0e4b21d04`，配套本地构建 `build.json` 绑定此提交。
 2. UI 来源：内部固定 Web `e6099547ddaab0f1e4534c6216e7b9977e3c7368`；未从内部脏工作区复制。
 3. 本地数据库候选：V161。本批不增加数据库迁移，V160/V161 属于先前 S2/S3。
 4. 本次没有正式环境写入、部署、微信上传、真实模型生成或飞书发送。
@@ -30,6 +31,7 @@
 4. route permissions / generated OpenAPI：4/4 通过，静态 `/visits/range` 路由位于动态 `/visits/{visit_id}` 前。
 5. 最终源目录与隔离构建输入逐文件 SHA256 对齐；非源码 `.DS_Store` 不计入留存清单。详情见 [证据清单](evidence/WEB_PC_ISOLATED_20261015.json) 和 [输入哈希](evidence/web-pc-20261015/source-sha256.json)。
 6. 最终桌面工作台、客户、商机及窄屏跟进截图已查看。截图全部为本机合成数据，不能作为神码真实业务数据。
+7. 提交后重新构建并回填本地 `business-web/dist`，74 个文件 SHA256 一致。相较浏览器已测产物，只有 `build.json` 版本/时间及 `index.html`、`entry.js` 中自动生成的资源缓存参数改变；业务 bundle、CSS 逐字节不变，入口去除缓存参数后与已测输入一致。详见 [构建绑定](evidence/web-pc-20261015/dist-sha256.json)。
 
 本批关键命令：
 

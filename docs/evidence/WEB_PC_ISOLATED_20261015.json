@@ -78,6 +78,11 @@
     "records-390.png": "fc8436bda1d9e38f8b7fced82fb2ef65fcc5b215c7d692a2ca893abb8a94b58b",
     "source-sha256.json": "e2935c8fd5aff9115dec92aa5aa66841d1b7ebb36d7b6b76e65ffabf64c769b3",
     "web-verify.log": "cea18ad2b68a61ff9d521f3ffc7129cef9e7529bdea2dc24d48486e38a5aa275",
-    "workspace-1440.png": "468a9bd990c411f45a7b1a715b11f05dc55c3377a9629152a3bb91ab934fd052"
-  }
+    "workspace-1440.png": "468a9bd990c411f45a7b1a715b11f05dc55c3377a9629152a3bb91ab934fd052",
+    "build.json": "0ea7f8ca72ac5594b9df410452c96debc2d491a598c9f57f3da03974d1d2d002",
+    "committed-build.log": "8266f60a1fe4e2e95e925a2d0c4f3de429923eefad2dc3546c1c25e19b53317d",
+    "dist-sha256.json": "0bb1ccc066fa092777d59b7846fcbaef606fa599b5df5f3a22ee5fbc7bc4d116"
+  },
+  "source_revision": "e9d09fb1f2d835e2e61fe1779f83f0b0e4b21d04",
+  "build_binding": "web-pc-20261015/dist-sha256.json"
 }
