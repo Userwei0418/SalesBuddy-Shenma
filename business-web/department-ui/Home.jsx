@@ -112,7 +112,7 @@ function ReceiptDetails({ message, invoke }) {
   </div>;
 }
 
-export default function Home({ page, data, invoke }) {
+export default function Home({ page, data, invoke, activityOnly = false }) {
   const [selectedId, setSelectedId] = useState(null);
   const messages = list(data.webHomeMessages);
   const selected = messages.find(message => String(message.id) === selectedId);
@@ -130,7 +130,7 @@ export default function Home({ page, data, invoke }) {
   const attentionCount = (list(data.webActivityGroups).find(g => g.key === 'attention') || {}).count || 0;
   return <div className="department-home">
 
-    <div className="department-home-summary">
+    {!activityOnly && <div className="department-home-summary">
       <div className="department-home-welcome">
         <strong>{data.greeting || '你好'}{data.userName ? `，${data.userName}` : ''}</strong>
       </div>
@@ -145,6 +145,8 @@ export default function Home({ page, data, invoke }) {
         }]} />
       </div>
     </div>
+
+    }
 
     {data.isFdeLead && data.fdeTeamSummary && <Button className="department-home-team-entry"
       onClick={() => invoke('openFdeTeamTasks')}>

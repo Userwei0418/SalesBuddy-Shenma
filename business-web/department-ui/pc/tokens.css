@@ -1,0 +1,82 @@
+/* Raccoon SalesBuddy PC 视觉 2.0 · 设计变量（2026-10-06）
+ * 在部门变量 @shandiant/tokens 与 design-tokens.css 之后加载，只改值不改名：
+ * - 保留神码主色 #2863CD 及原有悬停、焦点色；
+ * - 侧栏由深藏青改为浅色；
+ * - 字号与控件高度收紧到 PC 办公软件密度（正文 14、表格 13、辅助 12，指标 24，页标题 18）。
+ * 业务页面与组件只引用变量；要回到旧观感，删掉本文件与 theme.js 的覆盖即可。
+ * 小程序共享样式把同名变量写在 page（Web 中为 #page-root）上，所以这里同时覆盖 #page-root。 */
+:root, #page-root {
+  --ui-primary: #2863CD;
+  --ui-primary-hover: #2055B5;
+  --ui-primary-active: #194696;
+  --ui-selected: #EDF3FF;
+  --ui-selected-strong: #E1EAFF;
+  --ui-hover: #F2F5FC;
+  --ui-focus: #5786DC;
+  --ui-on-primary: #FFFFFF;
+
+  --ui-background: #F5F6F8;
+  --ui-surface: #FFFFFF;
+  --ui-surface-subtle: #F7F8FA;
+  --ui-surface-sunken: #EFF1F4;
+  --ui-ink: #1F2329;
+  --ui-secondary: #646A73;
+  --ui-muted: #8F959E;
+  --ui-line: #E3E5E8;
+  --ui-line-strong: #D0D3D6;
+
+  --ui-danger: #D83931;
+  --ui-danger-soft: #FDECEB;
+  --ui-warning: #B25F00;
+  --ui-warning-soft: #FFF3E0;
+  --ui-success: #1F8A4C;
+  --ui-success-soft: #E6F6EC;
+  --ui-neutral: #646A73;
+  --ui-neutral-soft: #F0F1F3;
+  --ui-accent: #7B61FF;
+  --ui-accent-soft: #F1EDFF;
+  --ui-teal: #0E8A8A;
+  --ui-teal-soft: #E3F6F5;
+
+  --ui-sidebar: #F4F6FA;
+  --ui-sidebar-ink: #1F2329;
+  --ui-sidebar-nav: #3B4048;
+  --ui-sidebar-muted: #8F959E;
+  --ui-sidebar-hover: #E8ECF4;
+  --ui-sidebar-active: #E1EAFF;
+  --ui-sidebar-accent: #2863CD;
+  --ui-sidebar-focus: #5786DC;
+  --ui-overlay: #1F232966;
+
+  --ui-text-small: 12px;
+  --ui-text-caption: 13px;
+  --ui-text-body: 14px;
+  --ui-text-section: 15px;
+  --ui-text-title: 16px;
+  --ui-text-page: 18px;
+  --ui-text-metric: 24px;
+
+  --ui-control-height: 32px;
+  --ui-control-height-compact: 28px;
+  --ui-field-height: 32px;
+  --ui-radius-control: 6px;
+  --ui-radius-panel: 8px;
+  --ui-page-gutter: 20px;
+  --ui-card-padding: 16px;
+  --ui-block-gap: 16px;
+  --ui-nav-width: 224px;
+
+  --ui-shadow-popup: 0 6px 20px #1F23291A, 0 1px 4px #1F23290A;
+  --ui-shadow-card: 0 1px 2px #1F23290D;
+
+  --ui-chart-1: #2863CD;
+  --ui-chart-2: #14C0B4;
+  --ui-chart-3: #7B61FF;
+  --ui-chart-4: #FF9A2E;
+  --ui-chart-5: #8F959E;
+  --ui-quadrant-asset: #F5F8FF;
+  --ui-quadrant-attack: #F5F8FF;
+}
+@media (max-width: 600px) {
+  :root, #page-root { --ui-text-body: 15px; --ui-page-gutter: 14px; --ui-field-height: 40px; --ui-control-height: 36px; }
+}

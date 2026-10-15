@@ -4,6 +4,8 @@ import {SbStatePanel} from '@shandiant/ui-react';
 import WeeklyReportDemo from './WeeklyReportDemo.jsx';
 import {uploadDate, feishuPublicationState} from './weekly-report-model.mjs';
 import './weekly-report.css';
+import {PageHead} from './pc/ui.jsx';
+import './shenma-report.css';
 
 const STATE = {queued:'等待生成',running:'正在生成',succeeded:'已完成',failed:'生成失败',cancelled:'已取消'};
 const ERRORS = {
@@ -197,9 +199,9 @@ function LiveReport({page, session}) {
   if(!allowed('weekly_report.read'))return <SbStatePanel state="empty" title="当前账号没有周报权限"/>;
   const visible=records.filter(r=>[r.customer_name,r.opportunity_name,r.follow_up_record,r.next_action].join(' ').toLowerCase().includes(query.toLowerCase().trim()));
   return <section className="ds-weekly" aria-label="周报">
-    <div className="ds-weekly-heading"><div><h1>周报</h1><p className="ds-muted">按周查看 · 基于本人近 14 天上传的完整记录</p></div><div className="ds-weekly-period"><span>{session.userName} · 本人</span>
+    <PageHead title="周报" subtitle="按周查看 · 基于本人近 14 天上传的完整记录" extra={<div className="ds-weekly-period"><span>{session.userName} · 本人</span>
       <Select aria-label="周报周期" value={kind} disabled={loading||busy||!currentWeek} options={[{value:'recent',label:'本周（截至当前）'},{value:'previous',label:'上一个自然周'}]} onChange={v=>discard(()=>setKind(v))}/>
-      <span>{meta?.report_week} — {meta?.report_week_end}</span></div></div>
+      <span>{meta?.report_week} — {meta?.report_week_end}</span></div>}/>
     {error&&<Alert type="error" showIcon title={error} action={<Button onClick={()=>discard(load)} disabled={busy}>重新读取</Button>}/>}
     <div className="ds-weekly-columns"><section className="ds-panel ds-weekly-records" aria-label="更新记录">
       <header className="ds-weekly-panel-head"><div><h2>更新记录 · {records.length}</h2><span className="ds-muted">{meta?.period.start_date} — {meta?.period.end_date}{report?' · 本次生成使用的素材':' · 待生成素材'}</span></div></header>

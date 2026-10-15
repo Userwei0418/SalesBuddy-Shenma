@@ -26,6 +26,7 @@ async function fixture(run,{width=1440}={}){
   if(u.pathname==='/api/v1/auth/password/login')return route.fulfill({json:{access_token:'synthetic-a',refresh_token:'synthetic-refresh',actor,must_change_password:false,auth_method:'password'}});
   if(u.pathname==='/api/v1/auth/me')return route.fulfill({json:actor});
   if(u.pathname==='/api/v1/assistant/home')return route.fulfill({json:{archived_visits:[],display_policy:{definition:{message_order:'desc'}},team_summary:{overdue:0,claim:0,handover:0}}});
+  if(u.pathname==='/api/v1/visits/range')return route.fulfill({json:{items:[],summary:{total:0},has_more:false,next_offset:null}});
   if(u.pathname==='/api/v1/tasks/overview')return route.fulfill({json:{items:[],metrics:{today_completed:0,today_pending:0,all_pending:0}}});
   const root='/api/v1/web/weekly-reports';
   if(u.pathname===root+'/sources')return route.fulfill({json:sources(u.searchParams.get('report_week')||week)});

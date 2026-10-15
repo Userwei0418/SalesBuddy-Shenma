@@ -49,6 +49,7 @@ from sales_backend.api.targets import router as targets_router
 from sales_backend.api.tasks import router as tasks_router
 from sales_backend.api.visit_flow import router as visit_flow_router
 from sales_backend.api.visit_imports import router as visit_imports_router
+from sales_backend.api.visit_range import router as visit_range_router
 from sales_backend.config import get_settings
 from sales_backend.db import Database
 from sales_backend.observability import (
@@ -151,6 +152,8 @@ app.include_router(agent_audit_router)
 app.include_router(company_rules_router)
 app.include_router(assistant_router)
 app.include_router(audio_router)
+# Static /visits/range must precede Business /visits/{visit_id}.
+app.include_router(visit_range_router)
 app.include_router(business_router)
 app.include_router(opportunity_views_router)
 app.include_router(collaboration_router)

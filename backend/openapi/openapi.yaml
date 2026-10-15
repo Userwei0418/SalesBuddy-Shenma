@@ -5549,6 +5549,340 @@ components:
       - next_action_passed
       title: VisitQualitySummary
       type: object
+    VisitRangeItem:
+      properties:
+        can_open_customer:
+          title: Can Open Customer
+          type: boolean
+        can_open_opportunity:
+          title: Can Open Opportunity
+          type: boolean
+        can_read_detail:
+          title: Can Read Detail
+          type: boolean
+        contact_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Contact Name
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        created_date:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          description: 兼容旧展示：人工填写日期，否则系统创建日期
+          title: Created Date
+        creator_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Creator Id
+        creator_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Creator Name
+        customer_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Customer Id
+        customer_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Name
+        follow_up_record:
+          anyOf:
+          - maxLength: 600
+            type: string
+          - type: 'null'
+          title: Follow Up Record
+        follow_up_score:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Follow Up Score
+        id:
+          format: uuid
+          title: Id
+          type: string
+        interaction_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Interaction At
+        interaction_mode_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Interaction Mode Code
+        is_first_visit:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is First Visit
+        is_summary:
+          const: true
+          title: Is Summary
+          type: boolean
+        linked_opportunities:
+          items:
+            $ref: '#/components/schemas/VisitRangeOpportunity'
+          title: Linked Opportunities
+          type: array
+        manager_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Manager Id
+        manager_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Manager Name
+        next_action:
+          anyOf:
+          - maxLength: 600
+            type: string
+          - type: 'null'
+          title: Next Action
+        opportunity_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Opportunity Id
+        opportunity_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Opportunity Name
+        original_recorder_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Original Recorder Name
+        partner_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Partner Id
+        partner_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Partner Name
+        quality_review:
+          anyOf:
+          - $ref: '#/components/schemas/VisitQualitySummary'
+          - type: 'null'
+        record_source:
+          default: unknown
+          description: 显式CRM历史导入、具有录入身份快照的记录或来源证据缺失
+          enum:
+          - crm_history
+          - recorded
+          - unknown
+          title: Record Source
+          type: string
+        recorded_on:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          description: 人工填写日期，不等于系统录入时间
+          title: Recorded On
+        recorder_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Recorder Active
+        recorder_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Recorder Id
+        recorder_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Recorder Name
+        recording_role_code_snapshot:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 记录创建时的可信岗位快照；缺失为null，不从当前目录推断
+          title: Recording Role Code Snapshot
+        recording_team_id_snapshot:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 记录创建时的部门快照；缺失为null
+          title: Recording Team Id Snapshot
+        status:
+          enum:
+          - confirmed
+          - archived
+          title: Status
+          type: string
+        subject_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Subject Id
+        subject_kind:
+          enum:
+          - customer
+          - partner
+          - opportunity
+          - unknown
+          title: Subject Kind
+          type: string
+        subject_name:
+          title: Subject Name
+          type: string
+        visit_date:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          description: 实际跟进日期，北京日期；历史未知不造日期
+          title: Visit Date
+      required:
+      - id
+      - status
+      - subject_kind
+      - subject_id
+      - subject_name
+      - customer_id
+      - customer_name
+      - partner_id
+      - partner_name
+      - opportunity_id
+      - opportunity_name
+      - linked_opportunities
+      - recorder_id
+      - recorder_name
+      - recorder_active
+      - original_recorder_name
+      - manager_id
+      - manager_name
+      - creator_id
+      - creator_name
+      - interaction_at
+      - visit_date
+      - recorded_on
+      - created_date
+      - created_at
+      - interaction_mode_code
+      - contact_name
+      - is_first_visit
+      - follow_up_record
+      - next_action
+      - follow_up_score
+      - quality_review
+      - can_open_customer
+      - can_open_opportunity
+      - can_read_detail
+      - is_summary
+      title: VisitRangeItem
+      type: object
+    VisitRangeOpportunity:
+      properties:
+        can_open:
+          title: Can Open
+          type: boolean
+        customer_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Customer Id
+        customer_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Name
+        id:
+          format: uuid
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+      required:
+      - id
+      - name
+      - customer_id
+      - customer_name
+      - can_open
+      title: VisitRangeOpportunity
+      type: object
+    VisitRangePage:
+      properties:
+        as_of:
+          format: date-time
+          title: As Of
+          type: string
+        has_more:
+          title: Has More
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/VisitRangeItem'
+          title: Items
+          type: array
+        next_offset:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Next Offset
+        summary:
+          $ref: '#/components/schemas/VisitRangeSummary'
+      required:
+      - items
+      - summary
+      - has_more
+      - next_offset
+      - as_of
+      title: VisitRangePage
+      type: object
+    VisitRangeSummary:
+      properties:
+        scored_count:
+          description: 已保存有效质检分数的记录数，不把缺评分当零分
+          minimum: 0.0
+          title: Scored Count
+          type: integer
+        subject_count:
+          description: 关联客户及伙伴ID去重后的数量，不将未知主体名称猜为客户
+          minimum: 0.0
+          title: Subject Count
+          type: integer
+        total:
+          description: 全部筛选范围的正式记录数，多商机关联不重复计数
+          minimum: 0.0
+          title: Total
+          type: integer
+      required:
+      - total
+      - subject_count
+      - scored_count
+      title: VisitRangeSummary
+      type: object
     VisitSummary:
       additionalProperties: true
       properties:
@@ -15770,6 +16104,131 @@ paths:
       summary: Visit Form Schema
       tags:
       - Business
+  /api/v1/visits/range:
+    get:
+      description: 当前公司 visit.read/RLS 范围内的跨客户跟进摘要，仅读 confirmed/archived 状态。日期、人员、团队等条件只缩小结果；不变更演示数据可见性、角色、录入和推送链路。
+      operationId: list_visits_api_v1_visits_range_get
+      parameters:
+      - in: query
+        name: scope
+        required: false
+        schema:
+          default: all
+          enum:
+          - all
+          - mine
+          title: Scope
+          type: string
+      - in: query
+        name: q
+        required: false
+        schema:
+          default: ''
+          maxLength: 100
+          title: Q
+          type: string
+      - in: query
+        name: recorder_ids
+        required: false
+        schema:
+          default: []
+          items:
+            format: uuid
+            type: string
+          maxItems: 100
+          title: Recorder Ids
+          type: array
+      - in: query
+        name: team_id
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Team Id
+      - in: query
+        name: customer_id
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Customer Id
+      - in: query
+        name: opportunity_id
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Opportunity Id
+      - in: query
+        name: date_basis
+        required: false
+        schema:
+          default: interaction
+          enum:
+          - interaction
+          - created
+          title: Date Basis
+          type: string
+      - in: query
+        name: date_from
+        required: false
+        schema:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Date From
+      - in: query
+        name: date_to
+        required: false
+        schema:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          title: Date To
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VisitRangePage'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: List Visits
+      tags:
+      - Follow-up range
   /api/v1/visits/{visit_id}:
     get:
       description: 按权限读取正式跟进；历史记录可含伙伴主体 partner_id/partner_name，原跟进人 original_recorder_name、当前管理人 manager_name

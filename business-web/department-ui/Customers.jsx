@@ -1,6 +1,9 @@
-import React, {useLayoutEffect, useMemo, useRef, useState} from 'react';
-import {Alert, Button, Modal, Tooltip} from 'antd';
-import {SbBattleMap, SbLabeledSelect, SbMetricStrip, SbSearch, SbStatusTag, SbTable} from '@shandiant/ui-react';
+import React, {useMemo, useState} from 'react';
+import {Alert, Button, Modal, Select, Tooltip} from 'antd';
+import {SbBattleMap, SbLabeledSelect, SbSearch, SbStatusTag, SbTable} from '@shandiant/ui-react';
+import FilterBar from './pc/FilterBar.jsx';
+import {PageHead} from './pc/ui.jsx';
+import ShenmaMetricStrip from './ShenmaMetricStrip.jsx';
 import './customers.css';
 
 const tone = value => ({green: 'good', yellow: 'watch', red: 'bad', gray: 'pending', good: 'good', watch: 'watch', bad: 'bad'}[value] || 'pending');
@@ -23,25 +26,7 @@ function Filter({label, options = [], index = 0, onChange, disabled}) {
 }
 
 export default function Customers({page, data: d, invoke}) {
-  const [{pageNumber, pageSize}, setPagination] = useState(() => ({pageNumber: page._departmentCustomerPage || 1, pageSize: page._departmentCustomerPageSize || 6}));
-  const tableViewport = useRef(null);
-  // 页面固定一屏：列表每页条数按表格区域剩余高度算，正好放满
-  useLayoutEffect(() => {
-    const viewport = tableViewport.current;
-    if (!viewport) return;
-    const measure = () => {
-      const headingHeight = viewport.querySelector('thead')?.getBoundingClientRect().height || 40;
-      const size = innerWidth <= 900 ? 6 : Math.max(3, Math.min(20, Math.floor((viewport.clientHeight - headingHeight - 1) / 56)));
-      setPagination(previous => {
-        if (previous.pageSize === size) return previous;
-        const next = {pageSize: size, pageNumber: Math.floor((previous.pageNumber - 1) * previous.pageSize / size) + 1};
-        page._departmentCustomerPage = next.pageNumber; page._departmentCustomerPageSize = size;
-        return next;
-      });
-    };
-    const observer = new ResizeObserver(measure); observer.observe(viewport); measure();
-    return () => observer.disconnect();
-  }, [page]);
+  const [{pageNumber, pageSize}, setPagination] = useState(() => ({pageNumber: page._departmentCustomerPage || 1, pageSize: page._departmentCustomerPageSize || 10}));
   const [showPending, setShowPending] = useState(false);
   const customers = (showPending ? d.pendingCustomers : d.customers) || [], plots = d.plotCustomers || [];
   const [cluster, setCluster] = useState(null);
@@ -76,9 +61,13 @@ export default function Customers({page, data: d, invoke}) {
     {title: '当前状态', key: 'status', width: '31%', render: (_, row) => <div className="ds-customer-health"><SbStatusTag tone={tone(row.signal?.tone)} label={TONE_LABEL[tone(row.signal?.tone)]} reason={row.signal?.reason || row.signal?.detail} showReason />{row.risk && !['暂无重大风险', '暂无判断依据', '没有需要关注的风险', '没有依据'].includes(row.risk) && row.risk !== (row.signal?.reason || row.signal?.detail) && <Tooltip title={row.risk}><p className="ds-muted">{row.risk}</p></Tooltip>}</div>},
     {title: '最近沟通', dataIndex: 'lastVisit', key: 'visit', width: 104, render: value => value || '未登记'},
   ];
-  return <section className="ds-customers">
+  return <section className="pc-page pc-list-page pc-customers ds-customers">
+    <PageHead title="客户经营" subtitle="查看客户资产、经营状态与跟进进展" extra={<>
+      {d.canCreateCustomer && <Button onClick={() => invoke('openCustomerCreate')}>{d.canRequestCustomer ? '客户建档 · 申请与进度' : '创建客户'}</Button>}
+      {d.canClaimCustomer && <Button type="primary" onClick={() => invoke('openCustomerClaim')}>客户认领</Button>}
+    </>}/>
     <section className="ds-customer-assets" aria-label="客户资产汇总">
-      <SbMetricStrip columns={4} variant="flat" loading={d.acvLoading && d.assetLoading}
+      <ShenmaMetricStrip loading={d.acvLoading && d.assetLoading}
         items={[
           {key: 'portfolio', label: '管理客户 · 家', value: d.scopeCustomerCount ?? '—', note: '当前权限范围全部客户'},
           {key: 'acv', label: '年度合同额 · 万元', value: d.acvLoading ? '…' : d.acvText, note: d.acvLoading ? '正在读取' : undefined},
@@ -90,20 +79,18 @@ export default function Customers({page, data: d, invoke}) {
     </section>
     {(d.assetError || d.acvError) && <Alert type="warning" showIcon title="部分资产数据暂不可用" description={d.assetError || d.acvError} action={<Button size="small" onClick={() => invoke('loadAssets')}>重试</Button>}/>}
     <section className="ds-panel ds-customer-workbench" aria-label="客户经营">
-    <section className="ds-customer-tools" aria-label="客户筛选">
-      <div className="ds-customer-search"><SbSearch value={d.keyword || ''} onChange={value => change('search', {detail: {value}})} placeholder="搜索客户或负责人" loading={d.mapLoading}/></div>
-      <div className="ds-customer-filters">
-        <Filter label="象限" options={d.quadrantOptions} index={d.quadrantIndex} onChange={picker('changeQuadrant')}/>
-        <Filter label="计划" options={d.planOptions} index={d.planIndex} onChange={picker('changePlan')}/>
-        <SbLabeledSelect label="优先级" mode="multiple" value={d.mapSelectedLevels || []} options={d.mapLevelOptions || []} onChange={values => chooseLevels(values || [])}/>
-        <Filter label="金额" options={d.mapAmountOptions} index={d.mapAmountIndex} onChange={picker('changeMapAmount')}/>
-        {d.canViewTeam && !d.isFde && <Filter label="团队" options={d.teamOptions} index={d.teamIndex} onChange={picker('changeTeam')} disabled={d.directoryLoading || !!d.directoryError}/>}
-        {!d.isFde && d.canViewTeam && <Filter label="成员" options={d.memberOptions} index={d.memberIndex} onChange={picker('changeMember')} disabled={d.directoryLoading || !!d.directoryError}/>}
-        {d.isFde && d.canViewTeam && <SbLabeledSelect label="协助成员" mode="multiple" value={d.fdeMapMemberIds || []} options={(d.fdeMapMembers || []).filter(p => p.id).map(p => ({value: p.id, label: p.name}))} disabled={d.directoryLoading || !!d.directoryError} onChange={ids => change('changeFdeMapMember', {detail: {ids: ids || []}})}/>}
-      </div>
-      {(d.keyword || d.mapFilterActive) && <Button className="ds-customer-reset" type="link" size="small" onClick={reset}>清除筛选</Button>}
-      {d.directoryError && <Alert type="warning" showIcon title={d.directoryError} action={<Button size="small" onClick={() => invoke('loadData')}>重试</Button>}/>}
-    </section>
+    <FilterBar className="ds-customer-tools" label="客户筛选" moreLabel="更多筛选"
+      search={<SbSearch value={d.keyword || ''} onChange={value => change('search', {detail: {value}})} placeholder="搜索客户或负责人" loading={d.mapLoading}/>}
+      actions={(d.keyword || d.mapFilterActive) && <Button className="ds-customer-reset" type="text" size="small" onClick={reset}>清除筛选</Button>}>
+      <Filter label="象限" options={d.quadrantOptions} index={d.quadrantIndex} onChange={picker('changeQuadrant')}/>
+      <Filter label="计划" options={d.planOptions} index={d.planIndex} onChange={picker('changePlan')}/>
+      <SbLabeledSelect label="优先级" mode="multiple" value={d.mapSelectedLevels || []} options={d.mapLevelOptions || []} onChange={values => chooseLevels(values || [])}/>
+      <Filter label="金额" options={d.mapAmountOptions} index={d.mapAmountIndex} onChange={picker('changeMapAmount')}/>
+      {d.canViewTeam && !d.isFde && <Filter label="团队" options={d.teamOptions} index={d.teamIndex} onChange={picker('changeTeam')} disabled={d.directoryLoading || !!d.directoryError}/>}
+      {!d.isFde && d.canViewTeam && <Filter label="成员" options={d.memberOptions} index={d.memberIndex} onChange={picker('changeMember')} disabled={d.directoryLoading || !!d.directoryError}/>}
+      {d.isFde && d.canViewTeam && <SbLabeledSelect label="协助成员" mode="multiple" value={d.fdeMapMemberIds || []} options={(d.fdeMapMembers || []).filter(p => p.id).map(p => ({value: p.id, label: p.name}))} disabled={d.directoryLoading || !!d.directoryError} onChange={ids => change('changeFdeMapMember', {detail: {ids: ids || []}})}/>}
+    </FilterBar>
+    {d.directoryError && <Alert className="ds-customer-directory-error" type="warning" showIcon title={d.directoryError} action={<Button size="small" onClick={() => invoke('loadData')}>重试</Button>}/>}
     <div className="ds-customer-workspace-wrap"><div className="ds-customer-workspace">
       <aside className="ds-customer-map-panel" aria-label="作战地图">
         <header><h2>{d.quadrantIndex ? d.mapQuadrant : '作战地图'}</h2><span className="ds-muted ds-customer-map-note">点色是状态，点大小是年度合同额档位</span></header>
@@ -114,15 +101,16 @@ export default function Customers({page, data: d, invoke}) {
           emptyText={d.mapLoading ? '正在加载客户…' : '这个范围还没有客户。先在客户列表登记关系和潜力。'} emptyAction={{label: '清除筛选', onClick: reset}} />
       </aside>
       <section className="ds-customer-list" aria-label="客户列表">
-        <header><h2>活跃客户 <span className="ds-customer-count">{d.mapLoading ? '—' : count}</span></h2><Button size="small" onClick={() => {setShowPending(!showPending);changePage(1);}}>{showPending ? '返回已定位客户' : `待评估 ${unrated} 家`}</Button>{d.canCreateCustomer && <Button size="small" onClick={() => invoke('openCustomerCreate')}>{d.canRequestCustomer ? '客户建档 · 申请与进度' : '创建客户'}</Button>}{d.canClaimCustomer && <Button type="primary" size="small" onClick={() => invoke('openCustomerClaim')}>客户认领</Button>}</header>
+        <header><h2>{showPending ? '待评估客户' : '活跃客户'} <span className="ds-customer-count">{d.mapLoading ? '—' : count}</span></h2><Button type="text" size="small" onClick={() => {setShowPending(!showPending);changePage(1);}}>{showPending ? '返回已定位客户' : `待评估 ${unrated} 家`}</Button></header>
         <p className="ds-muted ds-sync-note">近 6 个月有有效跟进 · {showPending ? '未取得完整评分，不绘制地图点' : '仅展示已定位客户'}{d.activitySince ? ` · 起始 ${d.activitySince}` : ''}</p>
-        <div className="ds-customer-table-viewport" ref={tableViewport}>
+        <div className="ds-customer-table-viewport">
           <SbTable rowKey="id" density="compact" columns={columns} rows={customers.slice((currentPage - 1) * pageSize, currentPage * pageSize)} state={state}
-            emptyTitle={state === 'error' ? '加载失败' : '没有匹配的客户'} emptyDescription={state === 'error' ? d.mapError : undefined} onRetry={() => invoke('loadData')} onClear={reset}
+            emptyTitle={state === 'error' ? '加载失败' : '没有匹配的客户'} emptyDescription={state === 'error' ? d.mapError : '可清除筛选，或切换待评估客户查看尚未定位的记录。'} onRetry={() => invoke('loadData')} onClear={reset}
             actions={row => <Button type="link" size="small" aria-label={`查看${row.name}`} onClick={() => openDetail(row.id)}>查看</Button>} actionsWidth={72} scrollX={540}
             pagination={{current: currentPage, pageSize, total: count, onChange: changePage}}
             expandable={{columnWidth: 28, expandedRowRender: row => <div className="ds-customer-expanded"><strong>{row.name}</strong><p>{row.team} · {row.owner}{row.level && ` · ${row.level}`}</p>{d.isFde && !!row.fde_members?.length && <p>协助：{row.fde_members.map(person => person.name).join('、')}</p>}<p>所属象限：{row.quadrant} · 客户潜力：{row.potential ?? '未填写'} · 关系深度：{row.relationship ?? '未填写'}</p>{row.risk && <p>{row.risk}</p>}</div>}}/>
         </div>
+        <footer className="ds-customer-page-size"><label>每页显示<Select aria-label="客户每页条数" value={pageSize} options={[10,20,50].map(value=>({value,label:`${value} 条`}))} onChange={value=>{page._departmentCustomerPage=1;page._departmentCustomerPageSize=value;setPagination({pageNumber:1,pageSize:value});}}/></label></footer>
       </section>
     </div></div>
     </section>

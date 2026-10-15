@@ -28,15 +28,16 @@
   const taskIcon = '<rect x="4" y="4" width="16" height="17" rx="3"/><path d="M9 3h6v4H9zM8 12l2 2 5-5M8 18h8"/>';
   const visitIcon = '<path d="M8 3h8l4 4v14H4V3h4zM15 3v5h5M8 12h8M8 16h5"/>';
   const navigationGroups = [
-    {title: '', items: [{text: '总览', pagePath: 'pages/index/index', permission: 'overview.read', icon: icons[0]}]},
-    {title: '销售流程', items: [{text: '客户', pagePath: 'pages/customers/index', permission: 'battle_map.read', icon: icons[1]}, {text: '商机', pagePath: 'pages/workbench/index', permission: 'opportunity.read', icon: icons[2]}, {text: '拜访与跟进', pagePath: 'pages/visit-entry/index', icon: visitIcon, capability: 'visit.create'}, {text: '任务', pagePath: 'pages/tasks/index', permission: 'task.read', icon: taskIcon}]},
+    {title: '', items: [{text: '工作台', pagePath: 'pages/index/index', permission: 'overview.read', icon: icons[0]}]},
+    {title: '销售流程', items: [{text: '客户', pagePath: 'pages/customers/index', permission: 'battle_map.read', icon: icons[1]}, {text: '商机', pagePath: 'pages/workbench/index', permission: 'opportunity.read', icon: icons[2]}, {text:'跟进记录',pagePath:'pages/visit-records/index',permission:'visit.read',icon:visitIcon}, {text: '记录拜访', pagePath: 'pages/visit-entry/index', icon: visitIcon, capability: 'visit.create'}, {text: '任务', pagePath: 'pages/tasks/index', permission: 'task.read', icon: taskIcon}]},
     {title: '经营复盘', items: [{text: '经营分析', pagePath: 'pages/bi/index', permission: ['dashboard.read','profile.fde_read'], icon: icons[3]}, {text: '周报', pagePath: 'pages/weekly-report/index', permission: SALES_MODE === 'preview' ? 'visit.read' : 'weekly_report.read', icon: visitIcon}]}
   ];
   const moduleRoutes = {
     'pages/customers/index': ['customers', 'customer-claim', 'customer-create', 'customer-assign-confirm', 'customer-detail', 'customer-edit', 'customer-assets'],
     'pages/tasks/index': ['tasks', 'task-detail', 'management-task-create'],
     'pages/workbench/index': ['workbench', 'opportunity-create', 'opportunities', 'demo-create'],
-    'pages/visit-entry/index': ['visit-entry', 'visit-confirm', 'visit-detail'],
+    'pages/visit-records/index': ['visit-records', 'visit-detail'],
+    'pages/visit-entry/index': ['visit-entry', 'visit-confirm'],
     'pages/bi/index': ['bi', 'report-detail', 'fde-records'],
     'pages/weekly-report/index': ['weekly-report'],
     'pages/profile/index': ['profile', 'member-growth'],
@@ -313,6 +314,10 @@
   };
   $('mobile-actions').onclick = openQuickActions;
   frame.onCreate = openQuickActions;
+  frame.onCreateAction = path => {
+    if (!availableQuickActions().some(action => action.path === path)) return;
+    SalesRuntime.userRoute('/' + path);
+  };
   $('close-quick').onclick = () => $('quick-dialog').close();
   $('preview-role').onchange = async e => {
     setPreviewRole(e.target.value);
@@ -347,11 +352,16 @@
     frame.accountRole = session ? (session.roleName || '') : '请使用企业账号';
     frame.accountTeam = session ? (session.team || session.scope || '') : '';
     frame.accountAvatar = session?.userName?.slice(-2) || '我';
+    frame.showAccount = !!session && path !== 'pages/login/index';
     $('mobile-account-button').hidden = !session || path === 'pages/login/index';
     if (accountDialog.open && (!session || path === 'pages/login/index')) accountDialog.close();
     const hasActions = !!session && path !== 'pages/login/index' && availableQuickActions().length > 0;
     $('mobile-actions').hidden = !hasActions;
     frame.showCreate = hasActions;
+    frame.createActions = availableQuickActions().map(action=>({...action,icon:action.path.includes('visit-')?'visit':action.path.includes('task-')?'task':'customer'}));
+    frame.adminLink = session && SalesRuntime.app?.can('console.access') ? '/admin' : '';
+    frame.crumbs = [frame.crumbGroup, ...(nav?.pagePath !== path && nav?.text ? [nav.text] : []), frame.title].filter(Boolean);
+    frame.crumbItems = frame.crumbs.map((label,index)=>({label,...(index===frame.crumbs.length-2&&nav?.pagePath&&nav.pagePath!==path?{path:nav.pagePath}:{})}));
     const mobileModulePath = tabs.some(tab => tab.pagePath === modulePath) ? modulePath : 'pages/index/index';
     frame.activeKey = modulePath;
     document.querySelectorAll('#mobile-nav [data-path]').forEach(b => {
@@ -366,7 +376,7 @@
       else renderQuickActions();
     }
     updateConnection();
-    document.title = (frame.title || '工作空间') + ' · 商汤销售小浣熊';
+    document.title = (frame.title || '工作空间') + ' · 神码 SalesBuddy';
     paintFrame();
   }
   window.addEventListener('sales:navigation', e => navigation(e.detail));

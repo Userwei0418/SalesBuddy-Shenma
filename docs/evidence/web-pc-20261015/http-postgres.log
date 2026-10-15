@@ -1,0 +1,5 @@
+Legacy resolver owner repair verified; application credential access remains denied
+VISIT_RANGE_API_ISOLATION database=salegent_verify_integration_6a1e3e6bc480 role=salegent_verify_role_6a1e3e6bc480 schema=V161
+.......................................................                  [100%]
+55 passed in 16.75s
+VISIT_RANGE_API_OK selected HTTP/opportunity/authorization/S2 regressions passed

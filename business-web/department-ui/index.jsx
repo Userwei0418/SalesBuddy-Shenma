@@ -2,7 +2,7 @@ import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {flushSync} from 'react-dom';
 import {App} from 'antd';
-import {SbProvider} from '@shandiant/ui-react';
+import {PcProvider} from './pc/PcProvider.jsx';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import '@shandiant/tokens/css';
@@ -12,7 +12,10 @@ import './sync109.css';
 import {renderFrame} from './Frame.jsx';
 import WeeklyReport from './WeeklyReport.jsx';
 import Bi, {supportsBi} from './Bi.jsx';
-import Home, {supportsHome} from './Home.jsx';
+import {supportsHome} from './Home.jsx';
+import Workspace from './Workspace.jsx';
+import VisitRecords from './VisitRecords.jsx';
+import {identity} from './pc/data.js';
 import Customers from './Customers.jsx';
 import Tasks from './Tasks.jsx';
 import TaskCreate, {supportsTaskCreate} from './TaskCreate.jsx';
@@ -30,6 +33,10 @@ import DemoCreate, {supportsDemoCreate} from './DemoCreate.jsx';
 import {FdeRecords, supportsFdeRecords, FdeBi, supportsFdeBi, FdeMemberGrowth, supportsFdeMemberGrowth, FdeWorkbench, supportsFdeWorkbench, FdeOpportunityBoard, supportsFdeOpportunityBoard} from './FdePages.jsx';
 import Login, {supportsLogin} from './Login.jsx';
 import {AssignConfirm, supportsAssignConfirm, CustomerClaim, supportsCustomerClaim, Risks, supportsRisks, RiskDetail, supportsRiskDetail, ReportDetail, supportsReportDetail, VisitDetail, supportsVisitDetail, CustomerEdit, supportsCustomerEdit, MemberGrowth, supportsMemberGrowth, OpportunityBoard, supportsOpportunityBoard} from './SmallPages.jsx';
+
+// Fixed e6099547 PC theme; Shenma page routes and contracts remain independently adapted.
+import './pc/tokens.css';
+import './pc/pc-theme.css';
 
 dayjs.locale('zh-cn');
 
@@ -73,7 +80,8 @@ function prepareSubcomponents(page, data, host, Component) {
 function view(page, data) {
   if (data.accessBlocked) return null;
   switch (page.route) {
-    case 'pages/index/index': return supportsHome(page, data) ? Home : null;
+    case 'pages/index/index': return supportsHome(page, data) ? Workspace : null;
+    case 'pages/visit-records/index': return VisitRecords;
     case 'pages/customers/index': return data.selectedCustomer || data.selectedBattleCustomer ? null : Customers;
     case 'pages/tasks/index': return Tasks;
     case 'pages/workbench/index': return supportsFdeWorkbench(page, data) ? FdeWorkbench : supportsOpportunities(page, data) ? Opportunities : null;
@@ -126,12 +134,12 @@ globalThis.SalesDepartmentUI = Object.freeze({
     };
     const invoke = (name, payload) => invokeOn(page, name, payload);
     const select = (selector, parent) => resolve(page, {selector, parent});
-    flushSync(() => mounted.render(<SbProvider><App><main className="department-ui" data-department-page={page.route}><Component key={page._id} page={page} data={data} invoke={invoke} invokeOn={invokeOn} select={select}/></main></App></SbProvider>));
+    flushSync(() => mounted.render(<PcProvider><App><main className="department-ui" data-department-page={page.route}><Component key={`${page._id}:${identity()}`} page={page} data={data} invoke={invoke} invokeOn={invokeOn} select={select}/></main></App></PcProvider>));
     return true;
   },
   unmount,
 });
 document.body.classList.add('department-design');
-document.title = globalThis.SALES_MODE === 'preview' ? '神舟数码 Web UI · 前端演示' : '商汤销售小浣熊';
+document.title = globalThis.SALES_MODE === 'preview' ? '神码 SalesBuddy · 前端演示' : '神码 SalesBuddy';
 const notice = document.querySelector('#preview-notice > span');
-if (notice && globalThis.SALES_MODE === 'preview') notice.textContent = '神舟数码 Web UI · 前端演示';
+if (notice && globalThis.SALES_MODE === 'preview') notice.textContent = '神码 SalesBuddy · 前端演示';

@@ -77,6 +77,7 @@ ROUTES = {
   'task_recipients':'$task_choices','list_tasks':'task.read','task_overview':'task.read','create_task':'$task','create_task_batch':'$task_batch',
   'task_detail':'task.read','create_task_event':'$task_event'},
  'visit_flow': {'structure':'visit.structure','quality':'visit.quality_review'},
+ 'visit_range': {'list_visits':'visit.read'},
  'visit_imports': {'upload_visit_file':'visit.upload','import_status':'visit.read','retry_import':'visit.retry_import','download_original':'visit.download_original'},
  'main': {'health_live':'*','health_version':'*','health_ready':'*','web_capabilities':'*','web_connection_status':'*'},
 }

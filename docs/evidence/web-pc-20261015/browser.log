@@ -1,0 +1,27 @@
+✔ S2 sales browser flow and recovery at 1440px (6712.52525ms)
+✔ S2 sales browser flow and recovery at 390px (3272.38225ms)
+✔ S2 operations browser flow and recovery at 1440px (2535.390958ms)
+✔ PC customer layout preserves filters, actions and reachable pagination at 1440px (2301.031375ms)
+✔ PC customer layout preserves filters, actions and reachable pagination at 390px (2360.007625ms)
+✔ S3 personal views CRUD, recovery and account isolation at 1440px (10441.708416ms)
+✔ S3 personal views CRUD, recovery and account isolation at 390px (10388.977208ms)
+✔ PC frame manager 1440px retains supported navigation and permissions (2907.6315ms)
+✔ PC frame sales 1440px retains supported navigation and permissions (1124.915958ms)
+✔ PC frame sales 390px retains supported navigation and permissions (939.228916ms)
+✔ new PC frame/workspace/follow-ups at 1440 (2651.888834ms)
+✔ new PC frame/workspace/follow-ups at 390 (1977.000792ms)
+✔ shared login, server draft, reload, manual conflict and previous week (3508.47025ms)
+✔ unknown response retries same generation id and cancellation retains history (1340.628291ms)
+✔ live weekly fits 1024px (1107.851792ms)
+✔ live weekly fits 390px (899.722ms)
+✔ v1 explicit confirmation sends once and pending status resumes after reload (5454.667125ms)
+✔ unknown cannot be resubmitted and operator recovery refreshes receipt (2336.98525ms)
+✔ failed cannot be resubmitted and operator recovery refreshes receipt (2569.789042ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67609.792292

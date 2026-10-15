@@ -1,0 +1,11 @@
+.sm-workspace { min-width: 0; }
+.sm-workspace-quick,.sm-workspace-filters { display:flex;flex-wrap:wrap;gap:12px;align-items:center; }
+.sm-workspace-filters { margin-bottom:16px;justify-content:space-between; }
+.sm-workspace .pc-panel-body>.pc-kpis { margin-bottom:16px; }
+.sm-workspace .department-home { display:block;min-height:300px; }
+.sm-workspace .department-home-activity { min-height:280px; }
+.sm-workspace .department-home-feed { max-height:560px; }
+@media(max-width:600px) { .sm-workspace-filters {align-items:flex-start;flex-direction:column;} .sm-workspace .pc-period,.sm-workspace .ant-segmented {max-width:100%;overflow:auto;} .sm-workspace-quick {gap:8px;} }
+.web-brand,.web-workspace-brand {display:flex;align-items:center;gap:10px;}
+.sm-brand-mark {width:32px;height:32px;flex:none;}
+.sm-brand-label {font-size:18px;white-space:nowrap;color:var(--ui-ink);}
