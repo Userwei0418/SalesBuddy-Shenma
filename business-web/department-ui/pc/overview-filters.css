@@ -50,7 +50,7 @@
 .department-ui .pc-filterbar-overflow { display: flex; flex-direction: column; gap: var(--ui-space-3); width: min(var(--overflow-width, 280px), calc(100vw - 64px)); max-height: min(520px, 70vh); overflow: auto; }
 .department-ui .pc-filterbar-overflow .pc-filterbar-item { width: 100%; flex: none; }
 .department-ui .pc-filterbar-done { align-self: flex-end; flex-shrink: 0; }
-.department-ui.pc-filterbar-popover, .department-ui.pc-view-popover { padding: 0; height: auto; }
+.department-ui.pc-filterbar-popover, .department-ui.pc-view-popover { padding: 0; height: auto; min-height: 0; }
 .department-ui .pc-view-settings { display: flex; flex-direction: column; gap: var(--ui-space-3); max-width: min(440px, calc(100vw - 64px)); }
 .department-ui .pc-view-settings .ds-opp-views { display: flex; flex-wrap: wrap; }
 .department-ui .pc-view-settings .pc-column-filter { justify-content: space-between; }

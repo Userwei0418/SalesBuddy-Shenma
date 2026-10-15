@@ -34,7 +34,7 @@
 .department-ui .ds-opp-view-error { margin: 8px 16px; padding: 8px 12px; background: var(--ui-danger-soft); border-radius: 6px; color: var(--ui-danger); font-size: 13px; line-height: 1.6; }
 .department-ui .ds-opp-views .ds-opp-view-error { margin: 10px 0 0; }
 .ds-opp-view-error { color: var(--ui-danger, #c53030); font-size: 13px; }
-.department-ui.sm-view-popover { padding: 0; height: auto; }
+.department-ui.sm-view-popover { padding: 0; height: auto; min-height: 0; }
 .department-ui .sm-view-settings { display: flex; flex-direction: column; gap: 12px; width: min(360px, calc(100vw - 64px)); max-height: min(600px, 65vh); overflow: auto; }
 .department-ui .sm-view-settings > p { margin: 0; font-size: 12px; line-height: 1.6; }
 .department-ui .sm-view-settings label { display: flex; align-items: center; gap: 12px; color: var(--ui-secondary); font-size: 12px; }
