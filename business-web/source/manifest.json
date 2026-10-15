@@ -203,7 +203,7 @@
     "pages/visit-entry/index.json": "a8a028d7674df94f882840ff01cc65845a59cb3b452a8afb415179b200b37f7d",
     "pages/visit-entry/index.wxml": "391ea88f1a47ffc17076fa04835c779b770bb030638f61da3c05c7ac750c46ef",
     "pages/visit-entry/index.wxss": "4c298ad33c4e0f6c69fa4546631a6b08965a7d8d7535e0c3b87df0dd9036fa12",
-    "pages/workbench/index.js": "3d8be0594f372ec7f09663badec6759ec9bb770cad9f3a5a0ef5cd57f3c2ceed",
+    "pages/workbench/index.js": "b9d52ecf7d7c1e7afce4f110362a0b32ca1a7d55040828deebace6f346983b90",
     "pages/workbench/index.json": "c966563984f6d399e92a9d02f556be21049b1aa7ef38542da91cf639b8e81a83",
     "pages/workbench/index.wxml": "b369d73f430b3262ec2c39384b80207e818c9ed766b08fdd4fa733fb294864e8",
     "pages/workbench/index.wxss": "bed52fee8ea062c0728273ab7671fc93f3b420cfcd081e9a2435b9522fd06eff",
@@ -217,7 +217,7 @@
     "templates/opportunity-list-card.wxml": "8b41be8608b50fae5b7ff79378f7e1e962abd8e4fb356abcf59ee2808aa4c77a",
     "utils/access.js": "bcdeafc98d7e8d36c795034c406a018469662371687250cba4f4bbc929016795",
     "utils/advicePool.js": "1faab011c5159802af698d4f3c56ba53a7b145bdc96453af32b6c3461bc68b40",
-    "utils/apiClient.js": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
+    "utils/apiClient.js": "15308b5d38ca602f24e2d9f1346b3f8dae039ea4ed727b2497eb193760a71c0b",
     "utils/businessOptions.js": "a0d3788253aee49d25f341658b135bfc77c20f7c9310ecf995d3d596949c89f1",
     "utils/customerAdvice.js": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
     "utils/customerDetail.js": "078fcd27265c32abaf54e9894d69c854288886e24be6e8e45898e2f00fbc30d3",
@@ -249,7 +249,7 @@
     "utils/quadrant.js": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
     "utils/rankingDisplay.js": "b0f0eda8f9cd5688becf74d8800b4221a53708f4ca38f3e854530c5000df8385",
     "utils/rememberedLogin.js": "6c890b1a7a54cc3eb19c5239512da1628d04f1705287a763aaa039976c7df3cd",
-    "utils/requestIdentity.js": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
+    "utils/requestIdentity.js": "3b82c8a8e48021e48e94c98bc2e370eac3ee0257e7fe3942388adea5e24ed2e9",
     "utils/statusLight.js": "cd71de6a2b3f0f2d08e1286f26b9f5ab371041c97acc03c0a71875271fb9ca43",
     "utils/taskOverview.js": "c3bf26ac5eb483a58eee7883cc17617184ad926e534ff8a492e0d716d90374d5",
     "utils/taskRecipients.js": "9873b71874665ee7ba1fabf8de14f79bc39883a3d1e45f8bbef55b328c14cc4e",
@@ -343,6 +343,48 @@
           "expected_current_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
           "expected_native_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
           "reason": "S2 shared permission/API/flow patch reviewed against native source; retain preexisting platform differences."
+        }
+      ]
+    },
+    {
+      "name": "shenma-s3-pc-private-opportunity-views-20261015",
+      "reason": "Reviewed PC-only personal opportunity views; native Mini filters and existing blue Web layouts preserved. Local candidate only, no release version change.",
+      "expected_manifest_sha256": "13e0a5fd0fbd2ee4c45f39611ce0986304ac838962ec565ab39cf7d7f413f083",
+      "files": [
+        {
+          "path": "pages/workbench/index.js",
+          "expected_previous_sha256": "3d8be0594f372ec7f09663badec6759ec9bb770cad9f3a5a0ef5cd57f3c2ceed",
+          "expected_current_sha256": "09daf632ef19195e4cd221ea8f4205c18c58be28f3f296272652b23e060bf887",
+          "expected_native_sha256": "3d8be0594f372ec7f09663badec6759ec9bb770cad9f3a5a0ef5cd57f3c2ceed",
+          "reason": "PC-only S3 stable owner IDs, personal-view API and idempotency adaptation. Intentionally diverges from native; no native source copied."
+        },
+        {
+          "path": "utils/apiClient.js",
+          "expected_previous_sha256": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
+          "expected_current_sha256": "15308b5d38ca602f24e2d9f1346b3f8dae039ea4ed727b2497eb193760a71c0b",
+          "expected_native_sha256": "fa9f4d7bb9813e6f78b4692cc9c8ea5d9848fcbdd9cf53d21a44d5e0f4ce74e2",
+          "reason": "PC-only S3 stable owner IDs, personal-view API and idempotency adaptation. Intentionally diverges from native; no native source copied."
+        },
+        {
+          "path": "utils/requestIdentity.js",
+          "expected_previous_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
+          "expected_current_sha256": "3b82c8a8e48021e48e94c98bc2e370eac3ee0257e7fe3942388adea5e24ed2e9",
+          "expected_native_sha256": "3ad4b7297fa7bc6e8fcb0651499fa674d342a84e0e36cb038d6c232fe58c0385",
+          "reason": "PC-only S3 stable owner IDs, personal-view API and idempotency adaptation. Intentionally diverges from native; no native source copied."
+        }
+      ]
+    },
+    {
+      "name": "shenma-s3-identity-reset-20261015",
+      "reason": "Explicitly reset nullable stored year when identity changes; preserve all other reviewed source checksums.",
+      "expected_manifest_sha256": "e09b43a6f7c43583a4ea7d2004b66bf2d3af0d0044956f226f250a98dc54070a",
+      "files": [
+        {
+          "path": "pages/workbench/index.js",
+          "expected_previous_sha256": "09daf632ef19195e4cd221ea8f4205c18c58be28f3f296272652b23e060bf887",
+          "expected_current_sha256": "b9d52ecf7d7c1e7afce4f110362a0b32ca1a7d55040828deebace6f346983b90",
+          "expected_native_sha256": "3d8be0594f372ec7f09663badec6759ec9bb770cad9f3a5a0ef5cd57f3c2ceed",
+          "reason": "S3 PC-only identity reset completeness; native Mini remains unchanged."
         }
       ]
     }

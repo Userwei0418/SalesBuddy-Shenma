@@ -40,6 +40,7 @@ from sales_backend.api.operations_customers import router as operations_customer
 from sales_backend.api.operations_opportunities import router as operations_opportunities_router
 from sales_backend.api.operations_reports import router as operations_reports_router
 from sales_backend.api.operations_targets import router as operations_targets_router
+from sales_backend.api.opportunity_views import router as opportunity_views_router
 from sales_backend.api.partners import router as partners_router
 from sales_backend.api.profile import router as profile_router
 from sales_backend.api.risks import router as risks_router
@@ -151,6 +152,7 @@ app.include_router(company_rules_router)
 app.include_router(assistant_router)
 app.include_router(audio_router)
 app.include_router(business_router)
+app.include_router(opportunity_views_router)
 app.include_router(collaboration_router)
 app.include_router(fde_profile_router)
 app.include_router(customers_router)

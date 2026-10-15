@@ -1,0 +1,71 @@
+{
+  "batch": "S3 personal opportunity views",
+  "verified_date": "2026-10-15",
+  "source_base_revision": "b72fb2e",
+  "migration": "V161",
+  "environment": "local synthetic PostgreSQL and local browser only",
+  "checks": [
+    {
+      "kind": "http-postgres-rls",
+      "passed": 68,
+      "failed": 0,
+      "file": "backend/tests/system/verify_opportunity_views_api.py"
+    },
+    {
+      "kind": "concurrency-postgres",
+      "passed_groups": 4,
+      "file": "backend/tests/system/verify_opportunity_views_postgres.py"
+    },
+    {
+      "kind": "v160-v161-preservation",
+      "passed_groups": 3,
+      "unchanged_tables": 115,
+      "file": "backend/tests/system/verify_opportunity_views_upgrade.py"
+    },
+    {
+      "kind": "combined-contracts-permission-openapi",
+      "passed": 48,
+      "failed": 0,
+      "files": [
+        "test_customer_creation_request_contract.py",
+        "test_opportunity_view_contract.py",
+        "test_opportunity_browse_contract.py",
+        "test_route_permissions.py",
+        "test_authorization_contracts.py",
+        "test_openapi_contract.py"
+      ]
+    },
+    {
+      "kind": "web-build-and-node",
+      "passed": 147,
+      "failed": 0
+    },
+    {
+      "kind": "web-browser",
+      "passed": 2,
+      "failed": 0,
+      "file": "business-web/tests/opportunity-views-s3.browser.mjs",
+      "note": "Synthetic local API responses; real built React, Page and API client; 1440/390 widths. Separate from real database integration."
+    },
+    {
+      "kind": "s2-browser-regression-on-s3-candidate",
+      "passed": 3,
+      "failed": 0,
+      "file": "business-web/tests/customer-creation-s2.browser.mjs"
+    }
+  ],
+  "protected": [
+    "existing business data",
+    "workspace/account/role overrides",
+    "quotas",
+    "Feishu destinations",
+    "model credentials",
+    "Shenma blue UI"
+  ],
+  "not_performed": [
+    "production writes or deployment",
+    "WeChat upload or release",
+    "native device acceptance",
+    "customer business acceptance"
+  ]
+}

@@ -3483,6 +3483,330 @@ components:
       - customer_id
       title: OpportunitySave
       type: object
+    OpportunityViewConfig:
+      additionalProperties: false
+      properties:
+        columns:
+          items:
+            enum:
+            - name
+            - stage
+            - owner
+            - amount
+            - signal
+            - money
+            - close
+            - product
+            type: string
+          maxItems: 8
+          minItems: 1
+          title: Columns
+          type: array
+        filters:
+          $ref: '#/components/schemas/OpportunityViewFilters'
+        group_by:
+          default: quarter
+          enum:
+          - quarter
+          - none
+          title: Group By
+          type: string
+        order:
+          default: quarter_stage
+          enum:
+          - quarter_stage
+          - close_date
+          title: Order
+          type: string
+        schema_version:
+          const: 1
+          default: 1
+          title: Schema Version
+          type: integer
+      title: OpportunityViewConfig
+      type: object
+    OpportunityViewCreate:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/OpportunityViewConfig'
+        name:
+          maxLength: 40
+          minLength: 1
+          title: Name
+          type: string
+      required:
+      - name
+      title: OpportunityViewCreate
+      type: object
+    OpportunityViewDelete:
+      additionalProperties: false
+      properties:
+        version_no:
+          minimum: 1.0
+          title: Version No
+          type: integer
+      required:
+      - version_no
+      title: OpportunityViewDelete
+      type: object
+    OpportunityViewDeleted:
+      additionalProperties: false
+      properties:
+        deleted:
+          const: true
+          title: Deleted
+          type: boolean
+        id:
+          format: uuid
+          title: Id
+          type: string
+        version_no:
+          title: Version No
+          type: integer
+      required:
+      - id
+      - deleted
+      - version_no
+      title: OpportunityViewDeleted
+      type: object
+    OpportunityViewFilters:
+      additionalProperties: false
+      properties:
+        close_period:
+          default: all
+          enum:
+          - all
+          - month
+          - quarter
+          - year
+          title: Close Period
+          type: string
+        grade:
+          anyOf:
+          - enum:
+            - A
+            - B
+            - C
+            - D
+            type: string
+          - type: 'null'
+          title: Grade
+        include_closed:
+          default: true
+          title: Include Closed
+          type: boolean
+        owner_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Owner Id
+        product_line:
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          title: Product Line
+        q:
+          default: ''
+          maxLength: 100
+          title: Q
+          type: string
+        quarters:
+          items:
+            enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            type: integer
+          maxItems: 4
+          title: Quarters
+          type: array
+        scope:
+          anyOf:
+          - enum:
+            - self
+            - team
+            type: string
+          - type: 'null'
+          title: Scope
+        stages:
+          items:
+            enum:
+            - identified
+            - qualified
+            - solution
+            - proposal
+            - negotiation
+            - won
+            - lost
+            type: string
+          maxItems: 7
+          title: Stages
+          type: array
+        team_id:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Team Id
+        year:
+          anyOf:
+          - maximum: 2100.0
+            minimum: 2000.0
+            type: integer
+          - type: 'null'
+          title: Year
+      title: OpportunityViewFilters
+      type: object
+    OpportunityViewItem:
+      additionalProperties: false
+      properties:
+        can_delete:
+          const: true
+          default: true
+          title: Can Delete
+          type: boolean
+        can_edit:
+          const: true
+          default: true
+          title: Can Edit
+          type: boolean
+        config:
+          $ref: '#/components/schemas/OpportunityViewConfig'
+        config_error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Config Error
+        config_valid:
+          default: true
+          title: Config Valid
+          type: boolean
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        id:
+          format: uuid
+          title: Id
+          type: string
+        name:
+          maxLength: 40
+          minLength: 1
+          title: Name
+          type: string
+        owner_user_ref_id:
+          format: uuid
+          title: Owner User Ref Id
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+        version_no:
+          title: Version No
+          type: integer
+      required:
+      - name
+      - id
+      - owner_user_ref_id
+      - version_no
+      - created_at
+      - updated_at
+      title: OpportunityViewItem
+      type: object
+    OpportunityViewList:
+      additionalProperties: false
+      properties:
+        data_source:
+          const: database
+          default: database
+          title: Data Source
+          type: string
+        items:
+          items:
+            $ref: '#/components/schemas/OpportunityViewItem'
+          title: Items
+          type: array
+        limit:
+          title: Limit
+          type: integer
+        offset:
+          title: Offset
+          type: integer
+        total:
+          title: Total
+          type: integer
+      required:
+      - items
+      - total
+      - limit
+      - offset
+      title: OpportunityViewList
+      type: object
+    OpportunityViewOptions:
+      additionalProperties: false
+      properties:
+        can_create_private:
+          const: true
+          default: true
+          title: Can Create Private
+          type: boolean
+        columns:
+          items:
+            additionalProperties:
+              type: string
+            type: object
+          title: Columns
+          type: array
+        default_columns:
+          items:
+            enum:
+            - name
+            - stage
+            - owner
+            - amount
+            - signal
+            - money
+            - close
+            - product
+            type: string
+          title: Default Columns
+          type: array
+        definition_version:
+          const: shenma_opportunity_view_v1
+          default: shenma_opportunity_view_v1
+          title: Definition Version
+          type: string
+      required:
+      - columns
+      - default_columns
+      title: OpportunityViewOptions
+      type: object
+    OpportunityViewUpdate:
+      additionalProperties: false
+      properties:
+        config:
+          anyOf:
+          - $ref: '#/components/schemas/OpportunityViewConfig'
+          - type: 'null'
+        name:
+          maxLength: 40
+          minLength: 1
+          title: Name
+          type: string
+        version_no:
+          minimum: 1.0
+          title: Version No
+          type: integer
+      required:
+      - name
+      - version_no
+      title: OpportunityViewUpdate
+      type: object
     OwnershipEvent:
       additionalProperties: true
       properties:
@@ -13135,6 +13459,15 @@ paths:
           - type: 'null'
           title: Owner
       - in: query
+        name: owner_id
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          title: Owner Id
+      - in: query
         name: q
         required: false
         schema:
@@ -13724,6 +14057,223 @@ paths:
       summary: Opportunity Timeline
       tags:
       - Detail read models
+  /api/v1/opportunity-views:
+    get:
+      description: 仅返回本人在当前公司的视图。配置仅保存列、筛选、排序及分组；读取商机仍由原商机接口校验当前授权。
+      operationId: list_views_api_v1_opportunity_views_get
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+      - in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          maximum: 100000
+          minimum: 0
+          title: Offset
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewList'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: List Views
+      tags:
+      - Opportunity views
+    post:
+      description: 创建个人私有视图；最多 100 个。必须携带 Idempotency-Key。
+      operationId: create_api_v1_opportunity_views_post
+      parameters:
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityViewCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Create
+      tags:
+      - Opportunity views
+  /api/v1/opportunity-views/options:
+    get:
+      description: 返回神码当前已有字段与安全默认列；本批仅个人视图，不授予业务数据权限。
+      operationId: options_api_v1_opportunity_views_options_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewOptions'
+          description: Successful Response
+      security:
+      - HTTPBearer: []
+      summary: Options
+      tags:
+      - Opportunity views
+  /api/v1/opportunity-views/{view_id}:
+    delete:
+      description: 只有创建人可删除。版本冲突返回 409，必须携带 Idempotency-Key；删除保留审计记录。
+      operationId: delete_api_v1_opportunity_views__view_id__delete
+      parameters:
+      - in: path
+        name: view_id
+        required: true
+        schema:
+          format: uuid
+          title: View Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityViewDelete'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewDeleted'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Delete
+      tags:
+      - Opportunity views
+    get:
+      operationId: detail_api_v1_opportunity_views__view_id__get
+      parameters:
+      - in: path
+        name: view_id
+        required: true
+        schema:
+          format: uuid
+          title: View Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Detail
+      tags:
+      - Opportunity views
+    put:
+      description: 仅本人可修改；省略 config 仅重命名，保留原配置。version_no 冲突返回 409。必须携带 Idempotency-Key。
+      operationId: update_api_v1_opportunity_views__view_id__put
+      parameters:
+      - in: path
+        name: view_id
+        required: true
+        schema:
+          format: uuid
+          title: View Id
+          type: string
+      - description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+        in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - format: uuid
+            type: string
+          - type: 'null'
+          description: 同一次提交及响应不确定后的重试使用同一 UUID；新的提交使用新 UUID。相同标识和内容回放结果，标识相同但内容不同返回 409。旧客户端可省略。
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityViewUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunityViewItem'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      security:
+      - HTTPBearer: []
+      summary: Update
+      tags:
+      - Opportunity views
   /api/v1/profile/evaluation:
     get:
       operationId: evaluation_summary_api_v1_profile_evaluation_get

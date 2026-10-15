@@ -208,6 +208,7 @@ async def opportunity_detail(
 async def opportunities(
     customer_id: UUID | None = Query(default=None),
     owner: str | None = Query(default=None, max_length=100),
+    owner_id: UUID | None = None,
     q: str | None = Query(None, max_length=100),
     stages: list[Literal["identified", "qualified", "solution", "proposal", "negotiation", "won", "lost"]] = Query(
         [], max_length=7
@@ -254,6 +255,7 @@ async def opportunities(
                 close_period=close_period,
                 order=order,
                 owner_name=owner,
+                owner_id=owner_id,
                 probability=probability,
                 stage_code=stage,
                 close_from=close_from,

@@ -96,6 +96,12 @@ Page({
     opportunityGradeIndex: 0,
     opportunityFilterActive: false, canViewTeam:false,
     opportunityQuery: '',
+    opportunityViewOrder: 'quarter_stage',
+    opportunityViewGroupBy: 'quarter',
+    opportunityViewColumns: ['name','stage','signal','money','close'],
+    opportunityViewScope: null,
+    opportunityProductLine: '',
+    opportunityIncludeClosed: true,
     filterRole: "",
     executionTeamOptions: [{
       value: "all",
@@ -106,16 +112,19 @@ Page({
     executionTeamIndex: 0,
     executionTeamLabel: "全部团队"
   },
+  opportunityViewsRequest(path, options) { return apiClient.opportunityViewsRequest(path, options); },
   opportunityParams() {
     const selectedOwner = (this.data.opportunityOwnerOptions[this.data.opportunityOwnerIndex] || {}).value;
     const owner = selectedOwner === 'all' ? this.data.executionMemberName : selectedOwner;
     return {
       pageSize: 20,
-      includeClosed: true,
-      order: 'quarter_stage',
+      includeClosed: this.data.opportunityIncludeClosed !== false,
+      order: this.data.opportunityViewOrder || 'quarter_stage',
+      scope: this.data.opportunityViewScope || null,
+      productLine: this.data.opportunityProductLine || null,
       query: this.data.opportunityQuery.trim(),
       teamId: this.data.executionTeamKey,
-      owner: owner === 'all' ? null : owner,
+      ownerId: owner === 'all' ? null : owner,
       stages: this.data.opportunitySelectedStages,
       closePeriod: this.data.opportunityCloseOptions[this.data.opportunityCloseIndex].value,
       grade: this.data.opportunityGradeOptions[this.data.opportunityGradeIndex].value,
@@ -176,17 +185,16 @@ Page({
       opportunityOwnerOptions = [{
         value: 'all',
         label: '全部负责人'
-      }, ...(facets.owners || []).filter(value => this.data.executionMemberName === 'all' || value === this.data.executionMemberName).map(value => ({
-        value,
-        label: value
-      }))];
+      }, ...(facets.owner_options || []).map(item => ({value:item.id,label:item.name}))];
     const previousOwner = (this.data.opportunityOwnerOptions[this.data.opportunityOwnerIndex] || {}).value || 'all';
+    if(previousOwner !== 'all' && !opportunityOwnerOptions.some(option=>option.value===previousOwner)) opportunityOwnerOptions.push({value:previousOwner,label:'已保存负责人'});
     const years = new Set([CURRENT_YEAR - 1, CURRENT_YEAR, CURRENT_YEAR + 1, this.data.summaryQuarter.year, this.data.listQuarter.year, ...(facets.years || [])]);
     const quarterYearOptions = [...years].sort((a, b) => a - b).map(value => ({
       value,
       label: `${value}年`
     }));
     const teamOptions=[{value:'all',label:'全部团队'},...(response.team_options||[]).map(team=>({value:team.id,label:team.name}))];
+    if(this.data.executionTeamKey !== 'all' && !teamOptions.some(option=>option.value===this.data.executionTeamKey)) teamOptions.push({value:this.data.executionTeamKey,label:'已保存团队'});
     const teamIndex=optionIndex(teamOptions,this.data.executionTeamKey);
     this.setData({
       opportunityItems: items,
@@ -395,7 +403,7 @@ Page({
   },
   applyOpportunityFilters() {
     this.setData({
-      opportunityFilterActive: Boolean(this.data.opportunityQuery.trim()) || this.data.listQuarter.quarters.length > 0 || [this.data.opportunityOwnerIndex, this.data.opportunityCloseIndex, this.data.opportunityGradeIndex].some(index => index > 0) || this.data.opportunitySelectedStages.length > 0 || this.data.canViewTeam && this.data.executionTeamIndex > 0
+      opportunityFilterActive: Boolean(this.data.opportunityQuery.trim()) || Boolean(this.data.opportunityProductLine) || Boolean(this.data.opportunityViewScope) || this.data.opportunityIncludeClosed === false || this.data.listQuarter.quarters.length > 0 || [this.data.opportunityOwnerIndex, this.data.opportunityCloseIndex, this.data.opportunityGradeIndex].some(index => index > 0) || this.data.opportunitySelectedStages.length > 0 || this.data.canViewTeam && this.data.executionTeamIndex > 0
     });
     return this.loadAllOpportunities();
   },
@@ -429,6 +437,10 @@ Page({
       clearTimeout(this.opportunitySearchTimer);
       this.listOpportunities = [];
       this.setData({
+        opportunityViewIdentity: context, opportunityViewYear: CURRENT_YEAR,
+        opportunityViewOrder: 'quarter_stage', opportunityViewGroupBy: 'quarter',
+        opportunityViewColumns: ['name','stage','signal','money','close'],
+        opportunityViewScope: null, opportunityProductLine: '', opportunityIncludeClosed: true,
         opportunityQuery: '',
         opportunityFilterActive: false,
         summaryQuarter: quarterSelection(CURRENT_YEAR),
@@ -491,6 +503,7 @@ Page({
   },
   resetOpportunityFilters() {
     this.setData({
+      opportunityViewScope: null, opportunityProductLine: '', opportunityIncludeClosed: true,
       opportunityQuery: '',
       listQuarter: quarterSelection(this.data.listQuarter.year),
       opportunityOwnerIndex: 0,

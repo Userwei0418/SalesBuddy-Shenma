@@ -22,3 +22,24 @@
 @media (max-width: 900px) { .department-ui .ds-opp-search { flex-basis: 100%; } }
 
 .department-ui .ds-opp-board .sb-mstrip-items { grid-template-columns: repeat(4, minmax(120px, 1fr)); }
+
+/* Personal PC views remain server-owned; the toolbar shares the Shenma blue theme. */
+.department-ui .ds-opp-views { display: flex; flex-direction: column; gap: var(--ui-space-2); padding-bottom: var(--ui-space-3); border-bottom: 1px solid var(--ui-border); min-width: 0; }
+.department-ui .ds-opp-view-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ui-space-2); min-width: 0; }
+.department-ui .ds-opp-view-row label, .department-ui .ds-opp-extra-filter { display: flex; align-items: center; gap: var(--ui-space-2); color: var(--ui-secondary); font-size: var(--ui-text-small); max-width: 100%; }
+.department-ui .ds-opp-view-row .ant-select { min-width: 160px; }
+.department-ui .ds-opp-view-select .ant-select { width: 220px; }
+.department-ui .ds-opp-columns { flex: 1 1 300px; }
+.department-ui .ds-opp-columns .ant-select { flex: 1; min-width: 180px; max-width: 440px; }
+.department-ui .ds-opp-extra-filter .ant-select { min-width: 110px; max-width: 250px; }
+.department-ui .ds-opp-extra-filter input { width: 170px; }
+.ds-opp-view-error { color: var(--ui-danger, #c53030); font-size: 13px; }
+.department-ui .ds-opp-scope { color: var(--ui-secondary); font-size: var(--ui-text-small); }
+@media (max-width: 900px) {
+  .department-ui .ds-opp-list { overflow: auto; }
+  .department-ui .ds-opp-groups { flex: none; overflow: visible; }
+  .department-ui .ds-opp-columns { flex-basis: 100%; }
+  .department-ui .ds-opp-view-select { width: 100%; }
+  .department-ui .ds-opp-view-select .ant-select { flex: 1; min-width: 0; }
+  .department-ui .ds-opp-board .sb-mstrip-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

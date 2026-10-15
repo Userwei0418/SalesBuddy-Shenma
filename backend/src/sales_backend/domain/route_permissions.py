@@ -66,6 +66,7 @@ ROUTES = {
   'system_events':'audit.events_read','export_role_usage':'ai.usage_export'},
  'operations_targets': {'targets':'target.read','save':'target.manage','requests':'target.approve','save_batch':'target.manage',
   'batches':'target.approve','decide_batch':'target.approve','decide':'target.approve','history':'target.history'},
+ 'opportunity_views': {name:'opportunity.read' for name in ('options','list_views','detail','create','update','delete')},
  'partners': {'directory':'partner.read','list_partners':'partner.read','save_partner':'partner.manage'},
  'profile': {'profile_scope_options':'profile.sales_read','scoped_performance':'profile.sales_read','update_sales_target':'target.submit',
   'ensure_sales_growth_review':'profile.sales_review','sales_growth':'profile.sales_read','scoped_sales_growth':'profile.sales_read',

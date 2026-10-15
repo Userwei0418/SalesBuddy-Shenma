@@ -26,6 +26,7 @@ async def browse_opportunities(
     offset=0,
     customer_id=None,
     owner_name=None,
+    owner_id=None,
     probability=None,
     stage_code=None,
     close_from=None,
@@ -73,6 +74,8 @@ async def browse_opportunities(
         base.append(f"o.customer_id={bind(customer_id, 'uuid')}")
 
     filters = []
+    if owner_id is not None:
+        filters.append(f"owner_id={bind(str(owner_id), 'uuid')}")
     if owner_name:
         filters.append(f"owner_name={bind(owner_name, 'text')}")
     team_predicate = (f"team_id={bind(str(team_id), 'uuid')}" if team_id is not None
@@ -148,7 +151,7 @@ async def browse_opportunities(
           {STAGE_SQL} AS display_stage,o.product_line,o.expected_close_date,o.updated_at,
           o.expected_close_year,o.expected_close_quarter,
           COALESCE(c.name,security.customer_reference(o.customer_id)->>'name') AS customer_name,
-          COALESCE(owner.display_name,'待分配') AS owner_name,
+          COALESCE(owner.display_name,'待分配') AS owner_name,o.owner_user_ref_id AS owner_id,
           COALESCE(team.name,'待分配团队') AS team_name,o.owner_team_id AS team_id,
           {creation_date_projection()} AS creation_date_fact,
           extract(year FROM timezone('Asia/Shanghai',o.closed_at))::integer AS closed_year
@@ -173,6 +176,9 @@ async def browse_opportunities(
           'owners',(SELECT COALESCE(jsonb_agg(value ORDER BY value),'[]'::jsonb) FROM
             (SELECT DISTINCT owner_name AS value FROM authorized
              WHERE owner_name IS NOT NULL AND {team_predicate}) valueset),
+          'owner_options',(SELECT COALESCE(jsonb_agg(jsonb_build_object('id',id,'name',name) ORDER BY name,id),'[]'::jsonb) FROM
+            (SELECT DISTINCT owner_id AS id,owner_name AS name FROM authorized
+             WHERE owner_id IS NOT NULL AND {team_predicate}) owner_values),
           'teams',(SELECT COALESCE(jsonb_agg(value ORDER BY value),'[]'::jsonb) FROM
             (SELECT DISTINCT team_name AS value FROM authorized WHERE team_name IS NOT NULL) valueset),
           'product_lines',(SELECT COALESCE(jsonb_agg(value ORDER BY value),'[]'::jsonb) FROM

@@ -397,8 +397,8 @@ function checkOpportunityName(customerId, name, excludeId) {
 // The server owns pagination and returns summaries for the complete filtered set.
 function listOpportunities(options = {}) {
   const params = [];
-  ['query','team','teamId','grade','productLine','closePeriod','order'].forEach(key => {
-    const name = {query:'q',teamId:'team_id',productLine:'product_line',closePeriod:'close_period'}[key] || key;
+  ['query','team','teamId','ownerId','grade','productLine','closePeriod','order'].forEach(key => {
+    const name = {query:'q',teamId:'team_id',ownerId:'owner_id',productLine:'product_line',closePeriod:'close_period'}[key] || key;
     if (options[key] && options[key] !== 'all') params.push(`${name}=${encodeURIComponent(options[key])}`);
   });
   (options.stages || []).forEach(stage => params.push(`stages=${encodeURIComponent(stage)}`));
@@ -795,3 +795,6 @@ const catalogReads=['getWorkbench','getDashboard','listOpportunities','getOpport
 catalogReads.forEach(name=>{const read=module.exports[name];if(read)module.exports[name]=(...args)=>getBusinessOptions().then(()=>read(...args));});
 
 module.exports.getOpportunityCreateOptions=()=>request({path:'/opportunities/create-options'});
+
+// Shenma PC-only personal views; use shared authentication and transport receipts.
+module.exports.opportunityViewsRequest = (path = "", options = {}) => request({...options, path: "/opportunity-views" + path});
