@@ -15,6 +15,7 @@ from sales_backend.domain.tasks import TaskConflict, TaskForbidden, TaskNotFound
 from sales_backend.repositories.advice import AdviceRepository
 from sales_backend.services.advice import AdviceService
 from sales_backend.services.idempotency import execute_mutation
+from sales_backend.contracts.task_alignment import legacy_safe_task_payload
 
 router = APIRouter(prefix="/api/v1/advice", tags=["Business advice"])
 
@@ -33,6 +34,11 @@ class SuggestionDecision(BaseModel):
                 raise ValueError("多人采纳只传 tasks，不同时传 task；无需待办时不得传任务")
             TaskBatchCreate(tasks=self.tasks)
         return self
+
+
+class AdviceDiscovery(BaseModel):
+    state: Literal["none", "queued", "running", "succeeded", "failed", "stale"]
+    analysis: dict | None
 
 
 @router.post("", description="请求经营建议。销售未关联商机的拜访可生成日常待办建议；已关联商机的拜访生成客户待办建议。")
@@ -54,6 +60,26 @@ async def advice_statistics(
 ):
     async with database.transaction(identity.actor, readonly=True) as connection:
         return {**await AdviceRepository().statistics(connection), "definition_version": "handled_valid_suggestions_v1"}
+
+
+@router.get("/latest", response_model=AdviceDiscovery, description=(
+    "只读发现当前工作区、用户、角色、对象及页签的最新可读建议；不生成、不入队。"
+    "none 表示当前权限可读集合中无记录，analysis 为 null；stale 对应原建议 status=superseded。"
+    "读取失败以 HTTP 错误返回，不转换为 none。"
+))
+async def latest_advice(
+    subject_kind: Literal["customer", "opportunity", "visit"],
+    subject_id: UUID,
+    section: Literal["overview", "tasks", "visits", "opportunity"] = "overview",
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+    settings: Settings = Depends(get_settings),
+):
+    subject = AdviceRequest(subject_kind=subject_kind, subject_id=str(subject_id), section=section)
+    try:
+        return await AdviceService(database, settings).latest(identity.actor, subject)
+    except AdviceError as exc:
+        raise HTTPException(exc.status, str(exc)) from exc
 
 
 @router.get("/{analysis_id}")
@@ -91,7 +117,7 @@ async def decide_suggestion(
                 identity.actor,
                 idempotency_key,
                 "suggestion.decide:" + str(suggestion_id),
-                body.model_dump(),
+                legacy_safe_task_payload(body.model_dump()),
                 lambda: service.decide(
                     connection,
                     identity.actor,

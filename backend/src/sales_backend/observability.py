@@ -2,7 +2,7 @@
 
 在此之前 API 侧没有 logging 配置、没有请求标识、也没有兜底异常处理：
 仓储抛出意外异常时客户端只拿到一个裸 500，日志里没有任何可关联的线索。
-这里补上三件事，不改任何已有的业务错误映射：
+这里提供请求追踪，公开错误由 error_contract 统一构造：
 - 每个请求有 request_id，入日志也回写到响应头，便于按 id 串起来查；
 - 未被业务代码处理的异常统一记 traceback，再返回带 request_id 的 500；
 - 统一日志格式，API 与 worker 共用。
@@ -10,12 +10,13 @@
 
 from __future__ import annotations
 
-import logging
 import ipaddress
+import json
+import logging
 import uuid
-from time import perf_counter
 from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
+from time import perf_counter
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
@@ -23,6 +24,7 @@ from sales_backend.domain.sanitization import redact_log
 from sales_backend.request_metadata import RequestMetadata, current_actor, request_metadata
 from sales_backend.services.request_audit import record_http_operation
 from sales_backend.performance import RequestTimings, request_timings
+from sales_backend.error_contract import error_response, request_error_context
 
 REQUEST_ID_HEADER = "X-Request-Id"
 LOG_FORMAT = "%(asctime)s %(levelname)s [%(request_id)s] %(name)s %(message)s"
@@ -77,6 +79,7 @@ async def request_id_middleware(request: Request, call_next: Callable[[Request],
     # 在更外层），所以同时挂到 request.state 上供它读取。
     request.state.request_id = request_id
     token = _request_id.set(request_id)
+    error_token = request_error_context.set((request_id, request.method))
     response = None
     started = perf_counter()
     timing = RequestTimings()
@@ -112,30 +115,59 @@ async def request_id_middleware(request: Request, call_next: Callable[[Request],
         if response is not None:
             response.headers["Server-Timing"] = (
                 f"app;dur={elapsed_ms:.1f}, db;dur={timing.database_ms:.1f}, "
-                f"pool;dur={timing.pool_wait_ms:.1f}, audit;dur={audit_ms:.1f}"
+                f"pool;dur={timing.pool_wait_ms:.1f}, audit;dur={audit_ms:.1f}, "
+                f"db_max;dur={timing.database_max_ms:.1f}"
             )
+            for name, duration in sorted(timing.stages.items()):
+                response.headers["Server-Timing"] += f", {name};dur={duration:.1f}"
             response.headers["X-DB-Queries"] = str(timing.query_count)
         if elapsed_ms >= 1000:
             route = getattr(request.scope.get("route"), "path", "unmatched")
             logger.warning(
                 "slow_request method=%s route=%s status=%s duration_ms=%.1f db_ms=%.1f "
-                "pool_wait_ms=%.1f audit_ms=%.1f queries=%s",
+                "pool_wait_ms=%.1f audit_ms=%.1f queries=%s db_max_ms=%.1f stages=%s",
                 request.method, route, response.status_code if response else 500,
                 elapsed_ms, timing.database_ms, timing.pool_wait_ms, audit_ms, timing.query_count,
+                timing.database_max_ms, json.dumps({key: round(value, 1) for key, value in timing.stages.items()},
+                                                  sort_keys=True, separators=(",", ":")),
                 extra={"event_type": "slow_request"},
             )
         request_timings.reset(timing_token)
         _request_id.reset(token)
         request_metadata.reset(metadata_token)
         current_actor.reset(actor_token)
+        request_error_context.reset(error_token)
     response.headers[REQUEST_ID_HEADER] = request_id
     return response
+
+
+def recovery_error_response(request: Request, *, status_code: int, code: str) -> JSONResponse:
+    """A failed response is not evidence that a business write rolled back.
+
+    A commit or an earlier transaction can have completed before a subsequent
+    timeout. Only safe reads advertise retryability. Existing write receipts
+    and status endpoints remain the authority for recovering uncertain results.
+    """
+    readonly = request.method in {"GET", "HEAD"}
+    request_id = getattr(request.state, "request_id", None) or current_request_id()
+    headers = {"Cache-Control": "no-store", REQUEST_ID_HEADER: request_id}
+    if readonly:
+        headers["Retry-After"] = "5"
+    return error_response(request, status_code=status_code, headers=headers, code=code,
+                          detail="读取暂未完成，请稍后重试" if readonly else
+                          "提交结果暂未确认，请先查看处理结果，勿重复提交")
+
+
+async def request_timeout_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.warning("request_timeout method=%s route=%s exception=%s", request.method,
+                   getattr(request.scope.get("route"), "path", "unmatched"), type(exc).__name__)
+    return recovery_error_response(request, status_code=504, code="REQUEST_TIMEOUT")
 
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """兜底：业务代码没处理的异常在这里留下可追溯的日志。
 
-    只处理未被端点捕获的异常，因此不会影响任何既有的状态码与 detail 文案。
+    HTTP 状态保持 500；保留旧 detail 机器码，并增加安全 message 和读写恢复指引。
     """
     request_id = getattr(request.state, "request_id", None) or current_request_id()
     logger.exception(
@@ -147,8 +179,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
             "actor": getattr(getattr(request.state, "identity", None), "actor", None),
         },
     )
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "INTERNAL_ERROR", "request_id": request_id},
-        headers={REQUEST_ID_HEADER: request_id},
-    )
+    return error_response(request, status_code=500, code="INTERNAL_ERROR", detail="INTERNAL_ERROR")

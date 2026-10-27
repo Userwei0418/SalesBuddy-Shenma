@@ -4,6 +4,7 @@ from sales_backend.domain.tasks import TaskConflict, TaskForbidden, TaskNotFound
 from sales_backend.repositories.task_mutations import TaskMutationRepository as Mutations
 from sales_backend.repositories.tasks import TaskRepository
 from sales_backend.services.authorization import require_permission
+from sales_backend.services.task_compatibility import require_legacy_mutation
 
 
 async def _locked(connection, task_id, expected_version):
@@ -30,6 +31,7 @@ async def _notify(connection, actor, task, template, title, note, *, creator_onl
 
 async def submit_completion(connection, *, actor, task_id, note, expected_version=None):
     await require_permission(connection, "task.complete", task_id=task_id)
+    await require_legacy_mutation(connection, task_id, "complete")
     from sales_backend.services.tasks import TaskService
     task = await _locked(connection, task_id, expected_version)
     owner = await connection.fetchval(
@@ -61,6 +63,7 @@ async def submit_completion(connection, *, actor, task_id, note, expected_versio
 
 async def review_completion(connection, *, actor, task_id, event_type, note, expected_version):
     await require_permission(connection, "task.review", task_id=task_id)
+    await require_legacy_mutation(connection, task_id, event_type)
     if expected_version is None:
         raise TaskConflict("验收须提供当前版本，请刷新任务")
     task = await _locked(connection, task_id, expected_version)

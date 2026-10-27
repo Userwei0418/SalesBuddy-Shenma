@@ -40,6 +40,9 @@ async def test_header_endpoints_keep_personal_scope_and_never_read_summary(conne
             assert result["id"] == customer_id
             assert not {"summary", "profile", "visits", "tasks", "risks"} & result.keys()
             assert result["primary_opportunity"]["id"] == opportunity_id
+            if path == paths[0]:
+                assert result["can_read_advice"] is True
+                assert result["can_request_advice"] is True
         assert (await client.get("/api/v1/customers/bad/header")).status_code == 422
         mismatch = f"/api/v1/customers/{uuid4()}/opportunities/{opportunity_id}/header"
         assert (await client.get(mismatch)).status_code == 404

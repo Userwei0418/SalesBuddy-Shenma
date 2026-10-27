@@ -1,9 +1,11 @@
 page { background:var(--ui-background); }
 .login-page { min-height:100vh; color:var(--ui-ink); background:var(--ui-background); }
 .product-hero { position:relative; overflow:hidden; padding:calc(constant(safe-area-inset-top) + 160rpx) 46rpx 86rpx; padding:calc(env(safe-area-inset-top) + 160rpx) 46rpx 86rpx; color:var(--ui-on-primary); background:var(--ui-sidebar); }
-/* Use the supplied white RGBA logo directly; no device-dependent blending. */
+/* 神码标识采用与线上 Web 一致的蓝色 S，原生布局不依赖外部图片。 */
 .brand-row { position:relative; z-index:1; width:550rpx; max-width:100%; }
-.brand-logo { display:block; width:100%; }
+.brand-logo { display:flex; align-items:center; gap:22rpx; width:100%; }
+.brand-mark { display:flex; flex-shrink:0; align-items:center; justify-content:center; width:92rpx; height:92rpx; border-radius:24rpx; background:#2863CD; color:#fff; font-family:Arial,sans-serif; font-size:56rpx; font-weight:700; line-height:1; }
+.brand-title { color:#fff; font-size:40rpx; font-weight:600; line-height:1.3; white-space:nowrap; }
 .welcome-copy { position:relative; z-index:1; margin-top:58rpx; }
 .welcome-title { color:var(--ui-on-primary); font-size:20px; font-weight:600; line-height:1.65; }
 .login-content { position:relative; z-index:2; margin-top:-40rpx; padding:0 30rpx calc(constant(safe-area-inset-bottom) + 28rpx); padding:0 30rpx calc(env(safe-area-inset-bottom) + 28rpx); }
@@ -22,7 +24,7 @@ page { background:var(--ui-background); }
 /* 账号、密码、新密码：sb-input stacked plain（框高 40px、字号、眼睛点击区由组件与桥接给出） */
 .login-input { display:block; }
 .login-pressed { opacity:.7; }
-/* 记住密码、同意协议：t-checkbox（默认圆形图标）；两行标题统一 14px 正文色，说明 12px */
+/* 记住账号、同意协议：t-checkbox（默认圆形图标）；两行标题统一 14px 正文色，说明 12px */
 .login-checks { margin:8rpx -20rpx 16rpx; --td-checkbox-vertical-padding:calc((var(--ui-touch-target) - 22px) / 2); --td-checkbox-title-color:var(--ui-ink); --td-checkbox-title-font:400 14px / 22px var(--ui-font); --td-checkbox-title-line-height:22px; --td-checkbox-description-color:var(--ui-muted); --td-checkbox-description-font:400 12px / 18px var(--ui-font); --td-checkbox-bg-color:transparent; }
 .agreement-label { color:var(--ui-ink); font-size:14px; line-height:22px; }
 .privacy-link { margin-left:4rpx; color:var(--ui-primary); }
@@ -40,3 +42,25 @@ page { background:var(--ui-background); }
 .account-suggestion::after { border:0; }
 .suggestion-account { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
 .suggestion-action { flex-shrink:0; color:var(--ui-primary); font-size:14px; }
+
+/* Company entry additions use the A package tokens and existing form rhythm. */
+.company-entry-group { margin-bottom:var(--ui-space-2); }
+.company-card { margin-top:8px; padding:var(--ui-space-2); border:1px solid var(--ui-line); border-radius:var(--ui-radius-control); background:var(--ui-surface); }
+.company-name { color:var(--ui-ink); font-size:14px; font-weight:600; line-height:1.5; overflow-wrap:anywhere; }
+.company-code { margin-top:4px; color:var(--ui-muted); font-size:var(--ui-text-small); line-height:1.6; overflow-wrap:anywhere; }
+.company-editor { margin-top:var(--ui-space-2); }
+.login-page .company-link[size="mini"] { width:auto; min-height:var(--ui-touch-target); margin:0; padding:0; background:transparent; color:var(--ui-primary); font-size:14px; line-height:var(--ui-touch-target); font-weight:400; }
+.company-link::after { border:0; }
+.company-link[disabled] { color:var(--ui-muted); }
+.company-error { margin-top:8px; color:var(--ui-danger); font-size:var(--ui-text-small); line-height:1.6; }
+.company-switch-note { margin-top:var(--ui-space-2); color:var(--ui-ink); font-size:14px; line-height:1.65; }
+.company-switch-note .company-link { display:block; text-align:left; margin-top:4px; }
+
+/* Phone-first login and device-encrypted memory controls. */
+.company-entry-panel { margin-bottom: 28rpx; }
+.login-mode-hint { margin-top: 12rpx; font-size: 21rpx; color: #8290a1; line-height: 1.6; }
+.login-mode-hint text,.forget-memory text { color: #225e91; }
+.login-alternatives { margin-top: 18rpx; text-align: center; }
+.login-help { padding: 18rpx 22rpx; margin-top: 10rpx; border-radius: 14rpx; background: #f6f8fb; font-size: 21rpx; color: #7f8b9b; text-align: left; line-height: 1.6; }
+.login-help-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12rpx; margin-top: 10rpx; }
+.forget-memory { text-align: right; font-size: 20rpx; line-height: 1.6; }

@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import httpx
+import asyncpg
 import pytest
 
 from sales_backend.repositories.agent_audit import AgentAuditRepository
@@ -39,12 +40,11 @@ async def test_failed_receipt_visible_to_management_not_other_sales_and_without_
     assert (
         await connection.execute("DELETE FROM agent.inference_operation WHERE id=$1::uuid", operation_id) == "DELETE 0"
     )
-    assert (
-        await connection.execute(
-            "UPDATE agent.inference_operation SET status='accepted' WHERE id=$1::uuid", operation_id
-        )
-        == "UPDATE 0"
-    )
+    with pytest.raises(asyncpg.InsufficientPrivilegeError):
+        async with connection.transaction():
+            await connection.execute(
+                "UPDATE agent.inference_operation SET status='accepted' WHERE id=$1::uuid", operation_id
+            )
     assert row["input_summary"]["record_counts"]["visits"] == 1
     assert "客户正文" not in str(row["input_summary"])
     await actor(connection, "XS002")
@@ -104,16 +104,21 @@ async def test_audit_statistics_use_business_receipts_not_http_and_exclude_fault
         audit = InferenceAudit(database, sales, operation_id, mode="operating_report", run_id=None, facts={}, config={})
         await audit.start()
         if final == "running":
-            await connection.execute(
-                "UPDATE agent.inference_operation SET started_at=now()-interval '20 minutes' WHERE id=$1::uuid",
-                operation_id,
-            )
+            role = await connection.fetchval("SELECT current_user")
+            await connection.execute("RESET ROLE")
+            try:
+                await connection.execute(
+                    "UPDATE agent.inference_operation SET started_at=now()-interval '20 minutes' WHERE id=$1::uuid",
+                    operation_id,
+                )
+            finally:
+                await connection.execute(f'SET LOCAL ROLE "{role}"')
             continue
         observer = DatabaseModelObserver(
             database, sales, "operating_report", operation_id=operation_id, provider="agent_platform"
         )
         invocation = await observer.start(
-            "chat-messages",
+            "agent-chat-messages",
             "fixture",
             {
                 "test_fault_injected": test_fault,
@@ -122,6 +127,7 @@ async def test_audit_statistics_use_business_receipts_not_http_and_exclude_fault
             1,
         )
         # HTTP 200 alone must not qualify the failed contract above.
+        await observer.prepare_dispatch(invocation)
         await observer.finish(invocation, httpx.Response(200, json={}), None)
         if fallback:
             audit.event("fallback_requested", "agent_platform", reason="TimeoutError")

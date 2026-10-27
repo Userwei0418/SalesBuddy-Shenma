@@ -47,12 +47,64 @@ async def opportunity_creation_options(connection, actor, owner_user_id=None):
     return {'teams': teams, 'default_team_id': default}
 
 
+async def opportunity_creation_form_options(connection, actor):
+    """Optional owner choices for the existing create-options endpoint.
+
+    Reuse self/team creation rules; delegated choices match the existing sales
+    owner validator and must pass both create and create_for_others scopes.
+    No organization-management directory or contact fields are exposed.
+    """
+    options = await opportunity_creation_options(connection, actor)
+    effective = await AuthorizationRepository().effective(connection)
+    owners = []
+    # INSERT ... RETURNING also obeys opportunity.read RLS. Do not offer a
+    # form target that the actor could create but cannot read back.
+    self_teams = [team for team in options["teams"] if effective.allows("opportunity.read", ObjectScope(
+        actor.workspace_id, actor.user_id, team["id"], frozenset({actor.user_id})))]
+    if self_teams:
+        person = await connection.fetchrow(
+            "SELECT display_name,account_code FROM platform.user_ref WHERE id=$1::uuid AND workspace_id=$2::uuid",
+            actor.user_id, actor.workspace_id,
+        )
+        owners.append({"id": actor.user_id, "name": person["display_name"],
+                       "account_code": person["account_code"], "teams": self_teams,
+                       "default_team_id": options["default_team_id"] if any(
+                           t["id"] == options["default_team_id"] for t in self_teams) else None})
+    if effective.allows("opportunity.create_for_others"):
+        rows = await connection.fetch("""SELECT DISTINCT ON (u.id) u.id::text,u.display_name AS name,
+            u.account_code,m.team_id::text,t.name AS team_name
+            FROM platform.user_ref u
+            JOIN platform.role_binding r ON r.user_ref_id=u.id AND r.workspace_id=u.workspace_id
+             AND r.role_code='sales' AND clock_timestamp()>=r.valid_from AND clock_timestamp()<r.valid_to
+            JOIN platform.team_membership m ON m.user_ref_id=u.id AND m.workspace_id=u.workspace_id
+             AND clock_timestamp()>=m.valid_from AND clock_timestamp()<m.valid_to
+            JOIN platform.team t ON t.id=m.team_id AND t.workspace_id=u.workspace_id
+             AND t.status='active' AND t.deleted_at IS NULL
+             AND clock_timestamp()>=t.valid_from AND clock_timestamp()<t.valid_to
+            WHERE u.workspace_id=$1::uuid AND u.id<>$2::uuid AND u.status='active' AND u.deleted_at IS NULL
+            ORDER BY u.id,m.is_primary DESC,m.created_at DESC""", actor.workspace_id, actor.user_id)
+        for row in rows:
+            scope = ObjectScope(actor.workspace_id, row["id"], row["team_id"], frozenset({row["id"]}))
+            if not all(effective.allows(p, scope) for p in ("opportunity.create", "opportunity.create_for_others", "opportunity.read")):
+                continue
+            owners.append({"id": row["id"], "name": row["name"], "account_code": row["account_code"],
+                           "teams": [{"id": row["team_id"], "name": row["team_name"]}],
+                           "default_team_id": row["team_id"]})
+    return {**options, "owners": owners, "default_owner_id": actor.user_id if self_teams else None}
+
+
 async def opportunity_creation_owner(connection, actor, data, *, delegated_owner=None):
     effective = await AuthorizationRepository().effective(connection)
     user_id = str(delegated_owner['user_id']) if delegated_owner else actor.user_id
     options = await opportunity_creation_options(connection, actor, user_id)
     allowed = {team['id'] for team in options['teams']}
     selected = delegated_owner['team_id'] if delegated_owner else data.get('owner_team_id')
+    if delegated_owner and user_id != actor.user_id and data.get('owner_team_id') is not None:
+        # Delegated form choices expose the owner's current primary team only.
+        # A stale explicit choice must not silently become another team's fact;
+        # older clients that omit it retain the existing primary-team default.
+        if str(data['owner_team_id']) != str(selected):
+            raise ValueError('负责人所属团队已变化，请刷新后重新选择团队')
     if selected:
         selected = str(selected)
         if selected not in allowed:

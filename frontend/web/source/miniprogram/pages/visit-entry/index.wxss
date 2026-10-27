@@ -1,0 +1,134 @@
+/* 记录客户拜访：灰底上放白卡，卡片不描边、不加阴影（飞书）；提交放底部固定条 sb-bottom-bar。 */
+page{background:var(--ui-background)}
+.visit-entry-page{min-height:100vh;box-sizing:border-box;padding:16rpx 32rpx 300rpx;padding-bottom:calc(300rpx + constant(safe-area-inset-bottom));padding-bottom:calc(300rpx + env(safe-area-inset-bottom));background:var(--ui-background);color:var(--ui-ink)}
+
+/* 顶部导航 */
+.entry-navigation{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--ui-background)}
+.entry-navigation-row{position:relative;display:flex;align-items:center;justify-content:center}
+.entry-navigation-row>text{font-size:var(--ui-text-body);font-weight:600;color:var(--ui-ink)}
+/* 返回键点击区 44×44px（px，不随屏宽缩） */
+.entry-back{position:absolute;left:12rpx;top:0;bottom:0;width:var(--ui-touch-target);max-width:var(--ui-touch-target);min-height:0;margin:0;padding:0;display:flex;align-items:center;justify-content:center;background:transparent}
+.entry-back::after{border:0}
+.entry-back>view{width:18rpx;height:18rpx;border-left:2px solid var(--ui-primary);border-bottom:2px solid var(--ui-primary);transform:rotate(45deg)}
+.entry-navigation .entry-back{width:var(--ui-touch-target);min-width:0;padding:0;max-width:var(--ui-touch-target)}
+
+/* 页面说明：sb-summary-card */
+.entry-hero{display:block}
+.customer-context{display:flex;align-items:center;gap:16rpx;padding-top:24rpx;border-top:1px solid var(--ui-line)}
+.customer-context text{flex:0 0 auto;font-size:var(--ui-text-small);color:var(--ui-secondary)}
+/* 客户全名最多两行，窄屏也能核对 */
+.customer-context label{display:-webkit-box;min-width:0;flex:1;overflow:hidden;font-size:14px;font-weight:600;line-height:1.5;color:var(--ui-ink);white-space:normal;word-break:break-all;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+
+/* 卡片通用 */
+.customer-picker-card,.note-card,.capture-card{margin-top:24rpx;padding:32rpx;border:0;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.capture-card{position:relative}
+
+/* 选择客户 */
+.customer-picker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24rpx}
+.customer-picker-head>view{min-width:0;flex:1}
+.customer-picker-head>view>text{display:flex;align-items:center;gap:12rpx;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.customer-picker-head>view>text>label{color:var(--ui-danger);font-size:var(--ui-text-small);font-weight:400}
+.customer-picker-head>view>view{margin-top:8rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5}
+/* 「更换」：上下各 12px 内边距撑到 44px（px，不随屏宽缩），负外边距抵掉占位 */
+.customer-picker-head>text{flex:0 0 auto;padding:12px 8rpx;margin:-12px -8rpx;color:var(--ui-primary);font-size:14px;line-height:20px}
+.link-pressed{opacity:.7}
+/* 客户搜索：sb-search plain（白底细线、放大镜、清除、搜索中） */
+.customer-search{margin-top:24rpx}
+.customer-search-state{margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.customer-results{max-height:320rpx;margin-top:16rpx;border-top:1px solid var(--ui-line)}
+.customer-result{display:flex;align-items:center;gap:16rpx;min-height:48px;box-sizing:border-box;padding:16rpx 0;border-bottom:1px solid var(--ui-line)}
+.customer-result-pressed{background:var(--ui-neutral-soft)}
+.customer-result>view,.selected-customer>view{width:56rpx;height:56rpx;display:flex;align-items:center;justify-content:center;flex:0 0 auto;border-radius:50%;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:14px;font-weight:600}
+.customer-result>text{min-width:0;flex:1;overflow:hidden;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:400;white-space:nowrap;text-overflow:ellipsis}
+.customer-result>text>label{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);font-weight:400}
+.customer-result>label{flex:0 0 auto;color:var(--ui-primary);font-size:14px}
+.customer-empty{margin-top:16rpx;padding:24rpx 0;color:var(--ui-secondary);font-size:14px;text-align:center}
+.customer-load-error{display:flex;flex-direction:column;align-items:center;gap:16rpx;color:var(--ui-danger)}
+/* 「重新加载」：t-button 默认尺寸（40px）；外包一层 view，伪元素把点击区扩到 44px（放在按钮后面，按钮本身照常响应），外层同样绑定重试方法 */
+.customer-retry{position:relative;z-index:0;display:flex}
+.customer-retry::after{content:'';position:absolute;z-index:-1;left:0;right:0;top:calc(50% - 22px);bottom:calc(50% - 22px)}
+.selected-customer{display:flex;align-items:center;gap:16rpx;margin-top:24rpx}
+/* 已选客户全名最多两行，窄屏也能核对；「已选择」照旧靠右 */
+.selected-customer>text{display:-webkit-box;min-width:0;flex:1;overflow:hidden;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.5;white-space:normal;word-break:break-all;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.selected-customer>label{flex:0 0 auto;height:20px;padding:0 12rpx;border-radius:4px;color:var(--ui-primary);background:var(--ui-selected);font-size:var(--ui-text-small);line-height:20px}
+
+/* 拜访原始记录 */
+.note-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}
+.note-head>view>text{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
+.note-head>view>label{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:14px}
+.note-head>.note-tools{display:flex;flex-direction:column;align-items:flex-end;gap:8rpx;min-width:130rpx;flex-shrink:0}
+.note-head>.note-tools>.note-count{white-space:nowrap;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.4}
+/* 一键清空：看起来是细线小按钮；外圈 16rpx 透明边，按钮高 44px，负外边距抵掉占位；宽度随文字，不折行 */
+.note-clear{display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:var(--ui-touch-target);min-height:var(--ui-touch-target);margin:-16rpx;padding:0 16rpx;border:16rpx solid transparent;border-radius:calc(var(--ui-radius-control) + 16rpx);background-color:var(--ui-surface);background-clip:padding-box;box-shadow:inset 0 0 0 1px var(--ui-line);color:var(--ui-ink);line-height:1.3;font-size:var(--ui-text-small);font-weight:400}
+.note-clear-pressed{background-color:var(--ui-neutral-soft)}
+.note-clear::after{border:0}
+.note-clear[disabled]{color:var(--ui-muted);background-color:var(--ui-surface)}
+.note-tools .note-clear{width:auto;min-width:0;max-width:none;white-space:nowrap}
+.note-input{box-sizing:border-box;width:100%;max-width:100%;height:440rpx;margin-top:24rpx;padding:24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-ink);font-size:var(--ui-text-body);line-height:1.6}
+.note-footer{margin-top:16rpx}
+/* 首次拜访：t-checkbox（圆形勾、整行可点），说明写在 content 一行 */
+.first-visit-field{display:block;--td-checkbox-vertical-padding:16rpx 0;--td-checkbox-bg-color:transparent}
+.draft-state{margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.draft-state.error{color:var(--ui-danger)}
+.draft-state.undo{display:flex;align-items:center;gap:16rpx}
+/* 撤销：按钮高 44px，文字在透明边框内垂直居中 */
+.draft-state.undo button{display:flex;align-items:center;justify-content:center;width:auto;min-width:0;max-width:162rpx;margin:-20rpx 0;padding:0 16rpx;min-height:var(--ui-touch-target);line-height:1.3;border:16rpx solid transparent;border-radius:calc(var(--ui-radius-control) + 16rpx);color:var(--ui-primary);background-color:var(--ui-surface);background-clip:padding-box;box-shadow:inset 0 0 0 1px var(--ui-line);font-size:var(--ui-text-small);font-weight:400}
+.draft-state.undo .undo-pressed{background-color:var(--ui-neutral-soft)}
+.draft-state.undo button::after{border:0}
+.transcript-state{display:flex;align-items:center;gap:8rpx;margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.transcript-state>text{width:10rpx;height:10rpx;border-radius:50%;background:var(--ui-success)}
+.transcript-state.error{color:var(--ui-danger)}
+.transcript-state.error>text{background:var(--ui-danger)}
+
+/* 语音与文件录入 */
+.capture-head{display:flex;align-items:center;gap:24rpx}
+.input-segment{flex:1;min-width:0;max-width:460rpx}
+.input-help::after,.capture-primary::after{border:0}
+/* 说明入口：图标 22px，按钮点按区 44px */
+.input-help{display:flex;justify-content:center;align-items:center;flex:0 0 var(--ui-touch-target);width:var(--ui-touch-target);height:var(--ui-touch-target);min-height:0;margin:-12rpx -20rpx -12rpx auto;padding:0;border:0;border-radius:50%;line-height:1;color:var(--ui-secondary);background:transparent}
+.input-help.open{color:var(--ui-primary)}
+.input-help-pressed{background:var(--ui-neutral-soft)}
+.capture-body{display:flex;align-items:center;gap:24rpx;margin-top:32rpx}
+.voice-icon,.file-icon{display:flex;align-items:center;justify-content:center;flex:0 0 64rpx;width:64rpx;height:64rpx;border-radius:var(--ui-radius-control);background:var(--ui-selected)}
+.voice-icon{gap:4rpx}
+.voice-icon>text{width:4rpx;height:16rpx;border-radius:999px;background:var(--ui-primary)}
+.voice-icon>text:nth-child(2),.voice-icon>text:nth-child(4){height:26rpx}
+.voice-icon>text:nth-child(3){height:36rpx}
+.file-outline{box-sizing:border-box;width:28rpx;height:34rpx;border:2px solid var(--ui-primary);border-radius:2px;padding:6rpx 4rpx}
+.file-outline text{display:block;height:2rpx;margin-bottom:5rpx;background:var(--ui-primary)}
+.file-outline text:last-child{width:65%}
+.capture-copy{flex:1;min-width:0}
+.capture-copy>text{display:block;font-size:var(--ui-text-body);color:var(--ui-ink);font-weight:600}
+.capture-copy>label{display:block;margin-top:4rpx;font-size:var(--ui-text-small);color:var(--ui-secondary);line-height:1.5}
+.capture-primary{display:flex;align-items:center;justify-content:center;flex:0 0 220rpx;height:var(--ui-touch-target);min-height:0;margin:0;padding:0 16rpx;line-height:1.4;border-radius:var(--ui-radius-control);background:var(--ui-primary);color:var(--ui-on-primary);font-size:var(--ui-text-body);font-weight:600}
+.capture-primary[disabled]{background:var(--ui-background);color:var(--ui-muted)}
+.recording .voice-icon{background:var(--ui-danger-soft)}
+.recording .voice-icon>text{background:var(--ui-danger);animation:wave .7s ease-in-out infinite alternate}
+.recording .capture-primary{background:var(--ui-danger)}
+@keyframes wave{from{transform:scaleY(.55)}to{transform:scaleY(1.25)}}
+.selected-material{margin-top:24rpx;padding-top:24rpx;border-top:1px solid var(--ui-line)}
+.material-line{display:flex;gap:16rpx;align-items:center;font-size:14px}
+.material-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ui-ink)}
+.material-status{color:var(--ui-secondary);font-size:var(--ui-text-small);white-space:nowrap}
+.material-status.failed{color:var(--ui-danger)}
+.upload-track{height:6rpx;margin-top:16rpx;border-radius:999px;background:var(--ui-background);overflow:hidden}
+.upload-track view{height:100%;background:var(--ui-primary);border-radius:999px}
+.material-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:0 32rpx;margin-top:0;font-size:14px;color:var(--ui-primary)}
+/* 附件操作：上下各 12px 内边距撑到 44px（px，不随屏宽缩） */
+.material-actions>text{padding:12px 0;line-height:20px}
+.help-body{padding-bottom:16rpx}
+.help-row{margin-top:16rpx}
+.help-row>text{display:block;color:var(--ui-ink);font-size:14px;font-weight:600}
+.help-row>label{display:block;margin-top:8rpx;font-size:14px;line-height:1.6;color:var(--ui-secondary)}
+.help-foot{padding-top:16rpx;margin-top:24rpx;border-top:1px solid var(--ui-line);color:var(--ui-secondary);font-size:14px;line-height:1.6}
+
+/* 流程说明（提交按钮在底部固定条） */
+.process-card{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12rpx;margin-top:32rpx}
+.process-card>view{display:flex;align-items:center;gap:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.process-card>view>text{width:32rpx;height:32rpx;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--ui-secondary);background:var(--ui-surface);border:1px solid var(--ui-line);font-size:var(--ui-text-small);font-weight:600}
+.process-card>text{color:var(--ui-muted);font-size:var(--ui-text-small)}
+.safe-tip{margin:16rpx 8rpx 24rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;text-align:center}
+
+
+/* New business controls; existing layout and palette preserved. */
+.recording-guide{margin:16rpx 0;padding:16rpx 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface)}.recording-guide-toggle{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:var(--ui-touch-target);font-size:14px;color:var(--ui-ink);text-align:left}.recording-guide-action{flex-shrink:0;color:var(--ui-primary)}.recording-guide-section{margin-top:16rpx}.recording-guide-title,.recording-guide-line,.recording-guide-note{display:block;font-size:14px;line-height:1.7;color:var(--ui-secondary)}.recording-guide-title{font-weight:600;color:var(--ui-ink)}.recording-guide-note{margin-top:16rpx;padding-top:16rpx;border-top:1px solid var(--ui-line)}

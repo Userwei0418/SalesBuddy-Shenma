@@ -24,4 +24,14 @@ function recentVisits(visits, now = new Date()) {
   });
   return recent;
 }
-module.exports = { recentVisits };
+function sevenDayVisits(visits, now = new Date()) {
+  const today=dayNumber(now),counts={};
+  (visits||[]).forEach(item=>{const day=dayNumber(item.interaction_at);if(day!==null)counts[day]=(counts[day]||0)+1;});
+  const rows=Array.from({length:7},(_,index)=>{
+    const day=today-6+index,date=new Date(day*86400000);
+    return {key:date.toISOString().slice(0,10),weekday:`周${'日一二三四五六'[date.getUTCDay()]}`,count:counts[day]||0,isToday:index===6};
+  });
+  const max=Math.max(...rows.map(row=>row.count),1);
+  return rows.map(row=>({...row,height:`${Math.max(row.count?22:5,Math.round(row.count/max*100))}%`}));
+}
+module.exports = { recentVisits, sevenDayVisits };

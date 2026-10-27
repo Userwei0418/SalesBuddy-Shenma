@@ -1,0 +1,68 @@
+/* SB120-WEB-001: one reading rhythm — overview, filters, scrollable results.
+ * Opt in only on list/overview pages. Forms and details keep natural scrolling. */
+.pc-page-filters { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ui-space-3); padding: 12px var(--ui-card-padding); background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.pc-results-scroll { min-width: 0; scrollbar-width: thin; }
+.pc-results-scroll:focus-visible { outline: 2px solid var(--ui-focus); outline-offset: -2px; }
+.pc-report-results { display: flex; flex-direction: column; gap: var(--ui-block-gap); }
+.pc-report-results > * { flex-shrink: 0; }
+.department-ui .ds-opp-groups { overflow: visible; }
+.pc-list-page .pc-kpi-label, .pc-list-page .pc-kpi-hint { white-space: normal; overflow: visible; }
+.pc-list-page .pc-kpi-label { padding-right: 14px; }
+.pc-list-page .pc-kpi-hint { color: var(--ui-secondary); }
+
+/* Business lists grow with their rows. The shell is the single vertical scroll
+ * surface; tables keep their own horizontal scroll only. Dialogs are excluded. */
+body.department-design #page-root.department-host:has(.pc-list-page) { overflow: auto !important; }
+.department-ui:has(> .pc-list-page) { height: auto; min-height: 100%; }
+.department-ui > .pc-list-page { height: auto; min-height: 0; }
+.pc-list-page > * { flex-shrink: 0; }
+.pc-list-page .pc-results-scroll { flex: none; min-height: 0; overflow: visible; }
+.pc-list-page > .pc-ws-grid { flex: none; align-content: start; }
+.pc-ws-grid.pc-results-scroll .pc-ws-side { position: static; }
+.pc-list-page > .ds-customers, .pc-list-page > .ds-opps, .pc-list-page > .department-tasks { flex: none; height: auto; min-height: 0; }
+.pc-list-page .ds-customer-assets, .pc-list-page .ds-customer-tools, .pc-list-page .ds-opp-board, .pc-list-page .ds-opp-tools { flex-shrink: 0; }
+.pc-list-page .ds-opp-list { overflow: visible; }
+.pc-list-page .department-tasks, .pc-list-page .department-task-panel { display: flex; flex-direction: column; min-height: 0; }
+.pc-list-page .department-task-panel { flex: none; }
+.pc-records > .pc-panel, .pc-history > .pc-panel { flex: none; min-height: 0; overflow: visible; }
+.pc-records > .pc-panel > .pc-panel-body, .pc-history > .pc-panel > .pc-panel-body { min-height: 0; overflow: visible; }
+.pc-list-page.pc-risk-list .pc-risk-results, .pc-list-page.pc-risk-list .ds-sp-body { flex: none; overflow: visible; }
+.pc-list-page.pc-customers .ds-customer-workbench, .pc-list-page.pc-customers .ds-customer-workspace-wrap { flex: none; overflow: visible; }
+.pc-list-page.pc-customers .ds-customer-workspace { align-items: start; }
+.pc-list-page.pc-customers .ds-customer-table-viewport { flex: none; overflow: visible; }
+.pc-list-page.pc-customers .ds-customer-map-panel { height: min(62vh, 640px); min-height: 360px; overflow: visible; position: sticky; top: 12px; }
+.pc-list-page.pc-customers .ds-customer-map-panel .sb-bmap { min-height: 0; }
+.pc-records .pc-records-caliber { font-size: var(--ui-text-small); }
+.pc-list-pagination { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--ui-space-2); padding-block: var(--ui-space-3); }
+@media (max-width: 900px) {
+  .pc-page-filters { align-items: flex-start; }
+  .pc-list-page.pc-customers .ds-customer-map-panel { position: static; height: 420px; }
+  /* The fixed mobile navigation and account shortcut sit above the shell.
+   * Leave space inside the actual scroll surface so the final row and pager
+   * can be moved fully above both controls. Drawers and meeting mode are not
+   * part of this surface. */
+  body.department-design #page-root.department-host:has(.pc-list-page) {
+    scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  }
+  .department-ui:has(> .pc-list-page) {
+    padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (min-width: 901px) and (max-height: 700px) {
+  .department-ui:has(> .pc-list-page) { --ui-page-gutter: 12px; --ui-block-gap: 10px; }
+  .pc-list-page .pc-kpi { padding-block: 8px; }
+  .pc-list-page .pc-kpi-hint { display: none; }
+  .pc-page-filters { padding-block: 8px; }
+}
+
+.pc-column-filter { display: inline-flex; align-items: center; gap: var(--ui-space-2); font-size: var(--ui-text-caption); color: var(--ui-secondary); }
+.department-ui .ds-opp-name b { flex-wrap: wrap; }
+.department-ui .ds-opp-views select, .department-ui .ds-opp-views input { border-color: var(--ui-line-strong); color: var(--ui-ink); }
+.department-ui .ds-opp-local-note { color: var(--ui-secondary); }
+
+/* Keep metrics at the same scale; red/yellow/green remain status signals. */
+.department-ui .department-task-kpis { background: var(--ui-surface); }
+.department-ui .department-task-kpi { align-items: flex-start; flex-direction: column; gap: var(--ui-space-1); }
+.department-ui .department-task-kpi span { font-size: var(--ui-text-caption); }
+.department-ui .department-task-kpi strong { font-size: var(--ui-text-metric); line-height: 1.3; }
+.department-ui .ds-opp-grade-A, .department-ui .ds-opp-grade-B { color: var(--ui-secondary); background: var(--ui-neutral-soft); }

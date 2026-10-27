@@ -15,16 +15,18 @@ function targetAmount(maturity, kind) {
   return candidates.map(number).find((value) => value !== null) ?? null;
 }
 
-function performanceMetric(maturity, kind, actual) {
+function performanceMetric(maturity, kind, actual, projection) {
   const target = targetAmount(maturity || {}, kind);
-  const completed = number(actual);
+  const financial=projection?require('./financialDisplay').aggregate(projection,kind):null;
+  const completed = financial?(financial.isSubtotal||financial.status==='withdrawn'?null:number(financial.amount)):number(actual);
   const rate = target && completed !== null ? completed / target * 100 : null;
   return {
     kind,
     name: kind === "collection" ? "回款" : "确收",
     targetText: target === null ? "未设置" : money(target),
-    completedText: completed === null ? "未登记" : money(completed),
-    rateText: rate === null ? (target === null ? "目标待设置" : "实绩待登记") : `完成率 ${rate.toFixed(1)}%`,
+    completedText: financial&&financial.status==='withdrawn'?'已撤回':financial&&financial.isSubtotal?'已登记小计 '+money(financial.displayAmount):completed === null ? "未登记" : money(completed),
+    financialHints:financial?financial.qualityHints:[],
+    rateText: rate === null ? (target === null ? "目标待设置" : financial&&financial.isSubtotal?'实绩未完整，暂不计算完成率':"实绩待登记") : `完成率 ${rate.toFixed(1)}%`,
     progress: rate === null ? 0 : Math.max(0, Math.min(100, Math.round(rate))),
   };
 }
@@ -36,7 +38,7 @@ function customerRetention(rows, now = new Date()) {
   (rows || []).forEach((row) => {
     const customerId = String(row.customer_id || "");
     const occurred = String(row.occurred_on || row.occurredAt || "");
-    const rowYear = Number(occurred.slice(0, 4));
+    const rowYear = Number(row.year || occurred.slice(0, 4));
     const amount = number(row.recognized_amount !== undefined ? row.recognized_amount : row.amount);
     if (!customerId || ![year, lastYear].includes(rowYear) || amount === null) return;
     if (!byCustomer.has(customerId)) byCustomer.set(customerId, { current: 0, previous: 0 });

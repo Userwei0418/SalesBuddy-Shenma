@@ -7,7 +7,7 @@ const storage = new Map();
 vm.runInNewContext(fs.readFileSync(__dirname+'/../miniprogram/pages/index/index.js','utf8'), {
   Page:p=>{page=p;},
   wx: { getStorageSync: key => storage.get(key), removeStorageSync: key => storage.delete(key) },
-  require:n=>n.includes('visitCards')?require('../miniprogram/utils/visitCards'):n.includes('taskOverview')?require('../miniprogram/utils/taskOverview'):{},
+  require:n=>n.includes('visitCards')?require('../miniprogram/utils/visitCards'):n.includes('taskOverview')?require('../miniprogram/utils/taskOverview'):n.includes('taskPresentation')?require('../miniprogram/utils/taskPresentation'):n.includes('knowledgeOverview')?require('../miniprogram/utils/knowledgeOverview'):n.includes('taskExecutionPresentation')?require('../miniprogram/utils/taskExecutionPresentation'):{},
 });
 test('完成任务只更新待办汇总，不把单条通知改成零计数卡片',()=>{
   const notification=page.buildRemoteNotificationMessage({id:'n',template_code:'task_assigned',object_id:'t',body:'保留通知正文',payload:{}},{scope:'仅本人'});
@@ -64,4 +64,37 @@ test('验收通知与旧卡片回读显示待确认和驳回，保留进入详�
   assert.equal(pending.card.metrics[0].value,'待发起人确认');
   const rejected=page.reconcileTaskCard(original,[{id:'t',status:'in_progress',last_event_type:'reject_completion',last_event_note:'补齐验证'}]);
   assert.equal(rejected.card.metrics[0].value,'执行中 · 已驳回');
+});
+
+test('转交通知显示实际操作人和历史负责人变化，不替换任务正文或入口',()=>{
+  const message=page.buildRemoteNotificationMessage({id:'transfer',template_code:'task_reassigned',object_id:'task-id',title:'任务已转交',body:'继续客户跟进',
+    payload:{actor_name:'协调人',previous_owners:[{user_id:'old',name:'原接收人'}],new_owner:{user_id:'new',display_name:'新接收人'}}},{scope:'本人'});
+  assert.equal(message.card.title,'任务已转交'); assert.equal(message.card.subtitle,'继续客户跟进');
+  assert.equal(message.card.rows[0].meta,'原接收人 → 新接收人'); assert.equal(message.card.footer,'协调人操作');
+  assert.equal(message.card.action.taskId,'task-id');
+});
+
+test('历史转交通知缺姓名时不推断负责人，取消通知保持原因和入口',()=>{
+  for(const template_code of ['task_reassigned','task_cancelled']){
+    const message=page.buildRemoteNotificationMessage({id:'legacy',template_code,object_id:'task-id',body:'保留原说明',
+      payload:{previous_owners:[{user_id:'old'}],new_owner:{user_id:'new'}}},{scope:'本人'});
+    assert.equal(message.card.rows.length,0); assert.equal(message.card.footer,'');
+    assert.equal(message.card.subtitle,'保留原说明'); assert.equal(message.card.action.taskId,'task-id');
+  }
+});
+
+test('首页最新状态：停止/历史终态中性，正常完成不沿用停止颜色，原说明保留',()=>{
+ const original=page.buildRemoteNotificationMessage({id:'n',template_code:'task_assigned',object_id:'t',payload:{}},{scope:'仅本人'});
+ for(const [fields,label,tone] of [
+  [{status:'completed',execution_mode:'execution_v3',completion_action:'close',completion_result:'项目不再继续'},'已停止','gray'],
+  [{status:'completed',execution_mode:'execution_v3',completion_action:'review_completion',completion_result:'已交付'},'正常完成','green'],
+  [{status:'cancelled',end_reason:'cancelled',last_event_note:'重复任务'},'历史取消','gray'],
+  [{status:'cancelled',end_reason:'rejected',last_event_note:'资源冲突'},'历史拒绝','gray'],
+  [{status:'completed',execution_mode:'execution_v3'},'已结束 · 结果待核对','gray'],
+ ]){
+  const message=page.reconcileTaskCard(original,[{id:'t',...fields}]);
+  assert.equal(message.card.metrics[0].value,label);assert.equal(message.card.tone,tone);
+  assert.equal(message.card.action.taskId,'t');
+  if(fields.last_event_note)assert.equal(message.card.rows[0].meta,fields.last_event_note);
+ }
 });

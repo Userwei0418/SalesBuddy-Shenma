@@ -75,11 +75,7 @@ def validate_run_result(run, result, facts):
             scope = facts.get("scope") or {}
             result["scope"] = str(
                 scope.get("scope_label")
-                or {
-                    "self": "本人",
-                    "team": "当前团队",
-                    "workspace": "当前工作空间",
-                }.get(run.actor.data_scope.value, "当前权限范围")
+                or "当前业务授权范围"
             )
             result["data_as_of"] = facts["data_as_of"]
         elif run.mode == "today_tasks":

@@ -296,3 +296,17 @@ def test_profile_prompt_and_contract_keep_own_coaching_after_runtime_override(ro
         )
     ordinary = replace(run, surface=None)
     assert "即时总结" in ensure_instant_summary_contract(ordinary, payload, facts(actor))["title"]
+
+
+def test_stops_and_unknown_results_are_not_completion_or_timely_success():
+    base = task('normal', 'completed', due=NOW, completed=NOW-timedelta(hours=1))
+    result = facts(tasks=[base,
+        {**base,'id':'stop','execution_mode':'execution_v3','completion_action':'close'},
+        {**base,'id':'unknown','execution_mode':'execution_v3','completion_action':None},
+        task('pending','in_progress',due=NOW-timedelta(hours=1)),
+    ])
+    dimensions={d['code']:d for d in result['dimensions']}
+    assert dimensions['task_completion']['denominator']==2
+    assert dimensions['task_completion']['score']==50
+    assert dimensions['task_timeliness']['denominator']==1
+    assert dimensions['task_timeliness']['score']==100

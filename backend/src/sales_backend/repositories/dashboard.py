@@ -3,6 +3,23 @@
 
 
 from sales_backend.repositories.dashboard_scope import resolve_selection
+from sales_backend.domain.finance_totals import actual_totals
+from collections import defaultdict
+from sales_backend.repositories.opportunity_product_lines import attach_product_lines
+
+
+def actual_detail(row):
+    """Whitelisted leaves from the exact rows aggregated by actual_totals."""
+    keys = ('id', 'customer_id', 'opportunity_id', 'material_line_id', 'year', 'quarter', 'kind',
+            'amount', 'raw_amount', 'tax_basis', 'tax_unresolved', 'source', 'status', 'occurred_on',
+            'period_start', 'period_end', 'period_precision', 'owner_user_ref_id', 'owner_team_id',
+            'complete', 'missing_material_count', 'version_no', 'attribution_status')
+    result = {key: row.get(key) for key in keys}
+    for key in ('id', 'customer_id', 'opportunity_id', 'material_line_id', 'owner_user_ref_id', 'owner_team_id',
+                'amount', 'raw_amount'):
+        if result[key] is not None:
+            result[key] = str(result[key])
+    return result
 
 
 def owner_scope(alias):
@@ -25,6 +42,26 @@ def selected_scope(alias):
     return owner_scope(alias) + f" AND ($5::uuid[] IS NULL OR {alias}.owner_team_id=ANY($5::uuid[]))"
 
 
+def unresolved_actual_scope():
+    # Company totals require both company dashboard AND actual authority. This
+    # is additional to the caller's current customer/opportunity read checks.
+    return """(a.kind='recognized' AND a.attribution_status='unresolved'
+      AND NOT $4::boolean AND $5::uuid[] IS NULL
+      AND security.authorization_subject($1::text,'department',NULL,NULL)
+      AND security.authorization_subject('actual.read','department',NULL,NULL))"""
+
+
+def actual_selected_scope():
+    return "COALESCE((" + selected_scope("fact") + " OR " + unresolved_actual_scope() + "),false)"
+
+
+def unresolved_count_scope():
+    # Count only objects in the viewer's current selected readable scope, without
+    # assigning their old amount to today's owner or disclosing other-company totals.
+    return """(a.kind='recognized' AND a.attribution_status='unresolved'
+      AND ((o.id IS NOT NULL AND """ + selected_scope("o") + ") OR (o.id IS NULL AND " + selected_scope("c") + ")))"
+
+
 def scope_arguments(actor, selection):
     return (selection.permission, selection.member_id, actor.workspace_id, selection.personal,
             list(selection.team_ids) if selection.team_ids is not None else None)
@@ -39,23 +76,25 @@ class DashboardRepository:
         args = scope_arguments(actor, selection)
         opportunities = await self.opportunities(connection, actor, selection=selection)
         forecasts = await self.forecasts(connection, actor, selection=selection)
-        actuals = await connection.fetch(
-            f"""SELECT extract(year FROM a.occurred_on)::int AS year,
-              extract(quarter FROM a.occurred_on)::int AS quarter,
-              sum(a.amount) FILTER(WHERE a.kind='recognized') AS recognized_amount,
-              sum(a.amount) FILTER(WHERE a.kind='collection') AS collection_amount,
-              count(*) FILTER(WHERE a.kind='recognized') AS recognized_count,
-              count(*) FILTER(WHERE a.kind='collection') AS collection_count
-            FROM crm.customer_actual a LEFT JOIN crm.customer c ON c.id=a.customer_id AND c.deleted_at IS NULL
+        actual_rows = await connection.fetch(
+            f"""SELECT a.*, NOT {actual_selected_scope()} AS _attribution_excluded
+            FROM crm.effective_actual a LEFT JOIN crm.customer c ON c.id=a.customer_id AND c.deleted_at IS NULL
             LEFT JOIN crm.opportunity o ON o.id=a.opportunity_id AND o.deleted_at IS NULL
-            CROSS JOIN LATERAL (SELECT COALESCE(o.owner_user_ref_id,c.owner_user_ref_id) AS owner_user_ref_id,
-              COALESCE(o.owner_team_id,c.owner_team_id) AS owner_team_id) fact
-            WHERE a.voided_at IS NULL AND security.customer_reference(a.customer_id) IS NOT NULL
-              AND {selected_scope("fact")}
-              AND a.occurred_on <= timezone('Asia/Shanghai',clock_timestamp())::date
-            GROUP BY 1,2 ORDER BY 1,2""",
+            CROSS JOIN LATERAL (SELECT a.owner_user_ref_id,a.owner_team_id) fact
+            WHERE security.customer_reference(a.customer_id) IS NOT NULL
+              AND ({actual_selected_scope()} OR {unresolved_count_scope()})
+              AND (a.kind<>'recognized' OR (security.authorization_customer('customer.read',a.customer_id)
+                AND security.authorization_customer('actual.read',a.customer_id)
+                AND (a.opportunity_id IS NULL OR (security.authorization_opportunity('opportunity.read',o.id)
+                  AND security.authorization_opportunity('actual.read',o.id)))))
+              AND (a.occurred_on IS NULL OR a.occurred_on <= timezone('Asia/Shanghai',clock_timestamp())::date)
+            ORDER BY a.year,a.quarter,a.id""",
             *args,
         )
+        periods = defaultdict(list)
+        for row in actual_rows:
+            periods[(row['year'],row['quarter'])].append(dict(row))
+        actuals = [{'year':year,'quarter':quarter,**actual_totals(rows)} for (year,quarter),rows in periods.items()]
         customers = await connection.fetch(
             f"""SELECT c.id::text,c.name,c.source_code,c.primary_partner_name,t.region_code,
               c.owner_user_ref_id::text AS owner_id,t.name AS team
@@ -75,8 +114,8 @@ class DashboardRepository:
         )
         return dict(
             data_source="database",
-            contract_version=3,
-            forecast_basis='filled_quarter_plan_times_probability',
+            contract_version=4,
+            forecast_basis='latest_sales_input',
             scope=scope,
             selection=dict(personal=personal, member_id=selection.member_id if personal else None,
                            team_groups=list(selection.team_groups)),
@@ -84,6 +123,11 @@ class DashboardRepository:
             opportunities=[dict(r) for r in opportunities],
             quarter_forecasts=[dict(r) for r in forecasts],
             quarter_actuals=[dict(r) for r in actuals],
+            actual_details=[actual_detail(dict(r)) for r in actual_rows if not r.get("_attribution_excluded")],
+            detail_coverage={"actuals": {"complete": True, "count": sum(not r.get("_attribution_excluded") for r in actual_rows),
+                                        "basis": "same_authorized_effective_actual_rows"},
+                             "forecasts": {"complete": True, "count": len(forecasts),
+                                           "basis": "latest_sales_input"}},
             customers=[dict(r) for r in customers],
             recent_visits=[dict(r) for r in visits],
             product_links=[dict(r) for r in links],
@@ -107,20 +151,17 @@ class DashboardRepository:
             ORDER BY o.expected_close_date NULLS LAST,o.id""",
             *args,
         )
-        return [dict(row) for row in rows]
+        return await attach_product_lines(connection, [dict(row) for row in rows])
 
     async def forecasts(self, connection, actor, *, personal=False, selection=None, permission="dashboard.read"):
         selection = selection or await resolve_selection(connection, actor, personal=personal, permission=permission)
         args = scope_arguments(actor, selection)
         rows = await connection.fetch(
-            f"""SELECT f.year,f.quarter,f.recognized_amount,f.collection_amount,
-              o.id::text AS opportunity_id,o.customer_id::text,o.status,o.probability,
-              (o.status IN ('open','won') AND o.probability>=10) AS forecast_eligible,
-              CASE WHEN o.status IN ('open','won') AND o.probability>=10 THEN
-                round(f.recognized_amount * o.probability / 100,2) END AS weighted_recognized_amount,
-              CASE WHEN o.status IN ('open','won') AND o.probability>=10 THEN
-                round(f.collection_amount * o.probability / 100,2) END AS weighted_collection_amount,
-              o.owner_user_ref_id::text AS owner_id
+            f"""SELECT f.year,f.quarter,f.recognized_amount::text AS recognized_amount,f.collection_amount::text AS collection_amount,
+              o.id::text AS opportunity_id,o.name AS opportunity_name,o.customer_id::text,
+              security.customer_reference(o.customer_id)->>'name' AS customer_name,o.status,o.probability,
+              f.updated_at,
+              o.owner_user_ref_id::text AS owner_id,o.owner_team_id::text AS team_id
             FROM crm.opportunity_forecast f JOIN crm.opportunity o ON o.id=f.opportunity_id
             WHERE o.deleted_at IS NULL AND {selected_scope("o")}
             ORDER BY f.year,f.quarter,o.id""",

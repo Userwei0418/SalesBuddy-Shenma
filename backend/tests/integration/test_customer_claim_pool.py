@@ -2,6 +2,8 @@
 
 from uuid import uuid4
 
+from tests.integration.tenant_fixtures import active_foreign_workspace
+
 import pytest
 
 from sales_backend.db import set_request_context
@@ -16,7 +18,8 @@ from tests.integration.test_profile_scores import business_login
 pytestmark = pytest.mark.asyncio
 
 DIRECTORY_FIELDS = {"id", "name", "industry_code", "level_code", "customer_type_code", "team_name",
-                    "owner_name", "ownership_state", "claimed", "can_claim", "claim_status"}
+                    "owner_name", "ownership_state", "claimed", "can_claim", "claim_status",
+                    "business_identities", "partner_profile_id", "primary_partner_id", "can_read_customer"}
 
 
 async def company_customers(connection, count):
@@ -76,7 +79,7 @@ async def test_company_directory_full_total_121_browse_search_empty_page_and_leg
         assert search.json()["items"] == rows[:3]
         assert (await client.get("/api/v1/customers/" + customers[0]["id"])).status_code == 404
         assert (await client.get("/api/v1/customers/" + customers[2]["id"])).status_code == 404
-    await set_request_context(connection, sales.model_copy(update={"workspace_id": str(uuid4())}))
+    await set_request_context(connection, sales.model_copy(update={"workspace_id": await active_foreign_workspace(connection)}))
     foreign = await CustomerMemberRepository().claim_pool_page(connection, query=query)
     assert foreign == {"items": [], "total": 0, "has_more": False, "next_offset": None}
 
@@ -160,7 +163,7 @@ async def test_industries_states_pinyin_and_pagination_share_server_criteria(con
     sales = await actor(connection, "XS001")
     repository = CustomerMemberRepository()
     # Cached phonetic keys must not preserve access after a workspace change.
-    await set_request_context(connection, sales.model_copy(update={"workspace_id": str(uuid4())}))
+    await set_request_context(connection, sales.model_copy(update={"workspace_id": await active_foreign_workspace(connection)}))
     assert (await repository.claim_pool_page(connection, query="shangtang"))["total"] == 0
     assert (await repository.claim_pool_options(connection))["industries"] == [{"value": "", "label": "全部行业"}]
     await actor(connection, "OPS001")

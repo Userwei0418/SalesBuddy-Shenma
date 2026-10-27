@@ -5,6 +5,15 @@ from sales_backend.domain.authorization import Authorization, Grant
 
 
 class AuthorizationRepository:
+    async def delegations(self, connection):
+        return json_value(await connection.fetchval("SELECT security.authorization_delegations()"))
+
+    async def save_delegation(self, connection, user_id, body):
+        return json_value(await connection.fetchval("SELECT security.save_authorization_delegation($1::uuid,$2::jsonb)", user_id, body))
+
+    async def modules(self, connection):
+        return json_value(await connection.fetchval("SELECT security.tenant_modules()"))
+
     async def directory(self, connection):
         return json_value(await connection.fetchval("SELECT security.authorization_directory()"))
 
@@ -28,7 +37,7 @@ class AuthorizationRepository:
 
     async def roles(self, connection):
         rows = await connection.fetch("""
-            SELECT r.id::text,r.name,r.description,r.builtin_role_code,r.status,r.version_no,
+            SELECT r.id::text,r.name,r.description,r.builtin_role_code,r.status,r.version_no,r.expires_at,
               COALESCE((SELECT jsonb_agg(jsonb_build_object('permission',g.permission_code,
                 'scope',g.scope_code,'team_ids',g.team_ids) ORDER BY g.permission_code)
                 FROM config.permission_role_grant g WHERE g.role_id=r.id),'[]'::jsonb) permissions
@@ -42,11 +51,11 @@ class AuthorizationRepository:
         row = await connection.fetchrow("""
             SELECT COALESCE((SELECT version_no FROM config.account_authorization
                 WHERE user_ref_id=$1::uuid AND workspace_id=common.current_workspace_id()),0) version_no,
-             COALESCE((SELECT jsonb_agg(jsonb_build_object('role_id',a.role_id,'scope',a.scope_code,'team_ids',a.team_ids))
+             COALESCE((SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object('role_id',a.role_id,'scope',a.scope_code,'team_ids',a.team_ids,'expires_at',a.expires_at,'delegation_user_ref_id',a.delegation_user_ref_id,'delegation_version',a.delegation_version,'approved_role_version',a.approved_role_version)))
                 FROM config.account_permission_role a WHERE user_ref_id=$1::uuid
                 AND workspace_id=common.current_workspace_id()),'[]') roles,
-             COALESCE((SELECT jsonb_agg(jsonb_build_object('permission',o.permission_code,'effect',o.effect,
-                 'scope',COALESCE(o.scope_code,'inherit'),'team_ids',o.team_ids))
+             COALESCE((SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object('permission',o.permission_code,'effect',o.effect,
+                 'scope',COALESCE(o.scope_code,'inherit'),'team_ids',o.team_ids,'expires_at',o.expires_at,'delegation_user_ref_id',o.delegation_user_ref_id,'delegation_version',o.delegation_version)))
                 FROM config.account_permission_override o WHERE user_ref_id=$1::uuid
                 AND workspace_id=common.current_workspace_id()),'[]') overrides
         """, user_id)

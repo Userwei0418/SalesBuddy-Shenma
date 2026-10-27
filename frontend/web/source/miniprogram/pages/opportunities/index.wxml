@@ -1,0 +1,48 @@
+<import src="../../templates/opportunity-list-card.wxml"/>
+<wxs module="opt">
+function lab(it,key,suffix){return (key ? it[key] : it) + (suffix || '');}
+function idx(list,key,suffix){var out=[];for(var i=0;i<(list||[]).length;i++){out.push({value:i,label:lab(list[i],key,suffix)});}return out;}
+function rest(list,key,suffix){var out=[];for(var i=1;i<(list||[]).length;i++){out.push({value:i,label:lab(list[i],key,suffix)});}return out;}
+function pick(i){var n=i * 1;return n>0?n:null;}
+module.exports={idx:idx,rest:rest,pick:pick};
+</wxs>
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<fde-projects id="fdeContent" wx:if="{{isFde}}" initial-scope="{{fdeScope}}" member-id="{{fdeMemberId}}" customer-id="{{fdeCustomerId}}"/>
+<block wx:if="{{!isFde}}">
+<view class="page">
+  <view class="page-head"><view class="page-head-main"><view class="title">全部商机</view><view class="subtitle">{{scope}} · 按商机阶段、关单日期与商机等级筛选</view></view><view wx:if="{{canCreate}}" class="create-row"><view class="create-opportunity" hover-class="create-opportunity-active" bindtap="createOpportunity"><label>新增商机</label></view></view></view>
+  <view class="filter-card compact-filter">
+    <view class="filter-line">
+      <text class="filter-title">筛选</text>
+      <scroll-view class="filter-scroll" scroll-x enhanced show-scrollbar="false">
+        <view class="filter-row">
+          <view wx:if="{{canViewTeam}}" class="filter-item filter-team"><sb-labeled-select size="small" label="团队" placeholder="全部团队" options="{{opt.rest(teamOptions,'label')}}" value="{{opt.pick(teamIndex)}}" bindchange="changeTeam"/></view>
+          <view wx:if="{{canViewTeam}}" class="filter-item filter-owner"><view class="filter-control" hover-class="filter-item-pressed" bindtap="openOwnerPicker"><text class="filter-value">{{ownerOptions[ownerIndex].label || '人员'}}</text><t-icon name="chevron-down" size="32rpx" class="chevron"/></view></view>
+          <view class="filter-item filter-stage {{selectedStages.length ? 'active' : ''}} filter-trigger" hover-class="filter-item-pressed" bindtap="toggleStageFilter"><view class="filter-control"><text wx:if="{{!selectedStages.length}}" class="filter-value">商机阶段</text><text wx:else class="filter-value">{{stageLabel}}</text><t-icon wx:if="{{showStageFilter}}" name="chevron-up" size="32rpx" class="chevron"/><t-icon wx:else name="chevron-down" size="32rpx" class="chevron"/></view></view>
+          <view class="filter-item filter-close"><sb-labeled-select size="small" useLabelSlot label="关单日期" title="关单日期" placeholder="{{closeOptions[0].label}}" options="{{opt.rest(closeOptions,'label')}}" value="{{opt.pick(closeIndex)}}" data-key="close" bindchange="changeFilter"><text slot="label">关单日期</text></sb-labeled-select></view>
+          <view class="filter-item filter-grade"><sb-labeled-select size="small" useLabelSlot label="商机等级" title="商机等级" placeholder="{{gradeOptions[0].label}}" options="{{opt.rest(gradeOptions,'label')}}" value="{{opt.pick(gradeIndex)}}" data-key="grade" bindchange="changeFilter"><text slot="label">商机等级</text></sb-labeled-select></view>
+          <view class="filter-item filter-activity"><sb-labeled-select size="small" useLabelSlot label="跟进时间" title="跟进时间" placeholder="{{activityWindowOptions[0].label}}" options="{{opt.rest(activityWindowOptions,'label')}}" value="{{opt.pick(activityWindowIndex)}}" data-key="activityWindow" bindchange="changeFilter"><text slot="label">跟进时间</text></sb-labeled-select></view>
+        </view>
+      </scroll-view>
+      <text wx:if="{{filterActive}}" class="filter-reset" hover-class="filter-reset-pressed" bindtap="resetFilters">重置</text>
+    </view>
+      <opportunity-period-filters value="{{opportunityPeriods}}" bind:change="changeOpportunityPeriods"/>
+    <view wx:if="{{showStageFilter}}" class="stage-panel">
+      <view class="stage-panel-title"><text>商机阶段</text><text class="stage-panel-hint">可多选</text></view>
+      <view class="stage-option {{!selectedStages.length ? 'selected' : ''}}" hover-class="stage-option-pressed" data-value="all" bindtap="toggleStage"><label class="stage-name">全部阶段</label></view>
+      <view wx:for="{{stageOptions}}" wx:key="value" class="stage-option {{item.selected ? 'selected' : ''}}" hover-class="stage-option-pressed" data-value="{{item.value}}" bindtap="toggleStage"><label class="stage-name">{{item.label}}</label></view>
+    </view>
+  </view>
+  <sb-state-panel wx:if="{{loading}}" class="list-state" state="loading" title="正在加载真实商机数据…"/>
+  <sb-state-panel wx:elif="{{loadError}}" class="list-state" state="error" title="商机加载失败" description="{{loadError}}" bind:retry="loadPage"/>
+  <view wx:elif="{{filtered.length}}" class="list"><view class="opportunity-order-note">当前结果 {{total}} 个 · 按预计关单季度分组 · 季度内按阶段进度降序</view><view wx:for="{{opportunityGroups}}" wx:for-item="group" wx:key="key" class="opportunity-quarter-group"><view class="opportunity-quarter-heading"><text class="opportunity-quarter-heading-title">{{group.label}}</text><label class="opportunity-quarter-heading-count">已显示 {{group.items.length}} 个商机</label></view><view wx:for="{{group.items}}" wx:key="id" class="card workbench-opportunity-card" hover-class="workbench-opportunity-card-pressed" data-customer-id="{{item.customer_id}}" data-opportunity-id="{{item.id}}" bindtap="openCustomer"><template is="opportunity-list-card" data="{{item: item}}"/></view></view></view>
+  <sb-state-panel wx:else class="list-state" state="empty" title="当前筛选条件下没有商机" description="换一个条件试试，或点筛选行的「重置」。"/>
+  <view wx:if="{{moreError}}" class="more-error">{{moreError}}<text class="more-retry" hover-class="more-retry-pressed" bindtap="loadMore">重试</text></view>
+  <sb-pagination wx:if="{{hasMore}}" class="pager" plain mode="more" summary="已显示 {{filtered.length}} / {{total}} 个商机" total="{{total}}" loading="{{loadingMore}}" bind:more="loadMore"/>
+</view>
+
+</block>
+</block>
+
+<person-picker id="personPicker" open="{{ownerPickerOpen}}" title="选择成员" members="{{ownerPickerMembers}}" teams="{{ownerPickerTeams}}" default-team-id="{{ownerPickerDefaultTeamId}}" selected="{{ownerPickerSelected}}" allow-all="{{true}}" all-label="全部成员" loading="{{loading}}" error="{{loadError}}" bind:confirm="confirmOwnerPicker" bind:close="closeOwnerPicker" bind:retry="loadPage"/>

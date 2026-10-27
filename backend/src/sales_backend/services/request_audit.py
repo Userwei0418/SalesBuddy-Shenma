@@ -1,15 +1,17 @@
+import asyncio
 import logging
 
 from sales_backend.repositories.operations_logs import OperationsLogRepository
 
 logger = logging.getLogger(__name__)
+RECEIPT_TIMEOUT_SECONDS = 3.0
 
 
 async def record_http_operation(database, identity, method, path, status, *, export_count=None, filters=None):
     if database is None or identity is None:
         return
     try:
-        async with database.transaction(identity.actor) as connection:
+        async with asyncio.timeout(RECEIPT_TIMEOUT_SECONDS), database.transaction(identity.actor) as connection:
             await OperationsLogRepository().record_request(
                 connection,
                 identity.actor,

@@ -5,7 +5,7 @@ function opportunityContext(raw, id) {
   if (!id || !opportunity) throw Error('商机不存在或无权查看');
   const linked = items => (items || []).filter(item => (item.opportunity_id && String(item.opportunity_id) === String(id)) ||
     (Array.isArray(item.linked_opportunities) && item.linked_opportunities.some(link=>String(link.id)===String(id))));
-  return {read_model:raw.read_model,summary:raw.summary,profile:raw.profile,primary_opportunity:opportunity,id:raw.id,name:raw.name,owner_name:raw.owner_name,team_name:raw.team_name,opportunities:[opportunity],tasks:linked(raw.tasks),visits:linked(raw.visits),risks:linked(raw.risks)};
+  return {shared_read_only:raw.shared_read_only,can_read_customer:raw.can_read_customer,read_model:raw.read_model,summary:raw.summary,profile:raw.profile,primary_opportunity:opportunity,id:raw.id,name:raw.name,owner_name:raw.owner_name,team_name:raw.team_name,opportunities:[opportunity],tasks:linked(raw.tasks),visits:linked(raw.visits),risks:linked(raw.risks)};
 }
 function opportunityEvents(context) {
   const item=context.opportunities[0], rows=[];

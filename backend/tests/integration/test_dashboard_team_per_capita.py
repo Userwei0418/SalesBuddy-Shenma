@@ -66,6 +66,7 @@ async def test_fde_kind_excluded_before_ranking_product_sales_retained_and_direc
     await followup(connection, "XS002", north)
     manager = await actor(connection, "ZJL001")
     north_team = await connection.fetchval("SELECT id FROM platform.team WHERE name='北区'")
+    await actor(connection, "ADMIN001")
     await connection.execute(
         "UPDATE platform.team SET name='任意改名的FDE团队',attributes=attributes||'{\"kind\":\"fde\"}' WHERE id=$1",
         north_team,
@@ -75,6 +76,7 @@ async def test_fde_kind_excluded_before_ranking_product_sales_retained_and_direc
         "WHERE id=$1::uuid",
         manager.team_ids[0],
     )
+    await set_request_context(connection, manager)
     directory = await dashboard_team_groups(connection, manager)
     assert len(directory) == 2
     result = await dashboard_rankings(
@@ -135,6 +137,7 @@ async def test_denominator_excludes_invalid_business_members(connection, invalid
     await two_teams(connection)
     manager = await actor(connection, "ZJL001")
     user = await connection.fetchval("SELECT id FROM platform.user_ref WHERE account_code='XS002'")
+    await actor(connection, "ADMIN001")
     if invalid == "inactive":
         await connection.execute("UPDATE platform.user_ref SET status='inactive' WHERE id=$1", user)
     elif invalid == "expired_membership":
@@ -145,6 +148,7 @@ async def test_denominator_excludes_invalid_business_members(connection, invalid
         await connection.execute(
             "UPDATE platform.role_binding SET valid_to=clock_timestamp() WHERE user_ref_id=$1", user
         )
+    await set_request_context(connection, manager)
     row = next(r for r in await groups(connection, manager) if r["name"] == "北区")
     assert row["member_count"] == 0
     assert row["rank"] is None and row["value"] is None and row["average"] is None

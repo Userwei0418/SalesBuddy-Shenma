@@ -1,27 +1,61 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
+import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from sales_backend.api.dependencies import RequestIdentity, get_database, get_identity
 from sales_backend.api.idempotency import MutationKey
 from sales_backend.api.models import TaskBatchCreate, TaskCreate, TaskEventCreate
+from sales_backend.contracts.task_alignment import TaskAlignmentUpdate, legacy_safe_task_payload
 from sales_backend.contracts.task_links import TaskLinkPage
+from sales_backend.contracts.task_management import TaskManagementOrder, TaskManagementOwnerPage, TaskManagementPage, management_filters
 from sales_backend.contracts.types import UUIDString
-from sales_backend.db import Database
+from sales_backend.db import Database, DatabaseBusy
 from sales_backend.domain.concurrency import VersionConflict
+from sales_backend.domain.route_permissions import TASK_EVENTS
 from sales_backend.domain.tasks import TaskConflict, TaskForbidden, TaskNotFound
 from sales_backend.repositories.task_browse import TaskBrowseRepository
 from sales_backend.repositories.task_links import TaskLinkRepository
+from sales_backend.repositories.task_management import TaskManagementRepository
 from sales_backend.repositories.task_targets import TaskTargetRepository
 from sales_backend.repositories.tasks import TaskRepository
+from sales_backend.services.authorization import require_permission
 from sales_backend.services.idempotency import execute_mutation
+from sales_backend.services.task_compatibility import require_legacy_mutation
 from sales_backend.services.tasks import TaskService
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["Tasks"])
+
+
+@router.get('/management', response_model=TaskManagementPage, description='任务管理只读列表。all 是 task.read 当前授权范围，mine 限本人发起/负责/候选；不扩大权限。日期按北京时间闭区间与创建/正式派发至截止区间相交，undated 明示无截止任务。summary.scope_total、各状态统计及 team_member_count 按权限、人员、周期及业务条件限定的基础范围计算，不受 tab/status 影响；summary.total 和 filtered_total 是应用 tab/status 后的列表总数，统计均不受分页影响。schedule_start_at 不是实际开工时间。')
+async def management_tasks(
+    filters: dict = Depends(management_filters),
+    order: TaskManagementOrder = Query('due_asc', description='分页前排序；默认最早到期。today_first按北京日期今天到期优先，同组最晚到期优先；空截止时间排末尾。'),
+    page_size: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0, le=2_147_483_647),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True, isolation="repeatable_read") as connection:
+        return await TaskManagementRepository().page(connection, limit=page_size, offset=offset, order=order, **filters)
+
+
+@router.get('/management/owners', response_model=TaskManagementOwnerPage, description='按同一筛选下可见任务生成负责人目录，包含历史停用负责人；不需要创建任务或组织读取权限，不暴露范围外人员。unassigned_count 是当前无负责人任务数，q 仅搜索姓名/账号。')
+async def management_task_owners(
+    filters: dict = Depends(management_filters),
+    q: str = Query('', max_length=100),
+    page_size: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0, le=2_147_483_647),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    async with database.transaction(identity.actor, readonly=True, isolation="repeatable_read") as connection:
+        return await TaskManagementRepository().owners(connection, query=q.strip(), limit=page_size, offset=offset, **filters)
 
 
 @router.get("/customers", response_model=TaskLinkPage)
@@ -57,7 +91,7 @@ async def task_opportunity_choices(
         )
 
 
-@router.get("/recipients")
+@router.get("/recipients", description="创建权限内的公司接收人目录；items.team_ids 和 team 用于按有效业务任职及组织归属展示、筛选；team_id 仍为真实业务任职或 null，不用于从组织归属授予权限；role_name 为公司岗位显示名（role 代码不变），teams 为当前有效团队（含空团队），defaults.team_id 为当前人的有效主团队或 null。选人不授予业务访问权。")
 async def task_recipients(
     q: str = Query(default="", max_length=100),
     page_size: int = Query(default=100, ge=1, le=100),
@@ -71,19 +105,44 @@ async def task_recipients(
             await require_capability(connection, identity.actor, "task.create")
         except PermissionError as exc:
             raise HTTPException(403, str(exc)) from exc
-        rows = await TaskTargetRepository().recipients(
-            connection, identity.actor, q=q.strip(), limit=page_size+1, offset=offset)
-    more = len(rows) > page_size
-    return {"items": rows[:page_size], "has_more": more, "next_offset": offset+page_size if more else None}
+        return await TaskTargetRepository().recipient_page(
+            connection, identity.actor, q=q.strip(), limit=page_size, offset=offset)
 
 
 
-@router.get("")
+@router.get("/{task_id}/reassignment-options", description="仅经该任务协调权限与状态校验后返回接收人目录；不依赖新建任务或组织读取权限。items.team_ids 和 team 用于按有效业务任职及组织归属展示、筛选；team_id 仍为真实业务任职或 null，不用于从组织归属授予权限；role_name 为公司岗位显示名（role 代码不变），teams 保留空团队，defaults.team_id 为当前人的有效主团队或 null。")
+async def task_reassignment_options(
+    task_id: UUIDString,
+    q: str = Query(default="", max_length=100),
+    page_size: int = Query(default=100, ge=1, le=100),
+    offset: int = Query(default=0, ge=0, le=2_147_483_647),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+):
+    from sales_backend.services.task_coordination import reassignment_options
+
+    try:
+        async with database.transaction(identity.actor, readonly=True) as connection:
+            return await reassignment_options(connection, actor=identity.actor, task_id=task_id,
+                                              query=q.strip(), limit=page_size, offset=offset)
+    except TaskNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except TaskForbidden as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except TaskConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@router.get("", description=("每个任务返回 can_cancel，按当前权限及状态计算。tab 模式下 member_id/team_id "
+    "按同一正式 owner 任职的成员/团队 UUID 筛选，旧 team 参数仍为团队名称。view 按当前 task.read 范围收窄，"
+    "view=self 为本人任务，view=team 在 task.read 授权内读取；member_id/team_id 仅进一步筛选。summary 是分页前完整基础筛选范围；filtered_total "
+    "再应用 tab/overview，overdue_count 为当前未完成且已过截止时间，today_pending_count/today_completed_count "
+    "按北京时间当天截止/正常完成统计。completed/summary.completed_count仅正常完成；ended/ended_count包括正常完成、停止与历史取消拒绝；stopped_count为停止，unknown_outcome_count为结果未知。旧rejected仍为cancelled历史集合，status/未传tab旧列表行为不变。行end_reason与ended_at披露结束结果和真实结束时间；ended使用completed_year/quarters时按结束时间筛选。新team_id必须配合tab。"))
 async def list_tasks(
     task_status: str | None = Query(
         default=None,
         alias="status",
-        pattern="^(pending_confirm|pending_execution|in_progress|pending_review|completed|deferred|cancelled)$",
+        pattern="^(pending_confirm|pending_execution|in_progress|pending_review|completed|deferred|needs_adjustment|cancelled)$",
     ),
     page_size: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
@@ -91,10 +150,11 @@ async def list_tasks(
     customer_id: UUIDString | None = Query(default=None),
     opportunity_id: UUIDString | None = Query(default=None),
     view: str = Query(default="self", pattern="^(self|team)$"),
-    tab: Literal["pending", "completed", "rejected", "all"] | None = None,
+    tab: Literal["pending", "completed", "ended", "rejected", "all"] | None = None,
     overview: Literal["today_pending", "today_completed", "all_pending"] | None = None,
     order: Literal["today_first", "due_desc", "due_asc", "created_desc"] = "today_first",
     member_id: UUIDString | None = None,
+    team_id: UUIDString | None = None,
     team: str | None = Query(None, max_length=100),
     member: str | None = Query(None, max_length=100),
     completed_year: int | None = Query(None, ge=2000, le=2100),
@@ -105,15 +165,15 @@ async def list_tasks(
 ) -> dict:
     if any(q not in {1, 2, 3, 4} for q in completed_quarters) or (completed_quarters and not completed_year):
         raise HTTPException(422, "请选择有效的完成年份和季度")
-    fde_view = None
-    if identity.actor.role.value in {"fde", "fde_lead"} and not customer_id and not opportunity_id:
-        fde_view = view
+    if team_id and tab is None:
+        raise HTTPException(422, "team_id 筛选需要指定 tab")
+    fde_view = view if not customer_id and not opportunity_id else None
     async with database.transaction(identity.actor, readonly=True) as connection:
         if tab is not None:
             return await TaskBrowseRepository().page(connection, limit=page_size, offset=offset,
                 status=task_status, customer_id=customer_id, opportunity_id=opportunity_id,
                 fde_view=fde_view, inbox=inbox, tab=tab, overview=overview, order=order,
-                member_id=member_id, team=team, member=member, completed_year=completed_year,
+                member_id=member_id, team_id=team_id, team=team, member=member, completed_year=completed_year,
                 completed_quarters=completed_quarters, opportunity_only=opportunity_only)
         items = await TaskRepository().list(
             connection, status=task_status, customer_id=customer_id, limit=page_size + 1, offset=offset, inbox=inbox,
@@ -124,12 +184,18 @@ async def list_tasks(
 
 
 class TaskOverviewMetrics(BaseModel):
-    today_completed: int
+    today_completed: int = Field(description="今日正常完成，不含停止或取消")
+    completed_count: int = Field(default=0, description="正常完成任务总数")
+    ended_count: int = Field(default=0, description="全部已结束任务总数")
+    stopped_count: int = Field(default=0, description="已停止任务总数")
+    unknown_outcome_count: int = Field(default=0, description="已结束但结果未知任务数")
     today_pending: int
     all_pending: int
 
 
 class TaskCardState(BaseModel):
+    end_reason: Literal["completed", "stopped", "cancelled", "rejected", "unknown"] | None = None
+    ended_at: datetime | None = None
     id: str
     status: str
     completion_note: str | None = None
@@ -137,6 +203,38 @@ class TaskCardState(BaseModel):
     handover_required: bool
     last_event_type: str | None = None
     last_event_note: str | None = None
+    execution_mode: Literal["legacy", "execution_v1", "execution_v2", "execution_v3"] = "legacy"
+    execution_protocol_version: Literal[1, 2, 3] | None = None
+    execution_compatibility: dict = Field(default_factory=dict)
+    execution_capabilities: dict = Field(default_factory=dict)
+    execution_flags: dict = Field(default_factory=dict)
+    self_managed: bool | None = None
+    review_required: bool | None = None
+    progress: dict | None = None
+    current_reviewer: str | None = None
+    reviewer: dict | None = None
+    executor: dict | None = None
+    executor_user_id: str | None = None
+    requirements_version: int | None = None
+    responsibility_version: int | None = None
+    checklist_revision: int | None = None
+    requirements_revalidation: bool | None = None
+    requirements_incomplete: bool | None = None
+    missing_deliverables: str | None = None
+    coordination_required: dict | None = None
+    pause: dict | None = None
+    execution_handover: dict | None = None
+    reviewer_handover: dict | None = None
+    pending_requirements: dict | None = None
+    processing_reason: Literal["adjustment_request", "paused", "awaiting_review"] | None = None
+    processing_detail: dict | None = None
+    current_submission: str | None = None
+    submission_round: int | None = None
+    latest_feedback: dict | None = None
+    next_step: str | None = None
+    completion_result: str | None = None
+    completion_action: str | None = None
+    completion_detail: dict | None = None
 
 
 class TaskOverviewResponse(BaseModel):
@@ -151,7 +249,7 @@ async def task_overview(
     database: Database = Depends(get_database),
 ) -> dict:
     # Summary is the full personal inbox; card states are bounded, RLS-checked IDs.
-    view = "self" if identity.actor.role.value in {"fde", "fde_lead"} else None
+    view = "self"
     async with database.transaction(identity.actor, readonly=True) as connection:
         return await TaskRepository().overview(connection, task_ids=task_ids, fde_view=view)
 
@@ -170,7 +268,7 @@ async def create_task(
                 identity.actor,
                 idempotency_key,
                 "tasks.create",
-                body.model_dump(),
+                legacy_safe_task_payload(body.model_dump()),
                 lambda: TaskService().create(
                     connection,
                     actor=identity.actor,
@@ -182,6 +280,12 @@ async def create_task(
                     association_kind=body.association_kind,
                     customer_id=body.customer_id,
                     opportunity_id=str(body.opportunity_id) if body.opportunity_id else None,
+                    alignment=body.alignment,
+                    alignment_contract_version=body.alignment_contract_version,
+                    execution_protocol_version=body.execution_protocol_version,
+                    checklist=body.checklist,
+                    deliverable=body.deliverable,
+                    acceptance_criteria=body.acceptance_criteria,
                 ),
             )
     except TaskNotFound as exc:
@@ -212,7 +316,7 @@ async def create_task_batch(
     try:
         async with database.transaction(identity.actor) as connection:
             return await execute_mutation(connection, identity.actor, idempotency_key,
-                "tasks.create_batch", body.model_dump(), lambda: create(connection))
+                "tasks.create_batch", legacy_safe_task_payload(body.model_dump()), lambda: create(connection))
     except TaskNotFound as exc:
         raise HTTPException(404, str(exc)) from exc
     except TaskForbidden as exc:
@@ -221,7 +325,25 @@ async def create_task_batch(
         raise HTTPException(409, str(exc)) from exc
 
 
-@router.get("/{task_id}")
+@router.get("/alignment-capabilities")
+async def alignment_capabilities(
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+) -> dict:
+    from sales_backend.repositories.task_alignment import TaskAlignmentRepository
+
+    try:
+        async with database.transaction(identity.actor, readonly=True) as connection:
+            available = await TaskAlignmentRepository.supports_v2(connection)
+    except (asyncpg.PostgresError, OSError, TimeoutError, DatabaseBusy) as exc:
+        raise HTTPException(503, "任务关联能力暂时无法核实，请稍后重试") from exc
+    return {"contract": "task_alignment", "supported_versions": [1, 2] if available else [1],
+            "preferred_version": 2 if available else 1,
+            "v2_requires": "target_or_key_result_or_other_reason" if available else None,
+            "target_reference_type": "sales_target", "other_reason_max_length": 2000}
+
+
+@router.get("/{task_id}", description="返回任务及事件历史；can_cancel 布尔值同时校验 task.cancel、任务协调资格和当前状态。已完成、已取消、待验收任务不可取消。")
 async def task_detail(
     task_id: UUIDString,
     identity: RequestIdentity = Depends(get_identity),
@@ -234,7 +356,51 @@ async def task_detail(
     return item
 
 
-@router.post("/{task_id}/events")
+@router.patch("/{task_id}/alignment", description="按任务当前版本替换指标/KR关系；仅任务协调者可改。贡献为计划声明，不增加财务业绩。旧请求缺省alignment不创建任何关系。")
+async def update_task_alignment(
+    task_id: UUIDString,
+    body: TaskAlignmentUpdate,
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+    idempotency_key: MutationKey = None,
+) -> dict:
+    from sales_backend.services.task_alignment import save_task_alignment
+
+    async def save(connection):
+        await save_task_alignment(connection, task_id, body.alignment, body.version_no,
+                                  contract_version=body.alignment_contract_version)
+        return await TaskRepository().detail(connection, task_id=task_id)
+
+    try:
+        async with database.transaction(identity.actor) as connection:
+            # A committed receipt does not preserve permissions. Recheck the
+            # current object scope before both execution and receipt replay;
+            # version and lifecycle checks stay inside the mutation itself.
+            access = await connection.fetchrow(
+                "SELECT security.authorization_task('task.read',t.id) AS readable,"
+                "security.fde_can_coordinate_task(t.id) AS editable FROM workflow.task t "
+                "WHERE t.id=$1::uuid AND t.workspace_id=$2::uuid AND t.deleted_at IS NULL",
+                task_id, identity.actor.workspace_id,
+            )
+            if access is None:
+                raise TaskNotFound("TASK_NOT_FOUND")
+            if not access["readable"] or not access["editable"]:
+                raise TaskForbidden("当前账号无权修改此任务关联")
+            return await execute_mutation(connection, identity.actor, idempotency_key,
+                f"tasks.alignment:{task_id}", legacy_safe_task_payload(body.model_dump()), lambda: save(connection))
+    except TaskNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    except TaskForbidden as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except TaskConflict as exc:
+        raise HTTPException(409, str(exc)) from exc
+
+
+@router.post("/{task_id}/events", description=(
+    "legacy任务保留接受、拒绝、完成、验收通过、验收驳回、转交及取消，沿用原版本和幂等；"
+    "execution_v1任务的前述六个旧动作返回409 TASK_EXECUTION_CLIENT_UPGRADE_REQUIRED，兼容取消仍保留；execution_v2任务所有旧动作均拒绝，请使用带独立清单版本的execution命令；execution_v3任务请使用execution-v3命令。"
+    "等待幂等锁后重新读取授权，再校验任务模式和当前对象权限；写入与回执回放均执行此检查。"
+))
 async def create_task_event(
     task_id: UUIDString,
     body: TaskEventCreate,
@@ -244,12 +410,20 @@ async def create_task_event(
 ) -> dict:
     try:
         async with database.transaction(identity.actor) as connection:
+            async def authorize():
+                # A waiter may hold an authorization snapshot from before a
+                # revocation. Refresh after the receipt lock before either path.
+                await connection.execute("SELECT security.authorization_refresh()")
+                await require_legacy_mutation(connection, task_id, body.event_type)
+                await require_permission(connection, TASK_EVENTS.get(body.event_type, ""), task_id=task_id)
+
+            await authorize()
             return await execute_mutation(
                 connection,
                 identity.actor,
                 idempotency_key,
                 f"tasks.events:{task_id}",
-                body.model_dump(),
+                legacy_safe_task_payload(body.model_dump()),
                 lambda: TaskService().apply_event(
                     connection,
                     actor=identity.actor,
@@ -258,7 +432,9 @@ async def create_task_event(
                     note=body.note,
                     expected_version=body.version_no,
                     assignee_account_code=body.assignee_account_code,
+                    actual_contribution=body.actual_contribution,
                 ),
+                authorize=authorize,
             )
     except TaskNotFound as exc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(exc)) from exc

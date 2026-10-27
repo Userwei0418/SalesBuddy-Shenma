@@ -11,11 +11,9 @@ from sales_backend.repositories.customer_map import CustomerMapRepository
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.opportunities import save_opportunity
-from tests.integration.feishu_fixtures import seed_execute
 from tests.integration.test_customer_assets import customer
 from tests.integration.test_fde_identity_tasks import fde_fixture
 from tests.integration.test_operations_claims_sql import actor
-from tests.integration.test_synthetic_trial_boundaries import customer as seeded_customer
 
 pytestmark = pytest.mark.asyncio
 
@@ -30,13 +28,43 @@ async def test_light_map_preserves_authorized_customers_and_display_facts(connec
     before = {r["id"]: r for r in old}
     display_fields = (
         "name", "owner_name", "owner_user_ref_id", "owner_team_id", "sales_members", "team_name",
-        "potential_score", "relationship_score", "quadrant_code", "quadrant_policy",
+        "potential_score", "relationship_score", "quadrant_code",
         "latest_visit_at", "weekly_follow_up_count", "risk_title", "risk_severity",
     )
     for row in new:
         assert {k: row[k] for k in display_fields} == {k: before[row["id"]][k] for k in display_fields}
         assert sorted(row["plan_close_dates"], key=str) == sorted(before[row["id"]]["plan_close_dates"], key=str)
         assert not {"attributes", "import_meta", "next_action", "demand_summary", "visits"} & row.keys()
+
+
+async def test_map_assessment_identity_and_policy_come_from_the_same_visible_score(connection):
+    from tests.integration.test_fde_battle_map_reviews import answer, handler_for
+
+    owner = await actor(connection, "XS001")
+    item = await customer(connection, owner)
+    await formal_visit(connection, owner, item["id"], today().isoformat())
+    handler = handler_for(connection)
+    for code, potential in [("XS001", 90), ("ZJ001", 30)]:
+        person = await actor(connection, code)
+        facts = await handler._load_facts(item["id"], person)
+        await handler._persist(item["id"], person, facts, answer(handler, facts, potential), {})
+        await connection.execute(
+            "UPDATE insight.quadrant_score SET input_snapshot=jsonb_set(input_snapshot,"
+            "'{company_policy}',jsonb_build_object('test_owner',$2::text)) "
+            "WHERE customer_id=$1::uuid AND subject_user_ref_id=common.current_user_ref_id() "
+            "AND valid_to='infinity'", item["id"], code,
+        )
+    await actor(connection, "ZJL001")
+    expected = await connection.fetchrow(
+        "SELECT id::text AS assessment_id,subject_user_ref_id::text,potential_score,"
+        "input_snapshot->'company_policy' AS quadrant_policy FROM insight.quadrant_score "
+        "WHERE customer_id=$1::uuid AND valid_to='infinity' "
+        "ORDER BY calculated_at DESC,id DESC LIMIT 1", item["id"],
+    )
+    point = next(row for row in await CustomerMapRepository().read(connection) if row["id"] == item["id"])
+    assert {key: point[key] for key in expected.keys()} == dict(expected)
+    assert point["quadrant_policy"] == {"test_owner": "ZJ001"}
+    assert point["potential_score"] == 30
 
 
 async def test_map_no_opportunities_and_unknown_are_distinct(connection):
@@ -108,14 +136,23 @@ async def formal_visit(connection, who, customer_id, day, opportunity_id=None):
 async def test_active_window_uses_original_date_not_claim_or_import_date(connection):
     from datetime import date
     sales = await actor(connection, "XS001")
-    claimed, old, boundary, future = [await customer(connection, sales) for _ in range(4)]
-    await formal_visit(connection, sales, old["id"], "2026-03-21")
-    await formal_visit(connection, sales, boundary["id"], "2026-03-22")
+    claimed, old, boundary, first_half, current, future = [
+        await customer(connection, sales) for _ in range(6)
+    ]
+    await formal_visit(connection, sales, old["id"], "2025-12-31")
+    await formal_visit(connection, sales, boundary["id"], "2026-01-01")
+    await formal_visit(connection, sales, first_half["id"], "2026-02-01")
+    await formal_visit(connection, sales, current["id"], "2026-09-22")
     await formal_visit(connection, sales, future["id"], "2026-09-23")
     points = await CustomerMapRepository().read(connection, as_of=date(2026, 9, 22))
     ids = {r["id"] for r in points}
-    assert boundary["id"] in ids
+    assert {boundary["id"], first_half["id"], current["id"]} <= ids
     assert not {claimed["id"], old["id"], future["id"]} & ids
+    # A calendar year restarts on January 1; it is not a rolling full year.
+    next_year = await CustomerMapRepository().read(connection, as_of=date(2027, 1, 1))
+    assert not {r["id"] for r in (claimed, old, boundary, first_half, current, future)} & {
+        r["id"] for r in next_year
+    }
     # Inactive archives remain searchable and retain the same raw historical date.
     customers = await CustomerRepository().list(connection, query=None, level=None, unassigned=None, limit=None)
     assert {claimed["id"], old["id"]} <= {r["id"] for r in customers}
@@ -124,6 +161,60 @@ async def test_active_window_uses_original_date_not_claim_or_import_date(connect
     assert summary["portfolio_customer_count"] == 1
     assert summary["customer_count"] == 0 and summary["entry_count"] == 0
     assert summary["acv_amount"] == 0
+
+
+async def test_active_customer_count_requires_formal_undeleted_visits_and_deduplicates(connection):
+    from datetime import date
+
+    sales = await actor(connection, "XS001")
+    active, pending, deleted = [await customer(connection, sales) for _ in range(3)]
+    confirmed = await formal_visit(connection, sales, active["id"], "2026-01-01")
+    await connection.execute(
+        "UPDATE activity.visit SET status='confirmed' WHERE id=$1::uuid", confirmed["id"]
+    )
+    await formal_visit(connection, sales, active["id"], "2026-06-30")
+    await formal_visit(connection, sales, active["id"], "2026-09-22")
+    unfinished = await formal_visit(connection, sales, pending["id"], "2026-09-22")
+    await connection.execute(
+        "UPDATE activity.visit SET status='pending_confirm' WHERE id=$1::uuid", unfinished["id"]
+    )
+    removed = await formal_visit(connection, sales, deleted["id"], "2026-09-22")
+    await connection.execute(
+        "UPDATE activity.visit SET deleted_at=clock_timestamp() WHERE id=$1::uuid", removed["id"]
+    )
+
+    rows = await CustomerMapRepository().read(connection, as_of=date(2026, 9, 22))
+    assert len([row for row in rows if row["id"] == active["id"]]) == 1
+    assert not {pending["id"], deleted["id"]} & {row["id"] for row in rows}
+    first_day = await CustomerMapRepository().read(connection, as_of=date(2026, 1, 1))
+    assert active["id"] in {row["id"] for row in first_day}
+    point = next(row for row in rows if row["id"] == active["id"])
+    # A customer-only follow-up activates an unassessed customer without an opportunity.
+    assert point["open_count"] == 0
+    assert point["potential_score"] is None and point["relationship_score"] is None
+
+
+async def test_active_window_honours_shanghai_midnight_boundaries(connection):
+    from datetime import date, datetime
+
+    sales = await actor(connection, "XS001")
+    cases = [
+        ("2025-12-31T15:59:59+00:00", False),
+        ("2025-12-31T16:00:00+00:00", True),
+        ("2026-09-22T15:59:59+00:00", True),
+        ("2026-09-22T16:00:00+00:00", False),
+    ]
+    expected = {}
+    for timestamp, included in cases:
+        item = await customer(connection, sales)
+        visit = await formal_visit(connection, sales, item["id"], "2026-09-22")
+        await connection.execute(
+            "UPDATE activity.visit SET interaction_at=$2 WHERE id=$1::uuid",
+            visit["id"], datetime.fromisoformat(timestamp),
+        )
+        expected[item["id"]] = included
+    ids = {row["id"] for row in await CustomerMapRepository().read(connection, as_of=date(2026, 9, 22))}
+    assert {customer_id: customer_id in ids for customer_id in expected} == expected
 
 
 async def test_portfolio_keeps_inactive_opportunities_and_unknown_amounts(connection):
@@ -144,43 +235,3 @@ async def test_portfolio_keeps_inactive_opportunities_and_unknown_amounts(connec
     summary = (await repo.read(connection, customer_id=c["id"]))["summary"]
     assert summary["acv_amount"] == 0 and summary["unknown_acv_count"] == 1
     assert await connection.fetchval("SELECT amount FROM crm.opportunity WHERE id=$1::uuid", op["id"]) is None
-
-
-async def test_trial_seed_without_visits_is_visible_unassessed_but_real_and_legacy_demo_stay_inactive(connection):
-    sales = await actor(connection, 'XS001')
-    trial, _ = await seeded_customer(connection, sales)
-    real, _ = await seeded_customer(connection, sales, synthetic=False)
-    legacy, _ = await seeded_customer(connection, sales, synthetic=False)
-    await seed_execute(connection, "UPDATE crm.customer SET data_kind='demo' WHERE id=$1", legacy)
-    rows = {row['id']: row for row in await CustomerMapRepository().read(connection)}
-    assert str(trial) in rows and not {str(real), str(legacy)} & rows.keys()
-    pending = rows[str(trial)]
-    assert pending['latest_visit_at'] is None and pending['weekly_follow_up_count'] == 0
-    assert all(pending[field] is None for field in ('potential_score', 'relationship_score', 'quadrant_code'))
-    assert pending['quadrant_policy'] is None
-    assert not {'import_meta', 'attributes', 'visits'} & pending.keys()
-    assert await connection.fetchval('SELECT count(*) FROM activity.visit WHERE customer_id=$1', trial) == 0
-    assert await connection.fetchval('SELECT count(*) FROM insight.quadrant_score WHERE customer_id=$1', trial) == 0
-
-
-async def test_trial_map_candidate_keeps_owner_rls_and_excludes_deleted_customer(connection):
-    sales = await actor(connection, 'XS001')
-    trial, _ = await seeded_customer(connection, sales)
-    await actor(connection, 'XS002')
-    assert str(trial) not in {row['id'] for row in await CustomerMapRepository().read(connection)}
-    await actor(connection, 'ZJL001')
-    assert str(trial) in {row['id'] for row in await CustomerMapRepository().read(connection)}
-    await seed_execute(connection, 'UPDATE crm.customer SET deleted_at=clock_timestamp() WHERE id=$1', trial)
-    await set_request_context(connection, sales)
-    assert str(trial) not in {row['id'] for row in await CustomerMapRepository().read(connection)}
-
-
-async def test_trial_seed_with_real_recorded_activity_keeps_its_visit_facts_once(connection):
-    sales = await actor(connection, 'XS001')
-    trial, _ = await seeded_customer(connection, sales)
-    record = await formal_visit(connection, sales, str(trial), today().isoformat())
-    rows = [row for row in await CustomerMapRepository().read(connection) if row['id'] == str(trial)]
-    assert len(rows) == 1
-    assert rows[0]['latest_visit_at'] == await connection.fetchval(
-        'SELECT interaction_at FROM activity.visit WHERE id=$1::uuid', record['id'])
-    assert rows[0]['weekly_follow_up_count'] == 1

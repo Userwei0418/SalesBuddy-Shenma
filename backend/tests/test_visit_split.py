@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -56,8 +57,90 @@ def test_structure_has_no_score_and_uses_bound_identity():
 def test_quality_never_rewrites_human_fields(key, value):
     result = deepcopy(RESULT)
     result["fields"][key] = value
-    with pytest.raises(ValueError, match="改写"):
+    accepted = validate_stage_result(result, FACTS)
+    assert accepted["fields"] == FIELDS
+    assert accepted["summary"] == FACTS["summary"]
+
+
+def test_quality_only_result_rebuilds_the_trusted_snapshot():
+    accepted = validate_stage_result({"quality_review": deepcopy(QUALITY)}, FACTS)
+    assert accepted["fields"] == FIELDS
+    assert accepted["summary"] == FACTS["summary"]
+    assert accepted["quality_review"]["follow_up_score"] == QUALITY["follow_up_score"]
+
+
+def test_quality_result_does_not_alias_the_trusted_fields_or_model_review():
+    facts = deepcopy(FACTS)
+    model_review = {"quality_review": deepcopy(QUALITY)}
+    accepted = validate_stage_result(model_review, facts)
+    accepted["fields"]["follow_up_record"] = "downstream mutation"
+    accepted["quality_review"]["suggestions"].append("downstream mutation")
+    assert facts == FACTS
+    assert model_review == {"quality_review": QUALITY}
+
+
+@pytest.mark.parametrize("in_review", [False, True])
+def test_quality_rejects_model_supplied_policy_provenance(in_review):
+    result = {"quality_review": deepcopy(QUALITY)}
+    target = result["quality_review"] if in_review else result
+    target["company_policy"] = {"id": "model-chosen", "definition": {}}
+    with pytest.raises(ValueError):
         validate_stage_result(result, FACTS)
+
+
+def test_quality_direct_prompt_requests_only_review_and_keeps_trusted_input():
+    from sales_backend.services.visit_prompts import stage_messages
+
+    facts = {**deepcopy(FACTS), "data_as_of": "2026-10-10T00:00:00+00:00"}
+    run = SimpleNamespace(capability="visit_quality", actor=SimpleNamespace(role=RoleCode.SALES), text="")
+    messages = stage_messages(run, facts)
+    schema = json.loads(messages[0].content.split("只输出符合下列JSON Schema的对象：", 1)[1])
+    assert schema["required"] == ["quality_review"]
+    assert set(schema["properties"]) == {"quality_review"}
+    assert schema["additionalProperties"] is False
+    assert json.loads(messages[1].content)["facts"] == facts
+
+
+def test_quality_accepts_legacy_envelope_without_echo_fields():
+    accepted = validate_stage_result({"quality_review": deepcopy(QUALITY), "fields": None}, FACTS)
+    assert accepted["fields"] == FIELDS
+    assert accepted["summary"] == FACTS["summary"]
+
+
+@pytest.mark.parametrize(
+    "fields,summary",
+    [
+        ({"unexpected": "model rewrite"}, {"unexpected": "model summary"}),
+        (["not", "a", "field", "object"], ["not", "a", "summary"]),
+        (42, False),
+        (None, {"nested": ["invalid"]}),
+    ],
+)
+def test_quality_discards_legacy_echoes_of_any_shape(fields, summary):
+    accepted = validate_stage_result(
+        {"fields": fields, "summary": summary, "quality_review": deepcopy(QUALITY)},
+        FACTS,
+    )
+    assert accepted["fields"] == FIELDS
+    assert accepted["summary"] == FACTS["summary"]
+
+
+@pytest.mark.parametrize("mutation", [
+    lambda quality: quality.pop("follow_up_score"),
+    lambda quality: quality.pop("next_action"),
+    lambda quality: quality.update(unexpected="must reject"),
+    lambda quality: quality["next_action"].update(unexpected="must reject"),
+])
+def test_quality_rejects_missing_or_extra_nested_review_fields(mutation):
+    result = {"quality_review": deepcopy(QUALITY)}
+    mutation(result["quality_review"])
+    with pytest.raises(ValueError):
+        validate_stage_result(result, FACTS)
+
+
+def test_quality_rejects_unknown_top_level_fields():
+    with pytest.raises(ValueError):
+        validate_stage_result({**deepcopy(RESULT), "unexpected": True}, FACTS)
 
 
 @pytest.mark.parametrize("score", [True, "80", 80.5, -1, 101])
@@ -167,7 +250,9 @@ async def test_quality_facts_keep_human_date_strings(monkeypatch):
     ("2026-12-31", "2027-01-01T00:00:00+08:00", ("2027-01-04", "2027-01-10"), False),
     ("2028-02-29", "2028-02-29T16:00:00+00:00", ("2028-03-06", "2028-03-12"), False),
 ])
-def test_relative_time_calendar_is_anchored_and_handles_week_year_and_leap_boundaries(anchor, current, expected, expired):
+def test_relative_time_calendar_is_anchored_and_handles_week_year_and_leap_boundaries(
+    anchor, current, expected, expired
+):
     from sales_backend.services.visit_flow import relative_time_context
 
     result = relative_time_context(anchor, current)

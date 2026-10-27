@@ -20,28 +20,70 @@ import {
   audit,
   systemLogs,
 } from "./pages.js";
+import {customerCreationRequests} from "./customer-creation.js";
 import {modelApis} from "./model-api.js";
+import {asrHotwords} from "./asr-hotwords.js";
 import {businessActivities} from "./activity.js";
 import {agentRuns} from "./agent-audit.js";
 import {companyRules, agentExecution} from "./company-rules.js";
 import {partners} from './partners.js';
 import {taskInbox} from './tasks.js';
+import {visits} from './visits.js';
 import {targets, targetRequests} from './targets.js';
 import {loadCompanies, chooseCompany, companyLabel} from './companies.js';
 import {permissionsPage} from "./permissions.js";
 import {feishuSync} from "./feishu-sync.js";
+import {supportAccess} from "./support-access.js";
+import {openFinanceDeepLink} from './opportunity-finance.js';
+import {materials} from './materials.js';
+import {knowledgeUnavailable} from './knowledge-availability.js';
+import {opportunityInitialization} from './opportunity-initialization.js';
+import {readCompanyEntry, readLoginHint, saveLoginHint, normalizeCompanyCode, resolveCompany, passwordLoginError} from './company-login.js';
+let loginStorage;
+try {loginStorage=window.localStorage;} catch (_) {}
+let loginHint=readLoginHint(loginStorage);
+let companyEntry=readCompanyEntry(window.location.search);
+let companyLookup;
+function canonicalCompanyURL(actor) {
+  // A generic /admin login must remain generic on refresh or the next logout.
+  if(!companyEntry.code&&!companyEntry.invalid)return;
+  const code=normalizeCompanyCode(actor?.company_code);
+  if(!code)return;
+  const url=new URL(window.location.href);url.searchParams.set('company',code);
+  window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+  companyEntry={code,invalid:false};
+}
+function rememberActor(actor, remember=loginHint.remember) {
+  saveLoginHint(loginStorage,actor,remember);loginHint=readLoginHint(loginStorage);
+}
+async function acceptCompanyEntry(session) {
+  const actor=session.actor||state.actor;
+  if(!companyEntry.invalid&&(!companyEntry.code || companyEntry.code===normalizeCompanyCode(actor?.company_code)))return true;
+  ++renderId;
+  $('#app').innerHTML=`<section class="login-form boot"><h2>确认要进入的公司</h2><p>当前已登录：<strong>${esc(actor?.company_name||actor?.company_code||'当前公司')}</strong></p><p>${companyEntry.invalid?'此公司链接格式不正确。可以明确选择留在当前公司，或退出后重新填写公司码。':`此链接指向另一家公司：<strong>${esc(companyEntry.code)}</strong>。切换后需使用该公司的账号重新登录。`}</p><div id="switch-error" role="alert"></div><button class="primary" id="continue-company">留在当前公司</button><button id="switch-company">退出并切换公司</button></section>`;
+  $('#continue-company').onclick=async()=>{canonicalCompanyURL(actor);if(session.must_change_password)passwordScreen();else try{await shell();}catch(error){login(error.message);}};
+  $('#switch-company').onclick=async()=>{try{await logoutAccount();login();}catch(error){if(error.code!=='SESSION_CHANGED')login(error.message);}};
+  return false;
+}
 export const nav = [
+  ["supportAccess", "临时支持访问", "♧"],
   ["customers", "客户管理", "◈"],
   ["claims", "认领审批", "☷"],
+  ["customerCreation", "客户新建审批", "☷"],
   ["opportunities", "商机管理", "▥"],
+  ["opportunityInitialization", "旧字段初始化", "▥"],
+  ["materials", "产品线/物料与规则", "◇"],
+  ["knowledge", "知识库 · 暂不能使用", "◇"],
+  ["visits", "跟进管理", "≡"],
   ["partners", "伙伴目录", "◇"],
-  ["tasks", "我的待办", "☑"],
+  ["tasks", "任务管理", "☑"],
   ["targets", "目标管理", "◷"],
   ["target_requests", "目标修改审批", "✓"],
   ["accounts", "账号与组织", "♧"],
   ["permissions", "权限管理", "♧"],
   ["ai", "AI 调用管理", "✧"],
   ["modelApis", "模型接口配置", "⚙"],
+  ["asrHotwords", "ASR 热词管理", "≡"],
   ["agentRuns", "智能体运行审计", "◎"],
   ["agentExecution", "Agent 运行配置", "◉"],
   ["feishuSync", "飞书同步", "↗"],
@@ -51,9 +93,15 @@ export const nav = [
   ["system", "系统运行日志", "⊞"],
 ];
 const pages = {
+  knowledge: knowledgeUnavailable,
+  opportunityInitialization,
+  materials,
+  customerCreation: customerCreationRequests,
+  supportAccess,
   customers,
   claims,
   opportunities,
+  visits,
   partners,
   tasks: taskInbox,
   targets,
@@ -62,6 +110,7 @@ const pages = {
   permissions: permissionsPage,
   ai: aiUsage,
   modelApis,
+  asrHotwords,
   agentRuns,
   agentExecution,
   companyRules,
@@ -70,8 +119,10 @@ const pages = {
   activities: businessActivities,
   system: systemLogs,
 };
-const pagePermissions={customers:'customer.read',claims:'customer.claim_review',opportunities:'opportunity.read',partners:'partner.read',tasks:'task.read',targets:'target.read',target_requests:'target.approve',accounts:'organization.read',permissions:'authorization.read',ai:'ai.usage_read',modelApis:'ai.config_read',agentRuns:'ai.run_read',agentExecution:'ai.execution_read',companyRules:'rule.read',feishuSync:'feishu.read',activities:'audit.business_read',audit:'audit.read',system:'audit.events_read'};
-const groups=[['业务运营',['customers','claims','opportunities','partners','tasks']],['组织与目标',['accounts','permissions','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
+const pagePermissions={materials:'material.read',customerCreation:'customer.create_review',supportAccess:'support.manage',customers:'customer.read',claims:'customer.claim_review',opportunities:'opportunity.read',visits:'visit.read',partners:'partner.read',tasks:'task.read',targets:'target.read',target_requests:'target.approve',accounts:'organization.read',permissions:'authorization.read',ai:'ai.usage_read',modelApis:'ai.config_read',asrHotwords:'asr_hotword.read',agentRuns:'ai.run_read',agentExecution:'ai.execution_read',companyRules:'rule.read',feishuSync:'feishu.read',activities:'audit.business_read',audit:'audit.read',system:'audit.events_read'};
+pagePermissions.opportunityInitialization='opportunity.update';
+pagePermissions.knowledge='access.console';
+const groups=[['业务运营',['customers','claims','customerCreation','opportunities','materials','opportunityInitialization','visits','partners','tasks','knowledge']],['组织与目标',['accounts','permissions','supportAccess','targets','target_requests']],['智能体与规则',['agentRuns','ai','modelApis','asrHotwords','agentExecution','companyRules','feishuSync']],['记录与诊断',['activities','audit','system']]];
 const iconPaths={customers:'M3 5h18v14H3z M3 10h18 M8 5v14',claims:'M8 5h12v16H4V5h4 M8 3h8v4H8z M8 12l2 2 5-5',opportunities:'M4 20V9h4v11 M10 20V4h4v16 M16 20v-8h4v8',accounts:'M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M8 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M17 4a4 4 0 0 1 0 8 M23 21v-2a4 4 0 0 0-4-4',agentRuns:'M12 3a9 9 0 1 0 9 9 M12 7v5l4 2 M17 3h4v4',companyRules:'M4 7h16 M4 17h16 M9 4v6 M15 14v6',tasks:'M5 3h14v18H5z M8 8h8 M8 12h8 M8 16h5'};
 const navIcon=id=>`<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${iconPaths[id]||'M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z'}"/></svg>`;
 let renderId = 0;
@@ -114,42 +165,97 @@ state.refresh = async ({reason = "refresh"} = {}) => {
   }
 };
 function login(message = "") {
+  companyLookup?.abort();
   clearSession();
   pageMemory.clear();
   renderId += 1;
   $("#dialog").close();
   $("#app").innerHTML =
     `<main class="login"><section class="login-art">
-      <div class="brand"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="Raccoon SalesBuddy"></div>
-      <div class="login-story"><div class="eyebrow">Raccoon SalesBuddy</div><h1>记录每一次沟通，<br>让 AI 助力销售增长。</h1><div class="story-divider"></div><p>从客户沟通到商机跟进，<br>用 AI 整理拜访要点，让销售行动更有依据。</p></div>
+      <div class="brand"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="神码 SalesBuddy"></div>
+      <div class="login-story"><div class="eyebrow">神码 SalesBuddy</div><h1>记录每一次沟通，<br>让 AI 助力销售增长。</h1><div class="story-divider"></div><p>从客户沟通到商机跟进，<br>用 AI 整理拜访要点，让销售行动更有依据。</p></div>
       <div class="login-process" aria-label="工作流程"><span><small>01</small>沟通记录</span><i aria-hidden="true">→</i><span><small>02</small>AI 整理</span><i aria-hidden="true">→</i><span><small>03</small>商机跟进</span></div>
-      <footer><span>Raccoon SalesBuddy</span><span>运营管理工作台</span></footer><img class="login-watermark" src="/admin/assets/brand-mark-white.svg" alt="" aria-hidden="true">
-    </section><section class="login-form"><form id="login-form"><div class="form-accent" aria-hidden="true"></div><h2>登录管理工作台</h2><p class="muted">使用由管理员开通的账号登录</p>
-      <label class="field"><b>账号</b><input name="account" type="text" autocomplete="username" placeholder="请输入账号名或手机号" required></label>
-      <label class="field password-field"><b>密码</b><span class="password-input"><input name="password" id="login-password" type="password" autocomplete="current-password" placeholder="请输入密码" required><button type="button" class="password-toggle" id="toggle-password" aria-label="显示密码" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
-      <div id="login-error" role="alert">${message ? `<div class="error-box">${esc(message)}</div>` : ""}</div><button class="primary login-submit" type="submit"><span>登录工作台</span><span aria-hidden="true">→</span></button><div class="login-footer">账号由管理员统一开通，不开放注册。<br>忘记密码请联系运营或系统管理员。</div>
+      <footer><span>神码 SalesBuddy</span><span>运营管理工作台</span></footer><img class="login-watermark" src="/admin/assets/brand-mark-white.svg" alt="" aria-hidden="true">
+    </section><section class="login-form"><form id="login-form"><div class="form-accent" aria-hidden="true"></div><h2>登录管理工作台</h2><p class="muted">使用本公司管理员开通的成员账号登录</p>
+      <div class="login-company"><div id="login-company-auto"><span class="muted">按账号自动识别所属公司</span><button type="button" class="link" id="use-company-entry">使用公司入口</button></div><div id="login-company-card" hidden><span class="muted">当前公司</span><strong id="login-company-name"></strong><small id="login-company-code"></small><button type="button" class="link" id="change-login-company">切换公司</button></div><label class="field" id="login-company-field" hidden><b>公司码（可选）</b><input name="workspace" type="text" autocomplete="off" maxlength="128" placeholder="请输入管理员提供的公司码"><small>通常只需账号和密码。同名账号可使用管理员提供的公司码或专属链接。</small></label><button type="button" class="link" id="use-account-entry" hidden>按账号自动识别公司</button><div id="company-entry-status" role="status"></div></div>
+      <label class="field"><b>账号</b><input name="account" type="text" autocomplete="section-company username" placeholder="请输入账号名或手机号" required></label>
+      <label class="field password-field"><b>密码</b><span class="password-input"><input name="password" id="login-password" type="password" autocomplete="section-company current-password" placeholder="请输入密码" required><button type="button" class="password-toggle" id="toggle-password" aria-label="显示密码" aria-pressed="false"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></label>
+      <label class="login-remember"><input name="remember" type="checkbox">记住账号（不保存密码）</label><div id="login-error" role="alert">${message ? `<div class="error-box">${esc(message)}</div>` : ""}</div><button class="primary login-submit" type="submit"><span>登录工作台</span><span aria-hidden="true">→</span></button><div class="login-footer">账号由管理员统一开通，不开放注册。<br>忘记密码请联系运营或系统管理员。<br><a href="/closed-company-export">公司已关闭？进入历史资料导出</a><br><a href="/platform">平台运营人员？进入平台管理</a></div>
     </form><div class="login-access-note"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="4" y="8" width="12" height="10" rx="2"/><path d="M7 8V5a3 3 0 0 1 6 0v3 M10 12v3"/></svg>按账号授权访问工作台</div></section></main>`;
+  const form=$('#login-form'),codeInput=form.elements.workspace;
+  // Remember the account, never silently constrain a generic login to its old company.
+  const preferred=companyEntry.code||'';
+  codeInput.value=preferred;
+  $('#login-company-field').hidden=!preferred&&!companyEntry.invalid;
+  $('#login-company-auto').hidden=!!preferred||companyEntry.invalid;
+  $('#use-account-entry').hidden=!preferred&&!companyEntry.invalid;
+  form.elements.account.value=(!companyEntry.code||companyEntry.code===loginHint.company_code)?loginHint.account_code||'':'';
+  form.elements.remember.checked=loginHint.remember;
+  const view=renderId;let lookupVersion=0,company=null,loginBusy=false,companySelectionEnabled=!!preferred||companyEntry.invalid;
+  const current=()=>view===renderId&&form.isConnected;
+  function chooseCompanyEntry() {
+    if(loginBusy)return;
+    companySelectionEnabled=true;
+    lookupVersion++;companyLookup?.abort();company=null;codeInput.value='';form.elements.password.value='';
+    $('#login-company-auto').hidden=true;$('#login-company-card').hidden=true;$('#login-company-field').hidden=false;
+    $('#use-account-entry').hidden=false;$('#company-entry-status').textContent='';codeInput.focus();
+  }
+  $('#use-company-entry').onclick=chooseCompanyEntry;
+  $('#use-account-entry').onclick=()=>{
+    if(loginBusy)return;
+    companySelectionEnabled=false;
+    lookupVersion++;companyLookup?.abort();company=null;codeInput.value='';form.elements.password.value='';
+    companyEntry={code:'',invalid:false};
+    const url=new URL(window.location.href);url.searchParams.delete('company');
+    window.history.replaceState(null,'',url.pathname+url.search+url.hash);
+    $('#login-company-auto').hidden=false;$('#login-company-card').hidden=true;$('#login-company-field').hidden=true;
+    $('#use-account-entry').hidden=true;$('#company-entry-status').textContent='';$('#login-error').textContent='';form.elements.account.focus();
+  };
+  async function lookup() {
+    const version=++lookupVersion;companyLookup?.abort();company=null;
+    const raw=codeInput.value.trim();
+    $('#login-company-card').hidden=true;$('#login-company-field').hidden=false;
+    if(!raw){$('#company-entry-status').textContent='';return;}
+    const controller=new AbortController();companyLookup=controller;
+    $('#company-entry-status').textContent='正在确认公司…';
+    try {
+      const result=await resolveCompany(raw,{signal:controller.signal});
+      if(!current()||version!==lookupVersion)return;
+      company=result;codeInput.value=result.company_code;
+      $('#login-company-name').textContent=result.company_name;$('#login-company-code').textContent=result.company_code;
+      $('#login-company-card').hidden=false;$('#login-company-field').hidden=true;$('#company-entry-status').textContent='';
+    }catch(error){if(current()&&version===lookupVersion&&error.name!=='AbortError'){$('#company-entry-status').textContent=error.message;throw error;}}
+  }
+  $('#change-login-company').onclick=chooseCompanyEntry;
+  codeInput.oninput=()=>{lookupVersion++;companyLookup?.abort();company=null;$('#company-entry-status').textContent='';};
+  codeInput.onblur=()=>{if(!loginBusy)lookup().catch(()=>{});};
+  if(companyEntry.invalid)$('#company-entry-status').textContent='公司链接格式不正确，请重新填写公司码或使用管理员提供的链接。';
+  else if(preferred)lookup().catch(()=>{});
   $('#toggle-password').onclick=()=>{const input=$('#login-password'),show=input.type==='password';input.type=show?'text':'password';$('#toggle-password').setAttribute('aria-pressed',String(show));$('#toggle-password').setAttribute('aria-label',show?'隐藏密码':'显示密码');};
   $("#login-form").onsubmit = async (e) => {
     e.preventDefault();
-    const f = e.currentTarget,
-      b = $("button[type=submit]", f);
-    b.disabled = true;
-    $("#login-error").textContent = "";
+    const f = e.currentTarget;
+    if(loginBusy)return;loginBusy=true;
+    const data=new FormData(f),remember=data.has('remember');
+    const controls=[...f.querySelectorAll('input,button')];controls.forEach(input=>input.disabled=true);
+    $('#login-error').textContent='';
     try {
-      const data = new FormData(f);
+      if(companySelectionEnabled&&companyEntry.invalid&&!codeInput.value.trim())throw Error('此公司链接无效，请填写有效公司码后再登录。');
+      if(companySelectionEnabled&&codeInput.value.trim()&&company?.company_code!==normalizeCompanyCode(codeInput.value))await lookup();
+      if(!current())return;
+      if(companySelectionEnabled&&codeInput.value.trim()&&!company)throw Error('请先确认有效的公司入口。');
       const session = await loginAccount({
-        account_code: data.get("account"),
-        password: data.get("password"),
-      });
-      if (session.must_change_password) return passwordScreen();
+        account_code: data.get('account'),
+        workspace: companySelectionEnabled?company?.company_code||null:null,
+        password: data.get('password'),
+      }).catch(error=>{throw passwordLoginError(error);});
+      if(!current())return;
+      f.elements.password.value='';rememberActor(session.actor,remember);canonicalCompanyURL(session.actor);
+      if(session.must_change_password)return passwordScreen();
       await shell();
-    } catch (err) {
-      $("#login-error").innerHTML =
-        `<div class="error-box">${esc(err.message)}</div>`;
-    } finally {
-      b.disabled = false;
-    }
+    }catch(err){if(current())$('#login-error').innerHTML=`<div class="error-box">${esc(err.code==='COMPANY_REQUIRED'||err.message==='COMPANY_REQUIRED'?'此账号存在于多家公司，请使用公司入口或已绑定手机号登录。':err.message)}</div>`;}
+    finally{loginBusy=false;if(current())controls.forEach(input=>input.disabled=false);}
+
   };
 }
 function passwordScreen(required = true) {
@@ -181,6 +287,7 @@ function passwordScreen(required = true) {
 async function shell() {
   const me = await api("/auth/me");
   state.actor = me.actor || state.actor;
+  rememberActor(state.actor);
   state.permissions = (await api("/permissions/me")).permissions;
   if (!state.permissions["access.console"]) {
     await logoutAccount();
@@ -193,7 +300,7 @@ async function shell() {
   if(pages[initial] && state.permissions[pagePermissions[initial]])state.page=initial;
   else if(!state.permissions[pagePermissions[state.page]])state.page=availableGroups[0]?.[1][0];
   if(!state.page){$('#app').innerHTML='<div class="boot">已登录，尚未分配可访问的管理功能。请联系管理员。</div>';return;}
-  $('#app').innerHTML=`<a class="skip-link" href="#content">跳到主要内容</a><div class="shell"><aside id="sidebar"><a class="brand" href="#customers" aria-label="Raccoon SalesBuddy运营管理"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="Raccoon SalesBuddy"></a><div class="workspace-label">运营管理工作台</div><label class="nav-search"><input id="nav-search" type="search" aria-label="查找功能" placeholder="查找功能…"><kbd>/</kbd></label><nav class="nav" aria-label="管理功能">${availableGroups.map(([group,items])=>`<section class="nav-group"><h2>${group}</h2>${items.map(id=>{const item=nav.find(n=>n[0]===id);return `<button type="button" data-nav="${id}" title="${item[1]}" aria-current="${state.page===id?'page':'false'}" class="${state.page===id?'active':''}"><span class="nav-icon">${navIcon(id)}</span><span class="nav-text">${item[1]}</span></button>`;}).join('')}</section>`).join('')}<p id="nav-empty" hidden>没有匹配的功能</p></nav><div class="side-bottom"><span class="connection-dot"></span>业务数据实时读取<button type="button" id="collapse-nav" aria-label="收起导航" title="收起导航">«</button></div></aside><button class="nav-scrim" aria-label="关闭导航" hidden></button><div class="main"><header class="topbar"><button class="mobile-menu" aria-label="展开导航" aria-expanded="false" aria-controls="sidebar">☰</button>${companyLabel()}<div class="user"><span class="avatar">${esc((state.actor.display_name||'管')[0])}</span><span>${esc(state.actor.display_name||state.actor.account_code||'管理账号')}<small>${esc(roles[state.actor.role])}</small></span><button class="link" id="change-password">修改密码</button><button class="link" id="logout">退出</button></div></header><div class="page-tools"><span class="crumb">运营管理</span><span id="page-status" role="status">正在读取数据…</span><button id="refresh-page" class="link" type="button">↻ 刷新当前页</button></div><main class="content" id="content" tabindex="-1"></main><footer class="main-footer">Raccoon SalesBuddy · 运营管理</footer></div></div>`;
+  $('#app').innerHTML=`<a class="skip-link" href="#content">跳到主要内容</a><div class="shell"><aside id="sidebar"><a class="brand" href="#customers" aria-label="神码 SalesBuddy运营管理"><img class="brand-logo" src="/admin/assets/brand-white.svg" alt="神码 SalesBuddy"></a><div class="workspace-label">运营管理工作台</div><label class="nav-search"><input id="nav-search" type="search" aria-label="查找功能" placeholder="查找功能…"><kbd>/</kbd></label><nav class="nav" aria-label="管理功能">${availableGroups.map(([group,items])=>`<section class="nav-group"><h2>${group}</h2>${items.map(id=>{const item=nav.find(n=>n[0]===id);return `<button type="button" data-nav="${id}" title="${item[1]}" aria-current="${state.page===id?'page':'false'}" class="${state.page===id?'active':''}"><span class="nav-icon">${navIcon(id)}</span><span class="nav-text">${item[1]}</span></button>`;}).join('')}</section>`).join('')}<p id="nav-empty" hidden>没有匹配的功能</p></nav><div class="side-bottom"><span class="connection-dot"></span>业务数据实时读取<button type="button" id="collapse-nav" aria-label="收起导航" title="收起导航">«</button></div></aside><button class="nav-scrim" aria-label="关闭导航" hidden></button><div class="main"><header class="topbar"><button class="mobile-menu" aria-label="展开导航" aria-expanded="false" aria-controls="sidebar">☰</button>${companyLabel()}<div class="user"><span class="avatar">${esc((state.actor.display_name||'管')[0])}</span><span>${esc(state.actor.display_name||state.actor.account_code||'管理账号')}<small>${esc(roles[state.actor.role])}</small></span><button class="link" id="change-password">修改密码</button><button class="link" id="switch-login-company">切换登录公司</button><button class="link" id="logout">退出</button></div></header><div class="page-tools"><span class="crumb">运营管理</span><span id="page-status" role="status">正在读取数据…</span><button id="refresh-page" class="link" type="button">↻ 刷新当前页</button></div><main class="content" id="content" tabindex="-1"></main><footer class="main-footer">神码 SalesBuddy · 运营管理</footer></div></div>`;
   document.querySelectorAll('[data-nav]').forEach(button=>button.onclick=()=>navigate(button.dataset.nav));
   $('#refresh-page').onclick=()=>state.refresh();
   state.selectCompany=async id=>{
@@ -218,8 +325,13 @@ async function shell() {
     }
     login(message);
   };
+  $('#switch-login-company').onclick=async()=>{
+    if(!window.confirm('切换公司将退出当前账号，未保存的表单不会保留。是否继续？'))return;
+    try{await logoutAccount();companyEntry={code:'',invalid:false};loginHint={remember:loginHint.remember};const url=new URL(window.location.href);url.searchParams.delete('company');window.history.replaceState(null,'',url.pathname+url.search);login();}catch(error){if(error.code!=='SESSION_CHANGED')login(error.message);}
+  };
   $(".mobile-menu").onclick = () => {const open=$(".shell").classList.toggle("menu-open");$('.mobile-menu').setAttribute('aria-expanded',String(open));};
   await state.refresh();
+  if(state.page==='opportunities')await openFinanceDeepLink();
 }
 window.addEventListener('hashchange',()=>{const page=window.location.hash.slice(1);if(page!==state.page&&state.actor&&$('#content'))navigate(page,{history:false});});
 document.addEventListener('keydown',event=>{if(event.key==='/'&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)&&!$('#dialog')?.open){event.preventDefault();$('.shell')?.classList.remove('nav-collapsed');$('#nav-search')?.focus();}if(event.key==='Escape')$('.shell')?.classList.remove('menu-open');});
@@ -229,8 +341,7 @@ document.addEventListener("session-expired", () =>
 );
 try {
   const s = await refreshToken();
-  if (s.must_change_password) passwordScreen();
-  else await shell();
+  if(await acceptCompanyEntry(s)){rememberActor(s.actor);canonicalCompanyURL(s.actor);if(s.must_change_password)passwordScreen();else await shell();}
 } catch (e) {
   login();
 }

@@ -1,0 +1,26 @@
+.department-ui .task-execution {padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0;}
+.department-ui .task-execution h2,.department-ui .task-execution h3,.department-ui .task-execution h4 {margin:0;}
+.department-ui .task-execution-heading,.department-ui .task-execution-actions {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.department-ui .task-execution-actions {justify-content:flex-start;}
+.department-ui .task-execution-summary {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;background:var(--ui-neutral-soft);border-radius:10px;padding:20px;}
+.department-ui .task-execution-summary>div {display:flex;flex-direction:column;gap:8px;}
+.department-ui .task-execution-summary strong {font-size:22px;overflow-wrap:anywhere;}
+.department-ui .task-execution-items,.department-ui .task-execution-feedback {list-style:none;padding:0;display:grid;gap:12px;}
+.department-ui .task-execution-items>li,.department-ui .task-checklist-editor {padding:16px;border:1px solid var(--ui-line);border-radius:10px;display:grid;gap:12px;margin:12px 0;}
+.department-ui .task-execution p {white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0;}
+.department-ui .task-execution-feedback>li {padding:16px 0;border-bottom:1px solid var(--ui-line);}
+.department-ui .task-execution-submit {padding-top:20px;border-top:1px solid var(--ui-line);}
+.department-ui .task-execution-detail {height:auto;align-items:start;}
+.department-ui .task-execution-detail .ds-td-main,.department-ui .task-execution-detail .ds-td-side {overflow:visible;height:auto;}
+.task-rework-option {display:flex;gap:8px;margin:12px 0;}
+@media(max-width:700px){.department-ui .task-execution-summary{grid-template-columns:1fr;}.department-ui .task-execution {padding:16px;}}
+
+.department-ui .task-execution-items>li>button {justify-self:start;}
+.department-ui .task-execution-create {margin:24px 0;}
+
+.task-governance-card {border:1px solid var(--ui-line);border-radius:10px;padding:16px;margin-top:16px;}
+.task-governance-diff {display:grid;gap:12px;}.task-governance-diff>div {border-top:1px solid var(--ui-line);padding-top:12px;}.task-governance-diff dt {font-weight:600;}.task-governance-diff dd {margin:8px 0;}.task-governance-diff dd span {font-size:12px;color:var(--ui-muted);}.task-governance-diff p {white-space:pre-wrap;overflow-wrap:anywhere;}
+.task-governance-candidates {display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}.task-governance-fields {display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:700px){.task-governance-fields{grid-template-columns:1fr;}}
+
+.task-feedback-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}.task-feedback-fields .ant-select{width:100%}@media(max-width:600px){.task-feedback-fields{grid-template-columns:1fr}}

@@ -138,6 +138,10 @@ async def test_fde_facts_and_fingerprint_capture_actual_actor_and_project_partic
             return {"recognized_amount": None, "collection_amount": None}
 
         async def fetchval(self, sql, *args):
+            if "security.authorization_snapshot" in sql:
+                assert args == (None,)
+                return {"workspace_id": actor.workspace_id, "user_id": actor.user_id,
+                        "permission_version": "test-permissions-v1", "grants": []}
             if "security.authorization_opportunity" in sql:
                 assert args == ("advice.opportunity", subject_id)
                 return True

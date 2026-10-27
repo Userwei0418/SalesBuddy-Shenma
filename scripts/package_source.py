@@ -66,9 +66,9 @@ def main() -> None:
                 parser.error('Private key found in ' + item.name)
             files[item.name] = (content, item.mode & 0o777)
     if args.include_business_web:
-        dist = ROOT / 'business-web/dist'
-        build = json.loads((dist / 'build.json').read_text())
-        if build.get('revision') != revision or build.get('customer') != 'shenzhoukuntai':
+        dist = ROOT / 'frontend/web/dist'
+        build = json.loads((dist / 'version.json').read_text()).get('web_build', {})
+        if build.get('sourceRevision') != revision or build.get('webSourceDirty') is not False:
             parser.error('Rebuild the customer Web at the committed release revision')
         for file in sorted(dist.rglob('*')):
             if file.is_symlink():

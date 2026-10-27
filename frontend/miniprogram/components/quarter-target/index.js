@@ -9,7 +9,7 @@ function centsFromDecimal(value, scale) {
  if(!match)return null;
  const digits=(match[1]+(match[2]||'').padEnd(scale,'0')).replace(/^0+(?=\d)/,'');
  const cents=Number(digits);
- return Number.isSafeInteger(cents)&&cents>0?digits:null;
+ return Number.isSafeInteger(cents)&&cents>=0?digits:null;
 }
 function decimalFromCents(digits,scale) {
  const padded=digits.padStart(scale+1,'0'),integer=padded.slice(0,-scale),fraction=padded.slice(-scale).replace(/0+$/,'');
@@ -38,7 +38,7 @@ Component({
    try{const result=await api.getTargets(this.query());if(!this.current(serial,key))return;
     if(!Array.isArray(result.items))throw Error('目标数据暂未加载完成');
     const pending=[...(result.pending_batches||[]).flatMap(batch=>(batch.items||[]).map(row=>({...row,reason:batch.reason||batch.request_reason||'',status:'pending'}))),...(result.pending_requests||[])].filter(row=>kinds.includes(row.kind));
-    const rows=kinds.map(kind=>{const item=result.items.find(row=>row.kind===kind),change=pending.find(row=>row.kind===kind),amount=item?(item.amount_text??item.amount):null;return {kind,name:kind==='collection'?'回款':'确收',amount:item?Number(amount):null,inputAmount:item?amountInput(amount):'',version_no:item?item.version_no:null,currentText:money(amount),proposedText:change?money(change.proposed_amount):'',pending:!!change};});
+    const rows=kinds.map(kind=>{const item=result.items.find(row=>row.kind===kind),change=pending.find(row=>row.kind===kind),amount=item?(item.amount_text??item.amount):null;return {kind,name:kind==='collection'?'回款':'确收',amount:amount==null?null:Number(amount),inputAmount:item?amountInput(amount):'',version_no:item?item.version_no:null,currentText:money(amount),proposedText:change?money(change.proposed_amount):'',pending:!!change};});
     const own=p.scope==='self'||(p.scope==='person'&&p.subjectId===getApp().globalData.session.userId);
     const now=new Date(Date.now()+28800000),currentQuarter=now.getUTCFullYear()===p.year&&Math.floor(now.getUTCMonth()/3)+1===p.quarter;
     const latest=(result.recent_batches||[]).find(row=>['approved','rejected','cancelled'].includes(row.status));
@@ -52,7 +52,7 @@ Component({
   async save(){
    if(this.data.saving||!this.data.canEdit||!this.data.open||this.formKey!==this.key())return;
    const items=[];
-   for(const kind of kinds){const cents=centsFromDecimal(this.data[kind]||'',6);if(cents===null){this.setData({error:'请填写有效的正数目标金额，最多保留 6 位小数（万元）'});return;}const old=this.data.rows.find(row=>row.kind===kind);items.push({kind,amount:decimalFromCents(cents,2),version_no:old?old.version_no:null});}
+   for(const kind of kinds){const cents=centsFromDecimal(this.data[kind]??'',6);if(cents===null){this.setData({error:'请填写有效的非负目标金额，最多保留 6 位小数（万元）'});return;}const old=this.data.rows.find(row=>row.kind===kind);items.push({kind,amount:decimalFromCents(cents,2),version_no:old?old.version_no:null});}
    const reason=String(this.data.reason||'').trim();if(!reason){this.setData({error:'请填写与负责人商定的依据或本次调整原因'});return;}
    const serial=this.serial,key=this.key();this.setData({saving:true,error:''});
    try{const result=await api.saveTargetBatch({...this.query(),items,reason});if(!this.current(serial,key))return;this.setData({saving:false,open:false});wx.showToast({title:result.status==='pending'?'已提交运营审批':result.status==='unchanged'?'目标未发生变化':'季度目标已生效',icon:'success'});await this.load();this.triggerEvent('saved',{status:result.status});}

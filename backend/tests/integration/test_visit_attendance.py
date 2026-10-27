@@ -15,12 +15,13 @@ from sales_backend.db import set_request_context
 from sales_backend.repositories.collaboration import effective_ids
 from sales_backend.services.agent_run.handler import AgentRunHandler
 from sales_backend.services.agent_run.persist import AgentRunStore
-from sales_backend.services.opportunities import save_opportunity
 from sales_backend.services.visit_flow import prepare_visit_run
-from tests.integration.test_visit_entry_platform import TransactionDatabase, existing_actor
+from tests.integration.test_visit_entry_platform import TransactionDatabase
 
 
-async def review_attendance(connection, actor, customer_id, opportunity_id, participants, mutation=None):
+async def review_attendance(
+    connection, actor, customer_id, opportunity_id, participants, mutation=None, *, fields_override=None,
+):
     database = TransactionDatabase(connection)
     handler = AgentRunHandler(database, get_settings())
     store = AgentRunStore(database, get_settings())
@@ -30,6 +31,7 @@ async def review_attendance(connection, actor, customer_id, opportunity_id, part
         "interaction_at": "2026-09-15", "created_date": "2026-09-15",
         "follow_up_record": "双方复核十条样本，八条通过，两条需补充版本。",
         "next_action": "2026年9月18日前销售补齐两条样本并与陈经理复核。",
+        **(fields_override or {}),
     })
     source = await prepare_visit_run(connection, actor, StructureRequest(
         customer_id=customer_id, opportunity_id=opportunity_id, text=fields["follow_up_record"]
@@ -58,30 +60,25 @@ async def review_attendance(connection, actor, customer_id, opportunity_id, part
 
 
 @pytest.mark.asyncio
-async def test_sales_attendance_appends_without_replacing_or_counting_fde_authorship(connection):
+@pytest.mark.parametrize("with_opportunity", [False, True])
+async def test_sales_attendance_is_visit_only_and_does_not_count_as_fde_authorship(connection, with_opportunity):
     from tests.integration.test_fde_identity_tasks import fde_fixture
     from tests.integration.test_operations_claims_sql import actor
 
-    sales, source_project, people, _ = await fde_fixture(connection, extra_members=1)
+    sales, source_project, people, _ = await fde_fixture(connection)
     customer_id = source_project["customer_id"]
-    zhou, zhang, ye = (people[key]["id"] for key in ("first", "second", "extra0"))
+    zhou, zhang, lead_id = (people[key]["id"] for key in ("first", "second", "lead"))
     lead = await actor(connection, people["lead"]["code"])
     personal_count = await connection.fetchval("SELECT count(*) FROM security.fde_recorded_visit_history()")
+    project_access_before = await connection.fetchval("SELECT id FROM crm.opportunity WHERE id=$1::uuid", source_project["id"])
     await set_request_context(connection, sales)
-    data = OpportunityCreate(name=f"事务回滚-本次参与-{uuid4().hex[:8]}", probability=10,
-                             amount=120000, expected_close_date="2026-12-01", sales_channel="direct",
-                             fde_member_ids=[zhou]).model_dump()
-    opportunity = await save_opportunity(connection, sales, customer_id=customer_id, data=data)
-    oid = opportunity["id"]
+    oid = source_project["id"] if with_opportunity else None
+    roster = await effective_ids(connection, source_project["id"])
+    version = await connection.fetchval("SELECT version_no FROM crm.opportunity WHERE id=$1::uuid", source_project["id"])
+    opportunity_count = await connection.fetchval("SELECT count(*) FROM crm.opportunity")
     database, identity = TransactionDatabase(connection), SimpleNamespace(actor=sales)
-    for attendees, expected in [([zhang], {zhou, zhang}), ([], {zhou, zhang}),
-                                 ([zhang, ye, zhang], {zhou, zhang, ye})]:
-        # Exercise the same commercial form mutation used by the mini program.
-        mutation = OpportunityCreate(**{**data, "action": "update", "opportunity_id": oid,
-            "fde_member_ids": None, "version_no": await connection.fetchval(
-                "SELECT version_no FROM crm.opportunity WHERE id=$1::uuid", oid
-            )}).model_dump(mode="json")
-        _, submitted = await review_attendance(connection, sales, customer_id, oid, attendees, mutation)
+    for attendees in ([zhang], [], [zhang, lead_id, zhang]):
+        _, submitted = await review_attendance(connection, sales, customer_id, oid, attendees)
         wrong = submitted.model_copy(deep=True)
         wrong.fde_participant_ids = [UUID(zhou)]
         with pytest.raises(HTTPException, match="重新质检"):
@@ -89,8 +86,11 @@ async def test_sales_attendance_appends_without_replacing_or_counting_fde_author
         visit = await create_visit(submitted, identity, database, None)
         replay = await create_visit(submitted, identity, database, None)
         assert replay["replayed"] and replay["id"] == visit["id"]
+        assert visit["opportunity_id"] == oid
         assert set(visit["fde_participant_ids"]) == set(attendees)
-        assert await effective_ids(connection, oid) == expected
+        assert await effective_ids(connection, source_project["id"]) == roster
+        assert await connection.fetchval("SELECT version_no FROM crm.opportunity WHERE id=$1::uuid", source_project["id"]) == version
+        assert await connection.fetchval("SELECT count(*) FROM crm.opportunity") == opportunity_count
         assert await connection.fetchval(
             "SELECT count(*) FROM activity.visit_participant WHERE visit_id=$1::uuid AND participant_role='fde'",
             visit["id"]
@@ -100,13 +100,10 @@ async def test_sales_attendance_appends_without_replacing_or_counting_fde_author
         ) == "sales"
     await set_request_context(connection, lead)
     assert await connection.fetchval("SELECT count(*) FROM security.fde_recorded_visit_history()") == personal_count
-    await set_request_context(connection, sales)
-    # Standalone editing remains an explicit full-roster replacement.
-    await save_opportunity(connection, sales, customer_id=customer_id, data={
-        **data, "action": "update", "opportunity_id": oid, "fde_member_ids": [zhou],
-        "version_no": await connection.fetchval("SELECT version_no FROM crm.opportunity WHERE id=$1::uuid", oid)
-    })
-    assert await effective_ids(connection, oid) == {zhou}
+    if not with_opportunity:
+        # Attendance allows this event without changing the existing project access.
+        assert await connection.fetchval("SELECT id FROM activity.visit WHERE id=$1::uuid", visit["id"])
+        assert await connection.fetchval("SELECT id FROM crm.opportunity WHERE id=$1::uuid", source_project["id"]) == project_access_before
 
 
 @pytest.mark.asyncio
@@ -115,11 +112,10 @@ async def test_quality_rejects_invalid_attendance_before_enqueuing(connection):
 
     actor, row, people, _ = await fde_fixture(connection)
     await set_request_context(connection, actor)
-    fde = people["first"]["id"]
-    body, _ = await review_attendance(connection, actor, row["customer_id"], row["id"], [])
+    body, _ = await review_attendance(connection, actor, row["customer_id"], None, [])
     before = await connection.fetchval("SELECT count(*) FROM agent.run")
     cases = [({"fde_participant_ids": [actor.user_id]}, "FDE"),
-             ({"fde_participant_ids": [fde], "opportunity_id": None}, "先关联商机"),
+             ({"fde_participant_ids": [str(uuid4())]}, "FDE"),
              ({"opportunity_mutation": OpportunityCreate(name="旧草稿", probability=10, amount=100,
                expected_close_date="2026-12-01", fde_member_ids=[])}, "仅选择本次")]
     for patch, message in cases:
@@ -127,3 +123,30 @@ async def test_quality_rejects_invalid_attendance_before_enqueuing(connection):
         with pytest.raises(ValueError, match=message):
             await prepare_visit_run(connection, actor, invalid, "quality")
     assert await connection.fetchval("SELECT count(*) FROM agent.run") == before
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("already_archived", [False, True])
+async def test_customer_attendance_rechecks_permission_before_quality_archive_and_replay(connection, already_archived):
+    from sales_backend.api.visit_flow import enqueue
+    from tests.integration.test_authorization_opportunities import grant
+    from tests.integration.test_fde_identity_tasks import fde_fixture
+    from tests.integration.test_operations_claims_sql import actor
+
+    sales, row, people, _ = await fde_fixture(connection)
+    await set_request_context(connection, sales)
+    body, submitted = await review_attendance(connection, sales, row["customer_id"], None, [people["first"]["id"]])
+    database, identity = TransactionDatabase(connection), SimpleNamespace(actor=sales)
+    key = str(uuid4())
+    if already_archived:
+        await create_visit(submitted, identity, database, key)
+    admin = await actor(connection, "ADMIN001")
+    await grant(connection, admin, sales.user_id, [dict(permission="visit.attendance_manage", effect="deny")])
+    await set_request_context(connection, sales)
+    before = await connection.fetchval("SELECT count(*) FROM activity.visit")
+    for operation in (lambda: enqueue(body, "quality", identity, database, None),
+                      lambda: create_visit(submitted, identity, database, key)):
+        with pytest.raises(HTTPException) as error:
+            await operation()
+        assert error.value.status_code == 403
+    assert await connection.fetchval("SELECT count(*) FROM activity.visit") == before

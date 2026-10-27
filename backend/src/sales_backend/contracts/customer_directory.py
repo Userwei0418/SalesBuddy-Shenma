@@ -1,6 +1,7 @@
 """Reference-only company directory; separate from customer detail permissions."""
 
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -8,10 +9,14 @@ from sales_backend.contracts.types import UUIDString
 
 
 class CustomerDirectoryItem(BaseModel):
+    can_read_customer: bool = False
     id: UUIDString
     name: str
     industry_code: str | None
     level_code: str | None
+    business_identities: list[str] = Field(default_factory=lambda: ["customer"])
+    partner_profile_id: UUID | None = None
+    primary_partner_id: UUID | None = None
     customer_type_code: str | None
     team_name: str | None
     owner_name: str | None

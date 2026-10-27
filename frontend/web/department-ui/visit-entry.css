@@ -1,0 +1,61 @@
+/* 记录拜访：左栏选客户，右栏原文与录入方式，底部一个动作 */
+.department-ui[data-department-page="pages/visit-entry/index"] { height: 100%; }
+.department-ui .ds-ventry { display: grid; grid-template-columns: minmax(300px, 360px) minmax(0, 1fr); gap: var(--ui-space-4); height: 100%; min-height: 0; }
+.department-ui .ds-ve-side { padding: var(--ui-space-4); display: flex; flex-direction: column; gap: var(--ui-space-3); min-height: 0; overflow: auto; }
+.department-ui .ds-ve-h { margin: 0; font-size: var(--ui-text-body); font-weight: 600; display: flex; align-items: baseline; gap: var(--ui-space-2); }
+.department-ui .ds-ve-h small { font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-ve-required { color: var(--ui-danger); }
+.department-ui .ds-ve-hint { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-ve-results { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+/* 列表滚动承接多客户，不能让 flex 压缩按钮并裁掉名称；空态也保留完整内容。 */
+.department-ui .ds-ve-results > * { flex-shrink: 0; }
+.department-ui .ds-ve-side > :not(.ds-ve-results) { flex-shrink: 0; }
+.department-ui .ds-ve-selected { display: flex; align-items: center; gap: var(--ui-space-3); padding: var(--ui-space-3); border: 1px solid var(--ui-primary); background: var(--ui-selected); border-radius: var(--ui-radius-control); }
+.department-ui .ds-ve-mark { flex: none; width: 36px; height: 36px; border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-primary); display: grid; place-items: center; font-weight: 600; }
+.department-ui .ds-ve-selected-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-ve-selected-main b { font-weight: 600; overflow-wrap: anywhere; } .department-ui .ds-ve-selected-main span { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-first { display: flex; gap: var(--ui-space-2); align-items: flex-start; padding-top: var(--ui-space-3); border-top: 1px solid var(--ui-line); cursor: pointer; }
+.department-ui .ds-ve-first span { display: flex; flex-direction: column; gap: 2px; } .department-ui .ds-ve-first b { font-weight: 600; } .department-ui .ds-ve-first small { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-main { display: flex; flex-direction: column; gap: var(--ui-space-3); padding: var(--ui-space-4) var(--ui-space-4) 0; min-height: 0; }
+.department-ui .ds-ve-note-head { display: flex; align-items: center; gap: var(--ui-space-3); } .department-ui .ds-ve-count { margin-left: auto; font-size: var(--ui-text-small); font-variant-numeric: tabular-nums; }
+.department-ui .ds-ve-textarea { flex: 1; min-height: 160px; resize: none; }
+.department-ui .ds-ve-status { display: flex; justify-content: space-between; align-items: center; gap: var(--ui-space-3); font-size: var(--ui-text-small); flex-wrap: wrap; }
+.department-ui .ds-ve-state { color: var(--ui-secondary); margin-left: auto; } .department-ui .ds-ve-state.is-error, .department-ui .ds-ve-error { color: var(--ui-danger); }
+.department-ui .ds-ve-capture { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--ui-space-4); padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); }
+.department-ui .ds-ve-capture.is-recording { border-color: var(--ui-danger); }
+.department-ui .ds-ve-capture-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .department-ui .ds-ve-capture-copy b { font-weight: 600; } .department-ui .ds-ve-capture-copy small { font-size: var(--ui-text-small); }
+.department-ui .ds-ve-file { display: flex; flex-direction: column; gap: var(--ui-space-2); padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); }
+.department-ui .ds-ve-file-line { display: flex; justify-content: space-between; gap: var(--ui-space-3); font-size: var(--ui-text-small); } .department-ui .ds-ve-file-line b { font-weight: 600; overflow-wrap: anywhere; }
+.department-ui .ds-ve-file-actions { display: flex; gap: var(--ui-space-2); }
+.department-ui .ds-ve-bar { margin: auto calc(-1 * var(--ui-space-4)) 0; border-top: 1px solid var(--ui-line); }
+@media (max-width: 1100px) { .department-ui[data-department-page="pages/visit-entry/index"] { height: auto; } .department-ui .ds-ventry { grid-template-columns: minmax(0, 1fr); height: auto; } .department-ui .ds-ve-capture { grid-template-columns: minmax(0, 1fr); } }
+/* 单列时限制候选列表高度，避免大量客户把原文录入区推到页面很远处。 */
+@media (max-width: 1100px) { .department-ui .ds-ve-results { flex: none; max-height: 320px; } }
+
+/* 录入要点（PC 视觉 2.0） */
+.department-ui .ds-ve-checklist { margin-top: var(--ui-space-3); padding: 10px 12px; border-radius: var(--ui-radius-control); background: var(--ui-surface-subtle); border: 1px dashed var(--ui-line-strong); }
+.department-ui .ds-ve-checklist > b { display: block; font-size: var(--ui-text-caption); font-weight: 600; color: var(--ui-ink); margin-bottom: 6px; }
+.department-ui .ds-ve-checklist ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px var(--ui-space-4); }
+.department-ui .ds-ve-checklist li { font-size: var(--ui-text-small); color: var(--ui-secondary); line-height: 20px; }
+.department-ui .ds-ve-checklist li span { display: inline-block; min-width: 72px; margin-right: 6px; color: var(--ui-primary); font-weight: 500; }
+@media (max-width: 1100px) { .department-ui .ds-ve-checklist ul { grid-template-columns: minmax(0, 1fr); } }
+.ds-ve-followup-entry{margin-bottom:16px;white-space:normal;height:auto;min-height:36px}.ds-ve-followup-context{margin-top:16px;padding:16px;background:var(--ui-bg);border-radius:8px}.ds-followup-picker{display:grid;gap:16px;padding:20px}
+/* Follow-up picker only: reset native button bevels without changing other lists. */
+.department-ui .ds-followup-picker { padding: 12px 0; }
+.department-ui .ds-followup-picker > p { margin: 0; }
+.department-ui .ds-followup-picker > .ant-segmented { justify-self: start; }
+.department-ui .ds-followup-results { display: grid; gap: 10px; min-width: 0; }
+.department-ui .ds-followup-results-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-size: 13px; }
+.department-ui .ds-followup-row { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; appearance: none; -webkit-appearance: none; width: 100%; margin: 0; padding: 14px 16px; border: 1px solid var(--ui-line, #dfe3e8); border-radius: 10px; box-shadow: none; background: var(--ui-surface, #fff); color: var(--ui-ink, #20242b); font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.department-ui .ds-followup-row:not(:disabled):hover { border-color: var(--ui-primary, #376cff); background: var(--ui-selected, #f2f6ff); box-shadow: none; }
+.department-ui .ds-followup-row:focus-visible { outline: 2px solid var(--ui-primary, #376cff); outline-offset: 2px; }
+.department-ui .ds-followup-row:disabled { cursor: not-allowed; opacity: .6; }
+.department-ui .ds-followup-row-name { font-size: 15px; font-weight: 600; line-height: 22px; overflow-wrap: anywhere; }
+.department-ui .ds-followup-row-summary { color: var(--ui-secondary, #667085); font-size: 13px; line-height: 20px; }
+.department-ui .ds-followup-customer { display: flex; align-items: center; gap: 16px; padding: 16px; border: 1px solid var(--ui-line, #dfe3e8); border-radius: 10px; background: var(--ui-surface-subtle, #f7f8fa); }
+.department-ui .ds-followup-customer-main { display: grid; gap: 4px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.department-ui .ds-followup-customer-main > .ds-muted { font-size: 12px; }
+.department-ui .ds-followup-customer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.department-ui .ds-followup-status { margin: 0; padding: 20px 0; text-align: center; }
+.department-ui .ds-followup-more { justify-self: center; }
+.department-ui .ds-followup-full-entry { margin-right: auto; padding-left: 0; }
+@media (max-width: 600px) { .department-ui .ds-followup-customer { align-items: stretch; flex-direction: column; } }

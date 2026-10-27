@@ -1,7 +1,9 @@
+const customerIdentity = require('../../utils/customerIdentity');
 const uiColors = require("../../utils/uiColors");
 const apiClient = require("../../utils/apiClient");
 const { normalizeCustomerSummary } = require("../../utils/customerDetail");
 const PAGE_SIZE = 50;
+const DEFAULT_CLAIM_STATUS = "unclaimed";
 
 function identityKey() {
   const app = getApp(), session = app.globalData.session || {};
@@ -23,22 +25,28 @@ function customerItem(raw) {
 
 Page({
   data: {
+    identityOptions:customerIdentity.FILTERS,identityIndex:0,businessIdentity:'all',
     loading: true, loadingMore: false, submitting: false, query: "",
-    industry: "", claimStatus: "", industryIndex: 0, statusIndex: 0, hasFilters: false,
+    industry: "", claimStatus: DEFAULT_CLAIM_STATUS, industryIndex: 0, statusIndex: 0, hasFilters: false,
+    claimStatusLabel: "未认领", emptyTitle: "暂无未认领客户", emptyDescription: "可切换认领状态查看全部客户",
     industryOptions: [], statusOptions: [], optionsLoading: false, optionsError: "",
     customers: [], total: null, hasMore: false, nextOffset: null,
     loadError: "", loadMoreError: "", refreshRequired: false, selectedCustomerId: "", resultMessage: "",
   },
 
-  onLoad() {
+  onLoad(options = {}) {
     if (getApp().guardPage && !getApp().guardPage(this, 'customer-claim')) return;
     if (!getApp().ensureLogin()) return;
     this.disposed = false;
     this.directoryIdentity = identityKey();
-    return this.loadCustomers();
+    // Navigation has already decoded q. It only narrows the directory; even an
+    // exact match must still be selected and explicitly submitted by the user.
+    const query = typeof options.q === 'string' ? [...options.q.trim()].slice(0, 100).join('') : '';
+    return this.loadCustomers(query);
   },
 
   onShow() {
+    this.claimHidden=false;
     if (this.disposed === undefined) return this.onLoad();
     const identityChanged = this.directoryIdentity !== identityKey();
     if (this.disposed === false && (this.refreshOnReturn || identityChanged)) {
@@ -46,12 +54,13 @@ Page({
       if (!getApp().ensureLogin()) return;
       this.refreshOnReturn = false;
       this.optionsLoaded = false;
-      this.setData({ submitting: false, resultMessage: "" });
+      this.setData({ submitting: !!this.claimMutation && this.claimMutation.identity===identityKey(), resultMessage: "" });
       return this.loadCustomers(identityChanged ? "" : this.data.query);
     }
   },
 
   onHide() {
+    this.claimHidden=true;this.claimConfirmation=null;
     this.refreshOnReturn = true;
     clearTimeout(this.searchTimer);
     // Returning reads the authoritative state. A pre-hide read or application
@@ -63,6 +72,11 @@ Page({
     this.disposed = true;
     clearTimeout(this.searchTimer);
     this.customerRequestId = (this.customerRequestId || 0) + 1;
+  },
+
+  openCustomerCreate() {
+    if (this.data.submitting) return;
+    wx.navigateTo({ url: "/pages/customer-create/index" });
   },
 
   currentIdentity(request) {
@@ -80,15 +94,23 @@ Page({
     if (this.directoryIdentity !== identity) {
       this.directoryEpoch = (this.directoryEpoch || 0) + 1;
       this.optionsLoaded = false;
-      this.setData({ submitting: false, resultMessage: "", industry: "", claimStatus: "",
-        industryIndex: 0, statusIndex: 0, industryOptions: [], statusOptions: [], optionsError: "" });
+      this.setData({ submitting: false, resultMessage: "", industry: "", claimStatus: DEFAULT_CLAIM_STATUS,
+        claimStatusLabel: "未认领",
+        industryIndex: 0, statusIndex: 0, identityIndex:0,businessIdentity:"all",industryOptions: [], statusOptions: [], optionsError: "" });
     }
     this.directoryEpoch = this.directoryEpoch || 1;
     this.directoryIdentity = identity;
     const request = { id: (this.customerRequestId || 0) + 1, identity, epoch: this.directoryEpoch,
-      industry: this.data.industry, claimStatus: this.data.claimStatus };
+      industry: this.data.industry, claimStatus: this.data.claimStatus,businessIdentity:this.data.businessIdentity };
     this.customerRequestId = request.id;
-    this.setData({ query, hasFilters: !!(query || this.data.industry || this.data.claimStatus), loading: true, loadingMore: false, customers: [], total: null,
+    const narrowed = !!(query || this.data.industry || this.data.businessIdentity !== 'all');
+    const unclaimed = this.data.claimStatus === DEFAULT_CLAIM_STATUS;
+    this.setData({ query, hasFilters: narrowed || !unclaimed,
+      emptyTitle: unclaimed ? (narrowed ? "没有匹配的未认领客户" : "暂无未认领客户")
+        : narrowed || this.data.claimStatus ? "没有符合当前筛选的客户" : "公司客户名单暂为空",
+      emptyDescription: unclaimed ? "可切换认领状态查看全部客户，或调整搜索与筛选条件"
+        : narrowed || this.data.claimStatus ? "请调整搜索或筛选条件" : "运营完成客户建档后，可在这里申请认领",
+      loading: true, loadingMore: false, customers: [], total: null,
       hasMore: false, nextOffset: null, selectedCustomerId: "", loadError: "", loadMoreError: "", refreshRequired: false });
     return request;
   },
@@ -103,7 +125,7 @@ Page({
     if (this.directoryIdentity !== identityKey()) return this.loadCustomers("");
     if (this.data.loading || this.data.loadingMore || !this.data.hasMore) return Promise.resolve();
     const request = { id: ++this.customerRequestId, identity: this.directoryIdentity, epoch: this.directoryEpoch,
-      industry: this.data.industry, claimStatus: this.data.claimStatus };
+      industry: this.data.industry, claimStatus: this.data.claimStatus,businessIdentity:this.data.businessIdentity };
     this.setData({ loadingMore: true, loadMoreError: "" });
     return this.fetchCustomers(request, this.data.query, this.data.nextOffset, true);
   },
@@ -112,7 +134,7 @@ Page({
   retryMore() { return this.data.refreshRequired ? this.refreshCustomers() : this.loadMore(); },
 
   fetchCustomers(request, query, offset, append) {
-    const filters = {};
+    const filters = request.businessIdentity && request.businessIdentity!=='all'?{businessIdentity:request.businessIdentity}:{};
     if (request.industry) filters.industry = request.industry;
     if (request.claimStatus) filters.claimStatus = request.claimStatus;
     return apiClient.listCustomerClaimPool({ q: query, pageSize: PAGE_SIZE, offset, ...filters }).then(page => {
@@ -167,16 +189,20 @@ Page({
       if (!options || !valid(options.industries) || !valid(options.claim_statuses)) {
         throw new Error("筛选选项数据不完整，请重试");
       }
+      if (!options.claim_statuses.some(item => item.value === DEFAULT_CLAIM_STATUS)) {
+        throw new Error("认领状态选项缺少未认领，请重试");
+      }
       const industryIndex = options.industries.findIndex(item => item.value === this.data.industry);
       const statusIndex = options.claim_statuses.findIndex(item => item.value === this.data.claimStatus);
+      if (statusIndex < 0) throw new Error("当前认领状态选项已变化，请重试");
       this.optionsLoaded = true;
       this.setData({ industryOptions: options.industries, statusOptions: options.claim_statuses,
-        industryIndex: Math.max(0, industryIndex), statusIndex: Math.max(0, statusIndex),
+        industryIndex: Math.max(0, industryIndex), statusIndex,
+        claimStatusLabel: options.claim_statuses[statusIndex].label,
         optionsLoading: false, optionsError: "" });
       // A removed industry must not leave a hidden filter behind after refresh.
-      if (industryIndex < 0 || statusIndex < 0) {
-        this.setData({ industry: industryIndex < 0 ? "" : this.data.industry,
-          claimStatus: statusIndex < 0 ? "" : this.data.claimStatus });
+      if (industryIndex < 0) {
+        this.setData({ industry: "" });
         return this.loadCustomers(this.data.query);
       }
     }).catch(error => {
@@ -194,13 +220,26 @@ Page({
     if (this.directoryIdentity !== identityKey() || this.data.optionsLoading || this.data.submitting) return;
     const index = Number(e.detail.value), option = this.data[optionsField][index];
     if (!Number.isInteger(index) || !option || option.value === this.data[field]) return;
-    this.setData({ [field]: option.value, [indexField]: index, resultMessage: "" });
+    this.setData({ [field]: option.value, [indexField]: index, resultMessage: "",
+      ...(field === 'claimStatus' ? { claimStatusLabel: option.label } : {}) });
     return this.loadCustomers(this.data.query);
   },
 
+  changeBusinessIdentity(e) {
+    const index=Number(e.detail.value),option=this.data.identityOptions[index];if(!option || this.data.submitting)return;
+    this.setData({identityIndex:index,businessIdentity:option.value});return this.loadCustomers(this.data.query);
+  },
+  openCustomerDetail(e) {
+    if(!this.data.canReadCustomer)return;
+    const id=e.currentTarget.dataset.id;if(!this.data.customers.some(row=>row.id===id && row.can_read_customer===true))return;
+    wx.navigateTo({url:'/pages/customer-detail/index?id='+encodeURIComponent(id)});
+  },
   clearFilters() {
     if (this.data.submitting) return;
-    this.setData({ industry: "", claimStatus: "", industryIndex: 0, statusIndex: 0, resultMessage: "" });
+    const statusIndex = this.data.statusOptions.findIndex(option => option.value === DEFAULT_CLAIM_STATUS);
+    this.setData({ industry: "", claimStatus: DEFAULT_CLAIM_STATUS, industryIndex: 0,
+      statusIndex: Math.max(0, statusIndex), claimStatusLabel: statusIndex < 0 ? "未认领" : this.data.statusOptions[statusIndex].label,
+      resultMessage: "",identityIndex:0,businessIdentity:"all" });
     return this.loadCustomers("");
   },
 
@@ -217,24 +256,29 @@ Page({
 
   // Applying and approved ownership are separate server states.
   confirmClaim() {
-    if (this.data.submitting || this.directoryIdentity !== identityKey()) return;
+    if (this.data.submitting || this.claimConfirmation || this.directoryIdentity !== identityKey()) return;
     const customer = this.selectedCustomer;
     if (!customer || !customer.claimEligible) {
       wx.showToast({ title: "请先选择要认领的客户", icon: "none" }); return;
     }
     const request = { identity: this.directoryIdentity, epoch: this.directoryEpoch };
+    this.claimConfirmation=request;
     wx.showModal({
       title: "提交认领申请？",
-      content: `申请认领“${customer.name}”，运营审批通过后加入你的作战地图。记录拜访无需先认领。`,
+      content: `申请认领“${customer.name}”，运营审批通过后加入你的客户经营范围。记录拜访无需先认领。`,
       confirmText: "提交申请", confirmColor: uiColors.primary,
       success: result => {
+        if(this.claimConfirmation!==request)return;
+        this.claimConfirmation=null;
         if (!result.confirm || this.data.submitting || !this.currentIdentity(request)
           || this.data.selectedCustomerId !== customer.id) return;
         this.setData({ submitting: true });
+        const mutation={identity:request.identity};this.claimMutation=mutation;let applied=false;
         apiClient.claimCustomer(customer.id).then(assignment => {
           if (!this.currentIdentity(request)) return;
           if (assignment.status !== "pending") throw new Error("申请状态已变化，请刷新名单确认");
           this.selectedCustomer = null;
+          applied=true;
           this.setData({ submitting: false, selectedCustomerId: "",
             resultMessage: `“${customer.name}”的认领申请已提交，等待运营审批。` });
           wx.showToast({ title: "申请已提交", icon: "success" });
@@ -243,9 +287,15 @@ Page({
           if (!this.currentIdentity(request)) return;
           this.setData({ submitting: false });
           wx.showToast({ title: error.message || "认领失败，请重试", icon: "none" });
-          if (error.statusCode === 409) this.loadCustomers(this.data.query);
+        }).finally(()=>{
+          if(this.claimMutation!==mutation)return;
+          this.claimMutation=null;
+          if(this.disposed || this.claimHidden || mutation.identity!==identityKey())return;
+          this.setData({submitting:false});
+          if(!applied)this.loadCustomers(this.data.query);
         });
       },
+      fail:()=>{if(this.claimConfirmation===request)this.claimConfirmation=null;},
     });
   },
 });

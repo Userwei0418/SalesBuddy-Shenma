@@ -1,0 +1,825 @@
+const uiColors = require("../../utils/uiColors");
+/**
+ * BACKEND-CONTRACT 拜访新入口：选择客户 → 原文/文件转写 → AI 草案 → visit-confirm 人工归档。
+ * 客户目录按现有assigned范围与claim_directory授权选择；可选商机 GET /opportunities 按客户读取；实际录入权限由各写入阶段服务端复核；录音/文件 POST /visit-imports（file + original_filename），再 GET /visit-imports/:id 轮询 status/extracted_text。
+ * 结构化分别调用 visit_entry 与 opportunity_draft Agent；后者失败可降级为空，仅预填，不创建业务对象。
+ * 草稿按 workspaceId:userId 存储 visitEntryV2/visitStructuredV2；真实记录仅由确认页 POST /visits 写入。
+ * 文档“60 分钟/扫描件不支持”的校验须由导入后端负责，前端仅检查文件大小与可选扩展名；没有模拟转写或模拟审核。
+ */
+const api = require("../../utils/apiClient");
+const access = require("../../utils/access");
+const customerSearch = require('../../utils/visitCustomerSearch');
+const uploadRecovery = require("../../utils/visitUploadRecovery");
+const uploadIntent = require("../../utils/visitUploadIntent");
+const visitDraft = require("../../utils/visitDraft");
+const {sha256} = require("../../utils/requestIdentity");
+const newDraftId = () => `visit-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+const draftFields = ["followUpOnly","targetKind","entryMode", "transcript", "customerId", "customerName", "customerQuery",
+  "opportunityId", "opportunityName", "isFirstVisit", "importId", "fileName", "importStatus",
+  "appliedImportId", "hasTranscription", "localFilePath", "localFileTemporary", "fileSaveErrorCode", "statusText", "errorText", "audioSourceKind", "asrSessionId", "homeAudioHandoff", "importPartialText", "importProgress", ...uploadRecovery.draftFields];
+const copy = value => JSON.parse(JSON.stringify(value));
+Page({
+  ...require("../../utils/visitOpportunityFollowUp").create(api,()=>getApp().globalData.session),
+  ...uploadRecovery.create(api),
+  onEntryModeChange(e) { return this.switchInputMode({ currentTarget: { dataset: { mode: e.detail.value } } }); },
+
+  data: {
+    ...uploadRecovery.EMPTY,
+    navTop: 20, navHeight: 44, draftNotice: "", draftSaveError: "", draftSavedAt: 0, undoAvailable: false, legacyDraftAvailable:false,
+    localFilePath: "", localFileTemporary: false, fileSaveErrorCode: "",
+    audioSourceKind:'',asrSessionId:'',homeAudioHandoff:false,importPartialText:'',importProgress:'',
+    entryMode: "voice",
+    inputHelpVisible: false,
+    recordingGuideVisible: false,
+    transcript: "",
+    hasTranscription: false,
+    customerId: "",
+    customerName: "",
+    customerInitial: "",
+    customerQuery: "",
+    customerResults: [],
+    customerSearchError: "",
+    customerSearchDone: false,
+    customerConfirmed: false,
+    followUpOnly:false,targetKind:'customer',followUpResolved:false,followUpPickerOpen:false,followUpItems:[],followUpQuery:"",
+    opportunityId: "", opportunityName: "", opportunityResolved: false,
+    searching: false,
+    isFirstVisit: false,
+    isRecording: false,
+    isStarting: false,
+    isStopping: false,
+    isProcessing: false,
+    recordingTime: "00:00",
+    statusText: "先记录事实，稍后确认客户与商机",
+    errorText: "",
+    canSubmit: false, opportunityRecoveryPending:false, opportunityRecoveryUnknown:false,
+    importId: "",
+    fileName: "",
+    importStatus: "",
+    uploadProgress: 0,
+  },
+  onLoad(options = {}) {
+    this.entryOptions = options;
+    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'visit-entry', options)) return;
+    if (!getApp().ensureLogin()) return;
+    this.entryInitialized = true;
+    this.closed = false;
+    this.hidden = false;
+    this.unloaded = false;
+    this.userKey = visitDraft.scope(getApp().globalData.session, api);
+    this.draftContext = visitDraft.context(options);
+    this.draftKey = visitDraft.key("visitEntryV2", this.userKey, this.draftContext);
+    this.actionRevision = 0;
+    this.setupNavigation();
+    let draft = {};
+    try { this.draftStore = visitDraft.open(wx, this.draftKey); draft = this.draftStore.value || {}; }
+    catch (_) { this.draftReadFailed = true; this.setData({draftSaveError:"草稿读取失败，请暂时保留此页面并重试"}); }
+    const restored = this.hasDraftContent(draft);
+    this.draftId = draft.draftId || newDraftId();
+    const customerId = restored ? draft.customerId || "" : options.customerId || options.customer_id || "";
+    const session=getApp().globalData.session;
+    const opportunityId=restored ? draft.opportunityId || '' : options.opportunityId || options.opportunity_id || '';
+    const companyFollowUp=access.can(session,'visit.company_opportunity_follow_up');
+    const companyCustomer=access.can(session,'visit.company_customer_follow_up');
+    const followUpOnly=(restored ? draft.followUpOnly===true : options.followUpOnly==='1'||companyCustomer||Boolean(companyFollowUp&&opportunityId)) || ((companyFollowUp || companyCustomer)&&!access.can(session,'visit.create'));
+    this.customerReferencePending = Boolean(customerId);
+    // A draft belongs to this unfinished action; route parameters must not rebind it.
+    this.setData({
+      ...(restored ? this.pickDraft(draft) : {}),
+      // Legacy drafts predate this marker; an applied import proves transcription completed.
+      hasTranscription: restored && (typeof draft.hasTranscription === "boolean"
+        ? draft.hasTranscription : Boolean(draft.appliedImportId || draft.importStatus === "succeeded")),
+      entryMode: draft.entryMode === "file" ? "file" : "voice",
+      isFde: access.assignedVisitOnly(getApp().globalData.session),
+      followUpOnly,targetKind:opportunityId?'opportunity':'customer',followUpResolved:false,
+      customerId, customerName: restored ? draft.customerName || "" : "",
+      customerInitial: "", customerQuery: restored ? draft.customerQuery || "" : "",
+      customerConfirmed: false, canSubmit: false,
+      opportunityId,
+      opportunityName: restored ? draft.opportunityName || "" : "", opportunityResolved: false,
+      isProcessing: false, isRecording: false, isStarting: false, isStopping: false,
+      draftNotice: restored ? "已恢复上次未完成的录入，可继续编辑" : "",
+    });
+    if(restored && draft.localFilePath && !draft.importId && !draft.uploadIntentKey && ["uploading","failed"].includes(draft.importStatus))this.setData({uploadIntentState:"legacy_unknown"});
+    this.appliedImportId = draft.appliedImportId || "";
+    this.refreshOpportunityRecovery();
+    this.detectLegacyDraft();
+    if(this.data.followUpOnly){if(this.data.opportunityId || this.data.customerId)this.refreshFollowUp();else this.openFollowUpDiscovery();}
+    else if (customerId) this.loadLinkedCustomer(customerId);
+    else this.searchDepartmentCustomers();
+    this.recorder = wx.getRecorderManager();
+    this.onRecorderStart = () => {
+      this.setData({
+        isStarting: false,
+        isRecording: true,
+        recordingTime: "00:00",
+      });
+      let seconds = 0;
+      this.timer = setInterval(() => {
+        seconds++;
+        this.setData({
+          recordingTime: `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`,
+        });
+      }, 1000);
+    };
+    this.onRecorderStop = (result) => {
+      clearInterval(this.timer);
+      this.setData({ isStarting: false, isRecording: false, isStopping: false });
+      if (this.closed) return;
+      if (!result.tempFilePath || result.duration < 800) {
+        this.fail("录音太短，请重新录入");
+        return;
+      }
+      // The Web recorder emits WebM/M4A while the native recorder emits MP3.
+      // Keep the recorder's actual name so the draft and upload metadata never
+      // claim that browser bytes are MP3; the browser transport also uses this
+      // name when building multipart `original_filename`.
+      this.setData({audioSourceKind:'recording',asrSessionId:uploadIntent.newKey()});
+      this.uploadFile({ path: result.tempFilePath, size: result.fileSize, name: result.fileName || "拜访录音.mp3" }, this.exitAfterRecording === true);
+    };
+    this.onRecorderError = (error) => {
+      clearInterval(this.timer);
+      this.setData({
+        isStarting: false,
+        isRecording: false,
+        isStopping: false,
+      });
+      this.fail(error.errMsg || "录音失败");
+    };
+    this.recorder.onStart(this.onRecorderStart);
+    this.recorder.onStop(this.onRecorderStop);
+    this.recorder.onError(this.onRecorderError);
+  },
+  async loadLinkedCustomer(customerId) {
+    const request = this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
+    const identity = access.identity(getApp().globalData.session);
+    this.setData({ searching: true });
+    try {
+      const customer = await api.getCustomerReference(customerId);
+      if (this.closed || request !== this.customerLoadSerial || identity !== access.identity(getApp().globalData.session)) return;
+      this.customerReferencePending = false;
+      this.customerReferenceInvalid = false;
+      this.confirmSelectedCustomer(customer);
+      this.setData({ searching: false });
+    } catch (error) {
+      if (this.closed || request !== this.customerLoadSerial || identity !== access.identity(getApp().globalData.session)) return;
+      this.customerReferencePending = false;
+      this.customerReferenceInvalid = true;
+      this.setData({ searching: false, errorText: error.message || "客户信息已变化，请重新选择客户" });
+    }
+  },
+  onShow() {
+    if (this.entryOptions && !this.entryInitialized) return this.onLoad(this.entryOptions);
+    if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'visit-entry')) return;
+    this.closed = false;
+    this.hidden = false;
+    this.refreshOpportunityRecovery();
+    if(this.data.homeAudioHandoff && this.data.localFilePath && !this.data.importId && !this.data.isProcessing){
+      this.setData({homeAudioHandoff:false});
+      this.uploadFile({path:this.data.localFilePath,name:this.data.fileName},false,!this.data.localFileTemporary);
+    }
+    if (this.forwarded) {
+      this.forwarded = false;
+      const saved = wx.getStorageSync(this.draftKey);
+      if (!saved) {
+        this.actionRevision = (this.actionRevision || 0) + 1;
+        this.draftStore = visitDraft.open(wx, this.draftKey);
+        this.draftId = newDraftId(); this.appliedImportId = "";
+        this.setData({followUpOnly:access.can(getApp().globalData.session,'visit.company_customer_follow_up') || access.can(getApp().globalData.session,'visit.company_opportunity_follow_up')&&!access.can(getApp().globalData.session,'visit.create'),targetKind:'customer',followUpResolved:false,...uploadRecovery.EMPTY,transcript:"",hasTranscription:false,customerId:"",customerName:"",customerQuery:"",customerInitial:"",customerConfirmed:false,
+          opportunityId:"",opportunityName:"",opportunityResolved:false,isFirstVisit:false,importId:"",fileName:"",importStatus:"",
+          localFilePath:"",localFileTemporary:false,fileSaveErrorCode:"",errorText:"",draftNotice:"",undoAvailable:false,canSubmit:false,isProcessing:false,statusText:"先记录事实，稍后确认客户与商机"});
+        if(this.data.followUpOnly)this.openFollowUpDiscovery();else this.searchDepartmentCustomers();
+      }
+    }
+    if (this.data.localFilePath && !this.data.localFileTemporary && !this.data.importId && !this.data.isProcessing && !this.fileSavePromise) {
+      this.continueFileUpload();
+    }
+    if(this.data.followUpOnly){this.refreshFollowUp();}
+    else if (this.data.customerId) {
+      this.setData({opportunityResolved:false,canSubmit:this.entryReady(this.data.transcript,{...this.data,opportunityResolved:false})});
+      const picker=this.selectComponent && this.selectComponent("#visitEntryOpportunity");
+      if(picker)picker.checkSelection(true);
+    }
+    if (
+      this.data.importId &&
+      ["queued", "processing"].includes(this.data.importStatus)
+    )
+      this.pollImport();
+  },
+  onHide() {
+    this.persist();
+    this.hidden = true;
+    clearTimeout(this.pollTimer);
+    if (this.data.isRecording) this.recorder.stop();
+  },
+  onUnload() {
+    this.persist();
+    this.closed = true;
+    this.unloaded = true;
+    clearTimeout(this.customerSearchTimer);
+    if (this.recorder) {
+      if (this.recorder.offStart) this.recorder.offStart(this.onRecorderStart);
+      if (this.recorder.offStop) this.recorder.offStop(this.onRecorderStop);
+      if (this.recorder.offError) this.recorder.offError(this.onRecorderError);
+      if (this.data.isRecording) this.recorder.stop();
+    }
+    clearTimeout(this.pollTimer);
+    clearInterval(this.timer);
+  },
+  setupNavigation() {
+    try {
+      const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      const capsule = wx.getMenuButtonBoundingClientRect();
+      const navTop = info.statusBarHeight || 20;
+      this.setData({navTop,navHeight:Math.max(44, (capsule.top-navTop)*2+capsule.height)});
+    } catch (_) { /* Older runtimes retain the safe default navigation dimensions. */ }
+  },
+  pickDraft(source = this.data) {
+    const snapshot = {};
+    draftFields.forEach(key => { if (source[key] !== undefined) snapshot[key] = source[key]; });
+    return snapshot;
+  },
+  detectLegacyDraft() {
+    if (!this.userKey || !this.userKey.includes(':service:') || this.data.transcript || this.data.fileName || this.data.importId) return;
+    try { this.setData({legacyDraftAvailable:Boolean(visitDraft.legacyText(wx,getApp().globalData.session))}); }
+    catch (_) { /* Legacy storage may be unavailable; current-service drafts still work. */ }
+  },
+  restoreLegacyDraft() {
+    if (this.data.transcript || this.data.fileName || this.data.importId || this.data.isProcessing || this.data.isRecording) return;
+    const owner=this.userKey;
+    wx.showModal({title:'恢复旧版草稿文字？',content:'旧稿未标记来源环境。只恢复文字到当前环境，客户和商机需要重新核对，附件需要重新选择；不会提交或调用 AI。旧稿仍保留。',confirmText:'恢复文字',success:result=>{
+      if(!result.confirm || owner!==visitDraft.scope(getApp().globalData.session,api) || this.unloaded || this.data.transcript || this.data.fileName || this.data.importId)return;
+      try {
+        const text=visitDraft.legacyText(wx,getApp().globalData.session);if(!text)return;
+        const before=this.data.transcript;
+        this.setData({transcript:text,canSubmit:this.entryReady(text)});
+        if(!this.persist()){this.setData({transcript:before,canSubmit:this.entryReady(before)});return;}
+        this.setData({legacyDraftAvailable:false,draftNotice:'已恢复旧稿文字，请核对客户、商机及内容后继续'});
+      } catch (_) {this.setData({draftSaveError:'旧版草稿读取失败，原稿仍保留'});}
+    }});
+  },
+  hasDraftContent(d = this.data) {
+    return Boolean(String(d.transcript || "").length || d.customerId || d.customerQuery || d.opportunityId || d.isFirstVisit || d.fileName || d.importId || d.localFilePath);
+  },
+  operationToken() { return {revision:this.actionRevision || 0, draftId:this.draftId, scope:this.userKey}; },
+  operationCurrent(token) {
+    if (this.discarded || this.unloaded || token.revision !== (this.actionRevision || 0) || token.draftId !== this.draftId) return false;
+    if (token.scope && token.scope !== visitDraft.scope(getApp().globalData.session, api)) return false;
+    if (token.scope && wx.getStorageSync) {
+      try {
+        const current = wx.getStorageSync(this.draftKey);
+        if (current && current.draftId && current.draftId !== token.draftId) return false;
+        if (this.draftStore && !this.draftStore.current()) return false;
+      } catch (_) { this.setData({isProcessing:false,draftSaveError:"草稿暂不可读，请保留此页面后重试"});return false; }
+    }
+    return true;
+  },
+  persist() {
+    if (!this.draftKey || this.discarded || this.forwarded || this.unloaded || this.draftReadFailed) return false;
+    if (this.userKey && this.userKey !== visitDraft.scope(getApp().globalData.session, api)) return false;
+    this.draftId = this.draftId || newDraftId();
+    try {
+      if (wx.getStorageSync) {
+        const current = wx.getStorageSync(this.draftKey);
+        if (current && current.draftId && current.draftId !== this.draftId && !this.replacingDraft) return false;
+      }
+      if (!this.draftStore) this.draftStore = visitDraft.open(wx, this.draftKey);
+      this.draftStore.write({
+        ...this.pickDraft(), draftId:this.draftId, savedAt:Date.now(),
+        appliedImportId:this.appliedImportId || this.data.appliedImportId || "",
+      });
+      this.setData({draftSaveError:"",draftSavedAt:Date.now()});
+      this.refreshOpportunityRecovery();
+      return true;
+    } catch (error) {
+      this.setData({draftSaveError:["DRAFT_CHANGED","DRAFT_STORAGE_PENDING","DRAFT_STORAGE_CONFLICT"].includes(error.code) ? error.message : "草稿未能保存，请保留此页面后重试"});
+      return false;
+    }
+  },
+  relatedDraftKeys() {
+    const scope = this.userKey || visitDraft.scope(getApp().globalData.session, api);
+    return ["visitStructuredV2", "visitConfirmV2", "visitStructureRun"].map(prefix => visitDraft.key(prefix, scope, this.draftContext));
+  },
+  leavePage() {
+    this.discardUndo();
+    wx.navigateBack({fail:() => wx.switchTab({url:"/pages/index/index"})});
+  },
+  requestBack() {
+    if (this.backPromptOpen || this.exitAfterRecording) return;
+    if (!this.hasDraftContent() && !this.data.isRecording && !this.data.isStarting) { this.leavePage(); return; }
+    this.backPromptOpen = true;
+    wx.showModal({
+      title:"是否保存本次拜访草稿？", content:"保存后，下次进入可继续编辑。放弃将清除本次未提交的内容。",
+      confirmText:"保存", cancelText:"放弃", confirmColor: uiColors.primary,
+      success:async result => {
+        this.backPromptOpen = false;
+        if (result.confirm) {
+          if (this.data.isStarting || this.data.isStopping) { wx.showToast({title:"录音正在准备或保存，请稍候",icon:"none"}); return; }
+          if (this.data.isRecording) { this.exitAfterRecording = true; this.recorder.stop(); return; }
+          if (this.fileSavePromise) { await this.fileSavePromise; return; }
+          if (this.data.localFileTemporary) { await this.uploadFile({path:this.data.localFilePath,name:this.data.fileName},true); return; }
+          if (this.persist()) this.leavePage();
+        } else if (result.cancel && this.discardDraft()) this.leavePage();
+      },
+      fail:() => { this.backPromptOpen = false; },
+    });
+  },
+  discardDraft() {
+    if(this.keepUnresolvedUpload())return false;
+    try {
+      if (this.userKey !== visitDraft.scope(getApp().globalData.session, api)) return false;
+      const current = wx.getStorageSync(this.draftKey);
+      if (current && current.draftId && current.draftId !== this.draftId) return false;
+      if (this.draftStore && !this.draftStore.current()) throw Error("草稿已变化");
+      visitDraft.removeAction(wx, this.relatedDraftKeys(), this.draftId);
+      if (this.draftStore) this.draftStore.remove(); else wx.removeStorageSync(this.draftKey);
+      this.discarded = true;
+      this.actionRevision = (this.actionRevision || 0) + 1;
+      clearTimeout(this.pollTimer);
+      this.removeLocalFile(this.data.localFilePath);
+      return true;
+    } catch (_) { this.setData({draftSaveError:"草稿清除失败，请重试"}); return false; }
+  },
+  clearTranscript() {
+    if(this.keepUnresolvedUpload())return;
+    if (this.data.isRecording || this.data.isStarting || this.data.isStopping || (!this.data.transcript && !this.data.fileName && !this.data.importId)) return;
+    const before = {...this.pickDraft(),appliedImportId:this.appliedImportId || this.data.appliedImportId || ""};
+    const oldId = this.draftId;
+    const related = {};
+    try { this.relatedDraftKeys().forEach(key => { related[key] = wx.getStorageSync(key); }); }
+    catch (_) { this.setData({draftSaveError:"草稿读取失败，暂未清空"}); return; }
+    this.actionRevision = (this.actionRevision || 0) + 1;
+    clearTimeout(this.pollTimer);
+    this.draftId = newDraftId(); this.appliedImportId = "";
+    this.setData({...uploadRecovery.EMPTY,transcript:"",hasTranscription:false,isFirstVisit:false,importId:"",fileName:"",importStatus:"",appliedImportId:"",localFilePath:"",localFileTemporary:false,fileSaveErrorCode:"",
+      uploadProgress:0,isProcessing:false,errorText:"",canSubmit:false,statusText:"已清空本次录入内容",draftNotice:"",undoAvailable:false});
+    this.replacingDraft = true;
+    const saved = this.persist(); this.replacingDraft = false;
+    if (!saved) { this.draftId=oldId; this.appliedImportId=before.appliedImportId; this.setData({...before,canSubmit:this.entryReady(before.transcript)}); return; }
+    this.undoDraft = {before,related};
+    this.setData({undoAvailable:true});
+    // The new action ID also isolates stale results if cleanup cannot complete.
+    try { this.relatedDraftKeys().forEach(key => wx.removeStorageSync(key)); } catch (_) {}
+  },
+  undoClear() {
+    if (!this.undoDraft || !this.data.undoAvailable) return;
+    const snapshot = this.undoDraft;
+    this.actionRevision = (this.actionRevision || 0) + 1;
+    this.appliedImportId = snapshot.before.appliedImportId;
+    this.setData({...snapshot.before,isProcessing:false,undoAvailable:false,statusText:"已撤销清空，可继续编辑",canSubmit:this.entryReady(snapshot.before.transcript)});
+    if (!this.persist()) { this.setData({undoAvailable:true}); return; }
+    // Keep raw input; AI output must be regenerated for this new action ID.
+    this.undoDraft = null;
+    if (this.data.importId && ["queued","processing"].includes(this.data.importStatus)) this.pollImport();
+  },
+  discardUndo() {
+    if (this.undoDraft && this.undoDraft.before.localFilePath !== this.data.localFilePath) this.removeLocalFile(this.undoDraft.before.localFilePath);
+    this.undoDraft = null;
+    if (this.data.undoAvailable) this.setData({undoAvailable:false});
+  },
+  removeLocalFile(path) {
+    if (path && wx.getFileSystemManager) wx.getFileSystemManager().removeSavedFile({filePath:path,fail:() => {}});
+  },
+  entryReady(text, context = this.data) { return Boolean(access.canVisitAction(getApp().globalData.session,'visit.structure',context) && !this.customerReferencePending && !this.customerReferenceInvalid && context.customerId && (!context.followUpOnly || context.followUpResolved) && String(text || "").trim() && (!context.opportunityId || context.opportunityResolved)); },
+  opportunityChanged(e) {
+    const detail=e.detail || {}, row=detail.opportunity;
+    if (detail.customerId!==this.data.customerId || this.data.isProcessing || this.data.isRecording) return;
+    if (row && (!row.id || (row.customer_id && row.customer_id!==this.data.customerId))) return;
+    const update={opportunityResolved:detail.resolved===true,
+      ...(row?{opportunityId:row.id,opportunityName:row.name}:detail.cleared?{opportunityId:"",opportunityName:""}:{})};
+    this.setData({...update,canSubmit:this.entryReady(this.data.transcript,{...this.data,...update})});
+    this.persist();
+  },
+  inputTranscript(e) {
+    this.discardUndo();
+    this.setData({
+      transcript: e.detail.value,
+      canSubmit: this.entryReady(e.detail.value),
+      errorText: "",
+    });
+    this.persist();
+  },
+  inputCustomerQuery(e) {
+    if(this.data.isProcessing)return;
+    this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
+    const customerQuery = customerSearch.query(e.detail.value);
+    this.setData({ customerQuery, customerResults:[],searching:true,customerSearchError:'',customerSearchDone:false,customerId: "", customerName: "", customerInitial: "", customerConfirmed: false, canSubmit: false, opportunityId:"", opportunityName:"", opportunityResolved:false });
+    clearTimeout(this.customerSearchTimer);
+    this.customerSearchTimer = setTimeout(() => this.searchDepartmentCustomers(), 250);
+    this.persist();
+  },
+  async searchDepartmentCustomers() {
+    if(this.data.isProcessing)return;
+    clearTimeout(this.customerSearchTimer);
+    const query = customerSearch.query(this.data.customerQuery).trim();
+    const request = this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
+    const identity = access.identity(getApp().globalData.session);
+    const isFde = access.assignedVisitOnly(getApp().globalData.session);
+    this.customerSearchIdentity=identity;
+    this.setData({ isFde, searching: true, customerSearchError: "", customerSearchDone:false,customerResults: [] });
+    try {
+      const response = await customerSearch.list(api,getApp().globalData.session,{q:query,pageSize:100});
+      if (this.closed || request !== this.customerLoadSerial || identity !== access.identity(getApp().globalData.session)) return;
+      if (!response || !Array.isArray(response.items)) throw new Error("客户列表响应不完整，请重试");
+      const customerResults = response.items.map(item => ({ ...item, initial: String(item.name || "?").substring(0, 1) }));
+      this.setData({ customerResults, searching: false,customerSearchDone:true });
+    } catch (error) {
+      if (this.closed || request !== this.customerLoadSerial || identity !== access.identity(getApp().globalData.session)) return;
+      const customerSearchError = customerSearch.errorMessage(error);
+      this.setData({ customerResults: [], searching: false, customerSearchError,customerSearchDone:false });
+    }
+  },
+  chooseCustomer(e) {
+    if(this.data.isProcessing || this.data.searching)return;
+    if(this.customerSearchIdentity!==undefined && this.customerSearchIdentity!==access.identity(getApp().globalData.session))return;
+    const customer = this.data.customerResults.find((item) => item.id === e.currentTarget.dataset.id);
+    if (!customer) return;
+    this.confirmSelectedCustomer(customer);
+  },
+  retryCustomerSearch(){return this.searchDepartmentCustomers();},
+  confirmSelectedCustomer(customer) {
+    clearTimeout(this.customerSearchTimer);
+    this.customerReferencePending = false;
+    this.customerReferenceInvalid = false;
+    this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
+    const sameCustomer = this.data.customerId === customer.id;
+    const update = {opportunityId:sameCustomer ? this.data.opportunityId : "",
+      opportunityName:sameCustomer ? this.data.opportunityName : "", opportunityResolved:false};
+    this.setData({
+      ...update,
+      customerId: customer.id,
+      customerName: customer.name,
+      customerInitial: String(customer.name || "?").substring(0, 1),
+      customerQuery: customer.name,
+      customerResults: [],
+      searching:false,customerSearchError:'',customerSearchDone:false,
+      customerConfirmed: true,
+      canSubmit: this.entryReady(this.data.transcript,{...this.data,...update,customerId:customer.id}),
+    });
+    this.persist();
+  },
+  changeCustomer() {
+    if(this.data.followUpOnly)return this.openFollowUpDiscovery();
+    if(this.data.isProcessing)return;
+    this.customerLoadSerial = (this.customerLoadSerial || 0) + 1;
+    this.setData({ customerId: "", customerName: "", customerInitial: "", customerConfirmed: false, canSubmit: false, opportunityId:"", opportunityName:"", opportunityResolved:false });
+    this.persist();
+    this.searchDepartmentCustomers();
+  },
+  toggleFirstVisit(e) {
+    if (this.data.isProcessing || this.data.isFde || this.data.followUpOnly) return;
+    this.setData({ isFirstVisit: e.detail.value.includes("first") });
+    this.persist();
+  },
+  fail(message) {
+    this.exitAfterRecording = false;
+    this.setData({
+      isProcessing: false,
+      errorText: message,
+      statusText: message,
+      canSubmit: this.entryReady(this.data.transcript),
+    });
+    this.persist();
+  },
+  toggleRecording() {
+    if (this.data.isStarting || this.data.isStopping || this.data.isProcessing)
+      return;
+    if (this.data.isRecording) {
+      this.setData({ isStopping: true });
+      this.recorder.stop();
+      return;
+    }
+    if (this.pendingLocalFile()) return;
+    this.setData({ isStarting: true, errorText: "" });
+    wx.authorize({
+      scope: "scope.record",
+      success: () =>
+        this.recorder.start({
+          duration: 600000,
+          sampleRate: 16000,
+          numberOfChannels: 1,
+          encodeBitRate: 48000,
+          format: "mp3",
+        }),
+      fail: (error) => this.recordingAuthorizationFailed(error),
+    });
+  },
+  recordingAuthorizationFailed(error = {}) {
+    const unavailable = () => {
+      if (this.closed) return;
+      this.setData({ isStarting: false });
+      const network = /network|timeout|timed out|ECONN|proxy|tunnel|网络/i.test(error.errMsg || "");
+      this.fail(network
+        ? "录音授权网络请求失败，请检查网络；开发者工具中请检查代理是否与当前网络状态一致，然后重试。"
+        : "录音授权请求失败，尚不能确认是权限问题，请重试；开发者工具中请检查网络与代理状态。");
+    };
+    wx.getSetting({
+      success: (result) => {
+        if (this.closed) return;
+        if (!result.authSetting || result.authSetting['scope.record'] !== false) return unavailable();
+        this.setData({ isStarting: false });
+        wx.showModal({
+          title: "需要麦克风权限",
+          content: "录音权限已关闭，可在设置中允许录音后重试，也可以继续文字录入或上传文件。",
+          confirmText: "去设置",
+          success: (r) => {
+            if (r.confirm && !this.closed) wx.openSetting({});
+          },
+        });
+      },
+      fail: unavailable,
+    });
+  },
+  switchInputMode(e) {
+    if (
+      this.data.isRecording ||
+      this.data.isStarting ||
+      this.data.isStopping ||
+      this.data.isProcessing
+    )
+      return;
+    const mode = e.currentTarget.dataset.mode;
+    if (!["voice", "file"].includes(mode)) return;
+    this.setData({ entryMode: mode, inputHelpVisible: false });
+    this.persist();
+  },
+  toggleInputHelp() {
+    this.setData({ inputHelpVisible: !this.data.inputHelpVisible });
+  },
+  toggleRecordingGuide() {
+    this.setData({ recordingGuideVisible: !this.data.recordingGuideVisible, inputHelpVisible: false });
+  },
+  dismissInputHelp() {
+    if (this.data.inputHelpVisible) this.setData({ inputHelpVisible: false });
+  },
+  stopBubble() {},
+  chooseMaterial() {
+    this.setData({ inputHelpVisible: false });
+    this.chooseFile([
+      "mp3",
+      "wav",
+      "m4a",
+      "aac",
+      "ogg",
+      "flac",
+      "amr",
+      "webm",
+      "pdf",
+      "docx",
+      "pptx",
+      "md",
+      "txt",
+    ]);
+  },
+  chooseFile(extension) {
+    if (this.data.isProcessing || this.data.isRecording) return;
+    if (this.pendingLocalFile()) return;
+    wx.chooseMessageFile({
+      count: 1,
+      type: "file",
+      extension,
+      success: (r) => {
+        if (r.tempFiles[0]) {this.setData({audioSourceKind:'file',asrSessionId:uploadIntent.newKey()});this.uploadFile(r.tempFiles[0]);}
+      },
+      fail: (e) => {
+        if (!String(e.errMsg).includes("cancel"))
+          this.fail("未能选择文件，请重试");
+      },
+    });
+  },
+  async uploadFile(file, exitAfterSave = false, alreadySaved = false, temporaryUpload = false) {
+    if (file.size > 100 * 1024 * 1024) { this.fail("录音文件最大100MB"); return; }
+    const extension = String(file.name || "").split(".").pop().toLowerCase();
+    if (["pdf","docx","pptx","md","txt"].includes(extension) && file.size > 20 * 1024 * 1024) { this.fail("文档最大20MB，请精简后上传"); return; }
+    if (this.data.isProcessing) return;
+    if(this.data.uploadIntentState==='legacy_unknown'){this.continueFileUpload();return;}
+    const sameFile=this.data.localFilePath===file.path && this.data.fileName===file.name;
+    // Resolve an earlier request before touching its local file again. A temporary
+    // path may already be gone even though the server accepted the original upload.
+    if(sameFile && this.data.uploadIntentKey && this.data.uploadIntentState!=='new')return this.continueFileUpload();
+    if(!sameFile && this.keepUnresolvedUpload())return;
+    if(!sameFile || !this.data.uploadIntentKey)this.setData({...uploadRecovery.EMPTY,uploadIntentKey:uploadIntent.newKey(),uploadIntentState:'new'});
+    this.discardUndo();
+    const token = this.operationToken();
+    // Keep the only audio reference before any storage API can fail. Temporary
+    // paths are recoverable while available, never advertised as durable drafts.
+    this.appliedImportId = "";
+    this.importPollCount=0;
+    this.setData({importId:"",appliedImportId:"",importPartialText:'',importProgress:'',fileName:file.name,localFilePath:file.path,
+      localFileTemporary:!alreadySaved,importStatus:"saving",fileSaveErrorCode:"",errorText:""});
+    if (!this.persist()) { this.exitAfterRecording=false; return; }
+    this.setData({isProcessing:true,statusText:"正在保存文件…"});
+    let path = file.path;
+    if (!alreadySaved && !temporaryUpload) {
+      this.fileSavePromise = new Promise(resolve => {
+        try {
+          if (!wx.getFileSystemManager) { resolve({error:{errCode:"UNAVAILABLE"}}); return; }
+          wx.getFileSystemManager().saveFile({tempFilePath:file.path,
+            success:r=>resolve(r.savedFilePath ? {path:r.savedFilePath} : {error:{errCode:"EMPTY_PATH"}}),
+            fail:error=>resolve({error})});
+        } catch (error) { resolve({error}); }
+      });
+      const saved = await this.fileSavePromise; this.fileSavePromise = null;
+      if (!this.operationCurrent(token)) { if(saved.path)this.removeLocalFile(saved.path); return; }
+      if (!saved.path) {
+        this.exitAfterRecording=false;
+        const error=saved.error||{}, message=String(error.errMsg||error.message||"");
+        const code=String(error.errCode||error.code||"UNKNOWN").replace(/[^A-Za-z0-9_-]/g,"").slice(0,32)||"UNKNOWN";
+        const reason=/quota|space|storage.*limit|exceed.*limit/i.test(message) ? "本地文件存储空间不足" :
+          /no such|not found|not exist/i.test(message) ? "临时文件已不可读取" :
+          /permission|denied/i.test(message) ? "微信未允许保存本地文件" : "微信本地文件保存失败";
+        this.setData({importStatus:"save_failed",fileSaveErrorCode:code});
+        this.fail(`${reason}（${code}）。尚未上传，已保留临时文件引用，请保持当前页面并点击“重试保存”。不要清缓存；临时文件失效后需重新录入。`);
+        return;
+      }
+      path = saved.path;
+    }
+    this.appliedImportId = "";
+    this.setData({importId:"",fileName:file.name,importStatus:"uploading",appliedImportId:"",localFilePath:path,localFileTemporary:temporaryUpload,fileSaveErrorCode:"",uploadProgress:0,errorText:"",statusText:"正在上传文件"});
+    if (!this.persist()) { this.setData({isProcessing:false});this.exitAfterRecording=false;return; }
+    if (exitAfterSave) { this.exitAfterRecording=false;this.setData({isProcessing:false});this.leavePage();return; }
+    this.setData({isProcessing:false});
+    return this.continueFileUpload();
+  },
+  pollImport() {
+    clearTimeout(this.pollTimer);
+    if (this.closed || !this.data.importId) return;
+    if(!this.requireImportPermission('visit.read'))return;
+    const requestedImportId = this.data.importId;
+    const token = this.operationToken();
+    this.setData({ isProcessing: true });
+    api
+      .request({ path: `/visit-imports/${requestedImportId}` })
+      .then((r) => {
+        if (!this.operationCurrent(token) || requestedImportId !== this.data.importId) return;
+        this.setData({ importStatus: r.status, fileName: r.filename });
+        const progress=r.progress,hasProgress=Number.isInteger(progress?.completed_segments)&&Number.isInteger(progress?.total_segments)&&progress.total_segments>0;
+        this.setData({importPartialText:r.status!=='succeeded'&&typeof r.partial_text==='string'?r.partial_text:'',
+          importProgress:hasProgress?`已完成 ${progress.completed_segments} / ${progress.total_segments} 段`:''});
+        if (r.status === "succeeded") {
+          const alreadyApplied =
+            (this.appliedImportId || this.data.appliedImportId) ===
+            requestedImportId;
+          const transcript = alreadyApplied
+            ? this.data.transcript
+            : [this.data.transcript, r.extracted_text]
+                .filter(Boolean)
+                .join("\n\n");
+          this.appliedImportId = requestedImportId;
+          this.setData({
+            transcript,
+            hasTranscription: this.data.hasTranscription || Boolean(String(r.extracted_text || "").trim()) || (alreadyApplied && Boolean(transcript)),
+            isProcessing: false,
+            canSubmit: this.entryReady(transcript),
+            errorText: "",
+            statusText: "文字已提取，可修改后提交 AI 整理",
+          });
+          this.persist();
+          return;
+        }
+        if (r.status === "failed") {
+          this.fail(require('../../utils/errorMessages').businessMessage({code:r.error_code}, '文件处理未完成，原文件已保留，请核对后重试'));
+          this.persist();
+          return;
+        }
+        this.setData({
+          statusText:
+            r.status === "queued"
+              ? "已进入处理队列，离开页面后仍会继续"
+              : "正在提取文字，长录音需要一些时间",
+        });
+        this.persist();
+        if (!this.hidden) this.pollTimer = setTimeout(() => this.pollImport(), Math.min(2000+(this.importPollCount=(this.importPollCount||0)+1)*500,5000));
+      })
+      .catch((e) => { if (this.operationCurrent(token)) this.fail(`${e.message}，可点击继续查看`); });
+  },
+  uploadTemporaryFile() {
+    if (this.data.isProcessing || !this.data.localFileTemporary || !this.data.localFilePath || this.data.importId) return;
+    return this.uploadFile({path:this.data.localFilePath,name:this.data.fileName},false,false,true);
+  },
+  pendingLocalFile() {
+    if (!this.data.localFilePath || this.data.importId) return false;
+    wx.showToast({title:"请先重试或移除待处理文件",icon:"none"});
+    return true;
+  },
+  requireImportPermission(permission) {
+    if(access.canVisitAction(getApp().globalData.session,permission,this.data))return true;
+    const message={
+      'visit.upload':'当前身份没有上传或查回材料的权限，原文件已保留。',
+      'visit.read':'当前身份没有查看材料处理结果的权限，原记录已保留。',
+      'visit.retry_import':'当前身份没有重新识别材料的权限，原记录已保留。',
+    };
+    this.fail(message[permission]||'当前身份未开放此项操作');
+    return false;
+  },
+  retryImport() {
+    if (this.data.isProcessing) return;
+    if(access.visitImportAction(this.data).kind==='local_reason')return this.continueFileUpload();
+    if (!this.data.importId) {
+      if(this.data.localFilePath&&this.data.uploadIntentState==='retryable_failure')return this.sendUploadIntent();
+      if (this.data.localFilePath) { return this.uploadFile({path:this.data.localFilePath,name:this.data.fileName},false,!this.data.localFileTemporary); }
+      this.chooseMaterial(); return;
+    }
+    return this.retryRegisteredImport();
+  },
+  removeFile() {
+    if (this.data.isProcessing || this.keepUnresolvedUpload()) return;
+    const previous = this.pickDraft(), applied = this.appliedImportId;
+    this.appliedImportId = "";
+    this.setData({...uploadRecovery.EMPTY,importId:"",fileName:"",importStatus:"",importPartialText:'',importProgress:'',appliedImportId:"",localFilePath:"",localFileTemporary:false,fileSaveErrorCode:"",errorText:""});
+    if (this.persist()) this.removeLocalFile(previous.localFilePath);
+    else { this.appliedImportId = applied;this.setData(previous); }
+  },
+  opportunityRecoverySignature() {
+    return sha256(JSON.stringify([this.draftId,this.data.transcript.trim(),this.data.customerId,this.data.opportunityId,this.data.isFirstVisit,this.data.importId]));
+  },
+  refreshOpportunityRecovery() {
+    if(this.data.followUpOnly){this.setData({opportunityRecoveryPending:false,opportunityRecoveryUnknown:false});return;}
+    const rows=typeof api.pendingAgentRuns==='function'?api.pendingAgentRuns('opportunity_draft'):[];
+    const receipt=rows.find(r=>r.contextSignature===this.opportunityRecoverySignature());
+    this.setData({opportunityRecoveryPending:!!receipt,opportunityRecoveryUnknown:!!(receipt && !receipt.runId)});
+  },
+  async structureVisit(body, token = this.operationToken()) {
+    const key=visitDraft.key("visitStructureRun", this.userKey || visitDraft.scope(getApp().globalData.session, api), this.draftContext);
+    const signature=JSON.stringify(body), saved=wx.getStorageSync(key);
+    let id=saved && saved.signature===signature && (!saved.draftId || saved.draftId===this.draftId) ? saved.id : '';
+    if(!id){const accepted=await api.submitVisitStage('structure',body);if(!this.operationCurrent(token))throw Error('本次录入已结束');id=accepted.run_id;wx.setStorageSync(key,{signature,id,draftId:this.draftId});}
+    try { return await api.waitVisitRun(id); }
+    // A failed read leaves the accepted run unknown; only an observed terminal run permits a new submit.
+    catch(error){if(this.operationCurrent(token) && ['failed','cancelled'].includes(error.runStatus))wx.removeStorageSync(key);throw error;}
+  },
+  async submitTranscript() {
+    if(this.data.followUpChecking)return;
+    if(this.data.followUpOnly ? !(await this.refreshFollowUp()) : !(await this.verifyFollowUpTarget()))return;
+    const text = this.data.transcript.trim();
+    if (!this.data.customerId) {
+      wx.showToast({ title: "请先选择客户", icon: "none" });
+      return;
+    }
+    if (this.customerReferencePending || this.customerReferenceInvalid) { this.fail("请先核对关联客户"); return; }
+    if (this.data.opportunityId && !this.data.opportunityResolved) { this.fail("请先核对已选商机，或清除关联后继续"); return; }
+    if (!text || this.data.isProcessing || this.data.isRecording) return;
+    if (this.pendingLocalFile()) return;
+    if (text.length > 50000) {
+      this.fail("原文超过5万字，请拆分录入");
+      return;
+    }
+    if (!this.draftKey) this.draftKey = visitDraft.key("visitEntryV2", visitDraft.scope(getApp().globalData.session, api), this.draftContext);
+    if (!this.persist()) return;
+    const token = this.operationToken();
+    const inputSignature=this.opportunityRecoverySignature();
+    this.setData({
+      isProcessing: true,
+      errorText: "",
+      statusText: "AI 正在整理沟通内容和下一步计划…",
+    });
+    const isFirstVisit = !this.data.followUpOnly && (!getApp().globalData.session.permissions || this.data.canFirstVisit) && this.data.isFirstVisit;
+    const opportunityPrompt = [
+      "请从以下拜访记录识别商机信息，只提取原文明确出现的内容，不要猜测。",
+      "请识别：已有商机名称或新商机名称、商机阶段或赢单概率、ACV、预计关单日期、合作伙伴、产品线；未明确的字段留空。",
+      "识别结果仅用于人工确认前的表单预填，不执行创建或修改。",
+      "",
+      text,
+    ].join("\n");
+    return Promise.all([
+      this.structureVisit({text,is_first_visit:isFirstVisit,customer_id:this.data.customerId,
+        opportunity_id:this.data.opportunityId || null,source_import_id:this.data.importId || null}, token),
+      this.data.followUpOnly || this.data.isFde || (getApp().can && !getApp().can('agent.opportunity_draft')) ? Promise.resolve(null) : api.runAgent("opportunity_draft",opportunityPrompt,this.data.customerId || null,null,{contextSignature:inputSignature}).catch(error=>{
+        if(error.recoveryKey || error.outcomeUnknown || error.runId)throw error;
+        return null;
+      }),
+    ]).then(([run, opportunityRun]) => {
+        if (!this.operationCurrent(token)) return;
+        if(inputSignature!==this.opportunityRecoverySignature())throw Error('输入已修改，旧 AI 结果未覆盖，请核对当前原文后再提交');
+        wx.setStorageSync(
+          visitDraft.key("visitStructuredV2", this.userKey || visitDraft.scope(getApp().globalData.session, api), this.draftContext),
+          {
+            draftId:this.draftId,
+            result: run.result || {},
+            opportunitySuggestion: opportunityRun && opportunityRun.result ? opportunityRun.result : null,
+            runId: run.run_id || run.id,
+            customerHintId: this.data.customerId,
+            customerHint: this.data.customerName,
+            followUpOnly:this.data.followUpOnly===true,targetKind:this.data.targetKind,
+            opportunityId: this.data.opportunityId || "",
+            isFirstVisit,
+            sourceImportId: this.data.importId,
+            original: text,
+          },
+        );
+        wx.removeStorageSync(
+          visitDraft.key("visitConfirmV2", this.userKey || visitDraft.scope(getApp().globalData.session, api), this.draftContext),
+        );
+        this.setData({
+          isProcessing: false,
+          statusText: "整理完成，请确认关联与内容",
+        });
+        this.persist();
+        if (!this.hidden) {
+          this.forwarded = true;
+          wx.navigateTo({url:"/pages/visit-confirm/index" + (this.draftContext ? "?draftContext=" + encodeURIComponent(this.draftContext) : ""),success:()=>{if(opportunityRun && opportunityRun.recoveryKey && api.acknowledgeAgentResult)api.acknowledgeAgentResult(opportunityRun.recoveryKey);},fail:() => {this.forwarded=false;this.fail("页面打开失败，原文已保留，可重试");}});
+        }
+      })
+      .catch((e) => {if(this.operationCurrent(token)){this.refreshOpportunityRecovery();this.fail(`${e.message}；原文已保留${e.recoveryAction==='resume_run'?'，再次点击继续查看原任务结果':e.outcomeUnknown?'，请先核对提交结果':'，请核对后重试'}`);}});
+  },
+});

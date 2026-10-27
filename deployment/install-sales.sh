@@ -19,9 +19,12 @@ if sudo -u postgres psql -X -At -c "SELECT 1 FROM pg_database WHERE datname='she
  echo 'Database exists; use the documented resume phases, do not recreate'; exit 1
 fi
 sudo -u postgres createdb --template=template0 shenma_sales
-sudo -u postgres env DATABASE_URL='postgresql:///shenma_sales?host=/var/run/postgresql' "$ROOT/backend/.venv/bin/python" database/scripts/migrate.py
+sudo -u postgres env DATABASE_URL='postgresql:///shenma_sales?host=/var/run/postgresql' "$ROOT/backend/.venv/bin/python" database/scripts/migrate.py --through-version 125
+# The checked-in runtime ACL is V125. Create it before subsequent ACL migrations;
+# upstream V246 deliberately no longer replays the historical grant chain.
 "$ROOT/backend/.venv/bin/python" deployment/provision-runtime.py
 sudo -u postgres psql -X -v ON_ERROR_STOP=1 -d shenma_sales -f deployment/runtime-grants.sql
+sudo -u postgres env DATABASE_URL='postgresql:///shenma_sales?host=/var/run/postgresql' "$ROOT/backend/.venv/bin/python" database/scripts/migrate.py
 sudo -u postgres "$ROOT/backend/.venv/bin/python" deployment/bootstrap-customer.py
 chown root:root /var/lib/shenma-provision/initial-admin.json
 chmod 600 /var/lib/shenma-provision/initial-admin.json

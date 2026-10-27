@@ -3,6 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const tick=()=>new Promise(r=>setImmediate(r));
 function wait(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};}
 function make(api){
+ api={getOpportunityCreateAccess:async id=>({can_create_opportunity:true,customer_reference:{id,name:'客户'}}),...api};
  const file=path.resolve(__dirname,'../miniprogram/pages/visit-confirm/index.js');let page;const timers=new Map();let timer=0;
  const app={globalData:{session:{workspaceId:'w',userId:'u',role:'sales',permissionVersion:1,loginAt:'one'}}};
  vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>page=p,getApp:()=>app,require:n=>n.endsWith('/apiClient')?api:require(path.resolve(path.dirname(file),n)),wx:{setStorageSync(){},showModal(){},showToast(){}},setTimeout:f=>{timers.set(++timer,f);return timer;},clearTimeout:id=>timers.delete(id)});
@@ -72,11 +73,13 @@ test('load-more failure keeps existing options and retry uses the same next offs
 });
 test('late success/error cannot write after customer change, hide, or permission change',async()=>{
  for(const change of [h=>{h.page.data.customerId='other';},h=>h.page.onHide(),h=>{h.app.globalData.session.permissionVersion=2;}])for(const reject of [false,true]){
-  const d=wait(),h=make({listOpportunities:()=>d.promise});const loaded=h.page.loadOpportunities();change(h);reject?d.reject(Error('late')):d.resolve(pageOf([row('late')]));await loaded;assert.equal(h.page.data.opportunityItems.length,0);assert.equal(h.page.data.opportunityError,'');
+  const d=wait(),h=make({listOpportunities:()=>d.promise});const loaded=h.page.loadOpportunities();await tick();change(h);reject?d.reject(Error('late')):d.resolve(pageOf([row('late')]));await loaded;assert.equal(h.page.data.opportunityItems.length,0);assert.equal(h.page.data.opportunityError,'');
  }
 });
-test('FDE remains on its dedicated eligibility picker without fetching sales opportunities',async()=>{
- let reads=0;const h=make({listOpportunities:async()=>{reads++;return pageOf([]);}});h.page.data.isFde=true;await h.page.loadOpportunities();assert.equal(reads,0);assert.equal(h.page.data.fdeOpportunityVerified,false);
+test('FDE uses the same optional readable candidates without gaining opportunity editing',async()=>{
+ let calls=0;const h=make({listOpportunities:async()=>{calls++;return pageOf([row('o1')]);}});h.page.data.isFde=true;
+ await h.page.loadOpportunities();assert.equal(calls,1);assert.equal(h.page.data.opportunityOptions[0].id,'');assert.equal(h.page.data.opportunityOptions.some(o=>o.id==='__new__'),false);
+ h.page.chooseOpportunity({currentTarget:{dataset:{id:'o1'}}});assert.equal(h.page.data.opportunityId,'o1');assert.equal(h.page.data.opportunityEditing,false);
 });
 
 const choose=(page,id)=>page.chooseOpportunity({currentTarget:{dataset:{id}}});
@@ -129,4 +132,26 @@ test('the actual shared form resets existing values and restores only the draft 
  choose(page,'__new__');reset();assert.equal(page.data.opportunityDraft.name,'');
  draft(page,{...form.data.form,name:'新项目'});choose(page,'old');reset();assert.equal(page.data.opportunityDraft.name,'已有商机');
  choose(page,'__new__');reset();assert.equal(page.data.opportunityDraft.name,'新项目');
+});
+
+
+test('创建资格拒绝不阻断关联或修改已有商机，也不把AI未匹配结果变成新建',async()=>{
+ const {page}=make({getOpportunityCreateAccess:async()=>({can_create_opportunity:false,customer_reference:null,denial_reason:'OPPORTUNITY_CUSTOMER_CLAIM_SCOPE_DENIED'}),listOpportunities:async()=>pageOf([row('old')])});
+ page.aiOpportunitySuggestion={name:'未匹配新项目',hasContent:true};await page.loadOpportunities();
+ assert.equal(page.data.opportunityOptions.some(item=>item.id==='__new__'),false);assert.equal(page.data.opportunityId,'');assert.match(page.data.opportunityCreateReason,/认领人/);
+ choose(page,'old');page.startOpportunityEdit();assert.equal(page.data.opportunityEditing,true);assert.equal(page.data.selectedOpportunity.id,'old');
+});
+test('恢复的新建草稿失去资格时保留内容，必须重新核对或明确取消关联',async()=>{
+ const {page}=make({getOpportunityCreateAccess:async()=>({can_create_opportunity:false,customer_reference:null,denial_reason:'OPPORTUNITY_CUSTOMER_CLAIM_REQUIRED'}),listOpportunities:async()=>pageOf([])});
+ page.data.opportunityId='__new__';page.data.opportunityEditing=true;page.data.opportunityDraft={name:'保留商机草稿'};page.data.values={follow_up_record:'保留拜访内容'};
+ await page.loadOpportunities();assert.equal(page.opportunityNeedsResolution(),true);assert.equal(page.data.opportunityDraft.name,'保留商机草稿');assert.equal(page.data.values.follow_up_record,'保留拜访内容');
+ choose(page,'');assert.equal(page.data.opportunityId,'');assert.equal(page.opportunityNeedsResolution(),false);
+});
+test('创建资格旧响应不能跨客户或账号恢复新建选项',async()=>{
+ for(const switchIdentity of [false,true]){
+  const pending=wait();const {page,app}=make({getOpportunityCreateAccess:()=>pending.promise,listOpportunities:async()=>pageOf([])});
+  const loading=page.loadOpportunities();if(switchIdentity)app.globalData.session.permissionVersion++;else page.data.customerId='other';
+  pending.resolve({can_create_opportunity:true,customer_reference:{id:'c',name:'旧客户'}});await loading;
+  assert.equal(page.canCreateForCustomer(),false);assert.equal(page.data.opportunityOptions.some(row=>row.id==='__new__'),false);
+ }
 });

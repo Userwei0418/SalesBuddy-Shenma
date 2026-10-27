@@ -1,14 +1,15 @@
 """Exercise forward/late runtime grants with production-style limited ACLs.
 
-Only disposable databases and NOLOGIN/NOBYPASSRLS roles are created. In contrast
-to broad integration fixtures, this never grants schema-wide table mutations or
-DELETE: the migration must supply the two relationship DELETE privileges.
+Only disposable databases and NOBYPASSRLS identities are created. Historical
+upgrades retain their relationship grant checks; newly provisioned identities
+use the current exact service policy, without schema-wide table mutations.
 """
 import asyncio
 import json
 import os
 from pathlib import Path
 import shutil
+import secrets
 import sys
 import tempfile
 import uuid
@@ -19,7 +20,10 @@ from verify_fde_postgres import context, fixture_before_upgrade
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
+sys.path.insert(0,str(ROOT.parent/'tools/installation'))
 from migrate import migrate
+from runtime_roles import load_policy, verify_service_roles
+from upgrade_permissions import reconcile_service_roles
 
 
 async def migrate_through(connection,version):
@@ -110,17 +114,14 @@ async def main():
         await connection.execute('RESET ROLE')
         assert await connection.fetchval('SELECT count(*) FROM workflow.task_assignee WHERE task_id=$1',unrelated_task)==1
         checks.append('native_rls_allows_real_replacement_and_rejects_deleting_someone_elses_task_owner')
-        # Empty installation may finish before the application role is created.
-        # A later deployment must repair it even though every version is unchanged.
+        # V246 deliberately stops inferring roles through the old reconciliation
+        # chain. A newly created identity needs the reviewed service policy even
+        # when every migration is unchanged; migration alone must not widen it.
         await base_runtime_grants(connection,late)
         assert not await connection.fetchval('SELECT has_table_privilege($1,\'activity.visit_participant\',\'SELECT\')',late)
         assert all(step['status']=='unchanged' for step in await migrate(connection))
-        for table in ('activity.visit_participant','workflow.task_assignee'):
-            for privilege in ('SELECT','INSERT','UPDATE','DELETE'):
-                assert await connection.fetchval('SELECT has_table_privilege($1,$2,$3)',late,table,privilege)
-        assert await connection.fetchval('SELECT has_table_privilege($1,\'activity.v_visit_collaborators\',\'SELECT\')',late)
-        assert all(step['status']=='unchanged' for step in await migrate(connection))
-        checks.append('late_runtime_role_is_reconciled_by_repeat_deployment_without_migration_replay')
+        assert not await connection.fetchval('SELECT has_table_privilege($1,\'activity.visit_participant\',\'SELECT\')',late)
+        assert not await connection.fetchval('SELECT has_table_privilege($1,\'workflow.task_assignee\',\'DELETE\')',late)
         login_helpers = ('security.login_limit_status(text,integer)',
                          'security.account_login_status(uuid)',
                          'security.unlock_account_login(uuid,text)')
@@ -131,10 +132,27 @@ async def main():
         for function in login_helpers:
             assert not await connection.fetchval(
                 'SELECT has_function_privilege($1,$2,\'EXECUTE\')',late,function)
-            await connection.execute(f'GRANT EXECUTE ON FUNCTION {function} TO "{late}"')
             assert not await connection.fetchval(
                 "SELECT has_function_privilege('salegent_feishu_worker',$1,'EXECUTE')",function)
-        checks.append('post_v105_late_role_requires_explicit_login_helper_allowlist_without_worker_access')
+        checks.append('current_migration_does_not_infer_late_api_permissions')
+        policy=load_policy()
+        password=await connection.fetchval('SELECT quote_literal($1::text)',secrets.token_urlsafe(40))
+        await connection.execute(f'ALTER ROLE "{late}" LOGIN PASSWORD {password}')
+        await connection.execute(f'GRANT CONNECT ON DATABASE "{database}" TO "{late}"')
+        async with connection.transaction():
+            await reconcile_service_roles(connection,{'api':late},policy)
+        for table in ('activity.visit_participant','workflow.task_assignee'):
+            for privilege in ('SELECT','INSERT','UPDATE','DELETE'):
+                assert await connection.fetchval('SELECT has_table_privilege($1,$2,$3)',late,table,privilege) is (
+                    privilege in policy['services']['api']['tables'][table])
+        assert await connection.fetchval('SELECT has_table_privilege($1,\'activity.v_visit_collaborators\',\'SELECT\')',late) is (
+            'SELECT' in policy['services']['api']['tables'].get('activity.v_visit_collaborators',[]))
+        assert all(step['status']=='unchanged' for step in await migrate(connection))
+        await verify_service_roles(connection,{'api':late},policy)
+        async with connection.transaction():
+            await reconcile_service_roles(connection,{'api':late},policy)
+        checks.append('late_api_exact_policy_provisioning_and_repeat_deployment_are_idempotent')
+        checks.append('post_v105_login_helpers_are_explicit_without_worker_or_private_table_access')
         for app_role in (runtime,late):
             for function in login_helpers:
                 assert await connection.fetchval('SELECT has_function_privilege($1,$2,\'EXECUTE\')',app_role,function)

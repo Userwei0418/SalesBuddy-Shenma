@@ -1,3 +1,4 @@
+# ruff: noqa: S608 -- Only fixed SQL subject predicates are interpolated; values stay bound.
 """Bounded customer/opportunity overviews from complete, RLS-authorized facts.
 
 History bodies are read separately. Aggregates never use the loaded history page,
@@ -9,31 +10,28 @@ from sales_backend.domain.visit_dates import visit_date_fields
 from sales_backend.repositories.customer_risk import current_clear_assessment
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.opportunities import OpportunityRepository
+from sales_backend.repositories.visit_subjects import visit_subject_predicate
 
 
-async def related_summary(connection, customer_id, opportunity_id=None):
+async def related_summary(connection, customer_id, opportunity_id=None, *, own_only=False):
+    subject = visit_subject_predicate(opportunity_scoped=bool(opportunity_id))
     row = await connection.fetchrow(
-        """WITH visits AS MATERIALIZED (
+        f"""WITH visits AS MATERIALIZED (
           SELECT v.id,v.status,v.interaction_at,v.created_at,v.recorded_on,v.history_sort_date
-          FROM activity.visit v WHERE (v.customer_id=$1::uuid OR (v.opportunity_id IS NULL AND EXISTS (
-            SELECT 1 FROM activity.visit_opportunity vo JOIN crm.opportunity linked ON linked.id=vo.opportunity_id
-            WHERE vo.visit_id=v.id AND linked.customer_id=$1::uuid AND linked.deleted_at IS NULL))
-            OR (v.customer_id IS NULL AND v.opportunity_id IS NOT NULL AND EXISTS (
-              SELECT 1 FROM crm.opportunity linked WHERE linked.id=v.opportunity_id
-                AND linked.customer_id=$1::uuid AND linked.deleted_at IS NULL))) AND v.deleted_at IS NULL
-            AND ($2::uuid IS NULL OR v.opportunity_id=$2::uuid OR (v.opportunity_id IS NULL AND EXISTS (
-              SELECT 1 FROM activity.visit_opportunity vo WHERE vo.visit_id=v.id AND vo.opportunity_id=$2::uuid)))
+          FROM activity.visit v WHERE {subject}
+           AND (NOT $3::boolean OR (v.recorder_user_ref_id=common.current_user_ref_id()
+            AND v.created_by_user_ref_id=common.current_user_ref_id()))
         ), visit_counts AS (
           SELECT count(*)::integer AS visit_count,
             count(*) FILTER(WHERE status IN ('confirmed','archived'))::integer AS confirmed_visit_count
           FROM visits
         ), task_counts AS (
           SELECT status,count(*)::integer AS count FROM workflow.task
-          WHERE customer_id=$1::uuid AND deleted_at IS NULL
+          WHERE customer_id=$1::uuid AND deleted_at IS NULL AND NOT $3::boolean
             AND ($2::uuid IS NULL OR opportunity_id=$2::uuid) GROUP BY status
         ), risks AS MATERIALIZED (
           SELECT id,status,severity_code,opened_at
-          FROM insight.risk WHERE customer_id=$1::uuid AND deleted_at IS NULL
+          FROM insight.risk WHERE customer_id=$1::uuid AND deleted_at IS NULL AND NOT $3::boolean
             AND ($2::uuid IS NULL OR opportunity_id=$2::uuid)
         ) SELECT
           (SELECT visit_count FROM visit_counts) AS visit_count,
@@ -43,24 +41,24 @@ async def related_summary(connection, customer_id, opportunity_id=None):
              ORDER BY v.interaction_at DESC NULLS LAST,v.history_sort_date DESC,v.id DESC LIMIT 1) selected
            JOIN LATERAL (SELECT left(v.next_action,600) AS next_action FROM activity.visit v
              WHERE v.id=selected.id LIMIT 1) body ON true) AS latest_visit,
-          (SELECT COALESCE(jsonb_object_agg(status,count),'{}'::jsonb) FROM task_counts) AS task_status_counts,
+          (SELECT COALESCE(jsonb_object_agg(status,count),'{{}}'::jsonb) FROM task_counts) AS task_status_counts,
           (SELECT count(*)::integer FROM risks) AS risk_count,
           (SELECT COALESCE(jsonb_agg(DISTINCT CASE WHEN severity_code IN ('critical','high','medium','low')
             THEN severity_code ELSE NULL END),'[]'::jsonb) FROM risks
-            WHERE status NOT IN ('resolved','accepted')) AS open_risk_severities,
+            WHERE status <> 'resolved') AS open_risk_severities,
           (SELECT to_jsonb(body) FROM (SELECT id FROM risks WHERE status<>'resolved'
-            ORDER BY CASE WHEN status IN ('new','pending','in_progress','escalated') THEN 0 ELSE 1 END,
+            ORDER BY CASE WHEN status <> 'resolved' THEN 0 ELSE 1 END,
               opened_at DESC,id LIMIT 1) selected JOIN LATERAL (
                 SELECT id::text,opportunity_id::text,status,severity_code,title,
                   left(description,600) AS description,opened_at FROM insight.risk WHERE id=selected.id LIMIT 1
               ) body ON true) AS status_risk,
-          (SELECT to_jsonb(body) FROM (SELECT id FROM risks WHERE status NOT IN ('resolved','accepted')
-            ORDER BY CASE WHEN status IN ('new','pending','in_progress','escalated') THEN 0 ELSE 1 END,
+          (SELECT to_jsonb(body) FROM (SELECT id FROM risks WHERE status <> 'resolved'
+            ORDER BY CASE WHEN status <> 'resolved' THEN 0 ELSE 1 END,
               opened_at DESC,id LIMIT 1) selected JOIN LATERAL (
                 SELECT id::text,opportunity_id::text,status,severity_code,title,
                   left(description,600) AS description,opened_at FROM insight.risk WHERE id=selected.id LIMIT 1
               ) body ON true) AS open_risk""",
-        customer_id, opportunity_id,
+        customer_id, opportunity_id, own_only,
     )
     result = dict(row)
     result["task_count"] = sum(result["task_status_counts"].values())
@@ -70,7 +68,7 @@ async def related_summary(connection, customer_id, opportunity_id=None):
 
 
 async def opportunity_risk_summaries(connection, ids):
-    """At most two risk references per displayed opportunity; keep accepted-risk semantics."""
+    """At most two risk references per displayed opportunity; accepted risks remain open."""
     if not ids:
         return {}
     rows = await connection.fetch(
@@ -78,13 +76,13 @@ async def opportunity_risk_summaries(connection, ids):
           (SELECT to_jsonb(r) FROM (
             SELECT id::text,opportunity_id::text,title,severity_code,status FROM insight.risk
             WHERE opportunity_id=selected.id AND deleted_at IS NULL AND status<>'resolved'
-            ORDER BY CASE WHEN status IN ('new','pending','in_progress','escalated') THEN 0 ELSE 1 END,
+            ORDER BY CASE WHEN status <> 'resolved' THEN 0 ELSE 1 END,
               opened_at DESC,id LIMIT 1) r) AS first_risk,
           (SELECT to_jsonb(r) FROM (
             SELECT id::text,opportunity_id::text,title,severity_code,status FROM insight.risk
             WHERE opportunity_id=selected.id AND deleted_at IS NULL AND status<>'resolved'
               AND severity_code IN ('critical','high')
-            ORDER BY CASE WHEN status IN ('new','pending','in_progress','escalated') THEN 0 ELSE 1 END,
+            ORDER BY CASE WHEN status <> 'resolved' THEN 0 ELSE 1 END,
               opened_at DESC,id LIMIT 1) r) AS high_risk
         FROM unnest($1::uuid[]) selected(id)""",
         ids,
@@ -180,6 +178,7 @@ class DetailOverviewRepository:
         return {
             "id": item["customer_id"], "name": item["customer_name"], "opportunities": [item],
             "primary_opportunity": item, "read_model": "detail_header_v1",
+            "shared_read_only": item["shared_read_only"], "can_read_customer": item["can_read_customer"],
         }
 
     async def opportunity(self, connection, actor, opportunity_id, *, customer_id=None):
@@ -187,14 +186,17 @@ class DetailOverviewRepository:
         if header is None:
             return None
         item = header["primary_opportunity"]
-        summary = await related_summary(connection, item["customer_id"], opportunity_id)
+        summary = await related_summary(connection, item["customer_id"], opportunity_id,
+                                        own_only=item["shared_read_only"])
         summary.update(opportunity_count=1, open_opportunity_count=int(item["status"] == "open"),
                        unknown_open_amount_count=int(item["status"] == "open" and
                                                      (item["amount"] is None or item["amount"] < 0)))
         summary["open_amount"] = (None if summary["unknown_open_amount_count"] else item["amount"]) \
             if item["status"] == "open" else 0
-        item["risk_summary"] = (await opportunity_risk_summaries(connection, [opportunity_id]))[opportunity_id]
+        if not item["shared_read_only"]:
+            item["risk_summary"] = (await opportunity_risk_summaries(connection, [opportunity_id]))[opportunity_id]
         return {
             "id": item["customer_id"], "name": item["customer_name"], "opportunities": [item],
             "primary_opportunity": item, "summary": summary, "read_model": "detail_overview_v1",
+            "shared_read_only": item["shared_read_only"], "can_read_customer": item["can_read_customer"],
         }

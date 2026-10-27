@@ -1,6 +1,8 @@
 """Two model contracts; business identity and archival metadata stay server-owned."""
 
+from copy import deepcopy
 from datetime import date
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
@@ -39,14 +41,16 @@ class StructureRequest(BaseModel):
 class QualityRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     customer_id: UUIDString
-    opportunity_id: UUIDString | None = None
+    opportunity_id: UUIDString | None = Field(default=None,
+        description="核对阶段可选择同一客户下当前有权录入的商机；变更关联时重新校验原结构化范围，原记录及原文保持不变")
     source_run_id: UUIDString
     fields: VisitFields
     summary: str = Field(max_length=5000)
     source_import_id: UUIDString | None = None
     collaborator_ids: list[UUIDString] = Field(default_factory=list, max_length=30)
     fde_participant_ids: list[UUIDString] = Field(
-        default_factory=list, max_length=30, description="本次拜访参与的FDE；归档时追加至商机名单，不覆盖已有成员"
+        default_factory=list, max_length=30,
+        description="仅记录本次拜访参与的FDE；不新增或覆盖商机长期名单，长期名单仅通过独立授权的显式操作维护"
     )
     opportunity_mutation: OpportunityCreate | None = None
 
@@ -72,8 +76,27 @@ class QualityReview(BaseModel):
     next_action: NextActionReview
 
 
-class QualityOutput(StructureOutput):
+class QualityReviewOutput(BaseModel):
+    """Canonical quality-stage response.
+
+    The reviewed fields and summary are already human-confirmed facts owned by
+    the backend.  The model only needs to produce the review decision.
+    """
+
+    model_config = ConfigDict(extra="forbid", strict=True)
     quality_review: QualityReview
+
+
+class QualityOutput(QualityReviewOutput):
+    """Compatibility envelope for older Agents that echoed the reviewed facts.
+
+    These two values are intentionally untyped and are discarded by
+    ``validate_stage_result``.  They are accepted only during the transition so
+    an older published Agent does not turn a valid review into a failed run.
+    """
+
+    fields: Any | None = None
+    summary: Any | None = None
 
 
 def canonical_fields(fields):
@@ -97,13 +120,19 @@ def validate_quality_input(fields):
 
 def validate_stage_result(result, facts):
     stage = facts["visit_stage"]
-    output = (QualityOutput if stage == "quality" else StructureOutput).model_validate(result).model_dump()
     if stage == "quality":
-        if output["fields"] != facts["fields"] or output["summary"] != facts["summary"]:
-            raise ValueError("质检改写了已核对的内容，请重新质检")
+        # ``fields`` and ``summary`` are trusted snapshots loaded from the
+        # reviewed request.  Never persist a model echo of either value: an
+        # older Agent may still return them and a newer Agent omits them.
+        output = QualityOutput.model_validate(result)
+        quality = output.quality_review.model_dump()
+        output = {
+            "fields": deepcopy(facts["fields"]),
+            "summary": facts["summary"],
+            "quality_review": quality,
+        }
         policy = facts["company_policy"]
         admission = VisitAdmissionPolicy(**policy["definition"])
-        quality = output["quality_review"]
         action = quality["next_action"]
         if action["passed"] and not (action["time_found"] and action["goal_or_plan_found"]):
             raise ValueError("下一步计划审核结论与依据不一致")
@@ -112,6 +141,7 @@ def validate_stage_result(result, facts):
         # Policy provenance comes from the trusted input, not a fabricated model receipt.
         output["company_policy"] = policy
     else:
+        output = StructureOutput.model_validate(result).model_dump()
         for key in ("customer_name", "customer_type", "created_date"):
             output["fields"][key] = facts["server_fields"][key]
         output["fields"]["is_first_visit"] = facts["is_first_visit"]
@@ -127,7 +157,7 @@ def archival_snapshot(fields):
         "collaborator_ids": sorted(set(fields.get("collaborator_ids") or [])),
         "fde_participant_ids": sorted(set(fields.get("_fde_participant_ids") or [])),
         "opportunity_mutation": OpportunityCreate.model_validate(fields["_opportunity_mutation"]).model_dump(
-            mode="json"
+            mode="json", exclude={"amount_confirmed_value"}
         )
         if fields.get("_opportunity_mutation")
         else None,
@@ -136,8 +166,15 @@ def archival_snapshot(fields):
 
 def reviewed_archival_snapshot(request):
     """Legacy reviews without attendance mean no explicitly selected attendees."""
+    mutation = request.get("opportunity_mutation")
+    # Human acknowledgement is not a reviewed business fact. Allow a final
+    # acknowledgement after quality review, including drafts from older clients.
+    # The actual amount remains bound to the reviewed snapshot and save guard.
+    if mutation:
+        mutation = {key: value for key, value in mutation.items() if key != "amount_confirmed_value"}
     return {
         **{key: request.get(key) for key in ("fields", "opportunity_id", "source_import_id", "opportunity_mutation")},
+        "opportunity_mutation": mutation,
         "collaborator_ids": sorted(set(request.get("collaborator_ids") or [])),
         "fde_participant_ids": sorted(set(request.get("fde_participant_ids") or [])),
     }

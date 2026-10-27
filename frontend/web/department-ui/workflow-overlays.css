@@ -1,0 +1,18 @@
+.ds-workflow-dialog .ant-modal-body { max-height: min(60vh, 600px); overflow: auto; overscroll-behavior: contain; }
+.ds-workflow-footer { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.ds-workflow-footer > .ds-muted { margin-right: auto; }
+.ds-workflow-dialog .ds-oc-person-main, .ds-workflow-dialog .ds-oc-extra-person > span { overflow-wrap: anywhere; }
+.ds-workflow-drawer .ant-drawer-content-wrapper { max-width: 100vw; }
+.ds-workflow-drawer .ant-drawer-body { overflow-y: auto; overscroll-behavior: contain; }
+.ds-advice-drawer .ds-vc-advice-list { list-style: decimal; gap: 16px; }
+.ds-advice-drawer .ds-vc-advice-list > li { padding-bottom: 16px; border-bottom: 1px solid var(--ui-line); overflow-wrap: anywhere; }
+.ds-advice-drawer .ds-vc-advice-list > li:last-child { border-bottom: 0; }
+.ds-advice-drawer .ds-vc-advice-list .ds-advice-actions,
+.ds-advice-drawer .ds-od-ai-rows .ds-advice-actions,
+.ds-advice-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.ds-advice-drawer .ds-advice-actions > button, .ds-advice-toolbar > button { width: auto; flex: none; }
+.ds-advice-drawer .ds-od-ai-rows > li { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .ds-workflow-dialog .ant-modal-body { max-height: 60dvh; }
+  .ds-workflow-drawer .ant-drawer-body { padding: 16px; }
+}

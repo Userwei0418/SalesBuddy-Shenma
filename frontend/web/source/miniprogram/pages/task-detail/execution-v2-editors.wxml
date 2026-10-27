@@ -1,0 +1,30 @@
+<view wx:if="{{taskMigration.raw.requires_single_owner}}" class="section-card"><view class="execution-form-notice">历史任务有多名主责，请先在任务协调中确认唯一主执行人，再开启进度管理；原成员和历史记录不会自动改写。</view></view>
+<view wx:if="{{taskMigration.caps.initialize_execution || execution.caps.initialize_execution}}" class="section-card">
+ <view class="section-title">本任务沿用原流程</view><view class="execution-help">开启后可维护自主清单，原任务状态、成果和历史记录保留。</view>
+ <button class="execution-action-btn" disabled="{{executionBusy || executionLoading || executionError}}" bindtap="openTaskMigration">开启任务进度管理</button>
+</view>
+<root-portal wx:if="{{migrationOpen}}"><view class="sb-portal-theme">
+ <sb-sheet visible="{{migrationOpen}}" title="开启本任务的进度管理" closeOnOverlay="{{false}}" cancelLabel="取消" confirmLabel="确认开启" confirmLoading="{{executionBusy}}" bind:confirm="initializeTask" bind:close="closeTaskMigration">
+  <view class="execution-sheet-body"><view class="execution-help">只接入当前任务，不补造完成成果，不改写历史。推进清单由执行人补充。</view>
+<picker wx:if="{{migrationResumeOptions.length}}" range="{{migrationResumeOptions}}" range-key="label" value="{{migrationResumeIndex}}" disabled="{{executionBusy}}" bindchange="chooseMigrationResume"><view class="execution-form-field">继续阶段：{{migrationResumeIndex >= 0 ? migrationResumeOptions[migrationResumeIndex].label : '请选择历史延期任务继续阶段'}}</view></picker>
+   <sb-textarea layout="stacked" plain label="接入原因" required value="{{migrationNote}}" maxlength="{{1000}}" disabled="{{executionBusy}}" bind:change="inputMigrationNote"/>
+   <view wx:if="{{migrationError}}" class="coordinate-error">{{migrationError}}</view></view>
+ </sb-sheet>
+</view></root-portal>
+<root-portal wx:if="{{checklistDraft}}"><view class="sb-portal-theme">
+ <sb-sheet visible="{{!!checklistDraft}}" title="维护推进清单" closeOnOverlay="{{false}}" cancelLabel="取消" confirmLabel="保存清单" confirmLoading="{{executionBusy}}" confirmDisabled="{{executionLoading || executionOffline || executionError}}" bind:confirm="saveChecklist" bind:close="closeChecklist">
+  <view class="execution-sheet-body"><view class="execution-help">保存后直接生效，按新清单重算进度；整体交付要求保持不变。</view>
+   <view class="execution-help">{{checklistImpact}}</view>
+   <view wx:if="{{execution.pause.active}}" class="execution-form-notice">暂停中可调整计划，恢复后才能更新完成成果。</view>
+   <view wx:for="{{checklistDraft}}" wx:key="item_id" class="execution-checklist-editor">
+    <sb-textarea layout="stacked" plain label="推进项标题" required value="{{item.title}}" maxlength="{{500}}" data-id="{{item.item_id}}" data-key="title" bind:change="inputChecklist" disabled="{{executionBusy}}"/>
+    <sb-textarea layout="stacked" plain label="完成标准" required value="{{item.acceptance_criteria}}" maxlength="{{2000}}" data-id="{{item.item_id}}" data-key="acceptance_criteria" bind:change="inputChecklist" disabled="{{executionBusy}}"/>
+    <button class="execution-text-action" data-id="{{item.item_id}}" data-delta="-1" bindtap="moveChecklist" disabled="{{executionBusy || index === 0}}">上移</button><button class="execution-text-action" data-id="{{item.item_id}}" data-delta="1" bindtap="moveChecklist" disabled="{{executionBusy || index === checklistDraft.length - 1}}">下移</button><button class="execution-text-action is-danger" data-id="{{item.item_id}}" bindtap="removeChecklist" disabled="{{executionBusy}}">移除此项</button>
+   </view>
+   <button class="execution-action-btn" disabled="{{executionBusy || checklistDraft.length >= 100}}" bindtap="addChecklist">添加推进项</button>
+   <sb-textarea layout="stacked" plain label="调整原因" required value="{{checklistReason}}" maxlength="{{1000}}" data-key="reason" bind:change="inputChecklist" disabled="{{executionBusy}}"/>
+<view wx:if="{{checklistNeedsReview}}" class="execution-form-notice"><view>请核对当前已保存清单；草稿中的增删会在下次保存时生效。</view><view wx:for="{{execution.items}}" wx:key="item_id">{{item.title}}：{{item.acceptance_criteria}}</view><button bindtap="confirmChecklistLatest" disabled="{{executionBusy || executionLoading}}">已核对，保留草稿继续编辑</button></view>
+   <view wx:if="{{checklistError}}" class="coordinate-error">{{checklistError}}</view>
+  </view>
+ </sb-sheet>
+</view></root-portal>

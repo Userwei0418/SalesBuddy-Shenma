@@ -54,27 +54,13 @@ class VisitRepository:
             clean[key] = value.isoformat()
         # Verify the immutable version before linking values to its definitions.
         await self.form_schema(connection)
-        customer = json_value(
-            await connection.fetchval(
-                "SELECT security.customer_reference($1::uuid)",
-                customer_id,
-            )
-        )
+        from sales_backend.repositories.opportunity_access import follow_up_reference
+
+        customer = await follow_up_reference(connection, customer_id, clean["opportunity_id"])
         if not customer:
             raise LookupError("客户不存在或不在当前权限范围内")
         opportunity_id = clean["opportunity_id"]
-        if opportunity_id:
-            opportunity = await connection.fetchrow(
-                "SELECT id::text,name FROM crm.opportunity WHERE id=$1::uuid AND customer_id=$2::uuid "
-                "AND deleted_at IS NULL",
-                opportunity_id,
-                customer_id,
-            )
-            if not opportunity:
-                raise ValueError("商机不属于当前客户，请重新关联")
-            clean["opportunity_name"] = opportunity["name"]
-        else:
-            clean["opportunity_name"] = ""
+        clean["opportunity_name"] = customer.get("opportunity_name") or ""
         collaborators = await validate_collaborators(connection, actor, clean["collaborator_ids"])
         if clean["source_import_id"]:
             owned = await connection.fetchval(
@@ -92,7 +78,7 @@ class VisitRepository:
             customer_name=customer["name"],
             customer_type=fields.get("customer_type")
             if fields.get("customer_type") in {"客户", "伙伴"}
-            else customer["customer_type_code"] or "",
+            else customer.get("customer_type_code") or "",
             recorder_user_id=recorder,
         )
         visit_id = str(uuid.uuid4())
@@ -118,7 +104,7 @@ class VisitRepository:
             customer_id,
             opportunity_id,
             actor.user_id,
-            actor.team_ids[0] if actor.team_ids else customer["owner_team_id"],
+            actor.team_ids[0] if actor.team_ids else customer.get("owner_team_id"),
             FORM_VERSION_ID,
             _interaction_datetime(clean["interaction_at"]) if clean["interaction_at"] else None,
             clean["interaction_mode"],
@@ -132,7 +118,7 @@ class VisitRepository:
             score,
             quality,
             clean["source_import_id"],
-            customer["customer_type_code"],
+            customer.get("customer_type_code"),
             clean["is_first_visit"],
             {key: clean[key] for key in FIRST_VISIT_KEYS} if clean["is_first_visit"] else {},
             business_date(clean["created_date"]),
@@ -181,7 +167,11 @@ class VisitRepository:
             v.status,v.expectation_code,v.follow_up_score,v.duration_minutes,v.interaction_mode_code,
             v.partner_name_snapshot,v.contact_name_snapshot,v.partner_id::text,
             v.original_recorder_name,manager.display_name AS manager_name,
-            COALESCE((SELECT jsonb_agg(jsonb_build_object('id',linked.id::text,'name',linked.name)
+            v.recording_role_code_snapshot,v.recording_team_id_snapshot::text,
+            CASE WHEN v.import_meta->>'import_type'='crm_history' THEN 'crm_history'
+            WHEN v.recording_role_code_snapshot IS NOT NULL THEN 'recorded' ELSE 'unknown' END AS record_source,
+            COALESCE((SELECT jsonb_agg(jsonb_build_object('id',linked.id::text,'name',linked.name,
+              'can_open',COALESCE(security.has_opportunity_read_access(linked.id),false))
               ORDER BY linked.name,linked.id) FROM activity.visit_opportunity vo
               JOIN crm.opportunity linked ON linked.id=vo.opportunity_id AND linked.deleted_at IS NULL
               WHERE vo.visit_id=v.id),'[]'::jsonb) AS linked_opportunities,
@@ -201,10 +191,13 @@ class VisitRepository:
             ARRAY(SELECT vp.user_ref_id::text FROM activity.visit_participant vp
               WHERE vp.visit_id=v.id AND vp.participant_role='collaborator') AS collaborator_ids,
             v.created_at,v.recorded_on,v.archived_fields,v.form_version_id::text,v.is_first_visit,v.first_visit_profile,
-            v.version_no,v.quality_review,v.opportunity_id::text,o.name AS opportunity_name,
+            v.version_no,v.quality_review,v.opportunity_id::text,COALESCE(o.name,v.archived_fields->>'opportunity_name') AS opportunity_name,
             u.display_name AS recorder_name,v.recorder_user_ref_id::text AS recorder_id,
             creator.display_name AS creator_name,v.created_by_user_ref_id::text AS creator_id,
-            v.customer_type_code_snapshot AS customer_type
+            v.customer_type_code_snapshot AS customer_type,
+            COALESCE(security.has_customer_access(v.customer_id),false) AS can_open_customer,
+            COALESCE(security.has_opportunity_read_access(v.opportunity_id),false) AS can_open_opportunity,
+            COALESCE((security.visit_saved_read_permissions(v.id)->>'can_export')::boolean,false) AS can_export
             FROM activity.visit v
             LEFT JOIN platform.user_ref u ON u.id=v.recorder_user_ref_id
             LEFT JOIN platform.user_ref manager ON manager.id=v.manager_user_ref_id
@@ -217,7 +210,16 @@ class VisitRepository:
         if not row:
             raise LookupError("拜访记录不存在或不可见")
         item = dict(row)
+        recording = {name: item.get(name) for name in
+                     ('recording_role_code_snapshot', 'recording_team_id_snapshot', 'record_source',
+                      'can_open_customer', 'can_open_opportunity', 'can_export', 'linked_opportunities')}
         item.update(json_value(item.get("first_visit_profile")) or {})
+        # Form/profile JSON cannot replace the immutable database provenance.
+        item.update(recording)
+        from sales_backend.repositories.visit_audio import audio_metadata, own_audio_location
+        audio = await own_audio_location(connection, visit_id)
+        if audio:
+            item["audio"] = audio_metadata(audio)
         return visit_date_fields(item)
 
     async def supplement(self, connection, actor, visit_id, data):
@@ -248,6 +250,8 @@ class VisitRepository:
             raise ValueError("仅跟进人可以补充本次记录")
         if data.get("version_no") != row["version_no"]:
             raise ValueError("记录已更新，请刷新后再补充")
+        from sales_backend.services.growth_triggers import visit_model_content
+        competency_before = await visit_model_content(connection, actor, visit_id)
         columns = {
             "partner_name": "partner_name_snapshot",
             "contact_name": "contact_name_snapshot",
@@ -330,4 +334,8 @@ class VisitRepository:
                 connection, actor, customer_id=result["customer_id"],
                 trigger_type="visit.supplemented", trigger_id=visit_id,
             )
+            from sales_backend.services.growth_triggers import enqueue_visit_review
+            competency_after = await visit_model_content(connection, actor, visit_id)
+            if competency_after is not None and competency_before != competency_after:
+                await enqueue_visit_review(connection, actor, result, trigger_type="visit.supplemented")
         return result

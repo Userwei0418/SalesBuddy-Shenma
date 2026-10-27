@@ -1,6 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "quarter-target": "../quarter-target/index"
-  }
-}

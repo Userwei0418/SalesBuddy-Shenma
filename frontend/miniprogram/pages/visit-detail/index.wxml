@@ -42,7 +42,7 @@ module.exports = { tags: tags, stripe: stripe, fields: fields };
 
     <sb-section class="section-card" title="结构化信息">
       <sb-desc-list layout="grid" items="{{view.fields(visit)}}" />
-      <view wx:for="{{visit.linkedOpportunities}}" wx:key="id" class="opportunity-link" hover-class="opportunity-link-active" data-id="{{item.id}}" bindtap="openOpportunity"><text>{{item.name}}</text><view class="opportunity-link-more"><label>查看商机详情</label><t-icon name="chevron-right" size="32rpx"/></view></view>
+      <view wx:for="{{visit.linkedOpportunities}}" wx:key="id" class="opportunity-link" hover-class="{{item.canOpen?'opportunity-link-active':'none'}}" data-id="{{item.id}}" bindtap="openOpportunity"><text>{{item.name}}</text><view wx:if="{{item.canOpen}}" class="opportunity-link-more"><label>查看商机详情</label><t-icon name="chevron-right" size="32rpx"/></view></view>
     </sb-section>
 
     <sb-section wx:if="{{visit.isFirstVisit}}" class="section-card first-visit" title="首次拜访信息">
@@ -58,17 +58,22 @@ module.exports = { tags: tags, stripe: stripe, fields: fields };
       <view class="content-row"><text>达成结果</text><label>{{visit.expectation}}</label></view>
       <view class="next-action"><text>下一步计划</text><label>{{visit.nextAction}}</label></view>
     </sb-section>
-    <sb-section class="section-card narrative {{visitAdvice.status==='ready' ? 'advice-card' : ''}}" plain="{{visitAdvice.status==='ready'}}" title="本次拜访建议">
+    <sb-section wx:if="{{canReadVisitAdvice}}" class="section-card narrative {{visitAdvice.status==='ready' ? 'advice-card' : ''}}" plain="{{visitAdvice.status==='ready'}}" title="本次拜访建议">
+      <sb-segmented block size="small" options="{{visitAdviceSections}}" value="{{visitAdviceSection}}" bind:change="onVisitAdviceSection"/>
       <view slot="extra"><sb-ai-badge wx:if="{{visitAdvice.status==='loading'}}" state="generating" /><sb-ai-badge wx:elif="{{visitAdvice.status==='ready'}}" state="advice" /></view>
-      <view wx:if="{{visitAdvice.status==='loading'}}" class="readonly-note">正在分析这次拜访…</view>
+      <view wx:if="{{visitAdvice.status==='loading'}}" class="readonly-note">{{visitAdvice.reading ? '正在读取已有建议…' : '正在提交分析…'}}</view>
       <view wx:elif="{{visitAdvice.status==='error'}}" class="readonly-note">{{visitAdvice.error}}</view>
+      <view wx:elif="{{visitAdvice.status==='queued' || visitAdvice.status==='running'}}" class="readonly-note">建议正在后台分析，可稍后刷新或重新进入查看</view>
+      <view wx:elif="{{visitAdvice.status==='stale'}}" class="readonly-note">资料或分析配置已变化，请重新生成建议</view>
+      <view wx:elif="{{visitAdvice.status==='idle'}}" class="readonly-note">尚未生成本次{{visitAdviceSection==='tasks' ? '待办' : '拜访'}}建议</view>
       <block wx:elif="{{visitAdvice.status==='ready'}}">
         <view class="readonly-note">{{visitAdvice.summary}}</view>
         <view wx:for="{{visitAdvice.rows}}" wx:key="id" class="content-row"><text>{{item.title}}</text><label>{{item.detail}}</label>
           <advice-actions analysis-id="{{visitAdvice.id}}" suggestion="{{item}}" bind:changed="loadVisitAdvice" />
         </view>
       </block>
-      <view wx:if="{{visitAdvice.status!=='loading'}}" class="opportunity-link advice-refresh" hover-class="opportunity-link-active" bindtap="loadVisitAdvice"><label>检查建议更新</label><t-icon name="chevron-right" size="32rpx"/></view>
+      <view wx:if="{{visitAdvice.status!=='loading'}}" class="opportunity-link advice-refresh" hover-class="opportunity-link-active" bindtap="loadVisitAdvice"><label>刷新状态</label><t-icon name="chevron-right" size="32rpx"/></view>
+      <view wx:if="{{canReadVisitAdvice && canSuggestVisitTasks && visitAdvice.status!=='loading' && visitAdvice.status!=='queued' && visitAdvice.status!=='running'}}" class="opportunity-link advice-refresh" hover-class="opportunity-link-active" data-advice-action="generate" data-visit-id="{{visitId}}" data-section="{{visitAdviceSection}}" bindtap="requestVisitAdvice"><label>{{visitAdvice.status==='ready' || visitAdvice.status==='stale' ? '重新生成建议' : '生成建议'}}</label><t-icon name="chevron-right" size="32rpx"/></view>
     </sb-section>
     <view class="readonly-note">已归档正文只读；建议由你确认后形成待办。</view>
   </block>

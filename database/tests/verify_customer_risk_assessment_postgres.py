@@ -10,6 +10,7 @@ import importlib.util
 import io
 import json
 import os
+import secrets
 import sys
 from contextlib import asynccontextmanager, redirect_stderr
 from datetime import datetime, timedelta, timezone
@@ -23,8 +24,14 @@ from verify_runtime_grants_postgres import migrate_through
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "database/scripts"))
 sys.path.insert(0, str(ROOT / "backend/src"))
+sys.path.insert(0, str(ROOT / "tools/installation"))
 from migrate import migrate
+from runtime_roles import load_policy, verify_service_roles
+from upgrade_permissions import reconcile_service_roles
+from sales_backend.auth.passwords import encode_password
+from sales_backend.contracts.authorization import RoleSave
 from sales_backend.db import set_request_context
+from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.repositories.identity import IdentityRepository
 
 spec = importlib.util.spec_from_file_location("customer_risk_cli", ROOT / "backend/scripts/customer_risk_assessments.py")
@@ -111,12 +118,33 @@ async def main():
         await context(connection, workspace, fde, "fde", team)
         assert await connection.fetchval("SELECT security.profile_customer_owner($1)", customer) == owner
         assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", customer) == owner
+        # The shipped V209 FDE read scope includes its department. Retain a
+        # positive check before configuring the narrower participant-only scenario
+        # through the same audited tenant-role API used by administrators.
+        assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", other_customer) == peer
+        await context(connection, workspace, administrator, "administrator", team)
+        # The legacy V097 seed predates password login. Satisfy the real guard
+        # requiring an effective administrator before editing tenant permissions.
+        await connection.execute("SELECT security.set_account_password($1,$2,false)",
+                                 administrator, encode_password(secrets.token_urlsafe(40)))
+        authorization = AuthorizationRepository()
+        role = next(r for r in await authorization.roles(connection) if r['builtin_role_code'] == 'fde')
+        assert next(p['scope'] for p in role['permissions'] if p['permission'] == 'customer.read') == 'departments'
+        await authorization.save_role(connection, role['id'], RoleSave(
+            name=role['name'], description=role['description'], status=role['status'],
+            expires_at=role['expires_at'], version_no=role['version_no'],
+            reason='隔离验收：明确配置仅参与客户的读取范围',
+            permissions=[{**p, 'scope': 'assigned', 'team_ids': []} if p['permission'] == 'customer.read' else p
+                         for p in role['permissions']],
+        ).model_dump(mode='json'))
+        await context(connection, workspace, fde, "fde", team)
+        assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", customer) == owner
         assert await connection.fetchval("SELECT security.customer_risk_assessment_owner($1)", other_customer) is None
         actual_owner = await IdentityRepository().find_actor_by_id(connection, workspace_id=str(workspace), user_id=str(owner), role="sales")
         assert actual_owner and actual_owner.context.user_id == str(owner)
         identity = actual_owner.context.model_dump(mode="json")
         assert set(identity["team_ids"]) == {str(team)}
-        checks.append("fde_can_resolve_only_visible_claimed_owner_and_its_actual_identity")
+        checks.append("fde_default_department_then_configured_assigned_scope_resolves_only_visible_claimed_owner")
 
         async def enqueue(*, actor=owner, initiator=fde, target=customer, key=None, job_type="customer.risk.review"):
             assessment_id, job_id = uuid4(), uuid4()
@@ -256,12 +284,28 @@ async def main():
         await runtime_grants(connection, late)
         roles.append(late)
         assert all(step["status"] == "unchanged" for step in await migrate(connection))
+        # Historical upgrades above retain their old runtime role. A role created
+        # after V246 receives no inferred grants from a repeat migration. Provision
+        # the current Worker explicitly, since executing assessments requires UPDATE
+        # while the current API role is limited to requesting them with INSERT.
+        for privilege in ("INSERT", "UPDATE"):
+            assert not await connection.fetchval("SELECT has_table_privilege($1,'insight.customer_risk_assessment',$2)", late, privilege)
+        policy = load_policy()
+        password = await connection.fetchval('SELECT quote_literal($1::text)', secrets.token_urlsafe(40))
+        await connection.execute(f'ALTER ROLE "{late}" LOGIN PASSWORD {password}')
+        await connection.execute(f'GRANT CONNECT ON DATABASE "{database}" TO "{late}"')
+        async with connection.transaction():
+            await reconcile_service_roles(connection, {'worker': late}, policy)
         for privilege in ("SELECT", "INSERT", "UPDATE"):
             assert await connection.fetchval("SELECT has_table_privilege($1,'insight.customer_risk_assessment',$2)", late, privilege)
         assert not await connection.fetchval("SELECT has_table_privilege($1,'insight.customer_risk_assessment','DELETE')", late)
         assert not await connection.fetchval("SELECT has_function_privilege($1,'security.reconcile_runtime_grants()','EXECUTE')", late)
         assert not await connection.fetchval("SELECT has_function_privilege($1,'ops.sync_customer_risk_assessment_job()','EXECUTE')", late)
-        checks.append("late_runtime_role_reconciliation_is_idempotent_without_private_function_or_delete_grants")
+        assert all(step["status"] == "unchanged" for step in await migrate(connection))
+        await verify_service_roles(connection, {'worker': late}, policy)
+        async with connection.transaction():
+            await reconcile_service_roles(connection, {'worker': late}, policy)
+        checks.append("late_worker_exact_policy_is_idempotent_without_private_function_or_delete_grants")
         print(json.dumps({"passed": len(checks), "checks": checks}, ensure_ascii=False))
     finally:
         if connection:

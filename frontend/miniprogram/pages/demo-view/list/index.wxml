@@ -1,0 +1,12 @@
+<import src="../common.wxml"/>
+<view class="page">
+  <view class="page-header"><view><view class="heading">{{pageTitle}}</view><view class="muted workspace-meta">{{companyName}}</view></view><view wx:if="{{ready}}" class="scope-pill">全部</view></view>
+  <view class="search"><view class="search-mark"></view><input value="{{query}}" bindinput="inputQuery" bindconfirm="search" confirm-type="search" placeholder="搜索{{title}}" maxlength="100"/><button size="mini" bindtap="search">搜索</button></view>
+  <template is="state" data="{{loading,ready,error}}"/>
+  <block wx:if="{{ready}}"><view class="muted count">共 {{total}} {{unit}}</view>
+    <view wx:for="{{items}}" wx:key="id" class="record" data-id="{{item.id}}" bindtap="openDetail" hover-class="row-pressed"><template is="record" data="{{item}}"/></view>
+    <view wx:if="{{!items.length}}" class="card state">暂无{{title}}记录</view>
+    <button wx:if="{{more}}" class="more" loading="{{loadingMore}}" bindtap="more">加载更多</button><view wx:elif="{{items.length}}" class="state end">已显示全部记录</view>
+  </block>
+  <template is="navigation" data="{{navItems,activeKey}}"/>
+</view>

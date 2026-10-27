@@ -1,17 +1,38 @@
 const uiColors = require("../../utils/uiColors");
+const {assertPersonDirectory}=require('../../utils/personPicker');
 const { scoreLight } = require('../../utils/statusLight');
 const apiClient = require("../../utils/apiClient");
 const profileMetrics = require("../../utils/profileMetrics");
 const access = require("../../utils/access");
 const {memberRanking} = require("../../utils/fdeEfficiency");
 const profileScores = require("../../utils/profileScores");
+const growth = require("../../utils/growthProfile");
+const { buildVersion } = require('../../utils/buildVersion');
+
+function salesEfficiencySelection(metric, structurePeriod, followupPeriod) {
+  const efficiencyMetric = ['customers','opportunities','followup'].includes(metric) ? metric : 'customers';
+  const followup = efficiencyMetric === 'followup';
+  const efficiencyPeriods = followup ? [{key:'week',label:'本周'},{key:'quarter',label:'本季度'},{key:'year',label:'本年'}] : [{key:'current',label:'当前总量'},{key:'year',label:'本年新增'}];
+  const selected = followup ? followupPeriod : structurePeriod;
+  return {efficiencyMetric,efficiencyPeriods,efficiencyPeriod:efficiencyPeriods.some(row=>row.key===selected)?selected:efficiencyPeriods[0].key};
+}
 
 Page({
+  openVisibleVisits(){if(access.can(getApp().globalData.session,['visit.read','visit.claimed_customer_read']))wx.navigateTo({url:'/pages/fde-records/index?mode=authorized'});},
+  ...growth.evidenceMethods(apiClient,()=>getApp().globalData.session,false,url=>wx.navigateTo({url})),
+  growthEvidenceContext(){return this.targetContext().key;},
+  onProfileTabSegment(e){return this.selectProfileTab({currentTarget:{dataset:{tab:e.detail.value}}});},
+  onEfficiencyMetricSegment(e){return this.selectEfficiencyMetric({currentTarget:{dataset:{metric:e.detail.value}}});},
+  onEfficiencyPeriodSegment(e){return this.selectEfficiencyPeriod({currentTarget:{dataset:{period:e.detail.value}}});},
+  onGrowthTab(e){return this.selectGrowthDimension({currentTarget:{dataset:{code:e.detail.key}}});},
+
   data: {
-    fdeScopeModes:[{value:"team",label:"团队"},{value:"person",label:"个人"}],fdeScopeMembers:[],fdeScopeTeams:[],fdeTeamId:"",fdeTeamLabel:"",ownUserId:"",fdeProfileScope:"self", fdeMemberOptions:[{id:"",name:"本人"}],fdeMemberIndex:0,fdeMemberId:"",fdeMemberName:"",fdeMembersError:"",
+    buildVersionLabel: '开发版',
+    fdeScopeModes:[{value:"team",label:"团队"},{value:"person",label:"个人"}],fdeScopeMembers:[],fdeScopeTeams:[],fdePickerDefaultTeamId:"",fdeTeamId:"",fdeTeamLabel:"",ownUserId:"",fdeProfileScope:"self", fdeMemberOptions:[{id:"",name:"本人"}],fdeMemberIndex:0,fdeMemberId:"",fdeMemberName:"",fdeMembersError:"",
     logoutBusy:false, logoutNavigating:false,viewerIdentity:"",
     role: "sales", roleName: "一线销售", scope: "仅本人", userName: "", account: "", team: "", initial: "",
-    growthLoading: false, growthReady: false, growthStatusText: "正在准备今日复盘",
+    growthLoading: false, growthReady: false, growthStatusText: "正在读取已有评估",
+    growthReview:growth.emptyReview(),growthEvidence:growth.emptyEvidence(),latestReviewId:"",growthCoverageText:"",growthBasisText:"",
     maturityScoreInfo: {}, efficiencyScoreInfo: {}, profileScoreInfo: {},
     overallScore: "--", reviewDate: "", reviewSummary: "",
     dimensions: [], growthOptions: [], selectedGrowthCode: "overall", selectedGrowthName: "综合评分",
@@ -21,7 +42,7 @@ Page({
     profileScopeOptions: [], profileScopeIndex: 0, profileScopeMode: "self", profileScopeLabel: "本人",
     profileTeamOptions: [], profileTeamIndex: 0,
     profileMemberOptions: [], profileMemberIndex: 0,
-    profileSelectedMemberName: "", profileSelectedMemberAccount: "", profileSelectedMemberId:"", profileTeamId:"", scopeMembers:[], scopeTeams:[],
+    profileSelectedMemberName: "", profileSelectedMemberAccount: "", profileSelectedMemberId:"", profileTeamId:"", profilePickerDefaultTeamId:"", scopeMembers:[], scopeTeams:[],
     targetYear:0,targetQuarter:0,targetQuarterLabel:"",targetAnchor:"",targetQueryScope:"self",targetQueryMemberId:"",targetContextKey:"",directoryLoading:false,directoryError:"",
     structurePeriod:"current",followupPeriod:"week",efficiencyRatio:{},efficiencyWindowLabel:"",profileNotApplicable:false,
     profileTabs: [
@@ -53,6 +74,7 @@ Page({
   },
   identity(){return typeof getApp==='function'?access.identity(getApp().globalData.session):this.data.account;},
   onShow(){
+    this.setData({buildVersionLabel:buildVersion(wx)});
     if(getApp().guardPage&&!getApp().guardPage(this,'profile'))return;
     if(!getApp().ensureLogin())return;
     this.visible=true;
@@ -64,17 +86,19 @@ Page({
       this.setData({isFde:true,isFdeLead:role==='fde_lead',efficiencyPeriods:[{key:'week',label:'本周'},{key:'month',label:'本月'},{key:'quarter',label:'本季度'},{key:'year',label:'本年'}],efficiencyPeriod:'week',efficiencyMetric:'opportunities',efficiencyMetrics:[{key:'opportunities',label:'商机'},{key:'followup',label:'跟进记录'},{key:'demo',label:'Demo 场景'}],profileTabs:[{key:'maturity',label:'项目成效'},{key:'efficiency',label:'协作效率'},{key:'profile',label:'FDE 画像'}]});
       this.loadFdeEfficiency();if(this.data.canViewFdeTeam)this.loadFdeMembers();return;
     }
-    this.setData({isFde:false,efficiencyMetrics:[{key:'customers',label:'客户'},{key:'opportunities',label:'商机'},{key:'followup',label:'跟进记录'}],profileTabs:[{key:'maturity',label:'营销成熟度'},{key:'efficiency',label:'营销效率'},{key:'profile',label:'销售画像'}]});
+    this.setData({isFde:false,...salesEfficiencySelection(this.data.efficiencyMetric,this.data.structurePeriod,this.data.followupPeriod),efficiencyMetrics:[{key:'customers',label:'客户'},{key:'opportunities',label:'商机'},{key:'followup',label:'跟进记录'}],profileTabs:[{key:'maturity',label:'营销成熟度'},{key:'efficiency',label:'营销效率'},{key:'profile',label:'销售画像'}]});
     this.loadProfileDirectory();
   },
   changePresentation(e){const choice=e.currentTarget.dataset.kind;if(!this.data.presentationOptions.some(row=>row.value===choice))return;this.clearSubjectData();this.setData({presentation:choice});return this.onShow();},
-  pause(){this.visible=false;if(this.growthTimer)clearTimeout(this.growthTimer);['growthRequestId','performanceRequestId','directoryRequestId','fdeEfficiencySerial'].forEach(key=>{this[key]=(this[key]||0)+1;});},
+  pause(){this.closeGrowthEvidence();this.visible=false;if(this.data.scopePickerOpen)this.profilePickerVisibility({detail:{open:false}});if(this.growthTimer)clearTimeout(this.growthTimer);['growthRequestId','performanceRequestId','directoryRequestId','fdeEfficiencySerial'].forEach(key=>{this[key]=(this[key]||0)+1;});},
   onHide(){this.pause();},onUnload(){this.pause();},
   clearSubjectData(message='正在确认当前查看范围'){
+    this.growthReadOwner=null;
+    this.closeGrowthEvidence();
     if(this.growthTimer)clearTimeout(this.growthTimer);this.growthTimer=null;
     ['growthRequestId','performanceRequestId','fdeEfficiencySerial'].forEach(key=>{this[key]=(this[key]||0)+1;});
     this.profilePerformance=null;this.performanceActuals={};this.marketingAnalytics=null;
-    this.setData({growthLoading:false,growthReady:false,growthStatusText:message,profileNotApplicable:false,
+    this.setData({growthReview:growth.emptyReview(),latestReviewId:'',growthCoverageText:'',growthBasisText:'',growthLoading:false,growthReady:false,growthStatusText:message,profileNotApplicable:false,
       overallScore:'--',profileScoreInfo:{},dimensions:[],history:[],growthOptions:[],selectedGrowthCode:'overall',selectedGrowthName:'综合评分',reviewDate:'',reviewSummary:'',visitCount:0,aiAdvice:[],
       organizationLoading:false,organizationReady:false,organizationError:'',performanceLoading:false,performanceError:'',canEditSalesTarget:false,performanceBoard:this.buildPerformanceBoard(),maturityFacts:[],maturityOverall:{},maturityTeams:[],maturityMembers:[],expandedMaturityMemberId:'',
       maturityScore:'--',maturityScoreInfo:{},maturityDimensions:[],efficiencyScore:'--',efficiencyScoreInfo:{},efficiencyRatio:{},efficiencyRanking:[],efficiencyDimensions:[],efficiencyTotal:'—',efficiencySecondaryValue:'待加载',efficiencyWindowLabel:'',efficiencySupplementals:{followup:null,customers:null,opportunities:null}});
@@ -86,7 +110,7 @@ Page({
     const now=new Date(Date.now()+28800000),targetYear=now.getUTCFullYear(),targetQuarter=Math.floor(now.getUTCMonth()/3)+1;
     const profileScopeOptions=session.role==='supervisor'?[{value:'team',label:'团队'},{value:'person',label:'个人'}]:session.role==='manager'?[{value:'department',label:'部门'},{value:'team',label:'团队'},{value:'person',label:'个人'}]:[];
     this.setData({viewerIdentity:identity,ownUserId:session.userId,role:session.role,roleName:session.roleName,scope:session.scope,userName:session.userName,account:session.account,team:session.team,initial:String(session.userName||'').substring(0,1),targetYear,targetQuarter,targetQuarterLabel:targetYear+' Q'+targetQuarter,targetAnchor:targetYear+'-'+String((targetQuarter-1)*3+1).padStart(2,'0')+'-01',profileScopeOptions,
-      ...(changed?{profileScopeMode:profileScopeOptions.length?profileScopeOptions[0].value:'self',profileScopeLabel:profileScopeOptions.length?profileScopeOptions[0].label:'本人',profileSelectedMemberId:session.userId||'',profileTeamId:'',fdeMemberId:'',fdeMemberName:'',fdeTeamId:'',fdeTeamLabel:'',fdeScopeTeams:[],fdeScopeMembers:[],fdeMemberOptions:[],fdeMemberIndex:0,fdeMembersError:'',fdeProfileScope:'self',scopeMembers:[],scopeTeams:[],profileMemberOptions:[],profileSelectedMemberName:'',profileSelectedMemberAccount:'',profileTeamOptions:[],profileTeamIndex:0,targetQueryScope:'self',targetQueryMemberId:'',targetContextKey:identity,structurePeriod:'current',followupPeriod:'week',efficiencyMetric:'customers',efficiencyPeriod:'current',efficiencyPeriods:[{key:'current',label:'当前总量'},{key:'year',label:'本年新增'}],organizationReady:false,canEditSalesTarget:false}:{} )});
+      ...(changed?{profileScopeMode:profileScopeOptions.length?profileScopeOptions[0].value:'self',profileScopeLabel:profileScopeOptions.length?profileScopeOptions[0].label:'本人',profileSelectedMemberId:session.userId||'',profileTeamId:'',profilePickerDefaultTeamId:'',fdePickerDefaultTeamId:'',fdeMemberId:'',fdeMemberName:'',fdeTeamId:'',fdeTeamLabel:'',fdeScopeTeams:[],fdeScopeMembers:[],fdeMemberOptions:[],fdeMemberIndex:0,fdeMembersError:'',fdeProfileScope:'self',scopeMembers:[],scopeTeams:[],profileMemberOptions:[],profileSelectedMemberName:'',profileSelectedMemberAccount:'',profileTeamOptions:[],profileTeamIndex:0,targetQueryScope:'self',targetQueryMemberId:'',targetContextKey:identity,structurePeriod:'current',followupPeriod:'week',efficiencyMetric:'customers',efficiencyPeriod:'current',efficiencyPeriods:[{key:'current',label:'当前总量'},{key:'year',label:'本年新增'}],organizationReady:false,canEditSalesTarget:false}:{} )});
     return session.role;
   },
   async loadProfileDirectory(){
@@ -97,6 +121,7 @@ Page({
       const result=await apiClient.getProfileScopeOptions();
       if(serial!==this.directoryRequestId||identity!==this.identity()||this.visible===false)return;
       if(result.data_source!=='database'||!Array.isArray(result.members)||!Array.isArray(result.teams))throw Error('查看范围加载失败');
+      assertPersonDirectory(result.members,result.teams,result.defaults);
       const session=getApp().globalData.session;
       const teams=result.teams.map(row=>({id:row.id,name:row.name}));
       const members=result.members.map(row=>({...row,id:row.user_id||row.id,name:(row.display_name||row.name)+(String(row.user_id||row.id)===String(session.userId)?'（本人）':''),initial:String(row.display_name||row.name||'人').slice(0,1),teamLabel:teams.filter(team=>(row.team_ids||[]).includes(team.id)).map(team=>team.name).join(' · ')}));
@@ -105,7 +130,7 @@ Page({
       const teamId=teams.some(row=>row.id===this.data.profileTeamId)?this.data.profileTeamId:teams.some(row=>row.id===defaultTeamId)?defaultTeamId:(teams[0]||{}).id||'';
       const mode=(result.allowed_scopes||[]).includes(this.data.profileScopeMode)?this.data.profileScopeMode:(result.defaults||{}).scope||'self';
       this.profilePeople=members;
-      this.setData({profileScopeOptions:session.permissions?[{value:'department',label:'部门'},{value:'team',label:'团队'},{value:'person',label:'个人'}].filter(row=>(result.allowed_scopes||[]).includes(row.value)):this.data.profileScopeOptions,directoryLoading:false,scopeMembers:members,scopeTeams:teams,profileSelectedMemberId:memberId,profileTeamId:teamId,profileScopeMode:mode});
+      this.setData({profileScopeOptions:session.permissions?[{value:'department',label:'部门'},{value:'team',label:'团队'},{value:'person',label:'个人'}].filter(row=>(result.allowed_scopes||[]).includes(row.value)):this.data.profileScopeOptions,directoryLoading:false,scopeMembers:members,scopeTeams:teams,profilePickerDefaultTeamId:teams.some(row=>row.id===defaultTeamId)?defaultTeamId:'',profileSelectedMemberId:memberId,profileTeamId:teamId,profileScopeMode:mode});
       this.refreshProfileScope();
     }catch(error){if(serial===this.directoryRequestId&&identity===this.identity()&&this.visible!==false){this.clearSubjectData('查看范围加载失败，重试后再查看画像');this.profilePeople=[];this.setData({directoryLoading:false,directoryError:error.message||'查看范围加载失败，请重试',scopeMembers:[],scopeTeams:[],organizationReady:false});}}
   },
@@ -120,113 +145,92 @@ Page({
     if(context.query.scope==='self')this.loadSalesGrowth();else this.loadScopedGrowth();
   },
   loadMarketingAnalytics(){return this.loadProfilePerformance();},
-  // BACKEND-CONTRACT GROWTH: 进入我的页会POST复盘请求，再轮询GET /profile/sales-growth。
-  // 必须后端幂等生成当日快照；页面触发不代表已完成AI分析。
-  loadSalesGrowth(){
-    const identity=this.identity(),serial=this.growthRequestId=(this.growthRequestId||0)+1;
-    this.setData({ overallScore:"--", profileScoreInfo:{}, growthReady:false, growthLoading: true, growthStatusText: "正在整理近期拜访复盘" });
-    const session=getApp().globalData.session;
-    if(session.permissions&&!access.can(session,'profile.sales_review'))return this.pollGrowth(60,serial,identity);
-    apiClient.ensureSalesGrowthReview()
-      .then(() => {if(identity===this.identity()&&serial===this.growthRequestId&&this.visible!==false)this.pollGrowth(0,serial,identity);})
-      .catch((error) => {
-        if(identity!==this.identity()||serial!==this.growthRequestId)return;
-        this.setData({ growthLoading: false, growthStatusText: error.message || "能力复盘加载失败" });
-      });
+  clearGrowthAccess(message='当前评估不可读取，请刷新后重试'){
+    this.growthReadOwner=null;
+    this.closeGrowthEvidence();clearTimeout(this.growthTimer);this.growthTimer=null;this.growthRequestId=(this.growthRequestId||0)+1;
+    this.setData({growthReview:growth.emptyReview(),latestReviewId:'',growthCoverageText:'',growthBasisText:'',growthReady:false,growthLoading:false,growthStatusText:message,overallScore:'--',profileScoreInfo:{},dimensions:[],history:[],growthOptions:[],reviewSummary:'',reviewDate:'',visitCount:null,aiAdvice:[]});
   },
-  pollGrowth(attempt,serial=this.growthRequestId,identity=this.identity()){
-    apiClient.getSalesGrowth(30).then((payload) => {
-      if(identity!==this.identity()||serial!==this.growthRequestId||this.visible===false)return;
-      if (payload.today_status === "succeeded" && payload.latest) {
-        this.applyGrowth(payload);
-        return;
-      }
-      if (payload.today_status === "failed" || attempt >= 60) {
-        this.setData({ growthLoading: false, growthStatusText: "今日复盘暂未完成，请稍后重试" });
-        return;
-      }
-      this.growthTimer = setTimeout(() => this.pollGrowth(attempt + 1,serial,identity), 1000);
-    }).catch((error) => {
-      if(identity===this.identity()&&serial===this.growthRequestId)this.setData({ growthLoading: false, growthStatusText: error.message || "能力数据加载失败" });
-    });
+  loadSalesGrowth(){return this.readGrowth();},
+  loadScopedGrowth(){return this.readGrowth();},
+  // Entry, refresh and polling are reads. Only requestGrowthReview may submit.
+  async readGrowth(attempt=0){
+    if(this.visible===false)return;
+    clearTimeout(this.growthTimer);this.growthTimer=null;
+    const session=getApp().globalData.session,context=this.targetContext(),identity=this.identity();
+    if(session.permissions&&!access.can(session,'profile.sales_read')){this.clearGrowthAccess();return;}
+    if(this.data.profileNotApplicable){this.clearGrowthAccess('该岗位暂不适用销售六维画像');return;}
+    if(context.query.scope==='person'&&(!context.query.member_id||context.query.member_id==='all')){this.clearGrowthAccess('请选择要查看的人员');return;}
+    if(attempt===0){this.closeGrowthEvidence();this.setData({growthReview:growth.emptyReview(),growthLoading:true,growthReady:false,overallScore:'--',profileScoreInfo:{},history:[],dimensions:[],aiAdvice:[],latestReviewId:'',growthStatusText:'正在读取已保存评估'});}
+    const serial=this.growthRequestId=(this.growthRequestId||0)+1;
+    const current=()=>this.visible!==false&&serial===this.growthRequestId&&identity===this.identity()&&context.key===this.targetContext().key;
+    try{
+      const payload=await (context.query.scope==='self'?apiClient.getSalesGrowth(30):apiClient.getScopedSalesGrowth({...context.query,days:30}));
+      if(!current())return;
+      if(!payload||(!payload.contract_version&&payload.data_source!=='database'&&payload.today_status===undefined))throw Error('销售画像响应不完整');
+      if(payload.applicable===false){this.clearGrowthAccess(payload.reason||'该岗位暂不适用销售六维画像');return;}
+      this.applyGrowth(payload,false);
+      if(this.data.growthReview.busy&&attempt<40)this.growthTimer=setTimeout(()=>{if(current())return this.readGrowth(attempt+1);},1500);
+      else if(this.data.growthReview.busy)this.setData({growthStatusText:'评估仍在后台更新，可稍后刷新查看；上次结果未改变'});
+    }catch(error){if(current())this.clearGrowthAccess(error.message||'评估读取失败，请重试');}
   },
-  loadScopedGrowth(){
-    if(this.data.profileNotApplicable){this.setData({growthLoading:false,growthReady:false,growthStatusText:'该岗位暂不适用销售六维画像'});return;}
-    const context = this.targetContext();
-    const requestId = this.growthRequestId = (this.growthRequestId || 0) + 1;
-    this.setData({overallScore:'--', profileScoreInfo:{}, growthReady:false, growthLoading:false});
-    if (context.query.scope === 'person' && (!context.query.member_id || context.query.member_id === 'all')) {
-      this.setData({growthStatusText:'请选择要查看的人员'}); return;
-    }
-    this.setData({growthLoading:true, growthStatusText:'正在加载所选范围的销售画像'});
-    return apiClient.getScopedSalesGrowth({...context.query,days:30}).then(payload => {
-      if (requestId !== this.growthRequestId || context.key !== this.targetContext().key) return;
-      if (!payload || payload.data_source !== 'database') throw new Error('销售画像数据格式异常');
-      if (payload.applicable===false) {this.setData({profileNotApplicable:true,growthLoading:false,growthReady:false,growthStatusText:payload.reason||'该岗位暂不适用销售六维画像'});return;}
-      if (!payload.latest) {
-        this.setData({growthLoading:false,growthReady:false,growthStatusText:'所选范围暂未形成销售画像'}); return;
-      }
-      this.applyGrowth(payload, false);
-    }).catch(error => {
-      if (requestId === this.growthRequestId && context.key===this.targetContext().key && this.visible!==false) this.setData({overallScore:'--',profileScoreInfo:{},growthLoading:false,growthReady:false,growthStatusText:error.message || '销售画像加载失败，请稍后重试'});
-    });
+  async requestGrowthReview(){
+    const session=getApp().globalData.session,context=this.targetContext(),identity=this.identity();
+    const own=context.query.scope==='self'||context.query.scope==='person'&&context.query.member_id===session.userId;
+    if(this.visible===false||!own||this.growthReadOwner!==context.key||!this.data.growthReview.canReview||this.data.growthReview.busy||!access.can(session,'profile.sales_review'))return;
+    this.closeGrowthEvidence();
+    clearTimeout(this.growthTimer);this.growthTimer=null;
+    const serial=this.growthRequestId=(this.growthRequestId||0)+1;
+    const current=()=>this.visible!==false&&serial===this.growthRequestId&&identity===this.identity()&&context.key===this.targetContext().key;
+    this.setData({growthReview:{...this.data.growthReview,busy:true,error:'',status:'submitting'},growthStatusText:'正在提交更新请求；已有结果保留原日期'});
+    try{
+      const receipt=await apiClient.ensureSalesGrowthReview();if(!current())return;
+      if(!receipt||!receipt.review_id||!['queued','running','succeeded','failed'].includes(receipt.status))throw Error('更新回执不完整，请刷新查看受理状态');
+      this.setData({growthReview:{...this.data.growthReview,status:receipt.status,currentReview:{id:receipt.review_id,status:receipt.status,generation_no:receipt.generation_no}}});
+      return this.readGrowth(1);
+    }catch(error){if(current()){
+      if([401,403,404].includes(error.statusCode)||error.code==='AUTH_REQUIRED'){this.clearGrowthAccess(error.message||'更新权限已失效');return;}
+      this.setData({growthReview:{...this.data.growthReview,busy:false,status:'failed',canReview:error.statusCode===409?false:this.data.growthReview.canReview,error:error.statusCode===409?'评估信息已变化，请刷新后重新操作':error.message||'提交结果未确认，可重试同一请求'},growthStatusText:'本次更新未完成；已有结果保留原日期'});
+    }}
   },
-  applyGrowth(payload, reloadAnalytics = true){
-    const frameworkDimensions = (payload.framework && payload.framework.dimensions) || [];
-    const scores = payload.latest.dimension_scores || {};
-    const profileScoreInfo = profileScores.displayScore(payload.latest.score_summary);
-    const dimensions = frameworkDimensions.map((definition) => {
-      const value = scores[definition.code] || {};
-      return {
-        signal:scoreLight(value.score),
-        code: definition.code,
-        name: definition.name,
-        shortName: definition.short_name || definition.name,
-        score: profileScores.numeric(value.score) === null ? "--" : Math.round(Math.min(100, Math.max(0, Number(value.score)))),
-        assessment: value.assessment || "暂无判断",
-        coachingAction: value.coaching_action || "继续积累拜访证据",
-      };
-    });
-    const growthOptions = [{ code: "overall", name: "综合" }].concat(dimensions.map((item) => ({ code: item.code, name: item.shortName })));
-    const improvements = Array.isArray(payload.latest.improvements) ? payload.latest.improvements.filter(Boolean) : [];
-    const aiAdvice = improvements.length ? improvements.slice(0, 6) : dimensions.map((item) => `${item.name}：${item.coachingAction}`).filter(Boolean).slice(0, 6);
-    const visitCount = Number((payload.latest.input_snapshot || {}).visit_count || 0);
-    this.setData({
-      growthLoading: false,
-      growthReady: true,
-      growthStatusText: payload.projection === "current_group" ? `有效复盘 ${payload.coverage.reviewed_members} / ${payload.coverage.eligible_members} 人 · 当前汇总` : "能力复盘 · 数据已同步",
-      overallScore: profileScoreInfo.text,
-      profileScoreInfo,
-      reviewDate: String(payload.latest.review_date || ""),
-      reviewSummary: payload.latest.summary || "已完成今日六维能力复盘",
-      dimensions,
-      growthOptions,
-      history: payload.history || [],
-      visitCount,
-      aiAdvice,
-    }, () => {
-      this.drawGrowthCharts();
-      if (reloadAnalytics) this.loadMarketingAnalytics();
-    });
+  applyGrowth(payload,reloadAnalytics=true){
+    const result=growth.salesDisplay(payload),context=this.targetContext(),session=getApp().globalData.session;
+    this.growthReadOwner=context.key;
+    const own=context.query.scope==='self'||context.query.scope==='person'&&context.query.member_id===session.userId;
+    result.growthReview.canReview=payload.can_review===true&&own&&access.can(session,'profile.sales_review');
+    this.setData(result,()=>{this.drawGrowthCharts();if(reloadAnalytics)this.loadMarketingAnalytics();});
   },
   showScoreRule(e){
     const kind = e.currentTarget.dataset.kind;
     const config = {maturity:[this.data.isFde?'项目成效总分':'营销成熟度总分',this.data.maturityScoreInfo],efficiency:[this.data.isFde?'协作效率总分':'营销效率总分',this.data.efficiencyScoreInfo],profile:['销售画像总分',this.data.profileScoreInfo]}[kind];
     if (!config) return;
     const info=config[1] || {};
+    if(kind==='profile'){
+      const review=this.data.growthReview||{},basis=review.scoreBasis||{};
+      const frozen=basis.snapshot_status==='frozen'&&basis.calculation_version==='sales_competency_frozen_complete_v2';
+      let content='尚无已保存评估，总分显示“--”。';
+      if(review.groupCoverage){
+        content='团队范围展示成员评估覆盖和同口径维度结果，不提供团队画像总分，也不拼接不同成员的缺失维度。';
+      }else if(frozen){
+        const state={assessed:'已评估',partially_assessed:'部分维度已评估，仍有缺项',insufficient_data:'材料不足，尚未评估'}[review.evaluationState]||'评估状态待核';
+        content=`显示评估当时已保存的公司评分结果，采用当时冻结的权重和规则，不按当前规则重算。\n\n所有正权重维度都有评估结果时才提供总分；正权重维度缺料时显示“--”。只有零权重维度缺料时，可保留已保存总分，但仍标记为部分评估。\n\n本次状态：${state}。已保存总分：${info.value==null?'--':info.text}。缺失总分不以原框架总分替代。`;
+        if(info.explanation)content+='\n已保存说明：'+info.explanation;
+        if(Number.isInteger(info.count)&&Number.isInteger(info.total))content+=`\n已评估 ${info.count}/${info.total} 项${info.coverage_percent==null?'':`，覆盖权重 ${info.coverage_percent}%`}。`;
+        content+='\n'+growth.basisLabel(basis);
+      }else if(review.reviewId||info.value!=null){
+        content='历史评估的规则快照未完整保存，评分口径未知。旧记录仅有原框架总分时，保留其原值；不能将它解释为新规则下的公司总分，也不按当前规则补算历史。\n\n历史结果：'+(info.value==null?'--':info.text)+'。';
+      }
+      wx.showModal({title:config[0],showCancel:false,confirmText:'知道了',content});
+      return;
+    }
     wx.showModal({title:config[0], showCancel:false, confirmText:'知道了',
       content:`${info.explanation || '暂无可计算数据'}\n\n状态：80分及以上为绿色健康，60–79分为黄色提醒，低于60分为红色告警，缺失评分为灰色待评估。\n\n总分为有效指标的加权平均，满分100分，超额达成按100分计。缺失项剔除后按剩余权重折算；全部缺失时显示“--”。${info.count ? '\n已纳入 ' + info.count + '/' + info.total + ' 项指标，覆盖权重 ' + info.coverage_percent + '%。' : ''}${info.rule ? '\n公司评分规则版本：' + info.rule.version : ''}`});
   },
-  onProfileTabSegment(e){return this.selectProfileTab({currentTarget:{dataset:{tab:e.detail.value}}});},
-  onEfficiencyMetricSegment(e){return this.selectEfficiencyMetric({currentTarget:{dataset:{metric:e.detail.value}}});},
-  onEfficiencyPeriodSegment(e){return this.selectEfficiencyPeriod({currentTarget:{dataset:{period:e.detail.value}}});},
   selectProfileTab(e){
     const activeProfileTab = e.currentTarget.dataset.tab;
     this.setData({ activeProfileTab }, () => {
       if (activeProfileTab === "profile" && this.data.growthReady) wx.nextTick(() => this.drawGrowthCharts());
     });
   },
-  onGrowthTab(e){return this.selectGrowthDimension({currentTarget:{dataset:{code:e.detail.key}}});},
   selectGrowthDimension(e){
     const code = e.currentTarget.dataset.code;
     const option = this.data.growthOptions.find((item) => item.code === code);
@@ -256,10 +260,11 @@ Page({
     if(!access.canViewTeam(session,'profile.fde_read'))return;
     try{const result=await apiClient.getFdeScopeOptions();if(identity!==this.identity()||serial!==this.fdeDirectorySerial||this.visible===false)return;
       if(result.data_source!=='database'||!Array.isArray(result.members)||!Array.isArray(result.teams))throw Error('成员范围加载失败');
+      assertPersonDirectory(result.members,result.teams,result.defaults);
       const teams=result.teams,members=result.members.map(row=>{const id=row.user_id||row.id,name=row.display_name||row.name;return {...row,id,name:name+(id===session.userId?'（本人）':''),initial:String(name||'人').slice(0,1),teamLabel:teams.filter(team=>(row.team_ids||[]).includes(team.id)).map(team=>team.name).join(' · ')};});
       const options=members.map(row=>({...row,id:row.id===session.userId?'':row.id})),index=Math.max(0,options.findIndex(row=>row.id===this.data.fdeMemberId)),member=options[index]||{id:'',name:this.data.userName};
       const team=teams.find(row=>row.id===this.data.fdeTeamId)||teams.find(row=>row.id===(result.defaults||{}).team_id)||teams[0]||{};
-      this.setData({fdeScopeMembers:members,fdeScopeTeams:teams,fdeTeamId:team.id||'',fdeTeamLabel:team.name||'',fdeMemberOptions:options,fdeMemberIndex:index,fdeMemberId:member.id,fdeMemberName:member.id?member.name:'',fdeMembersError:''});
+      this.setData({fdeScopeMembers:members,fdeScopeTeams:teams,fdePickerDefaultTeamId:teams.some(row=>row.id===(result.defaults||{}).team_id)?result.defaults.team_id:'',fdeTeamId:team.id||'',fdeTeamLabel:team.name||'',fdeMemberOptions:options,fdeMemberIndex:index,fdeMemberId:member.id,fdeMemberName:member.id?member.name:'',fdeMembersError:''});
       if(this.data.fdeProfileScope==='team')this.loadFdeEfficiency();
     }catch(error){if(identity===this.identity()&&serial===this.fdeDirectorySerial)this.setData({fdeMembersError:error.message||'成员列表加载失败，点击重试'});}
   },
@@ -307,7 +312,7 @@ Page({
   },
   retryEfficiency() {return this.data.isFde?this.loadFdeEfficiency():this.loadMarketingAnalytics();},
   applyEfficiencyRanking(){return this.applyEfficiencySupplemental();},
-  buildPerformanceBoard(){const targets=(this.profilePerformance||{}).targets||{},actuals=this.performanceActuals||{};return ['collection','recognized'].map(kind=>({...profileMetrics.performanceMetric({targets},kind,actuals[kind]),targetLabel:this.data.targetScopeLabel}));},
+  buildPerformanceBoard(){const targets=(this.profilePerformance||{}).targets||{},actuals=this.performanceActuals||{};return ['collection','recognized'].map(kind=>({...profileMetrics.performanceMetric({targets},kind,actuals[kind],actuals),targetLabel:this.data.targetScopeLabel}));},
   targetContext(){
     const role=this.data.role,mode=this.data.profileScopeMode;
     const query=role==='sales'&&!getApp().globalData.session.permissions?{scope:'self'}:mode==='department'?{scope:'department'}:mode==='team'?{scope:'team',team_id:this.data.profileTeamId||undefined}:mode==='person'?{scope:'person',member_id:this.data.profileSelectedMemberId||undefined}:{scope:'self'};
@@ -324,7 +329,7 @@ Page({
     try{
       const result=await apiClient.getProfilePerformance({...context.query,year:this.data.targetYear||undefined,quarter:this.data.targetQuarter||undefined,structure_period:this.data.structurePeriod,period:this.data.followupPeriod});
       if(!current())return;
-      if(result.data_source!=='database'||!result.actuals||!result.targets||!result.supplementals)throw Error('经营数据格式异常');
+      if(result.data_source!=='database'||!result.actuals||!['recognized_amount','collection_amount'].every(key=>Object.prototype.hasOwnProperty.call(result.actuals,key))||!result.targets||!result.supplementals)throw Error('经营数据格式异常');
       this.profilePerformance=result;this.performanceActuals=result.actuals;
       const retention=result.retention||{},score=profileScores.displayScore((result.scores||{}).maturity),period=result.target_period||{};
       const self=context.query.scope==='self'||(context.query.scope==='person'&&context.query.member_id===getApp().globalData.session.userId);
@@ -343,6 +348,7 @@ Page({
   },
   profilePickerVisibility(e){
     const scopePickerOpen = Boolean(e.detail.open);
+    if(scopePickerOpen){if(wx.hideTabBar)wx.hideTabBar({animation:false});}else if(wx.showTabBar)wx.showTabBar({animation:false});
     this.setData({scopePickerOpen}, () => {
       if (!scopePickerOpen && !this.data.isFde) {
         const redraw = () => {
@@ -357,76 +363,19 @@ Page({
     this.drawGrowthLine();
   },
   drawRadar(){
-    if (this.data.scopePickerOpen) return;
-    const dimensions = this.data.dimensions;
-    if (dimensions.length !== 6) return;
-    const query = this.createSelectorQuery();
-    query.select(".radar-canvas").boundingClientRect((rect) => {
-      if (!rect) return;
-      if (this.data.scopePickerOpen || this.visible === false) return;
-      const ctx = wx.createCanvasContext("abilityRadar", this);
-      const width = rect.width, height = rect.height;
-      const cx = width / 2, cy = height / 2 + 3, radius = Math.min(width, height) * 0.31;
-      const point = (index, scale) => {
-        const angle = -Math.PI / 2 + index * Math.PI / 3;
-        return [cx + Math.cos(angle) * radius * scale, cy + Math.sin(angle) * radius * scale];
-      };
-      ctx.setLineWidth(1);
-      for (let level = 1; level <= 5; level += 1) {
-        ctx.beginPath();
-        for (let i = 0; i < 6; i += 1) {
-          const p = point(i, level / 5);
-          if (i === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
-        }
-        ctx.closePath(); ctx.setStrokeStyle("rgba(79,96,120,.18)"); ctx.stroke();
-      }
-      for (let i = 0; i < 6; i += 1) {
-        const p = point(i, 1); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p[0], p[1]); ctx.setStrokeStyle("rgba(79,96,120,.13)"); ctx.stroke();
-      }
-      ctx.beginPath();
-      dimensions.forEach((item, index) => {
-        const p = point(index, (profileScores.numeric(item.score) || 0) / 100);
-        if (index === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
-      });
-      ctx.closePath(); ctx.setFillStyle("rgba(40,99,205,.22)"); ctx.fill(); ctx.setLineWidth(2); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
-      dimensions.forEach((item, index) => {
-        const p = point(index, (profileScores.numeric(item.score) || 0) / 100); ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill();
-        const label = point(index, 1.28); ctx.setFillStyle("#4F6078"); ctx.setFontSize(11); ctx.setTextAlign(label[0] < cx - 5 ? "right" : label[0] > cx + 5 ? "left" : "center"); ctx.fillText(`${item.shortName} ${item.score}`, label[0], label[1] + 4);
-      });
-      ctx.draw();
+    if(this.data.scopePickerOpen||this.data.dimensions.length!==6||typeof this.createSelectorQuery!=='function')return;
+    const dimensions=this.data.dimensions.map(row=>({...row,score:profileScores.numeric(row.score)}));
+    this.createSelectorQuery().select('.radar-canvas').boundingClientRect(rect=>{
+      if(!rect||this.data.scopePickerOpen||this.visible===false)return;
+      require('../../utils/fdeRadar').drawRadar(wx.createCanvasContext('abilityRadar',this),rect.width,rect.height,dimensions);
     }).exec();
   },
   drawGrowthLine(){
-    if (this.data.scopePickerOpen) return;
-    const history = this.data.history;
-    if (!history.length) return;
-    const code = this.data.selectedGrowthCode;
-    const query = this.createSelectorQuery();
-    query.select(".growth-canvas").boundingClientRect((rect) => {
-      if (!rect) return;
-      if (this.data.scopePickerOpen || this.visible === false) return;
-      const ctx = wx.createCanvasContext("growthLine", this);
-      const width = rect.width, height = rect.height, left = 34, right = 12, top = 18, bottom = 28;
-      const valueOf = (item) => code === "overall" ? Number(item.overall_score || 0) : Number(((item.dimension_scores || {})[code] || {}).score || 0);
-      [0, 25, 50, 75, 100].forEach((value) => {
-        const y = top + (100 - value) / 100 * (height - top - bottom);
-        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(width - right, y); ctx.setStrokeStyle("rgba(79,96,120,.12)"); ctx.stroke();
-        ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign("right"); ctx.fillText(String(value), left - 6, y + 3);
-      });
-      ctx.beginPath();
-      history.forEach((item, index) => {
-        const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right);
-        const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom);
-        if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      });
-      ctx.setLineWidth(2.5); ctx.setStrokeStyle("#2863CD"); ctx.stroke();
-      history.forEach((item, index) => {
-        const x = history.length === 1 ? (left + width - right) / 2 : left + index / (history.length - 1) * (width - left - right);
-        const y = top + (100 - valueOf(item)) / 100 * (height - top - bottom);
-        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.setFillStyle("#2863CD"); ctx.fill();
-        if (index === 0 || index === history.length - 1) { ctx.setFillStyle("#56677E"); ctx.setFontSize(9); ctx.setTextAlign(index === 0 ? "left" : "right"); ctx.fillText(String(item.review_date).slice(5), x, height - 7); }
-      });
-      ctx.draw();
+    if(this.data.scopePickerOpen||!this.data.history.length||typeof this.createSelectorQuery!=='function')return;
+    const points=growth.historyPoints(this.data.history,this.data.selectedGrowthCode);
+    this.createSelectorQuery().select('.growth-canvas').boundingClientRect(rect=>{
+      if(!rect||this.data.scopePickerOpen||this.visible===false)return;
+      require('../../utils/fdeHistory').draw(wx.createCanvasContext('growthLine',this),rect.width,rect.height,points);
     }).exec();
   },
   logout(){
@@ -436,9 +385,9 @@ Page({
     if (!getApp().globalData.session) { this.finishLogout(); return; }
     wx.showModal({
       title:"退出当前账号？",
-      content:"退出后需要重新选择身份并登录。",
+      content:"退出后需重新登录。本机已记住的账号和密码会保留，可在登录页选择忘记。",
       confirmText:"退出登录",
-      confirmColor:uiColors.danger,
+      confirmColor: uiColors.danger,
       success:(res)=>{
         if(!res.confirm) { this.setData({logoutBusy:false}); return; }
         this.finishLogout();

@@ -12,7 +12,6 @@ import asyncio
 import json
 import re
 import sys
-from contextlib import asynccontextmanager
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -34,6 +33,7 @@ from sales_backend.repositories.visits import VisitRepository
 from sales_backend.services.advice import AdviceService
 from sales_backend.services.operations_accounts import OperationsAccountService
 from sales_backend.worker import Worker
+from tests.integration.connection_pool import ScopedRolePool
 from tests.integration.test_business_rankings import opportunity
 
 
@@ -51,17 +51,7 @@ async def run(config, name, role):
     assert base.senseaudio_api_key and base.agent_fde_base_url
     pool = await asyncpg.create_pool(database=name, **config, min_size=1, max_size=5, init=_initialize_connection)
 
-    class ScopedPool:
-        @asynccontextmanager
-        async def acquire(self):
-            async with pool.acquire() as c:
-                await c.execute(f'SET ROLE "{role}"')
-                try:
-                    yield c
-                finally:
-                    await c.execute("RESET ROLE")
-
-    db = Database(replace(base, database_url="", agent_fde_pilot_path=""), pool=ScopedPool())
+    db = Database(replace(base, database_url="", agent_fde_pilot_path=""), pool=ScopedRolePool(pool, role))
     client = None
     # Diagnostics are limited to schema/reference metadata from this synthetic workspace.
     import sales_backend.services.advice as advice_module

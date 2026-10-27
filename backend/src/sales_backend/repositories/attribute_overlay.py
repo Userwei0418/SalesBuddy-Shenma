@@ -57,8 +57,13 @@ def _project(row: dict[str, Any], columns: dict[str, str] | tuple[str, ...]) -> 
         {name: name for name in columns} if isinstance(columns, tuple) else columns
     )
     for attr_key, column in mapping.items():
-        value = row.get(column)
+        if column not in row:
+            continue
+        value = row[column]
         if value is None or value == "" or value == {}:
+            # An explicitly cleared column is authoritative too. Import evidence
+            # remains stored, but must not resurrect the previous current value.
+            leftover.pop(attr_key, None)
             continue
         leftover[attr_key] = _json_ready(value)
     row["attributes"] = leftover
@@ -66,17 +71,28 @@ def _project(row: dict[str, Any], columns: dict[str, str] | tuple[str, ...]) -> 
 
 
 def overlay_customer_attributes(row: dict[str, Any]) -> dict[str, Any]:
-    """列上的值覆盖 jsonb 同名键；空值不写入，避免把「未填」显示成空字符串。"""
+    """正式列优先；已清空的列移除兼容键，未选取的列保留原兼容值。"""
+    if "customer" not in row.get("business_identities", ["customer"]):
+        row["assessment_status"] = "not_applicable"
+        row["customer_analysis_applicable"] = False
+        for key in ("potential_score", "relationship_score", "quadrant_code", "quadrant_policy"):
+            if key in row: row[key] = None
+    else:
+        row["customer_analysis_applicable"] = True
     return _project(row, CUSTOMER_ATTRIBUTE_COLUMNS)
 
 
 def overlay_task_attributes(row: dict[str, Any]) -> dict[str, Any]:
     overlay = _project(row, TASK_ATTRIBUTE_COLUMNS)
+    if "assignees" not in overlay:
+        return overlay
     assignees = overlay.get("assignees") or []
     owner = next((person for person in assignees if person.get("responsibility") == "owner"), None)
     account = (owner or {}).get("account_code") if owner else None
-    if account and "assignee_account_code" not in overlay["attributes"]:
+    if account:
         overlay["attributes"]["assignee_account_code"] = account
+    else:
+        overlay["attributes"].pop("assignee_account_code", None)
     return overlay
 
 

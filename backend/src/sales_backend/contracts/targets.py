@@ -7,7 +7,10 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 TargetPeriod = Literal["week", "month", "quarter", "year"]
 TargetScope = Literal["self", "person", "team", "department"]
-TargetKind = Literal["collection", "recognized", "acv", "opportunity_count", "visit_count", "demo_count"]
+# Separate target for the >=30% PPL reserve; it is not weighted or merged into collection.
+TargetKind = Literal[
+    "collection", "collection_ppl", "recognized", "acv", "opportunity_count", "visit_count", "demo_count"
+]
 TargetDepartment = Literal["sales", "fde"]
 
 
@@ -19,7 +22,7 @@ class TargetSave(BaseModel):
     period_type: TargetPeriod = "year"
     anchor_date: date
     kind: TargetKind
-    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    amount: Decimal = Field(ge=0, max_digits=18, decimal_places=2)
     version_no: int | None = Field(default=None, ge=1, le=2147483647)
     reason: str = Field(min_length=1, max_length=2000)
     department_code: TargetDepartment = "sales"
@@ -36,7 +39,7 @@ class TargetSave(BaseModel):
         if self.scope != "department" and self.department_code != "sales":
             raise ValueError("部门类别只用于部门目标")
         if self.kind.endswith("_count") and self.amount != self.amount.to_integral_value():
-            raise ValueError("数量目标必须为正整数")
+            raise ValueError("数量目标必须为非负整数")
         if not 2000 <= self.anchor_date.year <= 2100:
             raise ValueError("目标年份应在2000至2100之间")
         if self.scope == "person" and self.user_id is None:
@@ -53,13 +56,13 @@ class TargetSave(BaseModel):
 class TargetItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
     kind: TargetKind
-    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    amount: Decimal = Field(ge=0, max_digits=18, decimal_places=2)
     version_no: int | None = Field(default=None, ge=1, le=2147483647)
 
     @model_validator(mode="after")
     def integer_counts(self):
         if self.kind.endswith("_count") and self.amount != self.amount.to_integral_value():
-            raise ValueError("数量目标必须为正整数")
+            raise ValueError("数量目标必须为非负整数")
         return self
 
 

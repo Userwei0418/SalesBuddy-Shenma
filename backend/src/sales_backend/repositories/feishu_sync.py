@@ -1,10 +1,25 @@
 """Durable connection and leased queue; business projection is a separate adapter."""
 from uuid import uuid4
 
+import asyncpg
+
 from sales_backend.db import json_value
+from sales_backend import knowledge_availability
+
+
+class SyncLeaseLost(RuntimeError):
+    pass
 
 
 class FeishuRepository:
+    async def lock_lease(self, connection, event):
+        try:
+            await connection.execute("SELECT security.feishu_lock_lease($1,$2)", event['id'], event['lease_token'])
+        except asyncpg.PostgresError as exc:
+            if exc.sqlstate == 'P7403':
+                raise SyncLeaseLost('SYNC_LEASE_LOST') from None
+            raise
+
     async def config(self, connection, workspace_id, *, lock=False):
         row = await connection.fetchrow(
             "SELECT *,security.has_feishu_credential(id) AS has_credential FROM config.feishu_connection "  # noqa: S608
@@ -52,9 +67,9 @@ class FeishuRepository:
           SELECT 1 FROM ops.feishu_event e JOIN config.feishu_connection c ON c.id=e.connection_id
           WHERE e.id=$1 AND e.lease_token=$2 AND e.status='running'
           AND e.locked_until>clock_timestamp() AND c.enabled AND c.revision=$3
-          AND c.validated_revision=c.revision)""", event["id"], event["lease_token"], revision)
+          AND c.validated_revision=c.revision AND security.workspace_is_active(e.workspace_id) AND security.workspace_module_enabled(e.workspace_id,'feishu'))""", event["id"], event["lease_token"], revision)
         if not valid:
-            raise RuntimeError("SYNC_LEASE_OR_CONFIG_CHANGED")
+            raise SyncLeaseLost("SYNC_LEASE_OR_CONFIG_CHANGED")
 
     async def schedule_reconcile(self, connection):
         # Compatibility entry point: periodic full scans are retired. Durable
@@ -64,7 +79,8 @@ class FeishuRepository:
     async def claim(self, connection, *, prefer_history=False):
         return await connection.fetchrow("""WITH candidate AS (
           SELECT e.id FROM ops.feishu_event e JOIN config.feishu_connection c ON c.id=e.connection_id
-          WHERE c.enabled AND c.validated_revision=c.revision
+          WHERE c.enabled AND c.validated_revision=c.revision AND security.workspace_is_active(e.workspace_id) AND security.workspace_module_enabled(e.workspace_id,'feishu')
+          AND ($3::boolean OR e.object_kind <> 'knowledge')
           AND ((e.status IN ('pending','failed') AND e.available_at<=clock_timestamp())
             OR (e.status='running' AND e.locked_until<clock_timestamp()))
           AND NOT EXISTS(SELECT 1 FROM ops.feishu_event prior WHERE prior.connection_id=e.connection_id
@@ -79,7 +95,8 @@ class FeishuRepository:
             ELSE 1 END, e.sequence_no FOR UPDATE OF e,c SKIP LOCKED LIMIT 1
         ) UPDATE ops.feishu_event e SET status='running',attempts=attempts+1,
           lease_token=$1::uuid,locked_until=clock_timestamp()+interval '120 seconds'
-          FROM candidate WHERE e.id=candidate.id RETURNING e.*""", str(uuid4()), prefer_history)
+          FROM candidate WHERE e.id=candidate.id RETURNING e.*""", str(uuid4()), prefer_history,
+                                        knowledge_availability.KNOWLEDGE_AVAILABLE)
 
     async def finish(self, connection, event, *, error=None, retryable=False, retry_after=0):
         state = "succeeded" if error is None else (
@@ -91,16 +108,18 @@ class FeishuRepository:
           WHERE id=$1 AND lease_token=$2 AND status='running' AND locked_until>clock_timestamp()""",
           event["id"], event["lease_token"], state, error, delay)
         if status != "UPDATE 1":
-            raise RuntimeError("SYNC_LEASE_LOST")
+            raise SyncLeaseLost("SYNC_LEASE_LOST")
 
     async def remember(self, connection, event, table_id, record_id, digest, source_fingerprint=None):
-        await connection.execute("""INSERT INTO ops.feishu_record_map
-          (connection_id,workspace_id,object_kind,object_id,table_id,record_id,projection_hash,source_fingerprint)
-          VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(connection_id,object_kind,object_id)
-          DO UPDATE SET table_id=excluded.table_id,record_id=excluded.record_id,
-          projection_hash=excluded.projection_hash,source_fingerprint=excluded.source_fingerprint,
-          updated_at=clock_timestamp()""", event["connection_id"], event["workspace_id"],
-          event["object_kind"], event["object_id"], table_id, record_id, digest, source_fingerprint)
+        async with connection.transaction():
+            await self.lock_lease(connection, event)
+            await connection.execute("""INSERT INTO ops.feishu_record_map
+              (connection_id,workspace_id,object_kind,object_id,table_id,record_id,projection_hash,source_fingerprint)
+              VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(connection_id,object_kind,object_id)
+              DO UPDATE SET table_id=excluded.table_id,record_id=excluded.record_id,
+              projection_hash=excluded.projection_hash,source_fingerprint=excluded.source_fingerprint,
+              updated_at=clock_timestamp()""", event["connection_id"], event["workspace_id"],
+              event["object_kind"], event["object_id"], table_id, record_id, digest, source_fingerprint)
 
     async def freeze_delivery(self, connection, plan, workspace_id, card):
         await connection.execute("""INSERT INTO ops.feishu_delivery
@@ -126,23 +145,20 @@ class FeishuRepository:
             return await connection.fetchrow("""SELECT c.*,k.ciphertext,k.encryption_key_id,
               k.updated_at AS credential_updated_at
               FROM config.feishu_connection c JOIN security.feishu_credential k ON k.connection_id=c.id
-              WHERE c.validation_requested ORDER BY c.updated_at LIMIT 1""")
+              WHERE c.validation_requested AND security.workspace_is_active(c.workspace_id) AND security.workspace_module_enabled(c.workspace_id,'feishu') ORDER BY c.updated_at LIMIT 1""")
         return await connection.fetchrow("""SELECT c.*,k.ciphertext,k.encryption_key_id,
               k.updated_at AS credential_updated_at
           FROM config.feishu_connection c JOIN security.feishu_credential k ON k.connection_id=c.id
-          WHERE c.id=$1 AND c.enabled AND c.validated_revision=c.revision""", connection_id)
+          WHERE c.id=$1 AND c.enabled AND c.validated_revision=c.revision AND security.workspace_is_active(c.workspace_id) AND security.workspace_module_enabled(c.workspace_id,'feishu')""", connection_id)
 
     async def validation_result(self, connection, row, error):
         await connection.execute("""UPDATE config.feishu_connection SET validation_requested=false,
           validated_revision=CASE WHEN $3::text IS NULL THEN revision ELSE NULL END,last_error_code=$3
-          WHERE id=$1 AND revision=$2 AND EXISTS (SELECT 1 FROM security.feishu_credential k
+          WHERE id=$1 AND revision=$2 AND security.workspace_is_active(workspace_id) AND security.workspace_module_enabled(workspace_id,'feishu') AND EXISTS (SELECT 1 FROM security.feishu_credential k
             WHERE k.connection_id=$1 AND k.updated_at=$4)""",
           row["id"], row["revision"], error, row["credential_updated_at"])
 
     async def source(self, connection, event):
-        if event["object_kind"] == "weekly_report":
-            return json_value(await connection.fetchval("SELECT ops.feishu_weekly_source($1,$2)",
-                              event["connection_id"], event["object_id"]))
         return json_value(await connection.fetchval("SELECT ops.feishu_source($1,$2,$3)",
                           event["connection_id"], event["object_kind"], event["object_id"]))
 
@@ -161,7 +177,7 @@ class FeishuRepository:
             "WHERE id=$1 AND lease_token=$2 AND status='running' AND locked_until>clock_timestamp()",
             event["id"], event["lease_token"])
         if status != "UPDATE 1":
-            raise RuntimeError("SYNC_LEASE_LOST")
+            raise SyncLeaseLost("SYNC_LEASE_LOST")
 
     async def delivery_state(self, connection, key, status, *, message_id=None, error=None):
         await connection.execute("""UPDATE ops.feishu_delivery SET status=$2,message_id=$3,error_code=$4,
@@ -174,7 +190,7 @@ class FeishuRepository:
           WHERE id=$1 AND lease_token=$2 AND status='running' AND locked_until>clock_timestamp()""",
           event["id"], event["lease_token"])
         if status != "UPDATE 1":
-            raise RuntimeError("SYNC_LEASE_LOST")
+            raise SyncLeaseLost("SYNC_LEASE_LOST")
 
     async def try_lock(self, connection, key):
         return await connection.fetchval("SELECT pg_try_advisory_lock(hashtextextended($1,0))", key)

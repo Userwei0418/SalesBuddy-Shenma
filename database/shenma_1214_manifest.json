@@ -1,0 +1,332 @@
+{
+  "upstream_revision": "075cfbbf62b7a73a8a452c440b856bee335c6a9e",
+  "base_schema": "V399",
+  "target_schema": "V447",
+  "mapping": "upstream version + 148, historical gaps preserved",
+  "migrations": [
+    {
+      "upstream": "V253__review_history_and_daily_baselines.sql",
+      "mapped": "V401__review_history_and_daily_baselines.sql",
+      "upstream_sha256": "1993064e95f27f59418abaeeb6345e8583d29e01895a1e4a640ecbcbaaf0f442",
+      "mapped_sha256": "c0474423d7a9365540a5fe06d9a2395b4e052a5f2c35d7410fe5acdfee6e87b4",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V254__review_update_activity.sql",
+      "mapped": "V402__review_update_activity.sql",
+      "upstream_sha256": "a4f17558bffcc142b39a3ee9da74f89b5d70d761fba1635491bfacb3c7489e7e",
+      "mapped_sha256": "8452caab1f67fcd825054cb3ae0d9c32597c68707daa39f78d30b8132b0adf80",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V255__explicit_zero_targets.sql",
+      "mapped": "V403__explicit_zero_targets.sql",
+      "upstream_sha256": "57953a249e9d8a6524b69b6b6f8d1f6431db5cd080f13c86764f67e983c65828",
+      "mapped_sha256": "89e7fbb85bd15d581f5b2d84396367bbbd494b140d7de04c4a5e73175aa60aff",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V256__opportunity_explicit_collaboration.sql",
+      "mapped": "V404__opportunity_explicit_collaboration.sql",
+      "upstream_sha256": "5d8e9e11fbf61bb1cdf40d414335585ecf24ffd157e42c67057cf3706d5b9266",
+      "mapped_sha256": "eb6fc35f3b9e972d09d8a6a8ef8a52a10cadeb5f8c4d393847f71800a2b21816",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V257__task_execution_lifecycle.sql",
+      "mapped": "V405__task_execution_lifecycle.sql",
+      "upstream_sha256": "4e942c65d9037cc6733c2a1b28f116c0180d8e39d1185ae36318d4af7dc62ebb",
+      "mapped_sha256": "8ee92910b9c592bc080121f32032d71abd852b75a4ebd0f080b2f812ff71a1a8",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V258__knowledge_materials.sql",
+      "mapped": "V406__knowledge_materials.sql",
+      "upstream_sha256": "b090a351689a1c59e368b2b44f10a033d96c143cd9cb2479ad977baa063543c7",
+      "mapped_sha256": "3cf70c2711571d4be6921b63f741c06181979231a951815e30d83cad88b6fab0",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V259__opportunity_owner_transfer.sql",
+      "mapped": "V407__opportunity_owner_transfer.sql",
+      "upstream_sha256": "d2e838ae32300217d89bef6bdc56958cb3556e1b4f62dc283cb87abd28635a0d",
+      "mapped_sha256": "263d3f7bbb0b2d1cca4f5412021b8ca68128879ed22650e9379392724d8704a9",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V260__opportunity_owner_follow_up.sql",
+      "mapped": "V408__opportunity_owner_follow_up.sql",
+      "upstream_sha256": "0a19506ba6e4c899da88643cbe202680155e2d7e766c1704fe5d4b15bccfd31e",
+      "mapped_sha256": "21f0a6bbade8776eff3f31891acecf622c7e3c87fa779bd78aa014783cd9ce29",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V261__knowledge_acl_candidates.sql",
+      "mapped": "V409__knowledge_acl_candidates.sql",
+      "upstream_sha256": "a4bfe2b9e5bbd1ad6d6f815bad7ac347e268bd7cf32f09dcf0c65e7289b82381",
+      "mapped_sha256": "7b1e307e9b55df92829ce31553a1130eae4b77c5f1177f97d021cdd18e63cf0d",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V262__task_execution_legacy_compat.sql",
+      "mapped": "V410__task_execution_legacy_compat.sql",
+      "upstream_sha256": "408d8671f8a01b07b077ca9b2eda9a88c875b02f588a7c6b74152d8060dc2258",
+      "mapped_sha256": "1b816e56ff566ae20fe94bde3893a4071bc0b81e3b4b2a21a3b9c07716a4f61a",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V263__task_reviewer_handover_requires_confirmation.sql",
+      "mapped": "V411__task_reviewer_handover_requires_confirmation.sql",
+      "upstream_sha256": "faf0453026548b11941f89ebc71c75159df57d6f3f8332d280f2d02c4ea89a25",
+      "mapped_sha256": "04dd39ca446ff3172a4dd690af04d6bea31c63c4bf91353b50793573efa0cb59",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V264__knowledge_provider_bindings.sql",
+      "mapped": "V412__knowledge_provider_bindings.sql",
+      "upstream_sha256": "ac2d290ce14965094fef9bf0f2749ef014bac51dfe9e931a25e8ae297dcc36c1",
+      "mapped_sha256": "b851f1408c988484f9386a3022bbf67a05239d99cd152607632ff90979a478cb",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V265__knowledge_provider_binding_write.sql",
+      "mapped": "V413__knowledge_provider_binding_write.sql",
+      "upstream_sha256": "8d373a975e8876d7b04859782c6a93f09697709db3384f9c5b897923a796926f",
+      "mapped_sha256": "50d832ffaff48fb3569ad53191bd6cac848bf1808a2c21ffb02c75de482618ab",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V266__knowledge_work_sharing.sql",
+      "mapped": "V414__knowledge_work_sharing.sql",
+      "upstream_sha256": "97387eb4c4838ab6b4ad7274679995f7dd326b80e11615c93173584075f8cf9f",
+      "mapped_sha256": "a56b3f0e5d2071f210ac0483f41847432805994631c4b09d96a8a979572a748b",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V267__knowledge_source_import.sql",
+      "mapped": "V415__knowledge_source_import.sql",
+      "upstream_sha256": "971b6745850b109d82bdc818e25ab6f6d036a4daa6c9a2abbcb8e6251af0b127",
+      "mapped_sha256": "098df2c22c76c674d019d9266359d69a285ffd57e40c883298c04cc76b437945",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V268__knowledge_ingestion.sql",
+      "mapped": "V416__knowledge_ingestion.sql",
+      "upstream_sha256": "7c97060d2680b7bb04d73ed436a0bd750afe68b250af91e374672dbfa5bd2eca",
+      "mapped_sha256": "08e247d39f323c7a753ba088d0cb0a3ef77b9f008fd2536282ce6f15e04ba508",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V269__knowledge_customer_distribution.sql",
+      "mapped": "V417__knowledge_customer_distribution.sql",
+      "upstream_sha256": "dc546fc5e349dad153e161b15aecca740ddfc62b6d1d83a1e94efe2fb0a4e4ab",
+      "mapped_sha256": "488299324761f7c936ea6339e5cb53ad4f714fb6be30fa03e5e388f9ae5fe6a9",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V270__knowledge_distribution_feishu.sql",
+      "mapped": "V418__knowledge_distribution_feishu.sql",
+      "upstream_sha256": "52f323a648ae36e5264646aae893545484ebed7df10922796541fbf5744a80be",
+      "mapped_sha256": "175f002ecb2878a5a58104f04eedd9e52ce2625b6719a2683e7b220b42f4c375",
+      "preserves_weekly_kind": true
+    },
+    {
+      "upstream": "V271__knowledge_distribution_access_boundaries.sql",
+      "mapped": "V419__knowledge_distribution_access_boundaries.sql",
+      "upstream_sha256": "1636c6a1215b9588e877055c4e5e9bc6617229fbe5a8023cf5d984482845392f",
+      "mapped_sha256": "ddeefee83f9361166668bf79ffb626a37401f3971e4ab07c0ca8cabca36cdfb8",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V272__knowledge_notification_intent.sql",
+      "mapped": "V420__knowledge_notification_intent.sql",
+      "upstream_sha256": "e88379687dd76cda0d2b6b4b04c6e5269e101f65e54aa8b2081819dee426f96b",
+      "mapped_sha256": "00959eb9a443bfdbca885985424eb915afd5b1888ad935f548a5b0cfcca1e88d",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V273__knowledge_pdf_preview.sql",
+      "mapped": "V421__knowledge_pdf_preview.sql",
+      "upstream_sha256": "cbb823b0e0db63d44786a9f7abbfe5f1838c950e3f1a06df7ddc94a0b757951c",
+      "mapped_sha256": "194910523fb740b73dd2fb2c48c728617d9626a7ec91e4f89f89a013c1132ac0",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V274__knowledge_source_file_archive.sql",
+      "mapped": "V422__knowledge_source_file_archive.sql",
+      "upstream_sha256": "787d1e19e04cc96a2d7553e585e08c27b2e9205e5622c7ebfee2b10aba408eb1",
+      "mapped_sha256": "3f2ebd3364eb3fd2fd700aff3022e325e1b5a374aff059ac1e4a5682f2b3521f",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V275__opportunity_collaborator_original_access.sql",
+      "mapped": "V423__opportunity_collaborator_original_access.sql",
+      "upstream_sha256": "155162fe3b2db3046f54556393d9b8a4e28fe3991b464ca6cbb3a28661c4d3a2",
+      "mapped_sha256": "854b6534c93e1b3da46987a77517aaf4a28ab4ce2faaaba20ce25c5a988d948f",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V276__knowledge_feishu_labels.sql",
+      "mapped": "V424__knowledge_feishu_labels.sql",
+      "upstream_sha256": "560b11b6810b6b809cb808f1d12bb987fcc4bdf6a9cc750d250c628dc8af09ce",
+      "mapped_sha256": "dc2472693aae2c5b17c4ed4e201645652921f15fd18a060d02b014e066a111e4",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V277__knowledge_image_preview.sql",
+      "mapped": "V425__knowledge_image_preview.sql",
+      "upstream_sha256": "60224083fcbc9cd8218b3f7b48cf93820573c4f312a7e6e02c18d490bcc0a617",
+      "mapped_sha256": "e95e8633b94fed5056d3e1eb0329d0f99af7b30e26b6f16d2e6b8f3b05c0a67b",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V278__knowledge_silent_publication.sql",
+      "mapped": "V426__knowledge_silent_publication.sql",
+      "upstream_sha256": "fcb26b5bde3ee0ee0ff0b5f3ef70649189455c80463b975dffdb3a748833d07b",
+      "mapped_sha256": "b3dee6d93f1c27fe192930f34149621850a9bab356a82c9e8402a29b8d2aaade",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V279__visit_field_value_prefix_index.sql",
+      "mapped": "V427__visit_field_value_prefix_index.sql",
+      "upstream_sha256": "ae79f120bdd836e0628da95073eca304ce445cdbf84a11ba9368311b96567677",
+      "mapped_sha256": "ae79f120bdd836e0628da95073eca304ce445cdbf84a11ba9368311b96567677",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V280__fde_membership_change_history.sql",
+      "mapped": "V428__fde_membership_change_history.sql",
+      "upstream_sha256": "dbb59aedccc2b9c8dff2935cfbfa45d9c4f8399a5d0b8cec4488de714cba063d",
+      "mapped_sha256": "2530eb9502aeebc6ee8f172519da494e49a14a362311cc12e8959f35fd5b53ad",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V281__follow_up_customer_directory_recency.sql",
+      "mapped": "V429__follow_up_customer_directory_recency.sql",
+      "upstream_sha256": "a16ae909dcc10bfcbee377d6de4d279977ff02aab6b643dd85ddb67f889b4fe9",
+      "mapped_sha256": "42171cac2cfc431c1f083ddf49a10ce55675c75fee505ab7ffce5d98273967a0",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V282__company_asr_terminology_and_receipts.sql",
+      "mapped": "V430__company_asr_terminology_and_receipts.sql",
+      "upstream_sha256": "6d7d5fdf2c885948dde1b650ce8aa165aca398f7a0364fdb1e0c0033e5766d87",
+      "mapped_sha256": "145d5ad6798571674a9b8f403a50bc08fde17f036a089befd0c46efadbe81ad2",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V283__private_visit_audio.sql",
+      "mapped": "V431__private_visit_audio.sql",
+      "upstream_sha256": "c5d412d6891244f461e59f5e62f593f127b492809bc9def6db4105bd0c8840cc",
+      "mapped_sha256": "b472ace9821251060c6d62fb053d3f2510603d93114d8094eb5b03f0320aa008",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V284__asr_local_transport_capacity.sql",
+      "mapped": "V432__asr_local_transport_capacity.sql",
+      "upstream_sha256": "1f52717789736e565a2683ec0f0016e10ec583d4046f964f479743dfa45bc96d",
+      "mapped_sha256": "b0e94cafadbf64ace6c1f6ecd31fd76f0a9fc101ed97f77cb4d015455654b1f0",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V285__task_execution_autonomous_checklist.sql",
+      "mapped": "V433__task_execution_autonomous_checklist.sql",
+      "upstream_sha256": "306751aff39e52ce81782861905d610e5c2861ca63b2fee57d8da8240e944084",
+      "mapped_sha256": "7ad698e0fb95b1979bea2109674b4bad0b5638d595433faff8ccbb5ecbbeb22f",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V286__task_pending_handover_eligibility.sql",
+      "mapped": "V434__task_pending_handover_eligibility.sql",
+      "upstream_sha256": "74bfa34c599c5ba9ebbc7bc483fc7723c436a912c6d55e7f7c498242602f13dd",
+      "mapped_sha256": "7d49bb3d9963e5693a9e6128338443c7bf9211604e390eca203936635960eb1d",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V287__mini_readonly_identity.sql",
+      "mapped": "V435__mini_readonly_identity.sql",
+      "upstream_sha256": "053e1037c233801a8f549bd63eb6341addd49c0e855c6cd0104673077aa191ab",
+      "mapped_sha256": "9f6200638a30bc8b1818bb360d0adc0d9d3f13688b92e01f1f5f645d98f72960",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V288__task_execution_lightweight.sql",
+      "mapped": "V436__task_execution_lightweight.sql",
+      "upstream_sha256": "9fbca5a20cb761550c2c69bdf65315ba9d6ac54fe09d73d4d62e352a1e92c5de",
+      "mapped_sha256": "f4c87cf173735b58f60db6014ae36d49b6d4751aa5885aacd2897772383bc002",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V290__opportunity_collection_direct_edit.sql",
+      "mapped": "V438__opportunity_collection_direct_edit.sql",
+      "upstream_sha256": "da82182a0154e5fc2e1fa13b920ad8e44a0f70d509ca81d210098bc6638a99fc",
+      "mapped_sha256": "ae3ae7c16792348cfcf4b68f918a2f906568d23ce0148ead5ebad92c72f3a69b",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V291__company_opportunity_follow_up.sql",
+      "mapped": "V439__company_opportunity_follow_up.sql",
+      "upstream_sha256": "862b270bfa03ba5eaa6933c5faf6af1e29d2a0623ca93ac8d1adb65ebc84331a",
+      "mapped_sha256": "fb0cfee47692b0ed73791e957ee821a7345ef87c74cfebd247fa8fbed8afbaf7",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V292__sales_opportunity_creation_visibility.sql",
+      "mapped": "V440__sales_opportunity_creation_visibility.sql",
+      "upstream_sha256": "3b40f5dd34cd24203baea8b55a9dbf58955d5b08eff26428161095c1a83989e8",
+      "mapped_sha256": "89973f319ed82c86745059acbd1b4b5b661bfd4db4d87ff7e4955701be31e641",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V293__company_customer_follow_up.sql",
+      "mapped": "V441__company_customer_follow_up.sql",
+      "upstream_sha256": "c9e7758acd526a930d570c38fa730de010c2ec9aaaa3ae3c4ef20354b3049707",
+      "mapped_sha256": "690095c2bedfe1ea0e125d4eb3f7aba30363c482cb6f621764a4615e3637239b",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V294__opportunity_recognized_actuals.sql",
+      "mapped": "V442__opportunity_recognized_actuals.sql",
+      "upstream_sha256": "2caf64fb96ff6b90fa76ae137af73499b6d681c3436230953f7092c1befcb8bd",
+      "mapped_sha256": "1eaf2a5d6fd1f0efa3d6aafa064318cf2c658b2c43d7ec2d467f2e9b5d9151ce",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V295__dashboard_acv_amount_coverage.sql",
+      "mapped": "V443__dashboard_acv_amount_coverage.sql",
+      "upstream_sha256": "1a4de206777b8da24c5228c7736effe5107d6206cdb9bf1db0fd717f02ff964c",
+      "mapped_sha256": "ed18267fb888494fcfcc91b143de40dc0f187d43bdad7d646b39349cd87d6afe",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V296__target_metric_dictionary_restore.sql",
+      "mapped": "V444__target_metric_dictionary_restore.sql",
+      "upstream_sha256": "4bb7575e5012ab5495a716ca28a6be0770f6163c2a7ee1f9e0b4202058072fcd",
+      "mapped_sha256": "d136f2c724e9b40386dbc1d0d52093b7d8a82b4d3510601a6746ccf589eb4d9c",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V297__opportunity_creation_claim_scope.sql",
+      "mapped": "V445__opportunity_creation_claim_scope.sql",
+      "upstream_sha256": "277a6a1f4da2d89e504d14ecc4d9c8657abee11eaeb4d7b845f79cf7d10e2409",
+      "mapped_sha256": "9084c25cdabf19d041d01cde295f0290295407e62b1227dc6f05fb80dea5f406",
+      "preserves_weekly_kind": false
+    },
+    {
+      "upstream": "V298__battle_map_self_score_write.sql",
+      "mapped": "V446__battle_map_self_score_write.sql",
+      "upstream_sha256": "c3796a2a7d0ffbd4e02b2c1dc338865222b5ad606257fdad8ec20887be671df0",
+      "mapped_sha256": "8a9afa610830b28345df2ddff5ec80f8cbc3cf10a3fa94fdb7c2b648eddb37bd",
+      "preserves_weekly_kind": false
+    }
+  ],
+  "customer_migrations": [
+    {
+      "file": "V447__shenma_1214_runtime_grants.sql",
+      "sha256": "c548b2e9ed255d3bb145f7931d9ca4ebc2a3bfeedb67c2f2a91651a0a2d87d63",
+      "grant_statement_count": 133,
+      "upstream_permissions_sha256": "303056a3802b18c4597d0119853525833dbcd5d911fe46a3f811292b9423d3e4",
+      "feishu_delta": "security.is_demo_readonly_identity(uuid,uuid) EXECUTE for existing Feishu worker group"
+    }
+  ]
+}

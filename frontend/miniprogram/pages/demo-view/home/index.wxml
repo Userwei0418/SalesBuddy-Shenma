@@ -1,0 +1,16 @@
+<import src="../common.wxml"/>
+<view class="page">
+  <view class="workspace-head"><view><view class="heading">{{greeting}}</view><view class="muted workspace-meta">{{companyName}}</view></view><view wx:if="{{ready}}" class="scope-pill"><text class="scope-dot"></text>公司全部部门</view></view>
+  <template is="state" data="{{loading,ready,error}}"/>
+  <block wx:if="{{ready}}">
+    <view class="hero"><view class="hero-title">经营摘要</view><view class="metrics"><view wx:for="{{counts}}" wx:key="module" class="metric" data-module="{{item.module}}" bindtap="openModule" hover-class="row-pressed"><text class="metric-number">{{item.value}}</text><text class="metric-label">{{item.label}}</text></view></view></view>
+    <view class="quick-grid"><view wx:for="{{modules}}" wx:key="key" class="quick-entry" data-module="{{item.key}}" bindtap="openModule" hover-class="row-pressed"><image class="quick-icon" src="{{item.icon}}" mode="aspectFit"/><view><view class="quick-title">{{item.title}}</view><view class="quick-note">{{item.note}}</view></view></view></view>
+    <view wx:for="{{sections}}" wx:key="key">
+      <view class="section-head"><text class="section-title">{{item.title}}</text><text class="section-link" data-module="{{item.key}}" bindtap="openModule">全部 ›</text></view>
+      <view wx:if="{{item.loading}}" class="card state">正在加载…</view>
+      <view wx:elif="{{item.error}}" class="card state error"><text>{{item.error}}</text><button size="mini" data-module="{{item.key}}" bindtap="openModule">查看全部</button></view>
+      <block wx:else><view wx:for="{{item.items}}" wx:for-item="record" wx:key="id" class="record" data-id="{{record.id}}" data-module="{{item.key}}" bindtap="openRecord" hover-class="row-pressed"><template is="record" data="{{item:record}}"/></view><view wx:if="{{!item.items.length}}" class="card state">暂无记录</view></block>
+    </view>
+  </block>
+  <template is="navigation" data="{{navItems,activeKey}}"/>
+</view>

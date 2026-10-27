@@ -84,13 +84,21 @@ async def assistant_home(
     )
 
 
-@router.post("/conversations", response_model=ConversationResponse, status_code=201)
+@router.post(
+    "/conversations", response_model=ConversationResponse, status_code=201,
+    responses={403: {"description": "当前 Agent 用途或客户端入口权限不足"}},
+)
 async def create_conversation(
     body: ConversationCreate,
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
     idempotency_key: MutationKey = None,
 ) -> ConversationResponse:
+    """创建按当前用途授权的会话。
+
+    customer_create 只生成待人工确认的建档草稿，允许 customer.create 或
+    customer.create_request 任一权限；不会创建正式客户、商机或拜访。
+    """
     async with database.transaction(identity.actor) as connection:
         try:
             await require_agent_access(connection, identity.actor, body.mode, body.customer_id,
@@ -119,7 +127,10 @@ async def create_conversation(
     "/conversations/{conversation_id}/messages",
     response_model=RunAccepted,
     status_code=202,
-    responses={409: {"description": "同一 client_message_id 对应的消息内容发生变化"}},
+    responses={
+        403: {"description": "当前会话用途、Agent 历史或客户端入口权限不足"},
+        409: {"description": "同一 client_message_id 对应的消息内容发生变化"},
+    },
 )
 async def send_message(
     conversation_id: UUIDString,
@@ -127,6 +138,12 @@ async def send_message(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
 ) -> RunAccepted:
+    """按当前权限提交消息；幂等重放也会重新校验。
+
+    customer_create 草稿允许 customer.create 或 customer.create_request。
+    Worker 启动、读取事实、模型发送/重试和结果落库仍校验当前授权及权限版本。
+    正式创建与申请审核沿用各自的独立接口权限。
+    """
     try:
         async with database.transaction(identity.actor) as connection:
             context = await AssistantRepository().conversation_context(connection, conversation_id)

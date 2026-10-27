@@ -6,6 +6,48 @@ from decimal import Decimal
 
 from sales_backend.repositories.targets import TargetRepository
 
+Q4_TARGET_IMPORT_MARKER = "Q4目标表 revision54 导入"
+
+
+def is_q4_imported_target(row):
+    """Recognize the immutable Q4 import marker in either audit column.
+
+    The production import writes the provenance into ``change_reason`` while
+    older rows used ``source``.  Both columns are read-only provenance here;
+    accepting either keeps the yuan conversion at the read boundary without
+    converting manually maintained targets.
+    """
+    return any(
+        Q4_TARGET_IMPORT_MARKER in str(row.get(key) or "")
+        for key in ("source", "change_reason")
+    )
+
+
+def normalize_imported_target_amounts(result):
+    """Expose the historical Feishu import in the canonical yuan contract.
+
+    The first Q4 import stored the spreadsheet's business figures directly
+    (for example ``500`` meant 500 万元) before the target unit was made
+    explicit.  New target writes already store yuan.  Restricting the
+    conversion to the immutable source marker keeps unrelated targets and
+    historical audit snapshots untouched while making every read API agree.
+    """
+    def scale(value):
+        if value is None:
+            return None
+        return format(Decimal(str(value)) * Decimal(10000), ".2f")
+
+    for row in result.get("items", []):
+        if not is_q4_imported_target(row):
+            continue
+        for key in ("amount", "amount_text", "effective_amount"):
+            if key in row and row[key] is not None:
+                row[key] = scale(row[key])
+        pending = row.get("pending_change")
+        if isinstance(pending, dict) and pending.get("proposed_amount") is not None:
+            pending["proposed_amount"] = scale(pending["proposed_amount"])
+    return result
+
 
 def target_period(period_type, anchor):
     if period_type == "week":
@@ -69,15 +111,15 @@ async def read_targets(
     result = await repo.list(
         connection, actor, period=period, scope=selected, kind=kind, limit=limit, offset=offset, q=q
     )
-    pending = await repo.requests(connection, actor, period=period, scope=selected, status="pending", limit=100)
-    batches = await repo.batches(connection, actor, period=period, scope=selected, status="pending", limit=100)
-    recent = await repo.batches(connection, actor, period=period, scope=selected, limit=10)
+    pending = await repo.requests(connection, actor, period=period, scope=selected, status="pending", limit=100, legacy_only=True)
+    batches = await repo.batches(connection, actor, period=period, scope=selected, status="pending", limit=100, legacy_only=True)
+    recent = await repo.batches(connection, actor, period=period, scope=selected, limit=10, legacy_only=True)
     editable = await repo.allowed(connection, selected, write=True) if selected else management
     if not management:
         current = await connection.fetchval("SELECT timezone('Asia/Shanghai',clock_timestamp())::date")
         editable = editable and period == target_period("quarter", current)
     return {
-        **result,
+        **normalize_imported_target_amounts(result),
         "period": period,
         "scope": selected,
         "pending_requests": pending["items"],

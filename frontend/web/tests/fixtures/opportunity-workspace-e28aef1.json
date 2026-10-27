@@ -1,0 +1,1036 @@
+{
+  "backend_revision": "e28aef10f2da2fcb1ba9e6a6199dbc534720b3b9",
+  "definition_version": "opportunity_workspace_v2",
+  "sources": {
+    "backend/src/sales_backend/domain/opportunities.py": "2200bb279ee1c4605012348dd85bc57c575cd8efc81ba2157f80213a7f2af405",
+    "backend/src/sales_backend/domain/opportunity_field_catalog.py": "3f6ab0c5357e50a956967823e6995d906723666e10510e36d808699e46772370",
+    "backend/src/sales_backend/contracts/opportunity_workspace.py": "4d8656849f3580feb2fcce0112fcda2d001d23fd0b88e589d2a9adba72395b43",
+    "docs/collaboration/backend/SB120-WEB-005-VIEWS-CONTRACT.md": "fbf2d4fbe68c3ee2883d44b250d222ad5d15c6a8187e7cb3d4a070e3d5e3af7e",
+    "docs/collaboration/backend/SB120-MINI-002-UPLOAD-INTENT-CONTRACT.md": "d4e5f6be3ea72bfc7457389bb23f3643fb9221ba370bdec0e5e3986a0d4565b7"
+  },
+  "fields": [
+    {
+      "key": "id",
+      "label": "商机ID",
+      "type": "text",
+      "nullable": false,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "name",
+      "label": "商机名称",
+      "type": "text",
+      "nullable": false,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 240,
+      "max_length": 200
+    },
+    {
+      "key": "customer_name",
+      "label": "客户名称",
+      "type": "text",
+      "nullable": false,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 180
+    },
+    {
+      "key": "stage",
+      "label": "商机阶段",
+      "type": "enum",
+      "nullable": false,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 130,
+      "options": [
+        {
+          "value": "identified",
+          "label": "意向沟通"
+        },
+        {
+          "value": "qualified",
+          "label": "商机确认"
+        },
+        {
+          "value": "solution",
+          "label": "方案沟通"
+        },
+        {
+          "value": "proposal",
+          "label": "商务谈判"
+        },
+        {
+          "value": "negotiation",
+          "label": "客户签约"
+        },
+        {
+          "value": "won",
+          "label": "赢单 Won"
+        },
+        {
+          "value": "lost",
+          "label": "丢单 Lost"
+        }
+      ]
+    },
+    {
+      "key": "status",
+      "label": "商机状态",
+      "type": "enum",
+      "nullable": false,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 130,
+      "options": [
+        {
+          "value": "open",
+          "label": "在推"
+        },
+        {
+          "value": "won",
+          "label": "赢单"
+        },
+        {
+          "value": "lost",
+          "label": "输单"
+        }
+      ]
+    },
+    {
+      "key": "owner",
+      "label": "商机销售",
+      "type": "person",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 130,
+      "directory": {
+        "source": "scope_options.owners",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "team",
+      "label": "所属团队",
+      "type": "person",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 140,
+      "directory": {
+        "source": "scope_options.teams",
+        "kind": "team"
+      }
+    },
+    {
+      "key": "amount",
+      "label": "ACV（元）",
+      "type": "money",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 150
+    },
+    {
+      "key": "sales_channel",
+      "label": "签单方式",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "direct",
+          "label": "直签"
+        },
+        {
+          "value": "partner",
+          "label": "伙伴签约"
+        }
+      ]
+    },
+    {
+      "key": "partner",
+      "label": "所属伙伴",
+      "type": "person",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "directory": {
+        "url": "/api/v1/directory/partners",
+        "kind": "partner"
+      }
+    },
+    {
+      "key": "product_line",
+      "label": "产品线",
+      "type": "text",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "max_length": 200
+    },
+    {
+      "key": "expected_close_date",
+      "label": "预计关单日期",
+      "type": "date",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "expected_close_year",
+      "label": "预计关单年份",
+      "type": "number",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160
+    },
+    {
+      "key": "expected_close_quarter",
+      "label": "预计关单季度",
+      "type": "number",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160
+    },
+    {
+      "key": "customer_source",
+      "label": "客户来源",
+      "type": "multi_enum",
+      "nullable": false,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "has_any",
+        "has_all",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": false,
+      "groupable": false,
+      "width": 160,
+      "options": [
+        {
+          "value": "company_lead",
+          "label": "公司线索"
+        },
+        {
+          "value": "partner_existing",
+          "label": "伙伴存量客户"
+        },
+        {
+          "value": "marketing_event",
+          "label": "市场活动"
+        },
+        {
+          "value": "customer_referral",
+          "label": "以客带客"
+        },
+        {
+          "value": "partner_stock",
+          "label": "伙伴压货"
+        },
+        {
+          "value": "digital_marketing",
+          "label": "数字营销"
+        },
+        {
+          "value": "sales_outbound",
+          "label": "销售自拓"
+        }
+      ]
+    },
+    {
+      "key": "priority",
+      "label": "优先级",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "p0",
+          "label": "P0"
+        }
+      ]
+    },
+    {
+      "key": "is_key",
+      "label": "是否重点",
+      "type": "boolean",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160
+    },
+    {
+      "key": "trial_status",
+      "label": "是否开通试用",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "preparing",
+          "label": "素材准备中"
+        },
+        {
+          "value": "requested",
+          "label": "申请试用"
+        },
+        {
+          "value": "enabled",
+          "label": "开通试用"
+        }
+      ]
+    },
+    {
+      "key": "summary",
+      "label": "一句话总结",
+      "type": "text",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 260,
+      "max_length": 500
+    },
+    {
+      "key": "note",
+      "label": "备注",
+      "type": "text",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 260,
+      "max_length": 5000
+    },
+    {
+      "key": "ppl_status",
+      "label": "系统是否创建PPL",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "created",
+          "label": "已创建"
+        },
+        {
+          "value": "not_created",
+          "label": "未创建"
+        }
+      ]
+    },
+    {
+      "key": "external_system_status",
+      "label": "系统里状态",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "commit",
+          "label": "commit 十拿九稳"
+        },
+        {
+          "value": "high",
+          "label": "High 很有可能"
+        },
+        {
+          "value": "medium",
+          "label": "Medium 一半赢率"
+        },
+        {
+          "value": "low",
+          "label": "low 三成把握"
+        }
+      ]
+    },
+    {
+      "key": "primary_fde_id",
+      "label": "主责FDE",
+      "type": "person",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "directory": {
+        "url": "/api/v1/directory/opportunity-members?kind=fde",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "fde_member_ids",
+      "label": "长期协助FDE",
+      "type": "people",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "has_any",
+        "has_all",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": false,
+      "groupable": false,
+      "width": 160,
+      "directory": {
+        "url": "/api/v1/directory/opportunity-members?kind=fde",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "participants",
+      "label": "项目参与人员",
+      "type": "people",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "has_any",
+        "has_all",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": false,
+      "groupable": false,
+      "width": 160,
+      "directory": {
+        "url": "/api/v1/directory/opportunity-members?kind=all",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "fde_support_stage",
+      "label": "FDE支持阶段",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "trial_support",
+          "label": "试用支持"
+        },
+        {
+          "value": "demo_build",
+          "label": "Demo 搭建"
+        },
+        {
+          "value": "project_delivery",
+          "label": "项目落地"
+        }
+      ]
+    },
+    {
+      "key": "fde_progress",
+      "label": "FDE进展",
+      "type": "text",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 260,
+      "max_length": 5000
+    },
+    {
+      "key": "follow_up_plan",
+      "label": "下一步计划",
+      "type": "text",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "inline",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 260,
+      "max_length": 5000
+    },
+    {
+      "key": "customer_owner",
+      "label": "客户所属销售",
+      "type": "person",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "directory": {
+        "source": "scope_options.owners",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "region",
+      "label": "所属区域",
+      "type": "text",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160
+    },
+    {
+      "key": "creator",
+      "label": "创建人",
+      "type": "person",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "directory": {
+        "url": "/api/v1/directory/opportunity-members?kind=all",
+        "kind": "person"
+      }
+    },
+    {
+      "key": "business_created_on",
+      "label": "商机创建日期",
+      "type": "date",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "latest_followup_at",
+      "label": "最近一次跟进时间",
+      "type": "datetime",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "latest_progress",
+      "label": "最新进展",
+      "type": "text",
+      "nullable": true,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "contains",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 260
+    },
+    {
+      "key": "has_followup_7d",
+      "label": "7天内有跟进",
+      "type": "boolean",
+      "nullable": false,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160
+    },
+    {
+      "key": "demo_count",
+      "label": "Demo数量",
+      "type": "number",
+      "nullable": false,
+      "read_only": true,
+      "editable": false,
+      "edit_mode": "none",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "forecast_recognized",
+      "label": "期间预测含税确收（元）",
+      "type": "money",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "forecast_collection",
+      "label": "期间预测回款（元）",
+      "type": "money",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "collection_confidence",
+      "label": "期间回款信心",
+      "type": "enum",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "in",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": true,
+      "width": 160,
+      "options": [
+        {
+          "value": "high",
+          "label": "高"
+        },
+        {
+          "value": "low",
+          "label": "低"
+        }
+      ]
+    },
+    {
+      "key": "actual_recognized",
+      "label": "期间实际不含税确收（元）",
+      "type": "money",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    },
+    {
+      "key": "actual_collection",
+      "label": "期间实际回款（元）",
+      "type": "money",
+      "nullable": true,
+      "read_only": false,
+      "editable": false,
+      "edit_mode": "panel",
+      "filter_ops": [
+        "eq",
+        "ne",
+        "gt",
+        "gte",
+        "lt",
+        "lte",
+        "between",
+        "is_empty",
+        "is_not_empty"
+      ],
+      "sortable": true,
+      "groupable": false,
+      "width": 160
+    }
+  ],
+  "config_max_bytes": 32768
+}

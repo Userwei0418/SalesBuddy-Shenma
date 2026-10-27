@@ -66,16 +66,21 @@ EDIT_KEYS = (
 )
 
 
-def validate_forecast_completeness(opportunity, rows):
+def validate_forecast_completeness(opportunity, rows, *, existing=(), schema_version=1):
     """A zero plan is explicit; an absent/null plan is not a zero forecast."""
     if opportunity["status"] == "lost" or (opportunity.get("probability") or 0) < 30:
         return
     entered = [r for r in rows if r.get("recognized_amount") is not None or r.get("collection_amount") is not None]
     if not entered:
         raise ValueError("30%及以上阶段须至少填写一个季度的回款和确收，金额为零请填 0")
+    old = {(r["year"], r["quarter"]): r for r in existing}
     for row in entered:
         if row.get("recognized_amount") is None or row.get("collection_amount") is None:
             raise ValueError(f"{row['year']} Q{row['quarter']}：请补全季度回款和确收，金额为零请填 0")
+        prior = old.get((row["year"], row["quarter"]), {})
+        changed = any(row.get(k) != prior.get(k) for k in ("recognized_amount", "collection_amount", "collection_confidence"))
+        if schema_version >= 2 and changed and row.get("collection_confidence") not in {"high", "low"}:
+            raise ValueError(f"{row['year']} Q{row['quarter']}：请选择回款信心度")
 
 
 def normalize_forecasts(existing, updates):
@@ -86,7 +91,7 @@ def normalize_forecasts(existing, updates):
         if key in seen:
             raise ValueError("同一季度只能填写一条预测")
         seen.add(key)
-        merged[key] = dict(row)
+        merged[key] = {**merged.get(key, {}), **row}
     return [merged[key] for key in sorted(merged)]
 
 
@@ -100,11 +105,13 @@ def differences(before, after, old_forecasts, new_forecasts):
         "product_line": "产品线",
         "follow_up_plan": "跟进计划",
     }
-    if before and (
-        str(before.get("partner_id")) != str(after.get("partner_id"))
-        or before.get("sales_channel") != after.get("sales_channel")
-    ):
-        rows.append({"label": "销售渠道", "before": before.get("sales_channel"), "after": after.get("sales_channel")})
+    if before and before.get("sales_channel") != after.get("sales_channel"):
+        rows.append({"field": "sales_channel", "label": "销售渠道",
+                     "before": before.get("sales_channel"), "after": after.get("sales_channel")})
+    if before and str(before.get("partner_id")) != str(after.get("partner_id")):
+        rows.append({"field": "partner_id", "label": "所属伙伴标识",
+                     "before": str(before["partner_id"]) if before.get("partner_id") else None,
+                     "after": str(after["partner_id"]) if after.get("partner_id") else None})
     if not before or stage_label(before) != stage_label(after):
         rows.append(
             {"label": "商机阶段", "before": stage_label(before) if before else "新建", "after": stage_label(after)}
@@ -135,6 +142,11 @@ def differences(before, after, old_forecasts, new_forecasts):
                         "after": str(row[key] / Decimal(10000)) if row.get(key) is not None else "未填写",
                     }
                 )
+        if row.get("collection_confidence") != prior.get("collection_confidence"):
+            labels = {"high": "高（≥70%）", "low": "低（<70%）"}
+            rows.append({"label": f"{row['year']} Q{row['quarter']} 回款信心度",
+                         "before": labels.get(prior.get("collection_confidence"), "未填写"),
+                         "after": labels.get(row.get("collection_confidence"), "未填写")})
     return rows
 
 

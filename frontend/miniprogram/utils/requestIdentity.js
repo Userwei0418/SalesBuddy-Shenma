@@ -1,5 +1,6 @@
 // Transport receipts only: no business payload, result or token is stored here.
 const STORAGE_KEY = 'salesPendingMutations:v1';
+const OPPORTUNITY_STORAGE_KEY = 'salesPendingOpportunitySaves:v1';
 const K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
   0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
   0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
@@ -49,25 +50,90 @@ function uuid() {
     const r=Math.floor(Math.random()*16);return (c==='x'?r:(r&3)|8).toString(16);
   });
 }
+function fingerprint(scope, options) {
+  const payload=canonical(options.data || null);
+  // A fresh amount acknowledgment may change after an uncertain save when the
+  // company threshold changes. Keep the same business-intent key for its retry.
+  // Only these two formal opportunity writes use this non-business field.
+  if(options.method==='POST' && payload && typeof payload==='object') {
+    if(/^\/customers\/[^/?]+\/opportunities$/.test(options.path)) delete payload.amount_confirmed_value;
+    else if(options.path==='/visits' && payload.fields && payload.fields._opportunity_mutation) {
+      delete payload.fields._opportunity_mutation.amount_confirmed_value;
+    }
+  }
+  return sha256(JSON.stringify(canonical([scope,options.method,options.path,payload])));
+}
 function begin(scope, options) {
-  const fingerprint=sha256(JSON.stringify(canonical([scope,options.method,options.path,options.data||null])));
+  const signature=fingerprint(scope,options);
   const pending=wx.getStorageSync(STORAGE_KEY)||{};
-  const key=options.idempotencyKey||pending[fingerprint]||uuid();
-  pending[fingerprint]=key;
+  const key=options.idempotencyKey||(options.freshIntent ? uuid() : pending[signature])||uuid();
+  pending[signature]=key;
   // Persist BEFORE sending; if storage is unavailable, don't issue an unprotected mutation.
   wx.setStorageSync(STORAGE_KEY,pending);
-  return {fingerprint,key};
+  return {fingerprint:signature,key};
 }
 function finish(identity) {
   const pending=wx.getStorageSync(STORAGE_KEY)||{};
   if(pending[identity.fingerprint]!==identity.key) return;
   delete pending[identity.fingerprint];wx.setStorageSync(STORAGE_KEY,pending);
 }
+
+// Keep only receipt-routing metadata. Draft fields and saved business results
+// must never enter this store. One unresolved create also blocks a new customer.
+function opportunitySlot(scope, opportunityId) {
+  return sha256(JSON.stringify(canonical([scope, 'opportunity-save', opportunityId || 'create'])));
+}
+function pendingOpportunity(scope, opportunityId) {
+  const slot = opportunitySlot(scope, opportunityId);
+  const record = (wx.getStorageSync(OPPORTUNITY_STORAGE_KEY) || {})[slot];
+  if (!record) return null;
+  if (typeof record.key !== 'string' || !record.key || typeof record.fingerprint !== 'string' ||
+      typeof record.customerId !== 'string' || !record.customerId ||
+      !['create','update'].includes(record.action) || record.opportunityId !== (opportunityId || '')) {
+    throw Object.assign(new Error('原保存标识无法读取，请联系管理员核对，勿重复创建'), {code:'OPPORTUNITY_RECOVERY_INVALID'});
+  }
+  return {...record, slot};
+}
+function rememberOpportunity(scope, customerId, payload, identity) {
+  const opportunityId = payload.action === 'update' ? payload.opportunity_id : '';
+  const slot = opportunitySlot(scope, opportunityId), records = wx.getStorageSync(OPPORTUNITY_STORAGE_KEY) || {};
+  records[slot] = {key:identity.key, fingerprint:identity.fingerprint, customerId,
+    opportunityId:opportunityId || '', action:payload.action};
+  wx.setStorageSync(OPPORTUNITY_STORAGE_KEY, records);
+  return {...records[slot], slot};
+}
+function finishOpportunity(record) {
+  finish(record);
+  const records = wx.getStorageSync(OPPORTUNITY_STORAGE_KEY) || {};
+  if (!records[record.slot] || records[record.slot].key !== record.key) return;
+  delete records[record.slot];
+  wx.setStorageSync(OPPORTUNITY_STORAGE_KEY, records);
+}
+function validOpportunityReceipt(result, context = {}) {
+  const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
+  return !!result && uuid(result.id) &&
+    typeof result.changed === 'boolean' && Number.isInteger(result.version_no) && result.version_no > 0 &&
+    (!result.changed || uuid(result.event_id)) &&
+    (!context.opportunityId || result.id === context.opportunityId) &&
+    (result.customer_id === undefined || !context.customerId || result.customer_id === context.customerId) &&
+    (!context.recovered || (result.customer_id === context.customerId &&
+      (result.changed ? result.operation === (context.action === 'update' ? 'updated' : 'created') : result.operation === 'unchanged')));
+}
 function supports(options) {
+  if(options.method==='POST' && /^\/tasks\/[^/?]+\/execution(?:-v3)?\/[a-z_]+$/.test(options.path))return true;
+  if(options.method==='POST' && ['/visit-flow/structure','/visit-flow/quality'].includes(options.path)) return true;
+  if(options.method==='POST' && /^\/risks\/[^/?]+\/decision$/.test(options.path)) return true;
+  if(options.method==='POST' && options.path==='/profile/sales-growth/review') return true;
+  if(['POST','PUT'].includes(options.method) && /^\/work-reports(?:[/?]|$)/.test(options.path)) return true;
+  if(options.method==='POST' && options.path==='/opportunity-views') return true;
+  if(['PUT','DELETE'].includes(options.method) && /^\/opportunity-views\/[^/?]+$/.test(options.path)) return true;
+  if(options.method==='POST' && /^\/customer-assets\/map\/refresh(?:\?.*)?$/.test(options.path)) return true;
   if(options.method==='DELETE' && /^\/demo-scenes\/[^/?]+$/.test(options.path)) return true;
-  if(options.method==='PUT' && /^\/opportunities\/[^/?]+\/fde-members$/.test(options.path)) return true;
+  if(options.method==='PUT' && /^\/opportunities\/[^/?]+\/(?:fde-members|people)$/.test(options.path)) return true;
+  if(options.method==='PATCH' && /^\/opportunities\/[^/?]+\/fields$/.test(options.path)) return true;
   return ['POST','PATCH'].includes(options.method) && (
     /^\/customers(?:\/[^/?]+(?:\/(?:assignments|claims|opportunities))?)?$/.test(options.path) ||
+    options.path === '/customers/creation-requests' ||
     /^\/tasks(?:\/batch|\/[^/?]+\/events)?$/.test(options.path) ||
     /^\/advice\/suggestions\/[^/?]+\/decision$/.test(options.path) ||
     /^\/visits(?:\/[^/?]+)?$/.test(options.path) ||
@@ -77,4 +143,5 @@ function supports(options) {
     options.path === '/targets' || options.path === '/profile/sales-targets'
   );
 }
-module.exports={begin,finish,supports,sha256,canonical,STORAGE_KEY};
+module.exports={begin,finish,fingerprint,supports,sha256,canonical,STORAGE_KEY,
+  pendingOpportunity,rememberOpportunity,finishOpportunity,validOpportunityReceipt,OPPORTUNITY_STORAGE_KEY};

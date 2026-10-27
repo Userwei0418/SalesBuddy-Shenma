@@ -1,0 +1,7 @@
+{
+  "component": true,
+  "usingComponents": {
+    "t-result": "../../tdesign/result/result",
+    "t-button": "../../tdesign/button/button"
+  }
+}

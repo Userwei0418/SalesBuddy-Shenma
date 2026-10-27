@@ -1,8 +1,6 @@
 """Real RLS, task materialization and lifecycle boundaries; synthetic provider HTTP."""
 
-import asyncio
 import json
-from contextlib import asynccontextmanager
 from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
@@ -29,6 +27,7 @@ from sales_backend.services.agent_run import handler as business
 from sales_backend.services.agent_run.today_scope import TodaySourceChanged
 from sales_backend.services.tasks import TaskService
 from sales_backend.worker import Worker
+from tests.integration.connection_pool import FixtureConnectionPool
 from tests.integration.test_operations_claims_sql import actor as select_actor
 from tests.test_fde_facts_runtime import Chunks, frame
 from tests.test_today_tasks_platform import ANSWER, configured
@@ -112,18 +111,7 @@ async def test_today_tasks_only_materializes_own_followups_and_preserves_managem
         await repository.publish(connection, execution_id, 1)
         await set_request_context(connection, sales_actor)
 
-    class Pool:
-        # A production pool gives each borrower exclusive access. This fixture
-        # keeps one rollback connection, so cancellation audit and fallback
-        # must serialize their leases instead of sharing a busy connection.
-        lock = asyncio.Lock()
-
-        @asynccontextmanager
-        async def acquire(self):
-            async with self.lock:
-                yield connection
-
-    database = Database(config, pool=Pool())
+    database = Database(config, pool=FixtureConnectionPool(connection))
     answer = deepcopy(ANSWER)
     answer["ordered_items"][0]["source_id"] = visit["id"]
     answer["ordered_items"][0]["due_at"] = source_due.isoformat()

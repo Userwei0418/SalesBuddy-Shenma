@@ -72,6 +72,7 @@ async def main():
             "INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,$2,'Policy regression')",
             workspace, str(workspace),
         )
+        await connection.execute("UPDATE control.tenant_module SET enabled=true WHERE workspace_id=$1 AND module_code='ai'",workspace)
         await connection.execute(
             "INSERT INTO platform.team(id,workspace_id,code,name) VALUES($1,$2,'POLICY','Policy')", team, workspace
         )

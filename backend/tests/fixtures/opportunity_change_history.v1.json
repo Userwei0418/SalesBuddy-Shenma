@@ -1,0 +1,287 @@
+{
+  "schema_version": 1,
+  "opportunity_id": "00000000-0000-4000-8000-000000000007",
+  "history_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "changes": {
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "version_no": 3,
+        "created_at": "2026-10-20T07:30:00Z",
+        "actor": {
+          "id": "00000000-0000-4000-8000-000000000002",
+          "name": "合成销售",
+          "name_status": "current"
+        },
+        "reason": "按确认结果更新商机资料",
+        "fields": [
+          {
+            "field": "stage",
+            "label": "商机阶段",
+            "before": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "意向沟通－10%",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            },
+            "after": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "商机确认－30%",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            }
+          },
+          {
+            "field": "amount",
+            "label": "ACV（万元）",
+            "before": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "10",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            },
+            "after": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "20",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            }
+          },
+          {
+            "field": "forecast.2026.q4.collection",
+            "label": "2026 Q4 预测回款（万元）",
+            "before": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "未填写",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            },
+            "after": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "12",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            }
+          },
+          {
+            "field": "participants",
+            "label": "项目参与人员",
+            "before": {
+              "kind": "people",
+              "status": "empty",
+              "rows": [],
+              "empty_label": "无",
+              "truncated": false
+            },
+            "after": {
+              "kind": "people",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": null,
+                  "id": "00000000-0000-4000-8000-000000000003",
+                  "missing_name": true,
+                  "id_label": "人员ID",
+                  "detail": "销售参与者"
+                },
+                {
+                  "name": null,
+                  "id": "00000000-0000-4000-8000-000000000004",
+                  "missing_name": true,
+                  "id_label": "人员ID",
+                  "detail": "FDE参与者"
+                }
+              ],
+              "empty_label": "无",
+              "truncated": false
+            }
+          },
+          {
+            "field": "fde_members",
+            "label": "长期FDE名单",
+            "before": {
+              "kind": "people",
+              "status": "empty",
+              "rows": [],
+              "empty_label": "无",
+              "truncated": false
+            },
+            "after": {
+              "kind": "people",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": null,
+                  "id": "00000000-0000-4000-8000-000000000004",
+                  "missing_name": true,
+                  "id_label": "人员ID",
+                  "detail": null
+                }
+              ],
+              "empty_label": "无",
+              "truncated": false
+            }
+          },
+          {
+            "field": "material_lines",
+            "label": "交易物料",
+            "before": {
+              "kind": "materials",
+              "status": "empty",
+              "rows": [],
+              "empty_label": "无",
+              "truncated": false
+            },
+            "after": {
+              "kind": "materials",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "保存时的物料名称",
+                  "id": "00000000-0000-4000-8000-000000000005",
+                  "missing_name": false,
+                  "id_label": "物料ID",
+                  "detail": "数量：2；成交单价（元）：5000；用途：自用"
+                }
+              ],
+              "empty_label": "无",
+              "truncated": false
+            }
+          },
+          {
+            "field": "intent_product_line_ids",
+            "label": "意向产品线",
+            "before": {
+              "kind": "list",
+              "status": "empty",
+              "rows": [],
+              "empty_label": "无",
+              "truncated": false
+            },
+            "after": {
+              "kind": "list",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "保存时的产品线名称",
+                  "id": "00000000-0000-4000-8000-000000000006",
+                  "missing_name": false,
+                  "id_label": "产品线ID",
+                  "detail": null
+                }
+              ],
+              "empty_label": "无",
+              "truncated": false
+            }
+          },
+          {
+            "field": "operational_actual",
+            "label": "运营期间实际",
+            "before": {
+              "kind": "unavailable",
+              "status": "restricted",
+              "rows": [],
+              "empty_label": "无权查看此字段（财务实际）",
+              "truncated": false
+            },
+            "after": {
+              "kind": "unavailable",
+              "status": "restricted",
+              "rows": [],
+              "empty_label": "无权查看此字段（财务实际）",
+              "truncated": false
+            }
+          },
+          {
+            "field": "field_edit_reason",
+            "label": "商机字段维护说明",
+            "before": {
+              "kind": "scalar",
+              "status": "empty",
+              "rows": [],
+              "empty_label": "未填写",
+              "truncated": false
+            },
+            "after": {
+              "kind": "scalar",
+              "status": "recorded",
+              "rows": [
+                {
+                  "name": "按确认结果更新商机资料",
+                  "id": null,
+                  "missing_name": false,
+                  "id_label": null,
+                  "detail": null
+                }
+              ],
+              "empty_label": "未填写",
+              "truncated": false
+            }
+          }
+        ],
+        "detail_status": "partial",
+        "unavailable_field_count": 3
+      }
+    ],
+    "limit": 20,
+    "offset": 0,
+    "has_more": false,
+    "next_offset": null,
+    "order": "created_at_desc_id_desc",
+    "coverage_note": "仅展示已保存的变更，不补造缺失历史。字段名称只使用保存时快照；未记录名称保留ID。操作人明确标记当前姓名。"
+  }
+}

@@ -19,7 +19,8 @@ function fields(data) {
   keys.forEach(key => { result[key] = String(values[key] || '').trim(); });
   result.customer_name = data.customerName || result.customer_name;
   result.customer_type = data.customerType || '客户';
-  result.is_first_visit = data.isFirstVisit === true;
+  result.is_first_visit = !data.followUpOnly && data.isFirstVisit === true;
+  if(data.followUpOnly)for(const key of ['customer_main_business','customer_needs','customer_budget','contact_role'])result[key]='';
   result.partner_name = partnerName(data);
   const selected=(data.opportunityOptions || []).find(row=>row.id===data.opportunityId);
   result.opportunity_name = data.opportunityId === '__new__'
@@ -28,7 +29,9 @@ function fields(data) {
 }
 function signature(data) {
   return JSON.stringify({fields:fields(data), customerId:data.customerId, opportunityId:data.opportunityId || '',
-    draft:data.opportunityEditing ? data.opportunityDraft : null,
-    collaborators:[...(data.collaboratorIds || [])].sort(), source:data.sourceImportId || null});
+    draft:!data.followUpOnly && data.opportunityEditing ? data.opportunityDraft : null,
+    participants:data.isFde || data.followUpOnly ? [] : [...((data.opportunityDraft || {}).visit_fde_member_ids || [])].sort(),
+    collaborators:data.followUpOnly ? [] : [...(data.collaboratorIds || [])].sort(), source:data.sourceImportId || null,
+    ...(data.followUpOnly?{targetKind:data.targetKind || (data.opportunityId?'opportunity':'customer')}:{})});
 }
 module.exports={fields,signature,partnerName};

@@ -7,6 +7,8 @@ import asyncpg
 from sales_backend.domain.agent import ActorContext
 from sales_backend.repositories.attribute_overlay import overlay_opportunity_attributes
 from sales_backend.repositories.collaboration import members_by_opportunity, scoped_opportunity_ids
+from sales_backend.repositories.materials import line_document
+from sales_backend.domain.finance_totals import actual_totals
 
 NAME_CONFLICT_MESSAGE = "该客户已有同名商机，请选择已有商机，或在名称中补充部门、项目期次以区分"
 
@@ -43,7 +45,7 @@ class OpportunityRepository:
         member_ids: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         scoped_ids = None
-        if actor and (scope or member_id or member_ids) and not customer_id and not opportunity_id:
+        if actor and ((scope and scope != "authorized") or member_id or member_ids) and not customer_id and not opportunity_id:
             _, _, _, scoped = await scoped_opportunity_ids(connection, actor, scope, member_id, member_ids, permission='opportunity.read')
             scoped_ids = [r["id"] for r in scoped]
         rows = await connection.fetch(
@@ -52,9 +54,13 @@ class OpportunityRepository:
                    o.amount, o.currency, o.probability, o.expected_close_date,
                    o.expected_close_year,o.expected_close_quarter,o.original_owner_name,o.ownership_resolution,
                    o.status, o.version_no, o.partner_name, o.partner_id::text,
-                   o.sales_channel, o.product_line, o.closed_at, o.source_code,
+                   o.sales_channel, o.product_line, o.closed_at, o.source_code,o.trade_relation,o.upstream_opportunity_id::text,
                    o.attributes, o.import_meta, o.created_at, o.updated_at,
-                   COALESCE(c.name,security.customer_reference(o.customer_id)->>'name') AS customer_name,
+                   o.customer_source,o.priority,o.is_key,o.trial_status,o.summary,o.note,o.ppl_status,
+                   o.external_system_status,o.primary_fde_id::text,o.fde_support_stage,o.fde_progress,o.follow_up_plan,
+                   COALESCE(c.name,security.customer_reference(o.customer_id)->>'name',read_context.value->>'customer_name') AS customer_name,
+                   COALESCE((read_context.value->>'shared_read_only')::boolean,false) AS shared_read_only,
+                   COALESCE((read_context.value->>'can_read_customer')::boolean,false) AS can_read_customer,
                    o.owner_user_ref_id::text AS owner_id,o.owner_team_id::text AS team_id,
                    owner.display_name AS owner_name, team.name AS team_name,
                    security.can_manage_fde_members(o.id) AS can_manage_fde_members,
@@ -62,11 +68,12 @@ class OpportunityRepository:
           security.authorization_opportunity('opportunity.close',o.id) AS can_close,
           security.authorization_opportunity('opportunity.reopen',o.id) AS can_reopen
               FROM crm.opportunity o
+              CROSS JOIN LATERAL (SELECT security.opportunity_read_context(o.id) AS value) read_context
               LEFT JOIN crm.customer c ON c.id = o.customer_id AND c.deleted_at IS NULL
               LEFT JOIN platform.user_ref owner ON owner.id = o.owner_user_ref_id
               LEFT JOIN platform.team team ON team.id = o.owner_team_id
              WHERE o.deleted_at IS NULL AND ($9::boolean OR o.status = 'open')
-               AND ($5::boolean OR security.authorization_opportunity_direct('opportunity.read',o.id))
+               AND ($5::boolean OR security.authorization_opportunity('opportunity.read',o.id))
                AND ($12::uuid[] IS NULL OR o.id=ANY($12::uuid[]))
                AND ($1::text IS NULL OR o.customer_id = $1::uuid)
                AND ($2::text IS NULL OR owner.display_name = $2)
@@ -95,10 +102,11 @@ class OpportunityRepository:
 
     async def enrich(self, connection, rows):
         ids = [row["id"] for row in rows]
-        fde_members = await members_by_opportunity(connection, ids)
+        legacy_ids = [row["id"] for row in rows if not row.get("shared_read_only", False)]
+        fde_members = await members_by_opportunity(connection, legacy_ids)
         plans = (
             await connection.fetch(
-                """SELECT opportunity_id::text,year,quarter,recognized_amount,collection_amount,collection_confidence
+                """SELECT opportunity_id::text,year,quarter,recognized_amount::text AS recognized_amount,collection_amount::text AS collection_amount,collection_confidence,updated_at
             FROM crm.opportunity_forecast WHERE opportunity_id=ANY($1::uuid[]) ORDER BY year,quarter""",
                 ids,
             )
@@ -107,14 +115,10 @@ class OpportunityRepository:
         )
         actuals = (
             await connection.fetch(
-                """SELECT opportunity_id::text,
-            sum(amount) FILTER(WHERE kind='recognized') AS recognized_amount,
-            sum(amount) FILTER(WHERE kind='collection') AS collection_amount
-            FROM crm.customer_actual WHERE opportunity_id=ANY($1::uuid[]) AND voided_at IS NULL
-            GROUP BY opportunity_id""",
-                ids,
+                """SELECT * FROM crm.effective_actual WHERE opportunity_id=ANY($1::uuid[])""",
+                legacy_ids,
             )
-            if ids
+            if legacy_ids
             else []
         )
         associated = (await connection.fetch(
@@ -125,8 +129,8 @@ class OpportunityRepository:
         historical = (await connection.fetch(
             """SELECT opportunity_id::text,year,quarter,kind,raw_amount,source_unit,tax_basis,source_field
             FROM crm.opportunity_period_actual_snapshot WHERE opportunity_id=ANY($1::uuid[])
-            ORDER BY year,quarter,kind,source_field,id""", ids
-        )) if ids else []
+            ORDER BY year,quarter,kind,source_field,id""", legacy_ids
+        )) if legacy_ids else []
         partners_by_id: dict[str, list] = {}
         for partner in associated:
             value = dict(partner)
@@ -139,18 +143,26 @@ class OpportunityRepository:
         for plan in plans:
             value = dict(plan)
             plans_by_id.setdefault(value.pop("opportunity_id"), []).append(value)
-        actuals_by_id = {row["opportunity_id"]: dict(row) for row in actuals}
+        actuals_by_id = {}
+        for row in actuals:
+            actuals_by_id.setdefault(str(row['opportunity_id']),[]).append(dict(row))
+        materials_by_id = {}
+        if legacy_ids:
+            for row in await connection.fetch('SELECT * FROM crm.opportunity_material WHERE opportunity_id=ANY($1::uuid[]) AND is_active ORDER BY line_no,id',legacy_ids):
+                materials_by_id.setdefault(str(row['opportunity_id']),[]).append(line_document(row))
         result = []
         for row in rows:
             item = overlay_opportunity_attributes(dict(row))
             item["quarterly_forecasts"] = plans_by_id.get(item["id"], [])
             item["associated_partners"] = partners_by_id.get(item["id"], [])
-            item["historical_period_actuals"] = historical_by_id.get(item["id"], [])
-            actual = actuals_by_id.get(item["id"], {})
-            item["actuals"] = {key: actual.get(key) for key in ("recognized_amount", "collection_amount")}
-            item["fde_members"] = fde_members.get(item["id"], [])
+            if not item.get("shared_read_only", False):
+                item["historical_period_actuals"] = historical_by_id.get(item["id"], [])
+                item["actuals"] = actual_totals(actuals_by_id.get(item["id"], []))
+                item['material_lines'] = materials_by_id.get(item['id'],[])
+                item["fde_members"] = fde_members.get(item["id"], [])
             result.append(item)
-        return result
+        from sales_backend.repositories.opportunity_fields import profile_projection
+        return await profile_projection(connection, result)
 
     async def for_customer(self, connection, customer_id):
         """Internal customer projection; the request transaction's RLS remains authoritative."""
@@ -186,10 +198,14 @@ class OpportunityRepository:
         from sales_backend.repositories.customer_records import related_records
 
         item = items[0]
+        if item["shared_read_only"]:
+            return {"id": item["customer_id"], "name": item["customer_name"], "opportunities": [item],
+                    "shared_read_only": True, "can_read_customer": item["can_read_customer"]}
         return {
             "id": item["customer_id"],
             "name": item["customer_name"],
             "opportunities": [item],
+            "shared_read_only": False, "can_read_customer": item["can_read_customer"],
             **await related_records(connection, item["customer_id"], opportunity_id=opportunity_id),
         }
 

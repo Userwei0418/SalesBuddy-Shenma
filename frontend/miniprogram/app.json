@@ -7,31 +7,30 @@
     "pages/bi/index",
     "pages/profile/index",
     "pages/member-growth/index",
-    "pages/visit-entry/index",
-    "pages/visit-confirm/index",
     "pages/visit-detail/index",
     "pages/customer-detail/index",
     "pages/customer-create/index",
     "pages/customer-edit/index",
     "pages/opportunity-create/index",
     "pages/opportunities/index",
-    "pages/management-task-create/index",
     "pages/tasks/index",
-    "pages/task-detail/index",
     "pages/risks/index",
     "pages/risk-detail/index",
     "pages/report-detail/index",
     "pages/customer-assign-confirm/index",
     "pages/customer-claim/index",
-    "pages/customer-assets/index",
+    "pages/knowledge/index",
+    "pages/knowledge-webview/index",
     "pages/fde-records/index",
-    "pages/demo-create/index"
+    "pages/demo-create/index",
+    "pages/opportunity-transfer/index",
+    "pages/opportunity-collaboration/index"
   ],
   "window": {
     "backgroundColor": "#E9EDF3",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#FFFFFF",
-    "navigationBarTitleText": "Raccoon SalesBuddy",
+    "navigationBarTitleText": "神码 SalesBuddy",
     "navigationBarTextStyle": "black"
   },
   "permission": {},
@@ -74,5 +73,46 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "subPackages": [
+    {
+      "root": "pages/visit-entry",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/visit-confirm",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/task-detail",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/demo-view",
+      "pages": [
+        "home/index",
+        "list/index",
+        "detail/index",
+        "account/index"
+      ]
+    },
+    {
+      "root": "pages/management-task-create",
+      "pages": [
+        "index"
+      ]
+    },
+    {
+      "root": "pages/customer-assets",
+      "pages": [
+        "index"
+      ]
+    }
+  ]
 }

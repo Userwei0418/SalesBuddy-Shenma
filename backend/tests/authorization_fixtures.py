@@ -16,6 +16,8 @@ def visit_authorization_query(actor, *, customer_id="customer", opportunity_id=N
     snapshot = permission_snapshot(actor, {"visit.create": "self", "visit.structure": "self"}, version=version)
 
     async def read(sql, *args):
+        if "security.ai_service_policy()" in sql:
+            return {"shared_enabled": True}
         if "security.authorization_snapshot" in sql:
             return snapshot
         if "security.authorization_visit_target" in sql:
@@ -31,6 +33,8 @@ def configured_database(actor, permissions, *, version="rbac-test:1"):
     from unittest.mock import AsyncMock
 
     async def read(sql, *args):
+        if "security.ai_service_policy()" in sql:
+            return {"shared_enabled": True}
         if "security.authorization_snapshot" in sql:
             return permission_snapshot(actor, permissions, version=version)
         if "security.authorization_has" in sql:

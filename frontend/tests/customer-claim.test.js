@@ -48,7 +48,7 @@ function pageFor(api) {
   const wx = { showToast: x => toasts.push(x.title), showModal: x => x.success({ confirm: true }),
     setStorageSync: (k, v) => store.set(k, v) };
   vm.runInNewContext(fs.readFileSync(__dirname + '/../miniprogram/pages/customer-claim/index.js', 'utf8'), {
-    require: name => name.includes('apiClient') ? api : { normalizeCustomerSummary: x => x },
+    require: name => name.includes('apiClient') ? api : name.includes('customerIdentity') ? require('../miniprogram/utils/customerIdentity') : { normalizeCustomerSummary: x => x },
     Page: x => definition = x, wx, getApp: () => app,
     setTimeout: callback => { timers.set(++timerId, callback); return timerId; },
     clearTimeout: id => timers.delete(id),
@@ -59,6 +59,125 @@ function pageFor(api) {
     const callbacks = [...timers.values()]; timers.clear(); callbacks.forEach(callback => callback());
   } };
 }
+
+const reorderedOptions = () => ({ ...filterOptions(), claim_statuses: [
+  {value: '', label: '全部认领状态'}, {value: 'mine', label: '本人已认领'},
+  {value: 'pending', label: '我的申请待审批'}, {value: 'claimed', label: '已认领'},
+  {value: 'unclaimed', label: '未认领'},
+] });
+
+test('首请求及分页直接筛选未认领，选项未返回时标签明确且按真实选项顺序定位', async () => {
+  const options = deferred(), calls = [];
+  const rows = Array.from({length: 121}, (_, i) => ({...customer(i), ownership_state: i < 60 ? 'claimed' : 'unclaimed'}));
+  const {page} = pageFor({listCustomerClaimOptions: () => options.promise,
+    listCustomerClaimPool: async query => {
+      calls.push({...query});
+      const matches = rows.filter(row => !query.claimStatus || row.ownership_state === query.claimStatus);
+      return directory(matches.slice(query.offset, query.offset + query.pageSize), matches.length, query.offset);
+    }});
+  const loading = page.onLoad();
+  assert.equal(calls[0].claimStatus, 'unclaimed');
+  assert.equal(page.data.claimStatusLabel, '未认领');
+  assert.equal(page.data.hasFilters, false);
+  options.resolve(reorderedOptions()); await loading;
+  assert.equal(page.data.statusIndex, 4);
+  assert.equal(page.data.total, 61);
+  assert.equal(page.data.customers[0].id, '60');
+  await page.loadMore();
+  assert.deepEqual(calls.map(q => [q.claimStatus, q.offset]), [['unclaimed', 0], ['unclaimed', 50]]);
+  assert.equal(page.data.customers.length, 61);
+  assert.ok(page.data.customers.every(row => row.ownership_state === 'unclaimed'));
+});
+
+for (const status of ['', 'claimed', 'mine', 'pending']) {
+  test(`主动选择${status || '全部'}后搜索、分页、刷新及返回均保留，重置恢复未认领`, async () => {
+    const calls = [];
+    const {page, runSearch} = pageFor({listCustomerClaimOptions: async () => reorderedOptions(),
+      listCustomerClaimPool: async query => {
+        calls.push({...query});
+        return directory(Array.from({length: 50}, (_, i) => customer(i + query.offset)), 100, query.offset);
+      }});
+    await page.onLoad();
+    const start = calls.length;
+    await page.changeClaimStatus({detail: {value: page.data.statusOptions.findIndex(item => item.value === status)}});
+    assert.equal(page.data.hasFilters, true);
+    page.inputQuery({detail: {value: '查询'}}); runSearch(); await tick();
+    await page.loadMore(); await page.refreshCustomers();
+    page.onHide(); await page.onShow();
+    assert.ok(calls.slice(start).every(query => query.claimStatus === (status || undefined)));
+    assert.equal(calls.at(-1).q, '查询');
+    await page.changeIndustry({detail: {value: 1}});
+    await page.changeBusinessIdentity({detail: {value: 2}});
+    await page.clearFilters();
+    assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0, claimStatus: 'unclaimed'});
+    assert.equal(page.data.statusIndex, 4);
+    assert.equal(page.data.claimStatusLabel, '未认领');
+    assert.equal(page.data.hasFilters, false);
+  });
+}
+
+test('缺少未认领或当前所选状态时显式报错，不扩大为全部客户', async () => {
+  for (const missing of ['unclaimed', 'pending']) {
+    let broken = false;
+    const calls = [], {page} = pageFor({listCustomerClaimOptions: async () => {
+      const options = reorderedOptions();
+      if (broken) options.claim_statuses = options.claim_statuses.filter(item => item.value !== missing);
+      return options;
+    }, listCustomerClaimPool: async query => {calls.push({...query}); return directory([]);}});
+    await page.onLoad();
+    if (missing === 'pending') await page.changeClaimStatus({detail: {value: 2}});
+    broken = true; const before = calls.length;
+    await page.refreshCustomers();
+    assert.match(page.data.optionsError, /缺少未认领|当前认领状态选项已变化/);
+    assert.equal(page.data.claimStatus, missing);
+    assert.equal(calls.length, before + 1);
+    assert.equal(calls.at(-1).claimStatus, missing);
+    broken = false; await page.retryFilterOptions();
+    assert.equal(page.data.optionsError, '');
+    assert.equal(page.data.statusOptions[page.data.statusIndex].value, missing);
+  }
+});
+
+test('空态区分未认领、带搜索的未认领、其他状态以及真正的全公司空名单', async () => {
+  const {page, runSearch} = pageFor({listCustomerClaimPool: async () => directory([])});
+  await page.onLoad(); assert.equal(page.data.emptyTitle, '暂无未认领客户');
+  assert.match(page.data.emptyDescription, /查看全部客户/);
+  page.inputQuery({detail: {value: '不存在'}}); runSearch(); await tick();
+  assert.equal(page.data.emptyTitle, '没有匹配的未认领客户');
+  await page.changeClaimStatus({detail: {value: 2}});
+  assert.equal(page.data.emptyTitle, '没有符合当前筛选的客户');
+  await page.changeClaimStatus({detail: {value: 0}});
+  page.inputQuery({detail: {value: ''}}); runSearch(); await tick();
+  assert.equal(page.data.emptyTitle, '公司客户名单暂为空');
+  assert.equal(page.data.hasFilters, true);
+  await page.clearFilters(); assert.equal(page.data.emptyTitle, '暂无未认领客户');
+});
+
+test('导航搜索词只预填已解码查询，命中客户也不自动选择或申请', async () => {
+  const calls = []; let claims = 0;
+  const { page } = pageFor({ listCustomerClaimPool: async options => {
+    calls.push({ ...options }); return directory([customer('existing')]);
+  }, claimCustomer: async () => { claims++; } });
+  await page.onLoad({ q: '  客户 %26 & +  ', id: 'existing', claim: 'true' });
+  page.onShow();
+  assert.deepEqual(calls, [{ q: '客户 %26 & +', pageSize: 50, offset: 0, claimStatus: 'unclaimed' }]);
+  assert.equal(page.data.query, '客户 %26 & +');
+  assert.equal(page.data.selectedCustomerId, ''); assert.equal(page.selectedCustomer, null);
+  assert.equal(page.data.submitting, false); assert.equal(claims, 0);
+});
+
+test('导航搜索忽略非字符串并限制100个字符；拒绝访问和换号不继承预填词', async () => {
+  const calls = [];
+  const { page, app } = pageFor({ listCustomerClaimPool: async options => {
+    calls.push(options.q); return directory([]);
+  } });
+  await page.onLoad({ q: ['不能作为查询'] }); assert.equal(calls.at(-1), '');
+  await page.onLoad({ q: '客😀'.repeat(60) });
+  assert.equal([...calls.at(-1)].length, 100); assert.equal(calls.at(-1), '客😀'.repeat(50));
+  app.globalData.session.userId = 'other'; await page.onShow(); assert.equal(calls.at(-1), '');
+  app.guardPage = () => false;
+  const count = calls.length; await page.onLoad({ q: '不可见查询' }); assert.equal(calls.length, count);
+});
 
 test('首次加载与onShow不重复请求；同账号返回保留搜索、刷新审批状态并清除选择', async () => {
   const calls = []; let approved = false;
@@ -73,7 +192,7 @@ test('首次加载与onShow不重复请求；同账号返回保留搜索、刷�
   page.setData({ resultMessage: '旧申请待审批' });
   page.onHide(); approved = true; await page.onShow();
   assert.equal(calls.length, 3);
-  assert.deepEqual(calls.at(-1), { q: '客户', pageSize: 50, offset: 0 });
+  assert.deepEqual(calls.at(-1), { q: '客户', pageSize: 50, offset: 0, claimStatus: 'unclaimed' });
   assert.equal(page.data.selectedCustomerId, ''); assert.equal(page.selectedCustomer, null);
   assert.equal(page.data.resultMessage, '');
   assert.equal(page.data.customers[0].claimLabel, '本人已认领');
@@ -115,7 +234,7 @@ test('首屏只请求50条、总数取完整目录；超过100家可连续浏览
     return directory(items.slice(options.offset, options.offset + 50), 121, options.offset);
   } });
   await page.loadCustomers('');
-  assert.deepEqual(calls, [{ q: '', pageSize: 50, offset: 0 }]);
+  assert.deepEqual(calls, [{ q: '', pageSize: 50, offset: 0, claimStatus: 'unclaimed' }]);
   assert.equal(page.data.total, 121); assert.equal(page.data.customers.length, 50);
   const more = page.loadMore(); page.onReachBottom(); page.loadMore();
   assert.equal(calls.length, 2); assert.equal(page.data.customers.length, 50);
@@ -166,7 +285,7 @@ test('搜索输入即失效旧响应，防抖期间不出现旧数据；只请�
   assert.equal(page.data.customers.length, 0); assert.equal(page.data.total, null);
   assert.equal(page.data.query, '乙'); assert.equal(calls.length, 1);
   runSearch(); await tick();
-  assert.deepEqual(calls.at(-1), { q: '乙', pageSize: 50, offset: 0 });
+  assert.deepEqual(calls.at(-1), { q: '乙', pageSize: 50, offset: 0, claimStatus: 'unclaimed' });
   assert.equal(page.data.customers[0].id, '乙');
 });
 
@@ -229,7 +348,7 @@ test('申请成功仅展示待审批，清除分页重取当前搜索；重复�
   page.confirmClaim(); page.confirmClaim(); await tick();
   assert.equal(claims, 1); assert.match(page.data.resultMessage, /等待运营审批/);
   assert.equal(page.data.customers[0].claimEligible, false); assert.equal(page.data.selectedCustomerId, '');
-  assert.deepEqual(queries.at(-1), { q: '客户', offset: 0, pageSize: 50 });
+  assert.deepEqual(queries.at(-1), { q: '客户', offset: 0, pageSize: 50, claimStatus: 'unclaimed' });
   assert.equal(store.has('pendingBattleCustomerId'), false); assert.ok(toasts.includes('申请已提交'));
 });
 
@@ -256,7 +375,7 @@ test('后端提供行业与状态选项，组合筛选翻页保留条件，切�
   const { page } = pageFor({ listCustomerClaimPool: async opts => {
     calls.push({ ...opts });
     if (opts.offset) return late.promise;
-    return opts.claimStatus ? directory([customer('filtered')])
+    return opts.claimStatus === 'pending' ? directory([customer('filtered')])
       : directory(Array.from({length: 50}, (_, i) => customer(i)), 51);
   } });
   await page.loadCustomers('st');
@@ -271,7 +390,7 @@ test('后端提供行业与状态选项，组合筛选翻页保留条件，切�
   late.resolve(directory([customer('late')], 51, 50)); await more;
   assert.deepEqual(Array.from(page.data.customers, x => x.id), ['filtered']);
   await page.clearFilters();
-  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0});
+  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0, claimStatus: 'unclaimed'});
   assert.equal(page.data.hasFilters, false);
 });
 
@@ -294,13 +413,16 @@ test('换账号清空筛选和旧选项，旧选项响应不能带回原公司�
   const {page, app} = pageFor({listCustomerClaimOptions: () => ++count === 2 ? late.promise : Promise.resolve(filterOptions()),
     listCustomerClaimPool: async opts => {calls.push({...opts}); return directory([]);} });
   await page.loadCustomers(); await page.changeIndustry({detail: {value: 1}});
+  await page.changeClaimStatus({detail: {value: 2}});
   const refresh = page.refreshCustomers();
   app.globalData.session.userId = 'other'; await page.onShow();
   assert.equal(page.data.industry, ''); assert.equal(page.data.query, '');
+  assert.equal(page.data.claimStatus, 'unclaimed'); assert.equal(page.data.claimStatusLabel, '未认领');
+  assert.equal(page.data.hasFilters, false);
   const foreign = filterOptions(); foreign.industries.push({value: '旧公司行业', label: '旧公司行业'});
   late.resolve(foreign); await refresh;
   assert.equal(page.data.industryOptions.some(x => x.label === '旧公司行业'), false);
-  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0});
+  assert.deepEqual(calls.at(-1), {q: '', pageSize: 50, offset: 0, claimStatus: 'unclaimed'});
 });
 
 test('行业被移除后刷新同时移除旧筛选，不能显示全部行业却暗中带条件', async () => {
@@ -312,4 +434,47 @@ test('行业被移除后刷新同时移除旧筛选，不能显示全部行业�
   removed = true; await page.refreshCustomers();
   assert.equal(page.data.industry, ''); assert.equal(page.data.industryIndex, 0);
   assert.equal(page.data.hasFilters, false); assert.equal(calls.at(-1).industry, undefined);
+});
+
+test('认领写入跨隐藏恢复仍保持锁，旧名单先返回后必须在写入完成时回读',async()=>{
+ for(const outcome of ['success','unknown']){
+  const pending=deferred();let committed=false,reads=0,posts=0;
+  const h=pageFor({listCustomerClaimPool:async()=>{reads++;return directory([{...customer('race'),claim_status:committed?'pending':null,can_claim:!committed}]);},
+   claimCustomer:()=>{posts++;return pending.promise;}});
+  await h.page.loadCustomers();h.page.selectCustomer({currentTarget:{dataset:{id:'race'}}});h.page.confirmClaim();
+  h.page.onHide();await h.page.onShow();
+  assert.equal(h.page.data.submitting,true);assert.equal(h.page.data.customers[0].claimEligible,true);
+  h.page.selectCustomer({currentTarget:{dataset:{id:'race'}}});h.page.confirmClaim();assert.equal(posts,1);
+  committed=true;
+  if(outcome==='success')pending.resolve({status:'pending'});else pending.reject(Error('网络结果未知'));
+  await tick();
+  assert.equal(reads,3);assert.equal(posts,1);assert.equal(h.page.data.submitting,false);
+  assert.equal(h.page.data.customers[0].claimEligible,false);assert.equal(h.page.data.customers[0].claimLabel,'申请待审批');
+  assert.equal(h.toasts.length,0);
+ }
+});
+
+test('认领确认框重复回调不重复提交，隐藏后的未提交确认作废',async()=>{
+ const pending=deferred(),dialogs=[];let posts=0;
+ const h=pageFor({listCustomerClaimPool:async()=>directory([customer('c')]),claimCustomer:()=>{posts++;return pending.promise;}});
+ h.wx.showModal=options=>dialogs.push(options);
+ await h.page.loadCustomers();h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});h.page.confirmClaim();h.page.confirmClaim();assert.equal(dialogs.length,1);
+ h.page.onHide();dialogs[0].success({confirm:true});assert.equal(posts,0);
+ await h.page.onShow();h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});h.page.confirmClaim();
+ dialogs[1].success({confirm:true});dialogs[1].success({confirm:true});assert.equal(posts,1);
+ h.app.globalData.session.userId='other';pending.resolve({status:'pending'});await tick();assert.equal(h.toasts.length,0);
+});
+
+ test('企业身份筛选在服务端分页前生效，翻页保留条件且重置回全部',async()=>{
+  const calls=[];const h=pageFor({listCustomerClaimPool:async q=>{calls.push(q);return directory(Array.from({length:50},(_,i)=>({...customer(i+q.offset),business_identities:['partner']})),100,q.offset);}});
+  await h.page.onLoad();await h.page.changeBusinessIdentity({detail:{value:2}});assert.equal(calls.at(-1).businessIdentity,'partner');assert.equal(calls.at(-1).offset,0);
+  await h.page.loadMore();assert.equal(calls.at(-1).businessIdentity,'partner');assert.equal(calls.at(-1).offset,50);assert.equal(h.page.data.total,100);
+  await h.page.clearFilters();assert.equal(calls.at(-1).businessIdentity,undefined);assert.equal(h.page.data.businessIdentity,'all');
+ });
+test('企业目录逐条可读标志控制打开档案，不借目录权限打开受限详情',()=>{
+ const h=pageFor({}),urls=[];h.wx.navigateTo=o=>urls.push(o.url);h.page.setData({customers:[{id:'allowed',can_read_customer:true},{id:'denied',can_read_customer:false},{id:'unknown'}]});
+ h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.equal(urls.length,0);h.page.setData({canReadCustomer:true});
+ for(const id of ['denied','unknown','missing'])h.page.openCustomerDetail({currentTarget:{dataset:{id}}});assert.equal(urls.length,0);
+ h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.deepEqual(urls,['/pages/customer-detail/index?id=allowed']);
+ h.page.setData({canReadCustomer:false});h.page.openCustomerDetail({currentTarget:{dataset:{id:'allowed'}}});assert.equal(urls.length,1);
 });

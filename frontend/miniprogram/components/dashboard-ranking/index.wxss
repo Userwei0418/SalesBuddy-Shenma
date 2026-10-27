@@ -32,7 +32,8 @@
 .sheet-rows{padding-bottom:8px}
 .sheet-rows .rank-row{padding:24rpx 0}
 
-/* Team and member drilldown remains available in the new sheet. */
-.member-link,.member-back{color:var(--ui-primary)!important}
-.member-back{display:inline-flex;align-items:center;min-height:var(--ui-touch-target);margin:0 0 8rpx;padding:0 16rpx;border-radius:var(--ui-radius-control);font-size:var(--ui-text-small);background:var(--ui-neutral-soft)}
-.member-back::after{border:0}
+/* New business controls styled with the retained A tokens. */
+.upgrade-member-link,.upgrade-member-back{display:block;min-height:var(--ui-touch-target);line-height:var(--ui-touch-target);font-size:14px;color:var(--ui-primary)}
+
+/* 小计含状态文案，允许在金额列内换行，保留姓名列空间。 */
+.rank-value-subtotal{white-space:normal;overflow-wrap:anywhere}

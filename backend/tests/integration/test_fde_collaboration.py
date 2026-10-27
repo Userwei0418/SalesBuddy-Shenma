@@ -127,7 +127,7 @@ async def test_full_customer_opportunity_read_does_not_count_as_assistance(conne
         await fde_dashboard(connection, first, scope="team")
 
 
-async def test_attendance_only_adds_missing_members_never_removes_absent_member(connection):
+async def test_attendance_preserves_existing_members_without_changing_absent_members(connection):
     sales, opportunity, people, _ = await fde_fixture(connection)
     await record_visit(connection, sales, opportunity, [people["first"]])
     assert await effective_ids(connection, opportunity["id"]) == {people["first"]["id"], people["second"]["id"]}

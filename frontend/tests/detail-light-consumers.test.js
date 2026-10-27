@@ -35,18 +35,18 @@ test('opportunity editor reads one complete target including all forecast quarte
   let id;const h=load('opportunity-create',{getOpportunityDetailOverview:async value=>{id=value;return {id:'c',name:'客户',primary_opportunity:existing};},getCustomer(){throw Error('full customer history forbidden');}});
   h.page.data.customerId='c';h.page.opportunityId='o';await h.page.load();assert.equal(id,'o');assert.equal(h.page.data.existing,existing);assert.equal(h.page.data.existing.quarterly_forecasts.length,2);assert.equal(h.page.data.error,'');
 });
-test('new opportunity needs only authorized customer reference; wrong customer target is rejected',async()=>{
-  const h=load('opportunity-create',{getCustomerReference:async id=>({id,name:'客户引用'}),getOpportunityDetailOverview:async()=>({id:'different',name:'不匹配',primary_opportunity:{id:'o'}})});
+test('new opportunity needs only authorized creation reference; wrong customer target is rejected',async()=>{
+  const h=load('opportunity-create',{getOpportunityCreateAccess:async id=>({can_create_opportunity:true,customer_reference:{id,name:'客户引用'}}),getOpportunityDetailOverview:async()=>({id:'different',name:'不匹配',primary_opportunity:{id:'o'}})});
   h.page.data.customerId='c';await h.page.load();assert.equal(h.page.data.customerName,'客户引用');assert.equal(h.page.data.existing,null);
   h.page.opportunityId='o';await h.page.load();assert.match(h.page.data.error,/无权查看/);assert.equal(h.page.data.existing,null);assert.equal(h.page.data.customerName,'');
 });
 test('opportunity load cannot populate a different selected customer or unloaded page',async()=>{
-  const waits=[];const h=load('opportunity-create',{getCustomerReference:id=>{const d=deferred();waits.push([id,d]);return d.promise;}});
-  h.page.data.customerId='old';const old=h.page.load();const latest=h.page.selectCustomer({currentTarget:{dataset:{id:'new'}}});waits[1][1].resolve({id:'new',name:'新客户'});await latest;waits[0][1].resolve({id:'old',name:'旧客户'});await old;assert.equal(h.page.data.customerName,'新客户');
-  const after=h.page.load();h.page.onUnload();waits[2][1].resolve({id:'new',name:'离页迟到'});await after;assert.equal(h.page.data.customerName,'');
+  const waits=[];const h=load('opportunity-create',{getOpportunityCreateAccess:id=>{const d=deferred();waits.push([id,d]);return d.promise;}});
+  h.page.data.customerId='old';const old=h.page.load();const latest=h.page.selectCustomer({currentTarget:{dataset:{id:'new'}}});waits[1][1].resolve({can_create_opportunity:true,customer_reference:{id:'new',name:'新客户'}});await latest;waits[0][1].resolve({can_create_opportunity:true,customer_reference:{id:'old',name:'旧客户'}});await old;assert.equal(h.page.data.customerName,'新客户');
+  const after=h.page.load();h.page.onUnload();waits[2][1].resolve({can_create_opportunity:true,customer_reference:{id:'new',name:'离页迟到'}});await after;assert.equal(h.page.data.customerName,'');
 });
 test('search is invalidated when typing, before debounce, and when selecting a customer',async()=>{
-  const waits=[];const h=load('opportunity-create',{listCustomers:()=>{const d=deferred();waits.push(d);return d.promise;},getCustomerReference:async id=>({id,name:'已选择'})});
+  const waits=[];const h=load('opportunity-create',{listOpportunityCreateCustomers:()=>{const d=deferred();waits.push(d);return d.promise;},getOpportunityCreateAccess:async id=>({can_create_opportunity:true,customer_reference:{id,name:'已选择'}})});
   h.page.inputCustomer({detail:{value:'旧'}});h.runTimers();h.page.inputCustomer({detail:{value:'新'}});waits[0].resolve({items:[{id:'old'}]});await tick();assert.equal(h.page.data.customers.length,0);
   h.runTimers();await h.page.selectCustomer({currentTarget:{dataset:{id:'c'}}});waits[1].resolve({items:[{id:'new'}]});await tick();assert.equal(h.page.data.customers.length,0);
 });

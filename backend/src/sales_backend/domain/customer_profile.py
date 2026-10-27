@@ -27,7 +27,7 @@ def customer_profile(customer, opportunities, visits, contacts, risks, *, risk_a
     probabilities = [p for p in probabilities if p is not None]
     valid_visits = [v for v in visits if v.get("status") in {"confirmed", "archived"}]
     roles = {c.get("relationship_role_code") for c in contacts} & ROLE_POINTS.keys()
-    open_risks = [r for r in risks if r.get("status") not in {"resolved", "accepted"}]
+    open_risks = [r for r in risks if r.get("status") != "resolved"]
     return customer_profile_from_facts(customer, {
         "max_probability": max(probabilities, default=None), "confirmed_visit_count": len(valid_visits),
         "contact_roles": list(roles), "risk_count": len(risks),
@@ -71,6 +71,10 @@ def customer_profile_from_facts(customer, facts):
         strict=True,
     ):
         dimensions.append({"code": code, "label": label, "value": value, "basis": basis})
+    if "customer" not in customer.get("business_identities", ["customer"]):
+        return {"version": "customer_profile_v1", "dimensions": [
+            {**d, "value": None, "basis": "纯合作伙伴不适用客户评估"} for d in dimensions],
+            "coverage": 0, "total": 6, "scope": "not_applicable", "assessment_status": "not_applicable"}
     return {
         "version": "customer_profile_v1",
         "dimensions": dimensions,

@@ -7,17 +7,15 @@ module.exports={idx:idx,rest:rest,pick:pick};
 </wxs>
 <wxs module="ui">
 function partnerModes(d){return [{value:0,label:'直销',disabled:d},{value:1,label:'合作伙伴',disabled:d}];}
-module.exports={partnerModes:partnerModes};
+function productLines(rows){var out=[{value:'',label:'全部产品线'}];for(var i=0;i<(rows||[]).length;i++)out.push({value:rows[i].id,label:rows[i].name});return out;}
+module.exports={partnerModes:partnerModes,productLines:productLines};
 </wxs>
 <view class="opp-form">
-  <view wx:if="{{requiresOwnerTeam}}" class="field">
-    <view wx:if="{{ownerTeamsLoading}}" class="hint">正在加载可选团队…</view>
-    <view wx:elif="{{ownerTeamsError}}" class="error" bindtap="loadOwnerTeams">{{ownerTeamsError}} · 点击重试</view>
-    <sb-select wx:else layout="stacked" plain label="所属团队" required placeholder="{{ownerTeamLabel}}" options="{{opt.idx(ownerTeams,'name')}}" value="{{form.owner_team_id ? ownerTeamIndex : null}}" disabled="{{disabled}}" bind:change="changeOwnerTeam"/>
-  </view>
+  <view wx:if="{{requiresOwnerTeam}}" class="field"><view wx:if="{{ownerTeamsLoading}}" class="hint">正在加载可选团队…</view><view wx:elif="{{ownerTeamsError}}" class="error" bindtap="loadOwnerTeams">{{ownerTeamsError}} · 点击重试</view><sb-select wx:else layout="stacked" plain label="所属团队" required placeholder="{{ownerTeamLabel}}" options="{{opt.idx(ownerTeams,'name')}}" value="{{form.owner_team_id ? ownerTeamIndex : null}}" disabled="{{disabled}}" bind:change="changeOwnerTeam"/></view>
   <view class="field"><sb-input layout="stacked" plain label="商机名称" required value="{{form.name}}" maxlength="{{200}}" placeholder="填写项目名，可用部门、场景区分" disabled="{{disabled}}" data-key="name" bind:change="input"/><view class="hint" wx:if="{{checking}}">正在检查名称…</view><view class="error error-retry" wx:if="{{error}}" hover-class="text-pressed" bindtap="retryCatalog">{{error}}</view></view>
   <view class="field"><sb-select layout="stacked" plain label="商机阶段" required placeholder="请选择阶段" options="{{opt.idx(stages,'text')}}" value="{{form.stageIndex < 0 ? null : form.stageIndex}}" disabled="{{disabled || !stages.length}}" bind:change="stage"/><view class="track"><view wx:for="{{stages}}" wx:key="code" class="step {{form.stageIndex >= index && stages[form.stageIndex].status !== 'lost' && item.status !== 'lost' ? 'active' : ''}} {{stages[form.stageIndex].status === 'lost' ? 'lost' : ''}}"></view></view></view>
-  <view class="field"><sb-amount-input layout="stacked" plain label="ACV" required valueType="string" precision="{{4}}" value="{{form.amount}}" placeholder="请输入金额" disabled="{{disabled}}" data-key="amount" bind:change="input"/></view>
+  <view class="field"><sb-amount-input layout="stacked" plain label="ACV" required valueType="string" precision="{{6}}" value="{{form.amount}}" placeholder="请输入金额" disabled="{{disabled}}" data-key="amount" bind:change="input"/></view>
+  <view class="hint" wx:if="{{amountPreview}}">{{amountPreview}}</view>
   <view class="field"><sb-date-picker layout="stacked" plain label="预计关单日期" required value="{{form.expected_close_date}}" placeholder="选择日期" disabled="{{disabled}}" bind:change="date"/></view>
   <view class="hint" wx:if="{{dateHint}}">{{dateHint}}</view>
   <view class="field field-block"><view class="label">所属伙伴<text class="req"> *</text></view>
@@ -38,22 +36,235 @@ module.exports={partnerModes:partnerModes};
     <view class="sheet-hint" wx:elif="{{!partners.length}}">没有找到伙伴，请联系运营维护目录。</view>
     <sb-pagination wx:elif="{{partners.length < partnerTotal}}" mode="more" plain summary="已显示 {{partners.length}}／{{partnerTotal}}" total="{{partnerTotal}}" loading="{{partnersLoading}}" data-more="true" bind:more="loadPartners"/>
   </sb-sheet>
-  <fde-picker id="opportunityFdePicker" compact-form="{{true}}" selected="{{visitContext ? form.visit_fde_members : form.fde_members}}" hint="{{visitContext ? '仅选择本次拜访参与的 FDE；保存后追加到商机协助名单' : '商机协助人员，可搜索并选择多位 FDE'}}" disabled="{{disabled}}" bind:change="fdeChanged"/>
-  <view class="fold" hover-class="fold-pressed" bindtap="toggleForecast"><view>季度回款与确收 <text class="{{forecastRequired ? 'required' : 'optional'}}">{{forecastRequired ? '必填' : '选填'}}</text></view><view class="fold-text"><text>{{showForecast ? '收起' : '填写'}}</text><t-icon wx:if="{{showForecast}}" name="chevron-up" size="32rpx"/><t-icon wx:else name="chevron-down" size="32rpx"/></view></view>
-  <view wx:if="{{showForecast}}" class="forecast">
-    <sb-select layout="stacked" plain label="填写季度" options="{{opt.idx(quarterOptions,'label')}}" value="{{quarterIndex}}" bind:change="quarter"/>
-    <sb-amount-input layout="stacked" plain label="回款" required="{{forecastRequired}}" valueType="string" precision="{{4}}" value="{{collection}}" placeholder="未填写" disabled="{{disabled}}" data-key="collection" bind:change="forecast"/>
-    <sb-amount-input layout="stacked" plain label="确收" required="{{forecastRequired}}" valueType="string" precision="{{4}}" value="{{recognized}}" placeholder="未填写" disabled="{{disabled}}" data-key="recognized" bind:change="forecast"/>
-    <view class="forecast-results">
-      <view class="forecast-results-head"><text>自动计算</text><label>阶段概率 {{forecastRate}}</label></view>
-      <view class="grid">
-        <view class="forecast-result"><text>预测回款（万元）</text><label>{{predictedCollection}}</label></view>
-        <view class="forecast-result"><text>预测确收（万元）</text><label>{{predictedRecognized}}</label></view>
-      </view>
-      <view class="hint">预测金额 = 填写金额 × 商机阶段百分比</view>
+  <view class="material-section">
+    <view class="material-title">{{productLineReadonly ? '涉及产品线' : '意向产品线'}}<text class="optional">{{productLineReadonly ? '随物料回显' : '选填 · 可多选'}}</text></view>
+    <view wx:if="{{productLineReadonly}}" class="extra-chips product-lines">
+      <view wx:for="{{opportunityProductLines}}" wx:key="id" class="product-line-label">{{item.name}}<text wx:if="{{item.is_active === false}}">（已停用）</text></view>
     </view>
+    <view wx:if="{{productLineReadonly}}" class="hint">按当前物料所属产品线自动去重，一个商机可包含多条产品线。</view>
+    <view wx:if="{{productLineMissingCount}}" class="hint">有 {{productLineMissingCount}} 行历史物料尚未提供产品线关联，不按名称推测。</view>
+    <view wx:if="{{materialLinesLoading}}" class="hint">正在读取物料归属…</view>
+    <view wx:elif="{{!productLineReadonly && !materialLoadError}}">
+      <view wx:if="{{productLinesLoading}}" class="hint">正在读取产品线目录…</view>
+      <view wx:elif="{{productLinesError}}" class="error error-retry" bindtap="loadProductLines">{{productLinesError}} · 点击重试</view>
+      <scroll-view wx:elif="{{productLineOptions.length}}" scroll-y class="product-line-options">
+        <view class="extra-chips">
+          <view wx:for="{{productLineOptions}}" wx:key="id" class="extra-chip {{item.selected ? 'is-selected' : ''}} {{disabled || (item.is_active === false && !item.selected) ? 'is-disabled' : ''}}" data-id="{{item.id}}" bindtap="intentProductLine">{{item.name}}<text wx:if="{{item.is_active === false}}">（已停用）</text><text wx:if="{{item.selected}}"> ✓</text></view>
+        </view>
+      </scroll-view>
+      <view wx:else class="hint">目录暂无产品线，请联系运营维护。</view>
+      <view class="hint">尚未确定物料时可选意向产品线，添加物料后以物料归属回显。</view>
+    </view>
+    <view wx:if="{{legacyProductLine}}" class="hint trace-text">历史填写：{{legacyProductLine}}（保留原文，尚未映射到目录）</view>
+  </view>
+  <view class="material-section">
+    <view class="material-title">交易关系与物料</view>
+    <view class="hint">同一物料可按批次添加多行。调整销售计划不会改写已确认实际。</view>
+    <view wx:if="{{materialLinesLoading}}" class="hint">正在读取交易物料…</view>
+    <view wx:elif="{{materialLoadError}}" class="error" bindtap="retryMaterialLines">{{materialLoadError}} · 点击重试</view>
+    <block wx:else>
+      <sb-select layout="stacked" plain label="本次交易关系" required="{{form.material_lines.length > 0 || collectionActualAnyDirty}}" options="{{tradeRelations}}" value="{{form.trade_relation}}" disabled="{{disabled}}" bind:change="tradeRelation"/>
+      <view wx:if="{{collectionActualAnyDirty}}" class="hint">登记或修改季度实际回款前，请选择交易关系。下游终端的我方回款只能登记为 0。</view>
+      <view wx:if="{{form.trade_relation === 'downstream'}}" class="control row" bindtap="openUpstreams">{{form.upstream_opportunity_name || (form.upstream_opportunity_id ? '已关联上游商机 · 点击重新选择' : '选择上游经销商商机')}}<t-icon name="chevron-down"/></view>
+      <view wx:if="{{showUpstreamSearch}}" class="material-directory">
+        <view class="material-title">选择上游商机<text class="material-action" bindtap="closeUpstreams">收起</text></view>
+        <sb-search plain value="{{upstreamQuery}}" placeholder="搜索商机" bind:change="upstreamSearch" bind:clear="upstreamSearch"/>
+        <scroll-view scroll-y class="material-directory-list">
+          <t-cell wx:for="{{upstreamOptions}}" wx:key="id" title="{{item.name}}" description="{{item.customer_name}}" data-id="{{item.id}}" bind:click="chooseUpstream"/>
+          <view wx:if="{{upstreamLoading}}" class="hint">正在加载…</view><view wx:elif="{{upstreamError}}" class="error" bindtap="loadUpstreams">{{upstreamError}} · 重试</view><view wx:elif="{{!upstreamOptions.length}}" class="hint">没有符合交易关系的可见上游商机</view>
+          <sb-pagination wx:if="{{upstreamOptions.length < upstreamTotal}}" mode="more" plain total="{{upstreamTotal}}" loading="{{upstreamLoading}}" data-more="true" bind:more="loadUpstreams"/>
+        </scroll-view>
+      </view>
+      <view wx:for="{{form.material_lines}}" wx:key="client_key" class="material-line">
+        <view class="material-title">{{index + 1}}. {{item.materialLabel}}<text wx:if="{{!disabled}}" class="material-action" data-key="{{item.client_key}}" bindtap="removeMaterial">{{item.id ? '停用' : '移除'}}</text></view>
+        <view class="hint">{{item.productLineLabel}} · {{item.unitLabel}} · {{item.catalog_snapshot.code}}</view>
+        <sb-input layout="stacked" plain label="数量" required value="{{item.quantity}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="quantity" bind:change="materialInput"/>
+        <sb-input layout="stacked" plain label="成交含税单价（元）" required value="{{item.unit_price}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="unit_price" bind:change="materialInput"/>
+        <view class="hint">交易含税金额 {{item.line_amount_text}} 元；月数与账号数不再乘入总价。</view>
+        <view wx:if="{{item.discount_text}}" class="hint">成交价 / 快照目录价：{{item.discount_text}}（只读）</view>
+        <sb-select layout="stacked" plain label="物料用途" required options="{{materialUsages}}" value="{{item.usage}}" disabled="{{disabled}}" data-key="{{item.client_key}}" bind:change="materialUsage"/>
+        <sb-date-picker wx:if="{{item.inputVisibility.delivery}}" layout="stacked" plain clearable label="预计交付日期" value="{{item.expected_delivery_on}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_delivery_on" bind:change="materialInput"/>
+        <block wx:if="{{item.inputVisibility.monthly}}">
+          <sb-date-picker layout="stacked" plain clearable label="预计服务开始日期" value="{{item.expected_start_on}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_start_on" bind:change="materialInput"/>
+          <sb-date-picker wx:if="{{item.inputVisibility.oa}}" layout="stacked" plain clearable label="预计 OA 日期" value="{{item.expected_oa_on}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_oa_on" bind:change="materialInput"/>
+          <sb-input layout="stacked" plain label="服务月数" value="{{item.service_months}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="service_months" bind:change="materialInput"/>
+          <sb-input layout="stacked" plain label="预计账号数（说明信息）" value="{{item.expected_account_count}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_account_count" bind:change="materialInput"/>
+        </block>
+        <block wx:if="{{item.inputVisibility.consumption}}">
+          <sb-input layout="stacked" plain label="预计消耗金额（元）" value="{{item.expected_consumption_amount}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_consumption_amount" bind:change="materialInput"/>
+          <sb-input layout="stacked" plain label="预计消耗年份" value="{{item.expected_consumption_year}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_consumption_year" bind:change="materialInput"/>
+          <sb-input layout="stacked" plain label="预计消耗季度（1—4）" value="{{item.expected_consumption_quarter}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="expected_consumption_quarter" bind:change="materialInput"/>
+        </block>
+        <view wx:if="{{item.rule === 'manual'}}" class="hint">此物料由运营人工确认实际，无自动确收参考。</view>
+        <sb-input layout="stacked" plain label="物料备注" value="{{item.note}}" maxlength="{{1000}}" disabled="{{disabled}}" data-key="{{item.client_key}}" data-field="note" bind:change="materialInput"/>
+      </view>
+      <view class="fold" wx:if="{{!disabled}}" bindtap="openMaterials">＋ 从目录添加物料</view>
+      <view wx:if="{{showMaterialSearch}}" class="material-directory">
+        <view class="material-title">选择物料<text class="material-action" bindtap="closeMaterials">收起</text></view>
+        <sb-search plain value="{{materialQuery}}" placeholder="搜索物料名称或编码" maxlength="{{100}}" bind:change="materialSearch" bind:clear="materialSearch"/>
+        <sb-select layout="stacked" plain label="产品线" options="{{ui.productLines(materialProductLines)}}" value="{{materialProductLineId}}" bind:change="materialProductLine"/>
+        <scroll-view scroll-y class="material-directory-list">
+          <t-cell wx:for="{{materialCatalog}}" wx:key="id" title="{{item.name}}" description="{{item.code + ' · ' + (item.product_line_name || '未分产品线')}}" data-id="{{item.id}}" bind:click="chooseMaterial"/>
+          <view wx:if="{{materialsLoading}}" class="hint">正在加载目录…</view><view wx:elif="{{materialsError}}" class="error" bindtap="loadMaterials">{{materialsError}} · 重试</view><view wx:elif="{{!materialCatalog.length}}" class="hint">没有匹配物料，请联系运营维护目录。</view>
+          <sb-pagination wx:if="{{materialCatalog.length < materialTotal}}" mode="more" plain total="{{materialTotal}}" loading="{{materialsLoading}}" data-more="true" bind:more="loadMaterials"/>
+        </scroll-view>
+      </view>
+      <view wx:for="{{retiredMaterialLines}}" wx:key="id" class="hint">已停用：{{item.materialLabel}} · 历史实际保留</view>
+    </block>
+  </view>
+  <fde-picker id="opportunityFdePicker" compact-form="{{true}}" selected="{{visitContext ? form.visit_fde_members : form.fde_members}}" hint="{{visitContext ? '本次拜访出席人员；项目长期名单在更多信息中维护' : '商机协助人员，可搜索并选择多位 FDE'}}" disabled="{{disabled || (!visitContext && existing.capabilities.can_manage_fde_members === false)}}" bind:change="fdeChanged"/>
+  <view class="fold" hover-class="fold-pressed" bindtap="toggleForecast"><view>季度回款与确收 <text class="{{forecastRequired ? 'required' : 'optional'}}">{{forecastRequired ? '必填' : '选填'}}</text></view><view class="fold-text"><text>{{showForecast ? '收起预测' : '填写预测'}}</text><t-icon wx:if="{{showForecast}}" name="chevron-up" size="32rpx"/><t-icon wx:else name="chevron-down" size="32rpx"/></view></view>
+  <view wx:if="{{showForecast || form.material_lines.length}}" class="forecast">
+    <sb-select layout="stacked" plain label="试算与预测季度" options="{{opt.idx(quarterOptions,'label')}}" value="{{quarterIndex}}" bind:change="quarter"/>
+    <view wx:if="{{form.material_lines.length}}" class="material-reference">
+      <view class="fold" bindtap="previewMaterials">{{quarterLabel}} 物料试算参考<text class="fold-text">重新试算</text></view>
+      <view class="hint">按当前输入计算，可先补充缺项再保存；不会自动填写销售预测。</view>
+      <view wx:if="{{materialPreview.pending}}" class="hint">输入已更新，准备试算…</view>
+      <view wx:elif="{{materialPreview.loading}}" class="hint">正在试算当前输入…</view>
+      <view wx:elif="{{materialPreview.error}}" class="error error-retry" bindtap="previewMaterials">{{materialPreview.error}} · 点击重试</view>
+      <view wx:elif="{{materialPreview.display}}" class="material-trace">
+        <view class="hint">{{materialPreview.display.sourceLabel}} · {{materialPreview.display.periodLabel}}</view>
+        <view class="trace-summary">{{materialPreview.display.summary}}</view>
+        <view class="hint">后端计算的销售预测参考，不会自动改写预测或实际。</view>
+        <view wx:for="{{materialPreview.display.reasons}}" wx:key="index" class="hint">{{item}}</view>
+        <view wx:if="{{materialPreview.display.explanation}}" class="hint trace-text">{{materialPreview.display.explanation}}</view>
+        <view wx:if="{{materialPreview.display.versionText}}" class="hint">{{materialPreview.display.versionText}}</view>
+        <view wx:for="{{materialPreview.display.lines}}" wx:for-item="line" wx:key="key" class="trace-line">
+          <view class="trace-toggle" data-key="{{line.key}}" bindtap="toggleMaterialTrace" hover-class="text-pressed">
+            <view class="trace-name">{{line.name}}<view class="hint">{{line.statusText}}</view></view>
+            <text class="trace-action">{{line.expanded ? '收起' : '规则与过程'}}</text>
+          </view>
+          <view class="trace-text">{{line.amountText}}</view>
+          <view wx:for="{{line.reasons}}" wx:for-item="reason" wx:key="index" class="hint">{{reason}}</view>
+          <block wx:if="{{line.expanded}}">
+            <view class="hint trace-text">{{line.versionText}}</view>
+            <view class="trace-section">
+              <view class="trace-heading">{{line.definition.statusText}}</view>
+              <view wx:if="{{line.definition.description}}" class="trace-text">{{line.definition.description}}</view>
+              <view wx:if="{{line.definition.applicability}}" class="trace-text">适用范围：{{line.definition.applicability}}</view>
+              <view wx:if="{{line.definition.exceptions}}" class="trace-text">例外情况：{{line.definition.exceptions}}</view>
+              <view wx:for="{{line.definition.examples}}" wx:for-item="example" wx:key="index" class="trace-example">
+                <view class="trace-text">场景：{{example.scenario}}</view><view class="trace-text">说明：{{example.explanation}}</view>
+              </view>
+            </view>
+            <view wx:for="{{line.sections}}" wx:for-item="section" wx:key="index" class="trace-section">
+              <view class="trace-heading">{{section.title}}</view>
+              <view wx:for="{{section.rows}}" wx:for-item="row" wx:key="label" class="trace-row"><text class="trace-label">{{row.label}}</text><text class="trace-value">{{row.value}}</text></view>
+              <view wx:if="{{section.note}}" class="hint trace-text">{{section.note}}</view>
+            </view>
+            <view wx:if="{{line.months.length}}" class="trace-section">
+              <view class="trace-heading">完整服务期逐月分配</view>
+              <view class="hint">可上下滚动查看所有月份；排除的月份也保留显示。</view>
+              <scroll-view scroll-y class="trace-months">
+                <view wx:for="{{line.months}}" wx:for-item="month" wx:key="month" class="trace-month">
+                  <view class="trace-row"><text>{{month.month}}</text><text class="trace-value">{{month.amountText}}</text></view>
+                  <view class="hint">基础 {{month.base}} 分，尾部补 {{month.tail}} 分</view><view class="hint">{{month.statusText}}</view>
+                </view>
+              </scroll-view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </view>
+    <block wx:if="{{showForecast}}">
+    <sb-amount-input layout="stacked" plain label="预测回款（含税）" required="{{forecastRequired}}" valueType="string" precision="{{6}}" value="{{collection}}" placeholder="未填写" disabled="{{disabled}}" data-key="collection" bind:change="forecast"/>
+    <sb-amount-input layout="stacked" plain label="预测确收（含税）" required="{{forecastRequired}}" valueType="string" precision="{{6}}" value="{{recognized}}" placeholder="未填写" disabled="{{disabled}}" data-key="recognized" bind:change="forecast"/>
+    <sb-select layout="stacked" plain label="回款信心度" options="{{confidenceOptions}}" value="{{collectionConfidence}}" disabled="{{disabled}}" data-key="collection_confidence" bind:change="forecast"/>
+    <view class="hint">保存最新填写的季度含税预测；阶段和信心度不会折算金额。实际确收可在修改商机时按物料登记不含税金额，保存即生效。</view>
     <view wx:if="{{forecastError}}" class="error">{{forecastError}}</view>
     <view class="hint">{{forecastRequired ? '30%及以上阶段，至少填写一个季度；已填写的季度须同时填写回款和确收，金额为零请填 0。' : '当前阶段可选填；未填写与 0 不同。'}}填写金额为季度计划，实际回款和确收以已确认实绩为准。</view>
+    </block>
   </view>
-  <view class="fold" hover-class="fold-pressed" bindtap="toggleMore"><view>更多信息 <text class="optional">选填</text></view><view class="fold-text"><text>{{showMore ? '收起' : '补充'}}</text><t-icon wx:if="{{showMore}}" name="chevron-up" size="32rpx"/><t-icon wx:else name="chevron-down" size="32rpx"/></view></view><view wx:if="{{showMore}}" class="field"><sb-input layout="stacked" plain label="产品线" value="{{form.product_line}}" maxlength="{{200}}" placeholder="填写产品线" disabled="{{disabled}}" data-key="product_line" bind:change="input"/></view>
+  <view wx:if="{{recognizedActualVisible}}" class="recognized-actual-section">
+    <view class="material-title">季度实际不含税确收<text class="optional">选填</text><view class="material-action" bindtap="retryRecognizedActual">刷新状态</view></view>
+    <sb-select layout="stacked" plain label="所属季度" options="{{opt.idx(recognizedActualQuarterOptions,'label')}}" value="{{recognizedActualQuarterIndex}}" disabled="{{disabled || recognizedActualLoading}}" bind:change="recognizedActualQuarter"/>
+    <view class="hint">按物料登记本季度累计不含税金额，随商机保存生效；修改为新的累计额，不重复累加。物料调整后需先保存商机，再登记实际确收。</view>
+    <view wx:if="{{recognizedActualLoading}}" class="hint">正在读取实际确收…</view>
+    <view wx:if="{{recognizedActualError}}" class="error">{{recognizedActualError}}</view>
+    <view wx:if="{{recognizedActualError && !recognizedActualLoaded}}" class="material-action" bindtap="retryRecognizedActual">重新读取实际确收</view>
+    <block wx:if="{{recognizedActualLoaded}}">
+      <view class="recognized-actual-summary"><view>当前已保存金额<text>{{recognizedActualCurrentText}}</text></view><view wx:if="{{recognizedActualRows.length}}">物料填写合计<text>{{recognizedActualTotalText}}</text></view></view>
+      <view wx:if="{{recognizedActualReason}}" class="hint">{{recognizedActualReason}}</view>
+      <view wx:if="{{recognizedActualAttributionText}}" class="recognized-actual-notice">{{recognizedActualAttributionText}}</view>
+      <view wx:if="{{!recognizedActualRows.length}}" class="hint">尚无已保存的交易物料。新增物料后先保存商机，再按物料登记；已有历史总额保持原记录，不自动拆分。</view>
+      <view wx:for="{{recognizedActualRows}}" wx:key="material_line_id" class="recognized-actual-row">
+        <view class="recognized-actual-name">{{item.material_name}}</view>
+        <view class="hint">{{item.material_code}} · {{item.is_active ? '当前物料' : '历史物料'}} · 当前保存：{{item.currentText}}</view>
+        <view wx:if="{{recognizedActualNeedsReview && item.dirty}}" class="hint">最新登记依据：{{item.currentEvidence || '未填写'}}；备注：{{item.currentNote || '未填写'}}</view>
+        <block wx:if="{{recognizedActualEditable && item.eligible}}">
+          <sb-amount-input layout="stacked" plain label="本季度累计不含税确收" valueType="string" precision="{{6}}" value="{{item.amount}}" placeholder="未登记；金额为零请填 0" disabled="{{disabled || recognizedActualLoading}}" data-id="{{item.material_line_id}}" data-key="amount" bind:change="recognizedActualInput"/>
+          <view wx:if="{{item.amountPreview}}" class="hint">{{item.amountPreview}}</view>
+          <sb-input layout="stacked" plain label="确收依据" required="{{item.dirty}}" value="{{item.evidence}}" maxlength="{{160}}" placeholder="验收单、财务凭证等依据" disabled="{{disabled || recognizedActualLoading}}" data-id="{{item.material_line_id}}" data-key="evidence" bind:change="recognizedActualInput"/>
+          <view class="extra-text"><view class="label">备注<text class="optional">选填</text></view><textarea class="extra-textarea" value="{{item.note}}" maxlength="1000" placeholder="补充登记或调整说明" disabled="{{disabled || recognizedActualLoading}}" data-id="{{item.material_line_id}}" data-key="note" bindinput="recognizedActualInput" auto-height/></view>
+        </block>
+        <block wx:else><view wx:if="{{item.source_ref}}" class="hint">确收依据：{{item.source_ref}}</view><view wx:if="{{item.note}}" class="hint">备注：{{item.note}}</view><view class="hint">{{!item.eligible ? '此物料不在本商机登记确收' : '当前仅可查看'}}</view></block>
+      </view>
+      <view wx:if="{{recognizedActualNeedsReview}}" class="recognized-actual-notice">
+        <view>实际确收已有更新，已保留你修改的输入。请核对上方最新已登记金额和依据。</view>
+        <checkbox-group data-key="reviewed" bindchange="recognizedActualInput"><label><checkbox value="confirm" disabled="{{disabled}}"/>已核对最新登记，保存本次修改</label></checkbox-group>
+      </view>
+      <view wx:if="{{recognizedActualReplaceRequired}}" class="recognized-actual-notice">
+        <view>本季度存在其他来源的确收总额，按物料登记后将采用物料实绩，不与旧来源累加。请核对本季度完整物料登记。</view>
+        <checkbox-group data-key="replaceSource" bindchange="recognizedActualInput"><label><checkbox value="confirm" checked="{{recognizedActualReplaceSource}}" disabled="{{disabled}}"/>以本次物料登记替换原有确收来源</label></checkbox-group>
+      </view>
+      <view wx:if="{{recognizedActualDirty}}" class="material-action" bindtap="resetRecognizedActualDraft">撤销本季度输入</view>
+    </block>
+  </view>
+  <view wx:if="{{collectionActualVisible}}" class="collection-actual-section">
+    <view class="material-title">季度实际回款<text class="optional">选填</text><view class="material-action" bindtap="retryCollectionActual">刷新状态</view></view>
+    <sb-select layout="stacked" plain label="所属季度" options="{{opt.idx(collectionActualQuarterOptions,'label')}}" value="{{collectionActualQuarterIndex}}" disabled="{{disabled}}" bind:change="collectionActualQuarter"/>
+    <view wx:if="{{collectionActualLoading}}" class="hint">正在读取实际回款…</view>
+    <view wx:if="{{collectionActualError}}" class="error">{{collectionActualError}}</view>
+    <view wx:if="{{collectionActualError && !collectionActualLoaded}}" class="material-action" bindtap="retryCollectionActual">重新读取实际回款</view>
+    <block wx:if="{{collectionActualLoaded}}">
+      <view class="collection-actual-summary">当前实际回款：<text>{{collectionActualCurrentText}}</text></view>
+      <block wx:if="{{collectionActualEditable}}">
+        <sb-amount-input layout="stacked" plain label="季度累计实际回款" valueType="string" precision="{{6}}" value="{{collectionActualAmount}}" placeholder="未填写，金额为零请填 0" disabled="{{disabled || collectionActualLoading}}" data-key="amount" bind:change="collectionActualInput"/>
+        <view wx:if="{{collectionActualAmountPreview}}" class="hint">{{collectionActualAmountPreview}}</view>
+        <sb-input layout="stacked" plain label="回款依据" required="{{collectionActualDirty}}" value="{{collectionActualEvidence}}" maxlength="{{160}}" placeholder="填写收款凭据、流水号等依据" disabled="{{disabled || collectionActualLoading}}" data-key="evidence" bind:change="collectionActualInput"/>
+        <view class="extra-text"><view class="label">备注<text class="optional">选填</text></view><textarea class="extra-textarea" value="{{collectionActualNote}}" maxlength="1000" placeholder="补充说明" disabled="{{disabled || collectionActualLoading}}" data-key="note" bindinput="collectionActualInput" auto-height/></view>
+        <view wx:if="{{collectionActualReplaceRequired}}" class="collection-actual-replace">
+          <view class="warning">当前季度已有明细、历史或待核对的回款来源。保存后将以本次累计金额作为正式实际回款，不再与原来源相加；原记录仍保留。</view>
+          <checkbox-group bindchange="collectionActualReplace"><label><checkbox value="replace" checked="{{collectionActualReplaceSource}}" disabled="{{disabled || collectionActualLoading}}"/>以本次季度累计金额替换现有回款来源</label></checkbox-group>
+        </view>
+        <view class="hint">填写本季度累计金额，不是本次新增金额。点击页面保存后立即计入实际回款；未改金额不会重写。依据和备注随金额修改一并保存。</view>
+      </block>
+      <view wx:else class="hint">当前可查看实际回款，修改权限以商机授权为准。</view>
+    </block>
+  </view>
+  <view class="fold" hover-class="fold-pressed" bindtap="toggleMore"><view>更多信息 <text class="optional">选填</text></view><view class="fold-text"><text>{{showMore ? '收起' : '补充'}}</text><t-icon wx:if="{{showMore}}" name="chevron-up" size="32rpx"/><t-icon wx:else name="chevron-down" size="32rpx"/></view></view>
+  <view wx:if="{{showMore}}" class="extra-section">
+    <view wx:if="{{extraLoading}}" class="hint">正在加载补充选项…</view>
+    <view wx:elif="{{extraError}}" class="error error-retry" bindtap="loadExtraOptions">{{extraError}} · 点击重试</view>
+    <block wx:if="{{extraReady}}">
+      <block wx:for="{{extraFields}}" wx:key="key" wx:for-item="field">
+        <view wx:if="{{field.type === 'multi_enum'}}" class="extra-multi">
+          <view class="label">{{field.label}}</view>
+          <view class="extra-chips"><view wx:for="{{field.options}}" wx:key="value" class="extra-chip {{item.selected ? 'is-selected' : ''}} {{field.disabled || disabled ? 'is-disabled' : ''}}" data-key="{{field.key}}" data-value="{{item.value}}" bindtap="extraToggleSource">{{item.label}}<text wx:if="{{item.selected}}"> ✓</text></view></view>
+          <view wx:if="{{!field.value.length}}" class="hint">未维护</view>
+        </view>
+        <sb-select wx:elif="{{field.type === 'enum' || field.type === 'boolean'}}" layout="stacked" plain label="{{field.label}}" options="{{field.options}}" value="{{field.value}}" disabled="{{disabled || field.disabled}}" data-key="{{field.key}}" bind:change="extraChange"/>
+        <view wx:elif="{{field.type === 'text'}}" class="extra-text">
+          <view class="label">{{field.label}}</view><textarea class="extra-textarea" value="{{field.value || ''}}" placeholder="选填" maxlength="{{field.maxLength}}" disabled="{{disabled || field.disabled}}" data-key="{{field.key}}" bindinput="extraChange" auto-height/>
+        </view>
+      </block>
+      <view class="extra-people">
+        <view class="material-title">商机协作人员</view>
+        <view class="hint">长期协作关系与本次拜访出席分别维护。先选择长期协助人员，再指定主责。</view>
+        <fde-picker id="opportunityExtraFdePicker" wx:if="{{visitContext}}" compact-form="{{true}}" title="长期协助 FDE" selected="{{form.extra_roster}}" disabled="{{disabled || !extraCanManageFde}}" hint="保存商机时维护长期关系，不代表本次出席" bind:change="extraRosterChanged"/>
+        <sb-select layout="stacked" plain label="主责 FDE" options="{{extraPrimaryOptions}}" value="{{form.extra_values.primary_fde_id || null}}" disabled="{{disabled || !extraCanManageFde}}" bind:change="extraPrimary"/>
+        <view class="label">项目参与人员</view>
+        <view wx:for="{{extraParticipants}}" wx:key="user_id" class="extra-person"><view class="extra-person-copy">{{item.label}}<text wx:if="{{item.is_active === false}}">（已停用）</text><view class="hint">{{item.roleLabel}}</view></view><view wx:if="{{extraCanEditParticipants && !disabled}}" class="material-action" data-id="{{item.user_id}}" bindtap="removeExtraMember">移除</view></view>
+        <view wx:if="{{!extraParticipants.length}}" class="hint">未设置参与人员</view>
+        <view wx:if="{{extraCanEditParticipants && !disabled}}" class="fold" bindtap="openExtraMembers">＋ 添加项目参与人员</view>
+      </view>
+    </block>
+  </view>
+  <sb-sheet visible="{{extraMemberOpen}}" title="添加项目参与人员" bind:close="closeExtraMembers">
+    <view slot="header"><sb-select layout="stacked" plain label="参与职责" options="{{extraParticipantRoles}}" value="{{extraMemberRole}}" disabled="{{disabled}}" bind:change="extraMemberRole"/><sb-search plain value="{{extraMemberQuery}}" placeholder="搜索姓名、账号或团队" maxlength="{{100}}" disabled="{{disabled || !extraMemberRole}}" bind:change="extraMemberSearch" bind:clear="extraMemberSearch"/></view>
+    <view wx:if="{{!extraMemberRole}}" class="sheet-hint">先选择本项目的参与职责，再选择成员。</view>
+    <t-cell wx:for="{{extraMemberRows}}" wx:key="id" title="{{item.name}}" description="{{item.account_code}}" right-icon="{{item.selected ? 'check' : ''}}" data-id="{{item.id}}" bind:click="chooseExtraMember"/>
+    <view wx:if="{{extraMemberLoading}}" class="sheet-hint">正在加载…</view><view wx:elif="{{extraMemberError}}" class="error error-retry" bindtap="loadExtraMembers">{{extraMemberError}} · 重试</view><view wx:elif="{{extraMemberRole && !extraMemberRows.length}}" class="sheet-hint">没有找到可选成员</view>
+    <sb-pagination wx:if="{{extraMemberMore}}" mode="more" plain total="{{extraMemberTotal}}" loading="{{extraMemberLoading}}" data-more="true" bind:more="loadExtraMembers"/>
+  </sb-sheet>
 </view>

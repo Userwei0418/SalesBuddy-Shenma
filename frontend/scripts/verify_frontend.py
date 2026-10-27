@@ -6,6 +6,9 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+import sys
+sys.dont_write_bytecode = True
+from miniprogram_manifest import page_inventory, validate_dependencies
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -34,6 +37,8 @@ for relative in (
         fail(f"missing required file: {relative}")
 
 for path in ROOT.rglob("*"):
+    if path.relative_to(ROOT).parts[0] == "web":
+        continue  # The Web client has its own build and dependency checks.
     if path.name in {"project.private.config.json", ".DS_Store"}:
         # WeChat generates this local file when importing the formal development project.
         continue
@@ -42,7 +47,7 @@ for path in ROOT.rglob("*"):
     if path.is_dir() and path.name in {"node_modules", "miniprogram_npm", "__pycache__"}:
         fail(f"generated directory included: {path.relative_to(ROOT)}")
 
-json_files = sorted(p for p in ROOT.rglob("*.json") if p.name != "project.private.config.json")
+json_files = sorted(p for p in ROOT.rglob("*.json") if p.name != "project.private.config.json" and p.relative_to(ROOT).parts[0] != "web")
 for path in json_files:
     json.loads(path.read_text(encoding="utf-8"))
 
@@ -54,12 +59,14 @@ if not re.fullmatch(r"(?:touristappid|wx[0-9a-f]{16})", str(project.get("appid",
     fail("project.config.json appid must be touristappid or a valid WeChat AppID")
 
 app = json.loads((MINIPROGRAM / "app.json").read_text(encoding="utf-8"))
-pages = app.get("pages", [])
+pages, subpackage_roots = page_inventory(app)
 for page in pages:
     for suffix in (".js", ".json", ".wxml", ".wxss"):
         path = MINIPROGRAM / f"{page}{suffix}"
         if not path.is_file():
             fail(f"incomplete registered page: {path.relative_to(ROOT)}")
+validate_dependencies({str(path.relative_to(MINIPROGRAM)): path.read_bytes()
+                       for path in MINIPROGRAM.rglob('*') if path.is_file()}, subpackage_roots)
 
 for item in app.get("tabBar", {}).get("list", []):
     for key in ("iconPath", "selectedIconPath"):
@@ -79,6 +86,8 @@ banned_patterns = {
     "developer home path": re.compile(r"/Users/[^/\s]+"),
 }
 for path in ROOT.rglob("*"):
+    if path.relative_to(ROOT).parts[0] == "web":
+        continue  # The Web client has its own build and dependency checks.
     if not path.is_file() or path.suffix.lower() not in {".js", ".json", ".wxml", ".wxss", ".md"}:
         continue
     if path.name == "project.private.config.json" or path.resolve() == Path(__file__).resolve():
@@ -87,10 +96,6 @@ for path in ROOT.rglob("*"):
     for label, pattern in banned_patterns.items():
         # AppIDs identify the application; they are not credentials. Historical
         # release receipts may record the same ID as project.config.json.
-        if label == "owner AppID" and path.relative_to(ROOT).as_posix() in {"VERSION.json", "README.md"}:
-            if any(value != project["appid"] for value in pattern.findall(content)):
-                fail(f"{path.name} AppID differs from the customer project")
-            continue
         if label == "owner AppID" and (path.resolve() == project_config_path.resolve()
                                       or path.relative_to(ROOT).parts[0] == "docs"):
             continue
@@ -103,6 +108,7 @@ for path in ROOT.rglob("*"):
 
 print("FRONTEND_VERIFY_OK")
 print(f"registered_pages={len(pages)}")
+print(f"main_package_pages={len(app['pages'])}; subpackages={len(subpackage_roots)}")
 print(f"json_files={len(json_files)}")
 print(f"files={sum(1 for path in ROOT.rglob('*') if path.is_file())}")
 print(f"node_syntax_check={'enabled' if node else 'skipped (node not installed)'}")

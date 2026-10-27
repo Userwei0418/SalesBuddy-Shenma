@@ -1,6 +1,11 @@
 page{background:var(--ui-background)}
 .tasks-page{min-height:100vh;padding-bottom:48rpx;color:var(--ui-ink);background:var(--ui-background)}
 .tasks-hero{margin:24rpx 32rpx 0}
+.task-sync-note{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin:16rpx 32rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.task-sync-note>view{min-width:0;flex:1}.task-sync-note text,.task-sync-note label{display:block}.task-sync-note label{color:var(--ui-muted)}
+.task-sync-warning{color:var(--ui-warning)}.task-sync-note button{flex-shrink:0;margin:0;font-size:var(--ui-text-small);background:var(--ui-surface);color:var(--ui-primary)}
+.task-progress-summary{margin-top:20rpx}.task-progress-label{display:flex;justify-content:space-between;gap:12rpx;margin-bottom:8rpx;font-size:var(--ui-text-small);color:var(--ui-ink)}
+.task-progress-label label{color:var(--ui-secondary)}.task-progress-hint,.task-progress-updated{display:block;margin-top:6rpx;font-size:var(--ui-text-small);line-height:1.5;color:var(--ui-muted)}
 .task-view-switch{margin:16rpx 32rpx 0}
 /* 从成员下钻进来时的筛选说明：整行可点（44px），点了回到整个团队；原方法 changeTaskView 复位成员 */
 .member-scope{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:var(--ui-touch-target);margin-top:var(--ui-space-2);padding:0 var(--ui-space-3);border-radius:var(--ui-radius-panel);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px}
@@ -43,3 +48,13 @@ page{background:var(--ui-background)}
 
 
 /* Palette only: original geometry is preserved. */
+
+/* New business controls; existing layout and palette preserved. */
+.upgrade-cancel-action{display:flex;justify-content:flex-end;margin-top:16rpx}.upgrade-cancel-action button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);color:var(--ui-danger);background:var(--ui-surface);font-size:14px;line-height:var(--ui-touch-target)}
+.task-row-sync-stale { display: block; color: var(--ui-warning, #956b18); font-size: 22rpx; margin: 8rpx 0; }
+
+.task-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16rpx;margin:20rpx 32rpx}
+.task-summary>view{padding:20rpx 16rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.task-summary text{display:block;color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.task-summary label{display:block;margin-top:8rpx;color:var(--ui-ink);font-size:36rpx;font-weight:600;font-variant-numeric:tabular-nums}
+.task-count-note{margin:16rpx 32rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.6}

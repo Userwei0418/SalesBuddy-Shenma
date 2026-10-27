@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "看板",
-  "usingComponents": {
-    "fde-dashboard": "../../components/fde-dashboard/index",
-    "dashboard-picker": "../../components/dashboard-picker/index",
-    "dashboard-ranking": "../../components/dashboard-ranking/index"
-  }
-}

@@ -1,0 +1,32 @@
+@import "./opportunity-edit-entry.wxss";
+/* 商机卡片：白卡放灰底上，不描边不加阴影（飞书）；阶段与金额一行；只有红、黄信号出小标签。商机 Tab、全部商机与 FDE 商机页共用。 */
+.workbench-opportunity-card{box-sizing:border-box;padding:32rpx;border:0;border-radius:var(--ui-radius-panel);background:var(--ui-surface);box-shadow:none}
+.workbench-opportunity-card-pressed{background:var(--ui-neutral-soft)}
+.workbench-opportunity-head{min-width:0;flex:1}
+.workbench-opportunity-name{display:flex;align-items:flex-start;gap:12rpx;min-width:0}
+.workbench-opportunity-title{min-width:0;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.4;overflow-wrap:break-word;white-space:normal}
+.workbench-opportunity-customer{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:14px;line-height:1.4;overflow-wrap:break-word}
+.opportunity-grade{flex:0 0 auto;height:20px;margin-top:2px;padding:0 12rpx;border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);font-weight:400;line-height:20px}
+/* 卡内「编辑」：次按钮正文色（尺寸与 44px 点按区沿用 opportunity-edit-entry.wxss） */
+.workbench-opportunity-card-top .opportunity-card-edit{color:var(--ui-ink);font-weight:400}
+.workbench-opportunity-stage{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx;margin-top:24rpx;color:var(--ui-ink);font-size:14px;line-height:1.4}
+.workbench-opportunity-stage>.card-text{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workbench-opportunity-stage>.card-label{flex:0 0 auto;font-weight:600;font-variant-numeric:tabular-nums}
+.workbench-opportunity-progress{height:8rpx;margin-top:12rpx;overflow:hidden;border-radius:999px;background:var(--ui-neutral-soft)}
+.workbench-opportunity-progress>.card-text{display:block;height:100%;border-radius:inherit;background:var(--ui-primary)}
+.workbench-status{display:flex;align-items:center;gap:12rpx;min-width:0;margin-top:24rpx}
+.workbench-status-detail{min-width:0;overflow:hidden;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5;text-overflow:ellipsis;white-space:nowrap}
+.workbench-opportunity-meta{display:grid;grid-template-columns:1fr 1fr 1.3fr 1.1fr;gap:16rpx;margin-top:24rpx;padding-top:24rpx;border-top:1px solid var(--ui-line)}
+.workbench-opportunity-meta>.card-view{min-width:0}
+.workbench-opportunity-meta>.card-view>.card-text,.workbench-opportunity-meta>.card-view>.card-label{display:block}
+.workbench-opportunity-meta>.card-view>.card-text{color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.workbench-opportunity-meta>.card-view>.card-label{margin-top:4rpx;color:var(--ui-ink);font-size:14px;line-height:1.4;overflow-wrap:break-word;word-break:break-word}
+.workbench-opportunity-owner{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:24rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.workbench-opportunity-team{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workbench-opportunity-open{flex:0 0 auto;display:flex;align-items:center;gap:4rpx;color:var(--ui-primary)}
+
+/* Palette only: original geometry is preserved. */
+.workbench-opportunity-progress>.card-text { background:var(--sb-link-blue); }
+.workbench-opportunity-open { color:var(--sb-link-blue); }
+
+.workbench-status .workbench-status-detail { color:var(--sb-alert-ink); }

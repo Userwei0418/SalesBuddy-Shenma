@@ -13,5 +13,5 @@
   </view>
 </view>
 <root-portal>
-<t-date-time-picker visible="{{open}}" mode="{{mode === 'datetime' ? 'minute' : 'date'}}" title="{{title || label}}" value="{{pickerValue}}" format="{{mode === 'datetime' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'}}" start="{{start}}" end="{{end}}" cancel-btn="取消" confirm-btn="确定" bind:confirm="onConfirm" bind:cancel="onClose" bind:close="onClose" />
+<t-date-time-picker wx:if="{{open}}" data-picker-epoch="{{pickerEpoch}}" visible="{{open}}" mode="{{mode === 'datetime' ? 'minute' : 'date'}}" title="{{title || label}}" value="{{pickerValue}}" format="{{mode === 'datetime' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'}}" start="{{start}}" end="{{end}}" cancel-btn="取消" confirm-btn="确定" bind:confirm="onConfirm" bind:cancel="onClose" bind:close="onClose" />
 </root-portal>

@@ -3,9 +3,9 @@ const tick=()=>new Promise(r=>setImmediate(r));
 function setup({linked=false,storageFails=false,adviceFails=false,fde=false}={}){
  let page;let adviceCalls=0,archives=0;const urls=[];
  const file=path.resolve(__dirname,'../miniprogram/pages/visit-confirm/index.js');
- const api={createVisit:async()=>{archives++;return{id:'v1',opportunity_id:linked?'o1':null,fields:{}};},queryBusinessAdvice:async()=>{adviceCalls++;if(adviceFails)throw Error('网络异常');return{id:'a1',suggestions:[]};}};
- vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>page=p,require:n=>n.endsWith('/apiClient')?api:require(path.resolve(path.dirname(file),n)),wx:{getStorageSync:()=>null,removeStorageSync:()=>{if(storageFails)throw Error('storage');},setNavigationBarTitle(){},navigateTo:o=>urls.push(o.url),showToast(){}}});
- page.data={...page.data,isFde:fde,customerId:'c1',canSubmit:true,reviewPayload:{fields:{}}};page.setData=o=>Object.assign(page.data,o);page.refresh=()=>{};page.fail=e=>{throw e;};
+ const api={createVisit:async()=>{archives++;return{id:'v1',opportunity_id:linked?'o1':null,fields:{}};},requestBusinessAdvice:async()=>{adviceCalls++;if(adviceFails)throw Error('网络异常');return{id:'a1',subject_kind:'visit',subject_id:'v1',section:'tasks',status:'succeeded',summary:'建议',suggestions:[]};}};
+ vm.runInNewContext(fs.readFileSync(file,'utf8'),{Page:p=>page=p,getApp:()=>({globalData:{session:{userId:'u',workspaceId:'w'}}}),require:n=>n.endsWith('/apiClient')?api:require(path.resolve(path.dirname(file),n)),wx:{getStorageSync:()=>({}),removeStorageSync:()=>{if(storageFails)throw Error('storage');},setNavigationBarTitle(){},navigateTo:o=>urls.push(o.url),showToast(){}}});
+ page.data={...page.data,isFde:fde,customerId:'c1',canSubmit:true,reviewPayload:{fields:{}}};page.setData=o=>Object.assign(page.data,o);page.refresh=()=>{};page.persist=()=>true;page.fail=e=>{throw e;};
  return{page,urls,counts:()=>({adviceCalls,archives}),recover:()=>adviceFails=false};
 }
 for(const linked of [false,true])test(`销售归档关联商机=${linked}均推荐，清理异常不阻断详情`,async()=>{

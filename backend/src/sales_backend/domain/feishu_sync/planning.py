@@ -16,6 +16,7 @@ class SourceEvent:
     historical: bool = False
     production: bool = True
     department_ids: tuple[UUID, ...] = ()
+    change_id: UUID | None = None
 
 
 @dataclass(frozen=True)
@@ -32,9 +33,11 @@ def notification_plans(config: SyncConfig, event: SourceEvent) -> tuple[Delivery
         raise PermissionError("同步事件与连接不属于同一公司")
     notification = config.notification
     mapping = config.mappings.get(event.object_kind)
+    created = event.first_formal_create and event.object_kind in notification.on_create
+    updated = (not event.first_formal_create and event.object_kind in {ObjectKind.OPPORTUNITY, ObjectKind.KNOWLEDGE}
+               and event.change_id is not None and event.object_kind in notification.on_update)
     if not (config.enabled and mapping and mapping.enabled and notification.enabled
-            and event.first_formal_create and not event.historical and event.production
-            and event.object_kind in notification.on_create):
+            and not event.historical and event.production and (created or updated)):
         return ()
     chats = set()
     if notification.routing_mode == "department_routes":
@@ -47,6 +50,8 @@ def notification_plans(config: SyncConfig, event: SourceEvent) -> tuple[Delivery
     for chat in sorted(chat for chat in chats if chat):
         # Config revisions MUST NOT change the identity of an already planned delivery.
         identity = f"{config.workspace_id}:{config.connection_id}:{event.object_kind}:{event.object_id}:{chat}"
+        if updated:
+            identity += f":update:{event.change_id}"
         key = sha256(identity.encode()).hexdigest()
         plans.append(DeliveryPlan(config.connection_id, config.revision, event.event_id, chat, key))
     return tuple(plans)

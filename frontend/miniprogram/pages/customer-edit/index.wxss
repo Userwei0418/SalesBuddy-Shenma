@@ -1,3 +1,4 @@
+@import "../../styles/customer-identity.wxss";
 page{background:var(--ui-background)}
 .edit-page{min-height:100vh;box-sizing:border-box;padding:24rpx 32rpx calc(200rpx + constant(safe-area-inset-bottom));padding:24rpx 32rpx calc(200rpx + env(safe-area-inset-bottom));background:var(--ui-background);color:var(--ui-ink)}
 

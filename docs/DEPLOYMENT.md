@@ -1,3 +1,5 @@
+> 历史记录：当前版本和配置请先查阅 [PROJECT_FACTS.md](PROJECT_FACTS.md) 与 [OPERATIONS_HANDOVER.md](OPERATIONS_HANDOVER.md)。本文不能代替当前环境升级与验收。
+
 # 神码部署记录与操作入口
 
 本轮双端验收与修复见 [验收记录](FULL_ACCEPTANCE_20260927.md)。后续发布的实际版本以 `/api/v1/health/version`、`/workspace/build.json` 及对应 Release 回执为准。

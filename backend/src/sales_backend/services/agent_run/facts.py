@@ -4,12 +4,14 @@ from datetime import UTC, datetime
 from typing import Any
 
 from sales_backend.db import Database, json_value
-from sales_backend.domain.agent import RoleCode
 from sales_backend.domain.business_time import BUSINESS_TIMEZONE, business_datetime, localize_business_times
 from sales_backend.domain.follow_up_schedule import deadline_context
+from sales_backend.repositories.task_outcomes import NORMAL_COMPLETED_SQL
 from sales_backend.repositories.attribute_overlay import overlay_risk_attributes
 from sales_backend.repositories.company_rules import CompanyRulesRepository
+from sales_backend.services.agent_platform.authorization_snapshot import attach, capture
 from sales_backend.services.agent_run.models import RunInput
+from sales_backend.services.agent_run.personal_risk_sources import personal_risk_sources
 
 
 class AgentFactsLoader:
@@ -34,19 +36,27 @@ class AgentFactsLoader:
     async def _load(self, run: RunInput, *, today_tasks_scope=None) -> dict[str, Any]:
         async with self.database.transaction(run.actor, readonly=True) as connection:
             from sales_backend.services.agent_access import require_agent_access
-            from sales_backend.domain.route_permissions import AGENT_PERMISSIONS
 
-            await require_agent_access(connection,run.actor,run.mode,run.customer_id,
+            permission = await require_agent_access(connection,run.actor,run.mode,run.customer_id,
                 opportunity_id=run.opportunity_id,permission_version=run.permission_version)
             await connection.execute("SELECT set_config('app.authorized_feature',$1,true)",
-                'profile.fde_read' if run.surface=='fde_profile' else AGENT_PERMISSIONS[run.mode])
+                'profile.fde_read' if run.surface=='fde_profile' else permission)
+            read_scope = await capture(
+                connection, run.actor,
+                personal=run.surface == "fde_profile" or run.mode in {"today_tasks", "personal_risks"}
+                or (run.mode in {"chatbi", "operating_report"} and "范围仅本人" in run.text),
+                customer_id=run.customer_id,
+            )
             if run.surface == "fde_profile":
                 from sales_backend.services.fde_profile import current_run_facts
 
-                return await current_run_facts(connection, run)
+                return attach(await current_run_facts(connection, run), read_scope)
             if run.mode == "visit_entry":
                 if not run.customer_id:
                     raise ValueError("录入拜访必须先选择客户")
+                if run.opportunity_id:
+                    read_scope["selection"]["opportunity_id"] = run.opportunity_id
+                    read_scope["scope_label"] = "当前商机跟进，仅客户名称与本人录入上下文"
                 # Only bound customer reference fields and this actor's default
                 # recording values supplement the original input. No customer
                 # contacts, previous visit content or aggregates enter extraction.
@@ -62,7 +72,9 @@ class AgentFactsLoader:
                 }
                 if stage == "quality":
                     from sales_backend.services.visit_flow import (
-                        relative_time_context, structure_date_anchor, structure_source,
+                        relative_time_context,
+                        structure_date_anchor,
+                        structure_source,
                     )
 
                     anchor = request.get("date_anchor")
@@ -80,7 +92,7 @@ class AgentFactsLoader:
                         summary=request["summary"],
                         company_policy=await CompanyRulesRepository().active(connection, "visit_admission"),
                     )
-                return facts
+                return attach(facts, read_scope)
             if run.mode == "today_tasks":
                 facts = await self._load_today_task_facts(connection, run, scope=today_tasks_scope)
                 facts["company_policy"] = await CompanyRulesRepository().active(connection, "task_schedule")
@@ -94,70 +106,88 @@ class AgentFactsLoader:
                 )
                 for candidate in facts["follow_up_candidates"]:
                     candidate["deadline"] = deadline_context(candidate, facts["company_policy"])
-                return localize_business_times(facts)
+                return attach(localize_business_times(facts), read_scope)
             if run.mode == "personal_risks":
-                return await self._load_personal_risk_facts(connection, run)
-            if run.actor.role in {RoleCode.FDE, RoleCode.FDE_LEAD} and run.mode in {"chatbi", "operating_report"}:
-                from sales_backend.repositories.fde_analysis import fde_analysis_facts
-
-                return await fde_analysis_facts(connection, run.actor, personal="范围仅本人" in run.text,
-                                                permission=AGENT_PERMISSIONS[run.mode])
+                return attach(await self._load_personal_risk_facts(connection, run), read_scope)
             if run.mode == "operating_report":
-                return await self._load_operating_report_facts(connection, run)
+                return await self._load_operating_report_facts(connection, run, read_scope=read_scope)
             if run.mode == "opportunity_draft":
-                return await self._load_opportunity_draft_facts(connection, run)
+                return attach(await self._load_opportunity_draft_facts(connection, run), read_scope)
             if run.mode == "customer_chatbi" and run.customer_id:
-                return await self._load_customer_chatbi_facts(connection, run)
+                return attach(await self._load_customer_chatbi_facts(connection, run), read_scope)
             summary = await connection.fetchrow(
                 """
+                WITH customers AS (
+                  SELECT * FROM crm.customer WHERE deleted_at IS NULL AND 'customer'=ANY(business_identities)
+                    AND (NOT $1::boolean OR owner_user_ref_id = $2::uuid)
+                ), visits AS (
+                  SELECT * FROM activity.visit WHERE deleted_at IS NULL
+                    AND (NOT $1::boolean OR recorder_user_ref_id = $2::uuid)
+                ), opportunities AS (
+                  SELECT * FROM crm.opportunity WHERE deleted_at IS NULL
+                    AND (NOT $1::boolean OR owner_user_ref_id = $2::uuid)
+                ), risks AS (
+                  SELECT * FROM insight.risk WHERE deleted_at IS NULL
+                    AND (NOT $1::boolean OR owner_user_ref_id = $2::uuid)
+                ), tasks AS (
+                  SELECT t.* FROM workflow.task t WHERE t.deleted_at IS NULL
+                    AND (NOT $1::boolean OR EXISTS (
+                      SELECT 1 FROM workflow.task_assignee ta WHERE ta.task_id = t.id
+                        AND ta.responsibility = 'owner' AND ta.assignee_user_ref_id = $2::uuid))
+                )
                 SELECT
-                  (SELECT count(*) FROM crm.customer WHERE deleted_at IS NULL) AS customers,
-                  (SELECT count(*) FROM activity.visit WHERE deleted_at IS NULL) AS visits,
-                  (SELECT count(*) FROM activity.visit
-                    WHERE deleted_at IS NULL
-                      AND interaction_at >= date_trunc('day', clock_timestamp())) AS today_visits,
-                  (SELECT count(*) FROM crm.opportunity
-                    WHERE deleted_at IS NULL AND status = 'open') AS open_opportunities,
-                  (SELECT COALESCE(sum(amount), 0) FROM crm.opportunity
-                    WHERE deleted_at IS NULL AND status = 'open') AS open_pipeline_amount_cny,
-                  (SELECT count(*) FROM insight.risk
-                    WHERE deleted_at IS NULL
-                      AND status IN ('new','pending','in_progress','escalated')) AS open_risks,
-                  (SELECT count(*) FROM workflow.task
-                    WHERE deleted_at IS NULL
-                      AND status NOT IN ('completed', 'cancelled')) AS open_tasks,
-                  (SELECT count(*) FROM workflow.task
-                    WHERE deleted_at IS NULL AND status = 'completed') AS completed_tasks
-                """
+                  (SELECT count(*) FROM customers) AS customers,
+                  (SELECT count(*) FROM visits) AS visits,
+                  (SELECT count(*) FROM visits
+                    WHERE interaction_at >= date_trunc('day', clock_timestamp())) AS today_visits,
+                  (SELECT count(*) FROM opportunities WHERE status = 'open') AS open_opportunities,
+                  (SELECT COALESCE(sum(amount), 0) FROM opportunities
+                    WHERE status = 'open') AS open_pipeline_amount_cny,
+                  (SELECT count(*) FROM risks
+                    WHERE status <> 'resolved') AS open_risks,
+                  (SELECT count(*) FROM tasks
+                    WHERE status NOT IN ('completed', 'cancelled')) AS open_tasks,
+                  (SELECT count(*) FROM tasks t WHERE """ + NORMAL_COMPLETED_SQL + """) AS completed_tasks
+                """,
+                read_scope["selection"]["personal"], run.actor.user_id,
             )
             members = await connection.fetch(
                 """
+                WITH visit_totals AS (
+                  SELECT recorder_user_ref_id,
+                         count(*) FILTER (WHERE interaction_at >= clock_timestamp() - interval '7 days') AS visits_7d
+                  FROM activity.visit WHERE deleted_at IS NULL GROUP BY recorder_user_ref_id
+                ), opportunity_totals AS (
+                  SELECT owner_user_ref_id,
+                         count(*) FILTER (WHERE status = 'open') AS open_opportunities,
+                         sum(amount) FILTER (WHERE status = 'open') AS open_pipeline_amount_cny
+                  FROM crm.opportunity WHERE deleted_at IS NULL GROUP BY owner_user_ref_id
+                ), risk_totals AS (
+                  SELECT owner_user_ref_id,
+                         count(*) FILTER (WHERE status <> 'resolved') AS open_risks
+                  FROM insight.risk WHERE deleted_at IS NULL GROUP BY owner_user_ref_id
+                )
                 SELECT u.display_name,
-                       count(DISTINCT v.id) FILTER (
-                         WHERE v.interaction_at >= clock_timestamp() - interval '7 days'
-                       ) AS visits_7d,
-                       count(DISTINCT o.id) FILTER (WHERE o.status = 'open') AS open_opportunities,
-                       (SELECT COALESCE(sum(scope_o.amount), 0)
-                          FROM crm.opportunity scope_o
-                         WHERE scope_o.owner_user_ref_id = u.id
-                           AND scope_o.deleted_at IS NULL
-                           AND scope_o.status = 'open') AS open_pipeline_amount_cny,
-                       count(DISTINCT r.id) FILTER (
-                         WHERE r.status IN ('new','pending','in_progress','escalated')
-                       ) AS open_risks
+                       COALESCE(v.visits_7d, 0) AS visits_7d,
+                       COALESCE(o.open_opportunities, 0) AS open_opportunities,
+                       COALESCE(o.open_pipeline_amount_cny, 0) AS open_pipeline_amount_cny,
+                       COALESCE(r.open_risks, 0) AS open_risks
                 FROM platform.user_ref u
-                LEFT JOIN activity.visit v ON v.recorder_user_ref_id = u.id AND v.deleted_at IS NULL
-                LEFT JOIN crm.opportunity o ON o.owner_user_ref_id = u.id AND o.deleted_at IS NULL
-                LEFT JOIN insight.risk r ON r.owner_user_ref_id = u.id AND r.deleted_at IS NULL
+                LEFT JOIN visit_totals v ON v.recorder_user_ref_id = u.id
+                LEFT JOIN opportunity_totals o ON o.owner_user_ref_id = u.id
+                LEFT JOIN risk_totals r ON r.owner_user_ref_id = u.id
                 WHERE u.workspace_id = $1::uuid AND u.deleted_at IS NULL
-                  AND security.authorization_subject($2,'person',u.id,NULL)
-                GROUP BY u.id, u.display_name
+                  AND (NOT $3::boolean OR u.id = $4::uuid)
+                  AND EXISTS (
+                    SELECT 1 FROM unnest($2::text[]) permission
+                    WHERE security.authorization_subject(permission,'person',u.id,NULL))
                 ORDER BY u.display_name
                 """,
                 run.actor.workspace_id,
-                AGENT_PERMISSIONS[run.mode],
+                ["customer.read", "opportunity.read", "visit.read", "task.read", "risk.read"],
+                read_scope["selection"]["personal"], run.actor.user_id,
             )
-        return {
+        return attach({
             "scope": {
                 "type": run.actor.data_scope.value,
                 "team_ids": list(run.actor.team_ids),
@@ -166,7 +196,7 @@ class AgentFactsLoader:
             "summary": dict(summary),
             "members": [dict(row) for row in members],
             "data_as_of": datetime.now(UTC).isoformat(),
-        }
+        }, read_scope)
 
     async def _load_visit_server_fields(self, connection: Any, run: RunInput) -> dict[str, str]:
         identity = await connection.fetchrow(
@@ -185,15 +215,12 @@ class AgentFactsLoader:
             "customer_type": "",
         }
         if run.customer_id:
-            customer = json_value(
-                await connection.fetchval(
-                    "SELECT security.customer_reference($1::uuid)",
-                    run.customer_id,
-                )
-            )
+            from sales_backend.repositories.opportunity_access import follow_up_reference
+
+            customer = await follow_up_reference(connection, run.customer_id, run.opportunity_id)
             if not customer:
                 raise LookupError("客户不存在或不在当前权限范围内")
-            fields.update(customer_name=customer["name"], customer_type=customer["customer_type_code"] or "")
+            fields.update(customer_name=customer["name"], customer_type=customer.get("customer_type_code") or "")
         return fields
 
     async def _load_opportunity_draft_facts(self, connection: Any, run: RunInput) -> dict[str, Any]:
@@ -282,7 +309,7 @@ class AgentFactsLoader:
             SELECT id::text, title, status, severity_code
               FROM insight.risk
              WHERE customer_id = $1::uuid AND deleted_at IS NULL
-             ORDER BY (status IN ('resolved','accepted')), updated_at DESC
+             ORDER BY (status = 'resolved'), updated_at DESC
              LIMIT 12
             """,
             run.customer_id,
@@ -300,11 +327,11 @@ class AgentFactsLoader:
             ), task_totals AS (
               SELECT count(*) AS total,
                      count(*) FILTER (WHERE status NOT IN ('completed','cancelled')) AS open_count,
-                     count(*) FILTER (WHERE status = 'completed') AS completed_count
-                FROM workflow.task WHERE customer_id = $1::uuid AND deleted_at IS NULL
+                     count(*) FILTER (WHERE """ + NORMAL_COMPLETED_SQL + """) AS completed_count
+                FROM workflow.task t WHERE customer_id = $1::uuid AND deleted_at IS NULL
             ), risk_totals AS (
               SELECT count(*) AS total,
-                     count(*) FILTER (WHERE status IN ('new','pending','in_progress','escalated')) AS open_count
+                     count(*) FILTER (WHERE status <> 'resolved') AS open_count
                 FROM insight.risk WHERE customer_id = $1::uuid AND deleted_at IS NULL
             ), visit_totals AS (
               SELECT count(*) AS total FROM activity.visit
@@ -321,7 +348,9 @@ class AgentFactsLoader:
         details = {
             "opportunities": [dict(row) for row in opportunities],
             "visits": [dict(row) for row in visits],
-            "tasks": [dict(row) for row in tasks],
+            "tasks": [{**dict(row), **{key: json_value(row.get(key)) for key in
+                ("processing_reason", "processing_detail", "latest_feedback", "next_step", "completion_result", "completion_action")}}
+                for row in tasks],
             "risks": [dict(row) for row in risks],
         }
         return {
@@ -350,12 +379,11 @@ class AgentFactsLoader:
             "data_as_of": datetime.now(UTC).isoformat(),
         }
 
-    async def _load_operating_report_facts(self, connection: Any, run: RunInput) -> dict[str, Any]:
-        from sales_backend.repositories.authorization import AuthorizationRepository
-
-        grants = (await AuthorizationRepository().effective(connection)).for_permission("agent.operating_report")
-        scopes = {grant.scope for grant in grants}
-        personal_scope = scopes <= {"self"} or "范围仅本人" in run.text
+    async def _load_operating_report_facts(self, connection: Any, run: RunInput, *, read_scope=None) -> dict[str, Any]:
+        # The execution gate was checked independently. Each table's RLS uses
+        # its resource.read; an optional personal selection only narrows it.
+        personal_scope = "范围仅本人" in run.text
+        read_scope = read_scope or await capture(connection, run.actor, personal=personal_scope)
         visits = await connection.fetch(
             """
             SELECT v.id::text, v.interaction_at, v.expectation_code,
@@ -386,10 +414,16 @@ class AgentFactsLoader:
             """
             SELECT t.id::text, left(t.title, 160) AS title,
                    left(t.description, 400) AS description, t.status,
-                   t.priority_code, t.due_at, t.completed_at,
+                   t.priority_code, t.due_at, t.completed_at, t.completion_note, t.execution_mode,
+                   x.state->'processing_reason' AS processing_reason,
+                   x.state->'processing_detail' AS processing_detail,
+                   x.state->'latest_feedback' AS latest_feedback, x.state->'next_step' AS next_step,
+                   x.state->'completion_result' AS completion_result,
+                   x.state->'completion_action' AS completion_action,
                    assignee.id::text AS assignee_user_ref_id, assignee.display_name AS assignee_name,
                    team.name AS team_name, c.id::text AS customer_id, c.name AS customer_name
               FROM workflow.task t
+              LEFT JOIN workflow.task_execution x ON x.task_id=t.id AND x.workspace_id=t.workspace_id
               JOIN workflow.task_assignee ta
                 ON ta.task_id = t.id AND ta.responsibility = 'owner'
               JOIN platform.user_ref assignee ON assignee.id = ta.assignee_user_ref_id
@@ -422,7 +456,7 @@ class AgentFactsLoader:
              WHERE r.deleted_at IS NULL
                AND (r.opened_at >= clock_timestamp() - interval '7 days'
                     OR r.updated_at >= clock_timestamp() - interval '7 days'
-                    OR r.status IN ('new','pending','in_progress','escalated'))
+                    OR r.status <> 'resolved')
                AND (NOT $1::boolean OR owner.id = $2::uuid)
              ORDER BY CASE r.severity_code
                WHEN 'critical' THEN 1 WHEN 'high' THEN 2 WHEN 'medium' THEN 3 ELSE 4 END,
@@ -453,13 +487,10 @@ class AgentFactsLoader:
             personal_scope,
             run.actor.user_id,
         )
-        scope_label = ("个人" if personal_scope else "全公司授权范围" if "workspace" in scopes
-                       else "指定团队" if "teams" in scopes else "参与项目")
-        return {
+        return attach({
             "scope": {
                 "role": run.actor.role.value,
                 "scope_type": run.actor.data_scope.value,
-                "scope_label": scope_label,
                 "team_ids": list(run.actor.team_ids),
                 "user_id": run.actor.user_id,
             },
@@ -473,7 +504,7 @@ class AgentFactsLoader:
             "risks": [dict(row) for row in risks],
             "opportunities": [dict(row) for row in opportunities],
             "data_as_of": datetime.now(UTC).isoformat(),
-        }
+        }, read_scope)
 
     async def _load_today_task_facts(self, connection: Any, run: RunInput, *, scope=None) -> dict[str, Any]:
         active_tasks = await connection.fetch(
@@ -493,7 +524,7 @@ class AgentFactsLoader:
               LEFT JOIN crm.customer c ON c.id = t.customer_id
               LEFT JOIN platform.user_ref creator ON creator.id = t.creator_user_ref_id
              WHERE t.deleted_at IS NULL
-               AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred')
+               AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review', 'needs_adjustment')
              ORDER BY t.due_at, t.created_at DESC
             """,
             run.actor.user_id,
@@ -548,27 +579,7 @@ class AgentFactsLoader:
         }
 
     async def _load_personal_risk_facts(self, connection: Any, run: RunInput) -> dict[str, Any]:
-        visits = await connection.fetch(
-            """
-            SELECT v.id::text AS source_visit_id, v.customer_id::text,
-                   v.opportunity_id::text, c.name AS customer_name,
-                   o.name AS opportunity_name, o.status AS opportunity_status,
-                   o.amount AS opportunity_amount,
-                   v.interaction_at, v.interaction_mode_code,
-                   v.visit_location, v.duration_minutes, v.expectation_code,
-                   v.follow_up_record, v.next_action, c.level_code
-              FROM activity.visit v
-              LEFT JOIN crm.customer c ON c.id = v.customer_id
-              LEFT JOIN crm.opportunity o ON o.id = v.opportunity_id
-             WHERE v.deleted_at IS NULL
-               AND v.recorder_user_ref_id = $1::uuid
-               AND v.status IN ('confirmed', 'archived')
-               AND v.interaction_at >= clock_timestamp() - interval '180 days'
-             ORDER BY v.interaction_at DESC, v.created_at DESC
-             LIMIT 12
-            """,
-            run.actor.user_id,
-        )
+        visits = await personal_risk_sources(connection, run.actor)
         open_risks = await connection.fetch(
             """
             SELECT r.id::text AS risk_id, r.source_visit_id::text,
@@ -580,7 +591,7 @@ class AgentFactsLoader:
               LEFT JOIN crm.customer c ON c.id = r.customer_id
              WHERE r.deleted_at IS NULL
                AND r.owner_user_ref_id = $1::uuid
-               AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+               AND r.status <> 'resolved'
              ORDER BY CASE r.severity_code
                         WHEN 'critical' THEN 1 WHEN 'high' THEN 2
                         WHEN 'medium' THEN 3 ELSE 4 END,

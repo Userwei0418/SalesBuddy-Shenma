@@ -1,11 +1,19 @@
 """Create isolated DB login and configuration on the customer host; never print secrets."""
-import asyncio,base64,json,os,pwd,secrets,subprocess
+import asyncio
+import base64
+import json
+import os
+import pwd
+import secrets
+import socket
 from pathlib import Path
+
 import asyncpg
+
 
 async def main():
     if os.geteuid()!=0:raise SystemExit('Run as root on salesbuddy')
-    if subprocess.check_output(['hostname'],text=True).strip()!='salesbuddy':raise SystemExit('Wrong target host')
+    if socket.gethostname()!='salesbuddy':raise SystemExit('Wrong target host')
     target=Path('/etc/shenma-sales');target.mkdir(mode=0o750,exist_ok=True)
     service=pwd.getpwnam('shenma-sales')
     os.chown(target,0,service.pw_gid)
@@ -18,6 +26,12 @@ async def main():
         c=await asyncpg.connect(host='/var/run/postgresql',database='postgres',user='postgres')
         if await c.fetchval("SELECT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='shenma_runtime')"):
             raise RuntimeError('Runtime role already exists; review rather than overwrite')
+        check=await asyncpg.connect(host='/var/run/postgresql',database='shenma_sales',user='postgres')
+        try:
+            schema=await check.fetchval("SELECT max(substring(version FROM 2)::integer) FROM ops.schema_migration WHERE version ~ '^V[0-9]+$'")
+            if schema != 125:
+                raise RuntimeError('Fresh runtime provisioning requires V125 before the incremental ACL migrations; do not provision a late role')
+        finally:await check.close()
         await c.execute("CREATE ROLE shenma_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD '"+db_password+"'")
         await c.execute('GRANT CONNECT ON DATABASE shenma_sales TO shenma_runtime')
         await c.close()

@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "企业档案与认领",
+  "navigationBarTextStyle": "black",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "sb-search": "/ui/sb/sb-search/index",
+    "sb-state-panel": "/ui/sb/sb-state-panel/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-status-tag": "/ui/sb/sb-status-tag/index"
+  },
+  "homeButton": true
+}

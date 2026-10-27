@@ -48,7 +48,7 @@ async function consoleHarness(data) {
   const core=await import(pathToFileURL(path.join(assets,'core.js')).href);
   const page=await import(pathToFileURL(path.join(assets,'company-rules.js')).href);
   core.clearSession();
-  Object.assign(core.state,{token:'fixture-only',actor:{workspace_id:'company-a',user_id:'operator',role:'operations'},company:{id:'company-a',name:'当前甲公司'},filters:{}});
+  Object.assign(core.state,{token:'fixture-only',actor:{workspace_id:'company-a',user_id:'operator',role:'operations'},company:{id:'company-a',name:'当前甲公司'},filters:{},permissions:{'rule.read':true,'ai.execution_read':true,'rule.draft':true,'rule.preview':true}});
   global.fetch=async()=>({ok:true,status:200,json:async()=>data});
   return {core,page};
 }
@@ -73,7 +73,8 @@ test('运营可编辑业务指引但不可编辑运行配置，规则数与能�
   assert.match(view.html,/>12<\/strong><span>业务能力/);
   assert.match(view.html,/data-action="edit-business"/);
   assert.match(view.html,/data-action="business-versions"/);
-  assert.doesNotMatch(view.html,/data-action="edit"/);
+  assert.match(view.html,/data-action="edit"[^>]*>配置检查/);
+  assert.doesNotMatch(view.html,/>编辑运行配置</);
   assert.match(view.html,/公司 V3/);
   assert.match(view.html,/当前公司/);
   assert.match(view.html,/中台判断与后端校验/);

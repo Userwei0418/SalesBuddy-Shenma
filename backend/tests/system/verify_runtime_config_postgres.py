@@ -42,6 +42,8 @@ async def workspace_fixture(connection):
     workspace, team = uuid4(), uuid4()
     await connection.execute("INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,$2,'Config fixture')",
                              workspace, str(workspace))
+    if await connection.fetchval("SELECT to_regclass('control.tenant_module') IS NOT NULL"):
+        await connection.execute("UPDATE control.tenant_module SET enabled=true WHERE workspace_id=$1 AND module_code='ai'",workspace)
     await connection.execute("INSERT INTO platform.team(id,workspace_id,code,name) VALUES($1,$2,'CONFIG','Config')", team, workspace)
     actors = {}
     for role in ("administrator", "operations", "sales"):

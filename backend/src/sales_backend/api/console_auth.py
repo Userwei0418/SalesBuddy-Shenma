@@ -11,8 +11,10 @@ from sales_backend.auth.tokens import SessionReference, TokenError, TokenService
 from sales_backend.config import Settings
 from sales_backend.db import Database
 from sales_backend.request_metadata import current_actor
+from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.services.auth import AuthenticationFailed, AuthService
 from sales_backend.services.password_auth import LoginThrottled, PasswordAuthService
+from sales_backend.services.restricted import RestrictedAccessError
 
 router = APIRouter(prefix="/api/v1/console/auth", tags=["Console authentication"])
 COOKIE = "sales_console_refresh"
@@ -93,8 +95,10 @@ async def login(
         )
     except LoginThrottled as exc:
         raise HTTPException(429, str(exc), headers={"Retry-After": str(exc.retry_after)}) from exc
+    except RestrictedAccessError as exc:
+        raise HTTPException(exc.status, {"code": exc.code}) from exc
     except AuthenticationFailed as exc:
-        raise HTTPException(401, str(exc)) from exc
+        raise HTTPException(401, {"code": "INVALID_CREDENTIALS"}) from exc
     return session_response(request, response, session, must_change, new_login=True)
 
 
@@ -129,6 +133,7 @@ async def me(
     from sales_backend.services.capabilities import capability_snapshot
     async with database.transaction(identity.actor, readonly=True) as connection:
         effective = await capability_snapshot(connection, identity.actor)
+        effective.update(await IdentityRepository().company_identity(connection, identity.actor.workspace_id))
     return {
         "actor": AuthService.actor_response(identity.profile).model_copy(update=effective),
         "must_change_password": identity.must_change_password,

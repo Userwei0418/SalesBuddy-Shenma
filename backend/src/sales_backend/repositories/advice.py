@@ -2,6 +2,38 @@ from sales_backend.domain.advice import AdviceError
 
 
 class AdviceRepository:
+    async def latest_id(self, connection, actor, subject):
+        # RLS still applies. Role is explicit because advice RLS is user-scoped.
+        return await connection.fetchval(
+            "SELECT id::text FROM insight.business_advice "
+            "WHERE workspace_id=$1::uuid AND actor_user_ref_id=$2::uuid "
+            "AND actor_role_code=$3 AND subject_kind=$4 AND subject_id=$5::uuid AND section=$6 "
+            "ORDER BY COALESCE((configuration_snapshot->>'_request_sequence')::bigint,0) DESC,"
+            "created_at DESC,id DESC LIMIT 1",
+            actor.workspace_id, actor.user_id, actor.role.value,
+            subject.subject_kind, subject.subject_id, subject.section,
+        )
+
+    async def requested(self, connection, actor, subject, advice_id):
+        # Caller holds the existing subject-scoped request advisory lock.
+        # Keep request order separate from worker-controlled status/updated_at.
+        # This server-owned metadata is not part of the runtime configuration
+        # fingerprint; legacy snapshots without it keep their creation order.
+        await connection.execute(
+            "UPDATE insight.business_advice SET configuration_snapshot=jsonb_set("
+            "configuration_snapshot,'{_request_sequence}',to_jsonb(("
+            "SELECT COALESCE(MAX((a.configuration_snapshot->>'_request_sequence')::bigint),0)+1 "
+            "FROM insight.business_advice a WHERE a.workspace_id=$2::uuid "
+            "AND a.actor_user_ref_id=$3::uuid AND a.actor_role_code=$4 "
+            "AND a.subject_kind=$5 AND a.subject_id=$6::uuid AND a.section=$7)),true) "
+            "WHERE id=$1::uuid AND workspace_id=$2::uuid "
+            "AND actor_user_ref_id=$3::uuid AND actor_role_code=$4 "
+            "AND subject_kind=$5 AND subject_id=$6::uuid AND section=$7",
+            advice_id, actor.workspace_id, actor.user_id, actor.role.value,
+            subject.subject_kind, subject.subject_id, subject.section,
+        )
+        return await self.get(connection, advice_id, actor=actor)
+
     async def suggestion_kind(self, connection, suggestion_id):
         return await connection.fetchval(
             "SELECT a.subject_kind FROM insight.business_suggestion s JOIN insight.business_advice a ON a.id=s.advice_id "
@@ -9,9 +41,13 @@ class AdviceRepository:
             suggestion_id,
         )
 
-    async def get(self, connection, advice_id, *, lock=False):
+    async def get(self, connection, advice_id, *, lock=False, actor=None):
         sql = "SELECT * FROM insight.business_advice WHERE id=$1::uuid"
-        row = await connection.fetchrow(sql + (" FOR UPDATE" if lock else ""), advice_id)
+        args = [advice_id]
+        if actor is not None:
+            sql += " AND workspace_id=$2::uuid AND actor_user_ref_id=$3::uuid AND actor_role_code=$4"
+            args.extend((actor.workspace_id, actor.user_id, actor.role.value))
+        row = await connection.fetchrow(sql + (" FOR UPDATE" if lock else ""), *args)
         if not row:
             raise AdviceError("建议不存在或无权查看", 404)
         value = dict(row)

@@ -5,6 +5,7 @@ import logging
 from dataclasses import replace
 from datetime import datetime
 
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.domain.advice import fingerprint
 from sales_backend.domain.agent import ChatMessage
 from sales_backend.domain.customer_risk import (
@@ -13,19 +14,20 @@ from sales_backend.domain.customer_risk import (
     validate_customer_risk_result,
 )
 from sales_backend.job_context import current_job_lease
+from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.repositories.customer_risk import CONTRACT, load_customer_risk_facts
 from sales_backend.repositories.identity import IdentityRepository
-from sales_backend.repositories.authorization import AuthorizationRepository
-from sales_backend.services.authorization import require_permission
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.services.agent_business_rules import (
     business_policy_metadata,
     prepare_business_rules,
     supplementary_prompt,
 )
+from sales_backend.services.agent_platform.authorization_snapshot import attach, capture
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
 from sales_backend.services.agent_platform.inference import InferenceService, binding_for
 from sales_backend.services.agent_platform.pilot import personal_risk_pilot_policy
+from sales_backend.services.authorization import require_permission
 from sales_backend.services.runtime_config import load_runtime_configuration
 
 logger = logging.getLogger(__name__)
@@ -85,14 +87,19 @@ class CustomerRiskReviewHandler:
             if row["status"] in {"succeeded", "superseded"}:
                 await record_job_effect(connection, actor.workspace_id)
                 return
+            if not await customer_analysis_applies(connection, row["customer_id"]):
+                await self._supersede(connection, assessment_id, actor)
+                return
             await assert_current_owner(connection, actor, row)
-            permission_version = (await AuthorizationRepository().snapshot(connection))["permission_version"]
+            read_scope = await capture(connection, actor, customer_id=str(row["customer_id"]))
+            permission_version = read_scope["permission_version"]
             await connection.execute("SELECT set_config('app.authorized_feature','risk.auto_review',true)")
             if (row["fact_scope_version"] != await connection.fetchval("SELECT security.current_fact_scope_version()")
                 or not await self._is_latest(connection, row)):
                 await self._supersede(connection, assessment_id, actor)
                 return
             facts = await load_customer_risk_facts(connection, str(row["customer_id"]))
+            facts = attach(facts, read_scope)
             scope_version = await connection.fetchval("SELECT security.current_fact_scope_version()")
             updated = await connection.execute(
                 "UPDATE insight.customer_risk_assessment SET status='running',outcome='unknown',error_code=NULL,"
@@ -140,6 +147,9 @@ class CustomerRiskReviewHandler:
             await connection.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended($1,0))", "customer-risk:" + str(row["customer_id"]),
             )
+            if not await customer_analysis_applies(connection, row["customer_id"]):
+                await self._supersede(connection, assessment_id, actor)
+                return
             await assert_current_owner(connection, actor, row)
             if permission_version != (await AuthorizationRepository().snapshot(connection))["permission_version"]:
                 raise PermissionError("客户风险评估权限已变化，本次结果不再采用")
@@ -225,7 +235,7 @@ class CustomerRiskReviewHandler:
                 "model_ref=EXCLUDED.model_ref,input_snapshot=EXCLUDED.input_snapshot,evidence=EXCLUDED.evidence,"
                 "due_at=EXCLUDED.due_at,source_code=EXCLUDED.source_code,suggested_action=EXCLUDED.suggested_action,"
                 "agent_key=EXCLUDED.agent_key,version_no=insight.risk.version_no+1 "
-                "WHERE insight.risk.status NOT IN ('resolved','accepted') RETURNING id,status,(xmax=0) AS inserted",
+                "WHERE insight.risk.status <> 'resolved' RETURNING id,status,version_no,(xmax=0) AS inserted",
                 actor.workspace_id, facts["customer"]["id"], visit.get("opportunity_id"), visit["id"],
                 risk["risk_type"], risk["title"], risk["description"], risk["severity"], actor.user_id,
                 facts["customer"]["owner_team_id"], trace.get("model_ref", "customer_risk_agent"),
@@ -239,5 +249,6 @@ class CustomerRiskReviewHandler:
                     "INSERT INTO insight.risk_event(workspace_id,risk_id,event_type,to_status,"
                     "actor_user_ref_id,payload) VALUES($1::uuid,$2::uuid,$3,$4,$5::uuid,$6::jsonb)",
                     actor.workspace_id, row["id"], "detected" if row["inserted"] else "reanalyzed", row["status"],
-                    actor.user_id, {"assessment_id": assessment_id, "source_visit_id": visit["id"]},
+                    actor.user_id, {"assessment_id": assessment_id, "source_visit_id": visit["id"],
+                                   "risk_version_no": row["version_no"]},
                 )

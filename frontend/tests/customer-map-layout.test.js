@@ -2,6 +2,20 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
+test('长客户弹层仅正文分配剩余高度，头尾固定且底部安全区不重复', () => {
+  const wxml=fs.readFileSync(__dirname+'/../miniprogram/pages/customers/index.wxml','utf8');
+  const pageCss=fs.readFileSync(__dirname+'/../miniprogram/pages/customers/index.wxss','utf8');
+  const css=fs.readFileSync(__dirname+'/../miniprogram/styles/portal-layout.wxss','utf8');
+  assert.match(wxml,/<root-portal wx:if="\{\{selectedBattleCustomer\}\}"><view class="sb-portal-theme sb-customer-portal">/);
+  assert.match(pageCss,/styles\/portal-theme\.wxss/);
+  assert.match(css,/\.sb-customer-portal \.sb-sheet\s*\{[^}]*height: 80vh;[^}]*overflow: hidden/);
+  assert.match(css,/\.sb-customer-portal \.sb-sheet-body\s*\{[^}]*height: 0;[^}]*max-height: none/);
+  assert.match(css,/\.sb-portal-theme \.sb-sheet-body\s*\{[^}]*min-height: 0/);
+  assert.match(css,/\.sb-portal-theme \.sb-sheet-foot\s*\{[^}]*flex-shrink: 0/);
+  const footer=css.match(/\.sb-customer-portal \.sb-sheet-foot\.has-btn\s*\{([^}]+)\}/)[1];
+  assert.match(footer,/padding-bottom: var\(--ui-space-3\)/);assert.doesNotMatch(footer,/safe-area/);
+});
+
 test('作战地图使用单行胶囊筛选，并移除快捷筛选', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.wxml', 'utf8');
   const wxss = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.wxss', 'utf8');
@@ -10,7 +24,7 @@ test('作战地图使用单行胶囊筛选，并移除快捷筛选', () => {
   assert.match(wxml, /class="operating-filter-title">筛选</);
   assert.match(wxml, /class="operating-picker-scroll" scroll-x/);
   assert.match(wxml, /class="operating-picker-row"/);
-  assert.equal((wxml.match(/class="operating-picker filter-/g) || []).length, 5);
+  assert.equal((wxml.match(/class="operating-picker filter-/g) || []).length, 7);
   assert.match(wxml, /class="operating-picker filter-level/);
   assert.match(wxml, />客户优先级</);
   assert.match(wxml, /mapSelectedLevels/);
@@ -27,13 +41,15 @@ test('作战地图使用单行胶囊筛选，并移除快捷筛选', () => {
   assert.match(filterCss, /\.operating-picker-content\s*\{[^}]*display:\s*flex/);
   assert.match(filterCss, /\.operating-picker\s*\{[^}]*height:\s*32px/);
   assert.match(filterCss, /filter-plan,[\s\S]*filter-amount,[\s\S]*filter-team,[\s\S]*filter-member\s*\{\s*width:\s*100px/);
+  assert.match(filterCss, /filter-level\s*\{\s*width:\s*116px/);
+  assert.match(filterCss, /filter-level::after\s*\{[^}]*top:calc\(50% - 22px\)/);
   assert.match(wxss, /\.asset-period\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 
 test('作战地图提供客户认领入口并进入独立页面', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.wxml', 'utf8');
   const js = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.js', 'utf8');
-  assert.match(wxml, /class="map-claim-entry" bindtap="openCustomerClaim">客户认领/);
+  assert.match(wxml, /<button wx:if="\{\{canClaimCustomer\}\}" class="map-customer-entry map-claim-entry"[^>]*bindtap="openCustomerClaim"><text>企业档案<\/text><\/button>/);
   assert.match(js, /openCustomerClaim\(\)[\s\S]*navigateTo\(\{ url: "\/pages\/customer-claim\/index" \}\)/);
 });
 
@@ -53,15 +69,17 @@ test('作战地图客户标签统一显示 Tier 等级，并把旧 A/B/C 映射�
   assert.match(wxml, /wx:if="\{\{item\.level\}\}" class="level"/);
 });
 
-test('管理角色复用地图筛选条并按角色增加范围筛选', () => {
+test('各角色按有效授权提供地图范围筛选', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/index.wxml', 'utf8');
   const filterCss = fs.readFileSync(__dirname + '/../miniprogram/pages/customers/filter-bar.wxss', 'utf8');
   assert.doesNotMatch(wxml, /class="asset-scope-panel"/);
   assert.match(wxml, /wx:if="\{\{canViewTeam\}\}" class="operating-picker filter-team/);
   assert.match(wxml, /wx:if="\{\{!isFde && canViewTeam\}\}" class="operating-picker filter-member/);
-  assert.match(wxml, /role === 'supervisor' \? '团队成员' : '人员'/);
+  assert.match(wxml, /memberLabel \|\| '人员'/);
+  assert.match(wxml, /wx:if="\{\{!isFde && canViewTeam\}\}" class="operating-picker filter-scope/);
+  assert.match(wxml, /class="operating-picker filter-activity[^>]*>[\s\S]*?bindchange="changeActivityWindow"/);
   assert.match(wxml, /bindchange="changeTeam"/);
-  assert.match(wxml, /bindchange="changeMember"/);
+  assert.match(wxml, /bindtap="openMemberPicker"/);
   assert.match(filterCss, /\.operating-picker\.filter-team/);
   assert.match(filterCss, /\.operating-picker\.filter-member/);
 });

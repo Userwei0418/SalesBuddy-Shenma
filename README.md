@@ -1,25 +1,27 @@
-# SalesBuddy 神码版
+# 神码 SalesBuddy
 
-独立维护神码销售系统和小浣熊 Agent 中台。销售系统最初由商汤 1.0.8 派生，本次同步到内部 1.0.9 及后台性能补丁，来源提交 `be421b12b9dce38aa940e8b546dde1796c3bdef5`，数据库迁移头 V151；中台基于用户提供的 20260923 定制 Dify 1.17.0 安装包。
+神码销售系统、小程序及 Agent 中台的独立维护仓库。当前部署与微信发布状态见 [项目事实源](docs/PROJECT_FACTS.md)，日常维护见 [运维交接](docs/OPERATIONS_HANDOVER.md)。
 
 | 目录 | 内容 |
-|---|---|
-| frontend | 客户小程序，AppID `wx2824bdeb58528fd8` |
-| backend | 销售 API、管理端、Worker、受控中台适配器 |
-| database | 结构基线、系统种子及迁移，不含业务数据 |
-| agent-platform | 中台安装配置、API 源码、CLI、品牌资源和许可证 |
-| deployment | 神码服务器部署与初始化配置 |
-| scripts | 隔离与交付检查 |
-| docs | 计划、状态和来源证据 |
+| --- | --- |
+| `frontend/miniprogram` | 神码小程序，AppID `wx2824bdeb58528fd8` |
+| `frontend/web` | 当前销售 Web 源码与构建工具 |
+| `backend` | API、管理端、Worker、Agent 适配器与接口契约 |
+| `database` | 基线和迁移；当前交付迁移头 V449 |
+| `agent-platform` | 保留的中台安装配置、源码及许可证 |
+| `deployment` | 神码部署配置；已有环境升级必须先备份、核对兼容性 |
+| `scripts` | 神码目标隔离和源码打包检查 |
 
-已确认销售入口 `https://salesbuddy.shenzhoukuntai.com:28899`；中台入口 `https://ops-salesbuddy.shenzhoukuntai.com:18899`。客户提供的可信 HTTPS 证书已安装；续签及自动下发由对方运维确认。
+本次交付整理已部署的业务 1.2.14、Mini 1.2.17 及后续兼容迁移。旧 `business-web` 已迁至 `frontend/web`；旧实现可在 Git 历史中追溯。源码来源及逐文件摘要见 [交付清单](docs/DELIVERY_SOURCE_MANIFEST.json)。本次 Git 提交不意味着重新部署服务器或重新上传小程序。
 
-中台完整安装包存放在本公开仓库 Release 中，Web 编译产物不入 Git。下载后以包内 SHA256SUMS 校验；对源码的后续修改需要生成新的发行包和校验清单，不能冒用原版哈希。
+```sh
+python3 scripts/check_isolation.py
+python3 frontend/scripts/verify_frontend.py
+cd frontend/web
+npm ci --ignore-scripts
+npm run build
+```
 
-见 [首次安装指引](docs/INSTALL.md)、[计划与状态](docs/PLAN.md)、[隔离边界](AGENTS.md)、[来源清单](docs/SOURCE_MANIFEST.json)。
+后端使用 Python 3.12，依赖和开发依赖由 `backend/pyproject.toml`、`backend/uv.lock` 固定。Web 使用 Node.js 22 或更新版本。验证范围和未完成项目见项目事实源及本次源码交付记录。
 
-模型接入与后续替换见 [模型配置](docs/MODELS.md)。
-
-本轮同步及验收见 [1.0.9 神码同步记录](docs/SYNC_1.0.9_20260924.md)。源码版本、服务器运行版本、中台发布及微信预览分别记录；不以源码更新代替部署验收。
-
-已有服务器升级使用 [升级说明](docs/UPGRADE_1.0.9.md)，不要重跑首次安装脚本。
+中台原发行包位于本仓库 Release，完整 Web 编译产物不放入源码。运行凭据、证书私钥、数据库备份和私有账号交接材料不得提交。`docs/INSTALL.md`、`docs/UPGRADE_1.0.9.md` 等早期文档仅作历史参考，不能直接用于当前已有数据库升级。

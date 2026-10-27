@@ -1,0 +1,27 @@
+<view class="identity-card">
+  <view class="identity-title">业务身份 <text>可同时选择</text></view>
+  <t-checkbox-group value="{{businessIdentities}}" disabled="{{submitting || saving || loading || !identityOptionsReady}}" bind:change="changeBusinessIdentities">
+    <t-checkbox wx:for="{{identityOptions}}" wx:key="value" value="{{item.value}}" label="{{item.label}}" />
+  </t-checkbox-group>
+  <view wx:if="{{!isCustomerIdentity}}" class="identity-note">纯伙伴无需客户类型，不参与客户评分和作战地图。</view>
+  <view wx:if="{{isPartnerIdentity || partnerProfileId}}" class="identity-link">
+    <view>本企业伙伴档案{{!isPartnerIdentity && partnerProfileId ? '（历史关联）' : ''}}</view>
+    <view class="identity-choice" data-mode="profile" bindtap="openPartnerPicker">{{partnerProfileName || '选择已有档案（选填）'}}</view>
+    <view class="identity-note">{{partnerProfileId ? '已选档案通过唯一编号关联，不按同名自动合并' : '未选时建档通过后新建；如已有同名档案，请明确选择'}}。</view>
+    <text wx:if="{{partnerProfileId && !initialPartnerProfileId}}" class="identity-clear" data-mode="profile" bindtap="clearIdentityPartner">取消本次选择</text>
+  </view>
+  <view class="identity-link">
+    <view>关联合作伙伴 <text class="identity-note">外部渠道或合作方</text></view>
+    <view class="identity-choice" data-mode="associated" bindtap="openPartnerPicker">{{associatedPartnerName || '选择已有合作伙伴（选填）'}}</view>
+    <view wx:if="{{associatedPartnerName && !associatedPartnerId}}" class="identity-note">当前仅保留伙伴名称，选择档案后才会建立编号关联。</view>
+    <text wx:if="{{associatedPartnerId || associatedPartnerName}}" class="identity-clear" data-mode="associated" bindtap="clearIdentityPartner">清除关联</text>
+  </view>
+</view>
+<sb-sheet visible="{{partnerPickerVisible}}" title="{{partnerPickerMode === 'profile' ? '选择本企业伙伴档案' : '选择关联合作伙伴'}}" confirmLabel="关闭" bind:confirm="closePartnerPicker" bind:close="closePartnerPicker">
+  <sb-search value="{{partnerPickerQuery}}" placeholder="搜索伙伴名称" bind:change="searchIdentityPartners" bind:clear="searchIdentityPartners" />
+  <t-cell wx:for="{{partnerPickerItems}}" wx:key="id" title="{{item.name}}" description="{{item.description}}" data-id="{{item.id}}" bind:click="chooseIdentityPartner" hover />
+  <view wx:if="{{partnerPickerLoading}}" class="identity-note">正在加载…</view>
+  <view wx:elif="{{partnerPickerError}}" class="identity-note">{{partnerPickerError}}</view>
+  <view wx:elif="{{!partnerPickerItems.length}}" class="identity-note">没有可选择的伙伴档案</view>
+  <button wx:if="{{partnerPickerHasMore}}" disabled="{{partnerPickerLoading}}" bindtap="moreIdentityPartners">加载更多</button>
+</sb-sheet>

@@ -14,7 +14,9 @@ router = APIRouter(prefix="/api/v1/notifications", tags=["Notifications"])
 @router.get(
     "", response_model=PageResponse,
     description=(
-        "读取当前收件人的通知。customer_claim 类型的 payload.customer_name 为当前授权客户引用名称，"
+        "读取当前收件人仍有权访问的通知，取消通知不返回，任务通知实时校验task.read；"
+        "暂停复查通知还须匹配当前轮次和处理资格。未读列表使用相同过滤，不计入隐藏项。"
+        "customer_claim 类型的 payload.customer_name 为当前授权客户引用名称，"
         "不可读取时为 null；审批结果及原因仍由原通知 title/body 表示。读取不标记已读。"
     ),
 )

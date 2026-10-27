@@ -1,0 +1,7 @@
+<view class="collaboration-page">
+  <view class="card">
+    <view class="title">商机协作设置已取消</view>
+    <view class="intro">请返回商机继续操作。</view>
+    <button class="collaboration-button" bindtap="goBack">返回</button>
+  </view>
+</view>

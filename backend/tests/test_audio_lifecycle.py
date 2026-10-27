@@ -31,10 +31,12 @@ def assert_reaped(pid):
 
 @pytest.mark.parametrize("operation", ["cancel", "timeout"])
 async def test_real_process_is_killed_and_reaped(monkeypatch, tmp_path, operation):
-    monkeypatch.setattr(ffmpeg, "FFMPEG_EXECUTABLE", sys.executable)
+    monkeypatch.setattr(ffmpeg, "resolve_ffmpeg_executable", lambda: sys.executable)
     marker = tmp_path / "pid"
-    script = "import os,time,pathlib; pathlib.Path(__import__('sys').argv[1]).write_text(str(os.getpid()));time.sleep(30)"
-    task = asyncio.create_task(ffmpeg.run_ffmpeg("-c", script, str(marker), timeout=0.25 if operation == "timeout" else 5))
+    script = ("import os,time,pathlib; "
+              "pathlib.Path(__import__('sys').argv[1]).write_text(str(os.getpid()));time.sleep(30)")
+    task = asyncio.create_task(ffmpeg.run_ffmpeg(
+        "-c", script, str(marker), timeout=0.25 if operation == "timeout" else 5))
     try:
         await wait_for_file(marker)
         if operation == "cancel":
@@ -61,6 +63,7 @@ async def test_cancel_at_spawn_return_boundary_owns_new_child(monkeypatch, tmp_p
         created.set()
         await release.wait()
         return process
+    monkeypatch.setattr(ffmpeg, "resolve_ffmpeg_executable", lambda: sys.executable)
     monkeypatch.setattr(ffmpeg.asyncio, "create_subprocess_exec", delayed_spawn)
     task = asyncio.create_task(ffmpeg.run_ffmpeg("unused", timeout=5))
     try:
@@ -81,7 +84,7 @@ async def test_cancel_at_spawn_return_boundary_owns_new_child(monkeypatch, tmp_p
 
 
 async def test_process_result_and_stderr_are_returned(monkeypatch):
-    monkeypatch.setattr(ffmpeg, "FFMPEG_EXECUTABLE", sys.executable)
+    monkeypatch.setattr(ffmpeg, "resolve_ffmpeg_executable", lambda: sys.executable)
     result = await ffmpeg.run_ffmpeg("-c", "import sys;sys.stderr.write('invalid stream');sys.exit(7)", timeout=2)
     assert result.returncode == 7 and result.stderr == b"invalid stream"
 
@@ -129,6 +132,7 @@ async def test_audio_converter_cancellation_removes_working_directory(monkeypatc
         owned.append((process, folder))
         started.set()
         return process
+    monkeypatch.setattr(ffmpeg, "resolve_ffmpeg_executable", lambda: sys.executable)
     monkeypatch.setattr(ffmpeg.asyncio, "create_subprocess_exec", probe_spawn)
     if kind == "short":
         coroutine = audio_codec.transcode_for_asr(filename="recording.mp3", content=b"audio")

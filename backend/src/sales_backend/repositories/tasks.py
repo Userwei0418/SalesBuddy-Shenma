@@ -5,9 +5,21 @@ from typing import Any
 
 import asyncpg
 
+from sales_backend.repositories.task_outcomes import NORMAL_COMPLETED_SQL, ENDED_SQL, STOPPED_SQL, UNKNOWN_OUTCOME_SQL, ENDED_AT_SQL, END_EVENT_SQL
 from sales_backend.repositories.attribute_overlay import overlay_task_attributes
+from sales_backend.repositories.task_alignment import TASK_ALIGNMENT_READ_SQL
+from sales_backend.repositories.task_execution_projection import (
+    TASK_REQUIRES_ACTION_SQL,
+    TASK_RESPONSIBILITY_SQL,
+    normalize_execution,
+)
 
-TASK_HANDOVER_REQUIRED_SQL = """(t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review') AND (
+# Match coordinate_task's existing permission and live-state checks for both projections.
+TASK_CAN_CANCEL_SQL = """(t.status NOT IN ('completed','cancelled','pending_review')
+                 AND security.authorization_task('task.cancel',t.id)
+                 AND security.fde_can_coordinate_task(t.id))"""
+
+TASK_HANDOVER_REQUIRED_SQL = """(t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review','needs_adjustment') AND (
                  EXISTS(SELECT 1 FROM workflow.task_assignee ha WHERE ha.task_id=t.id AND ha.responsibility='owner'
                    AND NOT security.task_recipient_eligible(
                      t.id,ha.assignee_user_ref_id,ha.assignee_role,ha.assignee_team_id))
@@ -19,7 +31,8 @@ TASK_HANDOVER_REQUIRED_SQL = """(t.status IN ('pending_confirm','pending_executi
 
 class TaskRepository:
     _SELECT = """
-        SELECT t.id::text, t.task_type, t.association_kind, t.title, t.description,
+        SELECT t.id::text,t.execution_mode, t.task_type, t.association_kind, t.title, t.description,
+               """ + TASK_ALIGNMENT_READ_SQL + """ AS alignment,
                t.customer_id::text,
                COALESCE(c.name,security.customer_reference(t.customer_id)->>'name',
                  security.task_link_context(t.id)->>'customer_name') AS customer_name,
@@ -30,6 +43,7 @@ class TaskRepository:
                security.has_opportunity_read_access(t.opportunity_id) AS can_open_opportunity,
                t.target_position,t.source_suggestion_id::text,
                security.fde_can_coordinate_task(t.id) AS can_coordinate,
+               """ + TASK_CAN_CANCEL_SQL + """ AS can_cancel,
                jsonb_build_object(
                  'task.accept',security.authorization_task('task.accept',t.id),
                  'task.decline',security.authorization_task('task.decline',t.id),
@@ -43,10 +57,8 @@ class TaskRepository:
                  'role',tc.role_code,'note',tc.decision_note))
                  FROM workflow.task_candidate tc JOIN platform.user_ref cu ON cu.id=tc.user_ref_id
                  WHERE tc.task_id=t.id),'[]'::jsonb) AS candidates,
-               CASE WHEN t.status='pending_review' THEN t.creator_user_ref_id=common.current_user_ref_id()
-                 ELSE EXISTS(SELECT 1 FROM workflow.v_task_action_recipient ar
-                 WHERE ar.task_id=t.id AND ar.assignee_user_ref_id=common.current_user_ref_id()
-                   ) END AS requires_action,
+               workflow.task_execution_summary(t.id) AS execution,
+               """ + TASK_REQUIRES_ACTION_SQL + """ AS requires_action,
                (SELECT e.event_type FROM workflow.task_event e WHERE e.task_id=t.id
                  ORDER BY e.occurred_at DESC,e.id DESC LIMIT 1) AS last_event_type,
                (SELECT e.note FROM workflow.task_event e WHERE e.task_id=t.id
@@ -57,6 +69,7 @@ class TaskRepository:
                t.completed_at, t.completion_note, t.completion_submitted_at, t.completion_review_note, t.attributes, t.import_meta,
                t.source_code, t.agent_reason, t.source_follow_up_record,
                t.source_interaction_at, t.rejection_comment, t.version_no,
+               """ + ENDED_AT_SQL + """ AS ended_at, """ + END_EVENT_SQL + """ AS end_event_type,
                t.created_at, t.updated_at,
                COALESCE(
                  jsonb_agg(DISTINCT jsonb_build_object(
@@ -89,7 +102,7 @@ class TaskRepository:
                 args.append(value)
                 predicates.append(f"t.{column}=${len(args)}::{cast}")
         if fde_view == "self":
-            predicates.append("""(t.creator_user_ref_id=common.current_user_ref_id()
+            predicates.append("(" + TASK_RESPONSIBILITY_SQL + " OR " + """t.creator_user_ref_id=common.current_user_ref_id()
                 OR EXISTS(SELECT 1 FROM workflow.task_assignee s WHERE s.task_id=t.id
                   AND s.assignee_user_ref_id=common.current_user_ref_id())
                 OR EXISTS(SELECT 1 FROM workflow.task_candidate s WHERE s.task_id=t.id
@@ -99,7 +112,7 @@ class TaskRepository:
         elif fde_view is not None:
             raise ValueError("Unknown task view")
         if inbox:
-            predicates.append("""((t.status='pending_review' AND t.creator_user_ref_id=common.current_user_ref_id()) OR EXISTS(SELECT 1 FROM workflow.task_assignee a
+            predicates.append("(" + TASK_RESPONSIBILITY_SQL + " OR " + """(t.execution_mode='legacy' AND t.status='pending_review' AND t.creator_user_ref_id=common.current_user_ref_id()) OR EXISTS(SELECT 1 FROM workflow.task_assignee a
                 WHERE a.task_id=t.id AND a.assignee_user_ref_id=common.current_user_ref_id())
                 OR EXISTS(SELECT 1 FROM workflow.task_candidate tc
                   WHERE tc.task_id=t.id AND tc.user_ref_id=common.current_user_ref_id()))""")
@@ -123,17 +136,38 @@ class TaskRepository:
         predicates, args = self._filters(status=status, customer_id=customer_id,
             opportunity_id=opportunity_id, fde_view=fde_view, inbox=inbox)
         args.extend((limit, offset))
+        # Navigation hints are a snapshot for this statement, once per distinct
+        # parent in the RLS-filtered page. Parent detail requests still authorize
+        # independently; these flags are neither grants nor a cross-request cache.
         page = (
-            "WITH task_page AS MATERIALIZED (SELECT t.id FROM workflow.task t WHERE "
+            "WITH task_page AS MATERIALIZED (SELECT t.id,t.customer_id,t.opportunity_id FROM workflow.task t WHERE "
             + " AND ".join(predicates)
             + " ORDER BY (t.status='completed'),t.due_at,t.created_at DESC,t.id"
-            + f" LIMIT ${len(args)-1} OFFSET ${len(args)}) "
+            + f" LIMIT ${len(args)-1} OFFSET ${len(args)}), "
+            + """task_customer_access AS MATERIALIZED (
+                SELECT parent.customer_id,security.has_customer_access(parent.customer_id) AS can_open
+                FROM (SELECT DISTINCT customer_id FROM task_page WHERE customer_id IS NOT NULL) parent
+            ), task_opportunity_access AS MATERIALIZED (
+                SELECT parent.opportunity_id,security.has_opportunity_read_access(parent.opportunity_id) AS can_open
+                FROM (SELECT DISTINCT opportunity_id FROM task_page WHERE opportunity_id IS NOT NULL) parent
+            ) """
         )
         selected = self._SELECT.replace(
-            "FROM workflow.task t", "FROM task_page page JOIN workflow.task t ON t.id=page.id")
+            "FROM workflow.task t", """FROM task_page page JOIN workflow.task t ON t.id=page.id
+            LEFT JOIN task_customer_access customer_access ON customer_access.customer_id=t.customer_id
+            LEFT JOIN task_opportunity_access opportunity_access
+              ON opportunity_access.opportunity_id=t.opportunity_id""")
+        selected = selected.replace(
+            "security.has_customer_access(t.customer_id) AS can_open_customer",
+            "COALESCE(customer_access.can_open,false) AS can_open_customer",
+        ).replace(
+            "security.has_opportunity_read_access(t.opportunity_id) AS can_open_opportunity",
+            "COALESCE(opportunity_access.can_open,false) AS can_open_opportunity",
+        )
         rows = await connection.fetch(
             page + selected + """
-             GROUP BY t.id, c.name, creator.display_name, creator_team.name
+             GROUP BY t.id, c.name, creator.display_name, creator_team.name,
+                      customer_access.can_open, opportunity_access.can_open
              ORDER BY (t.status = 'completed'), t.due_at, t.created_at DESC,t.id
             """,
             *args,
@@ -145,25 +179,30 @@ class TaskRepository:
         assert not args
         where = " AND ".join(predicates)
         metrics = await connection.fetchrow("""
-            SELECT count(*) FILTER(WHERE t.status='completed' AND
+            SELECT count(*) FILTER(WHERE """ + NORMAL_COMPLETED_SQL + """ AND
                      timezone('Asia/Shanghai',t.completed_at)::date=timezone('Asia/Shanghai',clock_timestamp())::date)::int AS today_completed,
               count(*) FILTER(WHERE t.status NOT IN ('completed','cancelled') AND
                      timezone('Asia/Shanghai',t.due_at)::date=timezone('Asia/Shanghai',clock_timestamp())::date)::int AS today_pending,
-              count(*) FILTER(WHERE t.status NOT IN ('completed','cancelled'))::int AS all_pending
+              count(*) FILTER(WHERE t.status NOT IN ('completed','cancelled'))::int AS all_pending,
+              count(*) FILTER(WHERE """ + ENDED_SQL + """)::int AS ended_count,
+              count(*) FILTER(WHERE """ + STOPPED_SQL + """)::int AS stopped_count,
+              count(*) FILTER(WHERE """ + NORMAL_COMPLETED_SQL + """)::int AS completed_count,
+              count(*) FILTER(WHERE """ + UNKNOWN_OUTCOME_SQL + """)::int AS unknown_outcome_count
             FROM workflow.task t WHERE """ + where)
         rows = []
         if task_ids:
             rows = await connection.fetch("""
-                SELECT t.id::text,t.status,t.completion_note,
-                  jsonb_build_object('rejection_comment',COALESCE(NULLIF(t.rejection_comment,''),
-                    t.import_meta->>'rejection_comment',t.attributes->>'rejection_comment')) AS attributes,
+                SELECT t.id::text,t.execution_mode,t.status,t.completed_at,t.completion_note,
+                  """ + ENDED_AT_SQL + """ AS ended_at, """ + END_EVENT_SQL + """ AS end_event_type,
+                  workflow.task_execution_summary(t.id) AS execution,
+                  jsonb_build_object('rejection_comment',NULLIF(t.rejection_comment,'')) AS attributes,
                   """ + TASK_HANDOVER_REQUIRED_SQL + """ AS handover_required,
                   e.event_type AS last_event_type,e.note AS last_event_note
                 FROM workflow.task t LEFT JOIN LATERAL (
                   SELECT event_type,note FROM workflow.task_event WHERE task_id=t.id
                   ORDER BY occurred_at DESC,id DESC LIMIT 1
                 ) e ON true WHERE """ + where + " AND t.id=ANY($1::uuid[]) ORDER BY t.id", list(task_ids))
-        return {"metrics": dict(metrics), "items": [dict(row) for row in rows]}
+        return {"metrics": dict(metrics), "items": [self._normalize(dict(row)) for row in rows]}
 
     async def detail(self, connection: asyncpg.Connection, *, task_id: str) -> dict[str, Any] | None:
         row = await connection.fetchrow(
@@ -183,13 +222,15 @@ class TaskRepository:
               FROM workflow.task_event e
               LEFT JOIN platform.user_ref actor ON actor.id = e.actor_user_ref_id
              WHERE e.task_id = $1::uuid
-             ORDER BY e.occurred_at
+             ORDER BY e.occurred_at DESC,e.id DESC LIMIT 201
             """,
             task_id,
         )
         result = self._normalize(dict(row))
+        result["events_has_more"] = len(events) > 200
+        events = list(reversed(events[:200]))
         result["events"] = [dict(item) for item in events]
-        completed_event = next((item for item in reversed(events) if item["event_type"] in {"complete", "approve_completion"} and item["to_status"] == "completed"), None)
+        completed_event = next((item for item in reversed(events) if item["event_type"] in {"complete", "approve_completion", "submit_completion", "review_completion", "close"} and item["to_status"] == "completed"), None)
         if completed_event:
             result["completed_by_name"] = completed_event["actor_name"]
         return result
@@ -200,4 +241,4 @@ class TaskRepository:
         owner = next((person for person in assignees if person.get("responsibility") == "owner"), None)
         item["owner_name"] = owner.get("name") if owner else None
         item["team_name"] = owner.get("team_name") if owner else None
-        return overlay_task_attributes(item)
+        return overlay_task_attributes(normalize_execution(item))

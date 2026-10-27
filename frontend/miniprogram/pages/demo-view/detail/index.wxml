@@ -1,0 +1,9 @@
+<import src="../common.wxml"/>
+<view class="page"><view class="page-header"><view class="heading">{{title}}</view></view><template is="state" data="{{loading,ready,error}}"/>
+  <block wx:if="{{ready}}">
+    <view class="card detail-summary"><view class="record-top"><view class="record-avatar">{{summary.initial}}</view><view class="record-main"><view class="record-title">{{summary.title}}</view><view wx:if="{{summary.context}}" class="muted workspace-meta">{{summary.context}}</view></view></view><view class="record-meta"><text wx:if="{{summary.badge}}" class="status-tag tone-{{summary.tone}}">{{summary.badge}}</text><text wx:if="{{summary.secondary}}" class="muted">{{summary.secondary}}</text></view></view>
+    <view class="section-head"><text class="section-title">{{sectionTitle}}</text></view>
+    <view class="card"><view wx:for="{{rows}}" wx:key="label" class="field"><view class="muted">{{item.label}}</view><text class="field-value">{{item.value}}</text></view><view class="record-date">更新于 {{updatedAt}}</view></view>
+  </block>
+  <template is="navigation" data="{{navItems,activeKey}}"/>
+</view>

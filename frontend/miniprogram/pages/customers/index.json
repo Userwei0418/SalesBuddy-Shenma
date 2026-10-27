@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "作战地图",
+  "onReachBottomDistance": 480,
   "usingComponents": {
     "advice-actions": "/components/advice-actions/index",
     "detail-pagination": "../../components/detail-pagination/index",
@@ -13,6 +14,7 @@
     "sb-status-tag": "/ui/sb/sb-status-tag/index",
     "sb-tabs": "/ui/sb/sb-tabs/index",
     "t-cell": "/ui/tdesign/cell/cell",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "/components/person-picker/index"
   }
 }

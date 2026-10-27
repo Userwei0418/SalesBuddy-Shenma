@@ -1,0 +1,9 @@
+<view class="sb-kpi {{size === 'compact' ? 'compact' : ''}} {{bordered ? 'is-bordered' : ''}}" hover-class="{{tappable ? 'sb-kpi-hover' : 'none'}}" bind:tap="onTap" aria-role="{{tappable ? 'button' : 'group'}}" aria-label="{{label}}：{{text}}{{missing || loading ? '' : unit}}{{change ? '，' + change.text : ''}}">
+  <view class="sb-kpi-label">{{label}}</view>
+  <view class="sb-kpi-row">
+    <text class="sb-kpi-value {{missing ? 'missing' : ''}} {{loading ? 'loading' : ''}} {{long ? 'is-long' : ''}}">{{text}}</text>
+    <text wx:if="{{unit && !missing && !loading}}" class="sb-kpi-unit">{{unit}}</text>
+  </view>
+  <view wx:if="{{change && change.text}}" class="sb-kpi-change tone-{{changeTone}}">{{change.text}}</view>
+  <view wx:elif="{{note}}" class="sb-kpi-note">{{loading ? '正在读取' : note}}</view>
+</view>

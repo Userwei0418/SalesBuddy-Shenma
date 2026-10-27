@@ -1,0 +1,22 @@
+.department-ui .ds-dashboard-analysis { display:flex; flex-direction:column; gap:var(--ui-space-4); min-width:0; margin-top:var(--ui-space-3); }
+.department-ui .ds-analysis-stage-controls { display:flex; gap:var(--ui-space-2); align-items:center; flex-wrap:wrap; }
+.department-ui .ds-analysis-note { margin:var(--ui-space-2) 0; font-size:var(--ui-text-small); line-height:1.6; }
+.department-ui .ds-analysis-warning { margin:var(--ui-space-2) 0; color:var(--ui-warning); font-size:var(--ui-text-small); line-height:1.6; }
+.department-ui .ds-analysis-pipeline-charts { display:grid; grid-template-columns:minmax(260px,0.8fr) minmax(380px,1.2fr); gap:var(--ui-space-4); }
+.department-ui .ds-analysis-pipeline-charts>div,.department-ui .ds-analysis-chart { min-width:0; width:100%; }
+.department-ui .ds-analysis-pipeline-charts h3 { margin:var(--ui-space-3) 0 0; font-size:var(--ui-text-body); font-weight:600; }
+.department-ui .ds-analysis-pipeline-charts h3 small { font-weight:400; color:var(--ui-secondary); }
+.department-ui .ds-analysis-activity-grid { display:grid; grid-template-columns:minmax(280px,0.75fr) minmax(460px,1.55fr); gap:var(--ui-space-4); }
+.department-ui .ds-analysis-activity-grid>* { min-width:0; }
+.department-ui .ds-analysis-donut { position:relative; max-width:340px; margin:auto; }
+.department-ui .ds-analysis-donut-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--ui-space-1); pointer-events:none; }
+.department-ui .ds-analysis-donut-center b { color:var(--ui-primary); font-size:var(--ui-text-display,32px); font-variant-numeric:tabular-nums; }
+.department-ui .ds-analysis-donut-center span { font-size:var(--ui-text-small); color:var(--ui-secondary); }
+.department-ui .ds-analysis-legend { margin:0; display:grid; gap:var(--ui-space-2); }
+.department-ui .ds-analysis-legend>div { display:flex; justify-content:space-between; gap:var(--ui-space-3); }
+.department-ui .ds-analysis-legend dt { color:var(--ui-secondary); }
+.department-ui .ds-analysis-legend dd { margin:0; font-variant-numeric:tabular-nums; }
+.department-ui .ds-analysis-table .ant-table-cell { padding-block:6px; overflow-wrap:anywhere; font-size:var(--ui-text-small); }
+.department-ui .ds-analysis-table .ant-table-cell b { display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+.department-ui .ds-analysis-table .ant-table-cell small { display:block; margin-top:3px; color:var(--ui-secondary); white-space:nowrap; text-overflow:ellipsis; overflow:hidden; }
+@media(max-width:1150px) { .department-ui .ds-analysis-pipeline-charts,.department-ui .ds-analysis-activity-grid { grid-template-columns:minmax(0,1fr); } }

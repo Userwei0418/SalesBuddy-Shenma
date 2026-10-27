@@ -53,7 +53,7 @@ test('不关联商机保留选填伙伴，空值也可质检；原文和草稿�
 });
 
 test('关联商机的伙伴同步进入质检和最终归档，不提交隐藏的旧输入',async()=>{
-  const h=setup();await flush();choose(h.page,'first');await h.page.review();
+  const h=setup();await flush();choose(h.page,'first');await h.page.review();h.page.startOpportunityEdit();
   assert.equal(h.requests[0].fields.partner_name,'伙伴甲');assert.equal(h.page.data.canSubmit,true);
   h.page.submitArchive();await flush();assert.equal(h.archives[0].values.partner_name,'伙伴甲');
   assert.equal(h.archives[0].values._quality_review_run_id,'review');assert.equal(h.page.data.archived,true);
@@ -70,18 +70,18 @@ test('新建商机复用表单伙伴，直销和清空都会更新质检快照',
 });
 
 test('已质检后变更商机伙伴立即禁止归档，重新质检使用新的值',async()=>{
-  const h=setup();await flush();choose(h.page,'first');await h.page.review();
+  const h=setup();await flush();choose(h.page,'first');await h.page.review();h.page.startOpportunityEdit();
   form(h.page,{name:first.name,partner_mode:'partner',partner_id:'p2',partner_name:'伙伴乙'});
   assert.equal(h.page.data.canSubmit,false);h.page.submitArchive();assert.equal(h.archives.length,0);
   await h.page.review();assert.equal(h.requests[1].fields.partner_name,'伙伴乙');assert.equal(h.page.data.canSubmit,true);
 });
 
 test('切换商机和取消关联互不串值，恢复草稿仍保留独立的未关联输入',async()=>{
-  const h=setup();await flush();choose(h.page,'first');
+  const h=setup();await flush();choose(h.page,'first');h.page.startOpportunityEdit();
   form(h.page,{name:first.name,partner_mode:'partner',partner_id:'p3',partner_name:'草稿伙伴'});
   choose(h.page,'second');assert.equal(snapshot.fields(h.page.data).partner_name,'伙伴乙');
   choose(h.page,'');assert.equal(snapshot.fields(h.page.data).partner_name,fields.partner_name);
-  choose(h.page,'first');assert.equal(snapshot.fields(h.page.data).partner_name,'草稿伙伴');
+  choose(h.page,'first');assert.equal(snapshot.fields(h.page.data).partner_name,'伙伴甲');h.page.startOpportunityEdit();assert.equal(snapshot.fields(h.page.data).partner_name,'草稿伙伴');
   const reopened=setup({memory:h.memory});await flush();
   assert.equal(snapshot.fields(reopened.page.data).partner_name,'草稿伙伴');
   choose(reopened.page,'');assert.equal(snapshot.fields(reopened.page.data).partner_name,fields.partner_name);
@@ -96,9 +96,9 @@ test('迟到表单及隐藏输入事件不能改写当前商机或未关联伙�
 
 test('只读商机及FDE选择复用接口伙伴，不借用手工输入或旧表单',async()=>{
   const h=setup();await flush();h.page.data.isFde=true;h.page.data.canEditOpportunity=false;
-  h.page.fdeOpportunityChanged({detail:{opportunity:first,verified:true}});
+  h.page.setData({opportunityOptions:[{id:'',name:'不关联商机'},first]});h.page.selectOpportunity({detail:{value:1}});
   assert.equal(h.page.data.linkedPartnerName,'伙伴甲');assert.equal(snapshot.fields(h.page.data).partner_name,'伙伴甲');
-  h.page.fdeOpportunityChanged({detail:{opportunity:{...second,sales_channel:'direct',partner_name:null},verified:true}});
+  h.page.setData({opportunityOptions:[{id:'',name:'不关联商机'},{...second,sales_channel:'direct',partner_name:null}]});h.page.selectOpportunity({detail:{value:1}});
   assert.equal(snapshot.fields(h.page.data).partner_name,'直销');
 });
 
@@ -109,7 +109,7 @@ test('伙伴未知、商机未核对时不从原文或其他商机猜值',()=>{
 });
 
 test('重新读取商机伙伴变化会使原质检过期，不能沿用原审批结果',async()=>{
-  const h=setup();await flush();choose(h.page,'first');await h.page.review();
+  const h=setup();await flush();choose(h.page,'first');await h.page.review();h.page.startOpportunityEdit();
   h.api.listOpportunities=async()=>({items:[{...first,partner_name:'服务器更新伙伴'}],has_more:false,next_offset:null});
   await h.page.loadOpportunities();assert.equal(h.page.data.linkedPartnerName,'服务器更新伙伴');assert.equal(h.page.data.canSubmit,false);
 });

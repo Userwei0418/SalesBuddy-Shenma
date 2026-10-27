@@ -7,8 +7,8 @@
 .profile-page .performance-metric-head>label{flex-shrink:0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4;white-space:nowrap}
 .profile-page .performance-completed{margin-top:8px}
 .profile-page .performance-completed>label{display:block;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4}
-.profile-page .performance-completed>text{display:block;margin-top:4rpx;overflow:hidden;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
-/* 窄于 375 的屏：超过 11 个字符的金额（1 亿以上，如 ¥123,456,789）20px 放不下（320 宽 1 亿起、360 宽 10 亿起），降到 16px，不截断 */
+.profile-page .performance-completed>text{display:block;margin-top:4rpx;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.3;white-space:normal;word-break:normal;overflow-wrap:break-word;font-variant-numeric:tabular-nums}
+/* 优先在小计前缀与金额间换行，短金额保持完整；超长金额才在列内折行。 */
 @media (max-width:374px){.profile-page .performance-completed>text.long-value{font-size:16px}}
 .profile-page .performance-target{display:flex;align-items:center;justify-content:space-between;gap:8rpx;margin-top:8px}
 .profile-page .performance-target>view{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0;gap:8rpx}

@@ -20,6 +20,9 @@ async def setup(connection):
         workspace,
         str(workspace),
     )
+    # Historical V108/V117 probes intentionally have no SaaS capability table.
+    if await seed_fetchval(connection,"SELECT to_regclass('control.tenant_module') IS NOT NULL"):
+        await seed_execute(connection,"UPDATE control.tenant_module SET enabled=true,source='isolated-feishu-fixture' WHERE workspace_id=$1 AND module_code='feishu'",workspace)
     await seed_execute(connection,
         "INSERT INTO platform.user_ref(id,workspace_id,external_user_id,display_name) VALUES($1,$2,$3,'sync fixture')",
         user,
@@ -348,8 +351,9 @@ async def test_recovery_verifies_unknown_before_retry_and_audits_with_company_is
     await connection.execute(sql, cid, event, resolution, key, 'group manually checked')
     assert await connection.fetchval('SELECT status FROM ops.feishu_delivery WHERE dedupe_key=$1', key) == expected
     await connection.execute(sql, cid, event, 'retry', None, 'resume data synchronization')
-    row = await connection.fetchrow('SELECT status,attempts FROM ops.feishu_event WHERE id=$1', event)
-    assert dict(row) == {'status': 'pending', 'attempts': 0}
+    row = await connection.fetchrow(
+        'SELECT status,attempts,force_remote_check FROM ops.feishu_event WHERE id=$1', event)
+    assert dict(row) == {'status': 'pending', 'attempts': 0, 'force_remote_check': True}
     audit = await connection.fetch('SELECT after_snapshot FROM ops.feishu_config_audit WHERE action=\'recovery\'')
     assert len(audit) == 2
     assert audit[0]['after_snapshot']['event_id'] == str(event)
@@ -515,8 +519,10 @@ async def test_forecast_raw_projection_queue_reconcile_and_parent_isolation(conn
 async def test_source_fingerprint_updates_on_existing_map(connection):
     ws,cid=await setup(connection)
     oid=uuid4()
-    event={'connection_id':cid,'workspace_id':ws,'object_kind':'partner','object_id':oid}
+    await seed_execute(connection, "INSERT INTO ops.feishu_event(connection_id,workspace_id,object_kind,object_id) VALUES($1,$2,'partner',$3)",cid,ws,oid)
+    await connection.execute('SET LOCAL ROLE salegent_feishu_worker')
     repo=FeishuRepository()
+    event=await repo.claim(connection)
     await repo.remember(connection,event,'tblPartner','recPartner','hash-one','source-one')
     await repo.remember(connection,event,'tblPartner','recPartner','hash-two','source-two')
     mapped=await repo.mapped(connection,cid,'partner',oid)
@@ -550,3 +556,123 @@ async def test_manual_repair_enqueues_forced_successor_of_running_event(connecti
     pending = await connection.fetch("SELECT * FROM ops.feishu_event WHERE connection_id=$1 AND object_id=$2 AND status='pending'", cid, oid)
     assert len(pending) == 1 and pending[0]['force_remote_check']
     assert pending[0]['historical'] and not pending[0]['first_formal_create']
+
+
+@pytest.mark.parametrize('failure_status,delivery_status,remote_error', [
+    ('failed', 'sent', False),
+    ('dead_letter', 'failed', False),
+    ('dead_letter', 'sent', True),
+])
+async def test_manual_recovery_claim_rechecks_remote_with_acknowledged_fingerprint(
+    connection, failure_status, delivery_status, remote_error,
+):
+    from sales_backend.integrations.feishu import FeishuError
+    from tests.test_feishu_sync_service import setup as service_setup
+
+    ws, cid = await setup(connection)
+    await assert_restricted(connection)
+    application_role = await connection.fetchval('SELECT current_user')
+    service, _, client = service_setup()
+    config, _ = service.client({})
+    config = config.model_copy(update={'workspace_id': ws, 'connection_id': cid})
+    service.client = lambda row: (config, client)  # Only the provider boundary is mocked.
+    repo = service.repository = FeishuRepository()
+    await seed_execute(connection,
+        'UPDATE config.feishu_connection SET settings=$2 WHERE id=$1',
+        cid, config.model_dump(mode='json'))
+    oid = uuid4()
+    await seed_execute(connection,
+        "INSERT INTO crm.customer(id,workspace_id,name,normalized_name,"
+        "created_by_user_ref_id,owner_user_ref_id,data_kind) "
+        "SELECT $1,$2,'recovery fixture','recovery fixture',updated_by,updated_by,'production' "
+        "FROM config.feishu_connection WHERE id=$3", oid, ws, cid)
+    # Attaching this customer's owner emits an earlier company refresh event.
+    # Exercise that real queue item before testing the customer's recovery.
+    await connection.execute('SET LOCAL ROLE salegent_feishu_worker')
+    await assert_restricted(connection)
+    refresh = await repo.claim(connection)
+    assert refresh is not None
+    assert (refresh['connection_id'], refresh['object_kind'], refresh['object_id']) == (cid, 'refresh', ws)
+    await service.handle(connection, refresh, {})
+    await repo.finish(connection, refresh)
+    for name in ('fields', 'find_record', 'create_record', 'update_record', 'send_card'):
+        getattr(client, name).assert_not_awaited()
+    for name in ('fields', 'find_record', 'create_record', 'update_record', 'send_card', 'close'):
+        getattr(client, name).reset_mock()  # Reset provider counters, never database state.
+    event = await repo.claim(connection)
+    assert event is not None and event['object_id'] == oid
+    assert event['attempts'] == 1 and not event['force_remote_check']
+
+    # A real acknowledged projection and delivery establish the cached branch.
+    await service.handle(connection, event, {})
+    mapped_before = dict(await repo.mapped(connection, cid, 'customer', oid))
+    assert mapped_before['source_fingerprint']
+    original_delivery = await repo.deliveries(connection, event['id'])
+    assert len(original_delivery) == 1 and original_delivery[0]['status'] == 'sent'
+    client.send_card.assert_awaited_once()
+    for name in ('fields', 'find_record', 'create_record', 'update_record', 'send_card'):
+        getattr(client, name).reset_mock()
+    event = await connection.fetchrow('SELECT * FROM ops.feishu_event WHERE id=$1', event['id'])
+    await service.handle(connection, event, {})
+    for name in ('fields', 'find_record', 'create_record', 'update_record', 'send_card'):
+        getattr(client, name).assert_not_awaited()  # Ordinary unchanged work stays cached.
+
+    # Return to the console identity for fixture setup and operator recovery.
+    await connection.execute("SELECT set_config('role',$1,true)", application_role)
+    await assert_restricted(connection)
+
+    # Model a later failed attempt after the successful table write. Only fixture
+    # seeds elevate, inside the runner-created disposable database and savepoint.
+    await seed_execute(connection,
+        "UPDATE ops.feishu_event SET status=$2,attempts=10,error_code='FEISHU_1254002',"
+        "force_remote_check=false,lease_token=NULL,locked_until=NULL WHERE id=$1",
+        event['id'], failure_status)
+    if delivery_status == 'failed':
+        await seed_execute(connection,
+            "UPDATE ops.feishu_delivery SET status='failed',error_code='OPERATOR_SUPPRESSED' "
+            "WHERE event_id=$1", event['id'])
+    deliveries_before = [dict(row) for row in await repo.deliveries(connection, event['id'])]
+    await connection.execute('UPDATE config.feishu_connection SET enabled=false WHERE id=$1', cid)
+    user = await seed_fetchval(connection,
+        'SELECT updated_by FROM config.feishu_connection WHERE id=$1', cid)
+    await seed_execute(connection,
+        "INSERT INTO platform.role_binding(workspace_id,user_ref_id,role_code,data_scope_code) "
+        "VALUES($1,$2,'operations','workspace')", ws, user)
+    await set_request_context(connection, ActorContext(
+        workspace_id=str(ws), user_id=str(user), role=RoleCode.OPERATIONS,
+        data_scope=DataScope.WORKSPACE))
+    await assert_restricted(connection)
+    assert await connection.fetchval("SELECT security.authorization_has('feishu.recover')")
+    await connection.execute('SELECT security.feishu_recover($1,$2,$3,$4,$5)',
+        cid, event['id'], 'retry', None, 'verify prior projection against remote')
+    recovered = await connection.fetchrow('SELECT * FROM ops.feishu_event WHERE id=$1', event['id'])
+    assert recovered['status'] == 'pending' and recovered['attempts'] == 0
+    assert recovered['force_remote_check']
+    await connection.execute('UPDATE config.feishu_connection SET enabled=true WHERE id=$1', cid)
+    await connection.execute('SET LOCAL ROLE salegent_feishu_worker')
+    await assert_restricted(connection)
+    claimed = await repo.claim(connection)
+    assert claimed['id'] == event['id'] and claimed['attempts'] == 1
+    assert claimed['force_remote_check']
+    # The claimed SQL row drives the real service; no hand-built force flag.
+    if remote_error:
+        client.update_record.side_effect = FeishuError('FEISHU_1254002', retryable=True)
+        with pytest.raises(FeishuError, match='FEISHU_1254002'):
+            await service.handle(connection, claimed, {})
+        assert dict(await repo.mapped(connection, cid, 'customer', oid)) == mapped_before
+        await repo.finish(connection, claimed, error='FEISHU_1254002', retryable=True)
+        assert await connection.fetchval(
+            'SELECT status FROM ops.feishu_event WHERE id=$1', event['id']) == 'failed'
+    else:
+        await service.handle(connection, claimed, {})
+        await repo.finish(connection, claimed)
+        assert await connection.fetchval(
+            'SELECT status FROM ops.feishu_event WHERE id=$1', event['id']) == 'succeeded'
+        assert client.update_record.await_args.args[3]['名称'] == 'recovery fixture'
+    client.fields.assert_awaited_once()
+    client.find_record.assert_awaited_once()
+    client.update_record.assert_awaited_once()
+    client.create_record.assert_not_awaited()
+    client.send_card.assert_not_awaited()
+    assert [dict(row) for row in await repo.deliveries(connection, event['id'])] == deliveries_before
+    await connection.execute("SELECT set_config('role',$1,true)", application_role)

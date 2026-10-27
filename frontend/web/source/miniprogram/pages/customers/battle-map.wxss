@@ -1,0 +1,116 @@
+/* 作战地图（12 章 §2）：只有象限底色、点、分界线三层；象限名常显；点一律主色，只用大小表示金额档；状态点开看。 */
+.battle-section { margin-top:48rpx; }
+.battle-section-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16rpx; margin-bottom:12rpx; }
+.battle-section-head > view:first-child { min-width:0; }
+.battle-section-head .section-title { margin:0; color:var(--ui-ink); font-size:var(--ui-text-body); font-weight:600; }
+.battle-section-head > view:first-child > text { display:block; margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.map-result-count { flex:0 0 auto; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+
+.map-axis-legend { display:flex; align-items:center; gap:32rpx; margin-bottom:16rpx; }
+.map-axis-legend > view { display:flex; align-items:center; gap:8rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.map-axis-legend > view > text { color:var(--ui-muted); font-size:var(--ui-text-small); }
+.map-axis-legend label { color:var(--ui-ink); font-weight:600; }
+.map-axis-legend small { color:var(--ui-muted); font-size:var(--ui-text-small); }
+
+/* 正方形，宽度撑满 */
+.battle-map { position:relative; height:0; padding-bottom:100%; overflow:hidden; background:var(--ui-surface); }
+.map-zone { position:absolute; width:50%; height:50%; box-sizing:border-box; }
+.zone-attack { left:0; top:0; background:var(--ui-quadrant-attack); }
+.zone-asset { right:0; top:0; background:var(--ui-quadrant-asset); }
+.zone-order { left:0; bottom:0; background:var(--ui-quadrant-spot); }
+.zone-resource { right:0; bottom:0; background:var(--ui-quadrant-resource); }
+.map-zone.zone-expanded { left:0; top:0; width:100%; height:100%; background:var(--ui-surface); }
+.map-divider { position:absolute; z-index:2; pointer-events:none; }
+.map-divider-x { left:50%; top:0; bottom:0; width:0; border-left:1px dashed color-mix(in srgb, var(--ui-secondary) 40%, transparent); }
+.map-divider-y { left:0; right:0; top:50%; height:0; border-top:1px dashed color-mix(in srgb, var(--ui-secondary) 40%, transparent); }
+.map-quadrant-name { position:absolute; z-index:3; display:flex; flex-direction:column; pointer-events:none; }
+.map-quadrant-name text { color:var(--ui-ink); font-size:14px; font-weight:600; }
+.map-quadrant-name label { margin-top:4rpx; color:var(--ui-muted); font-size:var(--ui-text-small); }
+.name-attack { left:24rpx; top:20rpx; }
+.name-asset { right:24rpx; top:20rpx; align-items:flex-end; }
+.name-order { left:24rpx; bottom:20rpx; }
+.name-resource { right:24rpx; bottom:20rpx; align-items:flex-end; }
+
+.plot-hit-area { position:absolute; z-index:6; width:58rpx; height:58rpx; display:flex; align-items:center; justify-content:center; margin-left:-29rpx; margin-bottom:-29rpx; border-radius:50%; }
+.plot-hit-pressed { background:color-mix(in srgb, var(--ui-primary) 12%, transparent); } /* 点位按下态（hover-class） */
+.plot-point { width:32rpx; height:32rpx; box-sizing:border-box; border:2px solid var(--ui-surface); border-radius:50%; background:var(--ui-primary); }
+.plot-point.point-sm { width:24rpx; height:24rpx; }
+.plot-point.point-md { width:32rpx; height:32rpx; }
+.plot-point.point-lg { width:44rpx; height:44rpx; }
+/* 点一律主色实心，只用大小表示金额档；客户状态在点开后的客户卡里用状态标签看（2026-09-24 决定，见规范 12 章 2.3） */
+
+.map-empty { pointer-events:none; position:absolute; z-index:4; left:50%; top:50%; transform:translate(-50%,-50%); padding:8rpx 16rpx; border-radius:var(--ui-radius-control); background:var(--ui-surface); color:var(--ui-secondary); font-size:14px; white-space:nowrap; }
+.map-axis { position:absolute; z-index:4; padding:0 8rpx; background:var(--ui-surface); color:var(--ui-muted); font-size:var(--ui-text-small); pointer-events:none; }
+.map-axis-y { left:8rpx; top:50%; transform:translate(-28%,-50%) rotate(-90deg); }
+.map-axis-x { left:50%; bottom:6rpx; transform:translateX(-50%); }
+.map-point-legend { display:flex; flex-wrap:wrap; align-items:center; gap:8rpx 24rpx; margin-top:16rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.map-point-legend > view { display:flex; align-items:center; }
+.legend-sizes { gap:8rpx; }
+.map-point-legend > label { color:var(--ui-muted); }
+.legend-dot { display:inline-block; flex:none; box-sizing:border-box; border:2px solid var(--ui-surface); border-radius:50%; background:var(--ui-primary); } /* 和地图点一样带 2px 白边，看得见的蓝色大小与地图上一致 */
+.legend-dot.point-sm { width:24rpx; height:24rpx; } /* 与地图上三档点同尺寸 */
+.legend-dot.point-md { width:32rpx; height:32rpx; }
+.legend-dot.point-lg { width:44rpx; height:44rpx; }
+.quadrant-note { margin:8rpx 0 0; color:var(--ui-muted); font-size:var(--ui-text-small); line-height:1.5; }
+
+/* 点位客户卡（sb-sheet 正文）：白底，里面靠分隔线分组，不再套框；弹层外壳、标题、关闭、按钮交给 sb-sheet */
+.sheet-status { display:flex; align-items:center; flex-wrap:wrap; gap:16rpx; }
+.sheet-status > text { display:inline-flex; align-items:center; height:20px; padding:0 var(--ui-space-2); border-radius:4px; font-size:var(--ui-text-small); line-height:20px; }
+.sheet-status > .sheet-quadrant { color:var(--ui-neutral); background:var(--ui-neutral-soft); }
+.customer-profile-chart { padding:24rpx 0; border-top:1px solid var(--ui-line); }
+.profile-title text, .profile-title label { display:block; }
+.profile-title text { color:var(--ui-ink); font-size:var(--ui-text-body); font-weight:600; }
+.profile-title label { margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.radar-wrap { position:relative; width:430rpx; height:330rpx; margin:8rpx auto 0; }
+.radar-grid, .radar-series { position:absolute; left:50%; top:50%; width:210rpx; height:210rpx; transform:translate(-50%,-50%); }
+.radar-grid { -webkit-clip-path:polygon(50% 0,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%); clip-path:polygon(50% 0,93.3% 25%,93.3% 75%,50% 100%,6.7% 75%,6.7% 25%); box-sizing:border-box; background:var(--ui-line); }
+.radar-grid::after { content:""; position:absolute; inset:2rpx; -webkit-clip-path:inherit; clip-path:inherit; background:var(--ui-surface); }
+.radar-grid-mid { width:142rpx; height:142rpx; }
+.radar-grid-inner { width:74rpx; height:74rpx; }
+.radar-axis { position:absolute; left:50%; top:50%; width:210rpx; height:1px; background:var(--ui-line); transform-origin:center; }
+.axis-1 { transform:translate(-50%,-50%) rotate(90deg); }
+.axis-2 { transform:translate(-50%,-50%) rotate(30deg); }
+.axis-3 { transform:translate(-50%,-50%) rotate(-30deg); }
+.radar-series { z-index:3; }
+.radar-value { position:absolute; width:100%; height:100%; background:color-mix(in srgb, var(--ui-primary) 20%, transparent); }
+.radar-segment { position:absolute; height:2rpx; margin-top:-1rpx; background:var(--ui-primary); transform-origin:left center; }
+.radar-point { position:absolute; width:8rpx; height:8rpx; box-sizing:border-box; border-radius:50%; background:var(--ui-primary); transform:translate(-50%,-50%); }
+.radar-empty { position:absolute; left:50%; top:50%; z-index:4; transform:translate(-50%,-50%); padding:4rpx 12rpx; border-radius:var(--ui-radius-control); background:var(--ui-surface); color:var(--ui-secondary); font-size:var(--ui-text-small); white-space:nowrap; }
+.radar-note { margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); text-align:center; }
+.radar-label { position:absolute; z-index:4; color:var(--ui-secondary); font-size:var(--ui-text-small); text-align:center; white-space:nowrap; }
+.radar-label text { display:block; color:var(--ui-ink); font-size:var(--ui-text-small); font-weight:600; }
+.radar-label-missing, .radar-label-missing text { color:var(--ui-muted); }
+.label-1 { left:50%; top:0; transform:translateX(-50%); }
+.label-2 { right:0; top:56rpx; }
+.label-3 { right:0; bottom:55rpx; }
+.label-4 { left:50%; bottom:0; transform:translateX(-50%); }
+.label-5 { left:0; bottom:55rpx; }
+.label-6 { left:0; top:56rpx; }
+.sheet-scores { display:grid; grid-template-columns:repeat(3,1fr); padding:24rpx 0; border-top:1px solid var(--ui-line); }
+.sheet-scores > view { display:flex; flex-direction:column; align-items:center; border-right:1px solid var(--ui-line); }
+.sheet-scores > view:last-child { border:0; }
+.sheet-scores text { color:var(--ui-ink); font-size:20px; font-weight:600; }
+.sheet-scores label { margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.sheet-fields { border-top:1px solid var(--ui-line); }
+.sheet-field { display:grid; grid-template-columns:160rpx 1fr; gap:16rpx; padding:24rpx 0; border-bottom:1px solid var(--ui-line); }
+.sheet-field-label { display:flex; align-items:flex-start; gap:8rpx; color:var(--ui-secondary); font-size:14px; }
+.sheet-field-label > text { width:10rpx; height:10rpx; flex:0 0 auto; margin-top:12rpx; border-radius:50%; background:var(--ui-warning); }
+.sheet-field-content > view { color:var(--ui-ink); font-size:14px; line-height:1.5; }
+.sheet-field-content > text { display:block; margin-top:4rpx; color:var(--ui-muted); font-size:var(--ui-text-small); line-height:1.4; }
+.sheet-field.emphasis .sheet-field-label { color:var(--ui-warning); }
+.sheet-next { padding:24rpx 0 32rpx; }
+.sheet-next-head { display:flex; align-items:center; flex-wrap:wrap; gap:16rpx; }
+.sheet-next-head > text { color:var(--ui-ink); font-size:var(--ui-text-body); font-weight:600; }
+.sheet-next > label { display:block; margin-top:8rpx; color:var(--ui-secondary); font-size:14px; line-height:1.5; }
+
+.manual-edit-entry { display:flex; align-items:center; justify-content:space-between; gap:16rpx; margin-top:24rpx; padding-top:16rpx; border-top:1px solid var(--ui-line); }
+.manual-edit-entry text, .manual-edit-entry label { display:block; }
+.manual-edit-entry text { color:var(--ui-ink); font-size:14px; font-weight:600; }
+.manual-edit-entry label { margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.manual-edit-entry > .manual-edit-link { flex:0 0 auto; display:flex; align-items:center; min-height:var(--ui-touch-target); color:var(--ui-primary); font-size:14px; }
+.opportunity-edit-entry { display:flex; align-items:center; justify-content:space-between; min-height:96rpx; margin-top:16rpx; padding:0 32rpx; box-sizing:border-box; border-radius:var(--ui-radius-panel); background:var(--ui-surface); color:var(--ui-primary); font-size:14px; font-weight:600; }
+.opportunity-edit-entry label { display:flex; align-items:center; color:var(--ui-primary); font-size:14px; font-weight:400; }
+
+/* 相邻点位候选（sb-sheet 正文里的 t-cell 列表）：行左右各 16px，分隔线从文字起点开始 */
+.plot-candidate-list { margin:0 calc(-1 * var(--ui-page-gutter)); }
+.plot-candidate-desc > text { display:block; margin-top:4rpx; color:var(--ui-secondary); font-size:var(--ui-text-small); line-height:1.5; }

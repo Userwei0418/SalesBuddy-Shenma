@@ -1,3 +1,4 @@
+@import "../../components/visit-opportunity-selector/index.wxss";
 /* 记录客户拜访：灰底上放白卡，卡片不描边、不加阴影（飞书）；提交放底部固定条 sb-bottom-bar。 */
 page{background:var(--ui-background)}
 .visit-entry-page{min-height:100vh;box-sizing:border-box;padding:16rpx 32rpx 300rpx;padding-bottom:calc(300rpx + constant(safe-area-inset-bottom));padding-bottom:calc(300rpx + env(safe-area-inset-bottom));background:var(--ui-background);color:var(--ui-ink)}
@@ -30,7 +31,9 @@ page{background:var(--ui-background)}
 .customer-picker-head>view>text>label{color:var(--ui-danger);font-size:var(--ui-text-small);font-weight:400}
 .customer-picker-head>view>view{margin-top:8rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5}
 /* 「更换」：上下各 12px 内边距撑到 44px（px，不随屏宽缩），负外边距抵掉占位 */
-.customer-picker-head>text{flex:0 0 auto;padding:12px 8rpx;margin:-12px -8rpx;color:var(--ui-primary);font-size:14px;line-height:20px}
+.customer-change{flex:0 0 auto;width:auto;min-width:0;min-height:var(--ui-touch-target);padding:12px 8rpx;margin:-12px -8rpx;border:0;background:transparent;color:var(--ui-primary);font-size:14px;line-height:20px;font-weight:400}
+.customer-change::after{border:0}
+.customer-change[disabled]{color:var(--ui-muted)}
 .link-pressed{opacity:.7}
 /* 客户搜索：sb-search plain（白底细线、放大镜、清除、搜索中） */
 .customer-search{margin-top:24rpx}
@@ -130,14 +133,14 @@ page{background:var(--ui-background)}
 .safe-tip{margin:16rpx 8rpx 24rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;text-align:center}
 
 
-/* Preserve current recording guidance with the shared UI palette. */
-.recording-guide{margin-top:24rpx;border-top:1px solid var(--ui-line)}
-.recording-guide-toggle{display:flex;align-items:center;justify-content:space-between;gap:16rpx;width:100%;min-height:var(--ui-touch-target);margin:0;padding:18rpx 0;text-align:left;white-space:normal;line-height:1.5;font-size:var(--ui-text-body);font-weight:600;color:var(--ui-ink);background:transparent;border-radius:0}
-.recording-guide-toggle::after{border:0}
-.recording-guide-action{flex-shrink:0;color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:500}
-.recording-guide-content{padding:0 0 8rpx}
-.recording-guide-section{margin-top:16rpx;padding:20rpx;background:var(--ui-background);border-radius:var(--ui-radius-control)}
-.recording-guide-section:first-child{margin-top:0}
-.recording-guide-title{display:block;margin-bottom:10rpx;font-size:var(--ui-text-body);line-height:1.5;font-weight:600;color:var(--ui-ink)}
-.recording-guide-line{display:block;margin-top:8rpx;font-size:14px;line-height:1.7;color:var(--ui-secondary);overflow-wrap:break-word}
-.recording-guide-note{margin-top:20rpx;font-size:var(--ui-text-small);line-height:1.7;color:var(--ui-secondary)}
+/* New business controls; existing layout and palette preserved. */
+.recording-guide{margin:16rpx 0;padding:16rpx 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface)}.recording-guide-toggle{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:var(--ui-touch-target);font-size:14px;color:var(--ui-ink);text-align:left}.recording-guide-action{flex-shrink:0;color:var(--ui-primary)}.recording-guide-section{margin-top:16rpx}.recording-guide-title,.recording-guide-line,.recording-guide-note{display:block;font-size:14px;line-height:1.7;color:var(--ui-secondary)}.recording-guide-title{font-weight:600;color:var(--ui-ink)}.recording-guide-note{margin-top:16rpx;padding-top:16rpx;border-top:1px solid var(--ui-line)}
+
+/* 公司跟进目录内嵌在原客户白卡，不改变录入/录音区域。 */
+.inline-opportunity-result{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:var(--ui-touch-target);padding:20rpx 0;border-bottom:1px solid var(--ui-line);color:var(--ui-ink)}
+.inline-opportunity-result>text{flex:1;min-width:0;font-size:var(--ui-text-body);line-height:1.5;word-break:break-all}
+.inline-opportunity-result>t-icon{flex:none;color:var(--ui-muted)}
+
+.entry-mode-link button{width:auto;min-width:0;min-height:var(--ui-touch-target);margin:12rpx 0 -12rpx;padding:0;background:transparent;color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:400;line-height:var(--ui-touch-target);text-align:left}
+.entry-mode-link button::after{border:0}
+.entry-mode-link button[disabled]{color:var(--ui-muted)}

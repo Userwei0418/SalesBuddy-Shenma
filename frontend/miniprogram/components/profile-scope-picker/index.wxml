@@ -3,14 +3,5 @@ function teamTabs(teams){var out=[{key:'',label:'全部团队'}];for(var i=0;i<(
 module.exports={teamTabs:teamTabs};
 </wxs>
 <view class="scope-toolbar"><sb-segmented size="small" options="{{modes}}" value="{{mode}}" bind:change="onModeSegment"/><button wx:if="{{mode==='person' || (mode==='team' && teams.length>1)}}" size="mini" class="subject-trigger {{active ? 'subject-trigger-on' : ''}}" hover-class="subject-trigger-pressed" bindtap="show" aria-label="{{mode==='person'?'选择成员':'选择团队'}}，当前{{label || '未选择'}}"><view class="subject-chip"><text class="subject-trigger-text">{{label || (mode==='person'?'选择成员':'选择团队')}}</text><t-icon name="chevron-down" size="32rpx" class="subject-caret"/></view></button></view><view wx:if="{{!(mode==='person' || (mode==='team' && teams.length>1))}}" class="subject-caption">{{label}}</view>
-<sb-sheet visible="{{open}}" title="{{selecting==='team'?'选择团队':'选择成员'}}" bind:close="close">
-  <view slot="header" class="selector-fixed">
-    <sb-search wx:if="{{selecting==='person'}}" plain placeholder="搜索成员姓名" maxlength="{{20}}" value="{{search}}" bind:change="search" bind:clear="search"/>
-    <view wx:if="{{selecting==='person' && teams.length>1}}" class="selector-team-tabs"><sb-tabs size="small" items="{{scope.teamTabs(teams)}}" activeKey="{{filterTeam}}" bind:change="onTeamTab"/></view>
-  </view>
-  <view class="selector-rows">
-    <t-cell wx:for="{{selecting==='team'?teams:visibleMembers}}" wx:key="id" title="{{item.name}}" description="{{item.teamLabel}}" hover data-id="{{item.id}}" right-icon="{{(selecting==='team'?teamId:memberId)===item.id ? 'check' : ''}}" aria-label="{{item.name}}{{(selecting==='team'?teamId:memberId)===item.id ? '，当前已选中' : ''}}" bind:click="select"><view slot="left-icon" class="scope-avatar">{{item.initial || (selecting==='team'?'团':'人')}}</view></t-cell>
-    <view wx:if="{{selecting==='person' && !visibleMembers.length}}" class="selector-empty">没有匹配的成员</view>
-    <view class="selector-bottom">仅显示当前账号可查看的对象</view>
-  </view>
-</sb-sheet>
+<sb-sheet visible="{{open && selecting==='team'}}" title="选择团队" bind:close="close"><view class="selector-rows"><t-cell wx:for="{{teams}}" wx:key="id" title="{{item.name}}" hover data-id="{{item.id}}" right-icon="{{teamId===item.id ? 'check' : ''}}" bind:click="select"><view slot="left-icon" class="scope-avatar">{{item.initial || '团'}}</view></t-cell><view class="selector-bottom">仅显示当前账号可查看的对象</view></view></sb-sheet>
+<person-picker id="personPicker" open="{{open && selecting==='person'}}" members="{{members}}" teams="{{teams}}" default-team-id="{{defaultTeamId}}" selected="{{personSelected}}" loading="{{loading}}" error="{{error}}" bind:confirm="confirmPerson" bind:close="close" bind:retry="retry"/>

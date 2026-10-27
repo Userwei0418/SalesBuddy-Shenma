@@ -3,28 +3,58 @@ function members(list) { var out = []; for (var i = 0; i < (list || []).length; 
 module.exports = { members: members };
 </wxs>
 <view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:elif="{{task.execution_mode === 'execution_v3'}}"><include src="./lightweight.wxml"/></block>
 <block wx:else>
-<view wx:if="{{task}}" class="detail-page status-{{task.status}} traffic-{{task.signal.tone}}">
+<view wx:if="{{task}}" class="detail-page {{execution ? 'has-execution' : ''}} status-{{task.status}} traffic-{{task.signal.tone}}">
   <view class="detail-hero">
-    <sb-summary-card appearance="soft" tone="{{task.signal.tone === 'red' ? 'bad' : ''}}" title="{{task.title}}" subtitle="{{task.customer}} · {{task.team}}" tags="{{[{label:task.signal.label + ' · ' + task.statusLabel,tone:task.signal.tone === 'red' ? 'bad' : task.signal.tone === 'yellow' ? 'watch' : task.signal.tone === 'green' ? 'good' : 'pending'},{label:task.priority + '优先级'}]}}" progress="{{task.status === 'completed' ? 100 : task.status === 'pending_confirm' ? 16 : task.status === 'cancelled' ? 100 : 42}}" progressLabel="{{task.status === 'completed' ? '任务已完成，结果已同步' : task.status === 'pending_confirm' ? '等待接收方接受或拒绝' : task.status === 'pending_review' ? '完成说明已提交，等待发起人验收' : task.status === 'cancelled' ? (task.wasCancelled ? '任务已取消，原因和协调记录已保留' : '接收方已拒绝，等待发起人决定是否重新发起') : '任务执行中 · 等待完成反馈'}}" />
+    <sb-summary-card appearance="soft" tone="{{task.signal.tone === 'red' ? 'bad' : ''}}" title="{{task.title}}" subtitle="{{task.customer}} · {{task.team}}" tags="{{[{label:task.signal.label + ' · ' + task.statusLabel,tone:task.signal.tone === 'red' ? 'bad' : task.signal.tone === 'yellow' ? 'watch' : task.signal.tone === 'green' ? 'good' : 'pending'},{label:task.priority + '优先级'}]}}" progress="{{null}}" progressLabel="{{task.stageLabel}}" />
   </view>
 
-  <view class="detail-body">
+  <view class="detail-body"><view class="section-card" wx:if="{{execution.caps.adopt_v3 || taskMigration.caps.adopt_v3}}"><button bindtap="openLightweightAdopt" disabled="{{executionBusy}}">接入轻量流程</button><text class="completion-help">保留原任务记录，接入后使用统一更新入口。</text></view>
+    <include src="./execution-v2-editors.wxml"/><view wx:if="{{taskMigration.raw.supported_protocol_version === 2 || taskMigration.raw.protocol_version === 2}}" class="section-card"><button disabled="{{executionHistoryCursors.events === null}}" loading="{{executionHistoryLoading}}" data-kind="events" bindtap="loadExecutionHistory">加载更早任务记录</button><view wx:if="{{executionHistoryError}}">{{executionHistoryError}}</view></view>
+    <view wx:if="{{executionError}}" class="section-card execution-status-card"><text class="coordinate-error">{{executionError}}</text><button class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" bindtap="refreshTask">刷新任务执行信息</button></view>
+    <task-execution-panel wx:if="{{execution}}" id="taskExecutionPanel" enabled="{{true}}" protocol-version="{{execution.raw.protocol_version}}" current-user-id="{{executionActorUserId}}" context-key="{{executionContext}}" task-versions="{{execution.versions}}" progress-value="{{execution.progress}}" checklist="{{execution.items}}" feedback="{{execution.feedback}}" pause-view="{{execution.pause}}" executor-label="{{execution.executorLabel}}" reviewer-label="{{execution.reviewerLabel}}" last-synced-label="{{executionSynced}}" offline="{{executionOffline}}" busy="{{executionBusy || executionLoading}}" allow-feedback="{{!executionError && execution.caps.append_feedback}}" allow-progress="{{!executionError && execution.caps.set_item_progress}}" allow-pause="{{!executionError && execution.caps.pause}}" allow-resume="{{!executionError && execution.caps.resume}}" bind:refresh="refreshTask" bind:feedbackintent="executionFeedback" bind:actionintent="executionAction"/>
+    <view wx:if="{{execution && execution.raw.protocol_version === 2}}" class="section-card">
+      <button wx:if="{{execution.caps.save_checklist}}" class="execution-action-btn" bindtap="openChecklist" disabled="{{executionBusy || executionLoading || executionError}}">维护推进清单</button>
+      <button wx:if="{{execution.caps.complete_self}}" class="execution-action-btn is-primary" data-action="completeSelf" bindtap="executionPageAction" disabled="{{executionBusy || executionLoading || executionError}}">确认完成本人任务</button>
+      <button wx:if="{{execution.caps.cancel_task}}" class="execution-text-action is-danger" data-action="cancel" bindtap="executionPageAction" disabled="{{executionBusy || executionLoading || executionError}}">取消任务</button>
+      <button wx:if="{{executionHistoryCursors.events !== null}}" class="execution-text-action" data-kind="events" bindtap="loadExecutionHistory" loading="{{executionHistoryLoading}}">加载更早反馈与记录</button>
+      <button wx:if="{{executionHistoryCursors.submissions !== null}}" class="execution-text-action" data-kind="submissions" bindtap="loadExecutionHistory" loading="{{executionHistoryLoading}}">查看历史成果提交</button>
+      <view wx:for="{{executionSubmissions}}" wx:key="id" class="execution-item"><view>{{item.timeLabel}}</view><view class="description">{{item.note}}</view><view class="execution-help">提交时保留 {{item.itemCount}} 项清单 · 版本 {{item.snapshot.checklist_revision}}</view><view class="description">交付物：{{item.snapshot.requirements.deliverable}}</view><view class="description">完成标准：{{item.snapshot.requirements.acceptance_criteria}}</view><view wx:for="{{item.checklist}}" wx:for-item="entry" wx:key="item_id" class="execution-item"><view>{{entry.title}} · {{entry.stateLabel}}</view><view>{{entry.acceptance_criteria}}</view><view>{{entry.note}}</view></view></view>
+      <view wx:if="{{executionHistoryError}}" class="coordinate-error">{{executionHistoryError}}</view>
+    </view>
+    <view wx:if="{{execution && !executionError && (execution.caps.accept_task || execution.caps.decline_task || execution.caps.recheck_pause || execution.caps.withdraw_completion || execution.caps.submit_completion || execution.caps.review_completion || execution.caps.propose_requirements || execution.caps.initiate_executor_handover || execution.caps.initiate_reviewer_handover)}}" class="section-card execution-actions-card">
+      <view class="section-title">任务操作</view>
+      <view wx:if="{{execution.caps.accept_task || execution.caps.decline_task || execution.caps.submit_completion || execution.caps.review_completion}}" class="execution-primary-actions">
+        <button wx:if="{{execution.caps.accept_task}}" class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="accept" bindtap="executionPageAction">接受任务</button>
+        <button wx:if="{{execution.caps.decline_task}}" class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" data-action="decline" bindtap="executionPageAction">拒绝任务</button>
+        <button wx:if="{{execution.caps.submit_completion}}" class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="complete" bindtap="executionPageAction">{{execution.selfManaged ? '完成任务' : '提交整体验收'}}</button>
+        <block wx:if="{{execution.caps.review_completion}}"><button class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="approve" bindtap="executionPageAction">确认验收</button><button class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" data-action="reject" bindtap="executionPageAction">驳回并返工</button></block>
+      </view>
+      <button wx:if="{{execution.caps.recheck_pause && execution.pause.id}}" class="execution-management-row" disabled="{{executionBusy || executionLoading}}" data-action="recheck" bindtap="executionPageAction"><view><text class="execution-row-title">改期复查</text><text class="execution-row-hint">调整复查时间，任务保持暂停</text></view><text class="execution-row-arrow">›</text></button>
+      <button wx:if="{{execution.caps.withdraw_completion && execution.raw.current_submission}}" class="execution-management-row" disabled="{{executionBusy || executionLoading}}" data-action="withdrawCompletion" bindtap="executionPageAction"><view><text class="execution-row-title">撤回完成提交</text><text class="execution-row-hint">保留已有成果，继续处理任务</text></view><text class="execution-row-arrow">›</text></button>
+      <button wx:if="{{execution.caps.propose_requirements}}" class="execution-management-row" disabled="{{executionBusy || executionLoading}}" bindtap="openRequirements"><view><text class="execution-row-title">{{execution.selfManaged ? '修改任务要求' : '申请修改任务要求'}}</text><text class="execution-row-hint">{{execution.selfManaged ? '本人确认保存后生效' : '先核对差异，再由相关责任人确认'}}</text></view><text class="execution-row-arrow">›</text></button>
+      <button wx:if="{{execution.caps.initiate_executor_handover}}" class="execution-management-row" disabled="{{executionBusy || executionLoading}}" data-purpose="executor" bindtap="openExecutionHandover"><view><text class="execution-row-title">转交执行责任</text><text class="execution-row-hint">选择接手人，保留原有成果</text></view><text class="execution-row-arrow">›</text></button>
+      <button wx:if="{{execution.caps.initiate_reviewer_handover}}" class="execution-management-row" disabled="{{executionBusy || executionLoading}}" data-purpose="reviewer" bindtap="openExecutionHandover"><view><text class="execution-row-title">转交验收责任</text><text class="execution-row-hint">对方接受后生效，执行人不变</text></view><text class="execution-row-arrow">›</text></button>
+    </view>
+    <view wx:if="{{execution.coordinationRequired}}" class="section-card execution-form-notice">任务责任或权限发生变化，需要协调处理；已有成果保留。请使用可用交接入口，或联系任务发起人。</view><view wx:if="{{execution.raw.requirements_incomplete}}" class="section-card execution-form-notice">整体交付物或完成标准尚未补齐，请先修改任务要求。</view><include src="./execution-governance.wxml"/>
+
     <view wx:if="{{task.handover_required}}" class="fde-note">原接收人账号或岗位资格已变化，任务待交接；不自动完成或删除。</view>
-    <view wx:if="{{(task.can_coordinate || task.canCancel) && task.status !== 'pending_review' && !coordinateOpen}}" class="coordination-entry">
-      <t-cell title="协调任务" description="转交负责人或取消任务" arrow hover bordered="{{false}}" bind:click="openCoordination" />
+    <view wx:if="{{!executionError && !executionLoading && task.canCancel && (!execution || execution.raw.protocol_version !== 2)}}" class="coordination-entry"><t-cell title="取消任务" description="误建或无需继续时取消，原因和记录会保留" arrow hover bind:click="openCancellation"/></view>
+    <view wx:if="{{!execution && !executionLoading && !executionError && task.can_coordinate && task.status !== 'pending_review' && !coordinateOpen}}" class="coordination-entry">
+      <t-cell title="转交任务" description="选择接手人员并说明转交原因" arrow hover bordered="{{false}}" bind:click="openCoordination" />
     </view>
     <view wx:if="{{coordinateOpen}}" class="section-card fde-coordinate">
-      <view class="section-title">任务协调</view>
-      <sb-select wx:if="{{task.can_coordinate}}" layout="stacked" plain label="接手人员" required placeholder="选择接手人员" options="{{coord.members(coordinateMembers)}}" value="{{coordinateIndex >= 0 ? coordinateIndex : null}}" disabled="{{coordinateLoading || !coordinateMembers.length}}" bindchange="coordinateMember" />
-      <view wx:if="{{task.can_coordinate && coordinateLoading}}" class="coordinate-hint">正在读取可接手人员…</view><view wx:elif="{{task.can_coordinate && !coordinateMembers.length}}" class="coordinate-hint">当前没有可接手人员，可联系运营或说明原因后取消。</view>
-      <sb-textarea layout="stacked" plain label="协调原因" required maxlength="{{500}}" placeholder="请说明转交或取消原因" value="{{coordinateNote}}" bind:change="coordinateNote" />
+      <view class="section-title">转交任务</view>
+      <t-cell title="接手人员" note="{{coordinateSelectedName || '先选团队，再搜索接手人员'}}" arrow hover bind:click="openCoordinatePicker"/>
+      <view wx:if="{{coordinateLoading}}" class="coordinate-hint">正在读取可接手人员…</view><view wx:elif="{{coordinateDirectoryError}}" class="coordinate-hint" bindtap="loadCoordinationOptions">{{coordinateDirectoryError}} · 点击重试</view><view wx:elif="{{!coordinateMembers.length}}" class="coordinate-hint">当前没有可接手人员，请联系运营确认人员权限。</view>
+      <sb-textarea layout="stacked" plain label="转交原因" required maxlength="{{500}}" placeholder="请说明转交原因" value="{{coordinateNote}}" bind:change="coordinateNote" />
       <text wx:if="{{coordinateError}}" class="coordinate-error">{{coordinateError}}</text>
-      <view class="fde-coordinate-actions"><button class="coordinate-back" disabled="{{submitting}}" bindtap="closeCoordination">返回</button><button wx:if="{{task.canCancel}}" class="coordinate-cancel" disabled="{{submitting}}" data-event="cancel" bindtap="coordinate">取消任务</button><button wx:if="{{task.can_coordinate}}" class="coordinate-submit" disabled="{{submitting || !coordinateMembers.length}}" data-event="reassign" bindtap="coordinate">确认转交</button></view>
+      <view class="fde-coordinate-actions"><button class="coordinate-back" disabled="{{submitting}}" bindtap="closeCoordination">返回</button><button class="coordinate-submit" disabled="{{submitting || coordinateLoading || coordinateDirectoryError || !coordinateSelectedId}}" data-event="reassign" bindtap="coordinate">确认转交</button></view>
     </view>
     <view class="section-card description-card">
       <view class="section-title">任务要求</view>
-      <view class="description">{{task.description}}</view>
+      <view class="description">{{task.description}}</view><block wx:if="{{execution}}"><view class="section-title">整体交付物</view><view class="description">{{execution.raw.requirements.deliverable || '待补充'}}</view><view class="section-title">整体完成标准</view><view class="description">{{execution.raw.requirements.acceptance_criteria || '待补充'}}</view></block>
     </view>
 
     <view class="section-card info-card">
@@ -32,42 +62,70 @@ module.exports = { members: members };
     </view>
 
     <view wx:if="{{task.status === 'completed'}}" class="section-card completed-card">
-      <view class="completed-main"><view class="completed-head"><sb-status-tag tone="good" label="已完成" /><text>{{task.completedBy}} 已完成</text></view><label>{{task.completedLabel}}</label><view>{{task.completionNote}}</view></view>
+      <view class="completed-main"><view class="completed-head"><sb-status-tag tone="{{task.isSuccessful ? 'good' : 'pending'}}" label="{{task.statusLabel}}" /><text>{{task.completedBy}} 已完成</text></view><label>{{task.completedLabel}}</label><view>{{task.completionNote}}</view></view>
     </view>
 
-    <view wx:elif="{{task.status === 'cancelled'}}" class="section-card closed-card">
+    <view wx:elif="{{task.status === 'cancelled' || task.status === 'rejected'}}" class="section-card closed-card">
       <view class="rejected-copy">
-        <view class="rejected-head"><sb-status-tag tone="watch" label="{{task.wasCancelled ? '已取消' : '已拒绝'}}" /><text class="rejected-title">{{task.wasCancelled ? '任务已取消' : '任务已被拒绝'}}</text></view>
-        <label class="rejected-kicker">{{task.wasCancelled ? '协调人说明' : '接收方说明'}}</label>
-        <view class="rejected-comment">{{task.wasCancelled ? task.cancellationNote : (task.rejectionComment || '暂未填写拒绝原因')}}</view>
+        <view class="rejected-head"><sb-status-tag tone="pending" label="{{task.statusLabel}}" /><text class="rejected-title">{{task.statusLabel}}</text></view>
+        <label class="rejected-kicker">{{task.endReason === 'cancelled' ? '取消原因' : task.endReason === 'rejected' ? '拒绝说明' : '结束记录'}}</label>
+        <view class="rejected-comment">{{task.endReason === 'cancelled' ? task.cancellationNote : task.endReason === 'rejected' ? (task.rejectionComment || task.endNote) : task.endNote}}</view>
       </view>
     </view>
 
-    <view wx:elif="{{task.canRespond}}" class="section-card respond-card"><view class="section-title">接受或拒绝</view><view class="completion-help">确认后进入执行；岗位任务只需一人领取，拒绝仅表示本人不领取。拒绝时必须填写原因，系统会立即通知发起人。</view><sb-textarea layout="stacked" plain maxlength="{{2000}}" value="{{responseComment}}" placeholder="拒绝时必填：说明无法接受的原因或建议调整方式" bind:change="inputResponseComment" /></view>
+    <view wx:elif="{{!execution && !executionLoading && !executionError && task.canRespond}}" class="section-card respond-card"><view class="section-title">接受或拒绝</view><view class="completion-help">确认后进入执行；岗位任务只需一人领取，拒绝仅表示本人不领取。拒绝时必须填写原因，系统会立即通知发起人。</view><sb-textarea layout="stacked" plain maxlength="{{2000}}" value="{{responseComment}}" placeholder="拒绝时必填：说明无法接受的原因或建议调整方式" bind:change="inputResponseComment" /></view>
 
     <view wx:elif="{{task.status === 'pending_review'}}" class="section-card completion-card">
-      <view class="section-title">{{task.canReview ? '待你验收' : '等待发起人确认'}}</view>
+      <view class="section-title">{{execution ? (execution.caps.review_completion ? '待你验收' : '等待验收') : ((task.execution_mode === 'execution_v1' || task.execution_mode === 'execution_v2') ? '等待验收' : (task.canReview ? '待你验收' : '等待发起人确认'))}}</view>
+      <view wx:if="{{execution}}" class="completion-help">当前验收人：{{execution.reviewerLabel}}</view>
       <view class="completion-help">{{task.owner}} 提交的完成说明</view>
       <view class="description review-evidence">{{task.completionNote}}</view>
-      <block wx:if="{{task.canReview}}">
+      <block wx:if="{{!execution && !executionLoading && !executionError && task.canReview}}">
         <view class="completion-help">确认完成后任务闭环；驳回时请说明需要补充或改进的内容。</view>
         <sb-textarea layout="stacked" plain maxlength="{{2000}}" value="{{reviewNote}}" placeholder="验收意见（驳回时必填）" bind:change="inputReviewNote" />
       </block>
     </view>
-    <view wx:elif="{{task.canComplete}}" class="section-card completion-card">
+    <view wx:elif="{{!execution && !executionLoading && !executionError && task.canComplete}}" class="section-card completion-card">
       <view class="section-title">完成反馈</view><view wx:if="{{task.reviewRejected}}" class="review-rejected">驳回原因：{{task.reviewNote}}</view>
       <view class="completion-help">{{task.selfAssigned ? '填写完成说明后可直接完成。' : '请填写完成说明，提交后由发起人验收，通过才算完成。'}}</view>
       <sb-textarea layout="stacked" plain maxlength="{{2000}}" value="{{completionNote}}" placeholder="必填：说明交付结果、附件位置或后续安排" bind:change="inputCompletionNote" />
     </view>
 
-    <view wx:else class="readonly-tip"><text>该任务由 {{task.owner}} 负责完成，你可以查看最新状态。</text></view>
-    <view wx:if="{{task.history.length}}" class="section-card review-history"><view class="section-title">提交与验收记录</view><view wx:for="{{task.history}}" wx:key="id" class="review-history-row"><view>{{item.label}} · {{item.actor_name}}</view><text class="completion-help">{{item.time}}</text><view class="description review-evidence">{{item.note}}</view></view></view>
+    <view wx:elif="{{!execution || (!execution.caps.append_feedback && !execution.caps.set_item_progress && !execution.caps.pause && !execution.caps.resume && !execution.caps.accept_task && !execution.caps.decline_task && !execution.caps.recheck_pause && !execution.caps.withdraw_completion && !execution.caps.submit_completion && !execution.caps.review_completion && !execution.caps.propose_requirements && !execution.caps.respond_requirements && !execution.caps.withdraw_requirements && !execution.caps.initiate_executor_handover && !execution.caps.initiate_reviewer_handover && !execution.caps.respond_executor_handover && !execution.caps.respond_reviewer_handover)}}" class="readonly-tip"><text>{{execution ? '当前暂无可执行操作，可查看任务进展与记录。' : '该任务由 ' + task.owner + ' 负责完成，你可以查看最新状态。'}}</text></view>
+    <view wx:if="{{task.history.length}}" class="section-card review-history"><view class="section-title">任务记录</view><view wx:for="{{task.history}}" wx:key="id" class="review-history-row"><view>{{item.label}} · {{item.actor_name}}</view><text class="completion-help">{{item.time}}</text><view wx:if="{{item.transferSummary}}" class="description review-evidence">{{item.transferSummary}}</view><view class="description review-evidence">{{item.note}}</view></view></view>
   </view>
 
-  <view wx:if="{{task.canRespond}}" class="bottom-bar response-actions"><button wx:if="{{task.canDecline}}" class="reject-button {{submitting ? 'disabled' : ''}}" disabled="{{submitting}}" bindtap="rejectTask">拒绝</button><button wx:if="{{task.canAccept}}" class="accept-button {{submitting ? 'disabled' : ''}}" disabled="{{submitting}}" bindtap="acceptTask">{{submitting ? '正在同步' : task.responseLabel}}</button><view>拒绝原因将立即推送给 {{task.creator}}</view></view>
-  <sb-bottom-bar wx:elif="{{task.canRetry}}" class="bottom-bar retry-bar" primaryLabel="重新发起新任务" bind:primary="retryTask" note="原任务和拒绝说明会被保留，新任务可重新修改" />
-  <sb-bottom-bar wx:elif="{{task.canReview}}" class="bottom-bar response-actions" secondaryLabel="驳回" secondaryDisabled="{{submitting}}" bind:secondary="onRejectCompletion" primaryLabel="确认完成" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="onApproveCompletion" note="验收结果将通知 {{task.owner}}" />
-  <sb-bottom-bar wx:elif="{{task.canComplete}}" class="bottom-bar" primaryLabel="{{task.selfAssigned ? '确认完成' : '提交完成'}}" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="markCompleted" note="{{task.selfAssigned ? '填写说明后直接完成' : '提交后由 ' + task.creator + ' 验收'}}" />
+  <sb-bottom-bar wx:if="{{!execution && !executionLoading && !executionError && task.canRespond}}" class="bottom-bar response-actions" secondaryLabel="{{task.canDecline ? '拒绝' : ''}}" secondaryDisabled="{{submitting}}" bind:secondary="rejectTask" primaryLabel="{{task.responseLabel}}" disabled="{{!task.canAccept}}" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="acceptTask" note="拒绝原因将立即推送给 {{task.creator}}" />
+  <sb-bottom-bar wx:elif="{{!execution && !executionLoading && !executionError && task.canRetry}}" class="bottom-bar retry-bar" primaryLabel="重新发起新任务" bind:primary="retryTask" note="原任务和拒绝说明会被保留，新任务可重新修改" />
+  <sb-bottom-bar wx:elif="{{!execution && !executionLoading && !executionError && task.canReview}}" class="bottom-bar response-actions" secondaryLabel="驳回" secondaryDisabled="{{submitting}}" bind:secondary="onRejectCompletion" primaryLabel="确认完成" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="onApproveCompletion" note="验收结果将通知 {{task.owner}}" />
+  <sb-bottom-bar wx:elif="{{!execution && !executionLoading && !executionError && task.canComplete}}" class="bottom-bar" primaryLabel="{{task.selfAssigned ? '确认完成' : '提交完成'}}" loading="{{submitting}}" loadingLabel="正在同步" bind:primary="markCompleted" note="{{task.selfAssigned ? '填写说明后直接完成' : '提交后由 ' + task.creator + ' 验收'}}" />
 </view>
 
 </block>
+
+  <person-picker id="personPicker" open="{{coordinatePickerOpen}}" members="{{coordinateMembers}}" teams="{{coordinateTeams}}" default-team-id="{{coordinateDefaultTeamId}}" selected="{{coordinateSelectedIds}}" multiple="{{false}}" allow-all="{{false}}" max-selected="{{1}}" title="选择接手人员" loading="{{coordinateLoading}}" error="{{coordinateDirectoryError}}" bind:confirm="confirmCoordinateMember" bind:close="closeCoordinatePicker" bind:retry="loadCoordinationOptions" />
+  <task-cancel-dialog open="{{cancelOpen}}" task-id="{{taskId}}" task-version="{{task.version_no || 0}}" bind:close="closeCancellation" bind:cancelled="taskCancelled" bind:refreshed="taskCancellationRefreshed" />
+
+<root-portal wx:if="{{executionDialog}}">
+  <view class="sb-portal-theme">
+    <sb-sheet visible="{{!!executionDialog}}" title="{{executionDialog.action === 'complete_self' ? '完成本人任务' : executionDialog.action === 'cancel_task' ? '取消任务' : executionDialog.action === 'set_item_progress' ? '更新推进项' : executionDialog.action === 'pause' ? '暂停任务' : executionDialog.action === 'resume' ? '恢复任务' : executionDialog.action === 'recheck_pause' ? '改期复查' : executionDialog.action === 'submit_completion' ? (execution.selfManaged ? '完成任务' : '提交整体验收') : executionDialog.action === 'withdraw_completion' ? '撤回完成提交' : executionDialog.action === 'accept_task' ? '接受任务' : executionDialog.action === 'decline_task' ? '拒绝任务' : executionDialog.action === 'review_completion' ? (executionDialog.decision === 'reject' ? '驳回并返工' : '确认验收') : '确认任务操作'}}" closeOnOverlay="{{false}}" cancelLabel="返回" confirmLabel="确认保存" confirmLoading="{{executionBusy}}" confirmDisabled="{{executionLoading || executionOffline}}" bind:confirm="submitExecutionDialog" bind:close="closeExecutionDialog">
+      <view class="execution-sheet-body">
+        <view class="execution-sheet-task">{{task.title}}</view>
+        <view wx:if="{{executionDialog.action === 'pause' || executionDialog.action === 'recheck_pause'}}" class="execution-form-notice">{{executionDialog.action === 'pause' ? '说明暂停原因并安排复查时间。' : '说明改期原因并选择新的复查时间，任务保持暂停。'}}到期后不会自动恢复执行。</view>
+        <view wx:if="{{executionDialog.action === 'withdraw_completion'}}" class="execution-form-notice">撤回后可继续处理任务，已有成果与完成说明会保留。</view>
+        <picker wx:if="{{executionDialog.action === 'set_item_progress'}}" range="{{executionStates}}" value="{{executionState}}" data-key="executionState" bindchange="executionInput" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">推进状态</text><view class="execution-field-control"><text>{{executionStates[executionState]}}</text><text class="execution-row-arrow">›</text></view></view></picker>
+        <view wx:if="{{executionDialog.action === 'pause' || executionDialog.action === 'recheck_pause'}}" class="execution-field-pair">
+          <picker mode="date" value="{{executionDate}}" data-key="executionDate" bindchange="executionInput" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">复查日期 <text class="execution-required">*</text></text><view class="execution-field-control {{!executionDate ? 'is-placeholder' : ''}}"><text>{{executionDate || '请选择日期'}}</text><text class="execution-row-arrow">›</text></view></view></picker>
+          <picker mode="time" value="{{executionTime}}" data-key="executionTime" bindchange="executionInput" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">复查时间 <text class="execution-required">*</text></text><view class="execution-field-control"><text>{{executionTime}}</text><text class="execution-row-arrow">›</text></view></view></picker>
+        </view>
+        <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="{{executionDialog.action === 'set_item_progress' ? '成果依据或调整原因' : executionDialog.action === 'submit_completion' || executionDialog.action === 'complete_self' ? '完成说明' : executionDialog.action === 'review_completion' ? '验收意见' : executionDialog.action === 'pause' ? '暂停原因' : executionDialog.action === 'resume' ? '恢复原因' : executionDialog.action === 'recheck_pause' ? '改期原因' : executionDialog.action === 'withdraw_completion' ? '撤回原因' : '说明'}}" required="{{executionDialog.action !== 'accept_task' && !((executionDialog.action === 'respond_executor_handover' || executionDialog.action === 'respond_reviewer_handover' || executionDialog.action === 'respond_requirements' || executionDialog.action === 'review_completion') && executionDialog.decision !== 'reject')}}" value="{{executionNote}}" maxlength="{{executionDialog.action === 'set_item_progress' || executionDialog.action === 'submit_completion' || executionDialog.action === 'complete_self' || executionDialog.action === 'review_completion' ? 4000 : 1000}}" placeholder="请填写具体说明，便于相关同事了解" data-key="executionNote" bind:change="executionInput" disabled="{{executionBusy}}"/>
+        <block wx:if="{{executionDialog.action === 'submit_completion' && execution.raw.missing_deliverables}}"><view class="execution-form-notice">遗漏的交付：{{execution.raw.missing_deliverables}}</view><sb-textarea layout="stacked" plain label="如何补齐遗漏交付" required value="{{executionMissingResolution}}" maxlength="{{4000}}" data-key="executionMissingResolution" bind:change="executionInput" disabled="{{executionBusy}}"/></block>
+        <sb-textarea wx:if="{{executionDialog.action === 'review_completion' && executionDialog.decision === 'reject' && execution.raw.protocol_version === 2}}" layout="stacked" plain label="遗漏的整体交付" value="{{executionMissingDeliverables}}" maxlength="{{4000}}" data-key="executionMissingDeliverables" bind:change="executionInput" disabled="{{executionBusy}}"/>
+        <view wx:if="{{executionDialog.action === 'review_completion' && executionDialog.decision === 'reject'}}" class="execution-form-field"><text class="execution-field-label">需要返工的推进项 <text class="execution-required">*</text></text><checkbox-group bindchange="executionRework"><label wx:for="{{execution.items}}" wx:key="item_id" class="execution-check-row"><checkbox value="{{item.item_id}}" disabled="{{executionBusy}}" color="#2863CD"/><text>{{item.title}}</text></label></checkbox-group></view>
+        <view wx:if="{{executionDialogError}}" class="coordinate-error">{{executionDialogError}}</view>
+      </view>
+    </sb-sheet>
+  </view>
+</root-portal>
+
+<include src="./lightweight-editor.wxml"/>

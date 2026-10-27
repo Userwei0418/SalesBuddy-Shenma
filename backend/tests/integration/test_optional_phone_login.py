@@ -25,7 +25,7 @@ async def login(user, account, password=PASSWORD):
 
 async def test_phone_lifecycle_same_identity_preserved_password_and_omitted_field(connection):
     async with await client_for(connection) as admin, await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         body,created=await create(admin, None)
         assert created.status_code==201,created.text
         uid=created.json()['id']
@@ -52,7 +52,7 @@ async def test_phone_lifecycle_same_identity_preserved_password_and_omitted_fiel
 
 async def test_duplicate_and_legacy_numeric_account_conflicts_are_rejected(connection):
     async with await client_for(connection) as admin:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         body,result=await create(admin)
         assert result.status_code==201
         _,duplicate=await create(admin)
@@ -68,7 +68,7 @@ async def test_duplicate_and_legacy_numeric_account_conflicts_are_rejected(conne
 
 async def test_email_phone_share_password_failure_limit(connection):
     async with await client_for(connection) as admin, await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         body,created=await create(admin)
         assert created.status_code==201
         for name in [body['account_code'],PHONE,body['account_code'],PHONE,PHONE]:
@@ -85,7 +85,7 @@ async def test_email_phone_share_password_failure_limit(connection):
 
 async def test_removed_phone_cannot_issue_session_after_password_lookup(connection,monkeypatch):
     async with await client_for(connection) as admin, await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         body,created=await create(admin)
         assert created.status_code==201
         original=PasswordRepository.candidate
@@ -101,7 +101,7 @@ async def test_removed_phone_cannot_issue_session_after_password_lookup(connecti
 
 async def test_business_member_cannot_edit_phone(connection):
     async with await client_for(connection) as admin, await client_for(connection) as user:
-        await sign_in(admin)
+        await sign_in(admin, "ADMIN001")
         body,created=await create(admin)
         signed=await login(user,PHONE)
         user.headers['Authorization']='Bearer '+signed.json()['access_token']
@@ -109,7 +109,7 @@ async def test_business_member_cannot_edit_phone(connection):
         assert denied.status_code==403
 
 
-async def test_same_phone_in_two_companies_requires_explicit_company(connection):
+async def test_same_phone_is_globally_unique_without_company_disambiguation(connection):
     from tests.integration.test_company_tenants import provision_fixture
     _, manifest, wid, _ = await provision_fixture(connection)
     async with await client_for(connection) as admin, await client_for(connection) as user:
@@ -120,12 +120,14 @@ async def test_same_phone_in_two_companies_requires_explicit_company(connection)
         assert selected.status_code==200
         admin.headers['X-Company-ID']=wid
         _,second=await create(admin)
-        assert second.status_code==201,second.text
+        assert second.status_code==409,second.text
+        assert "手机号已被其他账号使用" in second.text
         assert (await login(user,PHONE)).status_code==401
-        for workspace,uid in [('demo-sales-workspace',first.json()['id']), (manifest['target_company']['code'],second.json()['id'])]:
-            response=await user.post('/api/v1/auth/password/login',json={'account_code':PHONE,'password':PASSWORD,'workspace':workspace})
-            assert response.status_code==200,response.text
-            assert response.json()['actor']['user_id']==uid
+        response=await user.post('/api/v1/auth/password/login',json={
+            'account_code':PHONE,'password':PASSWORD,'workspace':'demo-sales-workspace',
+        })
+        assert response.status_code==200,response.text
+        assert response.json()['actor']['user_id']==first.json()['id']
 
 async def test_session_revocation_function_enforces_permissions(connection):
     import asyncpg
@@ -144,7 +146,7 @@ async def test_session_revocation_function_enforces_permissions(connection):
         async with connection.transaction():
             await connection.execute('SELECT security.revoke_managed_account_sessions($1::uuid)', str(uuid4()))
 
-async def test_administrator_self_demotion_with_second_administrator(connection):
+async def test_administrator_self_demotion_requires_another_administrator(connection):
     from tests.integration.test_operations_claims_sql import actor
     from sales_backend.services.operations_accounts import OperationsAccountService
     from sales_backend.repositories.operations_accounts import OperationsAccountRepository
@@ -153,5 +155,6 @@ async def test_administrator_self_demotion_with_second_administrator(connection)
     team=org['departments'][0]['id']
     service=OperationsAccountService()
     await service.create(connection,admin,dict(account_code='SECONDADMIN',display_name='第二管理员',team_id=team,roles=['administrator']),PASSWORD)
-    result=await service.update(connection,admin,admin.user_id,dict(display_name='原管理员',team_id=team,roles=['sales'],status='active',version_no=1))
-    assert result['version_no']==2
+    with pytest.raises(ValueError,match='另一位公司管理员'):
+        await service.update(connection,admin,admin.user_id,dict(display_name='原管理员',team_id=team,roles=['sales'],status='active',version_no=1))
+    assert await connection.fetchval("SELECT count(*) FROM platform.role_binding WHERE user_ref_id=$1::uuid AND role_code='administrator' AND valid_to>clock_timestamp()",admin.user_id)==1

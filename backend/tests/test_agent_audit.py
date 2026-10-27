@@ -19,6 +19,15 @@ def test_diagnostic_shape_preserves_failure_types_without_model_text():
     assert not any(value in json.dumps(shape, ensure_ascii=False) for value in ["客户秘密", "密钥", "untrusted_field"])
 
 
+def test_task_import_audit_records_item_count_without_task_content():
+    shape = result_shape({'items': [{'source_line': 3, 'description': '客户未公开的任务内容'}]})
+    assert shape['items'] == {
+        'type': 'list', 'count': 1,
+        'sample_shapes': [{'source_line': 'int', 'description': 'str'}],
+    }
+    assert '客户未公开的任务内容' not in json.dumps(shape, ensure_ascii=False)
+
+
 @pytest.mark.asyncio
 async def test_audit_retains_both_contract_failures_and_no_false_acceptance():
     events = []

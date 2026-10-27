@@ -31,7 +31,9 @@ function buildVisitReceipt(record) {
         ...(record.opportunity_name ? [{ title: "关联商机", meta: displayText(record.opportunity_name, workspaceId), tag: "已关联" }] : []),
         { title: "下一步行动", meta: displayText(record.next_action, workspaceId), tag: "待执行" },
       ],
-      action: { label: "查看客户档案", code: "open_archived_customer", customerId: record.customer_id },
+      action: record.can_read_customer === true && record.customer_id
+        ? { label: "查看客户档案", code: "open_archived_customer", customerId: record.customer_id, visitId: record.id }
+        : { label: "查看跟进记录", code: "open_archived_visit", visitId: record.id },
     },
   };
 }

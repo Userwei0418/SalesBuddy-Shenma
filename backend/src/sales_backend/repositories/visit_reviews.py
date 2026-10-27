@@ -5,6 +5,8 @@ class VisitReviewRepository:
     async def lock_previous_archive(self, connection, actor, run_id):
         await connection.execute("SELECT pg_advisory_xact_lock(hashtextextended($1,0))", actor.user_id + run_id)
         previous = await connection.fetchval("SELECT security.archived_visit_receipt($1::uuid)", run_id)
+        if previous is None:
+            previous = await connection.fetchval("SELECT security.archived_visit_save_receipt($1::uuid)", run_id)
         return previous
 
     async def bind_archive(self, connection, visit_id, artifact_id, mutation_hash):

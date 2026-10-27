@@ -19,6 +19,10 @@ from sales_backend.integrations.senseaudio import SenseAudioClient, SenseAudioEr
 from sales_backend.repositories.admin import AgentRuntimeConfigRepository
 from sales_backend.repositories.model_api import ModelApiRepository
 from sales_backend.security.runtime_credentials import CredentialCipher, decrypt_credential
+from sales_backend.services.authorization import require_permission
+from sales_backend.services.model_calls import CallQuotaExceeded, DatabaseModelObserver
+from sales_backend.services.ai_service_policy import (AIServiceUnavailable, shared_allowed, legacy_owned,
+    purpose_owned, source_settings)
 
 
 class ModelApiError(Exception):
@@ -77,6 +81,8 @@ def receipt(row):
 
 
 def safe_test_error(exc):
+    if isinstance(exc, (CallQuotaExceeded, AIServiceUnavailable)):
+        return str(exc)
     status = getattr(exc, "status_code", None)
     if isinstance(exc, (TimeoutError, httpx.TimeoutException)):
         return "接口响应超时，请检查地址、模型或服务商状态"
@@ -96,15 +102,19 @@ class ModelApiService:
         self.database, self.settings = database, settings
         self.repo = ModelApiRepository()
         self.probe = probe or self._probe
+        self._injected_probe = probe is not None
 
     async def _legacy(self, conn, actor, purpose):
         row = await AgentRuntimeConfigRepository().current(conn, actor)
+        allowed = await shared_allowed(conn)
         settings = self.settings
+        if not allowed and not legacy_owned(row, purpose):
+            raise AIServiceUnavailable()
         if row and row["enabled"]:
             key = await decrypt_credential(conn, row, settings)
             settings = replace(
                 settings,
-                senseaudio_api_key=key or settings.senseaudio_api_key,
+                senseaudio_api_key=(key or settings.senseaudio_api_key) if allowed else key,
                 senseaudio_base_url=row["provider_base_url"] or settings.senseaudio_base_url,
                 llm_model=row["llm_model"] or settings.llm_model,
                 asr_model=row["asr_model"] or settings.asr_model,
@@ -115,6 +125,7 @@ class ModelApiService:
     async def list(self, actor):
         items = []
         async with self.database.transaction(actor, readonly=True) as conn:
+            allowed = await shared_allowed(conn)
             for purpose, info in PURPOSES.items():
                 row = await self.repo.current(conn, actor, purpose)
                 config = row["config_snapshot"] if row else {"mode": "inherit"}
@@ -131,13 +142,15 @@ class ModelApiService:
                             tts_model=old["tts_model"] or defaults.tts_model,
                         )
                     config = legacy_snapshot(defaults, purpose)
-                    has_key = bool((old and old["enabled"] and old["has_api_key"]) or defaults.senseaudio_api_key)
+                    has_key = bool((old and old["enabled"] and old["has_api_key"]) or (allowed and defaults.senseaudio_api_key))
                     tail = old.get("api_key_tail") if old and old["enabled"] and old["has_api_key"] else ""
                 else:
                     has_key, tail = bool(row.get("api_key_ciphertext")), row.get("api_key_tail")
+                available = allowed or (legacy_owned(old, purpose) if config["mode"] == "inherit" else purpose_owned(row))
                 items.append(
                     {
                         "purpose": purpose,
+                        "service_authorized": available and config["mode"] != "disabled",
                         **info,
                         "version": row["version_no"] if row else 0,
                         "configuration": config,
@@ -146,7 +159,7 @@ class ModelApiService:
                         "published_at": row["created_at"] if row else None,
                     }
                 )
-        return {"items": items}
+        return {"items": items, "service_policy": {"shared_enabled": allowed}}
 
     async def test(self, actor, purpose, body):
         config = body.configuration.model_dump()
@@ -158,6 +171,8 @@ class ModelApiService:
             secret,
         )
         async with self.database.transaction(actor) as conn:
+            if body.restored_from_version is not None:
+                await require_permission(conn, "ai.config_rollback")
             # Serialize duplicate request IDs even across purposes, then serialize the binding.
             await self.repo.lock(conn, actor, str(body.request_id))
             prior = await self.repo.test(conn, actor, body.request_id)
@@ -179,11 +194,15 @@ class ModelApiService:
             if config["mode"] == "custom":
                 if secret is None:
                     if current and current["config_snapshot"]["mode"] == "custom":
+                        if not purpose_owned(current):
+                            raise ModelApiError("该历史凭据继承自默认服务，请明确填写本公司的接口密钥", 422)
                         origin = current["config_snapshot"]
                         secret = await decrypt_credential(conn, current, self.settings)
                     else:
+                        legacy = await AgentRuntimeConfigRepository().current(conn, actor)
+                        if not legacy_owned(legacy, purpose):
+                            raise ModelApiError("独立接口需要填写本公司的密钥，不能复制平台共享密钥", 422)
                         origin, secret = await self._legacy(conn, actor, purpose)
-                        guard = fingerprint(origin, secret)
                     if (
                         urlsplit(origin["endpoint_url"]).netloc.lower()
                         != urlsplit(config["endpoint_url"]).netloc.lower()
@@ -199,14 +218,21 @@ class ModelApiService:
             if config["mode"] == "inherit":
                 origin, key = await self._legacy(conn, actor, purpose)
                 guard = fingerprint(origin, key)
+            allowed = await shared_allowed(conn)
             await self.repo.reserve(conn, actor, purpose, body, digest, credential, guard)
         # Do not hold a database connection while an external service runs.
         start, network_sent, status = time.monotonic(), config["mode"] == "custom", "passed"
         try:
             if network_sent:
                 settings = connection_settings(self.settings, actor, purpose, config, secret, body.expected_version + 1)
+                settings = source_settings(settings, allowed=allowed, source="tenant_test", purpose=purpose,
+                                           test_id=body.request_id)
                 async with asyncio.timeout(min(config["timeout_seconds"], 45)):
-                    await self.probe(purpose, settings, config)
+                    if self._injected_probe:
+                        await self.probe(purpose, settings, config)
+                    else:
+                        observer = DatabaseModelObserver(self.database, actor, 'model_connection_test', operation_id=str(body.request_id))
+                        await self.probe(purpose, settings, config, observer=observer)
                 message = "接口连通且固定样本返回合格；未执行真实业务"
             else:
                 message = (
@@ -215,6 +241,8 @@ class ModelApiService:
                     else "停用配置检查通过；未发送模型请求"
                 )
         except Exception as exc:
+            if isinstance(exc, (CallQuotaExceeded, AIServiceUnavailable)):
+                network_sent = False
             status, message = "failed", safe_test_error(exc)
         result = {
             "message": message,
@@ -238,6 +266,9 @@ class ModelApiService:
             test = await self.repo.test(conn, actor, body.test_id)
             if not test or test["purpose"] != purpose or str(test["actor_user_ref_id"]) != actor.user_id:
                 raise ModelApiError("找不到当前账号在本公司的测试回执", 404)
+            # Recheck even a replay: a later explicit revoke must invalidate restoration authority.
+            if test["restored_from_version"] is not None:
+                await require_permission(conn, "ai.config_rollback")
             prior = await self.repo.published_test(conn, actor, body.test_id)
             if prior is not None:
                 if test["expected_version"] != body.expected_version:
@@ -250,6 +281,8 @@ class ModelApiService:
                 raise ModelApiError("配置已更新，请刷新并重新测试")
             if test["status"] != "passed" or not test["unexpired"]:
                 raise ModelApiError("请先完成一次成功测试；测试回执有效期为 15 分钟")
+            if test["source_guard"] and test["config_snapshot"]["mode"] == "custom" and not await shared_allowed(conn):
+                raise AIServiceUnavailable()
             if test["source_guard"]:
                 origin, key = await self._legacy(conn, actor, purpose)
                 if fingerprint(origin, key) != test["source_guard"]:
@@ -258,7 +291,15 @@ class ModelApiService:
             return {"published_version": version, "replayed": False}
 
     async def _probe(self, purpose, settings, config, *, observer=None):
-        client = SenseAudioClient(replace(settings, max_retries=0), breaker=GatewayCircuitBreaker(), observer=observer)
+        if purpose == 'asr':
+            from sales_backend.services.asr import AsrService, prepare_session
+            if observer is None or not getattr(observer, 'actor', None):
+                raise ModelApiError('语音诊断缺少公司身份', 403)
+            session = await prepare_session(self.database, observer.actor, settings, scene='diagnostic',
+                                            session_id=observer.operation_id)
+            client = AsrService(self.database, observer.actor, settings, session)
+        else:
+            client = SenseAudioClient(replace(settings, max_retries=0), breaker=GatewayCircuitBreaker(), observer=observer)
         try:
             if purpose == "text":
                 answer = await client.chat_json(
@@ -270,7 +311,7 @@ class ModelApiService:
                     raise SenseAudioError("测试输出不符合约定")
             elif purpose == "asr":
                 content = (Path(__file__).resolve().parents[1] / "assets/model-api-test.wav").read_bytes()
-                await client.transcribe(filename="connection-test.wav", content=content, mime_type="audio/wav")
+                await client.transcribe(filename="connection-test.wav", content=content, mime_type="audio/wav", stage="diagnostic")
             else:
                 await client.synthesize(text="语音接口连接测试。", voice_id=config["voice_id"])
         finally:

@@ -1,3 +1,4 @@
+@import "../../styles/portal-theme.wxss";
 /* 触发片照 sb-labeled-select size="small"（高 32px，px 不随屏宽缩放）：灰底无边框，未选只显示标签，选中浅蓝底主色字显示人数（B-43） */
 .member-trigger{position:relative;display:flex;align-items:center;gap:8rpx;width:var(--member-trigger-width,104px);max-width:100%;min-width:0;height:var(--member-trigger-height,32px);box-sizing:border-box;padding:0 var(--ui-space-2) 0 var(--ui-space-3);border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft);color:var(--ui-ink);font-size:14px;line-height:1.3;white-space:nowrap}
 .member-trigger-label,.member-trigger-value{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--ui-ink);font-size:14px;font-weight:400}

@@ -1,0 +1,2659 @@
+{
+  "description": "Frozen c415 V250 source manifest, complete production historical registrations, and Backend-reviewed V253 SQL/runtime policy. No business rows or credentials.",
+  "migration_plan": [
+    {
+      "key": "BASELINE_V1",
+      "file": "baseline/V001__current_schema.sql",
+      "sha256": "916b22cf0b1d69a52bc183ce9e2a48c66fa9137209206443879c93691aee7204"
+    },
+    {
+      "key": "S001",
+      "file": "seeds/S001__system_configuration.sql",
+      "sha256": "44b9e66b4a3b450325398975f84bd690fbb8d7eb513e1180080667bbeb4cd24f"
+    },
+    {
+      "key": "V035",
+      "file": "V035__visit_closed_loop.sql",
+      "sha256": "dd328cbd9d2881a552449aab32799221b1a1d5bd4aa746aa2d168df58d39faff"
+    },
+    {
+      "key": "V036",
+      "file": "V036__visit_fields_and_opportunity_names.sql",
+      "sha256": "52c82a377ddd4778f332c8041c27f69ef7d77ed4cce90d164d59ef6c1e95a411"
+    },
+    {
+      "key": "V037",
+      "file": "V037__opportunity_lifecycle_forecasts.sql",
+      "sha256": "955a99a5b0754ce1eab9d1546a5f145c997ef842f7f21a74f5623a7768b6064f"
+    },
+    {
+      "key": "V038",
+      "file": "V038__customer_actuals.sql",
+      "sha256": "dc3fc568a5ef8ac127d67d755a94fff9c4ff7c47246414c3a4f310291026addb"
+    },
+    {
+      "key": "V039",
+      "file": "V039__actual_source_corrections.sql",
+      "sha256": "600e40b97d345aa0abc3e5717d49890dbcb0409b8f2d9facd5cd56d8c7189566"
+    },
+    {
+      "key": "V040",
+      "file": "migrations/V040__job_leases_and_completion_receipts.sql",
+      "sha256": "4cd9c91540afe4918f9fb69fab8dfb10b351a6bac7fadbb027b22d252884c9aa"
+    },
+    {
+      "key": "V041",
+      "file": "migrations/V041__mutation_receipts.sql",
+      "sha256": "efb95e9efb26dd2065dd8046a0b12fd0599443108af841e5c8196d7197941cad"
+    },
+    {
+      "key": "V042",
+      "file": "migrations/V042__visit_contract_v3.sql",
+      "sha256": "92c077d96c9c031670a8fde61b912398a141fe2513e010887025e4603c8a0fe6"
+    },
+    {
+      "key": "V043",
+      "file": "migrations/V043__shared_customers_and_owned_opportunities.sql",
+      "sha256": "b7a15b1d7b8e51a33ca9a3e2bfef651f1669a37eb60722e40dcabf85c16a000f"
+    },
+    {
+      "key": "V044",
+      "file": "migrations/V044__annual_sales_targets_and_customer_tiers.sql",
+      "sha256": "dc83ad3e2272cc9dffbcb7d8e29151714dd6c3bfffb33916d0b5dc44c7f7e653"
+    },
+    {
+      "key": "V045",
+      "file": "migrations/V045__invalidate_legacy_shared_customer_analysis.sql",
+      "sha256": "d02410100b8551fe11d50c13b8b53327c00fca043935577cc9a9000207b2be57"
+    },
+    {
+      "key": "V046",
+      "file": "migrations/V046__saved_agent_fact_scope.sql",
+      "sha256": "26e2ae895fa27b806aac41591d8cb88423d65d84b0eb38c6d4b50d4396f8028b"
+    },
+    {
+      "key": "V047",
+      "file": "migrations/V047__artifact_source_contract.sql",
+      "sha256": "830fcf4297e958b4207d961da662389171f37ff000eddeca7485639d7094f4d8"
+    },
+    {
+      "key": "V048",
+      "file": "migrations/V048__management_identity.sql",
+      "sha256": "5fda2cfe0fb3e487002bedd6c098a41012c63b101862b57ac30701161deff82c"
+    },
+    {
+      "key": "V049",
+      "file": "migrations/V049__customer_claim_approval.sql",
+      "sha256": "641a3bc17f17d0b4c3602ebff816de9f0d7182923e859cf01da54b8486ef8c7c"
+    },
+    {
+      "key": "V050",
+      "file": "migrations/V050__operations_observability.sql",
+      "sha256": "9dab50fa1c5d653c6c2735ce6d0f563cdfd38893f408e63cd1bc28942b41a451"
+    },
+    {
+      "key": "V051",
+      "file": "migrations/V051__operations_quote_references.sql",
+      "sha256": "c6f363a7ac070e9c7bc6c9761cc19e05e128e51477c7cd442db9fcff9d6da81e"
+    },
+    {
+      "key": "V052",
+      "file": "migrations/V052__opportunity_follow_up_plan.sql",
+      "sha256": "6354cbcf6498d4a3c1f3cb31b5e61a46937cb91201651f0d2af005403ce2cc71"
+    },
+    {
+      "key": "V053",
+      "file": "migrations/V053__business_activity_read_model.sql",
+      "sha256": "2967afffe98ca108623cc487fd2fd372d55a50f15b2f044704b63b134ac22efd"
+    },
+    {
+      "key": "V054",
+      "file": "migrations/V054__legacy_identity_function_owner.sql",
+      "sha256": "286d6b96da777580b57bf4b7321d4df6610d0230a2d09924d7714aaf8bf8eba9"
+    },
+    {
+      "key": "V055",
+      "file": "migrations/V055__agent_inference_audit.sql",
+      "sha256": "9e5085e57d66488bf666e5f47edaff8734d6d42091a9ea74cbd6a0bd00f378f6"
+    },
+    {
+      "key": "V056",
+      "file": "migrations/V056__company_policy_releases.sql",
+      "sha256": "17b0b2eca702887c7cdc92393ea2ef3bd87609c7ba9675c78b1fbabfe79b3066"
+    },
+    {
+      "key": "V057",
+      "file": "migrations/V057__visit_admission_policy.sql",
+      "sha256": "8e2d137ed306dc53dcae306b4616896ec59fb9b549be4c4c42c21f5ea055fea6"
+    },
+    {
+      "key": "V058",
+      "file": "migrations/V058__home_display_policy.sql",
+      "sha256": "88033d4c12ffd8d2348883ec79d51c8c1785d27dd81876fd1425397392a2fcdd"
+    },
+    {
+      "key": "V059",
+      "file": "migrations/V059__task_schedule_policy.sql",
+      "sha256": "813a8de9ea715c3977bb7b53d0dfcf2ab3164c2c175df075f2b03c8dd944dca9"
+    },
+    {
+      "key": "V060",
+      "file": "migrations/V060__agent_execution_policies.sql",
+      "sha256": "8afa350515984dd89d8f27daca5fe370a90b023a74027faec42969777b5141b6"
+    },
+    {
+      "key": "V061",
+      "file": "migrations/V061__inference_audit_runtime_grants.sql",
+      "sha256": "45ccac48f24121c9a2c7011295c615fff9078d8924fe44118ce142694225093d"
+    },
+    {
+      "key": "V062",
+      "file": "migrations/V062__partner_directory.sql",
+      "sha256": "a3cdc94b954842c3b15869ded7adb9c92dfb8b6b7323523b4ce6bd86c4b341f8"
+    },
+    {
+      "key": "V063",
+      "file": "migrations/V063__profile_score_policies.sql",
+      "sha256": "f7cf96cb71c2180eece28b8379633edf6cb00a79bb56d18046967519cf83d927"
+    },
+    {
+      "key": "V064",
+      "file": "migrations/V064__scoped_business_rankings.sql",
+      "sha256": "c3dbe16eb807bbec6fbf16a9848cb78d21a757b39f69ffd4869501a7dce90615"
+    },
+    {
+      "key": "V065",
+      "file": "migrations/V065__position_task_claims.sql",
+      "sha256": "de72d31f0fffc86bd35dafcd06a0ceef2fa3cdc21ce381790623e1bde3f3dd24"
+    },
+    {
+      "key": "V066",
+      "file": "migrations/V066__business_advice.sql",
+      "sha256": "9d4d84ce8686b236d3f29bf919df1d62ffd516d9735c8ce57d865dce3df9603a"
+    },
+    {
+      "key": "V067",
+      "file": "migrations/V067__opportunity_actual_visibility.sql",
+      "sha256": "152d89d39db7b077b21421cf0189097949a70f8697f8a88b1f9e99a28336ded8"
+    },
+    {
+      "key": "V068",
+      "file": "migrations/V068__multi_team_business_rankings.sql",
+      "sha256": "209038f05d046a62533aeab515611f8d686afe1d1f2fad307c53c02f2a9485d1"
+    },
+    {
+      "key": "V069",
+      "file": "migrations/V069__fde_identity_and_participation.sql",
+      "sha256": "dbc4e9daf6ff801247a2ab3a676d55fa2ebd1f63a5a3f6f9146a3725a7fa0d85"
+    },
+    {
+      "key": "V070",
+      "file": "migrations/V070__participation_runtime_privileges.sql",
+      "sha256": "e54501289a83b932c3e767d8da65c1d1b8ed55ec3c85bda1d2e14267cb5b408b"
+    },
+    {
+      "key": "V071",
+      "file": "migrations/V071__fde_private_quadrant_analysis.sql",
+      "sha256": "107f5769e21fa4023d7a4faa6ac00c08762f6fb7f5fda6d53cf42af32e605bbd"
+    },
+    {
+      "key": "V072",
+      "file": "migrations/V072__fde_owned_visit_recording.sql",
+      "sha256": "9a7047e4782c2baaa3664c7b3b80254fdaceb05965db7df59a725b8a90e4e46b"
+    },
+    {
+      "key": "V073",
+      "file": "migrations/V073__account_login_limit_management.sql",
+      "sha256": "a5118561289d133bceaac746b9e6617ea8b802e770921193451392be7361bc38"
+    },
+    {
+      "key": "V074",
+      "file": "migrations/V074__competency_review_execution_policy.sql",
+      "sha256": "edcde9daccf964b575933bd75f2a436e2fe56636600f89388cd3bfeea10e071f"
+    },
+    {
+      "key": "V075",
+      "file": "migrations/V075__scoped_fde_history_and_authorization.sql",
+      "sha256": "bfd5466aca27ff1bf4afda194ee7a8ff3bc8d50d3b46d7e32aae49b2e690302a"
+    },
+    {
+      "key": "V076",
+      "file": "migrations/V076__source_follow_up_deadlines.sql",
+      "sha256": "7a1fec132bce6732ca040048ab3009811a08e558460c82721b5dd8f2ba018816"
+    },
+    {
+      "key": "V077",
+      "file": "migrations/V077__audit_read_policy_evaluation.sql",
+      "sha256": "219e2fef64a0c3ef9e133a71834644e46272094d2b6c71fe5ac71bdbfa663557"
+    },
+    {
+      "key": "V078",
+      "file": "migrations/V078__typed_job_claim.sql",
+      "sha256": "5aef262d683573a2741c91d66e8bda8a2b45b36f73d9cf639bb5fa4e500fd03d"
+    },
+    {
+      "key": "V079",
+      "file": "migrations/V079__customer_claim_directory_pagination.sql",
+      "sha256": "4396eb2aaf2f54df971e4f07e1c28be5a202175d64e52a992d732372da4f499e"
+    },
+    {
+      "key": "V080",
+      "file": "migrations/V080__runtime_config_versions_and_credentials.sql",
+      "sha256": "dd9e73e19a98c2f30434ac10e4752d1acf63afb2b504db6159dfd1df9f5b3629"
+    },
+    {
+      "key": "V081",
+      "file": "migrations/V081__visit_history_seek_indexes.sql",
+      "sha256": "e4caaaf93025de0e3b2f716642924df8dd497421a8e90d54ea472865051d8cd1"
+    },
+    {
+      "key": "V082",
+      "file": "migrations/V082__fde_customer_scope_read_path.sql",
+      "sha256": "3eb67e6edf704fa3a152e6237e23bb85f2f4a17939480302b632d0ec2733709a"
+    },
+    {
+      "key": "V083",
+      "file": "migrations/V083__opportunity_demo_scenes.sql",
+      "sha256": "200fff192149f41668ee7994f14ed2db3d37c3d1faf2f25c4dbcc62078493d97"
+    },
+    {
+      "key": "V084",
+      "file": "migrations/V084__period_targets_and_change_approval.sql",
+      "sha256": "812713eb8c42850d74ea7b9993f259bd5f098e81ac44ba53f28f36ff958607d1"
+    },
+    {
+      "key": "V085",
+      "file": "migrations/V085__peer_rankings_and_profile_history.sql",
+      "sha256": "33a810252d07376ef984ef7838f5d36b2ce2141efc7cd6eda07b1671a352314e"
+    },
+    {
+      "key": "V086",
+      "file": "migrations/V086__task_association_kind.sql",
+      "sha256": "d8ee8422785bebf5cd60079650c75a12d12e463da2c8b446d2706d66d1fe363e"
+    },
+    {
+      "key": "V087",
+      "file": "migrations/V087__visit_material_storage.sql",
+      "sha256": "ca9d753b1f687e9694a6a53f2a4356eb18e21474d12784a2bb2fb06c9d4b076a"
+    },
+    {
+      "key": "V088",
+      "file": "migrations/V088__opportunity_change_assessment.sql",
+      "sha256": "a134516d14f214e4f36b6d5c6b157ae4dcbead4c7b5c5e206f388f69cd40c248"
+    },
+    {
+      "key": "V089",
+      "file": "migrations/V089__dashboard_region_rankings.sql",
+      "sha256": "c5947982cfd763f045354f2c6ed67b668e3588858dde4eedb91e272a86544942"
+    },
+    {
+      "key": "V090",
+      "file": "migrations/V090__dashboard_subject_rankings.sql",
+      "sha256": "5120a377c6b623b75d85ed336c2344859a4bdb380d539978e182596b336bb7e0"
+    },
+    {
+      "key": "V091",
+      "file": "migrations/V091__quarter_target_batches.sql",
+      "sha256": "d6f75e929742be0efb0763283632197c5d00b1195b0654b86d0296b40162bc9c"
+    },
+    {
+      "key": "V092",
+      "file": "migrations/V092__profile_customer_owner_projection.sql",
+      "sha256": "c3d1895802201130cf02d2edf75b0342819d7f965a0408fd84fab85a744118b4"
+    },
+    {
+      "key": "V093",
+      "file": "migrations/V093__fde_team_period_opportunity_counts.sql",
+      "sha256": "e6e3aa869e910addb8773c747912f12da22c85e27d15018349f91a05ecbafd6b"
+    },
+    {
+      "key": "V094",
+      "file": "migrations/V094__sales_role_customer_claims.sql",
+      "sha256": "03d3475bde5871384ba4ea72eed596b72b36e7c9731211f959a87e4b5df3d495"
+    },
+    {
+      "key": "V095",
+      "file": "migrations/V095__department_appointments.sql",
+      "sha256": "a251c036a987401577a558ea59f20f7110eaa498511cc1792cafbecd81a5fcaa"
+    },
+    {
+      "key": "V096",
+      "file": "migrations/V096__company_management.sql",
+      "sha256": "4ea7871e1f3275ff72a7e1961c1b26d9e1b6e9ee860454dddbc1e11afe02c995"
+    },
+    {
+      "key": "V097",
+      "file": "migrations/V097__agent_business_policies.sql",
+      "sha256": "9ce63f0e5521a28f7c497fdc77378439d932937aa5110204f99f1091bb0d8e63"
+    },
+    {
+      "key": "V098",
+      "file": "migrations/V098__customer_risk_assessment.sql",
+      "sha256": "b9908ffa660119803d01c1ca609f0f1e805b807cee7a734763bdd5145e446114"
+    },
+    {
+      "key": "V099",
+      "file": "migrations/V099__model_api_connections.sql",
+      "sha256": "5c9f7ccbd67697d6ed221c21ea278f008ed972e5ad596bd9f7415b11a0e92a60"
+    },
+    {
+      "key": "V100",
+      "file": "migrations/V100__visit_created_order_indexes.sql",
+      "sha256": "27a8c72d191983655fb5e4ea0099c2a87e6233a478caad50553492232eb5048a"
+    },
+    {
+      "key": "V101",
+      "file": "migrations/V101__historical_visit_unknown_first_flag.sql",
+      "sha256": "8c69cd1ea7d8bc4a5843442794bf64d17dc1e686bc09f8ea4dabd7bf35f082dc"
+    },
+    {
+      "key": "V102",
+      "file": "migrations/V102__company_password_policy.sql",
+      "sha256": "61a2f27280ebfee550531cdb660756685696634f3e2d7708da4d300128ce15c6"
+    },
+    {
+      "key": "V103",
+      "file": "migrations/V103__optional_phone_password_login.sql",
+      "sha256": "5667be01578c872ad2ad40191f1902a0a72eab3d6b2189179707b39c47854f00"
+    },
+    {
+      "key": "V104",
+      "file": "migrations/V104__task_completion_review.sql",
+      "sha256": "ace397adf7d6d5a8f2cb7291a5b8d5ac6f1201524bd6c026608bbf23afd65f2e"
+    },
+    {
+      "key": "V105",
+      "file": "migrations/V105__feishu_sync_storage.sql",
+      "sha256": "53271f7635fb409919990ca76a5695c0cf9684f18516bcd8e70031429701fafc"
+    },
+    {
+      "key": "V106",
+      "file": "migrations/V106__feishu_display_names_and_parent_refresh.sql",
+      "sha256": "06eedf40556d473b8c96c8d70420416bd8c2e958557c5e730e97e5936d088b57"
+    },
+    {
+      "key": "V107",
+      "file": "migrations/V107__feishu_queue_origin.sql",
+      "sha256": "b0f54374d04bdef489092c47fcdf5067c459662984a173717756183b72e478d1"
+    },
+    {
+      "key": "V108",
+      "file": "migrations/V108__feishu_test_batch_archive.sql",
+      "sha256": "c3cc50dcb2aa9a6fc00cd5d84e5167da0acbe1e30c46b0eb65a5ab2e83737927"
+    },
+    {
+      "key": "V109",
+      "file": "migrations/V109__feishu_notification_test_archive.sql",
+      "sha256": "115b75d759c404ff4b67746d8afc844a541280d145170309093c5967f659afdf"
+    },
+    {
+      "key": "V110",
+      "file": "migrations/V110__feishu_notification_test_archive_v2.sql",
+      "sha256": "0643aca7dd57f6c8d66af94ccb5e281e2ee542efb1ba77ad29b4aa6523161ecf"
+    },
+    {
+      "key": "V111",
+      "file": "migrations/V111__feishu_notification_test_archive_v3.sql",
+      "sha256": "cfada361a3761aa83ba4ceb1b0a1f2736894c370f6ae90cccdd669ba256baf6e"
+    },
+    {
+      "key": "V112",
+      "file": "migrations/V112__feishu_notification_test_archive_v4.sql",
+      "sha256": "a4da2518c1b04557e4fb7537c46d5819d722f1c73e38bc3d700da6696f72fda9"
+    },
+    {
+      "key": "V113",
+      "file": "migrations/V113__feishu_notification_test_archive_v5.sql",
+      "sha256": "881bb6c0e22eb4fe1e60ad53603a0be04d84848b877012ba2e855caf75fe52cc"
+    },
+    {
+      "key": "V114",
+      "file": "migrations/V114__feishu_notification_test_archive_v6.sql",
+      "sha256": "b917f4ab141ca254778b8101d262f25d21cdaf690094c88446c5c285ec5004b5"
+    },
+    {
+      "key": "V115",
+      "file": "migrations/V115__feishu_notification_test_archive_v7.sql",
+      "sha256": "d167fc1b7376362ed134aac16b6fc2091baca4e0be14832b1aa4bcbd53924a9e"
+    },
+    {
+      "key": "V116",
+      "file": "migrations/V116__feishu_notification_test_archive_v8.sql",
+      "sha256": "224dd0f3cc2ce9c2878c98fd93cd213cfa6a927b61e4fbe8b2c8acde9dd942f8"
+    },
+    {
+      "key": "V117",
+      "file": "migrations/V117__feishu_notification_test_archive_v9.sql",
+      "sha256": "e7a2a447ee6e3f7d9b39f1fdb8e28f024a9e5627c2f6665008493407954a92bb"
+    },
+    {
+      "key": "V118",
+      "file": "migrations/V118__team_target_directory_scope.sql",
+      "sha256": "67c10be15cc7a063f576a81e2f382334ad03e90b42d21390997ddff2aafaa8ca"
+    },
+    {
+      "key": "V119",
+      "file": "migrations/V119__account_contact_email.sql",
+      "sha256": "e207da9e59af9d9bf01d983b76dd647591641a198dc57455c988554bf8bcfddb"
+    },
+    {
+      "key": "V120",
+      "file": "migrations/V120__feishu_forecast_projection.sql",
+      "sha256": "cd010e3b15ea908ca636acae96f20bf1ad28411adc7d091f8b4cc68c11062c15"
+    },
+    {
+      "key": "V121",
+      "file": "migrations/V121__crm_history_import_provenance.sql",
+      "sha256": "4d872c9803aad67954dc0d8b24af865c29dca082687f86d41e3ee4d6c676390a"
+    },
+    {
+      "key": "V122",
+      "file": "migrations/V122__crm_history_subjects_and_ownership.sql",
+      "sha256": "9c1555cd595f7ea54e1f5fec978c0484c1d588955c33de213a698afda279d8f0"
+    },
+    {
+      "key": "V123",
+      "file": "migrations/V123__crm_portfolio_read_scope.sql",
+      "sha256": "30311b901a51ccce75508ca14ec04578a8ec5254d4104c5ef81f59e0ef2b73ae"
+    },
+    {
+      "key": "V124",
+      "file": "migrations/V124__feishu_opportunity_original_creation.sql",
+      "sha256": "79f5d8e41c8a6e7440e94001c7e3301d9b99d1e8cd520c2d6a1598b2f0e79bef"
+    },
+    {
+      "key": "V125",
+      "file": "migrations/V125__feishu_event_driven_sync.sql",
+      "sha256": "546417bc5d4bc61804bab8debb66fa2f5cb3fc1e91f7a58518033dedb4cb21c0"
+    },
+    {
+      "key": "V126",
+      "file": "migrations/V126__configurable_authorization.sql",
+      "sha256": "ad0ae4a95feee41d6afef29f0f81d7d94ff8bedca1425df23c7c8e5775fedf76"
+    },
+    {
+      "key": "V127",
+      "file": "migrations/V127__scoped_opportunity_authorization.sql",
+      "sha256": "b3bc8340a5eb0d7b63f07736de923672ca3193ef7523c2194fda5b72837653a7"
+    },
+    {
+      "key": "V128",
+      "file": "migrations/V128__scoped_customer_authorization.sql",
+      "sha256": "2efb47f5a54342b70a45b192c329261f06aa63efd3ee11c08e850627b2007164"
+    },
+    {
+      "key": "V129",
+      "file": "migrations/V129__account_permission_adapters.sql",
+      "sha256": "aa1d6e8cae5a4fa16b3cd2de143adacf8ede2bfd905e4aa7dc7837373f0e54e4"
+    },
+    {
+      "key": "V130",
+      "file": "migrations/V130__scoped_task_authorization.sql",
+      "sha256": "8db036e91adc9a806a533b0af439a7a7743c0bc15bd1f622dc9ea916bde19ff8"
+    },
+    {
+      "key": "V131",
+      "file": "migrations/V131__scoped_visit_authorization.sql",
+      "sha256": "a8bf6c63cd46a5a4a8f1461d4b3497b35b10f5c051529d9ca40c78d7bc762643"
+    },
+    {
+      "key": "V132",
+      "file": "migrations/V132__console_permission_adapters.sql",
+      "sha256": "d78913d3661469584003264562dfd3f568810af4d97ae92aa3fc9d1d75342974"
+    },
+    {
+      "key": "V133",
+      "file": "migrations/V133__scoped_subject_authorization.sql",
+      "sha256": "e1b32fbf8854d5fa6305df2f297a9da4c3ee7f53e76959e04b5b9869280d2559"
+    },
+    {
+      "key": "V134",
+      "file": "migrations/V134__feature_read_projections.sql",
+      "sha256": "b1892f384c63de7eb566c10cc51da0fb16bbdc8c1da4256e7e0067f9d9a64888"
+    },
+    {
+      "key": "V135",
+      "file": "migrations/V135__actual_demo_permissions.sql",
+      "sha256": "43b9dea85bddc1ad84084717b2bb9e40083ceb877513c3bda3b3069b424efcc6"
+    },
+    {
+      "key": "V136",
+      "file": "migrations/V136__customer_claim_permission_adapters.sql",
+      "sha256": "4f739f8e381c118316e98dc47f0dace7377281d334066454817251c095880811"
+    },
+    {
+      "key": "V137",
+      "file": "migrations/V137__opportunity_projection_permissions.sql",
+      "sha256": "42e3361babc0dcdd78b34d5589cc4765d1ba8734af674d093b489a793ac762bd"
+    },
+    {
+      "key": "V138",
+      "file": "migrations/V138__portfolio_authorization.sql",
+      "sha256": "f776e907e4c07f30cb823ab767b0467dbfd91f89e41a35947db5c9e4b9d200b1"
+    },
+    {
+      "key": "V139",
+      "file": "migrations/V139__authorization_scope_revisions.sql",
+      "sha256": "ef9731087d1825ea91ec9230c8e2ce4656198c61eda209533f8ca06b5ab018e8"
+    },
+    {
+      "key": "V140",
+      "file": "migrations/V140__fde_history_permissions.sql",
+      "sha256": "7a401168ef9b3db2b0dfe9fe64f1bff2513cfffcbbc01c38eeb5b5f8e7825cc6"
+    },
+    {
+      "key": "V141",
+      "file": "migrations/V141__ranking_permissions.sql",
+      "sha256": "653ec2516a8d5afaf861a912ac268b3733ad9b63776e45e26a043ed93c538acb"
+    },
+    {
+      "key": "V142",
+      "file": "migrations/V142__advice_import_permissions.sql",
+      "sha256": "6ca57fcdec2ffb8b3ce442a32b4da3b59dbe8e65103407896f8f64754b9ac7b2"
+    },
+    {
+      "key": "V143",
+      "file": "migrations/V143__risk_permissions.sql",
+      "sha256": "4ccbb8cff065f2f616c31db359d2948ca459bd66b220aaba4e9cf567486a1344"
+    },
+    {
+      "key": "V144",
+      "file": "migrations/V144__session_surface_authorization.sql",
+      "sha256": "6274ec18fb8f04af22a6d460cf84aea59ac90049624c60e179411d94d8a0b10e"
+    },
+    {
+      "key": "V145",
+      "file": "migrations/V145__approved_history_import_authorization.sql",
+      "sha256": "cfe019c45509772822238233b6a33dd8b0e4c5dfbb05653147291baf6a95d389"
+    },
+    {
+      "key": "V146",
+      "file": "migrations/V146__advice_multiple_independent_tasks.sql",
+      "sha256": "cb8dd84f6314cdc548137cc180acbbc907fe6585d29b35057eef4b3056ec7b29"
+    },
+    {
+      "key": "V147",
+      "file": "migrations/V147__customer_claim_directory_filters.sql",
+      "sha256": "3f9635e42c66a9bea896578b28f4190008e77d618903db78d6acc53a1deb62c2"
+    },
+    {
+      "key": "V148",
+      "file": "migrations/V148__dashboard_team_per_capita_rankings.sql",
+      "sha256": "266b3bb1595ae1cef91fdc76bc041685b5c704657ef65bb5401f486621640557"
+    },
+    {
+      "key": "V149",
+      "file": "migrations/V149__authorization_direct_scope_fast_path.sql",
+      "sha256": "e09908db50ab23c765e576b3ca2f47cec6f9a4c40ebc1ae1c862643b665a20a4"
+    },
+    {
+      "key": "V150",
+      "file": "migrations/V150__console_read_query_guards.sql",
+      "sha256": "08da7a07d48cc411c158c8e00c64242b8768e2a72f4269e34b8ff83c3dcb06ab"
+    },
+    {
+      "key": "V151",
+      "file": "migrations/V151__customer_workspace_read_fast_path.sql",
+      "sha256": "960244ea6f302dfdba9c3935af6a687d401dad1cd84872086e31b09158cf3ab9"
+    },
+    {
+      "key": "V152",
+      "file": "migrations/V152__organization_permission_role_labels.sql",
+      "sha256": "7477dce40ef6c9c550d2906b0d210c5efa85446152739dd43aa194f540e3f1d7"
+    },
+    {
+      "key": "V153",
+      "file": "migrations/V153__platform_tenant_control.sql",
+      "sha256": "72eaed62031e57bf670d1b90d4b01778a96fdbeb794ec8e0fca5817c6661a82e"
+    },
+    {
+      "key": "V154",
+      "file": "migrations/V154__tenant_lifecycle_guards.sql",
+      "sha256": "e93c3b9e28b72d55f4479f1431842a8092a6c74c754c8a478dfb3b928dea660d"
+    },
+    {
+      "key": "V155",
+      "file": "migrations/V155__platform_runtime_acl.sql",
+      "sha256": "0a91bc9685bade1ad8ad0f86f4065aca9d7bf9c8753917b8610b50507a23ede0"
+    },
+    {
+      "key": "V156",
+      "file": "migrations/V156__tenant_capabilities_and_expiry.sql",
+      "sha256": "83ac00c3c5ff68eb2cbe446ab88d5d52a0bf99b4c7412c0f6934e2166b95390b"
+    },
+    {
+      "key": "V157",
+      "file": "migrations/V157__capability_snapshot_query.sql",
+      "sha256": "4d57fd2d354659d2ebde3172af7964a0cbda7b020436ed6f23f9360a850b9a1c"
+    },
+    {
+      "key": "V158",
+      "file": "migrations/V158__platform_mfa.sql",
+      "sha256": "dcd6f0cefe8519c9f98d4bbee23cc454ff3fa14164141774967d90d675c68621"
+    },
+    {
+      "key": "V159",
+      "file": "migrations/V159__bounded_authorization_delegation.sql",
+      "sha256": "52500d358abc3329d6c19c4ae92a4b23d38d184b05700e09f7ce2636f03f78ab"
+    },
+    {
+      "key": "V160",
+      "file": "migrations/V160__tenant_job_fairness.sql",
+      "sha256": "94c052f675bcdc6698a4c94684885009e46df6a6e02dba065d8ec29233aa9251"
+    },
+    {
+      "key": "V161",
+      "file": "migrations/V161__tenant_account_quota.sql",
+      "sha256": "e47c135290905293998389d55a69a40658b9be2ddb2851dd7ebb2a7560015ecb"
+    },
+    {
+      "key": "V162",
+      "file": "migrations/V162__tenant_original_storage_quota.sql",
+      "sha256": "0a725c23579609d8c9c1b68316481cfd011a870089412e7fd965f9f12188c18d"
+    },
+    {
+      "key": "V163",
+      "file": "migrations/V163__tenant_call_quota.sql",
+      "sha256": "534e8d7e8e30fe695284b169b9ff387639d1f4bbf24c10bd4ac71f2d22c914cd"
+    },
+    {
+      "key": "V164",
+      "file": "migrations/V164__call_quota_job_identity.sql",
+      "sha256": "5151d9b42da822270e8a6721a25f91d5d77d9b0d096c9a192d83a42eeb3d0c07"
+    },
+    {
+      "key": "V165",
+      "file": "migrations/V165__call_execution_identity.sql",
+      "sha256": "53f91a6fc0e962c6a64b7e2f717759793ed6e7b508be25264584b0767344aaf2"
+    },
+    {
+      "key": "V166",
+      "file": "migrations/V166__tenant_http_limits.sql",
+      "sha256": "da9448b4351cfcd6f17e387e5c839b7b5bd9c084f0c3b68d515b7fa73a5c6bb1"
+    },
+    {
+      "key": "V167",
+      "file": "migrations/V167__tenant_business_export_permission.sql",
+      "sha256": "397986f5e1a33fcc182a3c822e47bcb685436576d73b0dceff06fbf71b016287"
+    },
+    {
+      "key": "V168",
+      "file": "migrations/V168__demo_template_receipt.sql",
+      "sha256": "e1489bdd86b2a47e1f1bd15752e61a830e181d295f662207c2bdd364ff5bea74"
+    },
+    {
+      "key": "V169",
+      "file": "migrations/V169__temporary_support_access.sql",
+      "sha256": "1513bb93513ebe551aa0dbaddb6814da00fbb09bc2d0365d30c15fe1524648a3"
+    },
+    {
+      "key": "V170",
+      "file": "migrations/V170__history_policy_private_provenance.sql",
+      "sha256": "5cbf713b11059640ab7f8bb029238f52a52d8d068e9612395a10de40bbb0ea6f"
+    },
+    {
+      "key": "V171",
+      "file": "migrations/V171__platform_runtime_overview.sql",
+      "sha256": "d7fcc7fa3aa7ce5f689164eb2db834e9303bc59446e02004ee304dfb0fbe8f22"
+    },
+    {
+      "key": "V172",
+      "file": "migrations/V172__tenant_configuration_status.sql",
+      "sha256": "4550ed2bcd887b01c24b9a19cc91b23122e0206e36f1129a2570d3c829d0cacf"
+    },
+    {
+      "key": "V173",
+      "file": "migrations/V173__tenant_ai_service_policy.sql",
+      "sha256": "5cb5e1aed1de70db5b8012ec68fcee0f5ae3f8c8bc5b8638f1f06f52ab391dd8"
+    },
+    {
+      "key": "V174",
+      "file": "migrations/V174__model_setup_probe_scheduling.sql",
+      "sha256": "ef03d73b51da2ff4d395cdd38a6dedad43da749ee79b5285d15e298638420b38"
+    },
+    {
+      "key": "V175",
+      "file": "migrations/V175__ai_source_function_owner_grants.sql",
+      "sha256": "225748ecd7d142ed5dd372387602a68941a67a30ff481e96130031aaecf481f2"
+    },
+    {
+      "key": "V176",
+      "file": "migrations/V176__model_credential_source_projection.sql",
+      "sha256": "45650e8a67f041ff80c7c31d03ea88ee5037420ff11005b272d47a23cef6fd6d"
+    },
+    {
+      "key": "V177",
+      "file": "migrations/V177__tenant_integration_readiness.sql",
+      "sha256": "ca9a6d92b2e8d26a75745103d1503b228e1dcde1c86899f21de4e44077af5a55"
+    },
+    {
+      "key": "V178",
+      "file": "migrations/V178__demo_business_reset.sql",
+      "sha256": "60338c63e009cd89e2568c80084eff8b4aa81441e75b4e28ff23b22b79f131bc"
+    },
+    {
+      "key": "V179",
+      "file": "migrations/V179__agent_audit_attempt_groups.sql",
+      "sha256": "9577f69b22d9ff52ba8a7afc6c24a981ae57904290a34316b4ed9c47741eea3a"
+    },
+    {
+      "key": "V180",
+      "file": "migrations/V180__closed_company_export.sql",
+      "sha256": "8916c02e90d6b4ccb5e0b8a379c66cebbb40fd6ddf009e1a617127ef78692cf6"
+    },
+    {
+      "key": "V181",
+      "file": "migrations/V181__bounded_fde_participant_authorization.sql",
+      "sha256": "fd81dee6b724c3b17b438ca2703ce054adae54ae7e61275601c49dfc868e0178"
+    },
+    {
+      "key": "V182",
+      "file": "migrations/V182__role_fixed_permission_scopes.sql",
+      "sha256": "86a62eece202ac9741a960ced149bf6220ab47d6036fcebd08ef038c4cf4fc1a"
+    },
+    {
+      "key": "V183",
+      "file": "migrations/V183__scoped_target_history.sql",
+      "sha256": "b0285d5950b4d0712a041dda1499cf7d771cfca22f47b0ff61f74dedd514f692"
+    },
+    {
+      "key": "V184",
+      "file": "migrations/V184__api_target_scope_write_acl.sql",
+      "sha256": "1a1ceb952c4b7f34f8dd11c1642f1e5b4a9de9cb572a7e4ec9efaaddbaffc0e4"
+    },
+    {
+      "key": "V185",
+      "file": "migrations/V185__task_recipient_current_identity.sql",
+      "sha256": "3c2728963702b165b24beecd697a3e095ce8ea20494cf35b89867852cf8ad9f3"
+    },
+    {
+      "key": "V186",
+      "file": "migrations/V186__legacy_target_current_applicant.sql",
+      "sha256": "55902048444a537c8bdc77ec2632f128b5f97b132886c705522dc8233b6d970b"
+    },
+    {
+      "key": "V187",
+      "file": "migrations/V187__opportunity_amount_confirmation_policy.sql",
+      "sha256": "2e3dc3494dc7f6efeb0c41adfa54aa1f9ead2d8c47919fa8b615efa51eef2f46"
+    },
+    {
+      "key": "V188",
+      "file": "migrations/V188__feishu_opportunity_update_notifications.sql",
+      "sha256": "ef26234f753ba6f0010c280b0bbf78139856c6c67e1b4ffbee7710c4f89d2d47"
+    },
+    {
+      "key": "V189",
+      "file": "migrations/V189__platform_two_step_login_and_company_entry.sql",
+      "sha256": "15c4e6b1b065777942644ec052d0c89cd97738846f01d8ebde21868fa6dd9e17"
+    },
+    {
+      "key": "V190",
+      "file": "migrations/V190__meeting_task_import.sql",
+      "sha256": "ae76935eef6bf72a453a9aa2af7d9b1d0a100260d3976d05e8ec0b051c4b5656"
+    },
+    {
+      "key": "V191",
+      "file": "migrations/V191__priority_reminder_idempotency.sql",
+      "sha256": "53ff5edfd9eb337c889749d0dc86049d43681a6b0c81108909967fc815513bbe"
+    },
+    {
+      "key": "V192",
+      "file": "migrations/V192__feishu_manual_recovery_force_check.sql",
+      "sha256": "f826ea03ad4999312e824511271098edea3b9297325141ae2a047696c94f489c"
+    },
+    {
+      "key": "V193",
+      "file": "migrations/V193__inference_audit_completion.sql",
+      "sha256": "1af1b03d675afea0e8701841aebcd402db91c3d458da3848b2d6527f6a051b4b"
+    },
+    {
+      "key": "V194",
+      "file": "migrations/V194__task_import_draft_reparse.sql",
+      "sha256": "99591055d41bb437f1d1e15b5d5aa55cfd0b11ae6004cd5eb600ccb85fe1183b"
+    },
+    {
+      "key": "V195",
+      "file": "migrations/V195__task_group_notifications.sql",
+      "sha256": "e36231fe5be493db929241ae0234f66f41e8e2d917be1997727c21f09109a3d1"
+    },
+    {
+      "key": "V196",
+      "file": "migrations/V196__phone_first_login.sql",
+      "sha256": "d54c66214872d8495246646a71f162a5de4b7094ee879fd0a64bb5f93febd7e7"
+    },
+    {
+      "key": "V197",
+      "file": "migrations/V197__feishu_customer_member_targeted_sync.sql",
+      "sha256": "278c6f16514da6dc7936f4e9183f959b4557c578bc53aad023efa0338cb3c5ef"
+    },
+    {
+      "key": "V198",
+      "file": "migrations/V198__feishu_customer_insight_targeted_sync.sql",
+      "sha256": "500909a158632816d6dee0ab204378f70708af1e9909b1b00500ab35dcfdda79"
+    },
+    {
+      "key": "V199",
+      "file": "migrations/V199__feishu_projection_dependency_sync.sql",
+      "sha256": "926e452b34e2c3269545bc5db0f2c595be3f950622302e72f29575a47033ea45"
+    },
+    {
+      "key": "V200",
+      "file": "migrations/V200__opportunity_actual_basis_and_finance_sync.sql",
+      "sha256": "c1e9df204a0a05900952f72bd5900a40472c9d316392a8a3d520cd0a266ddfef"
+    },
+    {
+      "key": "V201",
+      "file": "migrations/V201__quarterly_finance_tax_basis.sql",
+      "sha256": "160bba9aa70a855796701d5ec3fb7cc42f4d0f328aeaba7de2577772bfd3b1ec"
+    },
+    {
+      "key": "V202",
+      "file": "migrations/V202__business_read_team_scope.sql",
+      "sha256": "18a511ff3d17a76ac0e06a950b848612347a77a56b0012f59cd84f0ac9a0b31c"
+    },
+    {
+      "key": "V203",
+      "file": "migrations/V203__restore_sales_business_read_scope.sql",
+      "sha256": "8d8bff692768af14f709e5c38e072179175d200c85266dd816d5536034818161"
+    },
+    {
+      "key": "V204",
+      "file": "migrations/V204__customer_creation_request_approval.sql",
+      "sha256": "20e996aa00c31462e8aae305dffa5db7cd48081b121fa71db3b6750898298c82"
+    },
+    {
+      "key": "V209",
+      "file": "migrations/V209__unified_business_read_scope.sql",
+      "sha256": "85d2c1429703e020d903cba4d8d9f03ec72f9d0d873de4c0a57870d8d0e7dd40"
+    },
+    {
+      "key": "V210",
+      "file": "migrations/V210__claim_directory_grants_once.sql",
+      "sha256": "75d72158c3eb3c2fbaa80c47eb9c03b0c5aa6a3a25426fc3f4da364c23138319"
+    },
+    {
+      "key": "V211",
+      "file": "migrations/V211__customer_flow_history_and_review.sql",
+      "sha256": "7e59755791ce316d454a10a2c4f1559d59e871ee5df062d2c5d296da159208a2"
+    },
+    {
+      "key": "V212",
+      "file": "migrations/V212__materials_and_operational_actuals.sql",
+      "sha256": "459d1ff242acaaa1b9e750831646683e0d7a4aef1e5aa4f41509b9437bbe658f"
+    },
+    {
+      "key": "V213",
+      "file": "migrations/V213__material_product_line_variable_scope.sql",
+      "sha256": "90d9e57005cf36b1d377e239037a0088b26c73598689d228c37e32a55f1f7412"
+    },
+    {
+      "key": "V214",
+      "file": "migrations/V214__opportunity_business_fields.sql",
+      "sha256": "1eb027f46afdff2779661522439d4d10ddd5747e39751b99c77eab8fdf8fe5e5"
+    },
+    {
+      "key": "V215",
+      "file": "migrations/V215__opportunity_workspace_views.sql",
+      "sha256": "6c3e565af7516525837568523a52864c4cb020ed28238ac203ed0879e4b2e64a"
+    },
+    {
+      "key": "V216",
+      "file": "migrations/V216__visit_upload_intents.sql",
+      "sha256": "f620a8f5d939fd584468e4835bdfbb179fa2632a65bb5ae1e7da35f613a50531"
+    },
+    {
+      "key": "V217",
+      "file": "migrations/V217__exact_visit_import_claim.sql",
+      "sha256": "918b311f3c2d80963fd6966e9f740ba37b27877ccd8ea94ff664340c67cf47a3"
+    },
+    {
+      "key": "V218",
+      "file": "migrations/V218__fde_membership_finance_lock_order.sql",
+      "sha256": "ddc51593c14567fc91463050138fca32c66da57029354c84fec21428dbbbab4c"
+    },
+    {
+      "key": "V219",
+      "file": "migrations/V219__history_ownership_authorization.sql",
+      "sha256": "8b234ce4f1c5418f7d7f12cc56d2d0146979a0fa993487def271318e7f1c9967"
+    },
+    {
+      "key": "V220",
+      "file": "migrations/V220__customer_level_visit_recording.sql",
+      "sha256": "efbd8c39628510dc35026831baa179b7b48225b4fe264ecdd0ff23f8d60f7bed"
+    },
+    {
+      "key": "V221",
+      "file": "migrations/V221__exact_visit_agent_run_claim.sql",
+      "sha256": "32a1f5eb1493927d13a9d07da4d9522f93aec0ad90960af2e5f6f2953dd3d978"
+    },
+    {
+      "key": "V222",
+      "file": "migrations/V222__work_reports.sql",
+      "sha256": "97a72b7dc88f89edfcdb8dd648d1f8469a550fd46c456e4b0a00d5352c24e5ca"
+    },
+    {
+      "key": "V223",
+      "file": "migrations/V223__finance_reference_explanation_permission.sql",
+      "sha256": "8a9ea67ddc277a2b59723404602306b9275e2675dc8dd632aaff613c2b6f7f12"
+    },
+    {
+      "key": "V224",
+      "file": "migrations/V224__competency_review_generations.sql",
+      "sha256": "cdf83dd1f26db9cb0d68d6d78fd4091f37c7f0183c14cd5835fe8cec938920b3"
+    },
+    {
+      "key": "V225",
+      "file": "migrations/V225__fde_profile_review_details.sql",
+      "sha256": "a07c7fb6be24b3c1bc949f1f7d3e230a7aa07315741b5356c62a60a6c279d51d"
+    },
+    {
+      "key": "V226",
+      "file": "migrations/V226__own_unarchived_import_team_authorization.sql",
+      "sha256": "576c1f46ff971dc0ab879aba122998bd6af8ff82f8705f3ab117ded5df9a6a23"
+    },
+    {
+      "key": "V227",
+      "file": "migrations/V227__work_report_sales_week_facts.sql",
+      "sha256": "682d0f44db2e9259211a95f233ebbcce09d930b991ab64e3bd1caf35874e1e14"
+    },
+    {
+      "key": "V228",
+      "file": "migrations/V228__opportunity_typed_state_history.sql",
+      "sha256": "a7de5bab4fd65d26171f704188d7a69e73f253e350acb3f8fc46ab7a2de83526"
+    },
+    {
+      "key": "V229",
+      "file": "migrations/V229__risk_human_decisions_and_leader_resolution.sql",
+      "sha256": "0d74f15306044ee50ea9158f7f178a1310ae7f2e303a6295b4f139fbd43779db"
+    },
+    {
+      "key": "V230",
+      "file": "migrations/V230__risk_resolution_event_notification.sql",
+      "sha256": "665cd7d6e0960ec52d023824ef69d6ac9ba4ab761c87e3a8d42baa4227f5e4cb"
+    },
+    {
+      "key": "V231",
+      "file": "migrations/V231__accepted_risk_priority_reminders.sql",
+      "sha256": "e192fab73534c5a54e9577e723de5eac46297ae0215272296bd0ea348476dc65"
+    },
+    {
+      "key": "V232",
+      "file": "migrations/V232__exact_competency_review_claim.sql",
+      "sha256": "5e66a277b5dea27b77e2dbada4666ec046f1a4d662023fce094665c362367f33"
+    },
+    {
+      "key": "V233",
+      "file": "migrations/V233__work_report_worker_source_acl.sql",
+      "sha256": "674828c24635694938ee702160d8cc292cdebdbb448e713a75d525efc28af71e"
+    },
+    {
+      "key": "V234",
+      "file": "migrations/V234__opportunity_product_line_intents.sql",
+      "sha256": "55131d90466fc14e9f53209720d7202ef80abd92a25f8a48e3332fe11ea8663c"
+    },
+    {
+      "key": "V235",
+      "file": "migrations/V235__work_report_meeting_facts.sql",
+      "sha256": "9f9d6453d45327f820004341588d01b3c0032a5dc684676e6417c3d3eb0dd048"
+    },
+    {
+      "key": "V236",
+      "file": "migrations/V236__work_report_overview_freeze.sql",
+      "sha256": "c018bd6351b1dc9105999007cbb9a27e932007e74ea3610d47cb9948a94b51a1"
+    },
+    {
+      "key": "V237",
+      "file": "migrations/V237__work_report_exact_generation_version.sql",
+      "sha256": "5925f37840577a57e63e7e098a447e651cfc0ec3bc18a144a69e7d7a02e582f1"
+    },
+    {
+      "key": "V238",
+      "file": "migrations/V238__work_report_point_snapshot_access.sql",
+      "sha256": "529c8933a5ecf54e8590a357873d2e7adc598beb3ca55599f72774e3c41ca030"
+    },
+    {
+      "key": "V239",
+      "file": "migrations/V239__enterprise_business_identities.sql",
+      "sha256": "c8ec91a8e782919c8b182bac1e4fe8a3a6022e889627088e5429c736d9136934"
+    },
+    {
+      "key": "V240",
+      "file": "migrations/V240__review_metric_dictionary.sql",
+      "sha256": "58f4de04d5da4fb455bdbcb8d2e231079714eee5e044e1aae3b48725d084e4c2"
+    },
+    {
+      "key": "V241",
+      "file": "migrations/V241__review_okr.sql",
+      "sha256": "a8384262a44721dd2f744761e2d5db7a5334a2575aff719c6bd9801420fe4327"
+    },
+    {
+      "key": "V242",
+      "file": "migrations/V242__task_metric_alignment.sql",
+      "sha256": "431e9e5d89ff3d854c58f36e11bf14111142c35dbcf1b010db5719f981d01221"
+    },
+    {
+      "key": "V243",
+      "file": "migrations/V243__review_count_metric_definitions.sql",
+      "sha256": "8f6bbf86ec464a4792d5c1e9c056d24f31c6d911d3b4b8e2324cb20d72b43a53"
+    },
+    {
+      "key": "V244",
+      "file": "migrations/V244__task_alignment_object_basis.sql",
+      "sha256": "5f60cca782015a27a78274aff0872a3e92a82cbae2bfcf2f8f01543ffbb7ff42"
+    },
+    {
+      "key": "V245",
+      "file": "migrations/V245__work_report_review_freeze.sql",
+      "sha256": "36cab1055618b765dc822bdd69fa15f8b73e262316d31481969728adea06d19b"
+    },
+    {
+      "key": "V246",
+      "file": "migrations/V246__review_worker_fact_reads.sql",
+      "sha256": "947f157f37bf721bef5b0e8bbae5e28cb223a4a82b07fb6db81c3a3f07611d33"
+    },
+    {
+      "key": "V250",
+      "file": "migrations/V250__ppl_reserve_target_kind.sql",
+      "sha256": "10f954e4d1193dd8c1c6b5875a97b2338fb2f8b623b062d85593085bb371135b"
+    },
+    {
+      "key": "V253",
+      "file": "migrations/V253__review_history_and_daily_baselines.sql",
+      "sha256": "1993064e95f27f59418abaeeb6345e8583d29e01895a1e4a640ecbcbaaf0f442"
+    }
+  ],
+  "source_registered": [
+    "V001",
+    "V002",
+    "V003",
+    "V004",
+    "V005",
+    "V006",
+    "V007",
+    "V008",
+    "V009",
+    "V010",
+    "V011",
+    "V012",
+    "V013",
+    "V015",
+    "V016",
+    "V017",
+    "V018",
+    "V019",
+    "V020",
+    "V021",
+    "V022",
+    "V023",
+    "V024",
+    "V025",
+    "V026",
+    "V027",
+    "V028",
+    "V029",
+    "V030",
+    "V031",
+    "V032",
+    "V033",
+    "V034",
+    "V035",
+    "V036",
+    "V037",
+    "V038",
+    "V039",
+    "V040",
+    "V041",
+    "V042",
+    "V043",
+    "V044",
+    "V045",
+    "V046",
+    "V047",
+    "V048",
+    "V049",
+    "V050",
+    "V051",
+    "V052",
+    "V053",
+    "V054",
+    "V055",
+    "V056",
+    "V057",
+    "V058",
+    "V059",
+    "V060",
+    "V061",
+    "V062",
+    "V063",
+    "V064",
+    "V065",
+    "V066",
+    "V067",
+    "V068",
+    "V069",
+    "V070",
+    "V071",
+    "V072",
+    "V073",
+    "V074",
+    "V075",
+    "V076",
+    "V077",
+    "V078",
+    "V079",
+    "V080",
+    "V081",
+    "V082",
+    "V083",
+    "V084",
+    "V085",
+    "V086",
+    "V087",
+    "V088",
+    "V089",
+    "V090",
+    "V091",
+    "V092",
+    "V093",
+    "V094",
+    "V095",
+    "V096",
+    "V097",
+    "V098",
+    "V099",
+    "V100",
+    "V101",
+    "V102",
+    "V103",
+    "V104",
+    "V105",
+    "V106",
+    "V107",
+    "V108",
+    "V109",
+    "V110",
+    "V111",
+    "V112",
+    "V113",
+    "V114",
+    "V115",
+    "V116",
+    "V117",
+    "V118",
+    "V119",
+    "V120",
+    "V121",
+    "V122",
+    "V123",
+    "V124",
+    "V125",
+    "V126",
+    "V127",
+    "V128",
+    "V129",
+    "V130",
+    "V131",
+    "V132",
+    "V133",
+    "V134",
+    "V135",
+    "V136",
+    "V137",
+    "V138",
+    "V139",
+    "V140",
+    "V141",
+    "V142",
+    "V143",
+    "V144",
+    "V145",
+    "V146",
+    "V147",
+    "V148",
+    "V149",
+    "V150",
+    "V151",
+    "V152",
+    "V153",
+    "V154",
+    "V155",
+    "V156",
+    "V157",
+    "V158",
+    "V159",
+    "V160",
+    "V161",
+    "V162",
+    "V163",
+    "V164",
+    "V165",
+    "V166",
+    "V167",
+    "V168",
+    "V169",
+    "V170",
+    "V171",
+    "V172",
+    "V173",
+    "V174",
+    "V175",
+    "V176",
+    "V177",
+    "V178",
+    "V179",
+    "V180",
+    "V181",
+    "V182",
+    "V183",
+    "V184",
+    "V185",
+    "V186",
+    "V187",
+    "V188",
+    "V189",
+    "V190",
+    "V191",
+    "V192",
+    "V193",
+    "V194",
+    "V195",
+    "V196",
+    "V197",
+    "V198",
+    "V199",
+    "V200",
+    "V201",
+    "V202",
+    "V203",
+    "V204",
+    "V209",
+    "V210",
+    "V211",
+    "V212",
+    "V213",
+    "V214",
+    "V215",
+    "V216",
+    "V217",
+    "V218",
+    "V219",
+    "V220",
+    "V221",
+    "V222",
+    "V223",
+    "V224",
+    "V225",
+    "V226",
+    "V227",
+    "V228",
+    "V229",
+    "V230",
+    "V231",
+    "V232",
+    "V233",
+    "V234",
+    "V235",
+    "V236",
+    "V237",
+    "V238",
+    "V239",
+    "V240",
+    "V241",
+    "V242",
+    "V243",
+    "V244",
+    "V245",
+    "V246",
+    "V250"
+  ],
+  "policy": {
+    "format": "salesbuddy-runtime-permissions-v1",
+    "migration_fingerprint": "e2822093985fd15826ae024fd33b1d6ccf5fe56a5b5570c12d05e1872793c762",
+    "rls_fingerprint": "f1e22b796d099166b67ae4881e81c9e08d9416019a8e8235e7f0f845d95b1f95",
+    "schema": "V253",
+    "services": {
+      "api": {
+        "columns": {
+          "activity.visit_participant": {
+            "UPDATE": [
+              "participant_role",
+              "team_id_at_event",
+              "role_code_at_event",
+              "updated_at"
+            ]
+          },
+          "agent.conversation": {
+            "UPDATE": [
+              "updated_at"
+            ]
+          },
+          "config.model_api_current": {
+            "UPDATE": [
+              "version_no"
+            ]
+          },
+          "insight.sales_competency_review": {
+            "UPDATE": [
+              "status",
+              "error_code",
+              "error_detail",
+              "reviewed_at"
+            ]
+          },
+          "ops.schema_migration": {
+            "SELECT": [
+              "version",
+              "applied_at"
+            ]
+          }
+        },
+        "functions": [
+          "agent.work_report_source_manifest(jsonb)",
+          "common.current_role_code()",
+          "common.current_user_ref_id()",
+          "common.current_workspace_id()",
+          "crm.normalize_opportunity_name(text)",
+          "crm.valid_opportunity_sources(text[])",
+          "ops.record_system_event(uuid,uuid,uuid,text,text,text,text,text)",
+          "security.account_has_password(uuid)",
+          "security.account_login_status(uuid)",
+          "security.account_supervisor_title(uuid,uuid)",
+          "security.account_team_scope(uuid,uuid,text)",
+          "security.active_company_rule(text)",
+          "security.agent_operation_rows(timestamp with time zone,timestamp with time zone)",
+          "security.ai_invocation_report(timestamp with time zone,timestamp with time zone,text,uuid)",
+          "security.ai_service_policy()",
+          "security.approve_support(uuid,uuid,text[],timestamp with time zone,text)",
+          "security.archived_visit_receipt(uuid)",
+          "security.auth_session_is_active(uuid,uuid,uuid)",
+          "security.authorization_advice(text,uuid)",
+          "security.authorization_advice_subject(text,text,uuid)",
+          "security.authorization_allows(text,uuid,uuid,uuid[],boolean)",
+          "security.authorization_business_department(text)",
+          "security.authorization_business_read(text,uuid,uuid,uuid[],boolean)",
+          "security.authorization_current_grants()",
+          "security.authorization_customer(text,uuid)",
+          "security.authorization_delegations()",
+          "security.authorization_directory()",
+          "security.authorization_has(text)",
+          "security.authorization_history_provenance(text,uuid,text,text)",
+          "security.authorization_history_target(text,uuid)",
+          "security.authorization_import(text,uuid)",
+          "security.authorization_opportunity(text,uuid)",
+          "security.authorization_opportunity_direct(text,uuid)",
+          "security.authorization_opportunity_mutation(uuid)",
+          "security.authorization_portfolio_customer(text,uuid)",
+          "security.authorization_read_feature(text)",
+          "security.authorization_refresh()",
+          "security.authorization_risk(text,uuid)",
+          "security.authorization_risk_generation(uuid,uuid)",
+          "security.authorization_risk_scope(text,uuid,uuid,uuid,uuid,uuid)",
+          "security.authorization_snapshot(uuid)",
+          "security.authorization_subject(text,text,uuid,uuid)",
+          "security.authorization_task(text,uuid)",
+          "security.authorization_task_created(uuid)",
+          "security.authorization_task_mutation(uuid)",
+          "security.authorization_visit(text,uuid)",
+          "security.authorization_visit_target(text,uuid,uuid,uuid,uuid)",
+          "security.bump_fde_membership_version(uuid,integer)",
+          "security.business_activity_rows(timestamp with time zone,timestamp with time zone)",
+          "security.business_ranking(text,date,date,integer[],boolean)",
+          "security.can_manage_fde_members(uuid)",
+          "security.can_write_demo_scene(uuid)",
+          "security.can_write_visit(uuid)",
+          "security.change_own_password(text,text,uuid)",
+          "security.check_crm_import_target(uuid,uuid)",
+          "security.check_permission_administrator()",
+          "security.claim_customer(uuid)",
+          "security.closed_export_authorize(text,text[],boolean)",
+          "security.closed_export_candidate(text,text)",
+          "security.closed_export_content_chunk(text,uuid,integer)",
+          "security.closed_export_event(text,uuid,text,jsonb)",
+          "security.closed_export_issue(uuid,uuid,text,text,text,text)",
+          "security.closed_export_logout(text)",
+          "security.closed_export_originals(text,boolean,integer,integer)",
+          "security.closed_export_rows(text,text,integer,integer)",
+          "security.closed_export_status(text)",
+          "security.company_customer_directory_industries()",
+          "security.company_customer_directory_search(text,integer,integer,text,text,text[])",
+          "security.company_customer_directory_search(text,integer,integer,text,text,text[],text)",
+          "security.company_customer_directory_search_names(text)",
+          "security.company_directory()",
+          "security.company_entry(text)",
+          "security.company_management_actor(uuid)",
+          "security.complete_customer_creation_request(uuid,text,text,uuid)",
+          "security.complete_password_login(uuid,text,text)",
+          "security.confirm_review_key_result_progress(uuid,integer,numeric,text,boolean)",
+          "security.consume_http_request(text)",
+          "security.create_auth_session(uuid,uuid,uuid,text,timestamp with time zone,jsonb)",
+          "security.crm_history_visit_form_valid(uuid)",
+          "security.current_fact_scope_version()",
+          "security.customer_claim_pool(text,integer)",
+          "security.customer_creation_request_lock(uuid)",
+          "security.customer_name_is_available(text)",
+          "security.customer_portfolio_scope()",
+          "security.customer_reference(uuid)",
+          "security.customer_request_history(text,uuid,text,text,text,integer,integer,uuid)",
+          "security.customer_risk_assessment_owner(uuid)",
+          "security.dashboard_subject_ranking(text,date,date,integer[],uuid)",
+          "security.dashboard_team_ranking(text,date,date,integer[],uuid[],boolean)",
+          "security.demo_scene_history(uuid,integer,integer)",
+          "security.dispatch_model_call(uuid,uuid)",
+          "security.fde_can_coordinate_task(uuid)",
+          "security.fde_can_record_opportunity(uuid)",
+          "security.fde_dashboard_rankings(date,date,integer[],uuid)",
+          "security.fde_demo_statistics(uuid[],uuid[],timestamp with time zone,timestamp with time zone,integer[])",
+          "security.fde_permission_version()",
+          "security.fde_profile_history(uuid,integer,integer)",
+          "security.fde_profile_history_v2(uuid,integer,integer)",
+          "security.fde_profile_review_detail(uuid)",
+          "security.fde_recorded_visit_history()",
+          "security.fde_recorded_visit_history(timestamp with time zone,timestamp with time zone,uuid,uuid,integer[])",
+          "security.fde_task_eligible(uuid,uuid,text,uuid)",
+          "security.fde_user_is_active(uuid,text,uuid)",
+          "security.fde_visit_entry_enabled()",
+          "security.feishu_initialize(uuid)",
+          "security.feishu_recover(uuid,uuid,text,text,text)",
+          "security.fence_unpublished_storage(uuid,uuid)",
+          "security.finance_decimal_text(numeric)",
+          "security.finance_json_canonical(jsonb)",
+          "security.finance_management_scope(uuid,text)",
+          "security.finance_reference_fingerprint(uuid,uuid,integer,integer,text)",
+          "security.finance_timestamp_text(timestamp with time zone)",
+          "security.finance_window_totals(uuid[],date,date,integer[])",
+          "security.finance_write_lock()",
+          "security.finish_inference_operation(uuid,text,jsonb,jsonb,text)",
+          "security.finish_model_call(uuid,uuid,boolean,jsonb)",
+          "security.get_password_policy()",
+          "security.guard_native_account(uuid,text)",
+          "security.has_active_role(text)",
+          "security.has_analysis_scope(jsonb,smallint)",
+          "security.has_customer_access(uuid)",
+          "security.has_customer_write_access(uuid)",
+          "security.has_feishu_credential(uuid)",
+          "security.has_opportunity_access(uuid)",
+          "security.has_opportunity_read_access(uuid)",
+          "security.is_current_fact_scope(smallint)",
+          "security.is_fde_actor()",
+          "security.lock_password_login_identifier(text)",
+          "security.lock_password_login_identifier(text,text)",
+          "security.lock_visit_upload_quota()",
+          "security.login_attempt(text,integer)",
+          "security.login_limit_status(text,integer)",
+          "security.management_actor()",
+          "security.mark_storage_external(uuid,uuid)",
+          "security.material_product_lines(boolean)",
+          "security.mention_review_okr(text,uuid,integer,uuid[])",
+          "security.model_credential_owned(text,integer)",
+          "security.opportunity_name_is_available(uuid,text,uuid)",
+          "security.opportunity_view_company_allowed()",
+          "security.opportunity_view_team_allowed(uuid,boolean)",
+          "security.opportunity_view_team_options()",
+          "security.organization_management()",
+          "security.organization_permission_roles()",
+          "security.own_password_candidate()",
+          "security.partner_enterprise_reference(uuid)",
+          "security.password_account_workspace(text)",
+          "security.password_candidate(text,text,text)",
+          "security.password_candidate(text,text,text,text)",
+          "security.password_login_identifier(text,text)",
+          "security.password_login_identifier(text,text,text)",
+          "security.prepare_feishu_migration(uuid)",
+          "security.profile_customer_owner(uuid)",
+          "security.publish_company_rule(uuid,integer)",
+          "security.ranking_team_group(text)",
+          "security.record_task_contribution(uuid,jsonb,integer)",
+          "security.release_customer(uuid,integer,text)",
+          "security.release_unpublished_storage(uuid,uuid)",
+          "security.reparse_task_import_batch(uuid,integer,jsonb,jsonb,jsonb)",
+          "security.reserve_model_call(uuid,uuid)",
+          "security.reserve_visit_storage(uuid,uuid,bigint,text,text,text,text,text,text)",
+          "security.resolve_account_actor(text,text,text)",
+          "security.resolve_demo_actor(text,text)",
+          "security.resolve_legacy_customer_owner(uuid,integer,uuid,text)",
+          "security.restore_historical_customer_ownership(uuid,uuid,uuid)",
+          "security.review_customer_claim(uuid,text,text)",
+          "security.review_day_update_status(text,uuid[],timestamp with time zone,timestamp with time zone)",
+          "security.review_key_result_readable(uuid)",
+          "security.review_metric_baseline(text,uuid[],date,integer,integer,integer)",
+          "security.review_objective_readable(uuid)",
+          "security.review_target_batch(uuid,text,text)",
+          "security.review_target_change(uuid,text,text)",
+          "security.review_target_money_json(jsonb)",
+          "security.revoke_auth_session(uuid,uuid,uuid)",
+          "security.revoke_managed_account_sessions(uuid)",
+          "security.revoke_support(uuid,text)",
+          "security.rotate_auth_session(text,text,timestamp with time zone)",
+          "security.save_account_authorization(uuid,jsonb)",
+          "security.save_authorization_delegation(uuid,jsonb)",
+          "security.save_company_rule(text,text,jsonb,text,uuid,integer,uuid,uuid)",
+          "security.save_material_product_lines(integer,text,jsonb)",
+          "security.save_period_target(text,uuid,uuid,text,date,date,text,numeric,integer)",
+          "security.save_permission_role(uuid,jsonb)",
+          "security.save_review_key_result(uuid,jsonb,integer)",
+          "security.save_review_metric(text,jsonb,integer)",
+          "security.save_review_objective(uuid,jsonb,integer)",
+          "security.save_target_batch(text,uuid,uuid,text,date,date,jsonb,text,text)",
+          "security.save_task_alignment(uuid,jsonb,integer)",
+          "security.session_credentials(uuid)",
+          "security.set_account_password(uuid,text,boolean)",
+          "security.set_customer_business_identity(uuid,text[],uuid)",
+          "security.set_feishu_credential(uuid,bytea,text)",
+          "security.set_password_policy(boolean,bigint)",
+          "security.submit_customer_creation_request(jsonb)",
+          "security.supervises_team(uuid)",
+          "security.support_audit_page(bigint)",
+          "security.support_directory(text)",
+          "security.support_grants()",
+          "security.target_history_rows(uuid,integer,integer)",
+          "security.target_scope_read(text,uuid,uuid)",
+          "security.target_scope_read(text,uuid,uuid,text)",
+          "security.target_scope_write(text,uuid,uuid,text)",
+          "security.task_actor_recipient(uuid)",
+          "security.task_alignment_read(uuid)",
+          "security.task_import_batch_page(text,integer,integer)",
+          "security.task_import_batch_summary(uuid)",
+          "security.task_import_is_creator(uuid)",
+          "security.task_link_context(uuid)",
+          "security.task_recipient_eligible(uuid,uuid,text,uuid)",
+          "security.tenant_modules()",
+          "security.unlock_account_login(uuid,text)",
+          "security.work_report_audience_matches(jsonb)",
+          "security.work_report_history_access(jsonb)",
+          "security.work_report_review_access(jsonb)",
+          "security.work_report_source_access(jsonb,jsonb)",
+          "security.workspace_is_active(uuid)",
+          "security.workspace_job_enabled(uuid,text)",
+          "security.workspace_module_enabled(uuid,text)",
+          "workflow.complete_opportunity_change_review(uuid,jsonb)",
+          "workflow.enqueue_fde_collaboration_notification(uuid,uuid,text,uuid,jsonb)",
+          "workflow.enqueue_task_notification(uuid,uuid,text,text,text,uuid,text,jsonb)"
+        ],
+        "memberships": [],
+        "policies": {},
+        "schemas": [
+          "activity",
+          "agent",
+          "common",
+          "config",
+          "crm",
+          "insight",
+          "ops",
+          "platform",
+          "security",
+          "workflow"
+        ],
+        "sequences": {
+          "ops.audit_log_id_seq": [
+            "USAGE"
+          ]
+        },
+        "tables": {
+          "activity.visit": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "activity.visit_field_value": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "activity.visit_import": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "activity.visit_import_content": [
+            "SELECT",
+            "INSERT"
+          ],
+          "activity.visit_opportunity": [
+            "SELECT"
+          ],
+          "activity.visit_participant": [
+            "SELECT",
+            "INSERT",
+            "DELETE"
+          ],
+          "activity.visit_upload_attempt": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "activity.visit_upload_intent": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.artifact": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.confirmation": [
+            "INSERT"
+          ],
+          "agent.conversation": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.inference_operation": [
+            "INSERT"
+          ],
+          "agent.message": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.model_invocation": [
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.run": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.work_report_document": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.work_report_event": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.work_report_revision": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.work_report_run": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.work_report_scheme": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.work_report_scheme_revision": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.work_report_snapshot": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "config.account_authorization": [
+            "SELECT"
+          ],
+          "config.account_permission_override": [
+            "SELECT"
+          ],
+          "config.account_permission_role": [
+            "SELECT"
+          ],
+          "config.agent_definition": [
+            "SELECT"
+          ],
+          "config.agent_runtime_config": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "config.agent_runtime_release": [
+            "SELECT",
+            "INSERT"
+          ],
+          "config.authorization_audit": [
+            "SELECT"
+          ],
+          "config.dictionary": [
+            "SELECT"
+          ],
+          "config.dictionary_item": [
+            "SELECT"
+          ],
+          "config.feishu_connection": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "config.field_definition": [
+            "SELECT"
+          ],
+          "config.form_definition": [
+            "SELECT"
+          ],
+          "config.form_version": [
+            "SELECT"
+          ],
+          "config.form_version_field": [
+            "SELECT"
+          ],
+          "config.model_api_current": [
+            "SELECT",
+            "INSERT"
+          ],
+          "config.model_api_release": [
+            "SELECT",
+            "INSERT"
+          ],
+          "config.model_api_test": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "config.permission_role": [
+            "SELECT"
+          ],
+          "config.permission_role_grant": [
+            "SELECT"
+          ],
+          "config.prompt_template": [
+            "SELECT"
+          ],
+          "config.rule_set": [
+            "SELECT"
+          ],
+          "config.sales_competency_framework": [
+            "SELECT"
+          ],
+          "crm.business_change": [
+            "SELECT",
+            "INSERT"
+          ],
+          "crm.contact": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.customer": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.customer_actual": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.customer_claim_request": [
+            "SELECT"
+          ],
+          "crm.customer_creation_request": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.customer_ownership": [
+            "SELECT"
+          ],
+          "crm.customer_ownership_event": [
+            "SELECT"
+          ],
+          "crm.customer_product": [
+            "SELECT"
+          ],
+          "crm.customer_sales_member": [
+            "SELECT"
+          ],
+          "crm.effective_actual": [
+            "SELECT"
+          ],
+          "crm.finance_period_resolution": [
+            "SELECT"
+          ],
+          "crm.material": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "crm.opportunity_actual_basis": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_actual_confirmation": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_demo_scenes": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_forecast": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "crm.opportunity_forecast_event": [
+            "SELECT"
+          ],
+          "crm.opportunity_material": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_participant": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_period_actual_snapshot": [
+            "SELECT",
+            "INSERT"
+          ],
+          "crm.opportunity_project_participant": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "crm.opportunity_quote_reference": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "crm.opportunity_related_partner": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "crm.opportunity_saved_view": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.opportunity_state_event": [
+            "SELECT"
+          ],
+          "crm.opportunity_view_preference": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.partner": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.product": [
+            "SELECT"
+          ],
+          "crm.review_key_result": [
+            "SELECT"
+          ],
+          "crm.review_key_result_progress": [
+            "SELECT"
+          ],
+          "crm.review_metric": [
+            "SELECT"
+          ],
+          "crm.review_objective": [
+            "SELECT"
+          ],
+          "crm.sales_target": [
+            "SELECT"
+          ],
+          "crm.sales_target_batch_request": [
+            "SELECT"
+          ],
+          "crm.sales_target_change_request": [
+            "SELECT"
+          ],
+          "crm.v_customer_current_quadrant": [
+            "SELECT"
+          ],
+          "insight.business_advice": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.business_suggestion": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.customer_risk_assessment": [
+            "SELECT",
+            "INSERT"
+          ],
+          "insight.quadrant_score": [
+            "SELECT"
+          ],
+          "insight.risk": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "insight.risk_event": [
+            "SELECT",
+            "INSERT"
+          ],
+          "insight.sales_competency_review": [
+            "SELECT",
+            "INSERT"
+          ],
+          "ops.ai_usage_alert": [
+            "SELECT"
+          ],
+          "ops.ai_usage_rule": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.audit_log": [
+            "SELECT",
+            "INSERT"
+          ],
+          "ops.crm_import_batch": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.crm_import_binding": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.crm_import_record": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.feishu_delivery": [
+            "SELECT"
+          ],
+          "ops.feishu_event": [
+            "SELECT"
+          ],
+          "ops.feishu_record_map": [
+            "SELECT"
+          ],
+          "ops.job": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.job_effect": [
+            "INSERT"
+          ],
+          "ops.mutation_receipt": [
+            "SELECT",
+            "INSERT"
+          ],
+          "ops.system_event": [
+            "SELECT"
+          ],
+          "platform.auth_session": [
+            "SELECT"
+          ],
+          "platform.role_binding": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "platform.team": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "platform.team_membership": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "platform.user_ref": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "platform.workspace": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "workflow.notification": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task_alignment": [
+            "SELECT"
+          ],
+          "workflow.task_assignee": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "workflow.task_candidate": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task_event": [
+            "SELECT",
+            "INSERT"
+          ],
+          "workflow.task_import_batch": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task_import_item": [
+            "SELECT",
+            "INSERT"
+          ],
+          "workflow.task_key_result_alignment": [
+            "SELECT"
+          ],
+          "workflow.task_metric_alignment": [
+            "SELECT"
+          ],
+          "workflow.v_task_action_recipient": [
+            "SELECT"
+          ]
+        }
+      },
+      "feishu": {
+        "columns": {
+          "config.feishu_connection": {
+            "UPDATE": [
+              "last_error_code",
+              "next_reconcile_at",
+              "validated_revision",
+              "validation_requested"
+            ]
+          }
+        },
+        "functions": [
+          "common.current_role_code()",
+          "common.current_user_ref_id()",
+          "common.current_workspace_id()",
+          "ops.feishu_reconcile(uuid)",
+          "ops.feishu_source(uuid,text,uuid)",
+          "security.feishu_lock_lease(uuid,uuid)",
+          "security.has_active_role(text)",
+          "security.workspace_is_active(uuid)",
+          "security.workspace_module_enabled(uuid,text)"
+        ],
+        "memberships": [
+          "salegent_feishu_worker"
+        ],
+        "policies": {
+          "config.feishu_connection": "sync_worker",
+          "ops.feishu_delivery": "sync_worker",
+          "ops.feishu_event": "sync_worker",
+          "ops.feishu_record_map": "sync_worker"
+        },
+        "schemas": [
+          "activity",
+          "common",
+          "config",
+          "crm",
+          "ops",
+          "platform",
+          "security",
+          "workflow"
+        ],
+        "sequences": {
+          "ops.feishu_event_sequence_no_seq": [
+            "USAGE"
+          ]
+        },
+        "tables": {
+          "config.feishu_connection": [
+            "SELECT"
+          ],
+          "ops.feishu_delivery": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.feishu_event": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.feishu_record_map": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "security.feishu_credential": [
+            "SELECT"
+          ]
+        }
+      },
+      "platform": {
+        "columns": {},
+        "functions": [
+          "control.account_quota(text,uuid)",
+          "control.activate(text,text,text)",
+          "control.ai_service_settings(text,uuid)",
+          "control.audit_page(text,bigint)",
+          "control.begin_login(uuid,text,text,text,integer)",
+          "control.call_quotas(text,uuid)",
+          "control.complete_login(text,jsonb,integer,bigint,text,text)",
+          "control.configuration_status(text,uuid)",
+          "control.configuration_status(text,uuid,jsonb)",
+          "control.confirm_mfa(text,jsonb,integer,bigint,text,text)",
+          "control.consume_attempt(text,text)",
+          "control.finish_mfa(text,text,jsonb,integer,bigint,text)",
+          "control.http_limits(text,uuid)",
+          "control.issue_session(uuid,text,text,text,integer,bigint)",
+          "control.job_settings(text,uuid)",
+          "control.login_candidate(text)",
+          "control.logout(text)",
+          "control.mfa_candidate(text,text)",
+          "control.module_settings(text,uuid)",
+          "control.prepare_mfa(text,jsonb)",
+          "control.provision(text,uuid,text,jsonb,text)",
+          "control.reissue_activation(text,uuid,integer,text,text)",
+          "control.runtime_overview(text,uuid,integer)",
+          "control.save_account_quota(text,uuid,integer,bigint,text)",
+          "control.save_ai_service(text,uuid,integer,boolean,text)",
+          "control.save_call_quota(text,uuid,integer,text,bigint,text,text)",
+          "control.save_http_limit(text,uuid,integer,text,integer,integer,text)",
+          "control.save_job_settings(text,uuid,integer,integer,text)",
+          "control.save_modules(text,uuid,integer,jsonb,text)",
+          "control.save_modules(text,uuid,integer,jsonb,text,jsonb)",
+          "control.save_storage_quota(text,uuid,integer,bigint,text)",
+          "control.session_profile(text)",
+          "control.storage_quota(text,uuid)",
+          "control.support_assignments(text)",
+          "control.support_read(text,uuid,text,uuid)",
+          "control.tenants(text)",
+          "control.transition(text,uuid,integer,text,text)",
+          "control.transition(text,uuid,integer,text,text,jsonb)"
+        ],
+        "memberships": [],
+        "policies": {},
+        "schemas": [
+          "control"
+        ],
+        "sequences": {},
+        "tables": {}
+      },
+      "worker": {
+        "columns": {
+          "activity.visit": {
+            "UPDATE": [
+              "updated_at"
+            ]
+          },
+          "crm.customer": {
+            "UPDATE": [
+              "updated_at"
+            ]
+          },
+          "crm.customer_claim_request": {
+            "SELECT": [
+              "id",
+              "workspace_id",
+              "status",
+              "customer_id",
+              "applicant_user_ref_id"
+            ]
+          },
+          "crm.customer_ownership_event": {
+            "SELECT": [
+              "id",
+              "workspace_id",
+              "customer_id",
+              "owner_user_ref_id",
+              "occurred_at",
+              "reason",
+              "claim_request_id",
+              "event_type"
+            ]
+          },
+          "crm.opportunity": {
+            "UPDATE": [
+              "updated_at"
+            ]
+          },
+          "ops.schema_migration": {
+            "SELECT": [
+              "version",
+              "applied_at"
+            ]
+          }
+        },
+        "functions": [
+          "agent.work_report_source_manifest(jsonb)",
+          "common.current_role_code()",
+          "common.current_user_ref_id()",
+          "common.current_workspace_id()",
+          "crm.normalize_opportunity_name(text)",
+          "ops.claim_exact_competency_review(text,integer,uuid,uuid,uuid,uuid,integer,text,jsonb,text,uuid,integer)",
+          "ops.claim_exact_visit_agent_run(text,integer,uuid,uuid,uuid,uuid,text,text)",
+          "ops.claim_exact_visit_import(text,integer,uuid,uuid,uuid,uuid,text)",
+          "ops.claim_exact_work_report(text,integer,uuid,uuid,uuid,uuid,text,text,text,integer,timestamp with time zone,timestamp with time zone)",
+          "ops.claim_job(text,integer)",
+          "ops.claim_job(text,integer,text[],boolean)",
+          "ops.enqueue_daily_sales_competency_reviews()",
+          "ops.evaluate_ai_usage_alerts()",
+          "ops.fail_competency_review(uuid,uuid,text,boolean)",
+          "ops.prune_system_events()",
+          "ops.record_system_event(uuid,uuid,uuid,text,text,text,text,text)",
+          "ops.refresh_review_history()",
+          "ops.reject_invalid_job_actor(uuid,uuid)",
+          "ops.run_priority_reminder_monitor()",
+          "security.account_supervisor_title(uuid,uuid)",
+          "security.account_team_scope(uuid,uuid,text)",
+          "security.active_company_rule(text)",
+          "security.ai_service_policy()",
+          "security.auth_session_is_active(uuid,uuid,uuid)",
+          "security.authorization_advice(text,uuid)",
+          "security.authorization_advice_subject(text,text,uuid)",
+          "security.authorization_allows(text,uuid,uuid,uuid[],boolean)",
+          "security.authorization_business_department(text)",
+          "security.authorization_business_read(text,uuid,uuid,uuid[],boolean)",
+          "security.authorization_customer(text,uuid)",
+          "security.authorization_delegations()",
+          "security.authorization_directory()",
+          "security.authorization_has(text)",
+          "security.authorization_history_provenance(text,uuid,text,text)",
+          "security.authorization_history_target(text,uuid)",
+          "security.authorization_import(text,uuid)",
+          "security.authorization_opportunity(text,uuid)",
+          "security.authorization_opportunity_direct(text,uuid)",
+          "security.authorization_opportunity_mutation(uuid)",
+          "security.authorization_read_feature(text)",
+          "security.authorization_refresh()",
+          "security.authorization_risk(text,uuid)",
+          "security.authorization_risk_generation(uuid,uuid)",
+          "security.authorization_risk_scope(text,uuid,uuid,uuid,uuid,uuid)",
+          "security.authorization_snapshot(uuid)",
+          "security.authorization_subject(text,text,uuid,uuid)",
+          "security.authorization_task(text,uuid)",
+          "security.authorization_task_mutation(uuid)",
+          "security.authorization_visit(text,uuid)",
+          "security.authorization_visit_target(text,uuid,uuid,uuid,uuid)",
+          "security.can_manage_fde_members(uuid)",
+          "security.can_write_visit(uuid)",
+          "security.company_management_actor(uuid)",
+          "security.current_fact_scope_version()",
+          "security.customer_reference(uuid)",
+          "security.customer_risk_assessment_owner(uuid)",
+          "security.dispatch_model_call(uuid,uuid)",
+          "security.fde_can_coordinate_task(uuid)",
+          "security.fde_dashboard_rankings(date,date,integer[],uuid)",
+          "security.fde_demo_statistics(uuid[],uuid[],timestamp with time zone,timestamp with time zone,integer[])",
+          "security.fde_permission_version()",
+          "security.fde_recorded_visit_history(timestamp with time zone,timestamp with time zone,uuid,uuid,integer[])",
+          "security.fde_task_eligible(uuid,uuid,text,uuid)",
+          "security.fde_user_is_active(uuid,text,uuid)",
+          "security.fde_visit_entry_enabled()",
+          "security.finance_decimal_text(numeric)",
+          "security.finance_json_canonical(jsonb)",
+          "security.finance_reference_fingerprint(uuid,uuid,integer,integer,text)",
+          "security.finance_timestamp_text(timestamp with time zone)",
+          "security.finance_window_totals(uuid[],date,date,integer[])",
+          "security.finish_inference_operation(uuid,text,jsonb,jsonb,text)",
+          "security.finish_model_call(uuid,uuid,boolean,jsonb)",
+          "security.has_active_role(text)",
+          "security.has_analysis_scope(jsonb,smallint)",
+          "security.has_customer_access(uuid)",
+          "security.has_customer_write_access(uuid)",
+          "security.has_opportunity_access(uuid)",
+          "security.has_opportunity_read_access(uuid)",
+          "security.is_current_fact_scope(smallint)",
+          "security.is_fde_actor()",
+          "security.management_actor()",
+          "security.model_credential_owned(text,integer)",
+          "security.reserve_model_call(uuid,uuid)",
+          "security.resolve_account_actor(text,text,text)",
+          "security.resolve_demo_actor(text,text)",
+          "security.review_day_update_status(text,uuid[],timestamp with time zone,timestamp with time zone)",
+          "security.review_metric_baseline(text,uuid[],date,integer,integer,integer)",
+          "security.review_objective_readable(uuid)",
+          "security.target_scope_read(text,uuid,uuid,text)",
+          "security.target_scope_write(text,uuid,uuid,text)",
+          "security.task_actor_recipient(uuid)",
+          "security.task_alignment_read(uuid)",
+          "security.task_link_context(uuid)",
+          "security.task_recipient_eligible(uuid,uuid,text,uuid)",
+          "security.tenant_modules()",
+          "security.work_report_audience_matches(jsonb)",
+          "security.work_report_history_access(jsonb)",
+          "security.work_report_review_access(jsonb)",
+          "security.work_report_source_access(jsonb,jsonb)",
+          "security.workspace_is_active(uuid)",
+          "security.workspace_job_enabled(uuid,text)",
+          "workflow.complete_business_review(uuid,jsonb)",
+          "workflow.complete_opportunity_change_review(uuid,jsonb)",
+          "workflow.enqueue_battle_map_leader_notifications(uuid,uuid,uuid,text,text,numeric,numeric,text)",
+          "workflow.enqueue_task_notification(uuid,uuid,text,text,text,uuid,text,jsonb)"
+        ],
+        "memberships": [],
+        "policies": {},
+        "schemas": [
+          "activity",
+          "agent",
+          "common",
+          "config",
+          "crm",
+          "insight",
+          "ops",
+          "platform",
+          "security",
+          "workflow"
+        ],
+        "sequences": {
+          "ops.audit_log_id_seq": [
+            "USAGE"
+          ]
+        },
+        "tables": {
+          "activity.visit": [
+            "SELECT"
+          ],
+          "activity.visit_import": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "activity.visit_import_content": [
+            "SELECT",
+            "INSERT"
+          ],
+          "activity.visit_opportunity": [
+            "SELECT"
+          ],
+          "activity.visit_participant": [
+            "SELECT"
+          ],
+          "agent.artifact": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.conversation": [
+            "SELECT"
+          ],
+          "agent.inference_operation": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.message": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.model_invocation": [
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.run": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "agent.work_report_document": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "agent.work_report_event": [
+            "INSERT"
+          ],
+          "agent.work_report_revision": [
+            "SELECT",
+            "INSERT"
+          ],
+          "agent.work_report_run": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "agent.work_report_scheme": [
+            "SELECT"
+          ],
+          "agent.work_report_scheme_revision": [
+            "SELECT"
+          ],
+          "agent.work_report_snapshot": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "config.account_authorization": [
+            "SELECT"
+          ],
+          "config.account_permission_override": [
+            "SELECT"
+          ],
+          "config.account_permission_role": [
+            "SELECT"
+          ],
+          "config.agent_definition": [
+            "SELECT"
+          ],
+          "config.agent_runtime_config": [
+            "SELECT"
+          ],
+          "config.agent_runtime_release": [
+            "SELECT"
+          ],
+          "config.authorization_audit": [
+            "SELECT"
+          ],
+          "config.dictionary": [
+            "SELECT"
+          ],
+          "config.dictionary_item": [
+            "SELECT"
+          ],
+          "config.field_definition": [
+            "SELECT"
+          ],
+          "config.form_definition": [
+            "SELECT"
+          ],
+          "config.form_version": [
+            "SELECT"
+          ],
+          "config.form_version_field": [
+            "SELECT"
+          ],
+          "config.model_api_current": [
+            "SELECT"
+          ],
+          "config.model_api_release": [
+            "SELECT"
+          ],
+          "config.model_api_test": [
+            "SELECT"
+          ],
+          "config.permission_role": [
+            "SELECT"
+          ],
+          "config.permission_role_grant": [
+            "SELECT"
+          ],
+          "config.prompt_template": [
+            "SELECT"
+          ],
+          "config.rule_set": [
+            "SELECT"
+          ],
+          "config.sales_competency_framework": [
+            "SELECT"
+          ],
+          "crm.business_change": [
+            "SELECT"
+          ],
+          "crm.contact": [
+            "SELECT"
+          ],
+          "crm.customer": [
+            "SELECT"
+          ],
+          "crm.customer_actual": [
+            "SELECT"
+          ],
+          "crm.customer_creation_request": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "crm.effective_actual": [
+            "SELECT"
+          ],
+          "crm.finance_period_resolution": [
+            "SELECT"
+          ],
+          "crm.material": [
+            "SELECT"
+          ],
+          "crm.opportunity": [
+            "SELECT"
+          ],
+          "crm.opportunity_actual_basis": [
+            "SELECT"
+          ],
+          "crm.opportunity_actual_confirmation": [
+            "SELECT"
+          ],
+          "crm.opportunity_forecast": [
+            "SELECT"
+          ],
+          "crm.opportunity_forecast_event": [
+            "SELECT"
+          ],
+          "crm.opportunity_material": [
+            "SELECT"
+          ],
+          "crm.opportunity_participant": [
+            "SELECT"
+          ],
+          "crm.opportunity_period_actual_snapshot": [
+            "SELECT"
+          ],
+          "crm.opportunity_state_event": [
+            "SELECT"
+          ],
+          "crm.review_key_result": [
+            "SELECT"
+          ],
+          "crm.review_key_result_progress": [
+            "SELECT"
+          ],
+          "crm.review_metric": [
+            "SELECT"
+          ],
+          "crm.review_objective": [
+            "SELECT"
+          ],
+          "crm.sales_target": [
+            "SELECT"
+          ],
+          "insight.business_advice": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.business_suggestion": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.customer_risk_assessment": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.quadrant_score": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.risk": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "insight.risk_event": [
+            "INSERT"
+          ],
+          "insight.sales_competency_review": [
+            "SELECT",
+            "UPDATE"
+          ],
+          "ops.audit_log": [
+            "SELECT",
+            "INSERT"
+          ],
+          "ops.job": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "ops.job_effect": [
+            "SELECT",
+            "INSERT"
+          ],
+          "ops.system_event": [
+            "SELECT"
+          ],
+          "platform.auth_session": [
+            "SELECT"
+          ],
+          "platform.role_binding": [
+            "SELECT"
+          ],
+          "platform.team": [
+            "SELECT"
+          ],
+          "platform.team_membership": [
+            "SELECT"
+          ],
+          "platform.user_ref": [
+            "SELECT"
+          ],
+          "workflow.notification": [
+            "SELECT"
+          ],
+          "workflow.task": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task_assignee": [
+            "SELECT",
+            "INSERT",
+            "UPDATE",
+            "DELETE"
+          ],
+          "workflow.task_candidate": [
+            "SELECT",
+            "INSERT",
+            "UPDATE"
+          ],
+          "workflow.task_event": [
+            "SELECT",
+            "INSERT"
+          ],
+          "workflow.v_task_action_recipient": [
+            "SELECT"
+          ]
+        }
+      }
+    }
+  }
+}

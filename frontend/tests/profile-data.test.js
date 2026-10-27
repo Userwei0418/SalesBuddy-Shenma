@@ -13,13 +13,13 @@ function harness(relative,api={}){
  const instance={...definition,...definition.methods,data:JSON.parse(JSON.stringify(definition.data)),properties:{},visible:true,active:true,setData(data,done){Object.assign(this.data,data);if(done)done();},triggerEvent(){}};
  return {instance,app,toasts};
 }
-function performance(extra={}){return {data_source:'database',editable:true,targets:{collection:1000000,recognized:2000000},actuals:{collection:250000,recognized:800000},target_period:{type:'quarter',year,quarter},supplementals:{customers:60,opportunities:40,followup:88},scores:{maturity:{value:35,text:'35'},efficiency:{value:70,text:'70'}},efficiency:{customers:{numerator:12,denominator:20,evaluated_count:15,pending_count:5,rate:60,status:'partial'},opportunities:{numerator:4,denominator:10,evaluated_count:10,pending_count:0,rate:40,status:'ready'},followup:{count:7,customer_count:3,average_score:88}},windows:{structure:{period:'current'},followup:{start:'2026-09-14',end:'2026-09-20'}},...extra};}
+function performance(extra={}){return {data_source:'database',editable:true,targets:{collection:1000000,recognized:2000000},actuals:{collection_amount:250000,recognized_amount:800000,collection_complete:true,recognized_complete:true},target_period:{type:'quarter',year,quarter},supplementals:{customers:60,opportunities:40,followup:88},scores:{maturity:{value:35,text:'35'},efficiency:{value:70,text:'70'}},efficiency:{customers:{numerator:12,denominator:20,evaluated_count:15,pending_count:5,rate:60,status:'partial'},opportunities:{numerator:4,denominator:10,evaluated_count:10,pending_count:0,rate:40,status:'ready'},followup:{count:7,customer_count:3,average_score:88}},windows:{structure:{period:'current'},followup:{start:'2026-09-14',end:'2026-09-20'}},...extra};}
 function page(api={}){const h=harness('pages/profile/index.js',api);Object.assign(h.instance.data,{role:'sales',targetYear:year,targetQuarter:quarter,profileScopeLabel:'本人'});return h;}
 
 test('团队完全遵循后端目录，名称不触发隐藏，失效ID不能继续查询',async()=>{
  const teams=[{id:'leaf',name:'生态渠道'},{id:'north',name:'北区'},{id:'empty',name:'新业务组'}];
  for(const [current,visible,expected] of [['leaf',teams,'leaf'],['gone',teams,'north'],['leaf',[], '']]){
-  const {instance:p}=page({getProfileScopeOptions:async()=>({data_source:'database',teams:visible,members:[{id:'self-id',name:'本人',team_ids:['leaf','north']}],allowed_scopes:['self','team','department'],defaults:{scope:'team',team_id:'north',member_id:'self-id'}})});
+  const {instance:p}=page({getProfileScopeOptions:async()=>({data_source:'database',teams:visible,members:[{id:'self-id',name:'本人',team_ids:visible.filter(row=>['leaf','north'].includes(row.id)).map(row=>row.id)}],allowed_scopes:['self','team','department'],defaults:{scope:'team',team_id:visible.some(row=>row.id==='north')?'north':null,member_id:'self-id'}})});
   Object.assign(p.data,{role:'manager',profileTeamId:current,profileScopeMode:'team'});let selected;
   p.refreshProfileScope=()=>selected=p.data.profileTeamId;
   await p.loadProfileDirectory();assert.equal(p.data.directoryError,'');assert.equal(selected,expected);
@@ -62,7 +62,7 @@ test('成员和团队使用真实ID，选择他人后即使editable错误也不�
 
 test('慢响应在切人、切账号和隐藏页面后都不能污染新状态',async()=>{
  const pending=[];const {instance:p,app}=page({getProfilePerformance:()=>new Promise(resolve=>pending.push(resolve))});
- Object.assign(p.data,{role:'supervisor',profileScopeMode:'person',profileSelectedMemberId:'member-a'});const old=p.loadProfilePerformance();p.data.profileSelectedMemberId='member-b';const latest=p.loadProfilePerformance();pending[1](performance({actuals:{collection:222,recognized:333}}));await latest;pending[0](performance());await old;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
+ Object.assign(p.data,{role:'supervisor',profileScopeMode:'person',profileSelectedMemberId:'member-a'});const old=p.loadProfilePerformance();p.data.profileSelectedMemberId='member-b';const latest=p.loadProfilePerformance();pending[1](performance({actuals:{collection_amount:222,recognized_amount:333,collection_complete:true,recognized_complete:true}}));await latest;pending[0](performance());await old;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
  const swapped=p.loadProfilePerformance();app.globalData.session.userId='other-login';pending[2](performance());await swapped;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
  const hidden=p.loadProfilePerformance();p.onHide();pending[3](performance());await hidden;assert.equal(p.data.performanceBoard[0].completedText,'¥222');
 });
@@ -88,7 +88,7 @@ test('已有目标携带基准版本，审批提交不写成本地生效值',asy
 });
 
 test('原因必填且非法金额不发请求，失败保留表单可修改',async()=>{
- let calls=0;const {instance:c}=target({getTargets:async()=>({items:rows,editable:true}),saveTargetBatch:async()=>{calls++;throw Error('版本已更新，请重新读取');}});await c.load();c.show();await c.save();assert.equal(calls,0);assert.match(c.data.error,/依据|原因/);Object.assign(c.data,{collection:'0',reason:'调整'});await c.save();assert.equal(calls,0);c.data.collection='90';await c.save();assert.equal(calls,1);assert.equal(c.data.open,true);assert.match(c.data.error,/版本已更新/);
+ let calls=0;const {instance:c}=target({getTargets:async()=>({items:rows,editable:true}),saveTargetBatch:async()=>{calls++;throw Error('版本已更新，请重新读取');}});await c.load();c.show();await c.save();assert.equal(calls,0);assert.match(c.data.error,/依据|原因/);Object.assign(c.data,{collection:'-1',reason:'调整'});await c.save();assert.equal(calls,0);c.data.collection='90';await c.save();assert.equal(calls,1);assert.equal(c.data.open,true);assert.match(c.data.error,/版本已更新/);
 });
 
 test('待审显示当前及申请值并阻止覆盖；他人和历史季度只读',async()=>{
@@ -100,8 +100,10 @@ test('表单打开后切账号或主体，旧表单不能提交',async()=>{
  let calls=0;const {instance:c,app}=target({getTargets:async()=>({items:rows,editable:true}),saveTargetBatch:async()=>{calls++;}});await c.load();c.show();c.data.reason='说明';app.globalData.session.userId='other';await c.save();assert.equal(calls,0);app.globalData.session.userId='self-id';c.properties.contextKey='new-subject';await c.save();assert.equal(calls,0);
 });
 
-test('主体选择器只返回目录中的ID，搜索与团队分组不产生全员个人选项',()=>{
- const {instance:c}=harness('components/profile-scope-picker/index.js');const events=[];c.triggerEvent=(name,event)=>events.push(event);c.properties={mode:'person',modes:[{value:'person'}],members:[{id:'1',name:'张三',team_ids:['a']},{id:'2',name:'李四',team_ids:['b']}],teams:[]};c.setData({selecting:'person'});c.select({currentTarget:{dataset:{id:'forged'}}});assert.equal(events.length,0);c.teamFilter({currentTarget:{dataset:{id:'a'}}});assert.equal(c.data.visibleMembers.length,1);c.search({detail:{value:'李'}});assert.equal(c.data.visibleMembers.length,0);c.select({currentTarget:{dataset:{id:'1'}}});assert.equal(events[0].id,'1');
+test('主体选择器只接受共享选人弹层确认的有效单个ID',()=>{
+ const {instance:c}=harness('components/profile-scope-picker/index.js');const events=[];c.triggerEvent=(name,event)=>events.push({name,event});c.properties={mode:'person',modes:[{value:'person'}],members:[{id:'1',name:'张三',team_ids:['a']},{id:'2',name:'李四',team_ids:['b']}],teams:[]};c.show();events.length=0;
+ c.confirmPerson({detail:{ids:['forged']}});c.confirmPerson({detail:{ids:[]}});c.confirmPerson({detail:{ids:['1','2']}});assert.equal(events.length,0);
+ c.confirmPerson({detail:{ids:['1'],teamId:'a'}});assert.equal(events.at(-1).event.id,'1');assert.equal(events.at(-1).event.kind,'person');
 });
 
 test('主管从团队切个人，经选择器选择成员后经营数据与画像同时查询该成员UUID',async()=>{
@@ -112,7 +114,7 @@ test('主管从团队切个人，经选择器选择成员后经营数据与画�
  c.properties={modes:p.data.profileScopeOptions,mode:p.data.profileScopeMode,members:p.data.scopeMembers,teams:p.data.scopeTeams};
  c.triggerEvent=(name,detail)=>name==='modechange'?p.selectProfileScope({detail}):p.changeProfileSubject({detail});
  c.switchMode({currentTarget:{dataset:{mode:'person'}}});await tick();assert.equal(p.data.profileScopeMode,'person');assert.equal(queries.at(-1).member_id,'self-id');
- c.properties.mode=p.data.profileScopeMode;c.show();assert.equal(c.data.open,true);assert.equal(c.data.selecting,'person');assert.equal(c.data.visibleMembers.length,2);
+ c.properties.mode=p.data.profileScopeMode;c.show();assert.equal(c.data.open,true);assert.equal(c.data.selecting,'person');assert.equal(c.properties.members.length,2);
  c.select({currentTarget:{dataset:{id:memberId}}});await tick();assert.equal(c.data.open,false);assert.equal(p.data.profileSelectedMemberId,memberId);assert.equal(p.data.profileScopeLabel,'王新源');assert.equal(queries.at(-1).member_id,memberId);assert.equal(growth.at(-1).member_id,memberId);assert.equal(queries.at(-1).account_code,undefined);assert.equal(p.data.canEditSalesTarget,false);
  for(const tab of ['maturity','efficiency','profile']){p.selectProfileTab({currentTarget:{dataset:{tab}}});assert.equal(p.data.profileSelectedMemberId,memberId);assert.equal(p.data.targetQueryMemberId,memberId);}
  const before=queries.length;c.switchMode({currentTarget:{dataset:{mode:'department'}}});c.select({currentTarget:{dataset:{id:'not-in-directory'}}});assert.equal(queries.length,before);assert.equal(p.data.profileScopeMode,'person');assert.equal(p.data.profileSelectedMemberId,memberId);
@@ -186,7 +188,7 @@ test('FDE已显示画像在身份属性变化后立即清空，等待新账号�
 });
 
 test('一线销售目录请求失败显示统一重试状态，重试成功后恢复本人数据',async()=>{
- let rejectDirectory,calls=0;const {instance:p,app}=page({getProfileScopeOptions:()=>{calls++;return calls===1?new Promise((resolve,reject)=>{rejectDirectory=reject;}):Promise.resolve({data_source:'database',allowed_scopes:['self'],members:[{id:'self-id',display_name:'本人',role:'sales',team_ids:[]}],teams:[],defaults:{scope:'self',member_id:'self-id'}});},getProfilePerformance:async()=>performance(),ensureSalesGrowthReview:async()=>({}),getSalesGrowth:async()=>({today_status:'failed'})});
+ let rejectDirectory,calls=0;const {instance:p,app}=page({getProfileScopeOptions:()=>{calls++;return calls===1?new Promise((resolve,reject)=>{rejectDirectory=reject;}):Promise.resolve({data_source:'database',allowed_scopes:['self'],members:[{id:'self-id',display_name:'本人',role:'sales',team_ids:[]}],teams:[],defaults:{scope:'self',member_id:'self-id',team_id:null}});},getProfilePerformance:async()=>performance(),ensureSalesGrowthReview:async()=>({}),getSalesGrowth:async()=>({today_status:'failed'})});
  app.globalData.session.role='sales';p.sync();const first=p.loadProfileDirectory();assert.equal(p.data.directoryLoading,true);rejectDirectory(Error('查看范围暂不可用'));await first;assert.equal(p.data.directoryLoading,false);assert.equal(p.data.directoryError,'查看范围暂不可用');assert.equal(p.data.organizationReady,false);await p.loadProfileDirectory();await tick();assert.equal(calls,2);assert.equal(p.data.directoryError,'');assert.equal(p.data.profileScopeMode,'self');assert.equal(p.data.organizationReady,true);
  const markup=fs.readFileSync(path.resolve(__dirname,'../miniprogram/pages/profile/index.wxml'),'utf8');assert.match(markup,/<view wx:if="\{\{!isFde && \(directoryLoading \|\| directoryError\)\}\}" class="profile-directory-state surface">/);assert.match(markup,/<button wx:else class="profile-directory-retry" bindtap="loadProfileDirectory"/);assert.equal((markup.match(/bindtap="loadProfileDirectory"/g)||[]).length,1);assert.match(markup,/!directoryLoading && !directoryError && activeProfileTab === 'maturity'/);
 });
@@ -197,7 +199,7 @@ test('amount_text优先于已丢分位的JSON数字，超大合法目标回填�
 
 test('目标弹层提升到页面根节点，入口按内容宽度显示且缺目标提示不换行',()=>{
  const component=fs.readFileSync(path.resolve(__dirname,'../miniprogram/components/quarter-target/index.wxml'),'utf8'),css=fs.readFileSync(path.resolve(__dirname,'../miniprogram/components/quarter-target/index.wxss'),'utf8');
- assert.match(component,/<root-portal wx:if="\{\{open\}\}"><view class="sheet-mask"/);assert.match(component,/<button[^>]*class="target-edit-button"[^>]*size="mini"/);assert.match(css,/\.target-sheet\{display:flex;flex-direction:column/);assert.match(css,/\.sheet-footer\{flex-shrink:0/);
+ assert.match(component,/<root-portal wx:if="\{\{open\}\}"><view class="sheet-mask sb-portal-theme"/);assert.match(component,/<button[^>]*class="target-edit-button"[^>]*size="mini"/);assert.match(css,/\.target-sheet\{display:flex;flex-direction:column/);assert.match(css,/\.sheet-footer\{flex-shrink:0/);
  const metric=require('../miniprogram/utils/profileMetrics');assert.equal(metric.performanceMetric({},'collection',100).rateText,'目标待设置');assert.equal(metric.performanceMetric({targets:{collection:100}},'collection',null).rateText,'实绩待登记');
  for(const file of ['pages/profile/index.wxss','components/fde-profile/index.wxss'])assert.match(fs.readFileSync(path.resolve(__dirname,'../miniprogram',file),'utf8'),/white-space:nowrap/);
 });
@@ -239,4 +241,40 @@ test('销售和FDE画像的四张画布均按弹层状态卸载并保留等高�
   for(const id of ids)assert.match(markup,new RegExp('<canvas wx:if="\\{\\{!'+flag+'\\}\\}" canvas-id="'+id+'"'));
   assert.equal((markup.match(/<view wx:else class="(?:radar|growth|history)-canvas"\/>/g)||[]).length,2);
  }
+});
+
+
+test('明确零目标与未设置分开，零申请显示且可编辑提交审批',async()=>{
+ let body;
+ const zeroRows=[{kind:'collection',amount_text:'0.00',amount:0,version_no:2},{kind:'recognized',amount:null,version_no:3}];
+ const {instance:c,toasts}=target({getTargets:async()=>({items:zeroRows,editable:true}),saveTargetBatch:async value=>{body=value;return {status:'pending'};}});
+ await c.load();assert.equal(c.data.rows[0].currentText,'¥0');assert.equal(c.data.rows[0].inputAmount,'0');assert.equal(c.data.rows[1].currentText,'未设置');assert.equal(c.data.rows[1].amount,null);
+ c.show();assert.equal(c.data.collection,'0');assert.equal(c.data.recognized,'');assert.equal(c.data.isChange,true);
+ c.input({currentTarget:{dataset:{field:'recognized'}},detail:{value:'0.000000'}});
+ await c.save();assert.equal(body,undefined);assert.match(c.data.error,/依据|原因/);
+ c.data.reason='北区明确零目标';await c.save();assert.equal(body.items[0].amount,'0');assert.equal(body.items[1].amount,'0');assert.equal(body.items[0].version_no,2);assert.equal(toasts[0].title,'已提交运营审批');
+ const pending=target({getTargets:async()=>({items:rows,editable:true,pending_requests:[{kind:'collection',proposed_amount:0}]})}).instance;
+ await pending.load();assert.equal(pending.data.rows[0].proposedText,'¥0');pending.show();assert.equal(pending.data.open,false);
+});
+
+test('零目标首次提交仍要求权限，负值与空白拒绝且不除零',async()=>{
+ let calls=0;
+ const {instance:c,app}=target({getTargets:async()=>({items:[],editable:true}),saveTargetBatch:async()=>{calls++;return {status:'effective'};}});
+ await c.load();c.show();assert.equal(c.data.isChange,false);
+ for(const value of ['', '-1', '-0.1', '0.0000001']){Object.assign(c.data,{collection:value,recognized:'0',reason:'已商定'});await c.save();assert.equal(calls,0);}
+ Object.assign(c.data,{collection:0,recognized:'0'});await c.save();assert.equal(calls,1);
+ app.globalData.session.permissions={'target.submit':false};await c.load();assert.equal(c.data.canEdit,false);c.show();await c.save();assert.equal(calls,1);
+ const metrics=require('../miniprogram/utils/profileMetrics');
+ for(const actual of [0,100,null]){const m=metrics.performanceMetric({targets:{collection:0}},'collection',actual);assert.equal(m.targetText,'¥0');assert.equal(m.progress,0);assert.doesNotMatch(m.rateText,/NaN|Infinity|完成率/);}
+});
+
+test('保留回款零目标只调整确收正数，提交金额与各自版本不变形',async()=>{
+ let body;
+ const {instance:c}=target({getTargets:async()=>({items:[{kind:'collection',amount_text:'0.00',version_no:7},{kind:'recognized',amount_text:'2000000.00',version_no:9}],editable:true}),saveTargetBatch:async value=>{body=value;return {status:'pending'};}});
+ await c.load();c.show();assert.equal(c.data.collection,'0');assert.equal(c.data.recognized,'200');
+ c.input({currentTarget:{dataset:{field:'recognized'}},detail:{value:'200.30'}});
+ c.input({currentTarget:{dataset:{field:'reason'}},detail:{value:'回款保持零，仅调整确收'}});
+ await c.save();assert.equal(body.items[0].amount,'0');assert.equal(body.items[0].version_no,7);
+ assert.equal(body.items[1].amount,'2003000');assert.equal(body.items[1].version_no,9);
+ assert.equal(c.data.rows[0].currentText,'¥0');assert.equal(c.data.rows[1].currentText,'¥2,000,000');
 });

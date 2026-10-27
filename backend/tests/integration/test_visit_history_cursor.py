@@ -268,3 +268,84 @@ async def test_created_sort_api_echo_and_default_backward_compatibility(connecti
                 params={**params, "sort": "created_desc", "cursor": created.json()["next_cursor"], "offset": 2},
             )
         ).status_code == 422
+
+
+async def test_history_pages_merge_direct_bridge_and_null_customer_principal_without_duplicates(connection):
+    from tests.integration.feishu_fixtures import seed_execute
+    from tests.integration.test_business_rankings import opportunity
+    from tests.integration.test_customer_map_projection import formal_visit
+
+    sales, project, people = await fixture(connection, 0)
+    other = await opportunity(connection, "XS001", 200000)
+    expected_ids, bridge_ids = [], []
+    for kind in ("direct", "bridge", "principal"):
+        for index in range(2):
+            row = await formal_visit(
+                connection, sales, project["customer_id"], f"2026-09-{20 + index}",
+                project["id"] if kind != "bridge" else None,
+            )
+            expected_ids.append(row["id"])
+            if kind != "direct":
+                await seed_execute(
+                    connection, "UPDATE activity.visit SET customer_id=NULL WHERE id=$1::uuid", row["id"],
+                )
+            if kind == "bridge":
+                bridge_ids.append(row["id"])
+                await seed_execute(
+                    connection, """INSERT INTO activity.visit_opportunity(workspace_id,visit_id,opportunity_id)
+                    SELECT workspace_id,$1::uuid,id FROM crm.opportunity WHERE id=ANY($2::uuid[])""",
+                    row["id"], [project["id"], other["id"]],
+                )
+    await formal_visit(connection, sales, other["customer_id"], "2026-09-25", other["id"])
+    removed = await formal_visit(connection, sales, project["customer_id"], "2026-09-26", project["id"])
+    await connection.execute("UPDATE activity.visit SET deleted_at=clock_timestamp() WHERE id=$1::uuid", removed["id"])
+    await connection.execute(
+        "UPDATE activity.visit SET interaction_at=NULL WHERE id=ANY($1::uuid[])", expected_ids[::2],
+    )
+    # All three subject forms satisfy the real deferred consistency constraints;
+    # no invalid historical relation or disabled trigger is needed for this test.
+    await connection.execute("SET CONSTRAINTS ALL IMMEDIATE")
+    await connection.execute("SET CONSTRAINTS ALL DEFERRED")
+    legacy_subject = """(v.customer_id=$1::uuid OR (v.opportunity_id IS NULL AND EXISTS (
+      SELECT 1 FROM activity.visit_opportunity vo JOIN crm.opportunity linked ON linked.id=vo.opportunity_id
+      WHERE vo.visit_id=v.id AND linked.customer_id=$1::uuid AND linked.deleted_at IS NULL))
+      OR (v.customer_id IS NULL AND v.opportunity_id IS NOT NULL AND EXISTS (
+        SELECT 1 FROM crm.opportunity linked WHERE linked.id=v.opportunity_id
+          AND linked.customer_id=$1::uuid AND linked.deleted_at IS NULL))) AND v.deleted_at IS NULL"""
+    repo = DetailHistoryRepository()
+    for code in ("XS001", people["lead"]["code"]):
+        await actor(connection, code)
+        for target in (None, project["id"]):
+            args = [project["customer_id"]]
+            where = legacy_subject
+            if target:
+                args.append(target)
+                where += """ AND (v.opportunity_id=$2::uuid OR (v.opportunity_id IS NULL AND EXISTS (
+                  SELECT 1 FROM activity.visit_opportunity vo WHERE vo.visit_id=v.id AND vo.opportunity_id=$2::uuid)))"""
+            for sort in (None, "created_desc"):
+                order = ("created_at DESC,id DESC" if sort
+                         else "interaction_at DESC NULLS LAST,history_sort_date DESC,id DESC")
+                expected = [row["id"] for row in await connection.fetch(
+                    "SELECT v.id::text FROM activity.visit v WHERE " + where + " ORDER BY " + order,  # noqa: S608
+                    *args,
+                )]
+                # The FDE lead cannot read the other customer's project, so the
+                # real all-linked-opportunities RLS hides both multi-project rows.
+                visible = set(expected_ids) - (set(bridge_ids) if code != "XS001" else set())
+                assert set(expected) == visible and len(expected) == len(visible)
+                cursor, seen = None, []
+                for offset in range(0, len(expected), 2):
+                    page = await repo.visits(connection, project["customer_id"], opportunity_id=target,
+                                             limit=2, cursor=cursor, sort=sort)
+                    old = await repo.visits(connection, project["customer_id"], opportunity_id=target,
+                                            limit=2, offset=offset, sort=sort)
+                    ids = [row["id"] for row in page["items"]]
+                    assert ids == [row["id"] for row in old["items"]] == expected[offset:offset + 2]
+                    seen.extend(ids)
+                    cursor = page["next_cursor"]
+                assert seen == expected and cursor is None
+                assert not (await repo.visits(connection, project["customer_id"], opportunity_id=target,
+                                             limit=2, offset=6, sort=sort))["items"]
+    await actor(connection, "XS002")
+    for target in (None, project["id"]):
+        assert not (await repo.visits(connection, project["customer_id"], opportunity_id=target))["items"]

@@ -1,8 +1,9 @@
 /**
- * BACKEND-CONTRACT 今日任务摘要与列表共用北京时间口径：今日待办=今天 due_at 且 status 非 completed/cancelled；今日已完成=今天 completed_at。
+ * BACKEND-CONTRACT 今日任务摘要与列表共用北京时间口径：今日待办排除全部终态；今日已完成仅正常完成，按北京时间完成日期。
  * 全部待办包含过期与未来任务，不是仅今天；统计只遍历传入的已加载任务数组，不处理服务端分页。
- * 后端拒绝任务应返回 cancelled；字面 rejected 未被 isPending 排除，是对接需统一的状态兼容缺口。
+ * 首页正式摘要直接使用服务端全范围统计；本文件不从分页数据推算服务端数量。
  */
+const {outcome}=require('./taskExecutionPresentation');
 const CHINA_OFFSET_MS = 8 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -18,7 +19,7 @@ function chinaDay(value) {
 }
 
 function isPending(task) {
-  return task.status !== "completed" && task.status !== "cancelled";
+  return !outcome(task).isEnded;
 }
 
 // Compare dates in Beijing time, independent of the device's local time zone.
@@ -29,7 +30,7 @@ function selectOverviewTasks(tasks, filter, now = new Date()) {
   if (filter === "all_pending") return items.filter(isPending);
   if (today === null) return [];
   if (filter === "today_completed") {
-    return items.filter((task) => task.status === "completed" && chinaDay(task.completed_at) === today);
+    return items.filter((task) => outcome(task).isSuccessful && chinaDay(outcome(task).endedAt) === today);
   }
   if (filter === "today_pending") {
     return items.filter((task) => isPending(task) && chinaDay(task.due_at) === today);
@@ -39,7 +40,7 @@ function selectOverviewTasks(tasks, filter, now = new Date()) {
 
 function buildOverviewMetrics(tasks, now = new Date()) {
   return [
-    { key: "today_completed", label: "今日已完成", value: selectOverviewTasks(tasks, "today_completed", now).length },
+    { key: "today_completed", label: "今日正常完成", value: selectOverviewTasks(tasks, "today_completed", now).length },
     { key: "today_pending", label: "今日待办", value: selectOverviewTasks(tasks, "today_pending", now).length },
     { key: "all_pending", label: "全部待办", value: selectOverviewTasks(tasks, "all_pending", now).length },
   ];

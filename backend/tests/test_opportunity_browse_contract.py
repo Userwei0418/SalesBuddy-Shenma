@@ -13,6 +13,7 @@ from sales_backend.api import business, customer_assets
 from sales_backend.api.dependencies import get_database, get_identity
 from sales_backend.domain.agent import ActorContext
 from sales_backend.repositories import opportunity_browse, opportunity_overview
+from sales_backend.services import customer_map
 
 
 def client_context(role):
@@ -77,7 +78,7 @@ async def test_invalid_member_scope_is_forbidden_in_page_map_and_overview(monkey
     client, _, _ = client_context("fde_lead")
     forbidden = AsyncMock(side_effect=PermissionError("所选成员不在当前数据范围内"))
     monkeypatch.setattr(opportunity_browse, "scope_members", forbidden)
-    monkeypatch.setattr(customer_assets, "scope_members", forbidden)
+    monkeypatch.setattr(customer_map, "scope_members", forbidden)
     monkeypatch.setattr(opportunity_overview, "scoped_opportunity_ids", forbidden)
     params = {"scope": "team", "member_ids": str(uuid4()), "year": 2026}
     async with client:
@@ -92,7 +93,7 @@ async def test_map_and_overview_forward_selected_members_to_their_sql_scopes(mon
     members, projects = [str(uuid4()), str(uuid4())], [str(uuid4()), str(uuid4())]
     map_scope = AsyncMock(return_value=("team", members, []))
     overview_scope = AsyncMock(return_value=("team", members, [], [{"id": value} for value in projects]))
-    monkeypatch.setattr(customer_assets, "scope_members", map_scope)
+    monkeypatch.setattr(customer_map, "scope_members", map_scope)
     monkeypatch.setattr(opportunity_overview, "scoped_opportunity_ids", overview_scope)
     params = [("scope", "team"), *(('member_ids', value) for value in members), ("year", "2026")]
     async with client:
@@ -104,3 +105,101 @@ async def test_map_and_overview_forward_selected_members_to_their_sql_scopes(mon
         assert response.status_code == 200, response.text
         assert [str(value) for value in overview_scope.call_args.args[4]] == members
         assert connection.fetchrow.call_args.args[-1] == projects
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("params", [
+    {"include_overview": True},
+    {"include_overview": True, "overview_year": 1999},
+    {"include_overview": True, "overview_year": 2101},
+    {"include_overview": True, "overview_year": 2026, "overview_quarters": [0]},
+    {"include_overview": True, "overview_year": 2026, "overview_quarters": [5]},
+    {"include_overview": True, "overview_year": 2026, "overview_quarters": [1, 2, 3, 4, 1]},
+    {"include_overview": True, "overview_year": 2026, "overview_quarters": ["Q1"]},
+])
+async def test_filtered_overview_rejects_invalid_period_before_query(params):
+    client, connection, _ = client_context("sales")
+    async with client:
+        response = await client.get("/api/v1/opportunities", params=params)
+    assert response.status_code == 422, response.text
+    connection.fetchrow.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("role", ["sales", "supervisor", "manager", "operations", "administrator", "fde", "fde_lead"])
+async def test_opt_in_overview_uses_filtered_set_and_removes_private_date_facts(monkeypatch, role):
+    client, connection, actor = client_context(role)
+    monkeypatch.setattr(opportunity_browse, "scope_members", AsyncMock(return_value=("self", [actor.user_id], [])))
+    connection.fetchrow.return_value = {
+        "ids": [], "summary": {"total": 3}, "facets": {"years": []}, "creation_date_facts": [],
+        "overview_metrics": {
+            "total": 3, "won": 1, "active": 2, "missingCloseDates": 0, "missingWonDates": 0,
+            "demo_scene_count": 0, "creation_date_facts": [
+                {"historical": True, "source_created": "2026-07-01"},
+                {"historical": True, "created_at": "2026-07-01"},
+                {"historical": False, "created_at": "2026-03-31T15:59:59Z"},
+            ],
+        },
+    }
+    async with client:
+        response = await client.get("/api/v1/opportunities", params={
+            "include_overview": True, "overview_year": 2026, "overview_quarters": [3, 3],
+            "scope": "self", "member_id": str(actor.user_id), "q": "筛选关键词", "year": 2025,
+            "quarters": [4], "stages": ["won"], "product_line": "产品线", "grade": "A", "page_size": 1,
+        })
+    assert response.status_code == 200, response.text
+    payload = response.json()
+    assert payload["overview"] == {
+        "metrics": {"total": 3, "won": 1, "active": 2, "missingCloseDates": 0, "missingWonDates": 0,
+                    "demo_scene_count": 0, "newCount": 1, "missingCreatedDates": 1},
+        "year": 2026, "quarters": [3], "definition_version": "opportunity_filtered_overview_v1",
+    }
+    assert payload["summary"]["total"] == payload["overview"]["metrics"]["total"]
+    assert "creation_date_fact" not in response.text
+    connection.fetchrow.assert_awaited_once()
+    sql, *args = connection.fetchrow.call_args.args
+    assert "FROM filtered) AS overview_metrics" in sql
+    assert "FROM activity.visit v" in sql and "v.status IN ('confirmed','archived')" in sql
+    assert "timezone('Asia/Shanghai',closed_at)" in sql
+    assert "security.authorization_opportunity_direct('opportunity.read',o.id)" in sql
+    assert "筛选关键词" in args and "筛选关键词" not in sql
+    assert 2026 in args and [3] in args
+
+
+@pytest.mark.asyncio
+async def test_legacy_page_does_not_compute_or_return_filtered_overview():
+    client, connection, _ = client_context("sales")
+    async with client:
+        response = await client.get("/api/v1/opportunities", params={"page_size": 1})
+    assert response.status_code == 200
+    assert "overview" not in response.json()
+    sql = connection.fetchrow.call_args.args[0]
+    assert "AS overview_metrics" not in sql and "FROM activity.visit v" not in sql
+
+
+@pytest.mark.asyncio
+async def test_follow_up_order_is_opt_in_for_customer_candidates():
+    client, connection, _ = client_context("sales")
+    customer_id = str(uuid4())
+    async with client:
+        response = await client.get("/api/v1/opportunities", params={
+            "customer_id": customer_id, "order": "recent_follow_up",
+            "include_closed": True, "page_size": 20, "offset": 40,
+        })
+    assert response.status_code == 200, response.text
+    sql, *args = connection.fetchrow.call_args.args
+    assert "security.authorization_opportunity('opportunity.read',o.id)" in sql
+    assert "recency_ranked ORDER BY latest_follow_up_at DESC NULLS LAST,name,id" in sql
+    assert customer_id in map(str, args)
+    assert args[-2:] == [20, 40]
+
+
+@pytest.mark.asyncio
+async def test_follow_up_order_does_not_change_legacy_page_default():
+    client, connection, _ = client_context("sales")
+    async with client:
+        response = await client.get("/api/v1/opportunities", params={"page_size": 20})
+    assert response.status_code == 200, response.text
+    sql = connection.fetchrow.call_args.args[0]
+    assert "recency_visible_visits" not in sql
+    assert "expected_close_date NULLS LAST,amount DESC,updated_at DESC,id" in sql

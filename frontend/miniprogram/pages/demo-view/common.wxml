@@ -1,0 +1,22 @@
+<template name="navigation">
+  <view class="navigation">
+    <view wx:for="{{navItems}}" wx:key="key" class="nav-link {{activeKey === item.key ? 'active' : ''}}" data-key="{{item.key}}" bindtap="openNavigation" hover-class="row-pressed" aria-role="button" aria-label="{{item.label}}">
+      <image class="nav-icon" src="{{activeKey === item.key ? item.selectedIcon : item.icon}}" mode="aspectFit"/>
+      <text>{{item.label}}</text>
+    </view>
+  </view>
+</template>
+<template name="state">
+  <view wx:if="{{loading && !ready}}" class="state">正在加载…</view>
+  <view wx:if="{{error}}" class="state error"><text>{{error}}</text><button size="mini" bindtap="load">重试</button></view>
+</template>
+<template name="record">
+  <view class="record-top">
+    <view class="record-avatar">{{item.initial}}</view>
+    <view class="record-main"><view class="record-title">{{item.title}}</view><view wx:if="{{item.context}}" class="muted record-context">{{item.context}}</view></view>
+    <text class="chevron">›</text>
+  </view>
+  <view class="record-meta"><text wx:if="{{item.badge}}" class="status-tag tone-{{item.tone}}">{{item.badge}}</text><text wx:if="{{item.secondary}}" class="muted">{{item.secondary}}</text></view>
+  <view wx:if="{{item.preview}}" class="record-preview">{{item.preview}}</view>
+  <view class="record-footer"><text>{{item.footer}}</text><text wx:if="{{item.amountText}}" class="record-amount">{{item.amountText}}</text></view>
+</template>

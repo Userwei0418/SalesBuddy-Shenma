@@ -8,7 +8,8 @@
     "sb-summary-card": "/ui/sb/sb-summary-card/index",
     "sb-section": "/ui/sb/sb-section/index",
     "sb-desc-list": "/ui/sb/sb-desc-list/index",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "sb-segmented": "/ui/sb/sb-segmented/index"
   },
   "homeButton": true
 }

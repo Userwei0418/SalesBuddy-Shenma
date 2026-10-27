@@ -45,7 +45,8 @@ def test_deployment_lock_overrides_full_admin_grants_without_business_query(lock
     client, _ = locked_client
     response = client.request(method, path, json={"api_key": "synthetic-never-echo"})
     assert response.status_code == 403
-    assert response.json()["detail"] == LOCK_MESSAGE
+    assert response.json()["code"] == "FORBIDDEN"
+    assert response.json()["detail"] == "当前账号没有此操作权限，请联系管理员"
     assert "synthetic-never-echo" not in response.text
 
 
@@ -55,7 +56,12 @@ def test_locked_page_can_read_safe_config(locked_client):
     app.dependency_overrides[model_api.service] = lambda: service
     response = client.get("/api/v1/admin/model-apis")
     assert response.status_code == 200
-    assert response.json() == {"items": [], "locked": True, "lock_message": LOCK_MESSAGE}
+    payload = response.json()
+    safe_status = payload.pop("unified_model_key")
+    assert payload == {"items": [], "locked": True, "lock_message": LOCK_MESSAGE}
+    assert safe_status["managed"] is False and safe_status["can_manage"] is False
+    assert set(safe_status) == {"managed", "can_manage", "configured", "key_hint", "revision",
+                                "updated_at", "rotation_status", "message"}
 
 
 def test_agent_connectivity_route_is_not_blocked(locked_client):

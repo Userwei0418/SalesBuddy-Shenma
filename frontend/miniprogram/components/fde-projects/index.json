@@ -9,6 +9,8 @@
     "sb-select": "/ui/sb/sb-select/index",
     "sb-labeled-select": "/ui/sb/sb-labeled-select/index",
     "t-button": "/ui/tdesign/button/button",
-    "t-icon": "/ui/tdesign/icon/icon"
+    "t-icon": "/ui/tdesign/icon/icon",
+    "person-picker": "/components/person-picker/index",
+    "opportunity-period-filters": "../opportunity-period-filters/index"
   }
 }

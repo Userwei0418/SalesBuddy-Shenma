@@ -1,12 +1,16 @@
+const { MESSAGES } = require('../../utils/errorMessages');
 const access=require('../../utils/access');
 const {DetailReadSession,customerLoaders,activeSections,detailWithPages,pageStates} = require('../../utils/detailReadSession');
 const apiClient = require("../../utils/apiClient");
 const { normalizeCustomerDetail } = require("../../utils/customerDetail");
+
 // 顶部摘要卡标签（仅展示用）：风险黄/红/待评估用状态标签，绿色不标；象限、等级为中性标签。
 const RISK_TONES = { yellow: "watch", red: "bad", gray: "pending" };
 function heroTags(detail) {
+  if(!detail.isCustomerIdentity)return [{label:detail.businessIdentityText}];
   const tone = RISK_TONES[detail.signal && detail.signal.tone];
   return [
+    {label:detail.businessIdentityText},
     ...(tone ? [{ label: detail.risk, tone }] : []),
     { label: detail.quadrant },
     { label: `${detail.level}级客户` },
@@ -14,6 +18,10 @@ function heroTags(detail) {
 }
 
 Page({
+  openOpportunityTransfer(e){const id=e.currentTarget.dataset.id;if(id)wx.navigateTo({url:'/pages/opportunity-transfer/index?id='+encodeURIComponent(id)});},
+  editCustomer() {wx.navigateTo({url:'/pages/customer-edit/index?customerId='+encodeURIComponent(this.data.customerId)});},
+  onTabChange(e) { this.selectTab({ currentTarget: { dataset: { tab: e.detail.key } } }); },
+
   data: {
     customerId: "",
     role: "sales",
@@ -36,7 +44,7 @@ Page({
   onShow() {
     if (typeof getApp === "function" && getApp().guardPage && !getApp().guardPage(this, 'customer-detail')) return;
     if (!getApp().ensureLogin()) return;
-    this.setData({ role: getApp().globalData.role,userName:getApp().globalData.session.userName,viewerUserId:getApp().globalData.session.userId });
+    this.setData({ customer:null,role: getApp().globalData.role,userName:getApp().globalData.session.userName,viewerUserId:getApp().globalData.session.userId });
     this.loadCustomer();
   },
 
@@ -47,11 +55,18 @@ Page({
     if(!this._reader)this._reader=new DetailReadSession(()=>this.renderCustomer(),()=>access.identity(getApp().globalData.session));
     const reader=this._reader,token=reader.reset(this.data.customerId);
     this._raw=null;this._focused=null;this._fullVisits={};this._visitSerial=0;
-    this.setData({customer:null,detailPages:{},expandedVisitId:'',visitDetailState:{loading:false,error:'',ready:false},detailFocusError:''});
+    this.setData({customer:null,customerCanCreateOpportunity:false,customerOpportunityCreateReason:'',detailPages:{},expandedVisitId:'',visitDetailState:{loading:false,error:'',ready:false},detailFocusError:''});
     wx.showNavigationBarLoading();
     try {
       const raw=await apiClient.getCustomerHeader(this.data.customerId);
       if(!reader.current(token))return;
+      if(String(raw.id)!==String(this.data.customerId))throw Error('客户资料不匹配，请重新打开');
+
+      if(access.can(getApp().globalData.session,'opportunity.create')){
+        apiClient.getOpportunityCreateAccess(this.data.customerId).then(value=>{
+          if(reader.current(token))this.setData({customerCanCreateOpportunity:value.can_create_opportunity===true,customerOpportunityCreateReason:value.can_create_opportunity?'':MESSAGES[value.denial_reason] || '当前客户暂不能创建商机'});
+        }).catch(error=>{if(reader.current(token))this.setData({customerCanCreateOpportunity:false,customerOpportunityCreateReason:error.message || '创建资格核对失败，请重新打开客户'});});
+      }
       this._raw=raw;this._loaders=customerLoaders(apiClient,this.data.customerId);this.renderCustomer();this.loadSections();
       if(this.data.opportunityId){
         const target=await apiClient.getCustomerOpportunityHeader(this.data.customerId,this.data.opportunityId);
@@ -72,6 +87,7 @@ Page({
     const raw=detailWithPages(summary.data||this._raw,this._reader.pages,this._focused);
     raw.visits=raw.visits.map(visit=>this._fullVisits[visit.id]||visit);
     const detail=normalizeCustomerDetail(raw,this.data.opportunityId);
+    detail.opportunities=detail.opportunities.map(item=>({...item,canEdit:access.canObject(getApp().globalData.session,'opportunity.update',item,'can_edit')}));
     const stages=require('../../utils/opportunity').STAGES.slice(0,6).map(s=>s.label),current=Math.max(0,stages.indexOf(detail.opportunity.stage));
     this.setData({heroTags:heroTags(detail),detailSummary:{loading:summary.loading,loaded:summary.loaded,error:summary.error},detailPages:pageStates(this._reader.pages),customer:{...detail,initial:detail.name.substring(0,1),contacts:detail.contacts.map(item=>({...item,initial:item.name?item.name.substring(0,1):'?',strengthTone:item.strength==='首要联系人'?'strong':'attention'})),stageSteps:stages.map((label,index)=>({label,status:index<current?'done':index===current?'current':'upcoming'}))}});
   },
@@ -87,7 +103,6 @@ Page({
   loadSections(){if(this._reader&&this._loaders){activeSections(this.data.activeTab).forEach(key=>this._reader.load(key,this._loaders[key]));if(this.data.activeTab==='overview')this.loadCustomerSummary();}},
   moreSection(e){const key=e.currentTarget.dataset.section;return this._reader.load(key,this._loaders[key],{more:true});},
   retrySection(e){const key=e.currentTarget.dataset.section;return this._reader.load(key,this._loaders[key],{retry:true});},
-  onTabChange(e) { this.selectTab({ currentTarget: { dataset: { tab: e.detail.key } } }); },
   selectTab(e) {
     this.setData({ activeTab: e.currentTarget.dataset.tab, expandedVisitId: "" });
     this._visitSerial=(this._visitSerial||0)+1;this.loadSections();
@@ -119,8 +134,8 @@ Page({
       this._fullVisits[id]={...visit,is_summary:false};this.renderCustomer();this.setData({visitDetailState:{loading:false,error:'',ready:true}});
     } catch(error){if(reader.current(token)&&serial===this._visitSerial)this.setData({visitDetailState:{loading:false,error:error.message||'完整记录加载失败',ready:false}});}
   },
-  createOpportunity() { wx.navigateTo({ url: `/pages/opportunity-create/index?customerId=${this.data.customer.id}` }); },
-  editOpportunity(e) { wx.navigateTo({url:`/pages/opportunity-create/index?customerId=${this.data.customer.id}&opportunityId=${e.currentTarget.dataset.id}`}); },
+  createOpportunity() { if(!this.data.customerCanCreateOpportunity)return;wx.navigateTo({ url: `/pages/opportunity-create/index?customerId=${this.data.customer.id}` }); },
+  editOpportunity(e) { const customer=this.data.customer,opportunity=customer && customer.opportunities.find(item=>String(item.id)===String(e.currentTarget.dataset.id));if(!access.canObject(getApp().globalData.session,'opportunity.update',opportunity,'can_edit'))return;wx.navigateTo({url:`/pages/opportunity-create/index?customerId=${customer.id}&opportunityId=${opportunity.id}`}); },
   recordVisit() {
     const customer = this.data.customer;
     wx.navigateTo({

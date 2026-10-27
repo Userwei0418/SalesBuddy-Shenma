@@ -1,3 +1,4 @@
+@import "../../styles/customer-identity.wxss";
 page{background:var(--ui-background)}
 .create-page{min-height:100vh;padding-bottom:calc(240rpx + constant(safe-area-inset-bottom));padding-bottom:calc(240rpx + env(safe-area-inset-bottom));color:var(--ui-ink);background:var(--ui-background)}
 button::after{border:0}
@@ -9,6 +10,10 @@ button::after{border:0}
 .create-body{padding:24rpx 32rpx}
 .notice{margin-bottom:16rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}
 .notice.orange{color:var(--ui-warning)}
+.submission-error,.field-error{color:var(--ui-danger);line-height:1.5;overflow-wrap:break-word}
+.field-error{margin-top:12rpx;font-size:var(--ui-text-small)}
+.field-row.invalid{box-shadow:inset 4rpx 0 0 var(--ui-danger)}
+.refresh-options{display:inline-block;margin-top:12rpx;padding:8rpx 20rpx;font-size:var(--ui-text-small);color:var(--ui-primary);background:var(--ui-surface);line-height:1.5}
 
 /* 语音填写 */
 .voice-card{display:flex;align-items:center;gap:20rpx;padding:32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}

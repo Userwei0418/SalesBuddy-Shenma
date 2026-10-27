@@ -1,0 +1,33 @@
+.department-ui .ds-och { min-width: 0; margin-bottom: var(--ui-space-6); }
+.department-ui .ds-och-head, .department-ui .ds-och-event-head { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ui-space-2) var(--ui-space-3); }
+.department-ui .ds-och-head { justify-content: space-between; margin-bottom: var(--ui-space-3); }
+.department-ui .ds-och-head h3 { margin: 0; font-size: var(--ui-text-section); }
+.department-ui .ds-och-head h3 small { margin-left: var(--ui-space-2); color: var(--ui-muted); font-size: var(--ui-text-small); font-weight: 400; }
+.department-ui .ds-och-note, .department-ui .ds-och-reason, .department-ui .ds-och-incomplete { margin: var(--ui-space-2) 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.department-ui .ds-och-note, .department-ui .ds-och-incomplete { font-size: var(--ui-text-small); }
+.department-ui .ds-och-events { list-style: none; padding: 0; margin: 0; }
+.department-ui .ds-och-events > li { padding: var(--ui-space-3) 0 var(--ui-space-4); border-top: 1px solid var(--ui-line); }
+.department-ui .ds-och-event-head { font-size: var(--ui-text-small); overflow-wrap: anywhere; }
+.department-ui .ds-och-event-head strong { color: var(--ui-ink); font-size: var(--ui-text-body); }
+.department-ui .ds-och-version { padding: 2px var(--ui-space-2); border-radius: var(--ui-radius-control); background: var(--ui-neutral-soft); color: var(--ui-secondary); }
+.department-ui .ds-och-fields { table-layout: fixed; width: 100%; margin-top: var(--ui-space-3); border-collapse: collapse; font-size: var(--ui-text-caption); }
+.department-ui .ds-och-fields caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.department-ui .ds-och-field-column { width: 22%; }
+.department-ui .ds-och-fields th, .department-ui .ds-och-fields td { padding: var(--ui-space-2) var(--ui-space-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--ui-line); overflow-wrap: anywhere; white-space: pre-wrap; }
+.department-ui .ds-och-fields thead { color: var(--ui-secondary); background: var(--ui-neutral-soft); }
+.department-ui .ds-och-fields th { font-weight: 500; }
+.department-ui .ds-och-values { list-style: none; padding: 0; margin: 0; }
+.department-ui .ds-och-values li + li { margin-top: var(--ui-space-1); }
+.department-ui .ds-och-values small { display: block; font-size: inherit; }
+.department-ui .ds-och-mobile-label { display: none; }
+.department-ui .ds-och-state { color: var(--ui-secondary); font-size: var(--ui-text-small); }
+.department-ui .ds-och-state p { margin: var(--ui-space-2) 0; overflow-wrap: anywhere; }
+.department-ui .ds-och-error { padding: var(--ui-space-3); border-radius: var(--ui-radius-control); background: var(--ui-warning-soft); color: var(--ui-warning); }
+@media (max-width: 600px) {
+  .department-ui .ds-och-fields, .department-ui .ds-och-fields tbody { display: block; }
+  .department-ui .ds-och-fields colgroup, .department-ui .ds-och-fields thead { display: none; }
+  .department-ui .ds-och-fields tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border-bottom: 1px solid var(--ui-line); }
+  .department-ui .ds-och-fields th { grid-column: 1 / -1; padding-bottom: 0; }
+  .department-ui .ds-och-fields th, .department-ui .ds-och-fields td { border: 0; min-width: 0; }
+  .department-ui .ds-och-mobile-label { display: block; margin-bottom: var(--ui-space-1); }
+}

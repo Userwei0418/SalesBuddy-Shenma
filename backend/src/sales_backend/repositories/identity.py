@@ -9,6 +9,8 @@ import asyncpg
 from sales_backend.auth.tokens import SessionReference, TokenService
 from sales_backend.db import json_value
 from sales_backend.domain.agent import ActorContext, DataScope, RoleCode
+from sales_backend.domain.role_presentation import business_role_labels, business_role_title
+from sales_backend.repositories.restricted import is_restricted_identity
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +41,26 @@ SCOPE_NAMES = {"self": "仅本人", "team": "直属团队", "workspace": "全部
 
 
 class IdentityRepository:
+    async def company_identity(self, connection: asyncpg.Connection, workspace_id: str) -> dict:
+        """Safe projection after verifying an identity and binding its own tenant context."""
+        row = await connection.fetchrow(
+            """SELECT external_workspace_id AS company_code,name AS company_name,attributes,
+                common.current_role_code() AS role,
+                ARRAY(SELECT COALESCE(t.attributes->>'kind','general')
+                  FROM security.account_team_scope($1::uuid,common.current_user_ref_id(),common.current_role_code()) s
+                  JOIN platform.team t ON t.id=s.team_id::uuid AND t.workspace_id=$1::uuid) AS department_kinds
+                FROM platform.workspace WHERE id=$1::uuid AND id=common.current_workspace_id()""",
+            workspace_id,
+        )
+        if not row:
+            return {"company_code": None, "company_name": None}
+        result = {"company_code": row["company_code"], "company_name": row["company_name"]}
+        title = business_role_title(row["role"], business_role_labels(json_value(row["attributes"])),
+                                    row["department_kinds"])
+        if title:
+            result["role_name"] = title
+        return result
+
     async def find_company_management_actor(self, connection: asyncpg.Connection, target: str) -> ActorRecord | None:
         selected = json_value(await connection.fetchval(
             "SELECT security.company_management_actor($1::uuid)", target))
@@ -56,6 +78,8 @@ class IdentityRepository:
             workspace_external_id,
             account_code.strip().upper(),
         )
+        if row and await is_restricted_identity(connection, row["workspace_id"], row["user_id"]):
+            return None
         return await self._with_role_title(connection, self._actor(row)) if row else None
 
     async def find_maintenance_administrator(
@@ -80,6 +104,8 @@ class IdentityRepository:
         user_id: str,
         role: str | None = None,
     ) -> ActorRecord | None:
+        if await is_restricted_identity(connection, workspace_id, user_id):
+            return None
         row = await connection.fetchrow(
             """
             SELECT
@@ -130,6 +156,8 @@ class IdentityRepository:
         expires_at: datetime,
         client: dict[str, str],
     ) -> None:
+        if await is_restricted_identity(connection, actor.workspace_id, actor.user_id):
+            raise PermissionError("当前账号不能创建普通业务会话")
         await connection.execute(
             "SELECT security.create_auth_session($1::uuid, $2::uuid, $3::uuid, $4, $5, $6::jsonb)",
             session_id,
@@ -156,6 +184,8 @@ class IdentityRepository:
             new_expires_at,
         )
         if not row:
+            return None
+        if await is_restricted_identity(connection, row["workspace_id"], row["user_id"]):
             return None
         actor = ActorRecord(
             context=ActorContext(

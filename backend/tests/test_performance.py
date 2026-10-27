@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from sales_backend.performance import RequestTimings, record_pool_wait, record_query, request_timings
+from sales_backend.performance import RequestTimings, record_pool_wait, record_query, request_timings, timing_stage
 
 
 @pytest.mark.asyncio
@@ -28,3 +28,24 @@ def test_background_queries_do_not_accumulate_global_metrics():
     record_query(SimpleNamespace(elapsed=100))
     record_pool_wait(100)
     assert request_timings.get() is None
+
+
+def test_max_query_and_stage_failure_leave_safe_request_local_evidence():
+    timing = RequestTimings()
+    token = request_timings.set(timing)
+    try:
+        record_query(SimpleNamespace(elapsed=.01))
+        record_query(SimpleNamespace(elapsed=.02))
+        with pytest.raises(ValueError, match="failed"):
+            with timing_stage("map_projection"):
+                raise ValueError("failed")
+        assert timing.query_count == 2
+        assert timing.database_ms == 30
+        assert timing.database_max_ms == 20
+        assert timing.stages["map_projection"] >= 0
+        with pytest.raises(ValueError, match="unknown timing stage"):
+            with timing_stage("untrusted customer label"):
+                pass
+        assert set(timing.stages) == {"map_projection"}
+    finally:
+        request_timings.reset(token)

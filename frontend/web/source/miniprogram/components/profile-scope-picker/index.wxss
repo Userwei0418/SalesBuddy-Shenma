@@ -1,0 +1,21 @@
+/* 团队／个人切换用 sb-segmented（与看板同尺寸）；选择触发片和看板 dashboard-picker 同一约定：64rpx 灰底片、chevron-down，
+   外层按钮按 px 补足 44px 点击区；片上直接显示所选成员或团队（超长省略），只有选了非默认的对象才用浅蓝底主色字。
+   触发片出现时不再重复下一行说明；部门、单团队这类没有触发片的，说明行照常显示当前范围。只写类选择器。 */
+.scope-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:44px}
+.subject-trigger.subject-trigger{display:flex;align-items:center;flex:0 1 auto;width:auto;min-width:0;max-width:400rpx;height:44px;min-height:0;margin:0;padding:0;box-sizing:border-box;white-space:nowrap;line-height:1.4;border:0;border-radius:0;background:transparent;color:var(--ui-ink);font-size:14px;font-weight:400}
+.subject-trigger::after{border:0}
+.subject-chip{display:flex;align-items:center;gap:8rpx;min-width:0;max-width:100%;height:64rpx;box-sizing:border-box;padding:0 12rpx 0 16rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.subject-trigger-pressed .subject-chip{opacity:.7}
+.subject-trigger-text{min-width:0;overflow:hidden;line-height:1.2;white-space:nowrap;text-overflow:ellipsis}
+.subject-caret{display:inline-flex;flex-shrink:0;color:var(--ui-secondary)}
+.subject-trigger-on .subject-chip{background:var(--ui-selected);color:var(--ui-primary)}
+.subject-trigger-on .subject-trigger-text{font-weight:600}
+.subject-trigger-on .subject-caret{color:var(--ui-primary)}
+.subject-caption{margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4}
+
+/* 弹层：搜索框与团队页签固定在标题下；t-cell 一行一项，勾在右，分隔线从文字起点开始 */
+.selector-team-tabs{margin-top:8px}
+.selector-rows{--td-cell-horizontal-padding:0;--td-cell-vertical-padding:12px;--td-cell-right-icon-color:var(--ui-primary);--td-cell-right-icon-size:40rpx;--td-cell-border-left-space:88rpx}
+.scope-avatar{width:64rpx;height:64rpx;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:14px;font-weight:600}
+.selector-empty{padding:48rpx 20rpx;text-align:center;color:var(--ui-secondary);font-size:14px}
+.selector-bottom{padding:16rpx 0 8rpx;font-size:var(--ui-text-small);text-align:center;color:var(--ui-muted)}

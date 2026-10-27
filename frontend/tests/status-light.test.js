@@ -11,12 +11,12 @@ test('风险统一黄色提醒，已解除绿色健康，接受风险不等于�
  assert.equal(riskLight({status:'accepted'}).label,'提醒');assert.equal(riskLight({status:'resolved'}).label,'健康');
  const state=opportunitySignal({id:'o1',status:'open',expected_close_date:'2099-01-01'},[{opportunity_id:'o1',status:'open',severity_code:'critical'}]);assert.equal(state.label,'提醒');
 });
-test('任务完成健康、待办提醒、逾期告警，正常取消不判为表现差',()=>{
+test('正常完成绿色；停止和历史终态中性，未完成仍保留提醒与逾期',()=>{
  const now=Date.parse('2026-09-12T00:00:00Z');
- assert.equal(taskLight({status:'completed',due_at:'2026-01-01'},now).label,'健康');
+ assert.equal(taskLight({status:'completed',due_at:'2026-01-01'},now).label,'正常完成');
  assert.equal(taskLight({status:'pending_execution',due_at:'2026-01-01'},now).label,'告警');
  assert.equal(taskLight({status:'in_progress',due_at:'2026-10-01'},now).label,'提醒');
- assert.equal(taskLight({status:'cancelled',due_at:'2026-01-01'},now).label,'提醒');
+ assert.equal(taskLight({status:'cancelled',due_at:'2026-01-01'},now).label,'已结束');
  assert.equal(taskLight({},now).label,'待评估');
 });
 test('商机保留健康信号，跟进独立显示质检等级与原因',()=>{
@@ -35,4 +35,14 @@ test('业务动态92分不变仍健康，低分改善仍告警，无评分更新
  assert.equal(businessChangeLight({tone:'blue'}).label,'待评估');
  assert.equal(businessChangeLight({tone:'red',ai_review:{relationship_after:92}}).tone,'red');
  assert.equal(businessChangeLight({tone:'orange',ai_review:{relationship_after:92}}).tone,'yellow');
+});
+
+test('stopped and historic terminal outcomes cannot become success or attention',()=>{
+ for(const value of [
+  {status:'completed',execution_mode:'execution_v3',completion_action:'close'},
+  {status:'completed',execution_mode:'execution_v3'},
+  {status:'cancelled',last_event_type:'cancel_task'},
+  {status:'cancelled',last_event_type:'decline_task'},
+ ])assert.equal(taskLight({...value,due_at:'2000-01-01'}).tone,'gray');
+ assert.equal(taskLight({status:'completed',execution_mode:'execution_v3',completion_action:'review_completion'}).tone,'green');
 });

@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "dashboard-picker": "../dashboard-picker/index",
-    "dashboard-ranking": "../dashboard-ranking/index"
-  }
-}

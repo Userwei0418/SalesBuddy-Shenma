@@ -1,0 +1,18 @@
+.department-ui .ds-performance-ranking { display:flex; flex-direction:column; gap:var(--ui-space-3); min-width:0; margin-top:var(--ui-space-3); }
+.department-ui .ds-performance-metric-choices { display:flex; flex-wrap:wrap; align-items:center; gap:var(--ui-space-2); }
+.department-ui .ds-performance-ranking-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--ui-space-4); min-width:0; }
+.department-ui .ds-performance-ranking-panel { min-width:0; margin:0; box-shadow:none; }
+.department-ui .ds-performance-ranking-panel .pc-panel-title { flex-wrap:wrap; }
+.department-ui .ds-performance-ranking-panel .pc-panel-title span { font-size:var(--ui-text-small); color:var(--ui-secondary); }
+.department-ui .ds-performance-ranking-table .ant-table-cell { padding-block:8px; overflow-wrap:anywhere; font-size:var(--ui-text-small); font-variant-numeric:tabular-nums; }
+.department-ui .ds-performance-ranking-table .ant-table-cell small { display:block; margin-top:var(--ui-space-1); color:var(--ui-secondary); line-height:1.5; }
+.department-ui .ds-performance-amount { font-weight:600; }
+.department-ui .ds-performance-leading { font-weight:650; color:var(--ui-primary); }
+.department-ui .ds-performance-ranking-table .ds-performance-highlight>td { background:var(--ui-selected); }
+.department-ui .ds-performance-ranking-note { margin:0 0 var(--ui-space-3); color:var(--ui-warning); font-size:var(--ui-text-small); }
+.department-ui .ds-performance-ranking-note p { margin:0; }
+.department-ui .ds-performance-reference { margin:0; font-size:var(--ui-text-small); }
+.department-ui .ds-performance-caliber { margin:0 0 var(--ui-space-2); }
+.department-ui .ds-performance-caliber:last-child { margin-bottom:0; }
+@media(max-width:1150px) { .department-ui .ds-performance-ranking-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:600px) { .department-ui .ds-performance-metric-choices .ant-btn { height:auto; min-height:36px; white-space:normal; } }

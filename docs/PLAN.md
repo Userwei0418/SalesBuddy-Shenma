@@ -1,3 +1,5 @@
+> 历史记录：当前版本和配置请先查阅 [PROJECT_FACTS.md](PROJECT_FACTS.md) 与 [OPERATIONS_HANDOVER.md](OPERATIONS_HANDOVER.md)。本文不能代替当前环境升级与验收。
+
 # 神码独立部署计划
 
 ## 目标

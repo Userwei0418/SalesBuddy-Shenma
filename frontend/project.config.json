@@ -44,7 +44,7 @@
     "disableSWC": true
   },
   "appid": "wx2824bdeb58528fd8",
-  "projectname": "SalesBuddy-Shenma",
+  "projectname": "神码-SalesBuddy-生产发布",
   "libVersion": "3.17.2",
   "condition": {
     "search": {
@@ -78,6 +78,10 @@
       {
         "value": "docs",
         "type": "folder"
+      },
+      {
+        "value": "images/icons/avatar.png",
+        "type": "file"
       }
     ],
     "include": []

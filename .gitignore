@@ -22,7 +22,7 @@ __pycache__/
 .ruff_cache/
 .DS_Store
 project.private.config.json
-# Store immutable large distributions in private Releases
+# Store immutable large distributions in Releases
 *.zip
 *.tar.gz
 *.tgz
@@ -32,3 +32,13 @@ project.private.config.json
 business-web/dist/
 business-web/.runtime/
 business-web/验收/
+
+# Current Web build and private handover material
+frontend/web/dist/
+frontend/web/.runtime/
+*.pfx
+*.crt
+docs/shenma-private-handover/
+
+# Exclude dependency directories and developer-created symlinks
+node_modules

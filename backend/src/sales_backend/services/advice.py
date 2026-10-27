@@ -14,6 +14,7 @@ from sales_backend.domain.concurrency import require_version
 from sales_backend.repositories.advice import AdviceRepository
 from sales_backend.repositories.advice_facts import AdviceFactsRepository
 from sales_backend.repositories.capabilities import CapabilityRepository
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.services.agent_business_rules import business_policy_metadata, prepare_business_rules
@@ -140,7 +141,7 @@ class AdviceService:
                 request.section,
             )
             if latest and await self.key_for(connection, actor, latest, runtime) == latest["cache_key"]:
-                return present(await self.repo.get(connection, str(latest["id"])))
+                return present(await self.repo.requested(connection, actor, request, str(latest["id"])))
             loaded = await self.facts.load(connection, actor, request.subject_kind, request.subject_id)
             identity = await CapabilityRepository().analysis_identity(connection, actor)
             key = cache_key(
@@ -177,7 +178,7 @@ class AdviceService:
                         "UPDATE insight.business_advice SET status='succeeded' WHERE id=$1::uuid",
                         existing["id"],
                     )
-                    return present(await self.repo.get(connection, existing["id"]))
+                    return present(await self.repo.requested(connection, actor, request, existing["id"]))
                 if existing["status"] in {"failed", "superseded"} and request.retry:
                     await connection.execute(
                         "UPDATE insight.business_advice SET status='queued',error_code=NULL,completed_at=NULL "
@@ -185,7 +186,7 @@ class AdviceService:
                         existing["id"],
                     )
                     await self.repo.enqueue(connection, actor, existing["id"])
-                return present(await self.repo.get(connection, existing["id"]))
+                return present(await self.repo.requested(connection, actor, request, existing["id"]))
             subject = loaded["facts"]["subject"]
             analysis_id = await connection.fetchval(
                 """INSERT INTO insight.business_advice(workspace_id,actor_user_ref_id,actor_role_code,subject_kind,
@@ -210,14 +211,45 @@ class AdviceService:
                 config,
             )
             await self.repo.enqueue(connection, actor, analysis_id)
-            return present(await self.repo.get(connection, analysis_id))
+            return present(await self.repo.requested(connection, actor, request, analysis_id))
+
+    async def require_read(self, connection, kind, subject_id):
+        from sales_backend.services.authorization import require_permission
+
+        try:
+            await require_permission(connection, 'advice.read', **{kind + '_id': subject_id})
+        except PermissionError as exc:
+            raise AdviceError("记录不存在或无权查看", 404) from exc
+
+    async def latest(self, actor, subject):
+        require_advice_subject(subject.subject_kind, actor.role.value)
+        async with self.database.transaction(actor, readonly=True) as connection:
+            await self.assert_actor(connection, actor)
+            await self.require_read(connection, subject.subject_kind, subject.subject_id)
+            analysis_id = await self.repo.latest_id(connection, actor, subject)
+            if analysis_id is None:
+                # Absence must not mask an inaccessible/deleted/unsupported subject.
+                # This also preserves the pure-partner exclusion without generating.
+                await self.facts.load(connection, actor, subject.subject_kind, subject.subject_id)
+                return {"state": "none", "analysis": None}
+        # Reuse the by-id read's current permissions and full freshness fingerprint.
+        # Lookup failures propagate; they are never converted to an empty result.
+        analysis = await self.get(actor, str(analysis_id))
+        state = "stale" if analysis["status"] == "superseded" else analysis["status"]
+        return {"state": state, "analysis": analysis}
 
     async def get(self, actor, analysis_id):
         async with self.database.transaction(actor, readonly=True) as connection:
-            row = await self.repo.get(connection, analysis_id)
+            await self.assert_actor(connection, actor)
+            row = await self.repo.get(connection, analysis_id, actor=actor)
+            await self.require_read(connection, row["subject_kind"], str(row["subject_id"]))
         runtime = await self.runtime(actor, row["subject_kind"])
         async with self.database.transaction(actor, readonly=True) as connection:
             await self.assert_actor(connection, actor)
+            # Re-read after configuration loading so permission changes cannot use
+            # an earlier visible row; retain explicit identity/role constraints.
+            row = await self.repo.get(connection, analysis_id, actor=actor)
+            await self.require_read(connection, row["subject_kind"], str(row["subject_id"]))
             current = await self.key_for(connection, actor, row, runtime)
         return present(row, stale=current != row["cache_key"])
 
@@ -275,6 +307,12 @@ class AdviceService:
                     opportunity_id=None if daily_visit else str(selected_opportunity),
                     source_suggestion_id=suggestion_id,
                     association_kind="daily" if daily_visit else "customer",
+                    alignment=task.alignment,
+                    alignment_contract_version=task.alignment_contract_version,
+                    execution_protocol_version=task.execution_protocol_version,
+                    checklist=task.checklist,
+                    deliverable=task.deliverable,
+                    acceptance_criteria=task.acceptance_criteria,
                 )
                 task_results.append(task_result)
         elif decision != "no_task" or selected_tasks:
@@ -301,6 +339,10 @@ class AdviceHandler:
         async with self.database.transaction(actor) as connection:
             row = await self.service.repo.get(connection, analysis_id, lock=True)
             if row["status"] in {"succeeded", "superseded"}:
+                await record_job_effect(connection, actor.workspace_id)
+                return
+            if row["subject_kind"] == "customer" and not await customer_analysis_applies(connection, row["subject_id"]):
+                await connection.execute("UPDATE insight.business_advice SET status='superseded' WHERE id=$1::uuid", analysis_id)
                 await record_job_effect(connection, actor.workspace_id)
                 return
             await self.service.assert_actor(connection, actor)

@@ -1,0 +1,23 @@
+@import "../../styles/role-controls.wxss";
+@import "../../styles/opportunity-list-header.wxss";
+@import "../../styles/opportunity-list-card.wxss";
+/* FDE／FDE 主管的商机页：页底色上放标题，总览白卡，列表白卡（飞书：白卡不描边、不加阴影） */
+.projects{min-height:100vh;box-sizing:border-box;padding:24rpx 28rpx 50rpx;background:var(--ui-background);color:var(--ui-ink)}
+.heading{color:var(--ui-ink);font-size:var(--ui-text-page);font-weight:600;line-height:1.3}
+.sub{margin:8rpx 0 32rpx;color:var(--ui-secondary);font-size:14px;line-height:1.5}
+.error{color:var(--ui-danger)}
+/* 成员目录失败整行可点：上下各 12px 撑到 44px，上外边距抵掉占位 */
+.sub.error{padding:12px 0;margin:-12px 0 4px}
+/* 人员筛选片和同一行的 sb-labeled-select size=small 同高 32px（传给 member-scope-filter 的触发片） */
+.fde-member-filter{--member-trigger-height:32px;flex:0 0 auto;display:flex;align-items:center;width:104px;height:32px;min-width:0}
+.fde-summary-note{margin-top:16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+/* 总览失败整行可点：上下各 13px 撑到 44px；上外边距 -5px，文字仍在上一行下方 8px */
+.fde-summary-error{margin-top:-5px;padding:13px 0;color:var(--ui-danger)}
+.fde-result-note{display:flex;justify-content:space-between;gap:16rpx;margin:0 0 16rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.fde-projects-list{display:flex;flex-direction:column;gap:16rpx}
+.fde-projects-state{display:block}
+.fde-more-error{margin-top:16rpx;color:var(--ui-danger);font-size:var(--ui-text-small);line-height:1.5}
+.fde-more-error{margin-top:16px}
+.fde-more-retry{display:inline-block;margin:-13px 0 -13px 16rpx;padding:13px 8rpx;color:var(--ui-primary)}
+.fde-pressed{opacity:.7}
+.fde-projects-pager{display:block;margin-top:8rpx}

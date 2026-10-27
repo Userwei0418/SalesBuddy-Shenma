@@ -5,7 +5,7 @@ const {pathToFileURL} = require('node:url');
 const tick = () => new Promise(setImmediate);
 const assets = path.resolve(__dirname, '../../backend/src/sales_backend/web/assets');
 const actor = (user = 'admin', extra = {}) => ({workspace_id: 'workspace', user_id: user, role: 'administrator', ...extra});
-const customerRows = (name = '已入库客户', total = 120) => ({items: [{id: name, name, ownership_state: 'claimed', ownership_version: 2}], total});
+const customerRows = (name = '已入库客户', total = 120) => ({items: [{id: name, name, ownership_state: 'claimed', ownership_version: 2,can_release:true}], total});
 const summary = {customers: 120, unclaimed: 8, pending_claims: 2, legacy_review: 1};
 const report = (calls = 123) => ({summary: {calls, succeeded: calls, failed: 0, cancelled: 0, running: 0, input_tokens: null, output_tokens: null, unknown_token_calls: calls, average_latency_ms: 45, business_operations: calls, audio_seconds: null}, trend: [], roles: [], legacy_logical_calls: 0});
 const callRows = (name = '现有用户', total = 120) => ({items: [{id: name, actor_name: name, actor_role_code: 'sales', operation_code: 'competency_review', status: 'succeeded', record_kind: 'provider_attempt', latency_ms: null, input_tokens: null, output_tokens: null}], total});
@@ -15,7 +15,7 @@ async function harness(page = 'customers') {
   const core = await import(pathToFileURL(path.join(assets, 'core.js')).href);
   const pages = await import(pathToFileURL(path.join(assets, 'pages.js')).href);
   core.clearSession();
-  Object.assign(core.state, {actor: actor(), token: 'fixture-only', page, org: {accounts: [], departments: []}});
+  Object.assign(core.state, {actor: actor(), token: 'fixture-only', page, permissions:{'ai.usage_rules_manage':true,'customer.release':true}, org: {accounts: [], departments: []}});
   const requests = [];
   global.fetch = (url, options) => new Promise((resolve, reject) => requests.push({url, options, resolve, reject, answered: false}));
   global.FormData = class { constructor(form) { this.values = form.values || []; } [Symbol.iterator]() { return this.values[Symbol.iterator](); } get(name) { return this.values.find(([key]) => key === name)?.[1] ?? null; } has(name) { return this.values.some(([key]) => key === name); } };
@@ -71,25 +71,6 @@ test('customer summary failure is local and can be retried without reloading suc
   assert.match(h.region('summary'), /客户概览加载失败：数据库暂忙/); assert.match(h.region('list'), /已入库客户/);
   const retry = h.click('retry-summary'); h.respond('/summary', summary); await retry;
   assert.match(h.region('summary'), /120/); assert.equal(h.count('/customers'), 1);
-});
-
-test('management trial filters reach the list query and provenance is escaped beside unchanged customer names', async () => {
-  const h = await harness(); await h.render(); await h.finish();
-  assert.match(h.mounted.root.html,/name="data_kind"/);
-  assert.match(h.mounted.root.html,/name="trial_batch"/);
-  h.mounted.form.values = [['data_kind','demo'],['trial_batch','SM-TRIAL-20260930']];
-  h.mounted.form.onsubmit({preventDefault(){}}); await tick();
-  const request = h.pending('/customers');
-  assert.match(request.url,/data_kind=demo/);
-  assert.match(request.url,/trial_batch=SM-TRIAL-20260930/);
-  h.reply(request,{items:[{id:'c',name:'云川制造有限公司',data_kind:'demo',
-    synthetic_trial_batch_id:'SM-TRIAL-<img>',ownership_state:'claimed'}],total:1});
-  await h.finish();
-  const list = h.region('list');
-  assert.match(list,/云川制造有限公司/);
-  assert.match(list,/试用模拟/);
-  assert.match(list,/SM-TRIAL-&lt;img&gt;/);
-  assert.doesNotMatch(list,/<img>/);
 });
 
 test('AI list appears when overview is slow and rules fail; only list is requested on page changes', async () => {

@@ -5,6 +5,8 @@ from sales_backend.domain.concurrency import require_version
 from sales_backend.repositories.operations_accounts import OperationsAccountRepository
 from sales_backend.services.authorization import require_permission
 
+BUSINESS_ACCOUNT_ROLES = frozenset({"sales", "supervisor", "manager", "fde", "fde_lead"})
+
 
 async def require_assignable_roles(connection, roles):
     if set(roles) & {"operations", "administrator"}:
@@ -43,6 +45,12 @@ class OperationsAccountService:
             raise ValueError("请填写姓名")
         await self.repository.lock_workspace(connection, actor.workspace_id)
         await self.validate_organization(connection, data)
+        if (
+            BUSINESS_ACCOUNT_ROLES.intersection(data["roles"])
+            and not data.get("phone_number")
+            and await self.repository.requires_business_phone(connection)
+        ):
+            raise ValueError("新增销售、主管或 FDE 等业务岗位账号，请填写本人手机号；手机号由管理员核实维护")
         encoded = await asyncio.to_thread(encode_password, password)
         result = await self.repository.create(connection, actor, data)
         await self.repository.set_password(connection, result["id"], encoded)
@@ -71,6 +79,10 @@ class OperationsAccountService:
             and await self.repository.administrator_count(connection) <= 1
         ):
             raise ValueError("必须保留至少一位有效系统管理员")
+        if str(uid) == str(actor.user_id) and "administrator" in current["roles"] and (
+            data["status"] != "active" or "administrator" not in data["roles"]
+        ):
+            raise ValueError("请由另一位公司管理员调整你的管理员身份或停用账号")
         if data.get("company_roles") is None:
             data = {**data, "company_roles": current["company_roles"]}
         if data.get("memberships") is None:
@@ -87,6 +99,13 @@ class OperationsAccountService:
                     ],
                 }
         await self.validate_organization(connection, data)
+        if (
+            not BUSINESS_ACCOUNT_ROLES.intersection(current["roles"])
+            and BUSINESS_ACCOUNT_ROLES.intersection(data["roles"])
+            and not data.get("phone_number", current.get("phone_number"))
+            and await self.repository.requires_business_phone(connection)
+        ):
+            raise ValueError("首次增加销售、主管或 FDE 等业务岗位，请填写本人手机号；手机号由管理员核实维护")
         result = await self.repository.update(connection, actor, uid, data)
         await connection.execute("SELECT security.check_permission_administrator()")
         return result
@@ -117,6 +136,7 @@ class OperationsAccountService:
     async def rename_account(self, connection, actor, uid, version, account_code, email):
         """Maintenance rename only: keep roles, memberships and password untouched."""
         from pydantic import TypeAdapter
+
         from sales_backend.contracts.operations import AccountCode, AccountContact
         await require_permission(connection, "account.update")
         account_code = TypeAdapter(AccountCode).validate_python(account_code)

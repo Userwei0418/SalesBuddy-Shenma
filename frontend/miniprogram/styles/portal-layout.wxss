@@ -1,0 +1,30 @@
+/* Limit app-owned portals without modifying the shared UI vendor. */
+.sb-portal-theme .sb-sheet-body {
+  min-height: 0;
+}
+.sb-person-portal .sb-sheet {
+  height: 80vh;
+  overflow: hidden;
+}
+.sb-person-portal .sb-sheet-body {
+  height: 0;
+}
+.sb-portal-theme .sb-sheet-head,
+.sb-portal-theme .sb-sheet-desc,
+.sb-portal-theme .sb-sheet-header,
+.sb-portal-theme .sb-sheet-foot {
+  flex-shrink: 0;
+}
+/* The customer map's long profile scrolls independently of its action footer. */
+.sb-customer-portal .sb-sheet {
+  height: 80vh;
+  overflow: hidden;
+}
+.sb-customer-portal .sb-sheet-body {
+  height: 0;
+  max-height: none;
+}
+/* The underlying TDesign bottom popup already owns the device safe area. */
+.sb-customer-portal .sb-sheet-foot.has-btn {
+  padding-bottom: var(--ui-space-3);
+}

@@ -1,6 +1,13 @@
 // Presentation only: null remains unknown and chart values come from the API.
 const numeric = value => value === null || value === undefined || value === '' || !Number.isFinite(Number(value)) ? null : Number(value);
-const money = value => numeric(value) === null ? '未登记' : (Number(value) / 10000).toLocaleString('zh-CN', {maximumFractionDigits: 2});
+const money = value => numeric(value) === null ? '未登记' : Number(value)>0&&Number(value)<50?'<0.01':(Number(value) / 10000).toLocaleString('zh-CN', {maximumFractionDigits: 2});
+function acvSummary(row) {
+  const missing=Number.isInteger(row.open_acv_missing_count)?row.open_acv_missing_count:0;
+  const known=Number.isInteger(row.open_acv_known_count)?row.open_acv_known_count:null;
+  const unavailable=missing>0&&known===0;
+  return {valueText:unavailable?'未填写':money(row.open_acv),isSubtotal:missing>0&&!unavailable,
+    note:missing?`${missing} 个在推商机 ACV 未填写，未按零计入`:'当前参与项目'};
+}
 const pad = value => String(value).padStart(2, '0');
 function beijingTime(value, dateOnly = false) {
   if (!value) return '';
@@ -62,4 +69,4 @@ function rankedRows(rows, key) {
   return sorted.map((row, index) => ({...row, rank: index + 1, value: numeric(row[key]) === null ? '—' : row[key],
     width: maximum ? Math.max(0, Number(row[key]) || 0) / maximum * 100 : 0}));
 }
-module.exports = {numeric, money, beijingTime, visitItem, stageBars, visibleStageBars, rhythmBars, progressBars, rankedRows};
+module.exports = {numeric, money, acvSummary, beijingTime, visitItem, stageBars, visibleStageBars, rhythmBars, progressBars, rankedRows};

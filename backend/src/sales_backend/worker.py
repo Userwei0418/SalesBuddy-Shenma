@@ -10,7 +10,7 @@ from uuid import UUID
 import asyncpg
 
 from sales_backend.config import get_settings
-from sales_backend.db import Database
+from sales_backend.db import Database, DatabaseBusy, JobLeaseLockBusy, TenantInactive
 from sales_backend.domain.agent import ActorContext, DataScope, RoleCode
 from sales_backend.integrations.senseaudio import SenseAudioError
 from sales_backend.job_context import JobLease, JobLeaseLost, current_job_lease
@@ -22,12 +22,17 @@ from sales_backend.services.battle_map_reviews import BattleMapReviewHandler
 from sales_backend.services.competency_reviews import CompetencyReviewHandler
 from sales_backend.services.system_events import DatabaseEventSink
 from sales_backend.services.worker_maintenance import WorkerMaintenance
+from sales_backend import knowledge_availability
 
 logger = logging.getLogger("sales_backend.worker")
 
 
 class InvalidJobActor(ValueError):
     """A queued identity cannot be trusted to run business work."""
+
+
+class HeartbeatLeaseLost(JobLeaseLost):
+    """The heartbeat could not verify or renew this attempt's lease."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,11 +63,11 @@ class Worker:
         lanes = (
             JobLane("import", getattr(self.settings, "worker_import_concurrency", 1), ("visit.import",)),
             JobLane("interactive", getattr(self.settings, "worker_interactive_concurrency", 2),
-                    ("agent.run", "business.advice")),
+                    ("agent.run", "business.advice", "work_report.snapshot", "work_report.generate")),
             # This complement includes both review types and unknown jobs. An
             # unsupported type still reaches the normal observable dead-letter path.
             JobLane("review", getattr(self.settings, "worker_review_concurrency", 1),
-                    ("visit.import", "agent.run", "business.advice"), True),
+                    ("visit.import", "agent.run", "business.advice", "work_report.snapshot", "work_report.generate"), True),
         )
         if any(not 1 <= lane.capacity <= 8 for lane in lanes) or sum(lane.capacity for lane in lanes) > 16:
             raise ValueError("worker lanes require 1–8 slots each and at most 16 total")
@@ -72,7 +77,7 @@ class Worker:
         while True:
             try:
                 handled = await self.run_once(job_types=lane.job_types, exclude_types=lane.exclude_types)
-            except (asyncpg.PostgresError, OSError, TimeoutError):
+            except (DatabaseBusy, asyncpg.PostgresError, OSError, TimeoutError):
                 logger.exception("job queue unavailable lane=%s", lane.name,
                                  extra={"event_type": "worker_queue_unavailable"})
                 await asyncio.sleep(max(5, self.settings.worker_poll_seconds))
@@ -81,6 +86,16 @@ class Worker:
                 await asyncio.sleep(self.settings.worker_poll_seconds)
 
     async def run_once(self, *, job_types: tuple[str, ...] | None = None, exclude_types: bool = False) -> bool:
+        if not knowledge_availability.KNOWLEDGE_AVAILABLE:
+            # Pause existing knowledge jobs without consuming attempts, changing
+            # their status or taking execution slots from ordinary business jobs.
+            if job_types is None or exclude_types:
+                job_types = tuple(dict.fromkeys((*(job_types or ()), "knowledge.ingest")))
+                exclude_types = True
+            else:
+                job_types = tuple(kind for kind in job_types if kind != "knowledge.ingest")
+                if not job_types:
+                    return False
         async with self.database.connection() as connection:
             job = await self.jobs.claim(
                 connection,
@@ -91,6 +106,99 @@ class Worker:
             )
         if job is None:
             return False
+        return await self._execute_claimed_job(job)
+
+    async def run_exact_import(
+        self, *, job_id: str, workspace_id: str, import_id: str, user_id: str, content_sha256: str,
+    ) -> bool:
+        """Handle at most one exact fresh import, without polling or maintenance.
+
+        True means that this queue item was handled, including the existing
+        failure/invalid-identity path. It does not assert import success.
+        """
+        async with self.database.connection() as connection:
+            job = await self.jobs.claim_exact_import(
+                connection, worker_id=self.settings.worker_id, lock_seconds=self.settings.worker_lock_seconds,
+                job_id=job_id, workspace_id=workspace_id, import_id=import_id, user_id=user_id,
+                content_sha256=content_sha256,
+            )
+        if job is None:
+            return False
+        expected = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, import_id, user_id))
+        if not isinstance(job.payload, dict) or (
+            (job.id, job.workspace_id, job.aggregate_id, job.payload.get("user_id")) != expected
+            or job.job_type != "visit.import" or job.payload.get("workspace_id") != expected[1]
+        ):
+            raise InvalidJobActor("exact import claim returned a mismatched queue item")
+        return await self._execute_claimed_job(job)
+
+    async def run_exact_agent_run(
+        self, *, job_id: str, workspace_id: str, run_id: str, user_id: str, visit_stage: str, input_sha256: str,
+    ) -> bool:
+        """Handle at most one fresh visit structure/quality run under its lease.
+
+        False means no matching claim. True includes failure/lease-loss paths;
+        it does not assert model success, human confirmation or formal archive.
+        """
+        async with self.database.connection() as connection:
+            job = await self.jobs.claim_exact_agent_run(
+                connection, worker_id=self.settings.worker_id, lock_seconds=self.settings.worker_lock_seconds,
+                job_id=job_id, workspace_id=workspace_id, run_id=run_id, user_id=user_id,
+                visit_stage=visit_stage, input_sha256=input_sha256,
+            )
+        if job is None:
+            return False
+        expected = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, run_id, user_id))
+        if not isinstance(job.payload, dict) or (
+            (job.id, job.workspace_id, job.aggregate_id, job.payload.get("user_id")) != expected
+            or job.job_type != "agent.run" or job.payload.get("workspace_id") != expected[1]
+            or job.payload.get("run_id") != expected[2] or job.attempts != 1 or job.max_attempts < 1
+        ):
+            raise InvalidJobActor("exact agent claim returned a mismatched queue item")
+        try:
+            valid_lease = UUID(str(job.lease_token)).int != 0
+        except (ValueError, TypeError, AttributeError):
+            valid_lease = False
+        if not valid_lease:
+            raise InvalidJobActor("exact agent claim returned no valid lease")
+        return await self._execute_claimed_job(job)
+
+    async def run_exact_competency_review(
+        self, *, job_id: str, workspace_id: str, review_id: str, user_id: str, generation_no: int,
+        input_fingerprint: str, input_snapshot: dict, trigger_type: str,
+        trigger_id: str | None = None, trigger_version: int | None = None,
+    ) -> bool:
+        """Handle at most one fresh frozen generation with ordinary lease fences.
+
+        False means no exact claim. True includes existing failure/lease-loss
+        handling and does not assert a successful assessment or model call.
+        """
+        async with self.database.connection() as connection:
+            job = await self.jobs.claim_exact_competency_review(
+                connection, worker_id=self.settings.worker_id, lock_seconds=self.settings.worker_lock_seconds,
+                job_id=job_id, workspace_id=workspace_id, review_id=review_id, user_id=user_id,
+                generation_no=generation_no, input_fingerprint=input_fingerprint, input_snapshot=input_snapshot,
+                trigger_type=trigger_type, trigger_id=trigger_id, trigger_version=trigger_version,
+            )
+        if job is None:
+            return False
+        expected = tuple(str(UUID(str(value))) for value in (job_id, workspace_id, review_id, user_id))
+        if not isinstance(job.payload, dict) or (
+            (job.id, job.workspace_id, job.aggregate_id, job.payload.get("user_id")) != expected
+            or job.job_type != "sales_competency.review" or job.payload.get("workspace_id") != expected[1]
+            or job.attempts != 1 or job.max_attempts < 1
+        ):
+            raise InvalidJobActor("exact competency claim returned a mismatched queue item")
+        try:
+            valid_lease = UUID(str(job.lease_token)).int != 0
+        except (ValueError, TypeError, AttributeError):
+            valid_lease = False
+        if not valid_lease:
+            raise InvalidJobActor("exact competency claim returned no valid lease")
+        return await self._execute_claimed_job(job)
+
+    async def _execute_claimed_job(self, job: ClaimedJob) -> bool:
+        """Shared leased execution: actor, heartbeat, outcome and projection fences."""
         try:
             actor = self._job_actor(job)
         except InvalidJobActor:
@@ -105,25 +213,41 @@ class Worker:
         actor_token = current_actor.set(actor)
         started = perf_counter()
         outcome = "cancelled"
+        phase = "handler"
         logger.info("job started id=%s type=%s attempt=%s queue_wait_ms=%.1f", job.id, job.job_type,
-                    job.attempts, job.queue_wait_seconds * 1000, extra={"event_type": "worker_job_started"})
+                    job.attempts, job.queue_wait_seconds * 1000,
+                    extra={"event_type": "worker_job_started", "job_id": job.id})
         try:
             await self._run_with_heartbeat(job)
+            phase = "acknowledge"
             await self._finish_succeeded(job)
             outcome = "succeeded"
-        except JobLeaseLost:
+        except (JobLeaseLost, TenantInactive) as exc:
             outcome = "lease_lost"
-            logger.warning("job lease lost; stale attempt stopped", extra={"job_id": job.id})
+            lease_phase = "heartbeat" if isinstance(exc, HeartbeatLeaseLost) else phase
+            error_type = type(exc).__name__
+            cause_type = type(exc.__cause__).__name__ if exc.__cause__ else "none"
+            logger.warning(
+                "job lease lost; stale attempt stopped job_id=%s phase=%s error_type=%s cause_type=%s",
+                job.id, lease_phase, error_type, cause_type,
+                extra={"event_type": "worker_job_lease_lost", "job_id": job.id, "lease_phase": lease_phase,
+                       "error_type": error_type, "cause_type": cause_type},
+            )
         except Exception as exc:
             outcome = "failed"
-            logger.exception("job failed", extra={"job_id": job.id, "job_type": job.job_type})
+            if job.job_type in {"work_report.snapshot", "work_report.generate"}:
+                logger.error("work-report job failed code=%s", type(exc).__name__,
+                             extra={"job_id": job.id, "job_type": job.job_type})
+            else:
+                logger.exception("job failed", extra={"job_id": job.id, "job_type": job.job_type})
             try:
                 await self._finish_failed(job, exc)
-            except JobLeaseLost:
+            except (JobLeaseLost, TenantInactive):
                 logger.warning("job failure belongs to an expired attempt", extra={"job_id": job.id})
         finally:
             logger.info("job ended id=%s type=%s outcome=%s execution_ms=%.1f", job.id, job.job_type,
-                        outcome, (perf_counter() - started) * 1000, extra={"event_type": "worker_job_ended"})
+                        outcome, (perf_counter() - started) * 1000,
+                        extra={"event_type": "worker_job_ended", "job_id": job.id, "worker_outcome": outcome})
             current_job_lease.reset(context_token)
             current_actor.reset(actor_token)
         return True
@@ -145,6 +269,10 @@ class Worker:
             from sales_backend.services.visit_import import VisitImportHandler
 
             await VisitImportHandler(self.database).handle(job.aggregate_id, actor)
+        elif job.job_type == "knowledge.ingest":
+            from sales_backend.services.knowledge_ingestion import KnowledgeIngestionService
+
+            await KnowledgeIngestionService(self.database, self.settings).handle(job.aggregate_id, actor)
         elif job.job_type == "sales_competency.review":
             await CompetencyReviewHandler(self.database, self.settings).handle(job.aggregate_id, actor)
         elif job.job_type == "battle_map.review":
@@ -158,6 +286,12 @@ class Worker:
         elif job.job_type == "business.advice":
             from sales_backend.services.advice import AdviceHandler
             await AdviceHandler(self.database).handle(job.aggregate_id, actor)
+        elif job.job_type == "work_report.snapshot":
+            from sales_backend.services.work_report_jobs import WorkReportSnapshotHandler
+            await WorkReportSnapshotHandler(self.database).handle(job.aggregate_id, actor)
+        elif job.job_type == "work_report.generate":
+            from sales_backend.services.work_report_jobs import WorkReportGenerationHandler
+            await WorkReportGenerationHandler(self.database, self.settings).handle(job.aggregate_id, actor)
         elif job.job_type == "opportunity.change.review":
             from sales_backend.services.opportunity_changes import OpportunityChangeHandler
 
@@ -170,10 +304,25 @@ class Worker:
             while True:
                 await asyncio.sleep(max(1, self.settings.worker_lock_seconds / 3))
                 try:
-                    async with self.database.transaction(self._job_actor(job)) as connection:
-                        await self.jobs.heartbeat(connection, job=job, lock_seconds=self.settings.worker_lock_seconds)
+                    actor = self._job_actor(job)
+                    try:
+                        async with self.database.transaction(actor, lease_lock_nowait=True) as connection:
+                            await self.jobs.heartbeat(connection, job=job, lock_seconds=self.settings.worker_lock_seconds)
+                    except JobLeaseLockBusy:
+                        # A handler may hold this same row while committing its
+                        # result. Do not wait on our own transaction or extend a
+                        # busy lease. Recheck the token/expiry/tenant without a
+                        # lock, and retry on the next normal heartbeat only.
+                        async with self.database.transaction(actor, readonly=True):
+                            pass
+                        logger.info(
+                            "job heartbeat deferred job_id=%s phase=lease_lock error_type=JobLeaseLockBusy",
+                            job.id, extra={"event_type": "worker_heartbeat_deferred", "system_event": True,
+                                           "job_id": job.id, "lease_phase": "lease_lock",
+                                           "error_type": "JobLeaseLockBusy", "cause_type": "LockNotAvailableError"},
+                        )
                 except Exception as exc:
-                    raise JobLeaseLost("heartbeat failed; stop before any further result writes") from exc
+                    raise HeartbeatLeaseLost("heartbeat failed; stop before any further result writes") from exc
 
         handler = asyncio.create_task(self._handle_job(job))
         heartbeat = asyncio.create_task(pulse())
@@ -241,6 +390,7 @@ class Worker:
         retryable = (isinstance(exc, SenseAudioError) and exc.retryable) or isinstance(
             exc,
             (
+                DatabaseBusy,
                 TimeoutError,
                 ConnectionError,
                 asyncpg.PostgresConnectionError,
@@ -248,11 +398,33 @@ class Worker:
                 asyncpg.DeadlockDetectedError,
             ),
         )
+        error_code, error_detail = type(exc).__name__, str(exc)
+        report_error = None
+        if job.job_type in {"work_report.snapshot", "work_report.generate"}:
+            from sales_backend.services.work_report_jobs import failure_error
+            report_error = failure_error(exc, retryable=retryable)
+            retryable = report_error.retryable
+            error_code, error_detail = report_error.code, report_error.detail
         async with self.database.transaction(actor) as connection:
             if await connection.fetchval("SELECT EXISTS(SELECT 1 FROM ops.job_effect WHERE job_id=$1::uuid)", job.id):
                 await self.jobs.succeed(connection, job=job)
                 return
-            if job.job_type == "agent.run" and job.aggregate_id:
+            if report_error is not None and job.aggregate_id:
+                if not retryable or job.attempts >= job.max_attempts:
+                    from sales_backend.repositories.work_report import WorkReportRepository
+                    from sales_backend.domain.work_report import WorkReportError
+                    repository = WorkReportRepository()
+                    fail = repository.fail_snapshot if job.job_type == "work_report.snapshot" else repository.fail_run
+                    try:
+                        async with connection.transaction():
+                            await fail(connection, actor, job.aggregate_id, error=report_error)
+                    except WorkReportError:
+                        # Cancellation/permission loss must not overwrite a
+                        # terminal report or leave its queue item retrying.
+                        # Current RLS can deny the projection while the leased
+                        # queue completion remains separately authorized.
+                        pass
+            elif job.job_type == "agent.run" and job.aggregate_id:
                 await connection.execute(
                     """
                     UPDATE agent.run
@@ -274,31 +446,29 @@ class Worker:
                     type(exc).__name__,
                 )
             elif job.job_type == "sales_competency.review" and job.aggregate_id:
-                await connection.execute(
-                    """
-                    UPDATE insight.sales_competency_review
-                       SET status = CASE WHEN $2 THEN 'queued' ELSE 'failed' END,
-                           error_code = $3, error_detail = $4
-                     WHERE id = $1::uuid
-                    """,
-                    job.aggregate_id,
+                # A withdrawn business grant must not leave a failed generation
+                # running forever. The narrow function only closes this lease's
+                # matching projection and does not complete or claim any job.
+                await connection.fetchrow(
+                    "SELECT * FROM ops.fail_competency_review($1::uuid,$2::uuid,$3,$4)",
+                    job.id, job.lease_token, getattr(exc, "code", type(exc).__name__)[:100],
                     retryable and job.attempts < job.max_attempts,
-                    type(exc).__name__[:100],
-                    str(exc)[:2000],
                 )
             if job.job_type == "visit.import" and job.aggregate_id:
+                from sales_backend.services.visit_import import import_failure_message
+                error_code = getattr(exc, "code", error_code)
                 await connection.execute(
                     """UPDATE activity.visit_import SET status=$2,error_message=$3,updated_at=clock_timestamp() WHERE
                     id=$1::uuid""",
                     job.aggregate_id,
                     "queued" if retryable and job.attempts < job.max_attempts else "failed",
-                    "语音服务暂不可用，请稍后重试" if isinstance(exc, SenseAudioError) else str(exc)[:200],
+                    import_failure_message(exc),
                 )
             await self.jobs.fail(
                 connection,
                 job=job,
-                error_code=type(exc).__name__,
-                error_detail=str(exc),
+                error_code=error_code,
+                error_detail=error_detail,
                 retryable=retryable,
             )
 

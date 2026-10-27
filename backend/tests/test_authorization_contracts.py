@@ -57,3 +57,29 @@ def test_empty_labels_and_reasons_are_rejected():
         RoleSave(name="  ", reason="测试")
     with pytest.raises(ValidationError):
         AccountAuthorizationSave(version_no=0, reason=" ")
+
+
+def test_role_save_canonicalizes_only_fixed_scope_inheritance_without_mutating_input():
+    original = ScopedPermission(permission="access.console")
+    role = RoleSave(name="后台入口", reason="确认固定范围", permissions=[
+        original, dict(permission="visit.upload"), dict(permission="customer.read"),
+    ])
+    assert [p.scope for p in role.permissions] == ["workspace", "self", "inherit"]
+    assert original.scope == "inherit"
+    override = AccountAuthorizationSave(version_no=0, reason="明确禁用", overrides=[
+        dict(permission="access.console", effect="deny"),
+        dict(permission="visit.upload", effect="deny"),
+    ])
+    assert [p.scope for p in override.overrides] == ["inherit", "inherit"]
+
+
+@pytest.mark.parametrize("permission,scope", [("access.console", "self"), ("visit.upload", "workspace")])
+def test_fixed_role_scope_does_not_promote_explicit_invalid_input(permission, scope):
+    with pytest.raises(ValidationError, match="不支持"):
+        RoleSave(name="错误范围", reason="不能静默提升", permissions=[dict(permission=permission, scope=scope)])
+
+
+def test_delegation_still_requires_explicit_scope_for_fixed_functions():
+    from sales_backend.contracts.authorization import DelegationPermission
+    with pytest.raises(ValidationError, match="明确数据范围"):
+        DelegationPermission(permission="access.console")

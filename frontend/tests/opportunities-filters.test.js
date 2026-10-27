@@ -14,7 +14,7 @@ function pageDefinition(items, role = 'sales', directoryTeams) {
     require: name => name.endsWith('apiClient') ? { listOpportunities: async options => pageResponse(items,{...options,directoryTeams}) } : require(path.resolve(path.dirname(filename), name)),
     Date, setTimeout, clearTimeout,
     wx: { showToast() {}, navigateTo() {} },
-    getApp: () => ({ ensureLogin: () => true, globalData: { role, session: { scope: role === 'manager' ? '全部团队' : 'self' } } }),
+    getApp: () => ({ ensureLogin: () => true, globalData: { role, session: { capabilities: {'team.view':role==='manager'||role==='supervisor'}, scope: role === 'manager' ? '全部团队' : 'self' } } }),
   });
   page.data = JSON.parse(JSON.stringify(page.data));
   page.setData = function setData(values, callback) { Object.assign(this.data, values); if (callback) callback(); };
@@ -31,13 +31,13 @@ test('商机筛选以销售基础项为准，管理角色按权限追加范围�
   for (const label of ['商机阶段', '关单日期', '商机等级']) assert.match(wxml, new RegExp(`>${label}<`));
   assert.match(wxml, /canViewTeam.*filter-team/);
   assert.match(wxml, /canViewTeam.*filter-owner/);
-  assert.match(wxml, /role === 'supervisor' \? '直属成员' : '人员'/);
+  assert.match(wxml, /ownerOptions\[ownerIndex\]\.label \|\| '人员'/);
   assert.match(wxml, /class="stage-panel"/);
   assert.match(wxml, /class="filter-scroll" scroll-x/);
   assert.match(wxss, /\.filter-item\{width:104px/);
 });
 
-test('总经理团队筛选会联动人员选项，总监只追加直属成员', async () => {
+test('人员目录保留授权全集，团队业务筛选与人员ID筛选组合生效', async () => {
   const items=[
     {id:'1',status:'open',stage_code:'identified',amount:1,team_name:'南区',owner_name:'甲'},
     {id:'2',status:'open',stage_code:'identified',amount:1,team_name:'南区',owner_name:'乙'},
@@ -45,7 +45,7 @@ test('总经理团队筛选会联动人员选项，总监只追加直属成员',
   ];
   const manager=pageDefinition(items,'manager');manager.onShow();await waitForLoad();
   manager.changeTeam({detail:{value:manager.data.teamOptions.findIndex(item=>item.value==='南区')}});await waitForLoad();
-  assert.deepEqual([...manager.data.ownerOptions.map(item=>item.label)],['全部成员','甲','乙']);
+  assert.deepEqual([...manager.data.ownerOptions.map(item=>item.label)],['全部成员','甲','乙','丙']);
   manager.changeFilter({currentTarget:{dataset:{key:'owner'}},detail:{value:2}});await waitForLoad();
   assert.deepEqual([...manager.data.filtered.map(item=>item.id)],['2']);
   const supervisor=pageDefinition(items,'supervisor');supervisor.onShow();await waitForLoad();

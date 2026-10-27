@@ -2,7 +2,7 @@
 page{background:var(--ui-background);color:var(--ui-ink)}
 .bi-page{min-height:100vh;box-sizing:border-box;padding:32rpx 32rpx 64rpx;background:var(--ui-background)}
 
-/* 页头：直接的页面标题；周期触发片与筛选片同尺寸（灰底、chevron-down），外层按 px 补足 44px 点击区，320 宽屏也不缩 */
+/* 主看板沿用多季度选择；单季度监控是可展开的独立区域。 */
 .page-head{display:flex;align-items:center;justify-content:space-between;gap:24rpx}
 .page-heading{flex-shrink:0}
 .page-heading>text{display:block;color:var(--ui-ink);font-size:20px;font-weight:600;line-height:1.4}
@@ -41,7 +41,7 @@ page{background:var(--ui-background);color:var(--ui-ink)}
 .freshness .source-pill{color:var(--ui-secondary);font-size:var(--ui-text-small)}
 .state-card{margin-top:16px;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
 
-/* 季度倒计时：sb-summary-card 白卡，指标竖线分隔 */
+/* 原季度倒计时：sb-summary-card 深蓝 hero，指标竖线分隔。 */
 .countdown-card{margin-top:16px}
 .countdown-foot{color:var(--ui-secondary);font-size:14px}
 .countdown-foot text{margin:0 12rpx;color:var(--ui-muted)}
@@ -110,8 +110,113 @@ page{background:var(--ui-background);color:var(--ui-ink)}
 /* Palette only: original geometry is preserved. */
 .countdown-foot,.countdown-foot text { color:var(--sb-hero-muted); }
 
-/* Capability-driven sales/FDE view switch. */
-.permission-perspectives{display:flex;gap:16rpx;padding:16rpx 32rpx}
-.permission-perspectives button{display:flex;align-items:center;justify-content:center;flex:1;min-height:var(--ui-touch-target);line-height:1.5;padding:8rpx 16rpx;border-radius:var(--ui-radius-control);font-size:var(--ui-text-body);background:var(--ui-neutral-soft);color:var(--ui-ink)}
-.permission-perspectives button::after{border:0}
-.permission-perspectives .selected{background:var(--ui-primary);color:var(--ui-on-primary)}
+/* New business controls; existing layout and palette preserved. */
+.permission-perspectives{display:flex;flex-wrap:wrap;gap:16rpx;margin:24rpx 28rpx}.permission-perspectives button{min-height:var(--ui-touch-target);padding:0 24rpx;border:1px solid var(--ui-line);border-radius:var(--ui-radius-control);background:var(--ui-surface);color:var(--ui-secondary);font-size:14px;line-height:var(--ui-touch-target)}.permission-perspectives button.selected{border-color:var(--ui-primary);color:var(--ui-primary);background:var(--ui-selected)}
+
+/* New business controls; existing layout and palette preserved. */
+.upgrade-person-trigger{display:flex;align-items:center;gap:8rpx;min-height:var(--ui-touch-target);padding:0 16rpx;border-radius:var(--ui-radius-control);color:var(--ui-primary);background:var(--ui-selected);font-size:14px}
+
+.metrics-period-note{margin:16rpx 0;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;overflow-wrap:anywhere}
+.metric-trigger{min-width:0;display:flex;flex-direction:column;cursor:pointer}
+.metric-trigger .kpi-tile{flex:1}
+.metric-detail-link,.metric-rules-toggle{color:var(--ui-primary);font-size:var(--ui-text-small);line-height:var(--ui-touch-target)}
+.metric-detail-link{padding:0 16rpx}
+.metric-detail-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx;font-weight:600;color:var(--ui-ink)}
+.metric-detail-head>text{min-width:0;overflow-wrap:anywhere}
+.metric-detail-head button{flex-shrink:0;margin:0;min-height:var(--ui-touch-target);line-height:var(--ui-touch-target);background:var(--ui-surface);color:var(--ui-primary)}
+.metric-detail-context,.metric-detail-definition{margin-top:12rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6;overflow-wrap:anywhere}
+.metric-detail-summary{margin-top:16rpx;color:var(--ui-ink);line-height:1.6;overflow-wrap:anywhere}
+.metric-detail-rows{height:560rpx;margin-top:16rpx}
+.metric-detail-row{padding:16rpx 0;border-top:1px solid var(--ui-line)}
+.metric-detail-row>view{display:flex;gap:16rpx;align-items:flex-start;font-size:var(--ui-text-small);line-height:1.6}
+.metric-detail-row text{flex:0 0 130rpx;color:var(--ui-muted)}
+.metric-detail-row label{min-width:0;flex:1;color:var(--ui-ink);overflow-wrap:anywhere}
+.metric-definitions>view+view{margin-top:20rpx}
+.metric-definitions text{display:block;color:var(--ui-ink);font-weight:600}
+.metric-definitions label{display:block;margin-top:8rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}
+
+/* Single-quarter monitoring is independent of the existing chart period. */
+.monitor-section{margin-top:24rpx}
+.monitor-heading,.monitor-card-head,.monitor-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.monitor-heading>text,.monitor-sheet-head>text{font-size:18px;font-weight:600;min-width:0;color:var(--ui-ink)}
+.monitor-selectors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16rpx}
+.monitor-selectors sb-select{min-width:0}
+.monitor-group-title{font-size:16px;font-weight:600;color:var(--ui-ink)}
+.monitor-context,.monitor-note,.monitor-definition,.monitor-exact{margin-top:8rpx;font-size:13px;line-height:1.6;color:var(--ui-secondary);overflow-wrap:anywhere}
+
+.monitor-card-head>text:first-child{font-size:16px;line-height:1.5;font-weight:600;color:var(--ui-ink);min-width:0}
+.monitor-state{display:inline-block;padding:4rpx 12rpx;border-radius:var(--ui-radius-control);font-size:13px;line-height:1.5;color:var(--ui-secondary);background:var(--ui-neutral-soft);font-weight:400}
+.monitor-card-head>.monitor-state{flex-shrink:0}
+
+.monitor-amount{display:flex;align-items:baseline;gap:12rpx;margin-top:4rpx;flex-wrap:wrap}
+.monitor-amount>text{font-size:30px;font-weight:600;line-height:1.25;color:var(--ui-ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;word-break:break-all;min-width:0}
+.monitor-amount>label{font-size:13px;color:var(--ui-secondary)}
+.monitor-targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20rpx;margin-top:20rpx;padding-top:20rpx;border-top:1px solid var(--ui-line)}
+.monitor-targets text{display:block;font-size:13px;color:var(--ui-secondary)}
+.monitor-targets label{display:block;margin-top:6rpx;font-size:15px;font-weight:600;color:var(--ui-ink);overflow-wrap:anywhere}
+.monitor-gap{display:flex;justify-content:space-between;gap:20rpx;margin-top:16rpx;font-size:13px;line-height:1.5;color:var(--ui-secondary)}
+.monitor-gap label{color:var(--ui-ink);overflow-wrap:anywhere}
+.monitor-warning{margin-top:12rpx;font-size:13px;line-height:1.6;color:var(--ui-ink);overflow-wrap:anywhere}
+.monitor-definition{padding-top:16rpx}
+.monitor-link{margin:0;min-height:44px;padding:0 12rpx;font-size:14px;line-height:44px;color:var(--ui-primary);background:transparent;box-shadow:none}
+.monitor-link::after{border:0}
+.monitor-link[disabled]{color:var(--ui-muted);background:transparent}
+.monitor-actual-group{margin-top:32rpx}
+.monitor-actual-card{min-width:0;padding:24rpx;box-sizing:border-box;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.monitor-actual-card .monitor-amount>text{color:var(--ui-ink)}
+.monitor-mask{position:fixed;z-index:1100;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-end}
+.monitor-sheet{width:100%;box-sizing:border-box;max-height:90vh;padding:24rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));border-radius:24rpx 24rpx 0 0;background:var(--ui-surface)}
+.monitor-detail-scroll{height:60vh;margin-top:12rpx}
+.monitor-row-title,.monitor-row-subtitle{display:block;overflow-wrap:anywhere}
+.monitor-detail-row{padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.monitor-row-title{font-size:16px;line-height:1.5;font-weight:600;color:var(--ui-ink)}
+.monitor-row-subtitle{margin-top:6rpx;font-size:14px;line-height:1.5;color:var(--ui-secondary)}
+.monitor-row-line{display:flex;justify-content:space-between;gap:20rpx;margin-top:12rpx;font-size:13px;line-height:1.5}
+.monitor-row-line text{flex:0 0 120rpx;color:var(--ui-secondary)}
+.monitor-row-line label{min-width:0;text-align:right;color:var(--ui-ink);overflow-wrap:anywhere}
+.monitor-row-amount label{font-size:16px;font-weight:600}
+.monitor-pagination{display:flex;align-items:center;justify-content:space-between;gap:16rpx;font-size:13px;color:var(--ui-secondary);padding-top:12rpx}
+.monitor-empty{padding:32rpx 0;text-align:center;color:var(--ui-secondary);font-size:14px}
+
+/* 次级季度监控：紧凑预测与实际卡，主看板仍为原倒计时和双列 KPI。 */
+.metrics-section{margin-top:32rpx}
+.metrics-heading{flex-wrap:wrap}
+.metrics-heading .metrics-controls{flex-wrap:wrap}
+.monitor-filter-note{margin-top:8rpx;color:var(--ui-secondary);font-size:13px;line-height:1.5}
+.monitor-group-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8rpx;margin:24rpx 0 16rpx}
+.monitor-section-hint{font-size:13px;color:var(--ui-secondary)}
+.monitor-forecast-list{overflow:hidden;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.monitor-forecast-row{padding:24rpx}
+.monitor-forecast-row+.monitor-forecast-row{border-top:1px solid var(--ui-line)}
+.monitor-card-head{align-items:flex-start}
+.monitor-card-head>text:first-child{font-size:15px}
+.monitor-forecast-value{display:flex;align-items:baseline;flex-wrap:wrap;gap:12rpx;margin-top:10rpx}
+.monitor-forecast-value .monitor-amount{margin-top:0;min-width:0}
+.monitor-forecast-value .monitor-amount>text{font-size:26px}
+.monitor-forecast-value>t-icon{margin-left:auto;align-self:center;color:var(--ui-secondary)}
+.monitor-value-label{display:block;font-size:13px;line-height:1.5;color:var(--ui-secondary)}
+.monitor-inline-targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16rpx;margin-top:12rpx}
+.monitor-inline-targets>view{display:flex;flex-wrap:wrap;gap:8rpx;align-items:baseline;min-width:0;font-size:13px;line-height:1.5}
+.monitor-inline-targets text{color:var(--ui-secondary)}
+.monitor-inline-targets label{color:var(--ui-ink);font-weight:600;min-width:0;overflow-wrap:anywhere;word-break:break-all}
+.monitor-summary-hint{margin-top:10rpx;font-size:13px;color:var(--ui-secondary);line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.monitor-pressed{background:var(--ui-neutral-soft)}
+.monitor-actual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16rpx}
+.monitor-actual-title{display:block;min-height:44px;font-size:15px;font-weight:600;line-height:1.45;color:var(--ui-ink);overflow-wrap:anywhere}
+.monitor-actual-card>.monitor-state{padding:2rpx 10rpx;max-width:100%;box-sizing:border-box}
+.monitor-actual-card .monitor-amount{margin-top:20rpx;gap:6rpx}
+.monitor-actual-card .monitor-amount>text{font-size:24px;max-width:100%}
+.monitor-actual-card .monitor-amount-long>text{font-size:19px}
+.monitor-actual-card>.monitor-value-label{margin-top:6rpx}
+.monitor-card-more{display:flex;align-items:center;justify-content:space-between;gap:4rpx;min-height:44px;margin:8rpx 0 -12rpx;color:var(--ui-primary);font-size:13px}
+.monitor-updated{margin-top:16rpx;font-size:12px;line-height:1.5;color:var(--ui-secondary)}
+.monitor-detail-summary{margin-bottom:24rpx;padding:20rpx;border-radius:var(--ui-radius-panel);background:var(--ui-background)}
+.monitor-overview-toggle{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:32rpx;padding:24rpx;min-height:44px;box-sizing:border-box;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.monitor-overview-toggle>view:first-child{min-width:0}
+.monitor-overview-toggle>view>text{font-size:16px;font-weight:600;color:var(--ui-ink)}
+.monitor-overview-toggle label{display:block;margin-top:6rpx;font-size:13px;line-height:1.5;color:var(--ui-secondary)}
+.monitor-overview-action{display:flex;align-items:center;flex-shrink:0;gap:6rpx;color:var(--ui-primary)}
+.monitor-overview-toggle .monitor-overview-action>text{font-size:14px;font-weight:400;color:var(--ui-primary)}
+.monitor-overview-content{margin-top:16rpx}
+.monitor-period-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.monitor-period-head>text{font-size:15px;font-weight:600;color:var(--ui-ink)}

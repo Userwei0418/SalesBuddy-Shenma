@@ -32,7 +32,7 @@ def test_invalid_optional_unit_fails_before_stopping_services(monkeypatch):
 
 @pytest.mark.parametrize('optional',[False,True])
 @pytest.mark.parametrize('fail_health',[False,True])
-@pytest.mark.parametrize('before_schema,after_schema',[('V156','V157'),('V158','V159')])
+@pytest.mark.parametrize('before_schema,after_schema',[('V156','V157'),('V158','V159'),('V159','V399')])
 def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,optional,fail_health,before_schema,after_schema):
     old_revision,new_revision='a'*40,'b'*40
     root=tmp_path/'sales';old=root/'releases'/old_revision;old.mkdir(parents=True)
@@ -52,6 +52,7 @@ def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,op
     monkeypatch.setattr(upgrade.subprocess,'check_output',lambda *a,**k:'172.22.9.234\n')
     units=(*upgrade.CORE_SERVICES,upgrade.FEISHU_SERVICE) if optional else upgrade.CORE_SERVICES
     monkeypatch.setattr(upgrade,'existing_services',lambda:(units,units))
+    monkeypatch.setattr(upgrade,'validate_preflight',lambda path,args:{'status':'passed'})
     def unpack(_archive,destination,prefix=''):
         if not prefix:return
         (destination/'database').mkdir();(destination/'database'/'old.sql').write_text('-- historical\n')
@@ -77,6 +78,8 @@ def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,op
     health=[]
     def healthy(revision,services):
         health.append((revision,services))
+        if revision == new_revision and services == ('shenma-api',):
+            assert ['systemctl','start',*[unit for unit in units if unit != 'shenma-api']] not in calls
         if fail_health and revision==new_revision:raise RuntimeError('synthetic health failure')
         return {'revision':revision}
     monkeypatch.setattr(upgrade,'healthy',healthy)
@@ -88,8 +91,11 @@ def test_upgrade_and_rollback_use_same_service_inventory(tmp_path,monkeypatch,op
         with pytest.raises(RuntimeError,match='synthetic health failure'):upgrade.main()
     else:upgrade.main()
     service_calls=[c for c in calls if c[0]=='systemctl']
-    assert service_calls==[['systemctl',action,*units] for action in (['stop','start','stop','start'] if fail_health else ['stop','start'])]
-    assert health==[(new_revision,units)]+([(old_revision,units)] if fail_health else [])
+    prefix = [['systemctl','stop',*units], ['systemctl','start','shenma-api']]
+    suffix = ([['systemctl','stop',*units], ['systemctl','start',*units]] if fail_health else
+              [['systemctl','start',*[unit for unit in units if unit != 'shenma-api']]])
+    assert service_calls == prefix + suffix
+    assert health == [(new_revision,('shenma-api',))] + ([(old_revision,units)] if fail_health else [(new_revision,units)])
     assert (root/'current').resolve()==(old if fail_health else root/'releases'/new_revision)
 
 
@@ -114,3 +120,33 @@ def test_optional_worker_failure_prevents_success_even_when_api_is_active(monkey
     monkeypatch.setattr(upgrade,'run',run)
     with pytest.raises(RuntimeError,match='health verification failed'):
         upgrade.healthy('revision',(*upgrade.CORE_SERVICES,upgrade.FEISHU_SERVICE))
+
+
+@pytest.mark.parametrize('field',['revision','expected_current','expected_schema','target_schema','archive_sha256','wheels_sha256','status','existing_rows_unchanged','migration_repeat_unchanged'])
+def test_whole_upgrade_rejects_changed_or_failed_preflight(tmp_path,field):
+    data={'revision':'a'*40,'expected_current':'b'*40,'expected_schema':'V159','target_schema':'V399',
+          'archive_sha256':'c'*64,'wheels_sha256':'d'*64,'status':'passed',
+          'existing_rows_unchanged':True,'migration_repeat_unchanged':True}
+    args=SimpleNamespace(**data)
+    receipt=tmp_path/'preflight.json'
+    receipt.write_text(json.dumps(data))
+    assert upgrade.validate_preflight(receipt,args)['status']=='passed'
+    data[field]=False if isinstance(data[field],bool) else 'different'
+    receipt.write_text(json.dumps(data))
+    with pytest.raises(RuntimeError):upgrade.validate_preflight(receipt,args)
+
+
+def test_snapshot_compares_existing_columns_without_ignoring_old_values(monkeypatch):
+    queries=[]
+    def sql(database,query):
+        queries.append((database,query))
+        if 'count(*)' in query:return '2'
+        return 'digest-before' if database=='before' else 'digest-changed'
+    monkeypatch.setattr(upgrade,'sql',sql)
+    cols={'platform.user_ref':'id,account_code','platform.password_credential':'user_ref_id,password_hash'}
+    before=upgrade.preserved_snapshot('before',cols)
+    after=upgrade.preserved_snapshot('after',cols)
+    assert before['columns']==after['columns']==cols
+    assert before['rows']!=after['rows']
+    assert all('SELECT *' not in q for _,q in queries)
+    assert any('password_hash' in q for _,q in queries)

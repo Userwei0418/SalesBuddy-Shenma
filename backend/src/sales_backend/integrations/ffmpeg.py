@@ -4,13 +4,23 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from dataclasses import dataclass
 
 from sales_backend.async_resources import settle_owned_task
+from sales_backend.integrations.ffmpeg_config import (
+    DEFAULT_FFMPEG_EXECUTABLE,
+    FfmpegUnavailable,
+    validate_ffmpeg_executable,
+)
 
-FFMPEG_EXECUTABLE = "/usr/bin/ffmpeg"
+FFMPEG_EXECUTABLE = DEFAULT_FFMPEG_EXECUTABLE
 PROCESS_CLEANUP_SECONDS = 5
 logger = logging.getLogger(__name__)
+
+
+def resolve_ffmpeg_executable() -> str:
+    return validate_ffmpeg_executable(os.environ.get("FFMPEG_EXECUTABLE", FFMPEG_EXECUTABLE))
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,7 +55,7 @@ async def _cleanup(process, communication=None) -> None:
 async def run_ffmpeg(*arguments: str, timeout: float) -> ProcessResult:
     """Run with a deadline; cancellation also covers the spawn-return boundary."""
     spawn = asyncio.create_task(asyncio.create_subprocess_exec(  # noqa: S603
-        FFMPEG_EXECUTABLE, *arguments,
+        resolve_ffmpeg_executable(), *arguments,
         stdout=asyncio.subprocess.DEVNULL,
         stderr=asyncio.subprocess.PIPE,
     ))
@@ -59,6 +69,10 @@ async def run_ffmpeg(*arguments: str, timeout: float) -> ProcessResult:
         else:
             await _cleanup(process)
         raise
+    except OSError:
+        # A dependency removed or made non-executable after validation is still
+        # an infrastructure failure, not an invalid user recording.
+        raise FfmpegUnavailable() from None
 
     communication = asyncio.create_task(process.communicate())
     try:

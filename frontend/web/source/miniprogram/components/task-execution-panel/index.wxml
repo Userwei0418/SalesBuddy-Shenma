@@ -1,0 +1,43 @@
+<view wx:if="{{enabled}}" class="execution-panel">
+ <view class="execution-heading"><text class="execution-title">任务推进</text><button class="execution-link" disabled="{{busy}}" bindtap="refresh">刷新</button></view>
+ <view class="execution-sync">{{offline ? '当前离线 · ' : ''}}{{lastSyncedLabel ? '最近同步：' + lastSyncedLabel : '尚未同步'}}</view>
+ <view class="execution-responsibility"><text>执行：{{executorLabel || '待确认'}}</text><text>验收：{{reviewerLabel || '待确认'}}</text></view>
+ <view class="execution-progress-head"><text class="execution-percent">{{progressView.label}}</text><text>{{progressView.countLabel}}</text></view>
+ <progress wx:if="{{progressView.percent !== null && progressView.available}}" percent="{{progressView.percent}}" stroke-width="6" activeColor="#2864d2" backgroundColor="#edf0f5"/>
+ <view class="execution-hint">{{progressView.hint}}</view>
+ <view wx:for="{{checklist}}" wx:key="id" class="execution-item">
+  <view class="execution-item-head"><text class="execution-item-title">{{item.title}}</text><text class="execution-state">{{item.stateLabel}}</text></view>
+  <view class="execution-copy">完成标准：{{item.acceptance_criteria}}</view><view wx:if="{{item.requires_revalidation}}" class="execution-error">要求已变化，此项需重新核对。</view>
+  <view wx:if="{{item.note}}" class="execution-copy">{{item.note}}</view>
+  <button wx:if="{{allowProgress && item.editable}}" class="execution-link" data-action="progress" data-id="{{item.id}}" disabled="{{busy || pending || offline}}" bindtap="requestAction">更新推进与成果依据</button>
+ </view>
+ <view wx:if="{{pauseView && pauseView.active}}" class="execution-pause">
+  <text class="execution-subtitle">已暂停</text><view class="execution-copy">{{pauseView.reason}}</view>
+  <view class="execution-hint">复查时间：{{pauseView.recheckLabel || '待核对'}}。到时不会自动恢复。</view>
+  <button wx:if="{{allowResume}}" class="execution-link" data-action="resume" disabled="{{busy || pending || offline}}" bindtap="requestAction">恢复任务</button>
+ </view>
+ <button wx:elif="{{allowPause}}" class="execution-link" data-action="pause" disabled="{{busy || pending || offline}}" bindtap="requestAction">暂停任务</button>
+ <view class="execution-section"><text class="execution-subtitle">过程反馈</text><text class="execution-hint">记录进展与问题，不改变清单进度</text></view>
+ <view wx:if="{{!feedback.length}}" class="execution-hint">暂无过程反馈</view>
+ <block wx:for="{{feedback}}" wx:key="id"><view wx:if="{{showAllFeedback || index < 3}}" class="execution-item">
+  <view class="execution-item-head"><text>{{item.authorLabel}}</text><text class="execution-hint">{{item.timeLabel}}</text></view>
+  <view wx:if="{{item.relationLabel}}" class="execution-hint">{{item.relationLabel}}</view><view class="execution-copy">{{item.text}}</view><view wx:if="{{item.nextStep}}" class="execution-copy">下一步：{{item.nextStep}}</view><view wx:if="{{item.blocker}}" class="execution-copy">问题：{{item.blocker}}</view><button wx:for="{{item.evidenceUrls}}" wx:for-item="link" wx:for-index="linkIndex" wx:key="*this" class="execution-link" data-id="{{item.id}}" data-index="{{linkIndex}}" bindtap="copyEvidence">复制成果链接 {{linkIndex + 1}}</button><view wx:if="{{allowFeedback}}"><button class="execution-link" data-id="{{item.id}}" data-action="reply" disabled="{{busy || pending}}" bindtap="referenceFeedback">回复</button><button wx:if="{{item.actorUserId === currentUserId}}" class="execution-link" data-id="{{item.id}}" data-action="correct" disabled="{{busy || pending}}" bindtap="referenceFeedback">更正</button></view>
+ </view></block>
+ <button wx:if="{{feedback.length > 3}}" class="execution-link" bindtap="toggleFeedback">{{showAllFeedback ? '收起反馈' : '查看全部反馈'}}</button>
+ <view wx:if="{{allowFeedback}}" class="execution-editor">
+  <view wx:if="{{reference}}" class="execution-hint">{{corrects ? '更正原反馈（原文保留）' : '回复反馈'}}：{{reference}}<button class="execution-link" bindtap="clearFeedbackReference">取消关联</button></view>
+  <view wx:if="{{protocolVersion === 2}}">
+    <picker range="{{feedbackKinds}}" bindchange="chooseFeedbackKind" disabled="{{busy || pending}}"><view class="execution-form-field">反馈类型：{{feedbackKind === 'comment' ? '评论 / 协作说明' : '执行进展'}}</view></picker>
+    <picker range="{{itemOptions}}" range-key="title" bindchange="chooseFeedbackItem" disabled="{{busy || pending}}"><view class="execution-form-field">{{selectedItemId ? '已关联推进项' : '关联推进项（选填）'}}</view></picker>
+  </view>
+  <sb-textarea layout="stacked" plain label="新增反馈" maxlength="{{4000}}" value="{{note}}" disabled="{{busy || pending}}" placeholder="做了什么、遇到什么问题、下一步是什么" bind:change="inputFeedback"/>
+  <block wx:if="{{protocolVersion === 2}}">
+   <sb-textarea layout="stacked" plain label="下一步" maxlength="{{2000}}" value="{{nextStep}}" data-key="nextStep" disabled="{{busy || pending}}" bind:change="inputFeedback"/>
+   <sb-textarea layout="stacked" plain label="问题与阻碍" maxlength="{{2000}}" value="{{blocker}}" data-key="blocker" disabled="{{busy || pending}}" bind:change="inputFeedback"/>
+   <sb-textarea layout="stacked" plain label="成果链接" value="{{evidenceUrls}}" data-key="evidenceUrls" disabled="{{busy || pending}}" bind:change="inputFeedback" placeholder="每行一个网址，选填"/>
+  </block>
+  <view wx:if="{{error}}" class="execution-error">{{error}}</view>
+  <button wx:if="{{stale}}" class="execution-link" disabled="{{busy || offline}}" bindtap="confirmLatest">已核对最新任务，保留反馈继续</button>
+  <button class="execution-submit" loading="{{pending || busy}}" disabled="{{pending || busy || offline || stale || !note}}" bindtap="submitFeedback">提交反馈</button>
+ </view>
+</view>

@@ -5,9 +5,11 @@ import json
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
+from sales_backend.domain.task_outcome import normally_completed, task_end_reason
 from sales_backend.domain.fde_coaching import COACHING_CONTRACT_VERSION
 
 CONTRACT_VERSION = "fde.profile.v1"
+CALCULATION_VERSION = "fde_portrait_ratios_v2"
 PORTRAIT_PROMPT_VERSION = "fde.profile.coaching.v3"
 TZ = ZoneInfo("Asia/Shanghai")
 DIMENSIONS = (
@@ -61,14 +63,14 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
     actionable = [
         t
         for t in tasks
-        if t["status"] != "cancelled"
+        if task_end_reason(t) not in {"stopped", "cancelled", "rejected", "unknown"}
         and (in_window(t["due_at"], start, now) or in_window(t["completed_at"], start, now))
     ]
-    completed = [t for t in actionable if t["status"] == "completed"]
+    completed = [t for t in actionable if normally_completed(t)]
     timed = [
         t
         for t in tasks
-        if t["status"] == "completed" and t["due_at"] is not None and in_window(t["completed_at"], start, now)
+        if normally_completed(t) and t["due_at"] is not None and in_window(t["completed_at"], start, now)
     ]
     plans = sum(v["has_next_action"] for v in visible_visits)
     ratios = {
@@ -95,7 +97,7 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
             len(completed),
             len(actionable),
             True,
-            "周期内已到期或已完成的本人负责任务中，已完成的比例；取消任务不计",
+            "周期内已到期或正常完成的本人负责任务中，正常完成的比例；停止、取消、拒绝、结果未知不计",
         ),
         "task_timeliness": (
             sum(t["completed_at"] <= t["due_at"] for t in timed),
@@ -118,6 +120,7 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
                 "evidence_count": denominator,
                 "numerator": numerator,
                 "denominator": denominator,
+                "percent": percent,
             }
         )
     period = {"days": days, "start": start.isoformat(), "end": end.isoformat()}
@@ -125,6 +128,7 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
     # source versions so repeated GETs remain stable until business facts change.
     sources = {
         "contract_version": CONTRACT_VERSION,
+        "calculation_version": CALCULATION_VERSION,
         "actor": actor.model_dump(mode="json"),
         "permission_version": permission_version,
         "period": period,
@@ -162,4 +166,16 @@ def portrait(actor, *, days, now, permission_version, visits, projects, tasks, c
         "facts_fingerprint": fingerprint,
         "configuration": configuration or {},
         "coaching_inputs": sources["coaching_inputs"],
+        "coaching_versions": sources["coaching_versions"],
+        "score_basis": {
+            "basis_id": hashlib.sha256(CALCULATION_VERSION.encode()).hexdigest(),
+            "calculation_version": CALCULATION_VERSION,
+            "snapshot_status": "frozen",
+        },
+        "coaching_coverage": {
+            "status": "known", "visit_limit": 12, "task_limit": 20,
+            "selected_visits": sum(s.get("source_type") == "visit" for s in sources["coaching_inputs"]["sources"]),
+            "selected_tasks": sum(s.get("source_type") == "task" for s in sources["coaching_inputs"]["sources"]),
+            "truncated_text_sources": sum(bool(s.get("truncated")) for s in sources["coaching_inputs"]["sources"]),
+        },
     }

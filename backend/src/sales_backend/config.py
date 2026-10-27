@@ -40,14 +40,7 @@ class Settings:
     agent_platform_bindings_json: str = "{}"
     agent_fde_pilot_json: str = "{}"
     agent_fde_pilot_path: str = ""
-    weekly_agent_api_key: str = field(default="", repr=False)
-    weekly_agent_app_id: str = ""
-    weekly_agent_snapshot_id: str = ""
-    weekly_enabled_workspaces: str = ""
-    weekly_timeout_seconds: float = 180.0
-    weekly_max_input_bytes: int = 180000
     agent_fde_base_url: str = ""
-    agent_fde_ca_bundle: str = ""
     agent_fde_chatbi_id: str = ""
     agent_fde_chatbi_api_key: str = field(default="", repr=False)
     agent_fde_battle_map_id: str = ""
@@ -62,6 +55,11 @@ class Settings:
     agent_fde_visit_entry_api_key: str = field(default="", repr=False)
     agent_fde_today_tasks_id: str = ""
     agent_fde_today_tasks_api_key: str = field(default="", repr=False)
+    agent_fde_work_report_id: str = ""
+    agent_fde_work_report_api_key: str = field(default="", repr=False)
+    agent_fde_finance_assistant_id: str = ""
+    agent_fde_finance_assistant_api_key: str = field(default="", repr=False)
+    agent_finance_explanation_seconds: float = 30
     agent_fde_operating_report_id: str = ""
     agent_fde_operating_report_api_key: str = field(default="", repr=False)
     agent_fde_customer_advice_id: str = ""
@@ -72,17 +70,54 @@ class Settings:
     agent_fde_visit_advice_api_key: str = field(default="", repr=False)
     agent_fde_competency_review_id: str = ""
     agent_fde_competency_review_api_key: str = field(default="", repr=False)
+    agent_fde_task_import_id: str = ""
+    agent_fde_task_import_api_key: str = field(default="", repr=False)
     agent_today_tasks_acceptance_path: str = ""
     agent_today_tasks_acceptance_target: str = ""
     model_api_endpoint: str = ""
-    model_connections_locked: bool = False
-    unified_model_key_file: str = ""
-    model_key_operator_ids: str = ""
-    model_key_rotation_command_json: str = "[]"
     model_api_metadata: dict = field(default_factory=dict, repr=False)
     agent_execution_policy: dict = field(default_factory=dict, repr=False)
     agent_inference_total_seconds: float = 45.0
     agent_inference_platform_seconds: float = 12.0
+    work_report_inference_total_seconds: float = 600.0
+    work_report_inference_platform_seconds: float = 300.0
+    platform_database_url: str = field(default="", repr=False)
+    platform_mfa_keyring_file: str = ""
+    platform_mfa_key_id: str = ""
+    database_pool_wait_seconds: float = 5.0
+    public_web_origin: str = ""
+    # External knowledge provider is deliberately opt-in.  Empty values keep
+    # the local/internal material workflow available without making guessed
+    # network calls or treating a missing provider as a zero count.
+    knowledge_provider_base_url: str = ""
+    knowledge_provider_api_key: str = field(default="", repr=False)
+    knowledge_provider_auth_scheme: str = "bearer"
+    knowledge_provider_dataset_ids: str = ""
+    # Explicit administrator company -> provider dataset mapping; no global fallback.
+    knowledge_ingestion_workspace_datasets: str = "{}"
+    knowledge_provider_timeout_seconds: float = 15.0
+    knowledge_provider_retrieval_path: str = "/api/v1/retrieval"
+    knowledge_provider_agent_id: str = ""
+    # Enable only after checking the dedicated Agent has no off-scope retrieval/tools.
+    knowledge_provider_source_only_reviewed: bool = False
+    # Separate published document Workflow, never reuse the retrieval provider key.
+    knowledge_document_workflow_base_url: str = ""
+    knowledge_document_workflow_api_key: str = field(default="", repr=False)
+    knowledge_document_workflow_source_only_reviewed: bool = False
+    knowledge_document_workflow_download_origins: str = ""
+    knowledge_document_workflow_timeout_seconds: float = 60.0
+
+    weekly_agent_api_key: str = field(default="", repr=False)
+    weekly_agent_app_id: str = ""
+    weekly_agent_snapshot_id: str = ""
+    weekly_enabled_workspaces: str = ""
+    weekly_timeout_seconds: float = 180.0
+    weekly_max_input_bytes: int = 180000
+    agent_fde_ca_bundle: str = ""
+    model_connections_locked: bool = False
+    unified_model_key_file: str = ""
+    model_key_operator_ids: str = ""
+    model_key_rotation_command_json: str = "[]"
 
     @property
     def model_gateway_configured(self) -> bool:
@@ -113,13 +148,24 @@ def get_settings() -> Settings:
         raise RuntimeError("Production requires explicit AUTH_MODE=password")
     settings = Settings(
         app_env=app_env,
+        model_connections_locked=os.getenv('MODEL_CONNECTIONS_LOCKED', 'false').strip().lower() in {'1', 'true', 'yes', 'on'},
+        unified_model_key_file=os.getenv('UNIFIED_MODEL_KEY_FILE', ''),
+        model_key_operator_ids=os.getenv('MODEL_KEY_OPERATOR_IDS', ''),
+        model_key_rotation_command_json=os.getenv('MODEL_KEY_ROTATION_COMMAND_JSON', '[]'),
+        weekly_agent_api_key=os.getenv('WEEKLY_AGENT_API_KEY', ''),
+        weekly_agent_app_id=os.getenv('WEEKLY_AGENT_APP_ID', ''),
+        weekly_agent_snapshot_id=os.getenv('WEEKLY_AGENT_SNAPSHOT_ID', ''),
+        weekly_enabled_workspaces=os.getenv('WEEKLY_ENABLED_WORKSPACES', ''),
+        weekly_timeout_seconds=float(os.getenv('WEEKLY_TIMEOUT_SECONDS', '180')),
+        weekly_max_input_bytes=int(os.getenv('WEEKLY_MAX_INPUT_BYTES', '180000')),
+        agent_fde_ca_bundle=os.getenv('AGENT_FDE_CA_BUNDLE', ''),
         database_url=os.getenv("DATABASE_URL", ""),
+        platform_database_url=os.getenv("PLATFORM_DATABASE_URL", ""),
+        platform_mfa_keyring_file=os.getenv("PLATFORM_MFA_KEYRING_FILE", ""),
+        platform_mfa_key_id=os.getenv("PLATFORM_MFA_KEY_ID", ""),
+        public_web_origin=os.getenv("PUBLIC_WEB_ORIGIN", "").strip(),
         senseaudio_base_url=os.getenv("SENSEAUDIO_BASE_URL", "https://api.senseaudio.cn").rstrip("/"),
         senseaudio_api_key=os.getenv("SENSEAUDIO_API_KEY", ""),
-        model_connections_locked=os.getenv("MODEL_CONNECTIONS_LOCKED", "false").strip().lower() in {"1", "true", "yes", "on"},
-        unified_model_key_file=os.getenv("UNIFIED_MODEL_KEY_FILE", ""),
-        model_key_operator_ids=os.getenv("MODEL_KEY_OPERATOR_IDS", ""),
-        model_key_rotation_command_json=os.getenv("MODEL_KEY_ROTATION_COMMAND_JSON", "[]"),
         asr_model=os.getenv("SENSEAUDIO_ASR_MODEL", "senseaudio-asr-lite-1.5-260319"),
         tts_model=os.getenv("SENSEAUDIO_TTS_MODEL", "senseaudio-tts-1.5-260319"),
         llm_model=os.getenv("SENSEAUDIO_LLM_MODEL", "senseaudio-s2-lite"),
@@ -134,6 +180,7 @@ def get_settings() -> Settings:
         demo_workspace=os.getenv("DEMO_WORKSPACE", "demo-sales-workspace"),
         database_min_pool_size=int(os.getenv("DATABASE_MIN_POOL_SIZE", "1")),
         database_max_pool_size=int(os.getenv("DATABASE_MAX_POOL_SIZE", "8")),
+        database_pool_wait_seconds=float(os.getenv("DATABASE_POOL_WAIT_SECONDS", "5")),
         worker_poll_seconds=float(os.getenv("WORKER_POLL_SECONDS", "1")),
         worker_lock_seconds=int(os.getenv("WORKER_LOCK_SECONDS", "180")),
         worker_id=os.getenv("WORKER_ID", "sales-worker-1"),
@@ -149,14 +196,7 @@ def get_settings() -> Settings:
         agent_platform_bindings_json=os.getenv("AGENT_PLATFORM_BINDINGS_JSON", "{}"),
         agent_fde_pilot_json=os.getenv("AGENT_FDE_PILOT_JSON", "{}"),
         agent_fde_pilot_path=os.getenv("AGENT_FDE_PILOT_PATH", ""),
-        weekly_agent_api_key=os.getenv("WEEKLY_AGENT_API_KEY", ""),
-        weekly_agent_app_id=os.getenv("WEEKLY_AGENT_APP_ID", ""),
-        weekly_agent_snapshot_id=os.getenv("WEEKLY_AGENT_SNAPSHOT_ID", ""),
-        weekly_enabled_workspaces=os.getenv("WEEKLY_ENABLED_WORKSPACES", ""),
-        weekly_timeout_seconds=float(os.getenv("WEEKLY_TIMEOUT_SECONDS", "180")),
-        weekly_max_input_bytes=int(os.getenv("WEEKLY_MAX_INPUT_BYTES", "180000")),
         agent_fde_base_url=os.getenv("AGENT_FDE_BASE_URL", ""),
-        agent_fde_ca_bundle=os.getenv("AGENT_FDE_CA_BUNDLE", ""),
         agent_fde_chatbi_id=os.getenv("AGENT_FDE_CHATBI_ID", ""),
         agent_fde_chatbi_api_key=os.getenv("AGENT_FDE_CHATBI_API_KEY", ""),
         agent_fde_battle_map_id=os.getenv("AGENT_FDE_BATTLE_MAP_ID", ""),
@@ -171,6 +211,11 @@ def get_settings() -> Settings:
         agent_fde_visit_entry_api_key=os.getenv("AGENT_FDE_VISIT_ENTRY_API_KEY", ""),
         agent_fde_today_tasks_id=os.getenv("AGENT_FDE_TODAY_TASKS_ID", ""),
         agent_fde_today_tasks_api_key=os.getenv("AGENT_FDE_TODAY_TASKS_API_KEY", ""),
+        agent_fde_work_report_id=os.getenv("AGENT_FDE_WORK_REPORT_ID", ""),
+        agent_fde_work_report_api_key=os.getenv("AGENT_FDE_WORK_REPORT_API_KEY", ""),
+        agent_fde_finance_assistant_id=os.getenv("AGENT_FDE_FINANCE_ASSISTANT_ID", ""),
+        agent_fde_finance_assistant_api_key=os.getenv("AGENT_FDE_FINANCE_ASSISTANT_API_KEY", ""),
+        agent_finance_explanation_seconds=float(os.getenv("AGENT_FINANCE_EXPLANATION_SECONDS", "30")),
         agent_fde_operating_report_id=os.getenv("AGENT_FDE_OPERATING_REPORT_ID", ""),
         agent_fde_operating_report_api_key=os.getenv("AGENT_FDE_OPERATING_REPORT_API_KEY", ""),
         agent_fde_customer_advice_id=os.getenv("AGENT_FDE_CUSTOMER_ADVICE_ID", ""),
@@ -181,10 +226,36 @@ def get_settings() -> Settings:
         agent_fde_visit_advice_api_key=os.getenv("AGENT_FDE_VISIT_ADVICE_API_KEY", ""),
         agent_fde_competency_review_id=os.getenv("AGENT_FDE_COMPETENCY_REVIEW_ID", ""),
         agent_fde_competency_review_api_key=os.getenv("AGENT_FDE_COMPETENCY_REVIEW_API_KEY", ""),
+        agent_fde_task_import_id=os.getenv("AGENT_FDE_TASK_IMPORT_ID", ""),
+        agent_fde_task_import_api_key=os.getenv("AGENT_FDE_TASK_IMPORT_API_KEY", ""),
         agent_today_tasks_acceptance_path=os.getenv("AGENT_TODAY_TASKS_ACCEPTANCE_PATH", ""),
         agent_today_tasks_acceptance_target=os.getenv("AGENT_TODAY_TASKS_ACCEPTANCE_TARGET", ""),
         agent_inference_total_seconds=float(os.getenv("AGENT_INFERENCE_TOTAL_SECONDS", "45")),
         agent_inference_platform_seconds=float(os.getenv("AGENT_INFERENCE_PLATFORM_SECONDS", "12")),
+        work_report_inference_total_seconds=float(os.getenv("WORK_REPORT_INFERENCE_TOTAL_SECONDS", "600")),
+        work_report_inference_platform_seconds=float(os.getenv("WORK_REPORT_INFERENCE_PLATFORM_SECONDS", "300")),
+        knowledge_provider_base_url=os.getenv("KNOWLEDGE_PROVIDER_BASE_URL", "").strip().rstrip("/"),
+        knowledge_provider_api_key=os.getenv("KNOWLEDGE_PROVIDER_API_KEY", ""),
+        knowledge_provider_auth_scheme=os.getenv("KNOWLEDGE_PROVIDER_AUTH_SCHEME", "bearer").strip().lower(),
+        knowledge_provider_dataset_ids=os.getenv("KNOWLEDGE_PROVIDER_DATASET_IDS", "").strip(),
+        knowledge_ingestion_workspace_datasets=os.getenv("KNOWLEDGE_INGESTION_WORKSPACE_DATASETS", "{}").strip(),
+        knowledge_provider_timeout_seconds=float(os.getenv("KNOWLEDGE_PROVIDER_TIMEOUT_SECONDS", "15")),
+        knowledge_provider_retrieval_path=os.getenv(
+            "KNOWLEDGE_PROVIDER_RETRIEVAL_PATH", "/api/v1/retrieval"
+        ).strip() or "/api/v1/retrieval",
+        knowledge_provider_agent_id=os.getenv("KNOWLEDGE_PROVIDER_AGENT_ID", "").strip(),
+        knowledge_provider_source_only_reviewed=os.getenv(
+            "KNOWLEDGE_PROVIDER_SOURCE_ONLY_REVIEWED", "false"
+        ).strip().lower() == "true",
+        knowledge_document_workflow_base_url=os.getenv("KNOWLEDGE_DOCUMENT_WORKFLOW_BASE_URL", "").strip(),
+        knowledge_document_workflow_api_key=os.getenv("KNOWLEDGE_DOCUMENT_WORKFLOW_API_KEY", ""),
+        knowledge_document_workflow_source_only_reviewed=os.getenv(
+            "KNOWLEDGE_DOCUMENT_WORKFLOW_SOURCE_ONLY_REVIEWED", "false"
+        ).strip().lower() == "true",
+        knowledge_document_workflow_download_origins=os.getenv("KNOWLEDGE_DOCUMENT_WORKFLOW_DOWNLOAD_ORIGINS", ""),
+        knowledge_document_workflow_timeout_seconds=float(
+            os.getenv("KNOWLEDGE_DOCUMENT_WORKFLOW_TIMEOUT_SECONDS", "60")
+        ),
     )
     settings.require_auth_mode()
     return settings

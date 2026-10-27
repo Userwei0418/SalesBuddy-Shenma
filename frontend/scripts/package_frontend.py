@@ -15,6 +15,9 @@ import tempfile
 from datetime import datetime, timezone
 from io import BytesIO
 import zipfile
+import sys
+sys.dont_write_bytecode = True
+from miniprogram_manifest import page_inventory, validate_dependencies
 
 
 EXCLUDED_PARTS = {".git", ".DS_Store", "node_modules", "miniprogram_npm", "__pycache__",
@@ -34,7 +37,8 @@ def sha256(content: bytes) -> str:
 
 
 def excluded(path: PurePosixPath) -> bool:
-    return (any(part in EXCLUDED_PARTS for part in path.parts)
+    return (path.parts[:2] in {("frontend", "web"), ("frontend", "tests")}
+            or any(part in EXCLUDED_PARTS for part in path.parts)
             or path.name in EXCLUDED_NAMES or path.name.startswith(".env")
             or path.suffix.lower() in PRIVATE_SUFFIXES)
 
@@ -116,6 +120,9 @@ def build(args: argparse.Namespace) -> dict:
         files[private_name] = source.read_bytes()
 
     source_version = json.loads(files["frontend/VERSION.json"])
+    release_version = source_version.get("release_version")
+    if release_version is not None and not re.fullmatch(r"\d+\.\d+\.\d+", str(release_version)):
+        raise ValueError("源码 release_version 必须是三段数字版本。")
     config = files["frontend/miniprogram/config.js"].decode("utf-8")
     api_url = re.search(r'API_BASE_URL\s*:\s*["\'](https://[^"\']+)["\']', config)
     if not api_url:
@@ -123,14 +130,16 @@ def build(args: argparse.Namespace) -> dict:
     app = json.loads(files["frontend/miniprogram/app.json"])
     required = {"frontend/project.config.json", "frontend/miniprogram/app.js",
                 "frontend/miniprogram/app.wxss", "frontend/miniprogram/utils/apiClient.js"}
-    if not app.get("pages"):
-        raise ValueError("前端未注册页面。")
-    for page in app["pages"]:
+    pages, subpackage_roots = page_inventory(app)
+    for page in pages:
         required.update(f"frontend/miniprogram/{page}{suffix}" for suffix in (".js", ".json", ".wxml", ".wxss"))
     for tab in app.get("tabBar", {}).get("list", []):
         required.update("frontend/miniprogram/" + tab[key] for key in ("iconPath", "selectedIconPath"))
     if not required.issubset(files):
         raise ValueError("交付源码缺少工程配置、页面文件或导航图标。")
+    mini_prefix = "frontend/miniprogram/"
+    validate_dependencies({name[len(mini_prefix):]: content for name, content in files.items()
+                           if name.startswith(mini_prefix)}, subpackage_roots)
     project = json.loads(files["frontend/project.config.json"])
     if project.get("miniprogramRoot") != "miniprogram/":
         raise ValueError("工程目录必须配置为 miniprogram/。")
@@ -139,12 +148,22 @@ def build(args: argparse.Namespace) -> dict:
         "frontend_revision": head, "packaged_at": now.isoformat(),
         "backend_revision": args.backend_revision, "database_version": args.database_version,
         "deployment_verification": "Caller supplied after live API/Worker/database verification; this script does not access the server.",
-        "api_base_url": api_url.group(1), "registered_pages": len(app.get("pages", [])),
+        "api_base_url": api_url.group(1), "registered_pages": len(pages),
+        "main_package_pages": len(app["pages"]), "subpackage_roots": subpackage_roots,
         "contains_private_account_guide": bool(args.private_accounts_file),
         "api_contract_path": contract_name,
         "source_metadata": source_version,
     }
+    if release_version is not None:
+        version["release_version"] = release_version
     files["frontend/VERSION.json"] = json_bytes(version)
+    build_metadata = {"schemaVersion": 1, "environment": "online", "sourceRevision": head}
+    if release_version is not None:
+        build_metadata["releaseVersion"] = release_version
+    build_info = json_bytes(build_metadata)
+    files["frontend/miniprogram/buildInfo.json"] = build_info
+    # WeChat require loads JavaScript modules, not JSON modules.
+    files["frontend/miniprogram/buildInfo.js"] = b"module.exports = " + build_info.rstrip() + b";\n"
     privacy_note = ("\n本包包含经授权提供的演示账号说明，见 [账号登录说明](交付说明/账号登录说明.md)。"
                     "交付包仅发送给指定协作人员，不上传公开仓库或公开 Release。\n"
                     if args.private_accounts_file else "\n本包不含账号密码，登录账号由运营提供。\n")

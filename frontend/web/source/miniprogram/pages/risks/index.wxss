@@ -1,0 +1,39 @@
+page{background:var(--ui-background)}
+.risk-page{min-height:100vh;padding-bottom:48rpx;color:var(--ui-ink);background:var(--ui-background)}
+.risk-hero{margin:24rpx 32rpx 0}
+.risk-tabs{position:sticky;z-index:5;top:0;margin:16rpx 0;padding:0 32rpx;background:var(--ui-background)}
+/* 风险卡：白卡放在灰底上，不描边；卡内分组用分隔线；状态只由标签表达 */
+.risk-list{display:flex;flex-direction:column;gap:16rpx;padding:8rpx 32rpx 32rpx}
+.risk-card{padding:28rpx 32rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.risk-card-pressed{background:var(--ui-neutral-soft)}
+.risk-row-pressed{opacity:.7}
+.risk-top{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
+.risk-level{flex:0 0 auto;padding:0 12rpx;border-radius:4px;color:var(--ui-neutral);background:var(--ui-neutral-soft);font-size:var(--ui-text-small);line-height:20px}
+.risk-customer{margin-top:16rpx;color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600;line-height:1.45}
+.risk-title{margin-top:4rpx;color:var(--ui-ink);font-size:14px;line-height:1.5}
+.risk-description{display:-webkit-box;margin-top:8rpx;overflow:hidden;color:var(--ui-secondary);font-size:14px;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.risk-opportunity{display:flex;align-items:center;justify-content:space-between;gap:16rpx;min-height:var(--ui-touch-target);margin-top:24rpx;padding-top:20rpx;border-top:1px solid var(--ui-line)}
+.risk-opportunity>view:first-child{min-width:0;flex:1}
+.risk-opportunity>view:first-child text,.risk-opportunity>view:first-child label{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.risk-opportunity>view:first-child text{color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.risk-opportunity>view:first-child label{margin-top:4rpx;color:var(--ui-ink);font-size:14px;font-weight:600}
+.risk-link{display:flex;align-items:center;flex:0 0 auto;color:var(--ui-primary);font-size:14px}
+.risk-meta{display:grid;grid-template-columns:1fr 1.2fr;gap:16rpx;margin-top:24rpx}
+.risk-meta text{display:block;color:var(--ui-muted);font-size:var(--ui-text-small)}
+.risk-meta label{display:block;margin-top:4rpx;color:var(--ui-ink);font-size:14px}
+.risk-action{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin-top:24rpx;padding-top:20rpx;border-top:1px solid var(--ui-line);color:var(--ui-secondary);font-size:var(--ui-text-small)}
+.risk-action>text{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.risk-state-panel{padding:16rpx 32rpx}
+
+/* Palette only: original geometry is preserved. */
+.risk-card.status-open .risk-description { color:var(--sb-alert-ink); }
+
+.risk-filters{margin:24rpx 32rpx;padding:24rpx;border-radius:var(--ui-radius-panel);background:var(--ui-surface)}
+.risk-scope-options{display:flex;flex-wrap:wrap;gap:12rpx}
+.risk-scope{flex:1;min-width:104rpx;margin:0;padding:0 8rpx;font-size:24rpx;line-height:72rpx;color:var(--ui-secondary);background:var(--ui-neutral-soft)}
+.risk-scope.selected{color:var(--ui-primary);background:var(--ui-primary-soft)}
+.risk-filter-select{display:flex;align-items:center;justify-content:space-between;margin-top:20rpx;padding:16rpx 20rpx;font-size:28rpx;color:var(--ui-ink);background:var(--ui-background)}
+.risk-filter-error{margin-top:16rpx;color:var(--ui-secondary);font-size:24rpx;line-height:1.6}
+.risk-pagination{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin:0 32rpx;font-size:24rpx}
+.risk-pagination button{margin:0;padding:0 20rpx;font-size:24rpx}
+.risk-top .risk-state{flex:1;min-width:0}

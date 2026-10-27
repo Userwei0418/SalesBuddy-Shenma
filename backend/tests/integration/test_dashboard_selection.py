@@ -18,7 +18,7 @@ async def two_teams(connection):
     first = await opportunity(connection, 'XS001', 100)
     second = await opportunity(connection, 'XS002', 200)
     other = await actor(connection, 'XS002')
-    manager = await actor(connection, 'ZJL001')
+    manager = await actor(connection, 'ADMIN001')
     north = uuid4()
     await connection.execute("INSERT INTO platform.team(id,workspace_id,code,name) VALUES($1,$2,'test-north','北区')",
                              north, manager.workspace_id)
@@ -28,6 +28,7 @@ async def two_teams(connection):
         'UPDATE platform.role_binding SET team_id=$1 WHERE user_ref_id=$2::uuid', north, other.user_id)
     await seed_execute(connection, 'UPDATE crm.opportunity SET owner_team_id=$1 WHERE id=$2::uuid', north, second['id'])
     await connection.execute('UPDATE crm.customer SET owner_team_id=$1 WHERE id=$2::uuid', north, second['customer_id'])
+    await actor(connection, 'ZJL001')
     return first, second, other.user_id
 
 

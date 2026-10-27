@@ -1,0 +1,44 @@
+.review-okr { color:var(--ui-ink,#1f2329); display:flex; flex-direction:column; gap:16px; min-width:0; }
+.review-okr .pc-panel-body { padding:16px 20px; }
+.review-okr-toolbar,.review-okr-section-head,.review-okr-objective-head,.review-okr-editor-heading,.review-okr-editor-actions,.review-okr-footer { display:flex; align-items:center; gap:12px; }
+.review-okr-toolbar { flex-wrap:wrap; padding:0 0 16px; }
+.review-okr-toolbar-actions { margin-left:auto; display:flex; gap:8px; }
+.review-okr-field { display:flex; flex-direction:column; gap:6px; min-width:0; font-size:13px; }
+.review-okr-field>span { color:var(--ui-secondary,#646a73); }
+.review-okr-field .ant-select { width:100%; }
+.review-okr-objectives { border-top:1px solid var(--ui-line,#e2e8f0); }
+.review-okr-objective { border-bottom:1px solid var(--ui-line,#e2e8f0); }
+.review-okr-objective-head { padding:20px 0; align-items:flex-start; flex-wrap:wrap; }
+.review-okr-objective-title { flex:1; min-width:240px; }
+.review-okr-objective-title h3 { font-size:15px; line-height:1.6; font-weight:600; margin:0 0 6px; overflow-wrap:anywhere; }
+.review-okr-objective-title .pc-muted,.review-okr-objective-people { font-size:12px; }
+.review-okr-objective-people { display:flex; flex-direction:column; gap:4px; max-width:260px; }
+.review-okr-objective-people small { color:var(--ui-secondary,#646a73); }
+.review-okr-expand { display:grid; place-items:center; width:24px; height:24px; flex:0 0 24px; border:1px solid var(--ui-line,#e2e8f0); border-radius:5px; background:var(--ui-surface,#fff); color:var(--ui-primary,#3370ff); cursor:pointer; font-size:18px; }
+.review-okr-expand:focus-visible { outline:2px solid var(--ui-focus,#5786dc); outline-offset:2px; }
+.review-okr-row-actions { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.review-okr-results { border-top:1px solid var(--ui-line,#e2e8f0); padding:16px 0 20px 36px; }
+.review-okr-section-head { justify-content:space-between; padding-bottom:12px; }
+.review-okr-section-head b { font-size:14px; }
+.review-okr-table-wrap { overflow-x:auto; }
+.review-okr-table { border-collapse:collapse; table-layout:fixed; width:100%; min-width:780px; font-size:13px; }
+.review-okr-table th { text-align:left; background:var(--ui-background,#f5f6f8); color:var(--ui-secondary,#646a73); font-weight:500; }
+.review-okr-table th,.review-okr-table td { padding:12px 10px; border-bottom:1px solid var(--ui-line,#e2e8f0); vertical-align:top; overflow-wrap:anywhere; }
+.review-okr-table th:first-child { width:29%; }.review-okr-table th:nth-child(2) { width:13%; }.review-okr-table th:last-child { width:19%; }
+.review-okr-table small { display:block; margin-top:5px; color:var(--ui-muted,#8f959e); font-size:12px; }
+.review-okr-number { font-variant-numeric:tabular-nums; font-size:15px; }
+.review-okr-editor { border:1px solid var(--ui-primary,#3370ff); border-radius:8px; background:var(--ui-surface,#fff); padding:16px; margin:0 0 16px; }
+.review-okr-editor-heading { margin-bottom:16px; flex-wrap:wrap; }
+.review-okr-form { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.review-okr-field.is-wide { grid-column:1/-1; }
+.review-okr-period { display:grid; grid-template-columns:90px minmax(0,1fr); gap:6px; }
+.review-okr-definition,.review-okr-confirm { grid-column:1/-1; font-size:12px; color:var(--ui-secondary,#646a73); }
+.review-okr-editor-actions { justify-content:flex-end; margin-top:16px; }
+.review-okr-editor .ant-alert { margin-top:12px; }
+.review-okr-empty { padding:32px 20px; text-align:center; color:var(--ui-muted,#8f959e); }
+.review-okr-footer { padding-top:20px; justify-content:flex-end; }
+.review-okr-evidence { padding:4px 8px; font-size:13px; }
+.review-okr-evidence p { margin:6px 0; }.review-okr-evidence-copy { white-space:pre-wrap; }
+.review-okr-evidence details { margin-top:12px; }.review-okr-evidence summary { cursor:pointer; color:var(--ui-primary,#3370ff); }
+@media(max-width:900px){.review-okr-form{grid-template-columns:repeat(2,minmax(0,1fr));}.review-okr-objective-people{max-width:none;}.review-okr-results{padding-left:0;}}
+@media(max-width:600px){.review-okr-form{grid-template-columns:1fr;}.review-okr-toolbar-actions{margin-left:0;}.review-okr-objective-title{min-width:180px;}.review-okr-objective-head{gap:8px;}}

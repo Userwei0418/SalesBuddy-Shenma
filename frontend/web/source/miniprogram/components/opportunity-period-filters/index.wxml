@@ -1,0 +1,10 @@
+<view class="period-filters">
+ <button class="period-heading" bindtap="toggle"><view><text>创建 / 活跃季度</text><label>{{value.createdEnabled ? value.createdYear + '年 Q' + value.createdQuarter + '创建' : '创建时间不限'}}{{value.activeQuarter ? ' · ' + value.financialYear + '年 Q' + value.financialQuarter + '活跃' : ''}}</label></view><text>{{expanded ? '收起' : '展开'}}</text></button>
+ <view wx:if="{{expanded}}" class="period-body">
+  <view class="period-toggle"><view><text>按创建季度筛选</text><label>按商机原始创建日期</label></view><switch checked="{{value.createdEnabled}}" bindchange="toggleCreated" aria-label="按创建季度筛选"/></view>
+  <view wx:if="{{value.createdEnabled}}" class="period-selects"><picker mode="date" fields="year" start="2000-01-01" end="2100-12-31" value="{{value.createdYear + '-01-01'}}" data-key="createdYear" bindchange="changeYear"><view>创建年份 <text>{{value.createdYear}}年 ⌄</text></view></picker><picker range="{{quarters}}" value="{{value.createdQuarter - 1}}" data-key="createdQuarter" bindchange="changeQuarter"><view>创建季度 <text>Q{{value.createdQuarter}} ⌄</text></view></picker></view>
+  <view class="period-toggle"><view><text>只看季度活跃商机</text><label>预测确收或预测回款大于 0</label></view><switch checked="{{value.activeQuarter}}" bindchange="toggleActive" aria-label="只看季度活跃商机"/></view>
+  <view wx:if="{{value.activeQuarter}}" class="period-selects"><picker mode="date" fields="year" start="2000-01-01" end="2100-12-31" value="{{value.financialYear + '-01-01'}}" data-key="financialYear" bindchange="changeYear"><view>财务年份 <text>{{value.financialYear}}年 ⌄</text></view></picker><picker range="{{quarters}}" value="{{value.financialQuarter - 1}}" data-key="financialQuarter" bindchange="changeQuarter"><view>财务季度 <text>Q{{value.financialQuarter}} ⌄</text></view></picker></view>
+  <text class="period-note">筛选作用于全部可见商机，与关单时间、经营统计期间分别设置。</text>
+ </view>
+</view>

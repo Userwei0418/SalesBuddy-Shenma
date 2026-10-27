@@ -2,11 +2,16 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 import asyncpg
+from pydantic import ValidationError
 
+from sales_backend.contracts.task_creation import TaskCreationConfirmation
 from sales_backend.domain.agent import ActorContext
+from sales_backend.domain.authorization import ObjectScope
 from sales_backend.domain.concurrency import require_version
+from sales_backend.domain.route_permissions import TASK_EVENTS
 from sales_backend.domain.tasks import (
     NOTIFICATION_BODY_FALLBACK,
     TASK_RESPONSE_RULES,
@@ -15,14 +20,13 @@ from sales_backend.domain.tasks import (
     TaskNotFound,
     task_association_kind,
 )
+from sales_backend.repositories.authorization import AuthorizationRepository
 from sales_backend.repositories.task_links import TaskLinkRepository
 from sales_backend.repositories.task_mutations import TaskMutationRepository
 from sales_backend.repositories.task_targets import TaskTargetRepository
 from sales_backend.repositories.tasks import TaskRepository
 from sales_backend.services.authorization import require_permission
-from sales_backend.domain.route_permissions import TASK_EVENTS
-from sales_backend.domain.authorization import ObjectScope
-from sales_backend.repositories.authorization import AuthorizationRepository
+from sales_backend.services.task_compatibility import require_execution_creation_enabled, require_legacy_mutation
 
 
 async def validate_task_links(connection, actor, customer_id=None, opportunity_id=None, association_kind=None):
@@ -61,7 +65,32 @@ class TaskService:
         opportunity_id=None,
         source_suggestion_id=None,
         association_kind=None,
+        source_code=None,
+        alignment=None,
+        alignment_contract_version=None,
+        execution_protocol_version=None,
+        checklist=None,
+        deliverable=None,
+        acceptance_criteria=None,
     ):
+        try:
+            confirmation = TaskCreationConfirmation(
+                execution_protocol_version=execution_protocol_version, checklist=checklist or [],
+                deliverable=deliverable, acceptance_criteria=acceptance_criteria,
+            )
+        except ValidationError as exc:
+            raise TaskConflict("TASK_EXECUTION_CONFIRMATION_REQUIRED") from exc
+        await require_execution_creation_enabled(
+            connection, protocol_version=confirmation.execution_protocol_version)
+        lightweight = confirmation.execution_protocol_version == 3
+        if lightweight and target_position not in (None, "self"):
+            raise TaskConflict("TASK_EXECUTION_SINGLE_OWNER_REQUIRED")
+        # One task owns one definition namespace even when a batch shares text.
+        definitions = [{**item.model_dump(mode="json"), "item_id": str(uuid4())}
+                       for item in confirmation.checklist]
+        source_code = source_code or ("business_advice" if source_suggestion_id else "mini_program")
+        if source_code not in {"mini_program", "business_advice", "meeting_import"}:
+            raise ValueError("未知任务来源")
         permission = "task.create_" + task_association_kind(customer_id, opportunity_id, association_kind)
         effective = await AuthorizationRepository().effective(connection)
         own_scope = ObjectScope(actor.workspace_id, actor.user_id,
@@ -80,6 +109,14 @@ class TaskService:
         )
         if any(target["user_id"] != actor.user_id for target in targets):
             effective.require("task.assign", own_scope)
+        # "自己" is a named sole recipient, not a role-pool claim in V2.
+        if confirmation.execution_protocol_version in {2, 3} and target_position == "self":
+            target_position = None
+        if lightweight and len(targets) != 1:
+            raise TaskConflict("TASK_EXECUTION_SINGLE_OWNER_REQUIRED")
+        confirmed_self = (confirmation.execution_protocol_version in {2, 3} and not target_position
+                          and source_code in {"mini_program", "business_advice"}
+                          and len(targets) == 1 and targets[0]["user_id"] == actor.user_id)
         creator_name = await connection.fetchval(
             "SELECT display_name FROM platform.user_ref WHERE id=$1::uuid", actor.user_id
         )
@@ -88,8 +125,8 @@ class TaskService:
         task_id = await connection.fetchval(
             """INSERT INTO workflow.task(workspace_id,title,description,creator_user_ref_id,creator_team_id,
               customer_id,priority_code,status,due_at,source_code,opportunity_id,target_position,source_suggestion_id,association_kind)
-            VALUES($1::uuid,$2,$3,$4::uuid,$5::uuid,$6::uuid,$7,'pending_confirm',$8,
-              CASE WHEN $11::uuid IS NULL THEN 'mini_program' ELSE 'business_advice' END,$9::uuid,$10,$11::uuid,$12)
+            VALUES($1::uuid,$2,$3,$4::uuid,$5::uuid,$6::uuid,$7,$14,$8,
+              $13,$9::uuid,$10,$11::uuid,$12)
             RETURNING id::text""",
             actor.workspace_id,
             title,
@@ -103,6 +140,8 @@ class TaskService:
             target_position,
             source_suggestion_id,
             association_kind,
+            source_code,
+            "in_progress" if lightweight else "pending_confirm",
         )
         for target in targets:
             if target_position:
@@ -117,6 +156,8 @@ class TaskService:
                 )
             else:
                 await TaskMutationRepository.assign_owner(connection, actor.workspace_id, task_id, target)
+            if confirmed_self or (lightweight and target["user_id"] == actor.user_id):
+                continue
             await TaskMutationRepository.notify(
                 connection,
                 actor,
@@ -132,6 +173,7 @@ class TaskService:
                     "assignee_name": target["display_name"],
                     "due_at": due_at.isoformat(),
                     "priority_code": priority_code,
+                    "source_code": source_code,
                 },
             )
         await TaskMutationRepository.event(
@@ -140,10 +182,27 @@ class TaskService:
             task_id,
             "created",
             None,
-            "pending_confirm",
+            "in_progress" if lightweight else "pending_confirm",
             "岗位待办已发出，等待一人领取" if target_position else f"任务下发给{targets[0]['display_name']}",
             {"target_position": target_position, "recipient_ids": [t["user_id"] for t in targets]},
         )
+        if alignment is not None or alignment_contract_version is not None:
+            from sales_backend.services.task_alignment import save_task_alignment
+            await save_task_alignment(connection, task_id, alignment, contract_version=alignment_contract_version)
+        from sales_backend.services.task_execution import initialize_execution
+
+        if confirmation.execution_protocol_version == 1:
+            await initialize_execution(connection, task_id, definitions)
+        elif lightweight:
+            await initialize_execution(connection, task_id, {}, protocol_version=3)
+        elif confirmation.execution_protocol_version == 2:
+            await initialize_execution(connection, task_id, {
+                "requirements": {"title": title, "description": description,
+                    "deliverable": confirmation.deliverable,
+                    "acceptance_criteria": confirmation.acceptance_criteria,
+                    "due_at": due_at.isoformat(), "priority_code": priority_code},
+                "checklist": definitions,
+            }, protocol_version=2, confirmed_self=confirmed_self)
         return await TaskRepository().detail(connection, task_id=task_id)
 
     async def _respond_position(self, connection, actor, task, event_type, note):
@@ -241,8 +300,10 @@ class TaskService:
         note: str | None,
         expected_version: int | None = None,
         assignee_account_code: str | None = None,
+        actual_contribution=None,
     ) -> dict[str, Any]:
         await require_permission(connection, TASK_EVENTS.get(event_type, ""), task_id=task_id)
+        await require_legacy_mutation(connection, task_id, event_type)
         if event_type in {"cancel", "reassign"}:
             from sales_backend.services.task_coordination import coordinate_task
             return await coordinate_task(connection, actor=actor, task_id=task_id, event_type=event_type,
@@ -252,6 +313,9 @@ class TaskService:
             return await review_completion(connection, actor=actor, task_id=task_id,
                 event_type=event_type, note=note, expected_version=expected_version)
         if event_type == "complete":
+            if actual_contribution is not None:
+                from sales_backend.services.task_alignment import report_task_contribution
+                await report_task_contribution(connection, task_id, actual_contribution, expected_version)
             return await self.complete(
                 connection, actor=actor, task_id=task_id, note=note, expected_version=expected_version
             )

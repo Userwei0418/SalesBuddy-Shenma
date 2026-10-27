@@ -1,3 +1,4 @@
+const {outcome}=require('./taskExecutionPresentation');
 const STATES={green:{label:'健康',color:'var(--ui-success)',background:'var(--ui-success-soft)'},yellow:{label:'提醒',color:'var(--ui-warning)',background:'var(--ui-warning-soft)'},red:{label:'告警',color:'var(--ui-danger)',background:'var(--ui-danger-soft)'},gray:{label:'待评估',color:'var(--ui-neutral)',background:'var(--ui-neutral-soft)'}};
 function statusLight(tone,reason='') {const state=STATES[tone]||STATES.gray;return {...state,tone:STATES[tone]?tone:'gray',reason};}
 function scoreLight(value) {
@@ -7,10 +8,11 @@ function scoreLight(value) {
 }
 function riskLight(item={}) {return statusLight(item.status==='resolved'?'green':'yellow',item.status==='resolved'?'风险已解除':item.status==='accepted'?'风险已接受，仍需关注':item.title||'存在待处理风险');}
 function taskLight(item={},now=Date.now()) {
- if(item.status==='completed')return statusLight('green','任务已完成');
- if(['cancelled','rejected'].includes(item.status))return statusLight('yellow','任务已拒绝或取消，需确认后续安排');
+ const result=outcome(item);
+ if(result.isEnded)return {...statusLight(result.isSuccessful?'green':'gray',result.isSuccessful?'任务正常完成':result.endReason==='unknown'?'任务已结束，结果待核对':'任务已结束，原原因和记录已保留'),label:result.isSuccessful?'正常完成':'已结束'};
  const due=Date.parse(item.due_at||item.dueAt||'');
  if(Number.isFinite(due)&&due<Number(now))return statusLight('red','任务已逾期且未完成');
+ if(item.status==='needs_adjustment')return statusLight('yellow',({adjustment_request:'等待下发人处理调整',paused:'任务已暂停，需明确恢复',awaiting_review:'完成结果已提交，等待下发人验收'})[item.processing_reason]||'任务需调整');
  if(item.status==='pending_review')return statusLight('yellow','完成说明已提交，等待发起人确认');
  if(['pending_confirm','pending_execution','in_progress','deferred','pending'].includes(item.status))return statusLight('yellow','任务尚未完成，请关注负责人和期限');
  return statusLight('gray','任务状态未明确');

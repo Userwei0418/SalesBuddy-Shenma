@@ -24,20 +24,20 @@ function setup(api, name='visit-detail') {
 
 test('跟进建议生成中离开再返回可重新加载，旧响应不能覆盖新请求',async()=>{
   const pending=[];
-  const h=setup({queryBusinessAdvice:()=>new Promise(resolve=>pending.push(resolve))});
+  const h=setup({getLatestBusinessAdvice:()=>new Promise(resolve=>pending.push(resolve))});
   h.page.loadVisitAdvice=h.adviceMethod;h.page.data.visitId='v';h.page.data.visit={id:'v'};
   const first=h.page.loadVisitAdvice();assert.equal(pending.length,1);
   h.page.onHide();
   const second=h.page.loadVisitAdvice();assert.equal(pending.length,2);
   pending[0]({id:'old',status:'succeeded',summary:'old',suggestions:[]});await first;
   assert.equal(h.page.data.visitAdvice.status,'loading');
-  pending[1]({id:'new',status:'succeeded',summary:'new',suggestions:[]});await second;
+  pending[1]({id:'new',subject_kind:'visit',subject_id:'v',section:'overview',status:'succeeded',summary:'new',suggestions:[]});await second;
   assert.equal(h.page.data.visitAdvice.summary,'new');
 });
 
 test('同账号权限版本变化后不展示旧跟进建议响应',async()=>{
   let resolve;
-  const h=setup({queryBusinessAdvice:()=>new Promise(done=>resolve=done)});
+  const h=setup({getLatestBusinessAdvice:()=>new Promise(done=>resolve=done)});
   h.page.loadVisitAdvice=h.adviceMethod;h.page.data.visitId='v';h.page.data.visit={id:'v'};
   const request=h.page.loadVisitAdvice();h.app.globalData.session.permissionVersion=2;
   resolve({id:'permission-old',status:'succeeded',summary:'old permissions',suggestions:[]});await request;
@@ -107,15 +107,15 @@ test('历史季度原始记录原值原单位展示，零与未填写分开且�
 });
 
 test('详情有历史季度原值时，空的正式实绩仍为未登记',async()=>{
-  const calls=[];const h=setup({getCustomerAssetQuarters:async params=>{
-    calls.push(params);return {as_of:params.as_of,items:[],years:[]};
+  const calls=[];const h=setup({getOpportunityFinancialOverview:async id=>{
+    calls.push(id);return {schema_version:2,opportunity_id:id,customer_id:'c',periods:[]};
   }},'customer-assets');
   const opportunity=normalizeCustomerDetail({id:'c',opportunities:[{id:'o',historical_period_actuals:[
     {year:2026,quarter:2,kind:'recognized',raw_amount:9999,source_unit:'wan_cny',tax_basis:'unknown'},
   ]}]}).opportunities[0];
   Object.assign(h.page.data,{customerId:'c',opportunityId:'o',opportunity});
   await h.page.loadQuarterActuals();
-  assert.equal(calls.length,1);assert.equal(calls[0].opportunity_id,'o');
+  assert.equal(calls.length,1);assert.equal(calls[0],'o');
   assert.equal(h.page.data.quarterRecognized,'未登记');assert.equal(h.page.data.quarterCollection,'未登记');
   assert.equal(h.page.data.quarterEntryCount,0);assert.equal(h.page.data.opportunity.historicalPeriodRecords.length,1);
 });

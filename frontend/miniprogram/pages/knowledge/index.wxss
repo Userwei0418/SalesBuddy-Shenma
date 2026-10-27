@@ -1,0 +1,1 @@
+page{background:var(--ui-background,#f5f7fa);color:var(--ui-ink,#243654)}.knowledge-unavailable{margin:32rpx;padding:32rpx;background:var(--ui-surface,#fff);border:1rpx solid #e1e7f0;border-radius:16rpx}.knowledge-title{font-size:36rpx;font-weight:600}.knowledge-notice{margin-top:20rpx;color:#65758c;font-size:28rpx;line-height:1.6}

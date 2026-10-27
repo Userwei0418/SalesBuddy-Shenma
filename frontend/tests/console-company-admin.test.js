@@ -23,3 +23,58 @@ test('empty authorization and incomplete business appointments cannot be submitt
   f.append('company_roles','administrator'); f.set('membership:0:team','team');
   assert.throws(()=>accountPayload(f),/至少一个岗位/);
 });
+
+test('company terminology and product department titles only change labels',async()=>{
+  const {departmentRole}=await load();
+  const {state}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/core.js')).href);
+  state.org={roles:[{code:'sales',name:'客户经理'}]};
+  assert.equal(departmentRole('sales',{kind:'sales'}),'客户经理');
+  assert.equal(departmentRole('sales',{kind:'product_sales'}),'产品销售');
+  assert.equal(departmentRole('supervisor',{kind:'product_sales'}),'产品销售主管');
+  assert.equal(departmentRole('fde',{kind:'fde'}),'FDE');
+  state.org={roles:[{code:'sales',name:'一线销售'}]};
+  assert.equal(departmentRole('sales',{kind:'sales'}),'一线销售');
+});
+
+for (const role of ['administrator', 'operations']) {
+  for (const allowed of [true, false]) {
+    test(`company rename entry follows effective permission for ${role}: ${allowed}`, async()=>{
+      const {companyCards}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/companies.js')).href);
+      const {state}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/core.js')).href);
+      const previous={actor:state.actor,permissions:state.permissions,company:state.company,companies:state.companies};
+      try {
+        state.actor={role};
+        state.permissions={'company.update':allowed};
+        state.company={id:'current-company'};
+        state.companies=[{id:'current-company',name:'当前公司',code:'current',kind:'production',status:'active'}];
+        assert.equal(companyCards().includes('data-company-edit="current-company"'),allowed);
+      } finally { Object.assign(state,previous); }
+    });
+  }
+}
+
+test('company rename entry stays hidden until effective permissions are loaded',async()=>{
+  const {companyCards}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/companies.js')).href);
+  const {state}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/core.js')).href);
+  const previous={actor:state.actor,permissions:state.permissions,company:state.company,companies:state.companies};
+  try {
+    state.actor={role:'administrator'};state.permissions=undefined;
+    state.company={id:'current-company'};
+    state.companies=[{id:'current-company',name:'当前公司',code:'current',kind:'production',status:'active'}];
+    assert.equal(companyCards().includes('data-company-edit='),false);
+  } finally { Object.assign(state,previous); }
+});
+
+test('company rename permission does not expose editing another company',async()=>{
+  const {companyCards}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/companies.js')).href);
+  const {state}=await import(pathToFileURL(path.resolve(__dirname,'../../backend/src/sales_backend/web/assets/core.js')).href);
+  const previous={actor:state.actor,permissions:state.permissions,company:state.company,companies:state.companies};
+  try {
+    state.actor={role:'administrator'};state.permissions={'company.update':true};
+    state.company={id:'current-company'};
+    state.companies=[{id:'other-company',name:'其他公司',code:'other',kind:'production',status:'active'}];
+    const html=companyCards();
+    assert.equal(html.includes('data-company-edit='),false);
+    assert.equal(html.includes('data-company-select="other-company"'),true);
+  } finally { Object.assign(state,previous); }
+});

@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
+from sales_backend.repositories.customer_identity import customer_analysis_applies
 from sales_backend.config import Settings
 from sales_backend.contracts.battle_map import validate_battle_map_result
 from sales_backend.db import Database
@@ -17,6 +18,7 @@ from sales_backend.repositories.company_rules import CompanyRulesRepository
 from sales_backend.repositories.jobs import record_job_effect
 from sales_backend.services.agent_business_rules import prepare_business_rules, supplementary_prompt
 from sales_backend.services.agent_platform.audit import audit_original
+from sales_backend.services.agent_platform.authorization_snapshot import attach, capture, from_facts, recheck_connection
 from sales_backend.services.agent_platform.fde_facts_runtime import filtered_facts_runtime
 from sales_backend.services.agent_platform.inference import InferenceService
 from sales_backend.services.agent_platform.pilot import battle_map_pilot_policy
@@ -56,12 +58,17 @@ class BattleMapReviewHandler:
         *,
         trigger: dict[str, Any] | None = None,
     ) -> None:
+        async with self.database.transaction(actor) as connection:
+            if not await customer_analysis_applies(connection, customer_id):
+                await record_job_effect(connection, actor.workspace_id)
+                return
         facts = await self._load_facts(customer_id, actor)
         result = await self._evaluate(actor, facts)
         await self._persist(customer_id, actor, facts, result, trigger or {})
 
     async def _load_facts(self, customer_id: str, actor: ActorContext) -> dict[str, Any]:
         async with self.database.transaction(actor, readonly=True) as connection:
+            read_scope = await capture(connection, actor, customer_id=customer_id)
             policy = await CompanyRulesRepository().active(connection, "customer_quadrant")
             customer = await connection.fetchrow(
                 """
@@ -70,7 +77,7 @@ class BattleMapReviewHandler:
                        next_action, operation_type, cooperation_years, main_business, customer_budget,
                        owner_team_id::text
                   FROM crm.customer
-                 WHERE id = $1::uuid AND deleted_at IS NULL
+                 WHERE id = $1::uuid AND deleted_at IS NULL AND 'customer'=ANY(business_identities)
                 """,
                 customer_id,
             )
@@ -120,7 +127,7 @@ class BattleMapReviewHandler:
                 """,
                 customer_id,
             )
-        return {
+        return attach({
             "company_policy": policy,
             "customer": overlay_customer_attributes(dict(customer)),
             "opportunities": [dict(row) for row in opportunities],
@@ -128,7 +135,7 @@ class BattleMapReviewHandler:
             "contacts": [dict(row) for row in contacts],
             "previous_score": dict(current) if current else None,
             "data_as_of": datetime.now(UTC).isoformat(),
-        }
+        }, read_scope)
 
     async def _evaluate(self, actor: ActorContext, facts: dict[str, Any]) -> dict[str, Any]:
         runtime = await load_runtime_configuration(self.database, actor, self.settings, capability="battle_map_review")
@@ -229,6 +236,7 @@ class BattleMapReviewHandler:
             "summary": result["summary"],
             "rationale": result["rationale"],
             "company_policy": policy,
+            "authorization": from_facts(facts),
         }
         if "_inference_trace" in result:
             snapshot["inference_route"] = result["_inference_trace"]
@@ -240,8 +248,9 @@ class BattleMapReviewHandler:
                 "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
                 f"quadrant-score:{actor.workspace_id}:{customer_id}:{actor.user_id}",
             )
+            await recheck_connection(connection, actor, from_facts(facts))
             visible_customer = await connection.fetchval(
-                "SELECT id FROM crm.customer WHERE id = $1::uuid AND deleted_at IS NULL",
+                "SELECT id FROM crm.customer WHERE id = $1::uuid AND deleted_at IS NULL AND 'customer'=ANY(business_identities)",
                 customer_id,
             )
             if not visible_customer:

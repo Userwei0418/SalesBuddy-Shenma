@@ -1,0 +1,12 @@
+<view class="page"><view class="title">商机主责转交</view><view wx:if="{{record}}">{{record.name}}<view>当前主责：{{record.owner.display_name || '未确认'}} · {{record.owner.team_name || '团队未确认'}}</view></view>
+<view wx:if="{{loading}}">正在核对权限…</view><view wx:if="{{error}}" class="error">{{error}}</view><view wx:if="{{result}}">{{result}}<view>{{syncStatus}}</view></view>
+<button disabled="{{busy}}" bindtap="load">重新核对</button>
+<view wx:if="{{record && record.capabilities.can_transfer && record.status === 'open'}}">
+<view>请选择接手人和明确的目标团队；客户归属、任务责任保持不变。</view>
+<input value="{{query}}" maxlength="100" data-key="query" bindinput="input" disabled="{{busy || unknown}}" placeholder="搜索接手人"/><button bindtap="search" disabled="{{busy || unknown}}">搜索</button>
+<view wx:for="{{items}}" wx:key="user_id"><button data-id="{{item.user_id}}" bindtap="choose" disabled="{{busy || unknown}}">{{target === item.user_id ? '已选：' : ''}}{{item.display_name}}</button></view>
+<button wx:if="{{more}}" data-more="{{true}}" bindtap="search">更多候选</button>
+<view wx:for="{{teams}}" wx:key="team_id"><button data-id="{{item.team_id}}" bindtap="chooseTeam" disabled="{{busy || unknown}}">{{team === item.team_id ? '已选团队：' : '选择团队：'}}{{item.name}}</button></view>
+<textarea value="{{reason}}" maxlength="1000" data-key="reason" bindinput="input" disabled="{{busy || unknown}}" placeholder="转交原因（必填）"/>
+<button type="primary" bindtap="confirm" loading="{{busy}}" disabled="{{busy || loading}}">{{unknown ? '按原请求重试' : '确认转交'}}</button></view>
+<view wx:elif="{{record}}">当前不可转交：{{record.capability_reasons.transfer || '当前状态不允许转交'}}</view></view>

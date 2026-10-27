@@ -27,11 +27,16 @@ class CustomerRepository:
         level: str | None,
         unassigned: bool | None,
         limit: int | None,
+        business_identity: str = "all",
     ) -> list[dict[str, Any]]:
         rows = await connection.fetch(
             """
             WITH scope AS MATERIALIZED (
-              SELECT * FROM security.customer_portfolio_scope()
+              SELECT c.id,c.workspace_id,c.owner_team_id,
+                CASE WHEN own.state='claimed' THEN own.owner_user_ref_id END AS claimant_id
+              FROM crm.customer c LEFT JOIN crm.customer_ownership own
+                ON own.customer_id=c.id AND own.workspace_id=c.workspace_id
+              WHERE c.deleted_at IS NULL AND ($5::text='all' OR $5=ANY(c.business_identities))
             ), latest_visits AS MATERIALIZED (
               SELECT v.customer_id,max(v.interaction_at) AS interaction_at,
                 count(*) FILTER (WHERE timezone('Asia/Shanghai',v.interaction_at) >=
@@ -54,7 +59,7 @@ class CustomerRepository:
                 AND ($2::text IS NULL OR c.level_code=$2)
                 AND ($3::boolean IS NULL OR ($3 AND ownership.state='unclaimed')
                      OR (NOT $3 AND ownership.state='claimed'))
-              ORDER BY latest.interaction_at DESC NULLS LAST,c.name LIMIT $4
+              ORDER BY latest.interaction_at DESC NULLS LAST,c.name,c.id LIMIT $4
             ), without_date AS MATERIALIZED (
               SELECT c.id,c.name,scope.claimant_id,NULL::timestamptz AS interaction_at,
                 COALESCE(latest.weekly_follow_up_count,0)::integer AS weekly_follow_up_count
@@ -71,13 +76,13 @@ class CustomerRepository:
                 AND ($2::text IS NULL OR c.level_code=$2)
                 AND ($3::boolean IS NULL OR ($3 AND ownership.state='unclaimed')
                      OR (NOT $3 AND ownership.state='claimed'))
-              ORDER BY c.name
+              ORDER BY c.name,c.id
               LIMIT (CASE WHEN $4::integer IS NULL THEN NULL
                      ELSE GREATEST($4-(SELECT count(*) FROM visited),0) END)
             ), page AS MATERIALIZED (
               SELECT * FROM visited UNION ALL SELECT * FROM without_date
             )
-            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code, c.level_code,
+            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code,c.business_identities,c.partner_profile_id,c.primary_partner_id, c.level_code,
                    c.lifecycle_status, c.source_code, c.data_kind, c.attributes,
                    c.import_meta, c.owner_user_ref_id::text,
                    u.display_name AS owner_name, CASE WHEN u.id IS NULL THEN '[]'::jsonb
@@ -111,7 +116,7 @@ class CustomerRepository:
             LEFT JOIN LATERAL (
               SELECT r.title, r.severity_code FROM insight.risk r
               WHERE r.customer_id = c.id AND r.deleted_at IS NULL
-                AND r.status IN ('new','pending','in_progress','escalated')
+                AND r.status <> 'resolved'
               ORDER BY CASE r.severity_code WHEN 'critical' THEN 1 WHEN 'high' THEN 2 ELSE 3 END,
                        r.opened_at DESC LIMIT 1
             ) open_risk ON true
@@ -125,20 +130,28 @@ class CustomerRepository:
                WHERE o.customer_id = c.id AND o.deleted_at IS NULL AND o.status = 'open'
                ORDER BY o.updated_at DESC LIMIT 1
             ) opportunity ON true
-            ORDER BY latest.interaction_at DESC NULLS LAST, c.name
+            ORDER BY latest.interaction_at DESC NULLS LAST, c.name,c.id
             LIMIT $4
             """,
             query,
             level,
             unassigned,
             limit,
+            business_identity,
         )
         return [overlay_customer_attributes(dict(row)) for row in rows]
 
     async def base(self, connection: asyncpg.Connection, *, customer_id: str) -> dict[str, Any] | None:
         customer = await connection.fetchrow(
             """
-            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code, c.level_code,
+            SELECT c.id::text, c.name, security.authorization_customer('customer.update',c.id) AS can_edit, c.industry_code, c.customer_type_code,c.business_identities,c.partner_profile_id,c.primary_partner_id, c.level_code,
+                   ('customer'=ANY(c.business_identities)
+                    AND security.authorization_customer('advice.read',c.id)
+                    AND security.authorization_customer('advice.customer',c.id)) AS can_read_advice,
+                   ('customer'=ANY(c.business_identities)
+                    AND security.authorization_customer('advice.read',c.id)
+                    AND security.authorization_customer('advice.customer',c.id)
+                    AND security.authorization_customer('advice.request',c.id)) AS can_request_advice,
                    c.lifecycle_status, c.source_code, c.data_kind, c.primary_partner_name,
                    c.demand_summary, c.attributes, c.import_meta, c.version_no,
                    c.next_action, c.operation_type, c.cooperation_years, c.main_business, c.customer_budget,

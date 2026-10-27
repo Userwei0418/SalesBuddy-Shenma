@@ -1,0 +1,1596 @@
+{
+  "format": "salesbuddy-runtime-permissions-v1",
+  "migration_fingerprint": "78a3b92ae6b998754bd47d68f0decbf0c495619fd57cf7c80ca03be14c9304b5",
+  "rls_fingerprint": "802daf97d02bd1a2411306a2cdc64903df4a22f8ee57032bce6fcc7f90bdb9b7",
+  "schema": "V298",
+  "services": {
+    "api": {
+      "columns": {
+        "activity.visit_participant": {
+          "UPDATE": [
+            "participant_role",
+            "team_id_at_event",
+            "role_code_at_event",
+            "updated_at"
+          ]
+        },
+        "agent.conversation": {
+          "UPDATE": [
+            "updated_at"
+          ]
+        },
+        "config.model_api_current": {
+          "UPDATE": [
+            "version_no"
+          ]
+        },
+        "insight.sales_competency_review": {
+          "UPDATE": [
+            "status",
+            "error_code",
+            "error_detail",
+            "reviewed_at"
+          ]
+        },
+        "ops.schema_migration": {
+          "SELECT": [
+            "version",
+            "applied_at"
+          ]
+        },
+        "security.demo_readonly_text": {
+          "SELECT": [
+            "workspace_id",
+            "resource",
+            "resource_id",
+            "source_updated_at",
+            "display_text"
+          ]
+        }
+      },
+      "functions": [
+        "agent.work_report_source_manifest(jsonb)",
+        "common.current_role_code()",
+        "common.current_user_ref_id()",
+        "common.current_workspace_id()",
+        "crm.normalize_opportunity_name(text)",
+        "crm.valid_opportunity_sources(text[])",
+        "ops.record_system_event(uuid,uuid,uuid,text,text,text,text,text)",
+        "security.account_has_password(uuid)",
+        "security.account_login_status(uuid)",
+        "security.account_supervisor_title(uuid,uuid)",
+        "security.account_team_scope(uuid,uuid,text)",
+        "security.active_company_rule(text)",
+        "security.agent_operation_rows(timestamp with time zone,timestamp with time zone)",
+        "security.ai_invocation_report(timestamp with time zone,timestamp with time zone,text,uuid)",
+        "security.ai_service_policy()",
+        "security.approve_support(uuid,uuid,text[],timestamp with time zone,text)",
+        "security.archived_visit_receipt(uuid)",
+        "security.archived_visit_save_receipt(uuid)",
+        "security.asr_hotword_snapshot()",
+        "security.asr_unknown_attempts()",
+        "security.auth_session_is_active(uuid,uuid,uuid)",
+        "security.authorization_advice(text,uuid)",
+        "security.authorization_advice_subject(text,text,uuid)",
+        "security.authorization_allows(text,uuid,uuid,uuid[],boolean)",
+        "security.authorization_business_department(text)",
+        "security.authorization_business_read(text,uuid,uuid,uuid[],boolean)",
+        "security.authorization_current_grants()",
+        "security.authorization_customer(text,uuid)",
+        "security.authorization_delegations()",
+        "security.authorization_directory()",
+        "security.authorization_has(text)",
+        "security.authorization_history_provenance(text,uuid,text,text)",
+        "security.authorization_history_target(text,uuid)",
+        "security.authorization_import(text,uuid)",
+        "security.authorization_opportunity(text,uuid)",
+        "security.authorization_opportunity_direct(text,uuid)",
+        "security.authorization_opportunity_mutation(uuid)",
+        "security.authorization_portfolio_customer(text,uuid)",
+        "security.authorization_read_feature(text)",
+        "security.authorization_refresh()",
+        "security.authorization_risk(text,uuid)",
+        "security.authorization_risk_generation(uuid,uuid)",
+        "security.authorization_risk_scope(text,uuid,uuid,uuid,uuid,uuid)",
+        "security.authorization_snapshot(uuid)",
+        "security.authorization_subject(text,text,uuid,uuid)",
+        "security.authorization_task(text,uuid)",
+        "security.authorization_task_created(uuid)",
+        "security.authorization_task_mutation(uuid)",
+        "security.authorization_visit(text,uuid)",
+        "security.authorization_visit_target(text,uuid,uuid,uuid,uuid)",
+        "security.bump_fde_membership_version(uuid,integer)",
+        "security.business_activity_rows(timestamp with time zone,timestamp with time zone)",
+        "security.business_ranking(text,date,date,integer[],boolean)",
+        "security.can_manage_fde_members(uuid)",
+        "security.can_write_demo_scene(uuid)",
+        "security.can_write_visit(uuid)",
+        "security.change_own_password(text,text,uuid)",
+        "security.check_crm_import_target(uuid,uuid)",
+        "security.check_permission_administrator()",
+        "security.claim_customer(uuid)",
+        "security.close_asr_transport(uuid)",
+        "security.closed_export_authorize(text,text[],boolean)",
+        "security.closed_export_candidate(text,text)",
+        "security.closed_export_content_chunk(text,uuid,integer)",
+        "security.closed_export_event(text,uuid,text,jsonb)",
+        "security.closed_export_issue(uuid,uuid,text,text,text,text)",
+        "security.closed_export_logout(text)",
+        "security.closed_export_originals(text,boolean,integer,integer)",
+        "security.closed_export_rows(text,text,integer,integer)",
+        "security.closed_export_status(text)",
+        "security.company_customer_directory_candidates(text,text,text,text[],text)",
+        "security.company_customer_directory_industries()",
+        "security.company_customer_directory_page_items(uuid[])",
+        "security.company_customer_directory_search(text,integer,integer,text,text,text[])",
+        "security.company_customer_directory_search(text,integer,integer,text,text,text[],text)",
+        "security.company_customer_directory_search_names(text)",
+        "security.company_customer_follow_up_actor()",
+        "security.company_customer_follow_up_options(text,integer,integer,text)",
+        "security.company_customer_follow_up_reference(uuid)",
+        "security.company_directory()",
+        "security.company_entry(text)",
+        "security.company_management_actor(uuid)",
+        "security.company_opportunity_follow_up_actor()",
+        "security.company_opportunity_follow_up_customers(text,integer,integer)",
+        "security.company_opportunity_follow_up_options(text,uuid,integer,integer,text)",
+        "security.company_opportunity_follow_up_processing(uuid,uuid)",
+        "security.company_opportunity_follow_up_reference(uuid)",
+        "security.complete_customer_creation_request(uuid,text,text,uuid)",
+        "security.complete_password_login(uuid,text,text)",
+        "security.confirm_review_key_result_progress(uuid,integer,numeric,text,boolean)",
+        "security.consume_http_request(text)",
+        "security.create_auth_session(uuid,uuid,uuid,text,timestamp with time zone,jsonb)",
+        "security.crm_history_visit_form_valid(uuid)",
+        "security.current_fact_scope_version()",
+        "security.customer_claim_pool(text,integer)",
+        "security.customer_claim_visit_match(uuid,uuid,uuid)",
+        "security.customer_claim_visit_reader()",
+        "security.customer_claim_visit_reference(uuid,uuid)",
+        "security.customer_creation_request_lock(uuid)",
+        "security.customer_name_is_available(text)",
+        "security.customer_portfolio_scope()",
+        "security.customer_reference(uuid)",
+        "security.customer_request_history(text,uuid,text,text,text,integer,integer,uuid)",
+        "security.customer_risk_assessment_owner(uuid)",
+        "security.dashboard_subject_ranking(text,date,date,integer[],uuid)",
+        "security.dashboard_team_ranking(text,date,date,integer[],uuid[],boolean)",
+        "security.demo_readonly_admit(uuid,uuid,uuid,integer)",
+        "security.demo_readonly_candidate(text,text,text)",
+        "security.demo_readonly_context(uuid)",
+        "security.demo_readonly_create_session(uuid,uuid,uuid,integer,text,text)",
+        "security.demo_readonly_read(uuid,uuid,uuid,integer,text,uuid,text,integer,integer)",
+        "security.demo_readonly_revoke_session(uuid,uuid,uuid)",
+        "security.demo_readonly_session(uuid,uuid,uuid,integer)",
+        "security.demo_scene_history(uuid,integer,integer)",
+        "security.dispatch_model_call(uuid,uuid)",
+        "security.fde_can_coordinate_task(uuid)",
+        "security.fde_can_record_opportunity(uuid)",
+        "security.fde_dashboard_rankings(date,date,integer[],uuid)",
+        "security.fde_demo_statistics(uuid[],uuid[],timestamp with time zone,timestamp with time zone,integer[])",
+        "security.fde_permission_version()",
+        "security.fde_profile_history(uuid,integer,integer)",
+        "security.fde_profile_history_v2(uuid,integer,integer)",
+        "security.fde_profile_review_detail(uuid)",
+        "security.fde_recorded_visit_history()",
+        "security.fde_recorded_visit_history(timestamp with time zone,timestamp with time zone,uuid,uuid,integer[])",
+        "security.fde_task_eligible(uuid,uuid,text,uuid)",
+        "security.fde_user_is_active(uuid,text,uuid)",
+        "security.fde_visit_entry_enabled()",
+        "security.feishu_initialize(uuid)",
+        "security.feishu_recover(uuid,uuid,text,text,text)",
+        "security.fence_unpublished_storage(uuid,uuid)",
+        "security.finance_decimal_text(numeric)",
+        "security.finance_json_canonical(jsonb)",
+        "security.finance_management_scope(uuid,text)",
+        "security.finance_reference_fingerprint(uuid,uuid,integer,integer,text)",
+        "security.finance_timestamp_text(timestamp with time zone)",
+        "security.finance_window_totals(uuid[],date,date,integer[])",
+        "security.finance_write_lock()",
+        "security.finish_inference_operation(uuid,text,jsonb,jsonb,text)",
+        "security.finish_model_call(uuid,uuid,boolean,jsonb)",
+        "security.get_password_policy()",
+        "security.guard_native_account(uuid,text)",
+        "security.has_active_role(text)",
+        "security.has_analysis_scope(jsonb,smallint)",
+        "security.has_customer_access(uuid)",
+        "security.has_customer_write_access(uuid)",
+        "security.has_feishu_credential(uuid)",
+        "security.has_opportunity_access(uuid)",
+        "security.has_opportunity_read_access(uuid)",
+        "security.is_current_fact_scope(smallint)",
+        "security.is_demo_readonly_identity(uuid,uuid)",
+        "security.is_fde_actor()",
+        "security.kd_admin()",
+        "security.kd_create_share(uuid,uuid,text)",
+        "security.kd_public_file(text,text,uuid,text)",
+        "security.kd_public_metadata(text,text)",
+        "security.kd_public_response(text,text,uuid,text,integer,jsonb,text)",
+        "security.kd_publication_visible(uuid)",
+        "security.kd_publish(uuid,jsonb)",
+        "security.kd_revoke(uuid,boolean)",
+        "security.kd_sales_name(uuid)",
+        "security.knowledge_acl_candidates(uuid,text,text,integer,integer)",
+        "security.knowledge_archive_source_files(uuid,integer,integer,bigint,jsonb)",
+        "security.knowledge_bind_provider(uuid,uuid,text,text)",
+        "security.knowledge_can(uuid,text)",
+        "security.knowledge_can_create()",
+        "security.knowledge_create_work(uuid,jsonb)",
+        "security.knowledge_distribution_enqueue(uuid,uuid,uuid,uuid,text,integer,uuid)",
+        "security.knowledge_feature(text)",
+        "security.knowledge_file_read(uuid)",
+        "security.knowledge_import_authorize(uuid,uuid,jsonb)",
+        "security.knowledge_import_record(uuid,uuid,jsonb,text,text,text,bigint,jsonb,boolean)",
+        "security.knowledge_ingestion_allowed(uuid,uuid)",
+        "security.knowledge_ingestion_start(uuid,uuid,integer,text,text,text,jsonb)",
+        "security.knowledge_lock_work_parent(uuid,integer)",
+        "security.knowledge_projection(uuid)",
+        "security.knowledge_publish_work(uuid,integer,jsonb)",
+        "security.knowledge_resolve(jsonb,uuid)",
+        "security.knowledge_save_acl(uuid,integer,jsonb,uuid[])",
+        "security.knowledge_save_catalog(integer,jsonb)",
+        "security.knowledge_save_material(uuid,integer,jsonb)",
+        "security.knowledge_self_teams()",
+        "security.knowledge_source_files(uuid)",
+        "security.knowledge_store_file(uuid,text,text,bytea)",
+        "security.knowledge_work_can(uuid,boolean)",
+        "security.knowledge_work_candidates(uuid,text,text,integer,integer)",
+        "security.knowledge_work_recipients(uuid)",
+        "security.lock_password_login_identifier(text)",
+        "security.lock_password_login_identifier(text,text)",
+        "security.lock_visit_upload_quota()",
+        "security.login_attempt(text,integer)",
+        "security.login_limit_status(text,integer)",
+        "security.management_actor()",
+        "security.mark_storage_external(uuid,uuid)",
+        "security.material_product_lines(boolean)",
+        "security.mention_review_okr(text,uuid,integer,uuid[])",
+        "security.model_credential_owned(text,integer)",
+        "security.opportunity_access(uuid)",
+        "security.opportunity_collaborator_candidates(uuid,text,integer,integer)",
+        "security.opportunity_collection_actual(uuid,integer,integer)",
+        "security.opportunity_create_customer_access(uuid)",
+        "security.opportunity_create_customer_options(text,integer,integer)",
+        "security.opportunity_follow_up_options(text,uuid,integer,integer)",
+        "security.opportunity_follow_up_reference(uuid,uuid)",
+        "security.opportunity_name_is_available(uuid,text,uuid)",
+        "security.opportunity_read_context(uuid)",
+        "security.opportunity_recognized_actual(uuid,integer,integer)",
+        "security.opportunity_transfer_candidates(uuid,text,integer,integer)",
+        "security.opportunity_transfer_capability(uuid)",
+        "security.opportunity_view_company_allowed()",
+        "security.opportunity_view_team_allowed(uuid,boolean)",
+        "security.opportunity_view_team_options()",
+        "security.organization_management()",
+        "security.organization_permission_roles()",
+        "security.own_password_candidate()",
+        "security.partner_enterprise_reference(uuid)",
+        "security.password_account_workspace(text)",
+        "security.password_candidate(text,text,text)",
+        "security.password_candidate(text,text,text,text)",
+        "security.password_login_identifier(text,text)",
+        "security.password_login_identifier(text,text,text)",
+        "security.prepare_feishu_migration(uuid)",
+        "security.profile_customer_owner(uuid)",
+        "security.publish_company_rule(uuid,integer)",
+        "security.ranking_team_group(text)",
+        "security.record_task_contribution(uuid,jsonb,integer)",
+        "security.release_asr_capacity(uuid,uuid,text)",
+        "security.release_asr_capacity(uuid,uuid,text,text)",
+        "security.release_customer(uuid,integer,text)",
+        "security.release_unpublished_storage(uuid,uuid)",
+        "security.reparse_task_import_batch(uuid,integer,jsonb,jsonb,jsonb)",
+        "security.require_opportunity_create_customer(uuid)",
+        "security.reserve_asr_attempt(uuid,uuid,text,text,text,text,text,numeric)",
+        "security.reserve_model_call(uuid,uuid)",
+        "security.reserve_visit_storage(uuid,uuid,bigint,text,text,text,text,text,text)",
+        "security.resolve_account_actor(text,text,text)",
+        "security.resolve_demo_actor(text,text)",
+        "security.resolve_legacy_customer_owner(uuid,integer,uuid,text)",
+        "security.restore_historical_customer_ownership(uuid,uuid,uuid)",
+        "security.review_customer_claim(uuid,text,text)",
+        "security.review_day_update_status(text,uuid[],timestamp with time zone,timestamp with time zone)",
+        "security.review_key_result_readable(uuid)",
+        "security.review_metric_baseline(text,uuid[],date,integer,integer,integer)",
+        "security.review_objective_readable(uuid)",
+        "security.review_target_batch(uuid,text,text)",
+        "security.review_target_change(uuid,text,text)",
+        "security.review_target_money_json(jsonb)",
+        "security.review_update_activity(text,uuid[],timestamp with time zone,timestamp with time zone)",
+        "security.revoke_auth_session(uuid,uuid,uuid)",
+        "security.revoke_managed_account_sessions(uuid)",
+        "security.revoke_support(uuid,text)",
+        "security.rotate_auth_session(text,text,timestamp with time zone)",
+        "security.sales_shared_opportunity_actor()",
+        "security.save_account_authorization(uuid,jsonb)",
+        "security.save_authorization_delegation(uuid,jsonb)",
+        "security.save_company_rule(text,text,jsonb,text,uuid,integer,uuid,uuid)",
+        "security.save_material_product_lines(integer,text,jsonb)",
+        "security.save_opportunity_collaborators(uuid,integer,uuid[])",
+        "security.save_opportunity_collection_actual(uuid,integer,integer,numeric,text,text,text,boolean)",
+        "security.save_opportunity_recognized_actual(uuid,integer,integer,jsonb,text,boolean)",
+        "security.save_period_target(text,uuid,uuid,text,date,date,text,numeric,integer)",
+        "security.save_permission_role(uuid,jsonb)",
+        "security.save_review_key_result(uuid,jsonb,integer)",
+        "security.save_review_metric(text,jsonb,integer)",
+        "security.save_review_objective(uuid,jsonb,integer)",
+        "security.save_target_batch(text,uuid,uuid,text,date,date,jsonb,text,text)",
+        "security.save_task_alignment(uuid,jsonb,integer)",
+        "security.session_credentials(uuid)",
+        "security.set_account_password(uuid,text,boolean)",
+        "security.set_customer_business_identity(uuid,text[],uuid)",
+        "security.set_fde_members_with_history(uuid,integer,uuid[])",
+        "security.set_feishu_credential(uuid,bytea,text)",
+        "security.set_password_policy(boolean,bigint)",
+        "security.submit_customer_creation_request(jsonb)",
+        "security.supervises_team(uuid)",
+        "security.support_audit_page(bigint)",
+        "security.support_directory(text)",
+        "security.support_grants()",
+        "security.target_history_rows(uuid,integer,integer)",
+        "security.target_scope_read(text,uuid,uuid)",
+        "security.target_scope_read(text,uuid,uuid,text)",
+        "security.target_scope_write(text,uuid,uuid,text)",
+        "security.task_actor_recipient(uuid)",
+        "security.task_alignment_read(uuid)",
+        "security.task_import_batch_page(text,integer,integer)",
+        "security.task_import_batch_summary(uuid)",
+        "security.task_import_is_creator(uuid)",
+        "security.task_link_context(uuid)",
+        "security.task_recipient_eligible(uuid,uuid,text,uuid)",
+        "security.tenant_modules()",
+        "security.transfer_opportunity_owner(uuid,integer,uuid,uuid,text,uuid)",
+        "security.unlock_account_login(uuid,text)",
+        "security.visit_saved_read_permissions(uuid)",
+        "security.work_report_audience_matches(jsonb)",
+        "security.work_report_history_access(jsonb)",
+        "security.work_report_review_access(jsonb)",
+        "security.work_report_source_access(jsonb,jsonb)",
+        "security.workspace_is_active(uuid)",
+        "security.workspace_job_enabled(uuid,text)",
+        "security.workspace_module_enabled(uuid,text)",
+        "workflow.complete_opportunity_change_review(uuid,jsonb)",
+        "workflow.enqueue_fde_collaboration_notification(uuid,uuid,text,uuid,jsonb)",
+        "workflow.enqueue_task_notification(uuid,uuid,text,text,text,uuid,text,jsonb)",
+        "workflow.task_execution_adopt_v3(uuid,jsonb,uuid)",
+        "workflow.task_execution_adoption_v3(uuid)",
+        "workflow.task_execution_candidates(uuid,text,text,integer,integer)",
+        "workflow.task_execution_command(uuid,text,jsonb,uuid)",
+        "workflow.task_execution_command_v3(uuid,text,jsonb,uuid)",
+        "workflow.task_execution_initialize(uuid,jsonb)",
+        "workflow.task_execution_initialize_v2(uuid,jsonb,boolean)",
+        "workflow.task_execution_initialize_v3(uuid,jsonb)",
+        "workflow.task_execution_progress(jsonb)",
+        "workflow.task_execution_read(uuid)",
+        "workflow.task_execution_summary(uuid)"
+      ],
+      "memberships": [],
+      "policies": {},
+      "schemas": [
+        "activity",
+        "agent",
+        "common",
+        "config",
+        "crm",
+        "insight",
+        "knowledge",
+        "ops",
+        "platform",
+        "security",
+        "workflow"
+      ],
+      "sequences": {
+        "ops.audit_log_id_seq": [
+          "USAGE"
+        ]
+      },
+      "tables": {
+        "activity.asr_attempt": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "activity.asr_session": [
+          "SELECT",
+          "INSERT"
+        ],
+        "activity.visit": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "activity.visit_field_value": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "activity.visit_import": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "activity.visit_import_content": [
+          "SELECT",
+          "INSERT"
+        ],
+        "activity.visit_opportunity": [
+          "SELECT",
+          "INSERT"
+        ],
+        "activity.visit_participant": [
+          "SELECT",
+          "INSERT",
+          "DELETE"
+        ],
+        "activity.visit_upload_attempt": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "activity.visit_upload_intent": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.artifact": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.confirmation": [
+          "INSERT"
+        ],
+        "agent.conversation": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.inference_operation": [
+          "INSERT"
+        ],
+        "agent.message": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.model_invocation": [
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.run": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.work_report_document": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.work_report_event": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.work_report_revision": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.work_report_run": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.work_report_scheme": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.work_report_scheme_revision": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.work_report_snapshot": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.account_authorization": [
+          "SELECT"
+        ],
+        "config.account_permission_override": [
+          "SELECT"
+        ],
+        "config.account_permission_role": [
+          "SELECT"
+        ],
+        "config.agent_definition": [
+          "SELECT"
+        ],
+        "config.agent_runtime_config": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.agent_runtime_release": [
+          "SELECT",
+          "INSERT"
+        ],
+        "config.asr_budget_policy": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.asr_capacity_resolution": [
+          "SELECT"
+        ],
+        "config.asr_hotword_current": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.asr_hotword_operation": [
+          "SELECT",
+          "INSERT"
+        ],
+        "config.asr_hotword_version": [
+          "SELECT",
+          "INSERT"
+        ],
+        "config.authorization_audit": [
+          "SELECT"
+        ],
+        "config.dictionary": [
+          "SELECT"
+        ],
+        "config.dictionary_item": [
+          "SELECT"
+        ],
+        "config.feishu_connection": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.field_definition": [
+          "SELECT"
+        ],
+        "config.form_definition": [
+          "SELECT"
+        ],
+        "config.form_version": [
+          "SELECT"
+        ],
+        "config.form_version_field": [
+          "SELECT"
+        ],
+        "config.model_api_current": [
+          "SELECT",
+          "INSERT"
+        ],
+        "config.model_api_release": [
+          "SELECT",
+          "INSERT"
+        ],
+        "config.model_api_test": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "config.permission_role": [
+          "SELECT"
+        ],
+        "config.permission_role_grant": [
+          "SELECT"
+        ],
+        "config.prompt_template": [
+          "SELECT"
+        ],
+        "config.rule_set": [
+          "SELECT"
+        ],
+        "config.sales_competency_framework": [
+          "SELECT"
+        ],
+        "crm.business_change": [
+          "SELECT",
+          "INSERT"
+        ],
+        "crm.contact": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.customer": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.customer_actual": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.customer_claim_request": [
+          "SELECT"
+        ],
+        "crm.customer_creation_request": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.customer_ownership": [
+          "SELECT"
+        ],
+        "crm.customer_ownership_event": [
+          "SELECT"
+        ],
+        "crm.customer_product": [
+          "SELECT"
+        ],
+        "crm.customer_sales_member": [
+          "SELECT"
+        ],
+        "crm.effective_actual": [
+          "SELECT"
+        ],
+        "crm.finance_period_resolution": [
+          "SELECT"
+        ],
+        "crm.material": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "crm.opportunity_actual_basis": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_actual_confirmation": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_demo_scenes": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_forecast": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "crm.opportunity_forecast_event": [
+          "SELECT"
+        ],
+        "crm.opportunity_material": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_participant": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_period_actual_snapshot": [
+          "SELECT",
+          "INSERT"
+        ],
+        "crm.opportunity_project_participant": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "crm.opportunity_quote_reference": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "crm.opportunity_related_partner": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "crm.opportunity_saved_view": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.opportunity_state_event": [
+          "SELECT"
+        ],
+        "crm.opportunity_view_preference": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.partner": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.product": [
+          "SELECT"
+        ],
+        "crm.review_key_result": [
+          "SELECT"
+        ],
+        "crm.review_key_result_progress": [
+          "SELECT"
+        ],
+        "crm.review_metric": [
+          "SELECT"
+        ],
+        "crm.review_objective": [
+          "SELECT"
+        ],
+        "crm.sales_target": [
+          "SELECT"
+        ],
+        "crm.sales_target_batch_request": [
+          "SELECT"
+        ],
+        "crm.sales_target_change_request": [
+          "SELECT"
+        ],
+        "crm.v_customer_current_quadrant": [
+          "SELECT"
+        ],
+        "insight.business_advice": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.business_suggestion": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.customer_risk_assessment": [
+          "SELECT",
+          "INSERT"
+        ],
+        "insight.quadrant_score": [
+          "SELECT"
+        ],
+        "insight.risk": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "insight.risk_event": [
+          "SELECT",
+          "INSERT"
+        ],
+        "insight.sales_competency_review": [
+          "SELECT",
+          "INSERT"
+        ],
+        "knowledge.audit": [
+          "SELECT"
+        ],
+        "knowledge.catalog": [
+          "SELECT"
+        ],
+        "knowledge.distribution_event": [
+          "SELECT"
+        ],
+        "knowledge.distribution_publication": [
+          "SELECT"
+        ],
+        "knowledge.distribution_response": [
+          "SELECT"
+        ],
+        "knowledge.distribution_share": [
+          "SELECT"
+        ],
+        "knowledge.file": [
+          "SELECT"
+        ],
+        "knowledge.ingestion": [
+          "SELECT"
+        ],
+        "knowledge.ingestion_file": [
+          "SELECT"
+        ],
+        "knowledge.material": [
+          "SELECT"
+        ],
+        "knowledge.material_acl": [
+          "SELECT"
+        ],
+        "knowledge.provider_binding": [
+          "SELECT"
+        ],
+        "knowledge.version": [
+          "SELECT"
+        ],
+        "knowledge.version_file": [
+          "SELECT"
+        ],
+        "knowledge.work": [
+          "SELECT"
+        ],
+        "knowledge.work_file": [
+          "SELECT"
+        ],
+        "knowledge.work_grant": [
+          "SELECT"
+        ],
+        "knowledge.work_source": [
+          "SELECT"
+        ],
+        "ops.ai_usage_alert": [
+          "SELECT"
+        ],
+        "ops.ai_usage_rule": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.audit_log": [
+          "SELECT",
+          "INSERT"
+        ],
+        "ops.crm_import_batch": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.crm_import_binding": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.crm_import_record": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.feishu_delivery": [
+          "SELECT"
+        ],
+        "ops.feishu_event": [
+          "SELECT"
+        ],
+        "ops.feishu_record_map": [
+          "SELECT"
+        ],
+        "ops.job": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.job_effect": [
+          "INSERT"
+        ],
+        "ops.mutation_receipt": [
+          "SELECT",
+          "INSERT"
+        ],
+        "ops.system_event": [
+          "SELECT"
+        ],
+        "platform.auth_session": [
+          "SELECT"
+        ],
+        "platform.role_binding": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "platform.team": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "platform.team_membership": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "platform.user_ref": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "platform.workspace": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "workflow.notification": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task_alignment": [
+          "SELECT"
+        ],
+        "workflow.task_assignee": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "workflow.task_candidate": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task_event": [
+          "SELECT",
+          "INSERT"
+        ],
+        "workflow.task_execution": [
+          "SELECT"
+        ],
+        "workflow.task_execution_event": [
+          "SELECT"
+        ],
+        "workflow.task_execution_submission": [
+          "SELECT"
+        ],
+        "workflow.task_import_batch": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task_import_item": [
+          "SELECT",
+          "INSERT"
+        ],
+        "workflow.task_key_result_alignment": [
+          "SELECT"
+        ],
+        "workflow.task_metric_alignment": [
+          "SELECT"
+        ],
+        "workflow.v_task_action_recipient": [
+          "SELECT"
+        ]
+      }
+    },
+    "feishu": {
+      "columns": {
+        "config.feishu_connection": {
+          "UPDATE": [
+            "last_error_code",
+            "next_reconcile_at",
+            "validated_revision",
+            "validation_requested"
+          ]
+        }
+      },
+      "functions": [
+        "common.current_role_code()",
+        "common.current_user_ref_id()",
+        "common.current_workspace_id()",
+        "ops.feishu_reconcile(uuid)",
+        "ops.feishu_source(uuid,text,uuid)",
+        "security.demo_readonly_context(uuid)",
+        "security.feishu_lock_lease(uuid,uuid)",
+        "security.has_active_role(text)",
+        "security.is_demo_readonly_identity(uuid,uuid)",
+        "security.workspace_is_active(uuid)",
+        "security.workspace_module_enabled(uuid,text)"
+      ],
+      "memberships": [
+        "salegent_feishu_worker"
+      ],
+      "policies": {
+        "config.feishu_connection": "sync_worker",
+        "ops.feishu_delivery": "sync_worker",
+        "ops.feishu_event": "sync_worker",
+        "ops.feishu_record_map": "sync_worker"
+      },
+      "schemas": [
+        "activity",
+        "common",
+        "config",
+        "crm",
+        "ops",
+        "platform",
+        "security",
+        "workflow"
+      ],
+      "sequences": {
+        "ops.feishu_event_sequence_no_seq": [
+          "USAGE"
+        ]
+      },
+      "tables": {
+        "config.feishu_connection": [
+          "SELECT"
+        ],
+        "ops.feishu_delivery": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.feishu_event": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.feishu_record_map": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "security.feishu_credential": [
+          "SELECT"
+        ]
+      }
+    },
+    "platform": {
+      "columns": {},
+      "functions": [
+        "control.account_quota(text,uuid)",
+        "control.activate(text,text,text)",
+        "control.ai_service_settings(text,uuid)",
+        "control.audit_page(text,bigint)",
+        "control.begin_login(uuid,text,text,text,integer)",
+        "control.call_quotas(text,uuid)",
+        "control.complete_login(text,jsonb,integer,bigint,text,text)",
+        "control.configuration_status(text,uuid)",
+        "control.configuration_status(text,uuid,jsonb)",
+        "control.confirm_mfa(text,jsonb,integer,bigint,text,text)",
+        "control.consume_attempt(text,text)",
+        "control.finish_mfa(text,text,jsonb,integer,bigint,text)",
+        "control.http_limits(text,uuid)",
+        "control.issue_session(uuid,text,text,text,integer,bigint)",
+        "control.job_settings(text,uuid)",
+        "control.login_candidate(text)",
+        "control.logout(text)",
+        "control.mfa_candidate(text,text)",
+        "control.module_settings(text,uuid)",
+        "control.prepare_mfa(text,jsonb)",
+        "control.provision(text,uuid,text,jsonb,text)",
+        "control.reissue_activation(text,uuid,integer,text,text)",
+        "control.runtime_overview(text,uuid,integer)",
+        "control.save_account_quota(text,uuid,integer,bigint,text)",
+        "control.save_ai_service(text,uuid,integer,boolean,text)",
+        "control.save_call_quota(text,uuid,integer,text,bigint,text,text)",
+        "control.save_http_limit(text,uuid,integer,text,integer,integer,text)",
+        "control.save_job_settings(text,uuid,integer,integer,text)",
+        "control.save_modules(text,uuid,integer,jsonb,text)",
+        "control.save_modules(text,uuid,integer,jsonb,text,jsonb)",
+        "control.save_storage_quota(text,uuid,integer,bigint,text)",
+        "control.session_profile(text)",
+        "control.storage_quota(text,uuid)",
+        "control.support_assignments(text)",
+        "control.support_read(text,uuid,text,uuid)",
+        "control.tenants(text)",
+        "control.transition(text,uuid,integer,text,text)",
+        "control.transition(text,uuid,integer,text,text,jsonb)"
+      ],
+      "memberships": [],
+      "policies": {},
+      "schemas": [
+        "control"
+      ],
+      "sequences": {},
+      "tables": {}
+    },
+    "worker": {
+      "columns": {
+        "activity.visit": {
+          "UPDATE": [
+            "updated_at"
+          ]
+        },
+        "crm.customer": {
+          "UPDATE": [
+            "updated_at"
+          ]
+        },
+        "crm.customer_claim_request": {
+          "SELECT": [
+            "id",
+            "workspace_id",
+            "status",
+            "customer_id",
+            "applicant_user_ref_id"
+          ]
+        },
+        "crm.customer_ownership_event": {
+          "SELECT": [
+            "id",
+            "workspace_id",
+            "customer_id",
+            "owner_user_ref_id",
+            "occurred_at",
+            "reason",
+            "claim_request_id",
+            "event_type"
+          ]
+        },
+        "crm.opportunity": {
+          "UPDATE": [
+            "updated_at"
+          ]
+        },
+        "ops.schema_migration": {
+          "SELECT": [
+            "version",
+            "applied_at"
+          ]
+        },
+        "workflow.task_execution": {
+          "SELECT": [
+            "task_id",
+            "workspace_id",
+            "state"
+          ]
+        }
+      },
+      "functions": [
+        "agent.work_report_source_manifest(jsonb)",
+        "common.current_role_code()",
+        "common.current_user_ref_id()",
+        "common.current_workspace_id()",
+        "crm.normalize_opportunity_name(text)",
+        "ops.claim_exact_competency_review(text,integer,uuid,uuid,uuid,uuid,integer,text,jsonb,text,uuid,integer)",
+        "ops.claim_exact_visit_agent_run(text,integer,uuid,uuid,uuid,uuid,text,text)",
+        "ops.claim_exact_visit_import(text,integer,uuid,uuid,uuid,uuid,text)",
+        "ops.claim_exact_work_report(text,integer,uuid,uuid,uuid,uuid,text,text,text,integer,timestamp with time zone,timestamp with time zone)",
+        "ops.claim_job(text,integer)",
+        "ops.claim_job(text,integer,text[],boolean)",
+        "ops.enqueue_daily_sales_competency_reviews()",
+        "ops.evaluate_ai_usage_alerts()",
+        "ops.fail_competency_review(uuid,uuid,text,boolean)",
+        "ops.prune_system_events()",
+        "ops.record_system_event(uuid,uuid,uuid,text,text,text,text,text)",
+        "ops.refresh_review_history()",
+        "ops.reject_invalid_job_actor(uuid,uuid)",
+        "ops.run_priority_reminder_monitor()",
+        "security.account_supervisor_title(uuid,uuid)",
+        "security.account_team_scope(uuid,uuid,text)",
+        "security.active_company_rule(text)",
+        "security.ai_service_policy()",
+        "security.asr_hotword_snapshot()",
+        "security.auth_session_is_active(uuid,uuid,uuid)",
+        "security.authorization_advice(text,uuid)",
+        "security.authorization_advice_subject(text,text,uuid)",
+        "security.authorization_allows(text,uuid,uuid,uuid[],boolean)",
+        "security.authorization_business_department(text)",
+        "security.authorization_business_read(text,uuid,uuid,uuid[],boolean)",
+        "security.authorization_customer(text,uuid)",
+        "security.authorization_delegations()",
+        "security.authorization_directory()",
+        "security.authorization_has(text)",
+        "security.authorization_history_provenance(text,uuid,text,text)",
+        "security.authorization_history_target(text,uuid)",
+        "security.authorization_import(text,uuid)",
+        "security.authorization_opportunity(text,uuid)",
+        "security.authorization_opportunity_direct(text,uuid)",
+        "security.authorization_opportunity_mutation(uuid)",
+        "security.authorization_read_feature(text)",
+        "security.authorization_refresh()",
+        "security.authorization_risk(text,uuid)",
+        "security.authorization_risk_generation(uuid,uuid)",
+        "security.authorization_risk_scope(text,uuid,uuid,uuid,uuid,uuid)",
+        "security.authorization_snapshot(uuid)",
+        "security.authorization_subject(text,text,uuid,uuid)",
+        "security.authorization_task(text,uuid)",
+        "security.authorization_task_mutation(uuid)",
+        "security.authorization_visit(text,uuid)",
+        "security.authorization_visit_target(text,uuid,uuid,uuid,uuid)",
+        "security.can_manage_fde_members(uuid)",
+        "security.can_write_visit(uuid)",
+        "security.close_asr_transport(uuid)",
+        "security.company_customer_follow_up_actor()",
+        "security.company_customer_follow_up_reference(uuid)",
+        "security.company_management_actor(uuid)",
+        "security.company_opportunity_follow_up_actor()",
+        "security.company_opportunity_follow_up_reference(uuid)",
+        "security.current_fact_scope_version()",
+        "security.customer_claim_visit_match(uuid,uuid,uuid)",
+        "security.customer_claim_visit_reader()",
+        "security.customer_reference(uuid)",
+        "security.customer_risk_assessment_owner(uuid)",
+        "security.demo_readonly_context(uuid)",
+        "security.dispatch_model_call(uuid,uuid)",
+        "security.fde_can_coordinate_task(uuid)",
+        "security.fde_dashboard_rankings(date,date,integer[],uuid)",
+        "security.fde_demo_statistics(uuid[],uuid[],timestamp with time zone,timestamp with time zone,integer[])",
+        "security.fde_permission_version()",
+        "security.fde_recorded_visit_history(timestamp with time zone,timestamp with time zone,uuid,uuid,integer[])",
+        "security.fde_task_eligible(uuid,uuid,text,uuid)",
+        "security.fde_user_is_active(uuid,text,uuid)",
+        "security.fde_visit_entry_enabled()",
+        "security.finance_decimal_text(numeric)",
+        "security.finance_json_canonical(jsonb)",
+        "security.finance_reference_fingerprint(uuid,uuid,integer,integer,text)",
+        "security.finance_timestamp_text(timestamp with time zone)",
+        "security.finance_window_totals(uuid[],date,date,integer[])",
+        "security.finish_inference_operation(uuid,text,jsonb,jsonb,text)",
+        "security.finish_model_call(uuid,uuid,boolean,jsonb)",
+        "security.has_active_role(text)",
+        "security.has_analysis_scope(jsonb,smallint)",
+        "security.has_customer_access(uuid)",
+        "security.has_customer_write_access(uuid)",
+        "security.has_opportunity_access(uuid)",
+        "security.has_opportunity_read_access(uuid)",
+        "security.is_current_fact_scope(smallint)",
+        "security.is_demo_readonly_identity(uuid,uuid)",
+        "security.is_fde_actor()",
+        "security.knowledge_can(uuid,text)",
+        "security.knowledge_file_read(uuid)",
+        "security.knowledge_ingestion_allowed(uuid,uuid)",
+        "security.knowledge_ingestion_step(uuid,text,uuid,text,integer,text)",
+        "security.management_actor()",
+        "security.model_credential_owned(text,integer)",
+        "security.opportunity_follow_up_reference(uuid,uuid)",
+        "security.opportunity_read_context(uuid)",
+        "security.reserve_asr_attempt(uuid,uuid,text,text,text,text,text,numeric)",
+        "security.reserve_model_call(uuid,uuid)",
+        "security.resolve_account_actor(text,text,text)",
+        "security.resolve_demo_actor(text,text)",
+        "security.review_day_update_status(text,uuid[],timestamp with time zone,timestamp with time zone)",
+        "security.review_metric_baseline(text,uuid[],date,integer,integer,integer)",
+        "security.review_objective_readable(uuid)",
+        "security.review_update_activity(text,uuid[],timestamp with time zone,timestamp with time zone)",
+        "security.sales_shared_opportunity_actor()",
+        "security.target_scope_read(text,uuid,uuid,text)",
+        "security.target_scope_write(text,uuid,uuid,text)",
+        "security.task_actor_recipient(uuid)",
+        "security.task_alignment_read(uuid)",
+        "security.task_link_context(uuid)",
+        "security.task_recipient_eligible(uuid,uuid,text,uuid)",
+        "security.tenant_modules()",
+        "security.visit_saved_read_permissions(uuid)",
+        "security.work_report_audience_matches(jsonb)",
+        "security.work_report_history_access(jsonb)",
+        "security.work_report_review_access(jsonb)",
+        "security.work_report_source_access(jsonb,jsonb)",
+        "security.workspace_is_active(uuid)",
+        "security.workspace_job_enabled(uuid,text)",
+        "workflow.complete_business_review(uuid,jsonb)",
+        "workflow.complete_opportunity_change_review(uuid,jsonb)",
+        "workflow.enqueue_battle_map_leader_notifications(uuid,uuid,uuid,text,text,numeric,numeric,text)",
+        "workflow.enqueue_task_notification(uuid,uuid,text,text,text,uuid,text,jsonb)",
+        "workflow.task_execution_enqueue_coordination_checks(integer)",
+        "workflow.task_execution_enqueue_pause_rechecks(integer)"
+      ],
+      "memberships": [],
+      "policies": {},
+      "schemas": [
+        "activity",
+        "agent",
+        "common",
+        "config",
+        "crm",
+        "insight",
+        "knowledge",
+        "ops",
+        "platform",
+        "security",
+        "workflow"
+      ],
+      "sequences": {
+        "ops.audit_log_id_seq": [
+          "USAGE"
+        ]
+      },
+      "tables": {
+        "activity.asr_attempt": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "activity.asr_session": [
+          "SELECT",
+          "INSERT"
+        ],
+        "activity.visit": [
+          "SELECT"
+        ],
+        "activity.visit_import": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "activity.visit_import_content": [
+          "SELECT",
+          "INSERT"
+        ],
+        "activity.visit_opportunity": [
+          "SELECT"
+        ],
+        "activity.visit_participant": [
+          "SELECT"
+        ],
+        "agent.artifact": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.conversation": [
+          "SELECT"
+        ],
+        "agent.inference_operation": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.message": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.model_invocation": [
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.run": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "agent.work_report_document": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "agent.work_report_event": [
+          "INSERT"
+        ],
+        "agent.work_report_revision": [
+          "SELECT",
+          "INSERT"
+        ],
+        "agent.work_report_run": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "agent.work_report_scheme": [
+          "SELECT"
+        ],
+        "agent.work_report_scheme_revision": [
+          "SELECT"
+        ],
+        "agent.work_report_snapshot": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "config.account_authorization": [
+          "SELECT"
+        ],
+        "config.account_permission_override": [
+          "SELECT"
+        ],
+        "config.account_permission_role": [
+          "SELECT"
+        ],
+        "config.agent_definition": [
+          "SELECT"
+        ],
+        "config.agent_runtime_config": [
+          "SELECT"
+        ],
+        "config.agent_runtime_release": [
+          "SELECT"
+        ],
+        "config.authorization_audit": [
+          "SELECT"
+        ],
+        "config.dictionary": [
+          "SELECT"
+        ],
+        "config.dictionary_item": [
+          "SELECT"
+        ],
+        "config.field_definition": [
+          "SELECT"
+        ],
+        "config.form_definition": [
+          "SELECT"
+        ],
+        "config.form_version": [
+          "SELECT"
+        ],
+        "config.form_version_field": [
+          "SELECT"
+        ],
+        "config.model_api_current": [
+          "SELECT"
+        ],
+        "config.model_api_release": [
+          "SELECT"
+        ],
+        "config.model_api_test": [
+          "SELECT"
+        ],
+        "config.permission_role": [
+          "SELECT"
+        ],
+        "config.permission_role_grant": [
+          "SELECT"
+        ],
+        "config.prompt_template": [
+          "SELECT"
+        ],
+        "config.rule_set": [
+          "SELECT"
+        ],
+        "config.sales_competency_framework": [
+          "SELECT"
+        ],
+        "crm.business_change": [
+          "SELECT"
+        ],
+        "crm.contact": [
+          "SELECT"
+        ],
+        "crm.customer": [
+          "SELECT"
+        ],
+        "crm.customer_actual": [
+          "SELECT"
+        ],
+        "crm.customer_creation_request": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "crm.effective_actual": [
+          "SELECT"
+        ],
+        "crm.finance_period_resolution": [
+          "SELECT"
+        ],
+        "crm.material": [
+          "SELECT"
+        ],
+        "crm.opportunity": [
+          "SELECT"
+        ],
+        "crm.opportunity_actual_basis": [
+          "SELECT"
+        ],
+        "crm.opportunity_actual_confirmation": [
+          "SELECT"
+        ],
+        "crm.opportunity_forecast": [
+          "SELECT"
+        ],
+        "crm.opportunity_forecast_event": [
+          "SELECT"
+        ],
+        "crm.opportunity_material": [
+          "SELECT"
+        ],
+        "crm.opportunity_participant": [
+          "SELECT"
+        ],
+        "crm.opportunity_period_actual_snapshot": [
+          "SELECT"
+        ],
+        "crm.opportunity_state_event": [
+          "SELECT"
+        ],
+        "crm.review_key_result": [
+          "SELECT"
+        ],
+        "crm.review_key_result_progress": [
+          "SELECT"
+        ],
+        "crm.review_metric": [
+          "SELECT"
+        ],
+        "crm.review_objective": [
+          "SELECT"
+        ],
+        "crm.sales_target": [
+          "SELECT"
+        ],
+        "insight.business_advice": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.business_suggestion": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.customer_risk_assessment": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.quadrant_score": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.risk": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "insight.risk_event": [
+          "INSERT"
+        ],
+        "insight.sales_competency_review": [
+          "SELECT",
+          "UPDATE"
+        ],
+        "knowledge.file": [
+          "SELECT"
+        ],
+        "knowledge.ingestion": [
+          "SELECT"
+        ],
+        "knowledge.ingestion_file": [
+          "SELECT"
+        ],
+        "ops.audit_log": [
+          "SELECT",
+          "INSERT"
+        ],
+        "ops.job": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "ops.job_effect": [
+          "SELECT",
+          "INSERT"
+        ],
+        "ops.system_event": [
+          "SELECT"
+        ],
+        "platform.auth_session": [
+          "SELECT"
+        ],
+        "platform.role_binding": [
+          "SELECT"
+        ],
+        "platform.team": [
+          "SELECT"
+        ],
+        "platform.team_membership": [
+          "SELECT"
+        ],
+        "platform.user_ref": [
+          "SELECT"
+        ],
+        "workflow.notification": [
+          "SELECT"
+        ],
+        "workflow.task": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task_assignee": [
+          "SELECT",
+          "INSERT",
+          "UPDATE",
+          "DELETE"
+        ],
+        "workflow.task_candidate": [
+          "SELECT",
+          "INSERT",
+          "UPDATE"
+        ],
+        "workflow.task_event": [
+          "SELECT",
+          "INSERT"
+        ],
+        "workflow.v_task_action_recipient": [
+          "SELECT"
+        ]
+      }
+    }
+  }
+}

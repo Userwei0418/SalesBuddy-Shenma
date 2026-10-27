@@ -4,20 +4,23 @@
   <view class="confirm-hero"><sb-summary-card title="{{customerName}}" subtitle="客户建档与下发草案" meta="{{roleName}} · 创建人 {{recorderName}}" progress="{{progressPercent}}" progressLabel="必填已完成 {{completedCount}} / {{requiredCount}}" /></view>
 
   <view class="confirm-body">
+    <view wx:if="{{creationOptionsError}}" class="notice orange">{{creationOptionsError}}，原草稿仍保留。</view>
     <view wx:if="{{draftRestored}}" class="notice blue">已恢复上次保存的客户建档草稿。</view>
     <view wx:if="{{missingCount}}" class="notice orange">还有 {{missingCount}} 个关键字段待补充，完成后才能正式建档下发。</view>
     <view wx:elif="{{saved}}" class="notice green">当前修改已经保存为草稿。</view>
     <view class="ai-card surface"><view class="ai-head"><view><view>核对客户与负责销售</view><text>识别到的信息可修改，未识别内容请补充</text></view><sb-ai-badge class="ai-head-badge" state="pending" /></view><view class="ai-copy">请核对客户名称、联系人角色和负责销售；确认后完成客户建档、负责人绑定和销售端提醒。</view></view>
     <view class="section-heading"><text>客户建档与下发字段</text><label>{{fields.length}} 项</label></view>
+    <include src="../../templates/customer-identity.wxml" />
     <view class="field-list surface">
-      <view wx:for="{{fields}}" wx:key="key" class="field-row {{item.missing ? 'missing' : ''}} {{item.system ? 'system' : ''}} {{item.edited ? 'edited' : ''}}" hover-class="row-pressed" data-index="{{index}}" bindtap="openEditor">
+      <view wx:for="{{fields}}" wx:key="key" wx:if="{{!item.hidden}}" class="field-row {{item.missing ? 'missing' : ''}} {{item.system ? 'system' : ''}} {{item.edited ? 'edited' : ''}}" hover-class="row-pressed" data-index="{{index}}" bindtap="openEditor">
         <view class="field-label">{{item.label}}<text wx:if="{{item.required}}">*</text><label wx:if="{{item.edited}}">已修改</label><label wx:elif="{{item.system}}">系统生成</label></view>
+        <view wx:if="{{item.validationError}}" class="notice orange">{{item.validationError}}</view>
         <view class="field-value"><text>{{item.value || '待补充'}}</text><label>{{item.readonly ? '自动匹配' : item.missing ? '补充' : '编辑'}}<t-icon name="chevron-right" size="32rpx" /></label></view>
       </view>
     </view>
   </view>
 
-  <sb-bottom-bar class="bottom-bar" secondaryLabel="保存草稿" bind:secondary="saveDraft" primaryLabel="确认建档并下发" inactive="{{missingCount > 0}}" disabledReason="还有 {{missingCount}} 个关键字段待补充" loading="{{submitting}}" loadingLabel="正在建档下发…" bind:primary="confirmArchive" />
+  <sb-bottom-bar class="bottom-bar" secondaryLabel="保存草稿" bind:secondary="saveDraft" primaryLabel="确认建档并下发" inactive="{{!creationOptionsReady || invalidFieldCount > 0 || missingCount > 0}}" disabledReason="{{!creationOptionsReady ? '创建选项目录暂不可用' : invalidFieldCount ? '请重选标出的建档选项' : '还有 ' + missingCount + ' 个关键字段待补充'}}" loading="{{submitting}}" loadingLabel="正在建档下发…" bind:primary="confirmArchive" />
 
   <sb-sheet visible="{{editorVisible}}" title="{{editorTitle}}" confirmLabel="保存修改" bind:confirm="saveEditor" bind:close="closeEditor">
     <view class="editor-body">

@@ -105,10 +105,26 @@ class CustomerProfile(BaseModel):
     dimensions: list[ProfileDimension]
     coverage: int = Field(ge=0, le=6)
     total: Literal[6]
-    scope: Literal["current_authorized_records"]
+    scope: Literal["current_authorized_records", "not_applicable"]
+    assessment_status: Literal["not_applicable"] | None = None
 
 
-class CustomerHeader(DetailObject):
+class CustomerAdviceAccess(DetailObject):
+    can_read_advice: bool = Field(
+        default=False,
+        description="当前账号对此客户的建议读取与客户分析授权均有效；不代表客户档案读取权限。读取建议时重新校验。",
+    )
+    can_request_advice: bool = Field(
+        default=False,
+        description="除可读取此客户建议外，当前账号还具有对此客户生成建议的授权；生成时重新校验。",
+    )
+
+
+class CustomerHeader(CustomerAdviceAccess):
+    business_identities: list[str] = Field(default_factory=lambda: ["customer"])
+    partner_profile_id: UUID | None = None
+    primary_partner_id: UUID | None = None
+    customer_analysis_applicable: bool = True
     id: UUID
     name: str
     primary_contact: ContactSummary | None
@@ -116,7 +132,12 @@ class CustomerHeader(DetailObject):
     read_model: Literal["detail_header_v1"]
 
 
-class OpportunityDetailHeader(DetailObject):
+class OpportunityReadContext(DetailObject):
+    shared_read_only: bool = Field(default=False, description="仅创建时共享规则提供商机读取；不扩展财务、AI或他人历史权限。")
+    can_read_customer: bool = Field(default=False, description="是否另有所属客户完整档案读取权限；客户名称只作引用。")
+
+
+class OpportunityDetailHeader(OpportunityReadContext):
     id: UUID = Field(description="所属客户ID")
     name: str = Field(description="所属客户名称")
     opportunities: list[OpportunityCard] = Field(min_length=1, max_length=1)
@@ -124,7 +145,7 @@ class OpportunityDetailHeader(DetailObject):
     read_model: Literal["detail_header_v1"]
 
 
-class CustomerOverview(DetailObject):
+class CustomerOverview(CustomerAdviceAccess):
     id: UUID
     name: str
     summary: CustomerSummary
@@ -134,7 +155,7 @@ class CustomerOverview(DetailObject):
     read_model: Literal["detail_overview_v1"]
 
 
-class OpportunityDetailOverview(DetailObject):
+class OpportunityDetailOverview(OpportunityReadContext):
     id: UUID = Field(description="所属客户ID")
     name: str = Field(description="所属客户名称")
     opportunities: list[OpportunityCard] = Field(min_length=1, max_length=1)
@@ -159,9 +180,28 @@ class VisitQualitySummary(BaseModel):
 
 
 class VisitSummary(DetailObject):
-    created_at: datetime | None = Field(default=None, description="系统实际录入时间，含时区；非人工填写日期或拜访发生时间")
+    customer_id: UUID | None = Field(default=None, description="跟进所属客户；跨客户汇总时用于回到客户详情")
+    customer_name: str | None = Field(default=None, description="跟进所属客户名称")
+    created_at: datetime | None = Field(
+        default=None, description="系统实际录入时间，含时区；非人工填写日期或拜访发生时间"
+    )
     id: UUID
     opportunity_id: UUID | None
+    opportunity_name: str | None = Field(default=None, description="主商机名称")
+    recorder_id: UUID | None = Field(default=None, description="实际跟进人稳定账号ID")
+    recorder_user_id: UUID | None = Field(default=None, description="兼容 FDE 活动接口的跟进人账号ID")
+    recorder_name: str | None = Field(default=None, description="实际跟进人名称")
+    recorder_role: str | None = Field(default=None, description="录入时岗位快照")
+    recording_role_code_snapshot: str | None = Field(default=None, description="录入时岗位快照兼容字段")
+    source_system: str | None = Field(default=None, description="外部来源系统；仅有溯源时返回")
+    fde_participant_ids: list[UUID] = Field(default_factory=list, description="本次跟进的 FDE 参与人")
+    fde_participants: list[dict[str, Any]] = Field(default_factory=list, description="本次跟进的 FDE 参与人展示信息")
+    collaborators: list[dict[str, Any]] = Field(default_factory=list, description="本次跟进的协同人展示信息")
+    visit_goal: str | None = Field(default=None, description="拜访目标")
+    duration_minutes: int | None = Field(default=None, description="沟通时长（分钟）")
+    interaction_mode_code: str | None = Field(default=None, description="沟通方式编码")
+    contact_name_snapshot: str | None = Field(default=None, description="联系人快照")
+    is_first_visit: bool | None = Field(default=None, description="是否首次拜访")
     status: str
     follow_up_score: float | None = Field(default=None, description="跟进记录已保存的质检分数；历史未评分为null")
     quality_review: VisitQualitySummary | None = Field(default=None, description="质检结果安全摘要；未保存结果为null")
@@ -174,7 +214,9 @@ class VisitSummary(DetailObject):
 
 
 class VisitHistoryPage(HistoryPage[VisitSummary]):
-    sort: Literal["created_desc"] | None = Field(default=None, description="显式按系统录入时间倒序的服务端回执；缺省请求不返回此字段")
+    sort: Literal["created_desc"] | None = Field(
+        default=None, description="显式按系统录入时间倒序的服务端回执；缺省请求不返回此字段"
+    )
 
 
 class TimelineEvent(DetailObject):
@@ -217,10 +259,14 @@ class ActualQuarters(DetailObject):
 
 
 class OperationsCustomerOverview(DetailObject):
+    business_identities: list[str] = Field(default_factory=lambda: ["customer"])
+    partner_profile_id: UUID | None = None
+    primary_partner_id: UUID | None = None
     id: UUID
     name: str
     ownership: dict[str, Any] | None
     version_no: int
+    can_update: bool = Field(default=False, description="当前账号对这条客户资料的修改权限；保存时重新校验")
     customer_code: str | None = None
     external_customer_id: str | None = None
     company_reference: str | None = None
@@ -243,7 +289,6 @@ class OperationsCustomerOverview(DetailObject):
     lifecycle_status: str
     data_source: str
     data_kind: str
-    synthetic_trial_batch_id: str | None = None
     team_name: str | None = None
     creator_name: str | None = None
     created_at: datetime

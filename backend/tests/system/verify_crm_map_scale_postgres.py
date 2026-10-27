@@ -6,6 +6,7 @@ Queries must complete within 5s, with 300 map points and an exact 17,001 count.
 
 import asyncio
 import json
+import os
 import time
 
 import asyncpg
@@ -13,10 +14,9 @@ from run_integration_postgres import main
 
 from sales_backend.db import _initialize_connection, set_request_context
 from sales_backend.repositories.customer_assets import CustomerAssetRepository, today
-from sales_backend.repositories.customer_map import CustomerMapRepository, activity_since
+from sales_backend.repositories.customer_map import activity_since
 from sales_backend.repositories.identity import IdentityRepository
-from sales_backend.repositories.profile_customers import subject_customers
-from sales_backend.repositories.profile_scope import resolve_scope
+from sales_backend.services.customer_map import read_map
 
 
 def emit(value):
@@ -50,6 +50,33 @@ class Capture:
             {"method": "fetchrow", "sql": query, "args": args, "ms": round((time.perf_counter() - start) * 1000, 2)}
         )
         return result
+
+    async def fetchval(self, query, *args):
+        start = time.perf_counter()
+        result = await self.conn.fetchval(query, *args)
+        self.calls.append(
+            {"method": "fetchval", "sql": query, "args": args, "ms": round((time.perf_counter() - start) * 1000, 2)}
+        )
+        return result
+
+
+async def explain_after_measurement(connection, *, actor, iteration, groups):
+    """Optional synthetic diagnostics; never replace the measured latency gate."""
+    output = os.environ.get("SALES_MAP_SCALE_PLAN_OUTPUT")
+    if not output:
+        return
+    # Plans are collected only after original timings and payload assertions.
+    # This diagnostic run is not comparable to a normal uninstrumented run's
+    # later iterations: EXPLAIN ANALYZE executes the query again.
+    for phase, calls in groups.items():
+        for call in calls:
+            plan = await connection.fetchval(
+                "EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) " + call["sql"], *call["args"]
+            )
+            fd = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+            with os.fdopen(fd, "a") as stream:
+                stream.write(json.dumps({"actor": actor, "iteration": iteration, "phase": phase,
+                                         "measured_ms": call["ms"], "plan": plan}, default=str) + "\n")
 
 
 async def verify(config, name, role):
@@ -119,34 +146,15 @@ async def verify(config, name, role):
                     await set_request_context(conn, actor)
                     capture = Capture(conn)
                     start = time.perf_counter()
-                    items = await CustomerMapRepository().read(capture, as_of=today())
-                    selected = await resolve_scope(
-                        conn, actor, scope="department" if code == "ZJL001" else "team" if code == "ZJ001" else "self"
-                    )
-                    assessments = {
-                        r["id"]: r
-                        for r in await subject_customers(
-                            conn,
-                            member_ids=selected["member_ids"],
-                            scope=selected["scope"],
-                            team_ids=selected["team_ids"],
-                            customer_ids=[r["id"] for r in items],
-                        )
-                    }
-                    items = [
-                        {
-                            **item,
-                            **{
-                                key: assessments[item["id"]][key]
-                                for key in ("potential_score", "relationship_score", "quadrant_code", "quadrant_policy")
-                            },
-                        }
-                        for item in items
-                        if item["id"] in assessments
-                    ]
+                    # Exercise the production service, including authorized
+                    # directory resolution and subject-score selection.
+                    items = await read_map(capture, actor, as_of=today())
                     map_ms = (time.perf_counter() - start) * 1000
                     assert len(items) == 300, (code, len(items))
-                    map_query = capture.calls[0]
+                    map_queries = [call for call in capture.calls if "WITH recent_visits" in call["sql"]]
+                    assert len(map_queries) == 1, "One map projection must select both customer and subject scores"
+                    map_query = map_queries[0]
+                    scope_calls = [call for call in capture.calls if call is not map_query]
                     map_payload = {
                         "items": items,
                         "as_of": today(),
@@ -165,16 +173,23 @@ async def verify(config, name, role):
                         "map_items": len(items),
                         "map_with_scope_ms": round(map_ms, 2),
                         "map_sql_ms": map_query["ms"],
+                        "scope_and_service_ms": round(map_ms - map_query["ms"], 2),
+                        "scope_sql_ms": [q["ms"] for q in scope_calls],
+                        "subject_scores_in_map_projection": True,
                         "map_payload_bytes": size(map_payload),
                         "portfolio_customer_count": assets["summary"]["portfolio_customer_count"],
                         "assets_repository_ms": round(assets_ms, 2),
                         "assets_sql_ms": [q["ms"] for q in capture.calls],
                         "assets_payload_bytes": size(assets),
                     }
+                    emit(row)
+                    await explain_after_measurement(
+                        conn, actor=code, iteration=attempt,
+                        groups={"map": [map_query]},
+                    )
                     assert map_ms < 5000, row
                     assert assets_ms < 5000, row
                     report["runs"].append(row)
-                    emit(row)
         emit({"phase": "complete", "synthetic_only": True, "bounded_payload_and_queries": True})
     finally:
         await conn.close()

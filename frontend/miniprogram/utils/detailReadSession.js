@@ -1,3 +1,4 @@
+const {createWindowCache,cloneWindowCache,applyWindow,projectWindowCache}=require('./taskListSync');
 const access = require('./access');
 const currentIdentity = () => access.identity(getApp().globalData.session);
 const emptyPage = () => ({items: [], loading: false, error: '', loaded: false, hasMore: false, nextOffset: 0, nextCursor: null});
@@ -45,7 +46,7 @@ class DetailReadSession {
   async load(name, request, {more = false, retry = false} = {}) {
     const prior = this.state(name);
     if (retry && prior.failedMore) more = true;
-    if (!this.current() || prior.loading || (!more && !retry && prior.loaded) || (more && !prior.hasMore)) return;
+    if (!this.current() || prior.loading || prior.syncing || (!more && !retry && prior.loaded) || (more && !prior.hasMore)) return;
     const token = this.token(), cursor = more ? prior.nextCursor : null, offset = more && !cursor ? prior.nextOffset : 0;
     this.pages[name] = {...prior, loading: true, error: ''};
     this.emit();
@@ -65,12 +66,32 @@ class DetailReadSession {
         const id = String(rowId(row));
         if (!seen.has(id)) { items.push(row); seen.add(id); }
       }
-      this.pages[name] = {items, loaded: true, loading: false, error: '', hasMore: response.has_more, nextOffset: response.next_offset, nextCursor: response.next_cursor || null};
+      if(name==='tasks'&&Number.isSafeInteger(response.summary&&response.summary.filtered_total)){
+        const cache=more?(prior.taskCache?cloneWindowCache(prior.taskCache):createWindowCache(prior.items,response.summary.filtered_total)):createWindowCache([],response.summary.filtered_total);
+        applyWindow(cache,response,{offset,page_size:20},false);const window=projectWindowCache(cache,cache.total);
+        this.pages[name]={items:window.items,taskCache:cache,loaded:true,loading:false,error:'',hasMore:window.has_more,nextOffset:window.next_offset,nextCursor:null};
+      }else this.pages[name] = {items, loaded: true, loading: false, error: '', hasMore: response.has_more, nextOffset: response.next_offset, nextCursor: response.next_cursor || null};
     } catch (error) {
       if (this.current(token)) this.pages[name] = {...prior, loading: false, failedMore: more, error: error.message || '加载失败，请重试'};
     }
     if (this.current(token)) this.emit();
   }
+
+  async refreshTasks(request,window={offset:0,page_size:100}) {
+    const prior=this.state('tasks');
+    if(!this.current()||!prior.loaded||prior.loading||prior.syncing||prior.syncDenied)return;
+    const token=this.token();this.pages.tasks={...prior,syncing:true};
+    try {
+      const response=await request(window);if(!this.current(token))return;
+      const total=response&&response.summary&&response.summary.filtered_total;
+      if(!response||!Array.isArray(response.items)||response.items.length>window.page_size||response.items.some(row=>!rowId(row))||!Number.isSafeInteger(total)||total<0)throw Error('任务状态响应不完整，请重试');
+      const cache=prior.taskCache?cloneWindowCache(prior.taskCache):createWindowCache(prior.items,total);
+      applyWindow(cache,response,window);const projected=projectWindowCache(cache,total);
+      this.pages.tasks={...prior,items:projected.items,taskCache:cache,hasMore:projected.has_more,nextOffset:projected.next_offset,nextCursor:null,syncing:false,syncError:cache.dirty.size?'部分已加载任务等待重新同步':'',lastSyncedAt:Date.now()};
+    }catch(error){if(this.current(token)){const denied=[401,403].includes(error.statusCode);this.pages.tasks={...prior,...(denied?{items:[],taskCache:null,syncDenied:true,hasMore:false}:{}),syncing:false,syncError:error.message||'任务同步失败，保留最近数据'};}}
+    if(this.current(token))this.emit();
+  }
+
 }
 
 function customerLoaders(api, id, {visitSort} = {}) {
@@ -94,6 +115,6 @@ function detailWithPages(raw, pages, focused) {
   return result;
 }
 function pageStates(pages) {
-  return Object.fromEntries(Object.entries(pages).map(([key, {items, ...state}]) => [key, {...state, count: items.length}]));
+  return Object.fromEntries(Object.entries(pages).map(([key, {items, taskCache, ...state}]) => [key, {...state, count: items.length}]));
 }
 module.exports = {DetailReadSession, customerLoaders, activeSections, detailWithPages, pageStates};

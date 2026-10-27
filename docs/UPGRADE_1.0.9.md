@@ -1,3 +1,5 @@
+> 历史记录：当前版本和配置请先查阅 [PROJECT_FACTS.md](PROJECT_FACTS.md) 与 [OPERATIONS_HANDOVER.md](OPERATIONS_HANDOVER.md)。本文不能代替当前环境升级与验收。
+
 # 神码已有环境升级到 1.0.9
 
 适用：销售主机 `salesbuddy` / `172.22.9.234`，已有 V125 数据库。首次安装脚本不用于本次升级。

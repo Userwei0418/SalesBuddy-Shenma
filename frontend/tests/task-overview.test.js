@@ -40,7 +40,7 @@ test("cancelled tasks never enter pending counts and every count matches its dri
   const metrics = buildOverviewMetrics(tasks, now);
 
   assert.deepEqual(metrics, [
-    { key: "today_completed", label: "今日已完成", value: 1 },
+    { key: "today_completed", label: "今日正常完成", value: 1 },
     { key: "today_pending", label: "今日待办", value: 1 },
     { key: "all_pending", label: "全部待办", value: 3 },
   ]);
@@ -57,7 +57,8 @@ test("task page preserves server-selected raw statuses when rendering cards and 
   let navigationTitle;
   const source = fs.readFileSync(path.join(__dirname, "../miniprogram/pages/tasks/index.js"), "utf8");
   vm.runInNewContext(source, {
-    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : {},
+    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : name.endsWith("taskCancellation") ? require("../miniprogram/utils/taskCancellation") : name.endsWith("taskExecutionPresentation") ? require("../miniprogram/utils/taskExecutionPresentation") : name.endsWith("knowledgeOverview") ? require("../miniprogram/utils/knowledgeOverview") : name.endsWith("taskPresentation") ? require("../miniprogram/utils/taskPresentation") : {},
+    getApp: () => ({globalData:{session:{userId:"test-reader",permissions:{"task.read":true,"task.cancel":false}}}}),
     Page: (page) => { definition = page; },
     wx: { setNavigationBarTitle: ({ title }) => { navigationTitle = title; } },
   });
@@ -74,22 +75,22 @@ test("task page preserves server-selected raw statuses when rendering cards and 
   ];
 
   page.onLoad({ overview: "today_pending" });
-  page.acceptTaskPage({items:[tasks[0]],summary:{total:3,pending_count:1,completed_count:1,filtered_total:1},has_more:false,next_offset:null});
+  page.acceptTaskPage({items:[tasks[0]],summary:{total:3,pending_count:1,completed_count:1,ended_count:2,stopped_count:0,unknown_outcome_count:1,filtered_total:1},has_more:false,next_offset:null});
   assert.equal(navigationTitle, "今日待办");
   assert.deepEqual(ids(page.data.filteredTasks), ["pending"]);
   assert.equal(page.data.filteredTasks[0].due_at, today);
   assert.equal(page.data.totalCount, 3);
 
   page.onLoad({ overview: "today_completed" });
-  page.acceptTaskPage({items:[tasks[2]],summary:{total:3,pending_count:1,completed_count:1,filtered_total:1},has_more:false,next_offset:null});
+  page.acceptTaskPage({items:[tasks[2]],summary:{total:3,pending_count:1,completed_count:1,ended_count:2,stopped_count:0,unknown_outcome_count:1,filtered_total:1},has_more:false,next_offset:null});
   assert.deepEqual(ids(page.data.filteredTasks), ["completed"]);
   assert.equal(page.data.filteredTasks[0].completed_at, today);
 
   page.onLoad({ tab: "rejected" });
-  page.acceptTaskPage({items:[tasks[1]],summary:{total:3,pending_count:1,completed_count:1,filtered_total:1},has_more:false,next_offset:null});
+  page.acceptTaskPage({items:[tasks[1]],summary:{total:3,pending_count:1,completed_count:1,ended_count:2,stopped_count:0,unknown_outcome_count:1,filtered_total:1},has_more:false,next_offset:null});
   assert.equal(page.data.overviewFilter, "");
   assert.deepEqual(ids(page.data.filteredTasks), ["cancelled"]);
-  assert.equal(page.data.filteredTasks[0].statusLabel, "已拒绝");
+  assert.equal(page.data.filteredTasks[0].statusLabel, "已结束 · 结果待核对");
 });
 
 test("default order puts Beijing today first, then descending deadlines, without mutating records", () => {
@@ -123,7 +124,7 @@ test("changing the dropdown keeps the existing filters and opens the existing ta
   let definition;
   let detailUrl;
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../miniprogram/pages/tasks/index.js"), "utf8"), {
-    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : {},
+    require: (name) => name.endsWith("taskOverview") ? { selectOverviewTasks, sortTasks, TASK_SORT_OPTIONS } : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : name.endsWith("taskExecutionPresentation") ? require("../miniprogram/utils/taskExecutionPresentation") : name.endsWith("knowledgeOverview") ? require("../miniprogram/utils/knowledgeOverview") : name.endsWith("taskPresentation") ? require("../miniprogram/utils/taskPresentation") : {},
     Page: (page) => { definition = page; },
     wx: { setNavigationBarTitle() {}, navigateTo: ({ url }) => { detailUrl = url; } },
   });
@@ -148,7 +149,7 @@ test("home summary and quick entry route to the existing task page without runni
   let definition;
   const urls = [];
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../miniprogram/pages/index/index.js"), "utf8"), {
-    require: (name) => name.endsWith("taskOverview") ? { buildOverviewMetrics } : {},
+    require: (name) => name.endsWith("taskOverview") ? { buildOverviewMetrics } : name.endsWith("knowledgeOverview") ? require("../miniprogram/utils/knowledgeOverview") : name.endsWith("taskPresentation") ? require("../miniprogram/utils/taskPresentation") : name.endsWith("statusLight") ? require("../miniprogram/utils/statusLight") : {},
     Page: (page) => { definition = page; },
     wx: { navigateTo: ({ url }) => urls.push(url) },
   });
@@ -162,4 +163,15 @@ test("home summary and quick entry route to the existing task page without runni
     "/pages/tasks/index?overview=all_pending",
     "/pages/tasks/index?overview=today_pending",
   ]);
+});
+
+test('today normal completions exclude stops and unknown V3 outcomes; historical rejected is never pending',()=>{
+ const at='2026-10-26T08:00:00+08:00';const rows=[
+  {id:'done',status:'completed',execution_mode:'execution_v3',completion_action:'submit_completion',completed_at:at},
+  {id:'stop',status:'completed',execution_mode:'execution_v3',completion_action:'close',completed_at:at},
+  {id:'unknown',status:'completed',execution_mode:'execution_v3',completed_at:at},
+  {id:'rejected',status:'rejected',due_at:at},
+ ];
+ assert.deepEqual(ids(selectOverviewTasks(rows,'today_completed',at)),['done']);
+ assert.deepEqual(ids(selectOverviewTasks(rows,'all_pending',at)),[]);
 });

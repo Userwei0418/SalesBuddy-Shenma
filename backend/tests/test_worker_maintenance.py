@@ -30,8 +30,10 @@ async def test_failed_monitor_has_bounded_retry_and_other_monitors_continue(capl
 
     scheduler = WorkerMaintenance(DatabaseStub(execute))
     results = await asyncio.gather(*(scheduler.run_once(name) for name in scheduler.INTERVALS))
-    assert results == [30, 86400, 300, 1800]
-    assert len(calls) == 4
+    assert results == [30, 60, 86400, 300, 1800, 60, 60]
+    assert len(calls) == 7
+    assert "SELECT workflow.task_execution_enqueue_coordination_checks(100)" in calls
+    assert "SELECT workflow.task_execution_enqueue_pause_rechecks(100)" in calls
     assert "worker maintenance failed: ai_usage" in caplog.text
 
 

@@ -1,3 +1,4 @@
+@import "../../styles/portal-theme.wxss";
 /* 季度目标：弹层外壳保留（root-portal 提升到页面根节点，测试断言），里面的字段用 sb-amount-input、sb-textarea 的 stacked plain 版式；
    弹层是 position:fixed，sb-textarea 传 fixed。按钮与入口高度写 44px（px 不随屏宽缩，320 宽屏也够 44px）。只写类选择器。 */
 .quarter-target-bar{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin:8px 0 0}

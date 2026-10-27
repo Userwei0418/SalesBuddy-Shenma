@@ -178,6 +178,9 @@ def present_activity(row):
     changes = body.get("changes") or _differences(entries)
     # Ignore display-equivalent optional values in older change records.
     changes = [dict(c) for c in changes if c.get("before") != c.get("after")]
+    for change in changes:
+        if change.get("field") == "material_reason" and isinstance(change.get("after"), dict):
+            change["after"] = change["after"].get("reason")
     facts = []
     materials = body.get("materials") or []
     visits = body.get("visits") or []

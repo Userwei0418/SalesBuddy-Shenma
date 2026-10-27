@@ -70,7 +70,7 @@ def advice_context(source_opportunity=None, kind="visit"):
 @pytest.mark.asyncio
 async def test_visit_advice_without_opportunity_creates_daily_task_and_keeps_source(monkeypatch):
     service, connection, customer, suggestion = advice_context()
-    task = TaskCreate(description="联系客户确认验收标准", assignee_account_code="OTHER_TEAM",
+    task = TaskCreate(**dict(execution_protocol_version=1, checklist=[dict(item_id="10000000-0000-4000-8000-000000000019", definition_version=1, title="人工确认事项", acceptance_criteria="交付结果可核实")]),description="联系客户确认验收标准", assignee_account_code="OTHER_TEAM",
                       due_at=datetime.now(UTC)+timedelta(days=1), association_kind="daily")
     create = AsyncMock(return_value={"id": str(uuid4())})
     monkeypatch.setattr(TaskService, "create", create)
@@ -86,7 +86,7 @@ async def test_fixed_source_and_missing_selection_cannot_be_reclassified_as_dail
     for fixed, selected, association in [(str(uuid4()), str(uuid4()), "customer"),
                                          (None, None, None), (None, None, "daily")]:
         service, connection, customer, suggestion = advice_context(fixed)
-        task = TaskCreate(description="联系客户确认验收标准", assignee_account_code="OTHER_TEAM",
+        task = TaskCreate(**dict(execution_protocol_version=1, checklist=[dict(item_id="10000000-0000-4000-8000-000000000019", definition_version=1, title="人工确认事项", acceptance_criteria="交付结果可核实")]),description="联系客户确认验收标准", assignee_account_code="OTHER_TEAM",
                           due_at=datetime.now(UTC)+timedelta(days=1), customer_id=customer,
                           opportunity_id=selected, association_kind=association)
         with pytest.raises(AdviceError):

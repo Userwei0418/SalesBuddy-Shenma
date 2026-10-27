@@ -68,7 +68,7 @@ test('看板单选同步事实和排名，全部选项只在UI中存在且适应
  const filename=path.resolve(__dirname,'../miniprogram/pages/bi/index.js');
  vm.runInNewContext(fs.readFileSync(filename,'utf8'),{
   Page:value=>page=value,
-  require:name=>name.endsWith('/apiClient')?{getDashboardOptions:async()=>({members:[],team_groups:groups})}:require(path.resolve(path.dirname(filename),name)),
+  require:name=>name.endsWith('/apiClient')?{getDashboardOptions:async()=>({members:[],teams:[],defaults:{team_id:null},team_groups:groups})}:require(path.resolve(path.dirname(filename),name)),
   getApp:()=>({globalData:{role:'manager',session:{role:'manager',userId:'self',workspaceId:'w'}}}),
  });
  page.data=JSON.parse(JSON.stringify(page.data));Object.assign(page.data,{role:'manager',viewMode:'team',canViewTeam:true});
@@ -106,4 +106,41 @@ test('成员明细随换团队、刷新、接口失败或离开页面关闭；�
  tap();c.properties.loading=true;def.observers['loading, error'].call(c);assert.equal(c.data.open,false);tap();assert.equal(c.data.open,false);
  c.properties.loading=false;c.properties.error='接口失败';tap();assert.equal(c.data.open,false);
  c.properties.error='';c.properties.rows=[{id:'team:a',value:100}];tap();assert.equal(c.data.open,false);
+});
+
+ test('ACV公共排名未知金额不冒充零或正式名次，部分金额保留分并标暂排',()=>{
+   const {rankingDisplay}=require('../miniprogram/utils/rankingDisplay');
+   const rows=[{user_id:'partial',value:'10.49',rank:1,record_count:2,known_amount_count:1,missing_amount_count:1},
+     {user_id:'missing',value:'0',rank:2,record_count:1,known_amount_count:0,missing_amount_count:1},
+     {user_id:'zero',value:'0',rank:2,record_count:1,known_amount_count:1,missing_amount_count:0}];
+   const result=rankingDisplay({rows,groups:[]},false,true).rows;
+   assert.equal(result[0].amount,'已知小计 ¥10.49');assert.equal(result[0].rankProvisional,true);
+   assert.equal(result[1].amount,'未填写');assert.equal(result[1].value,null);assert.equal(result[1].rank,null);
+   assert.equal(result[2].amount,'¥0');assert.equal(result[2].rank,2);
+   const mixed=rankingDisplay({rows,groups:[]},false,true);assert.equal(mixed.total,'已知小计 ¥10.49');
+   const unknown={...rows[1],code:'unassigned'};
+   const missing=rankingDisplay({rows:[rows[1],unknown],groups:[]},false,true);
+   assert.equal(missing.total,'未填写');assert.equal(missing.unassignedAmount,'未填写');
+   const precise=rankingDisplay({rows:[{...rows[0],missing_amount_count:0},{...unknown,value:'0.49',known_amount_count:1,missing_amount_count:0}],groups:[]},false,true);
+   assert.equal(precise.total,'¥10.49');assert.equal(precise.unassignedAmount,'¥0.49');
+ });
+ test('FDE ACV元数据区分全缺、部分、零、空集合并保留微小正额',()=>{
+   const {acvSummary}=require('../miniprogram/utils/fdePresentation');
+   assert.equal(acvSummary({open_acv:'0',open_acv_known_count:0,open_acv_missing_count:1}).valueText,'未填写');
+   const partial=acvSummary({open_acv:'10',open_acv_known_count:1,open_acv_missing_count:1});
+   assert.equal(partial.valueText,'<0.01');assert.equal(partial.isSubtotal,true);assert.match(partial.note,/1 个/);
+   assert.equal(acvSummary({open_acv:'0',open_acv_known_count:1,open_acv_missing_count:0}).valueText,'0');
+   assert.equal(acvSummary({open_acv:'0',open_acv_known_count:0,open_acv_missing_count:0}).valueText,'0');
+ });
+
+test('FDE桌面成员入口验证目录和当前授权，不要求Mini弹层打开',()=>{
+ let definition;
+ const session={userId:'self',workspaceId:'w',permissions:{'profile.fde_read':true},permissionGrants:[{permission_code:'profile.fde_read',effect:'allow',scope_code:'teams',team_ids:['t']}]};
+ const filename=path.resolve(__dirname,'../miniprogram/components/fde-dashboard/index.js');
+ vm.runInNewContext(fs.readFileSync(filename,'utf8'),{Component:value=>definition=value,require:name=>require(path.resolve(path.dirname(filename),name)),getApp:()=>({globalData:{session}})});
+ const access=require('../miniprogram/utils/access'),calls=[];
+ const c={...definition.methods,properties:{},dashboardIdentity:access.identity(session),data:{scope:'self',memberPickerOpen:false,memberOptions:[{id:'',name:'本人'},{id:'peer',name:'同事'},{id:'inactive',is_active:false}]},member:e=>calls.push(e.detail.value)};
+ c.selectDashboardMember({detail:{id:'peer'}});assert.deepEqual(calls,[1]);
+ c.selectDashboardMember({detail:{id:'absent'}});c.selectDashboardMember({detail:{id:'inactive'}});assert.deepEqual(calls,[1]);
+ session.permissionGrants[0].scope_code='self';c.dashboardIdentity=access.identity(session);c.selectDashboardMember({detail:{id:'peer'}});assert.deepEqual(calls,[1]);
 });

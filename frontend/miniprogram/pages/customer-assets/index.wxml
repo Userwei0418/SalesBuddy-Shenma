@@ -10,9 +10,9 @@ module.exports={idx:idx,rest:rest,pick:pick};
 <view class="actual-page actual-refresh">
   <view wx:if="{{customerId && !originCustomerId}}" class="actual-breadcrumb" hover-class="is-pressed" bindtap="backToCustomers"><t-icon name="chevron-left" size="32rpx" />返回客户汇总</view>
   <view class="actual-heading"><view><view class="actual-eyebrow">{{opportunityId ? '商机经营详情' : customerId ? '客户实绩' : '经营总览'}}</view><view class="actual-title">{{opportunity ? opportunity.name : (customerName || '客户资产明细')}}</view><text class="actual-subtitle">{{opportunityId ? '查看商机概览、关联待办、跟进和进展' : customerId ? '查看确收、回款及来源' : '按客户查看已登记的经营成果'}}</text></view><view class="actual-info" hover-class="is-pressed" bindtap="help" aria-role="button" aria-label="实绩口径说明"><t-icon name="info-circle" size="40rpx" /></view></view>
-  <view wx:if="{{opportunityId && opportunity && (isFde || canCreateDemoHere)}}" class="fde-quick-actions">
+  <view wx:if="{{opportunityId && opportunity && (isFde || canCreateDemoHere || canFollowUpThisOpportunity)}}" class="fde-quick-actions">
     <block>
-      <button wx:if="{{isFde && canRecordThisOpportunity}}" size="mini" class="fde-quick-action" hover-class="row-pressed" bindtap="recordFdeVisit" aria-label="录入拜访">
+      <button wx:if="{{canFollowUpThisOpportunity || (isFde && canRecordThisOpportunity)}}" size="mini" class="fde-quick-action" hover-class="row-pressed" bindtap="recordFdeVisit" aria-label="录入拜访">
         <view class="fde-quick-heading"><t-icon name="edit" size="40rpx" class="fde-quick-icon" aria-hidden="true" /><text class="fde-quick-title">录入拜访</text><t-icon name="chevron-right" size="32rpx" class="fde-quick-arrow" /></view>
         <text class="fde-quick-description">记录沟通与下一步计划</text>
       </button>
@@ -21,26 +21,32 @@ module.exports={idx:idx,rest:rest,pick:pick};
         <text class="fde-quick-description">添加商机演示场景</text>
       </button>
     </block>
-    <text wx:if="{{!canRecordThisOpportunity && !canCreateDemoHere}}" class="fde-quick-readonly">当前商机仅可查看</text>
+    <text wx:if="{{!canFollowUpThisOpportunity && !canRecordThisOpportunity && !canCreateDemoHere}}" class="fde-quick-readonly">当前商机仅可查看</text>
   </view>
 
   <view wx:if="{{opportunityId}}" class="op-detail-tabs {{isFde ? 'fde-detail-tabs' : ''}}"><sb-tabs items="{{opportunityTabs}}" activeKey="{{opportunityTab}}" fit size="{{isFde ? 'small' : 'default'}}" bind:change="onOpportunityTabChange" /></view>
   <view wx:if="{{opportunityId && opportunity && opportunityTab!=='demo' && !detailSummary.loaded}}" class="detail-summary-state"><text class="detail-summary-copy">{{detailSummary.loading ? '经营汇总加载中，其他资料可继续查看' : detailSummary.error ? '经营汇总暂不可用，已加载资料不受影响' : '经营汇总按需加载'}}</text><button class="detail-summary-button" wx:if="{{!detailSummary.loading}}" bindtap="retryOpportunitySummary">{{detailSummary.error ? '重试汇总' : '查看汇总'}}</button></view>
   <view wx:if="{{opportunityId && opportunityTab!=='overview' && opportunityLoading}}" class="op-detail-empty">正在加载商机经营信息…</view>
   <view wx:if="{{opportunityId && opportunityTab!=='overview' && opportunityError}}" class="op-detail-empty" hover-class="row-pressed" bindtap="loadOpportunity">{{opportunityError}} · 点击重试</view>
-  <view wx:if="{{canOpportunityAdvice && opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab!=='demo'}}" class="op-advice">
-    <view class="op-advice-head"><view><text>{{isFde ? 'FDE 专业智能体建议' : '销售专家智能体建议'}}</text><sb-ai-badge state="advice" /></view><view class="op-advice-refresh" hover-class="is-pressed" bindtap="loadOpportunityAdvice">{{opportunityAdvice[opportunityTab].checking?'检查中':opportunityAdvice[opportunityTab].status==='loading'?'准备中':'检查更新'}}</view></view>
+  <view wx:if="{{!sharedReadOnly && opportunityAccessReady && canReadOpportunityAdvice && opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab!=='demo'}}" class="op-advice">
+    <view class="op-advice-head"><view><text>{{isFde ? 'FDE 专业智能体建议' : '销售专家智能体建议'}}</text><sb-ai-badge state="advice" /></view>
+      <view wx:if="{{opportunityAdvice[opportunityTab].status!=='loading'}}" class="op-advice-refresh" hover-class="is-pressed" bindtap="loadOpportunityAdvice">{{opportunityAdvice[opportunityTab].checking?'读取中':'刷新状态'}}</view>
+    </view>
     <view class="op-advice-scope">{{opportunity.name}} · {{opportunityTab==='overview'?'商机概览':opportunityTab==='tasks'?'待办事项':opportunityTab==='visits'?'跟进记录':'商机进展'}}</view>
-    <view wx:if="{{opportunityAdvice[opportunityTab].status==='loading'}}" class="op-advice-message">建议正在后台准备，下方资料可直接查看</view>
+    <view wx:if="{{opportunityAdvice[opportunityTab].status==='loading'}}" class="op-advice-message">正在提交生成请求，下方资料可直接查看</view>
+    <view wx:elif="{{opportunityAdvice[opportunityTab].checking && opportunityAdvice[opportunityTab].status!=='ready'}}" class="op-advice-message">正在读取已有建议状态</view>
+    <view wx:elif="{{opportunityAdvice[opportunityTab].status==='queued' || opportunityAdvice[opportunityTab].status==='running'}}" class="op-advice-message">{{opportunityAdvice[opportunityTab].status==='queued'?'已有建议任务排队中':'已有建议任务处理中'}}，可刷新状态查看结果</view>
+    <view wx:elif="{{opportunityAdvice[opportunityTab].status==='stale'}}" class="op-advice-message">资料已变化，上次建议已失效{{canReadAdvice && canOpportunityAdvice?'，可主动重新生成':''}}</view>
     <view wx:elif="{{opportunityAdvice[opportunityTab].status==='error'}}" class="op-advice-message">{{opportunityAdvice[opportunityTab].error}}</view>
     <block wx:elif="{{opportunityAdvice[opportunityTab].status==='ready'}}">
       <view class="op-advice-summary {{!adviceExpanded[opportunityTab]?'op-advice-compact':''}}">{{opportunityAdvice[opportunityTab].summary}}</view>
-      <view wx:if="{{opportunityAdvice[opportunityTab].checking || opportunityAdvice[opportunityTab].checkError}}" class="op-advice-message">{{opportunityAdvice[opportunityTab].checkError || '正在核对资料变化，暂显示上次建议'}}</view>
+      <view wx:if="{{opportunityAdvice[opportunityTab].checking || opportunityAdvice[opportunityTab].checkError}}" class="op-advice-message">{{opportunityAdvice[opportunityTab].checkError || '正在读取已有建议，暂显示上次结果'}}</view>
       <view class="op-advice-toggle" hover-class="is-pressed" bindtap="toggleAdvice">{{adviceExpanded[opportunityTab]?'收起建议':'查看完整建议'}}<t-icon name="{{adviceExpanded[opportunityTab]?'chevron-up':'chevron-down'}}" size="32rpx" /></view>
-      <block wx:if="{{adviceExpanded[opportunityTab]}}"><view wx:for="{{opportunityAdvice[opportunityTab].rows}}" wx:key="index" class="op-advice-row"><text>{{index+1}}. {{item.title}}</text><label>{{item.detail}}</label><advice-actions wx:if="{{!opportunityAdvice[opportunityTab].checking && !opportunityAdvice[opportunityTab].needsCheck}}" analysis-id="{{opportunityAdvice[opportunityTab].id}}" suggestion="{{item}}" bind:changed="loadOpportunityAdvice" /></view></block>
+      <block wx:if="{{adviceExpanded[opportunityTab]}}"><view wx:for="{{opportunityAdvice[opportunityTab].rows}}" wx:key="index" class="op-advice-row"><text>{{index+1}}. {{item.title}}</text><label>{{item.detail}}</label><advice-actions wx:if="{{!readOnly && !opportunityAdvice[opportunityTab].checking && !opportunityAdvice[opportunityTab].needsCheck}}" analysis-id="{{opportunityAdvice[opportunityTab].id}}" suggestion="{{item}}" bind:changed="loadOpportunityAdvice" /></view></block>
       <view class="op-advice-source">基于当前商机关联资料生成 · 建议供参考{{opportunityAdvice[opportunityTab].updatedAt?' · '+opportunityAdvice[opportunityTab].updatedAt:''}}</view>
     </block>
-    <view wx:else class="op-advice-message op-advice-generate" hover-class="is-pressed" bindtap="loadOpportunityAdvice">点击生成当前商机建议</view>
+    <view wx:else class="op-advice-message">尚未生成当前商机建议{{canReadAdvice && canOpportunityAdvice?'，可点击生成建议':' · 当前账号可查看已有建议'}}</view>
+      <view wx:if="{{canReadAdvice && canOpportunityAdvice && !opportunityAdvice[opportunityTab].checking && opportunityAdvice[opportunityTab].status!=='loading' && opportunityAdvice[opportunityTab].status!=='queued' && opportunityAdvice[opportunityTab].status!=='running'}}" class="op-advice-generate" hover-class="is-pressed" data-advice-action="generate" data-opportunity-id="{{opportunityId}}" data-section="{{opportunityTab}}" bindtap="requestOpportunityAdvice">{{opportunityAdvice[opportunityTab].status==='ready'?'重新生成建议':'生成建议'}}</view>
   </view>
   <view wx:if="{{canReadDemo && opportunity && !opportunityLoading && !opportunityError && opportunityTab==='demo'}}" class="linked-demos">
     <view class="linked-demo-heading"><view><text class="linked-demo-title">Demo 场景</text><text class="linked-demo-count">{{demoTotal}} 个场景</text></view><text class="linked-demo-badge">已登记</text></view>
@@ -55,7 +61,8 @@ module.exports={idx:idx,rest:rest,pick:pick};
   </view>
   <block wx:if="{{canOpportunityAdvice && opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab==='tasks'}}">
     <view class="op-task-stats"><view><text>{{taskStats.total}}</text><label>全部事项</label></view><view><text class="traffic-text-green">{{taskStats.completed}}</text><label>已完成</label></view><view><text class="traffic-text-yellow">{{taskStats.pending}}</text><label>未完成</label></view></view>
-    <view wx:for="{{relatedTasks}}" wx:key="id" class="op-related-card" hover-class="row-pressed" data-id="{{item.id}}" bindtap="openRelatedTask"><view class="op-related-head"><text>{{item.title}}</text><label class="traffic-badge traffic-{{item.signal.tone}}">{{item.signal.label}} · {{item.statusLabel}}</label></view><view class="op-related-copy">{{item.description || '暂无任务说明'}}</view><view class="op-related-meta">{{item.assigneeName}} · {{item.timelineAt}}</view><view class="op-related-link">查看任务<t-icon name="chevron-right" size="32rpx" /></view></view>
+    <view wx:if="{{detailPages.tasks.syncError}}" class="op-detail-error">{{detailPages.tasks.syncError}}</view>
+    <view wx:for="{{relatedTasks}}" wx:key="id" class="op-related-card related-task-live-row" hover-class="row-pressed" data-id="{{item.id}}" bindtap="openRelatedTask"><view class="op-related-head"><text>{{item.title}}</text><label class="traffic-badge traffic-{{item.signal.tone}}">{{item.signal.label}} · {{item.statusLabel}}</label></view><view class="op-related-copy">{{item.description || '暂无任务说明'}}</view><view wx:if="{{item.showProgress}}" class="op-related-meta">{{item.progressView.label}} · {{item.progressView.countLabel}} · {{item.responsibilityLabel}}</view><view class="op-related-meta">{{item.assigneeName}} · {{item.timelineAt}}</view><view class="op-related-link">查看任务<t-icon name="chevron-right" size="32rpx" /></view></view>
     <detail-pagination empty-text="" state="{{detailPages.tasks}}" data-section="tasks" bind:more="moreOpportunitySection" bind:retry="retryOpportunitySection" />
     <view wx:if="{{detailPages.tasks.loaded && !detailPages.tasks.loading && !detailPages.tasks.error && !relatedTasks.length}}" class="op-detail-empty"><text>当前商机暂无已关联待办</text><label>仅展示明确关联此商机的任务</label></view>
   </block>
@@ -73,8 +80,32 @@ module.exports={idx:idx,rest:rest,pick:pick};
     <view wx:if="{{detailPages.visits.loaded && !detailPages.visits.loading && !detailPages.visits.error && !relatedVisits.length}}" class="op-detail-empty"><text>当前商机暂无已关联跟进</text><label>未关联商机的客户跟进不会计入</label></view>
     </block>
   </block>
+  <view wx:if="{{opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab==='opportunity'}}" class="op-related-card change-history">
+      <view class="op-events-head"><text class="op-events-title">变更历史</text></view>
+      <view class="op-events-order">按时间倒序 · 修改人、版本及字段前后值</view>
+      <view class="op-events-order">{{changeHistory.coverageNote || '仅展示已记录的变更；缺失的历史内容会明确标注。'}}</view>
+      <view wx:for="{{changeHistory.items}}" wx:for-item="history" wx:key="id" class="change-history-entry">
+        <view class="change-history-meta"><text>{{history.actor}}</text><text>{{history.versionLabel}}</text></view>
+        <view class="op-events-order">{{history.at || '时间未记录'}}</view>
+        <view wx:if="{{history.reason}}" class="op-related-copy">{{history.reason}}</view>
+        <view wx:if="{{history.unavailable}}" class="op-related-copy">这条变更的详细内容未完整记录。</view>
+        <view wx:elif="{{history.partial}}" class="op-related-copy">部分内容未完整记录或不可查看<text wx:if="{{history.unavailableFieldCount}}">（{{history.unavailableFieldCount}} 项）</text>，以各字段说明为准。</view>
+        <view wx:for="{{history.changes}}" wx:for-item="change" wx:key="key" class="change-history-change">
+          <text class="change-history-field">{{change.label}}</text>
+          <view class="change-history-side"><text class="change-history-label">变更前</text><text wx:if="{{change.before.emptyLabel}}" class="change-history-value">{{change.before.emptyLabel}}</text><view wx:for="{{change.before.rows}}" wx:for-item="line" wx:key="key"><text class="change-history-value">{{line.name}}</text><text wx:if="{{line.missingName && line.id}}" class="change-history-id">{{line.idLabel}}：{{line.id}}</text><text wx:if="{{line.detail}}" class="change-history-value">{{line.detail}}</text></view><text wx:if="{{change.before.truncated}}" class="change-history-label">此历史值较长，已显示部分内容。</text></view>
+          <view class="change-history-side"><text class="change-history-label">变更后</text><text wx:if="{{change.after.emptyLabel}}" class="change-history-value">{{change.after.emptyLabel}}</text><view wx:for="{{change.after.rows}}" wx:for-item="line" wx:key="key"><text class="change-history-value">{{line.name}}</text><text wx:if="{{line.missingName && line.id}}" class="change-history-id">{{line.idLabel}}：{{line.id}}</text><text wx:if="{{line.detail}}" class="change-history-value">{{line.detail}}</text></view><text wx:if="{{change.after.truncated}}" class="change-history-label">此历史值较长，已显示部分内容。</text></view>
+        </view>
+      </view>
+      <view wx:if="{{changeHistory.loading}}" class="op-events-order">正在读取变更记录…</view>
+      <view wx:elif="{{changeHistory.error}}" class="change-history-error"><text>{{changeHistory.error}}</text><button wx:if="{{changeHistory.conflict}}" size="mini" bindtap="refreshChangeHistory">重新读取</button><button wx:else size="mini" bindtap="retryChangeHistory">重试</button></view>
+      <button wx:elif="{{changeHistory.hasMore}}" size="mini" class="change-history-more" bindtap="moreChangeHistory">加载更早的变更</button>
+      <button wx:elif="{{!changeHistory.loaded}}" size="mini" class="change-history-more" bindtap="loadChangeHistory">读取变更历史</button>
+      <view wx:elif="{{changeHistory.loaded && !changeHistory.items.length}}" class="op-events-order">暂无已记录的变更历史。</view>
+  </view>
   <block wx:if="{{canOpportunityAdvice && opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab==='opportunity'}}">
     <view class="op-related-card"><view class="op-related-head"><text>当前商机阶段</text><label class="traffic-badge traffic-{{opportunity.signal.tone}}">{{opportunity.signal.label}} · {{opportunity.statusLabel}}</label></view><view class="op-progress-stage">{{opportunity.stageText}}</view><view class="op-progress-track"><view style="width:{{opportunity.probability || 0}}%"></view></view><view class="op-related-copy">{{opportunity.signal.reason}}</view><view class="op-related-meta">预计签约 {{opportunity.expectedDate}}</view></view>
+  </block>
+  <block wx:if="{{canOpportunityAdvice && opportunityId && opportunity && !opportunityLoading && !opportunityError && opportunityTab==='opportunity'}}">
     <view class="op-related-card"><view class="op-events-head"><text class="op-events-title">已记录动态</text><button size="mini" class="op-events-toggle" hover-class="is-pressed" bindtap="toggleProgressEvents" aria-expanded="{{progressEventsExpanded}}" aria-label="{{progressEventsExpanded ? '收起已记录动态' : '展开已记录动态'}}">{{progressEventsExpanded ? '收起' : '展开全部'}}<t-icon name="{{progressEventsExpanded ? 'chevron-up' : 'chevron-down'}}" size="32rpx" /></button></view><view class="op-events-order">{{progressEventsExpanded ? '按时间倒序' : '最新 3 条动态'}}</view><block wx:for="{{progressEvents}}" wx:key="key"><view wx:if="{{progressEventsExpanded || index < 3}}" class="op-event" hover-class="row-pressed" data-key="{{item.key}}" bindtap="openProgressEvent"><view class="op-event-dot"></view><view><text>{{item.title}}</text><label>{{item.date}}</label><view>{{item.detail}}</view></view></view></block><detail-pagination wx:if="{{progressEventsExpanded || progressEvents.length < 3}}" empty-text="" state="{{detailPages.timeline}}" data-section="timeline" bind:more="moreOpportunitySection" bind:retry="retryOpportunitySection" /><view wx:if="{{detailPages.timeline.loaded && !detailPages.timeline.error && !progressEvents.length}}" class="op-detail-empty"><text>暂无已记录动态</text><label>不根据当前阶段推测历史推进过程</label></view></view>
   </block>
   <block wx:if="{{!opportunityId || opportunityTab==='overview'}}">
@@ -105,55 +136,43 @@ module.exports={idx:idx,rest:rest,pick:pick};
       <view wx:else class="opportunity-quarter-empty">未填写季度预测</view>
       <view wx:if="{{opportunity.historicalPeriodRecords.length}}" class="historical-period-records">
         <view class="opportunity-quarter-title">历史季度原始记录</view>
-        <view class="opportunity-quarter-empty">保留历史填报值，未计入季度实绩或预测</view>
+        <view class="opportunity-quarter-empty">原始资料供核对，实际金额以当前采用值为准；不与确认结果重复累计</view>
         <view class="opportunity-quarter-list"><view wx:for="{{opportunity.historicalPeriodRecords}}" wx:key="key"><text>{{item.period}} {{item.kindText}}</text><label>{{item.amountText}} · {{item.taxBasisText}}<text wx:if="{{item.sourceFieldText}}"> · 来源：{{item.sourceFieldText}}</text></label></view></view>
       </view>
-      <view class="quarter-actual-section">
+      <view wx:if="{{opportunityAccessReady && !sharedReadOnly}}" class="quarter-actual-section">
         <view class="quarter-actual-head"><text>季度实绩</text><sb-labeled-select wx:if="{{quarterActualOptions.length}}" class="quarter-actual-select" size="small" label="季度" allOption="{{false}}" options="{{opt.idx(quarterActualOptions,'label')}}" value="{{quarterActualIndex}}" bindchange="changeActualQuarter" /></view>
         <view wx:if="{{quarterActualLoading}}" class="quarter-actual-note">正在汇总季度实绩…</view>
         <view wx:elif="{{quarterActualError}}" class="quarter-actual-error">{{quarterActualError}}<view class="quarter-actual-retry" hover-class="is-pressed" bindtap="loadQuarterActuals">重新加载</view></view>
         <block wx:else>
-          <view class="quarter-actual-metrics"><view><label>季度累计回款</label><text>{{quarterCollection}}</text></view><view><label>季度累计确收</label><text>{{quarterRecognized}}</text></view></view>
-          <view class="quarter-actual-note">{{quarterEntryCount}} 条已确认记录 · 按发生日期归属季度，截至 {{quarterActualAsOf}}</view>
+          <view class="quarter-actual-metrics"><view><label>季度实际回款</label><text>{{quarterCollection}}</text></view><view><label>季度实际确收（不含税）</label><text>{{quarterRecognized}}</text></view></view>
+          <view class="quarter-actual-note">实际按运营确认期间展示，原始证据不重复累计。</view>
+          <view wx:if="{{quarterActualHint}}" class="quarter-actual-note">{{quarterActualHint}}</view>
+          <view class="quarter-actual-note">确收：{{quarterFinancial.recognized.sourceLabel}} · {{quarterFinancial.recognized.statusLabel}}；回款：{{quarterFinancial.collection.sourceLabel}} · {{quarterFinancial.collection.statusLabel}}</view>
+          <view wx:for="{{quarterFinancial.recognized.confirmations}}" wx:key="displayKey" class="quarter-actual-note">{{item.materialLabel}} · {{item.amountText}} · {{item.statusLabel}}<text wx:if="{{item.source_ref}}"> · {{item.sourceLabel}} {{item.source_ref}}</text></view>
+          <view wx:for="{{quarterFinancial.collection.confirmations}}" wx:key="displayKey" class="quarter-actual-note">商机回款 · {{item.amountText}} · {{item.statusLabel}}<text wx:if="{{item.source_ref}}"> · {{item.sourceLabel}} {{item.source_ref}}</text></view>
         </block>
       </view>
       <view class="opportunity-readonly-note">商业资料只读；协助名单由有权人员单独维护</view>
     </block>
   </view>
-  <view class="actual-summary">
+  <view wx:if="{{!opportunityId || (opportunityAccessReady && !sharedReadOnly)}}" class="actual-summary">
     <view class="actual-summary-top"><view class="actual-kind"><sb-segmented size="small" emitSame options="{{kindOptions}}" value="{{kind}}" bind:change="onKindSegment" /></view><view class="actual-period"><sb-segmented size="small" emitSame options="{{periodOptions}}" value="{{period}}" bind:change="onPeriodSegment" /></view></view>
-    <view class="actual-total-label">{{period==='year'?'本年':'历年累计'}}{{kind==='recognized'?'确收':'回款'}}</view>
-    <view class="actual-total">{{loading && !items.length ? '…' : totalText}}<text class="actual-unit">万元</text></view>
+    <view class="actual-total-label">{{period==='year'?'本年':'历年累计'}}{{kind==='recognized'?'确收（不含税）':'回款'}}{{totalPartial?' · 已登记小计':''}}</view>
+    <view class="actual-total">{{loading && !items.length ? '…' : totalText}}<text class="actual-unit">{{totalUnit}}</text></view>
+    <view wx:for="{{financialHints}}" wx:key="*this" class="quarter-actual-note">{{item}}</view>
     <view class="actual-summary-caption">{{summary.entry_count || 0}} 条记录 · 截至 {{asOf}}</view>
     <view wx:if="{{summary.first_date && period==='all'}}" class="actual-first-date">当前可用记录始于 {{summary.first_date}}</view>
   </view>
-  <view wx:if="{{!readOnly && customerId}}" class="actual-context"><view class="actual-context-link" hover-class="is-pressed" bindtap="openProfile">客户档案<t-icon name="chevron-right" size="32rpx" /></view><view wx:if="{{opportunityId}}" class="actual-context-link" hover-class="is-pressed" bindtap="showAllOpportunities">查看客户全部实绩</view><view wx:if="{{canManage && basis==='entries'}}" class="actual-add" hover-class="is-pressed" bindtap="openForm">＋ 登记{{kind==='recognized'?'确收':'回款'}}</view></view>
-  <block wx:if="{{!readOnly}}">
+  <view wx:if="{{!readOnly && customerId && (!opportunityId || canReadProfile)}}" class="actual-context"><view class="actual-context-link" hover-class="is-pressed" bindtap="openProfile">客户档案<t-icon name="chevron-right" size="32rpx" /></view><view wx:if="{{opportunityId}}" class="actual-context-link" hover-class="is-pressed" bindtap="showAllOpportunities">查看客户全部实绩</view></view>
+  <block wx:if="{{!readOnly && (!opportunityId || (opportunityAccessReady && !sharedReadOnly))}}">
   <view class="actual-list-label">{{customerId ? '实绩明细' : '贡献客户'}}<text class="actual-list-unit">{{customerId && opportunityId ? '当前商机' : '按已登记记录统计'}}</text></view>
   <view wx:if="{{error}}" class="actual-empty"><sb-state-panel state="error" title="数据加载失败" description="{{error}}" bind:retry="retry" /></view>
-  <view wx:elif="{{!loading && !items.length}}" class="actual-empty"><sb-state-panel state="empty" title="暂无{{kind==='recognized'?'确收':'回款'}}记录" description="{{customerId && canManage ? '确认已有实绩后，可从上方登记。' : '已确认的经营实绩会显示在这里。'}}" /></view>
-  <block wx:elif="{{!customerId}}"><view wx:for="{{items}}" wx:key="customer_id" class="actual-customer" hover-class="row-pressed" data-id="{{item.customer_id}}" bindtap="openCustomer"><view class="actual-customer-identity"><view class="actual-customer-mark">{{item.customerInitial}}</view><view class="actual-customer-main"><view class="actual-customer-top"><view class="actual-customer-name">{{item.customer_name}}</view><t-icon name="chevron-right" size="36rpx" class="actual-customer-arrow" /></view><view class="actual-customer-meta">{{item.team_name || '未分组'}} · {{item.owner_name || '待分配'}}</view></view></view><view class="actual-customer-bottom"><text class="actual-customer-amount">{{item.totalText}}<text class="actual-small-unit">万元</text></text><text class="actual-customer-count">{{item.entry_count}} 条记录</text></view></view></block>
-  <block wx:else><view wx:for="{{items}}" wx:key="id" class="actual-entry"><view class="actual-entry-top"><text class="actual-entry-date">{{item.period_label || item.occurred_on}}</text><text class="actual-entry-amount">{{item.amountText}}<text class="actual-small-unit">万元</text></text></view><view class="actual-entry-opportunity {{item.opportunity_id?'linked':''}}" hover-class="{{item.opportunity_id ? 'is-pressed' : 'none'}}" data-id="{{item.opportunity_id}}" bindtap="openProfile">{{item.opportunity_name || '暂未关联商机'}}<t-icon wx:if="{{item.opportunity_id}}" name="chevron-right" size="32rpx" /></view><view class="actual-source"><text class="actual-source-label">{{basis==='historical'?'原始字段':'来源编号'}}</text><text class="actual-source-value">{{item.source_ref}}</text></view><view wx:if="{{item.note}}" class="actual-entry-note">{{item.note}}</view><view class="actual-entry-footer"><text class="actual-confirmer">{{basis==='historical' ? item.taxBasisText : (item.confirmed_by || '管理人员') + ' 已确认'}}</text><view wx:if="{{canVoidActual && item.can_void && !readOnly && basis==='entries'}}" class="actual-void" hover-class="is-pressed" data-id="{{item.id}}" bindtap="voidEntry">作废</view></view></view></block>
+  <view wx:elif="{{!loading && !items.length}}" class="actual-empty"><sb-state-panel state="empty" title="暂无{{kind==='recognized'?'确收':'回款'}}记录" description="运营确认后，实际金额会显示在这里。" /></view>
+  <block wx:elif="{{!customerId}}"><view wx:for="{{items}}" wx:key="customer_id" class="actual-customer" hover-class="row-pressed" data-id="{{item.customer_id}}" bindtap="openCustomer"><view class="actual-customer-identity"><view class="actual-customer-mark">{{item.customerInitial}}</view><view class="actual-customer-main"><view class="actual-customer-top"><view class="actual-customer-name">{{item.customer_name}}</view><t-icon name="chevron-right" size="36rpx" class="actual-customer-arrow" /></view><view class="actual-customer-meta">{{item.team_name || '未分组'}} · {{item.owner_name || '待分配'}}</view></view></view><view class="actual-customer-bottom"><text class="actual-customer-amount">{{item.totalText}}<text class="actual-small-unit">{{item.totalUnit}}</text></text><text class="actual-customer-count">{{item.entry_count}} 条记录</text></view></view></block>
+  <block wx:else><view wx:for="{{items}}" wx:key="id" class="actual-entry"><view class="actual-entry-top"><text class="actual-entry-date">{{item.period_label || item.occurred_on}}</text><text class="actual-entry-amount">{{item.amountText}}<text class="actual-small-unit">{{item.amountUnit}}</text></text></view><view class="actual-entry-opportunity {{item.opportunity_id?'linked':''}}" hover-class="{{item.opportunity_id ? 'is-pressed' : 'none'}}" data-id="{{item.opportunity_id}}" bindtap="openProfile">{{item.opportunity_name || '暂未关联商机'}}<t-icon wx:if="{{item.opportunity_id}}" name="chevron-right" size="32rpx" /></view><view class="actual-source"><text class="actual-source-label">采用来源</text><text class="actual-source-value">{{item.sourceLabel}} {{item.source_ref}}</text></view><view wx:for="{{item.qualityHints}}" wx:for-item="hint" wx:key="*this" class="actual-entry-note">{{hint}}</view><view wx:if="{{item.note}}" class="actual-entry-note">{{item.note}}</view><view class="actual-entry-footer"><text class="actual-confirmer">{{item.taxBasisText}}</text></view></view></block>
   <view wx:if="{{loading}}" class="actual-loading">正在加载…</view><sb-pagination wx:elif="{{hasMore}}" mode="more" plain summary="已显示 {{items.length}} 条" loading="{{loading}}" end="{{!hasMore}}" bind:more="more" />
   </block>
-  <sb-sheet visible="{{formOpen}}" title="登记{{kind === 'recognized' ? '确收' : '回款'}}" description="{{customerName}}" closeOnOverlay="{{!saving}}" confirmLabel="确认登记" confirmLoading="{{saving}}" confirmDisabled="{{formTargetLoading || formSelectionRequired}}" bind:confirm="submit" bind:close="closeForm">
-    <view class="actual-form-body">
-      <text class="actual-field-label">关联商机（选填）</text>
-      <sb-search plain value="{{formQuery}}" placeholder="搜索商机名称" maxlength="{{50}}" disabled="{{saving}}" bind:change="searchFormOpportunity" bind:clear="searchFormOpportunity" />
-      <view class="actual-opportunity-options">
-        <t-cell title="暂不关联商机" hover data-id="" right-icon="{{!formOpportunity.id ? 'check' : ''}}" bind:click="selectFormOpportunity" />
-        <t-cell wx:for="{{formChoices}}" wx:key="id" title="{{item.name}}" hover data-id="{{item.id}}" right-icon="{{formOpportunity.id === item.id ? 'check' : ''}}" bind:click="selectFormOpportunity" />
-        <detail-pagination state="{{formChoiceState}}" bind:more="moreFormChoices" bind:retry="retryFormChoices" />
-      </view>
-      <view wx:if="{{formTargetLoading}}" class="actual-form-hint">正在确认原关联商机…</view>
-      <sb-amount-input layout="stacked" plain label="金额" required unit="万元" valueType="string" precision="{{6}}" value="{{amount}}" placeholder="请输入已确认金额" disabled="{{saving}}" data-field="amount" bind:change="input" />
-      <sb-date-picker layout="stacked" plain label="{{kind === 'recognized' ? '确收' : '回款'}}日期" required value="{{occurredOn}}" start="1900-01-01" end="{{asOf}}" shortcuts="{{['today']}}" disabled="{{saving}}" bind:change="pickDate" />
-      <sb-input layout="stacked" plain label="{{basis === 'historical' ? '原始字段' : '来源编号'}}" required maxlength="{{160}}" value="{{sourceRef}}" placeholder="如：财务台账2026-09·第12行" disabled="{{saving}}" data-field="sourceRef" bind:change="input" />
-      <sb-textarea layout="stacked" plain fixed label="备注（选填）" maxlength="{{1000}}" placeholder="补充来源或本次登记的说明" value="{{note}}" disabled="{{saving}}" data-field="note" bind:change="input" />
-      <view wx:if="{{formError}}" class="actual-form-error">{{formError}}</view>
-      <text class="actual-form-hint">确认后计入客户资产；录错可作废后重新登记。</text>
-    </view>
-  </sb-sheet>
+
   </block>
 </view>
 

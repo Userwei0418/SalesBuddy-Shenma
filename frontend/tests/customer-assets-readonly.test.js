@@ -8,7 +8,7 @@ const vm = require('node:vm');
 const {AdvicePool}=require('../miniprogram/utils/advicePool');
 function pageDefinition(api = {}, pool = new AdvicePool()) {
   let page;
-  api={getOpportunityDetailHeader:api.getOpportunityDetailOverview,...api};
+  api={getLatestBusinessAdvice:async()=>null,getOpportunityDetailHeader:api.getOpportunityDetailOverview,...api};
   const filename = path.resolve(__dirname, '../miniprogram/pages/customer-assets/index.js');
   vm.runInNewContext(fs.readFileSync(filename, 'utf8'), {
     Page: definition => { page = definition; },
@@ -32,11 +32,11 @@ test('历史金额明细传递来源并保留季度、税口径，不允许作�
      has_more:false,can_manage:true,as_of:'2026-09-23'};
  }});
  page.onLoad({basis:'historical',customer_id:'c',customer_name:'客户'});await page.load();
- assert.equal(requests[0].basis,'historical');assert.equal(page.data.totalText,'54');
+ assert.equal(requests[0].basis,'effective');assert.equal(page.data.totalText,'54');
  assert.equal(page.data.items[0].occurred_on,null);assert.equal(page.data.items[0].period_label,'2026 Q2');
  assert.equal(page.data.items[0].taxBasisText,'税口径未确认');
  // wx.showModal is intentionally absent: historical values cannot invoke void.
- page.voidEntry({currentTarget:{dataset:{id:'h'}}});await page.openForm();assert.equal(page.data.formOpen,false);
+ assert.equal(page.voidEntry,undefined);assert.equal(page.openForm,undefined);assert.equal(page.data.canManage,false);
 });
 
 test('商机实绩入口加载完整商机信息并启用只读模式', async () => {
@@ -62,7 +62,7 @@ test('商机实绩入口加载完整商机信息并启用只读模式', async ()
 
 test('只读实绩页隐藏登记和作废入口', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/customer-assets/index.wxml', 'utf8');
-  const sharedWxss = fs.readFileSync(__dirname + '/../miniprogram/pages/customer-assets/opportunity-view.wxss', 'utf8');
+  const sharedWxss = fs.readFileSync(__dirname + '/../miniprogram/styles/opportunity-view.wxss', 'utf8');
   assert.match(wxml, /class="opportunity-view surface"/);
   assert.match(wxml, /class="actual-page actual-refresh"/);
   assert.match(wxml, /class="actual-total-label"/);
@@ -71,21 +71,21 @@ test('只读实绩页隐藏登记和作废入口', () => {
   assert.match(wxml, /商业资料只读；协助名单由有权人员单独维护/);
   assert.match(wxml, /商机等级/);
   assert.match(wxml, /<block wx:if="\{\{!readOnly\}\}">/);
-  assert.match(wxml,/canVoidActual && item.can_void && !readOnly/);
+  assert.doesNotMatch(wxml,/bindtap="voidEntry"|bindtap="openForm"|bind:confirm="submit"/);
 });
 
 test('详情默认当前季度、切换季度只更改两项实绩，迟到响应不覆盖新商机', async () => {
   const date=new Date(Date.now()+8*3600000).toISOString().slice(0,10);
   const currentYear=date.slice(0,4);
   let finishOld;
-  const page=pageDefinition({getCustomerAssetQuarters:options=>options.opportunity_id==='old'
+  const page=pageDefinition({getOpportunityFinancialOverview:id=>id==='old'
     ? new Promise(resolve=>{finishOld=resolve})
-    : Promise.resolve({as_of:date,years:[Number(currentYear)],items:[{year:Number(currentYear),quarter:Math.ceil(Number(date.slice(5,7))/3),collection_amount:120000,recognized_amount:null,collection_count:1,recognized_count:0,entry_count:1}]})});
+    : Promise.resolve({schema_version:2,opportunity_id:id,customer_id:'c1',periods:[{year:Number(currentYear),quarter:Math.ceil(Number(date.slice(5,7))/3),kind:'collection',amount:'120000',status:'confirmed',complete:true}]})});
   page.onLoad({customer_id:'c1',opportunity_id:'old',readonly:'1',period:'all'});
   const old=page.loadQuarterActuals();
   page.setData({opportunityId:'new'});
   await page.loadQuarterActuals();
-  finishOld({as_of:date,years:[Number(currentYear)],items:[]});await old;
+  finishOld({schema_version:2,opportunity_id:'old',customer_id:'c1',periods:[]});await old;
   assert.equal(page.data.quarterCollection,'12万');
   assert.equal(page.data.quarterRecognized,'未登记');
   const currentQuarter=Math.ceil(Number(date.slice(5,7))/3);
@@ -120,49 +120,26 @@ test('商机事件时间按北京时间展示，时间戳排序保留原时刻�
  assert.equal(byKey['done:t1'].at,Date.parse('2026-09-12T21:30:00Z'));
 });
 
-test('详情四个标签各自生成并缓存建议，任务跟进数量不串入同客户其他商机',async()=>{
+test('Detail tabs preserve linked records without generating advice on reads',async()=>{
  const prompts=[];const page=pageDefinition({getOpportunityDetailOverview:async()=>({...linkedRaw,tasks:[],visits:[],summary:{task_count:1,task_status_counts:{},visit_count:1}}),listDetailTasks:async()=>({items:[linkedRaw.tasks[0]],has_more:false,next_offset:null}),listVisits:async()=>({items:[linkedRaw.visits[0]],has_more:false,next_offset:null}),getOpportunityTimeline:async()=>({items:[],has_more:false,next_offset:null}),queryBusinessAdvice:async(kind,id,tab)=>{assert.equal(kind,'opportunity');assert.equal(id,'o1');prompts.push(tab);return {id:'a1',status:'succeeded',summary:'仅针对当前商机',suggestions:[]};}});
  page.onLoad({customer_id:'c1',opportunity_id:'o1',readonly:'1'});await page.loadOpportunity();await new Promise(r=>setImmediate(r));
  assert.equal(page.data.relatedTasks.length,0);assert.equal(page.data.relatedVisits.length,0);assert.equal(page.data.taskStats.total,1);
  assert.equal(page.data.opportunity.ownerLabel,'负责人');
  for(const tab of ['tasks','visits','opportunity']){page.selectOpportunityTab({currentTarget:{dataset:{tab}}});await new Promise(r=>setImmediate(r));}
- assert.equal(page.data.relatedTasks.length,1);assert.equal(page.data.relatedVisits.length,1);assert.equal(prompts.length,4);
+ assert.equal(page.data.relatedTasks.length,1);assert.equal(page.data.relatedVisits.length,1);assert.equal(prompts.length,0);
  assert.equal(page.data.relatedVisits[0].signal.badgeText,'质检合格 · 75 分');
- for(const tab of Object.keys(TABS))assert.equal(page.data.opportunityAdvice[tab].status,'ready');
- page.selectOpportunityTab({currentTarget:{dataset:{tab:'overview'}}});await new Promise(r=>setImmediate(r));assert.equal(prompts.length,4);
- await page.loadOpportunityAdvice({currentTarget:{}});assert.equal(prompts.length,5);
+ for(const tab of Object.keys(TABS))assert.equal(page.data.opportunityAdvice[tab].status,'idle');
+ page.selectOpportunityTab({currentTarget:{dataset:{tab:'overview'}}});await new Promise(r=>setImmediate(r));assert.equal(prompts.length,0);
+ await page.loadOpportunityAdvice({currentTarget:{}});assert.equal(prompts.length,0);
 });
 
-test('离开商机详情后迟到建议不写回，失败明确展示并允许重试',async()=>{
- let finish;const page=pageDefinition({getOpportunityDetailOverview:async()=>linkedRaw,queryBusinessAdvice:()=>new Promise(r=>finish=r)});
- page.onLoad({customer_id:'c1',opportunity_id:'o1',readonly:'1'});await page.loadOpportunity();
- assert.equal(page.data.opportunityAdvice.overview.status,'loading');
- page.onUnload();finish({id:'a2',status:'succeeded',summary:'旧建议',suggestions:[]});await new Promise(r=>setImmediate(r));
- assert.notEqual(page.data.opportunityAdvice.overview.status,'ready');
- let failed=true;const p=pageDefinition({getOpportunityDetailOverview:async()=>linkedRaw,queryBusinessAdvice:async()=>{if(failed)throw Error('offline');return {id:'a3',status:'succeeded',summary:'恢复成功',suggestions:[]};}});
- p.onLoad({customer_id:'c1',opportunity_id:'o1'});await p.loadOpportunity();await new Promise(r=>setImmediate(r));assert.equal(p.data.opportunityAdvice.overview.status,'error');
- failed=false;await p.loadOpportunityAdvice({currentTarget:{}});assert.equal(p.data.opportunityAdvice.overview.summary,'恢复成功');
-});
-
-test('未点击也预取四个标签，重新进入先预览并校验；权限拒绝清除旧建议',async()=>{
- const pool=new AdvicePool(),calls=[];
- const ready=async(kind,id,tab)=>{calls.push(tab);return {id:tab,status:'succeeded',summary:'缓存摘要',suggestions:[]};};
- const first=pageDefinition({getOpportunityDetailOverview:async()=>linkedRaw,queryBusinessAdvice:ready},pool);
- first.onLoad({customer_id:'c1',opportunity_id:'o1'});await first.loadOpportunity();
- await new Promise(r=>setImmediate(r));assert.equal(calls.length,4);
- const deferred=[];
- const second=pageDefinition({getOpportunityDetailOverview:async()=>linkedRaw,queryBusinessAdvice:()=>new Promise(resolve=>deferred.push(resolve))},pool);
- second.onLoad({customer_id:'c1',opportunity_id:'o1'});await second.loadOpportunity();
- assert.equal(second.data.opportunityAdvice.overview.summary,'缓存摘要');
- assert.equal(second.data.opportunityAdvice.overview.checking,true);
- assert.equal(second.data.opportunityAdvice.overview.needsCheck,false);
- await new Promise(r=>setImmediate(r));assert.equal(deferred.length,2);
- deferred.splice(0).forEach(resolve=>resolve({id:'fresh',status:'succeeded',summary:'已更新摘要',suggestions:[]}));
- await new Promise(r=>setImmediate(r));
- deferred.splice(0).forEach(resolve=>resolve({id:'fresh',status:'succeeded',summary:'已更新摘要',suggestions:[]}));
- await new Promise(r=>setImmediate(r));assert.equal(second.data.opportunityAdvice.overview.checking,false);
- assert.equal(second.data.opportunityAdvice.overview.summary,'已更新摘要');
- const third=pageDefinition({getOpportunityDetailOverview:async()=>linkedRaw,queryBusinessAdvice:async()=>{throw Object.assign(Error('权限已变化'),{statusCode:403});}},pool);
- third.onLoad({customer_id:'c1',opportunity_id:'o1'});await third.loadOpportunity();await new Promise(r=>setImmediate(r));
- assert.equal(third.data.opportunityAdvice.overview.status,'error');assert.equal(third.data.opportunityAdvice.overview.summary,undefined);
+test('MINI-R01 实绩明细与客户汇总保留税未知的小计，少于万元不会四舍五入成零',async()=>{
+ const projection={recognized_amount:null,recognized_confirmed_subtotal:'20',recognized_complete:false,recognized_tax_unknown_period_count:1};
+ const page=pageDefinition({getCustomerAssets:async()=>({basis:'effective',summary:projection,items:[{id:'h',customer_id:'c',customer_name:'客户',...projection,amount:null,confirmed_subtotal:'20',known_exclusive_subtotal:'20',status:'single_source',source:'entries',tax_unknown:true,tax_basis:'unknown',complete:false,occurred_on:null,period_label:'2026 Q2'}],has_more:false})});
+ page.onLoad({customer_id:'c',customer_name:'客户'});await page.load();
+ assert.equal(page.data.items[0].amountText,'已登记小计 20元');assert.equal(page.data.items[0].amountUnit,'');
+ assert.match(page.data.items[0].qualityHints.join(''),/税口径/);assert.equal(page.data.items[0].occurred_on,null);
+ assert.equal(page.data.totalPartial,true);assert.equal(page.data.totalText,'20');assert.equal(page.data.totalUnit,'元');
+ page.setData({customerId:''});await page.load();
+ assert.equal(page.data.items[0].totalText,'小计 20');assert.equal(page.data.items[0].totalUnit,'元');assert.match(page.data.items[0].qualityHints.join(''),/税口径/);
 });

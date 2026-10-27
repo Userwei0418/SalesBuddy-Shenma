@@ -1,3 +1,5 @@
+const customerIdentity = require('./customerIdentity');
+const {outcome:taskOutcome}=require('./taskExecutionPresentation');
 const { statusLight, taskLight } = require('./statusLight');
 const { opportunitySignal, visitSignal } = require('./customerSignals');
 const { QUADRANTS } = require("./quadrant");
@@ -137,8 +139,9 @@ function sortVisitsByTime(visits = []) {
 }
 
 function normalizeCustomerTask(item = {}) {
+  const outcome=taskOutcome(item);
   const dueAt = item.due_at ? new Date(item.due_at).getTime() : 0;
-  const overdue = Boolean(dueAt && dueAt < Date.now() && item.status !== "completed" && item.status !== "cancelled");
+  const overdue = Boolean(dueAt && dueAt < Date.now() && !outcome.isEnded);
   const statusMap = {
     pending_confirm: "待接受",
     pending_review: "待发起人确认", pending_execution: "已接受",
@@ -148,15 +151,17 @@ function normalizeCustomerTask(item = {}) {
     cancelled: "已拒绝",
   };
   let statusTone = "pending";
-  if (item.status === "completed") statusTone = "completed";
-  else if (item.status === "cancelled") statusTone = "cancelled";
+  if (outcome.isSuccessful) statusTone = "completed";
+  else if (outcome.isEnded) statusTone = "cancelled";
   else if (overdue) statusTone = "overdue";
   return {
     ...item,
     signal:taskLight(item),
     statusLabel: overdue ? "已逾期" : (statusMap[item.status] || "待完成"),
+    ...(['execution_v1','execution_v2','execution_v3'].includes(item.execution_mode)?require('./taskExecutionPresentation').summary(item):{}),
+    ...outcome,
     statusTone,
-    statusSymbol: item.status === "completed" ? "✓" : "×",
+    statusSymbol: outcome.isSuccessful ? "✓" : outcome.isEnded ? "—" : "×",
     timelineAt: dateTimeText(item.completed_at || item.due_at || item.created_at),
     assigneeName: item.assignee_name || "负责人待确认",
     opportunityName: item.opportunity_name || "",
@@ -171,6 +176,7 @@ function mapScore(value) {
 }
 
 function normalizeCustomerSummary(item) {
+  const identity = customerIdentity.summary(item);
   const potential = mapScore(item.potential_score !== undefined ? item.potential_score : item.potential);
   const relationship = mapScore(item.relationship_score !== undefined ? item.relationship_score : item.relationship);
   const hasMapScores = potential !== null && relationship !== null;
@@ -179,15 +185,16 @@ function normalizeCustomerSummary(item) {
     (item.plan_close_dates || []).map(date=>({date}));
   return {
     ...item,
+    ...identity,
     plan_close_periods: planPeriods.map(period=>({date:period && period.date || null,
       year:period && period.year != null ? period.year : null,quarter:period && period.quarter != null ? period.quarter : null})),
     owner: item.owner_name || item.owner || "待分配",
     team: item.team_name || item.team || "待分配团队",
     level: normalizeCustomerLevel(item.level_code || item.level),
-    potential, relationship, hasMapScores,
-    potentialText: potential === null ? '待评估' : String(potential),
-    relationshipText: relationship === null ? '待评估' : String(relationship),
-    quadrant,
+    potential:identity.isCustomerIdentity?potential:null, relationship:identity.isCustomerIdentity?relationship:null, hasMapScores:identity.isCustomerIdentity && hasMapScores,
+    potentialText: !identity.isCustomerIdentity ? '不适用' : potential === null ? '待评估' : String(potential),
+    relationshipText: !identity.isCustomerIdentity ? '不适用' : relationship === null ? '待评估' : String(relationship),
+    quadrant:identity.isCustomerIdentity?quadrant:'不适用',
     signal:statusLight(item.risk_title || (item.risk && item.risk !== '暂无重大风险') ? 'yellow' : 'green',item.risk_title || item.risk || '当前未发现风险'),
     risk: item.risk_title || item.risk || "暂无重大风险",
     latestVisitAt: item.latest_visit_at || null,
@@ -261,7 +268,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
     const visitCustomerId = visit.customer_id || '';
     const links = Array.isArray(visit.linked_opportunities) && visit.linked_opportunities.length ? visit.linked_opportunities :
       (visit.opportunity_id ? [{id:visit.opportunity_id,name:visit.opportunity_name || '商机名称待补充'}] : []);
-    const linkedOpportunities = [...new Map(links.filter(link=>link && typeof link.id==='string' && link.id.trim()).map(link=>[link.id.trim(),{id:link.id.trim(),name:text(link.name || '商机名称待补充')}])).values()];
+    const linkedOpportunities = [...new Map(links.filter(link=>link && typeof link.id==='string' && link.id.trim()).map(link=>[link.id.trim(),{id:link.id.trim(),name:text(link.name || '商机名称待补充'),canOpen:typeof link.can_open==='boolean'?link.can_open:visit.can_open_opportunity===true}])).values()];
     return {
     id: visit.id,
     customerId: visitCustomerId,
@@ -307,7 +314,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
   normalizedOpportunities.forEach(o=>{o.relatedVisits=visits.filter(v=>v.opportunityId===o.id || v.linkedOpportunities.some(link=>String(link.id)===String(o.id)));o.relatedTasks=tasks.filter(t=>t.opportunityId===o.id);});
   const completedTaskCount = summary ? Number(taskStatusCounts.completed || 0) : tasks.filter((item) => item.status === "completed").length;
   const statusRisk = summary ? summary.status_risk : (raw.risks || []).find(risk => risk.status !== "resolved");
-  const openRisk = summary ? summary.open_risk : (raw.risks || []).find((risk) => !["resolved", "accepted"].includes(risk.status));
+  const openRisk = summary ? summary.open_risk : (raw.risks || []).find((risk) => risk.status !== 'resolved');
   const contacts = (raw.contacts || []).map((contact) => ({
     id: contact.id,
     name: contact.name,
@@ -328,7 +335,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
   const detail = {
     ...customer,
     industry: raw.industry_code || "待补充",
-    customerType: CUSTOMER_TYPE_NAME[raw.customer_type_code] || raw.customer_type_code || "待补充",
+    customerType: customer.isCustomerIdentity ? CUSTOMER_TYPE_NAME[raw.customer_type_code] || raw.customer_type_code || "待补充" : "不适用",
     annualValue: summary ? (summary.open_amount == null ? "—" : amountText(summary.open_amount)) : (opportunities.some(item=>item.status==="open"&&(item.amount==null||Number(item.amount)<0)) ? "—" : amountText(opportunities.filter(item=>item.status==="open").reduce((sum,item)=>sum+Number(item.amount),0))),
     cooperationYears: (raw.cooperation_years ?? attributes.cooperation_years) !== null && (raw.cooperation_years ?? attributes.cooperation_years) !== undefined ? `${raw.cooperation_years ?? attributes.cooperation_years}年` : "未登记",
     cooperationPending: (raw.cooperation_years ?? attributes.cooperation_years) === null || (raw.cooperation_years ?? attributes.cooperation_years) === undefined,
@@ -338,7 +345,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
     currentOpportunitySummary: `${primaryOpportunity.name || "暂无活跃商机"} · ${primaryOpportunity.amount == null ? "—" : amountText(primaryOpportunity.amount)}`,
     grossProfitContract: "合同及毛利数据尚未接入",
     territoryId: `${customer.team} · 当前负责人 ${customer.owner}`,
-    channelEcosystem: `${raw.source_code || "来源待补充"} · 合作伙伴：${raw.primary_partner_name || "无"}`,
+    channelEcosystem: `${raw.source_code || "来源待补充"} · 关联合作伙伴：${raw.primary_partner_name || "无"}`,
     opportunity: {
       id: primaryOpportunity.id || "",
       name: primaryOpportunity.name || "暂无活跃商机",
@@ -362,7 +369,7 @@ function normalizeCustomerDetail(raw, selectedOpportunityId = "", {preserveVisit
     tasks,
     taskCount: summary ? summary.task_count : tasks.length,
     completedTaskCount,
-    pendingTaskCount: summary ? ["pending_confirm","pending_execution","in_progress","deferred","pending_review"].reduce((n,key)=>n+Number(taskStatusCounts[key]||0),0) : tasks.filter(item => ["pending_confirm", "pending_execution", "in_progress", "deferred", "pending_review"].includes(item.status)).length,
+    pendingTaskCount: summary ? ["pending_confirm","pending_execution","in_progress","deferred","pending_review","needs_adjustment"].reduce((n,key)=>n+Number(taskStatusCounts[key]||0),0) : tasks.filter(item => ["pending_confirm", "pending_execution", "in_progress", "deferred", "pending_review", "needs_adjustment"].includes(item.status)).length,
     quadrantDefinition: quadrantMeta.definition || "待计算",
     quadrantAction: quadrantMeta.action || "等待补充数据",
     updatedAt: summary ? (summary.latest_visit ? `更新于 ${dateText(summary.latest_visit.interaction_at || summary.latest_visit.visit_date)}` : "暂无拜访更新") : (visits.length ? `更新于 ${visits[0].date}` : "暂无拜访更新"),

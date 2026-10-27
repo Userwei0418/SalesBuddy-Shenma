@@ -12,10 +12,12 @@ from sales_backend.api.dependencies import (
 from sales_backend.api.management_dependencies import get_password_identity
 from sales_backend.auth.models import (
     ActorResponse,
+    CompanyEntry,
     DemoLoginRequest,
+    NativePasswordLogin,
     PasswordChange,
-    PasswordLogin,
     RefreshRequest,
+    RestrictedSessionResponse,
     SessionResponse,
 )
 from sales_backend.config import Settings
@@ -23,28 +25,51 @@ from sales_backend.db import Database
 from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.services.auth import AuthenticationFailed, AuthService
 from sales_backend.services.capabilities import capability_snapshot
+from sales_backend.services.company_entry import CompanyEntryService
 from sales_backend.services.password_auth import LoginThrottled, PasswordAuthService
+from sales_backend.services.restricted import RestrictedAccessError
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
 
 
-@router.post("/password/login", response_model=SessionResponse)
+@router.get("/company-entry", response_model=CompanyEntry)
+async def company_entry(
+    request: Request, response: Response, company_code: str = "",
+    database: Database = Depends(get_database),
+) -> CompanyEntry:
+    response.headers["Cache-Control"] = "no-store"
+    try:
+        entry = await CompanyEntryService(database).lookup(
+            company_code, request.client.host if request.client else "unknown",
+        )
+    except LoginThrottled as exc:
+        raise HTTPException(429, str(exc), headers={"Retry-After": str(exc.retry_after), "Cache-Control": "no-store"}) from exc
+    if entry is None:
+        raise HTTPException(404, "公司入口无效或暂不可用，请向公司管理员核对", headers={"Cache-Control": "no-store"})
+    return CompanyEntry(**entry)
+
+
+@router.post("/password/login", response_model=SessionResponse | RestrictedSessionResponse)
 async def password_login(
-    body: PasswordLogin, request: Request, response: Response,
+    body: NativePasswordLogin, request: Request, response: Response,
     database: Database = Depends(get_database), settings: Settings = Depends(get_settings),
-) -> SessionResponse:
-    """Shared password login for Mini Program and business Web; same accounts and Bearer session contract."""
+) -> SessionResponse | RestrictedSessionResponse:
+    """Bearer sessions for native clients; shared password verification, no Web cookie dependency."""
     try:
         session, _ = await PasswordAuthService(database, settings).login(
             account=body.account_code, password=body.password.get_secret_value(),
-            workspace=body.workspace, role=body.role,
+            workspace=body.workspace, role=body.role, login_type=body.login_type,
             client_ip=request.client.host if request.client else "unknown", client_channel="wechat-mini-program",
+            restricted_session_version=body.restricted_session_version,
         )
     except LoginThrottled as exc:
         raise HTTPException(429, str(exc), headers={"Retry-After": str(exc.retry_after)}) from exc
+    except RestrictedAccessError as exc:
+        raise HTTPException(exc.status, {"code": exc.code}) from exc
     except AuthenticationFailed as exc:
-        raise HTTPException(401, str(exc)) from exc
-    bind_login_identity(request, session)
+        raise HTTPException(401, {"code": "INVALID_CREDENTIALS"}) from exc
+    if isinstance(session, SessionResponse):
+        bind_login_identity(request, session)
     response.headers["Cache-Control"] = "no-store"
     return session
 
@@ -101,6 +126,7 @@ async def get_me(
 ) -> ActorResponse:
     async with database.transaction(identity.actor, readonly=True) as connection:
         effective = await capability_snapshot(connection, identity.actor)
+        effective.update(await IdentityRepository().company_identity(connection, identity.actor.workspace_id))
     response.headers["Cache-Control"] = "no-store"
     return AuthService.actor_response(identity.profile).model_copy(update=effective)
 

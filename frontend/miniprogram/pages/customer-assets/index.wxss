@@ -131,3 +131,19 @@
    不用描边样式：t-button 的描边画在内部原生 button 的 ::after 上，app.wxss 的 button::after{border:0} 会把它清掉，截图里只剩一行蓝字；
    实底主按钮不依赖描边，保存中（loading + disabled）走桥接的禁用态：中性浅灰底、弱化字 */
 .fde-save-row{margin:16rpx 0 8rpx;--td-button-medium-height:44px}
+
+/* 历史使用纵向前后值，长名称与缺失名称的完整 ID 均可换行。 */
+.change-history-entry{padding:24rpx 0;border-bottom:1px solid var(--ui-line)}
+.change-history-entry:last-child{border-bottom:0}
+.change-history-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12rpx;font-size:var(--ui-text-small);color:var(--ui-secondary)}
+.change-history-change{margin-top:16rpx}
+.change-history-side+.change-history-side{margin-top:20rpx}
+.change-history-label,.change-history-id{display:block;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.6}
+.change-history-value{display:block;color:var(--ui-ink);font-size:var(--ui-text-body);line-height:1.6;white-space:pre-wrap;overflow-wrap:break-word}
+.change-history-id{word-break:break-all}
+.change-history-error{color:var(--ui-secondary);line-height:1.6}
+.change-history-error button,.change-history-more{margin-top:16rpx;color:var(--ui-primary)}
+
+.op-advice-generate{display:flex;justify-content:flex-end;align-items:center;min-height:var(--ui-touch-target);margin-top:12rpx;color:var(--ui-primary);font-size:14px}
+
+.change-history-field{display:block;margin-bottom:12rpx;font-weight:600;color:var(--ui-ink);font-size:var(--ui-text-body)}

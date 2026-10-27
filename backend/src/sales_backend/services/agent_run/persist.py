@@ -7,6 +7,7 @@ from sales_backend.config import Settings
 from sales_backend.db import Database
 from sales_backend.repositories.attribute_overlay import overlay_risk_attributes, overlay_task_attributes
 from sales_backend.repositories.jobs import record_job_effect
+from sales_backend.repositories.task_execution_projection import normalize_execution
 from sales_backend.services.agent_access import require_agent_access
 from sales_backend.services.agent_run.materialize import (
     follow_up_task_drafts,
@@ -15,12 +16,12 @@ from sales_backend.services.agent_run.materialize import (
     task_card,
 )
 from sales_backend.services.agent_run.models import RunInput
+from sales_backend.services.agent_run.personal_risk_sources import recheck_personal_risk_sources
 from sales_backend.services.agent_run.today_scope import (
     TodayScopeChanged,
     load_today_scope,
     recheck_follow_up_sources,
 )
-from sales_backend.services.tasks import validate_task_links
 
 
 class AgentRunStore:
@@ -70,6 +71,7 @@ class AgentRunStore:
                     await recheck_follow_up_sources(connection, run.actor, facts.get("follow_up_candidates", []))
                 result = await self._materialize_today_tasks(connection, run, result, facts)
             elif run.mode == "personal_risks":
+                await recheck_personal_risk_sources(connection, run.actor, facts.get("visits", []))
                 result = await self._materialize_personal_risks(
                     connection, run, result, facts,
                     model_ref=inference_trace["model_ref"] if inference_trace is not None else self.settings.llm_model,
@@ -181,8 +183,8 @@ class AgentRunStore:
                   agent_key = EXCLUDED.agent_key,
                   source_run_id = EXCLUDED.source_run_id,
                   version_no = insight.risk.version_no + 1
-                WHERE insight.risk.status NOT IN ('resolved', 'accepted')
-                RETURNING id::text, status, (xmax = 0) AS inserted
+                WHERE insight.risk.status <> 'resolved'
+                RETURNING id::text, status, version_no, (xmax = 0) AS inserted
                 """,
                 run.actor.workspace_id,
                 visit.get("customer_id"),
@@ -233,7 +235,8 @@ class AgentRunStore:
                 "detected" if row["inserted"] else "reanalyzed",
                 row["status"],
                 run.actor.user_id,
-                {"run_id": run.run_id, "source_visit_id": draft.source_visit_id},
+                {"run_id": run.run_id, "source_visit_id": draft.source_visit_id,
+                 "risk_version_no": row["version_no"]},
             )
             written_keys.append(draft.key)
 
@@ -248,7 +251,7 @@ class AgentRunStore:
               LEFT JOIN crm.customer c ON c.id = r.customer_id
              WHERE r.deleted_at IS NULL
                AND r.owner_user_ref_id = $1::uuid
-               AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+               AND r.status <> 'resolved'
              ORDER BY CASE r.severity_code
                         WHEN 'critical' THEN 1 WHEN 'high' THEN 2
                         WHEN 'medium' THEN 3 ELSE 4 END,
@@ -288,70 +291,23 @@ class AgentRunStore:
         for draft in follow_up_task_drafts(model_result, candidates, schedule_policy=facts.get("company_policy")):
             candidate = draft.candidate
             source_id = draft.source_visit_id
-            await validate_task_links(connection, run.actor, candidate.get("customer_id"), candidate.get("opportunity_id"), "customer")
-            inserted_id = await connection.fetchval(
-                """
-                INSERT INTO workflow.task (
-                  id, workspace_id, task_type, title, description, customer_id,
-                  opportunity_id, source_visit_id, creator_user_ref_id, creator_team_id,
-                  priority_code, status, due_at, source_code, agent_reason,
-                  source_follow_up_record, source_interaction_at, association_kind
-                ) VALUES ($1::uuid, $2::uuid, 'visit_follow_up', $3, $4, $5::uuid,
-                          $6::uuid, $7::uuid, $8::uuid, $9::uuid, $10,
-                          'pending_execution', $11, 'today_task_agent', $12, $13, $14::timestamptz, 'customer')
-                ON CONFLICT (workspace_id, source_visit_id)
-                  WHERE task_type = 'visit_follow_up'
-                    AND source_visit_id IS NOT NULL
-                    AND deleted_at IS NULL
-                DO NOTHING
-                RETURNING id::text
-                """,
-                str(uuid.uuid4()),
-                run.actor.workspace_id,
-                draft.title,
-                draft.description,
-                candidate.get("customer_id"),
-                candidate.get("opportunity_id"),
-                source_id,
-                run.actor.user_id,
-                run.actor.team_ids[0] if run.actor.team_ids else None,
-                draft.priority,
-                draft.due_at,
-                None if draft.agent_reason in (None, "") else str(draft.agent_reason),
-                candidate.get("follow_up_record"),
-                candidate.get("interaction_at"),
-            )
-            if not inserted_id:
-                continue
-            await connection.execute(
-                """
-                INSERT INTO workflow.task_assignee (
-                  task_id, workspace_id, assignee_user_ref_id, assignee_team_id,
-                  assignee_role, responsibility
-                ) VALUES ($1::uuid, $2::uuid, $3::uuid, $4::uuid, 'sales', 'owner')
-                """,
-                inserted_id,
-                run.actor.workspace_id,
-                run.actor.user_id,
-                run.actor.team_ids[0] if run.actor.team_ids else None,
-            )
-            await connection.execute(
-                """
-                INSERT INTO workflow.task_event (
-                  workspace_id, task_id, event_type, to_status,
-                  actor_user_ref_id, note, payload
-                ) VALUES ($1::uuid, $2::uuid, 'created', 'pending_execution',
-                          $3::uuid, '由今日待办Agent从已归档拜访的下一步行动生成', $4::jsonb)
-                """,
-                run.actor.workspace_id,
-                inserted_id,
-                run.actor.user_id,
-                {"source_visit_id": source_id, "run_id": run.run_id, "company_policy": facts.get("company_policy")},
-            )
+            pending_candidates.append({
+                "source_visit_id": source_id,
+                "customer_id": candidate.get("customer_id"),
+                "opportunity_id": candidate.get("opportunity_id"),
+                "customer_name": candidate.get("customer_name"),
+                "description": draft.description,
+                "title": draft.title,
+                "due_at": draft.due_at.isoformat(),
+                "priority_code": draft.priority,
+                "requires_human_confirmation": True,
+                "reason": "请核对任务要求和接收人后确认创建",
+            })
 
         rows = await connection.fetch(
             """
-            SELECT t.id::text AS task_id, t.task_type, t.title, t.description,
+            SELECT t.id::text AS task_id, t.execution_mode, t.status, t.task_type, t.title, t.description,
+                   workflow.task_execution_summary(t.id) AS execution,
                    t.source_visit_id::text, t.priority_code, t.due_at,
                    c.name AS customer_name, creator.display_name AS creator_name,
                    t.attributes, t.import_meta, t.source_code, t.agent_reason,
@@ -364,7 +320,7 @@ class AgentRunStore:
               LEFT JOIN crm.customer c ON c.id = t.customer_id
               LEFT JOIN platform.user_ref creator ON creator.id = t.creator_user_ref_id
              WHERE t.deleted_at IS NULL
-               AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred')
+               AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'needs_adjustment', 'pending_review')
              ORDER BY t.due_at, t.created_at DESC
             """,
             run.actor.user_id,
@@ -374,5 +330,14 @@ class AgentRunStore:
             [overlay_task_attributes(dict(row)) for row in rows],
             scope=facts.get("scope"),
         )
+        executions = {str(row["task_id"]): normalize_execution(dict(row)) for row in rows}
+        for item in card["rows"]:
+            source = executions[item["task_id"]]
+            for key in ("execution_mode", "execution_protocol_version", "execution_compatibility", "status",
+                        "progress", "self_managed", "review_required", "pause", "coordination_required",
+                        "processing_reason", "processing_detail", "latest_feedback", "next_step",
+                        "completion_result", "completion_action", "completion_detail"):
+                if key in source:
+                    item[key] = source[key]
         card["pending_candidates"] = pending_candidates
         return card

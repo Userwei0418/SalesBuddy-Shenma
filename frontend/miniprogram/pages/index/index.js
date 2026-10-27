@@ -1,9 +1,14 @@
 const uiColors = require("../../utils/uiColors");
 const {businessChangeLight} = require("../../utils/statusLight");
-const {REPORT_ACTIONS,buildReport} = require("../../utils/operatingReport");
+const {REPORT_ACTIONS,reportPrompt,buildReport} = require("../../utils/operatingReport");
 const apiClient = require("../../utils/apiClient");
+const access = require("../../utils/access");
+const uploadIntent = require('../../utils/visitUploadIntent');
+const visitDraft = require('../../utils/visitDraft');
 const { mergeVisitReceipts } = require("../../utils/visitCards");
 const { buildOverviewMetrics } = require("../../utils/taskOverview");
+const taskPresentation = require('../../utils/taskExecutionPresentation');
+const { taskTransferSummary } = require("../../utils/taskPresentation");
 const homeConfig = require("../../config");
 const homeChatBIEnabled = homeConfig.HOME_CHATBI_ENABLED === true;
 const homeMessageOrder = homeConfig.HOME_MESSAGE_ORDER === "asc" ? "asc" : "desc";
@@ -22,16 +27,42 @@ function chatBIContextKey(app) {
   ]);
 }
 
-function taskCardState(status, task = {}) {
+function taskCardStateBase(status, task = {}) {
+  const flags=task.execution_flags||{},execution=task.execution||{};
+  const outcome=taskPresentation.outcome({...task,status});
+  if(outcome.isEnded)return {value:outcome.statusLabel,tag:outcome.statusLabel,tone:outcome.isSuccessful?'green':'gray',eyebrow:'任务记录',meta:task.completion_result||execution.completion_result||task.completion_note||task.last_event_note||(task.attributes||{}).rejection_comment||'原原因和历史记录已保留'};
+
   if (task.handover_required) return { value:"待交接",tag:"待交接",tone:"orange",eyebrow:"任务交接",meta:"原接收人资格或项目权限已变化，等待协调处理" };
-  if (status === "cancelled" && task.last_event_type === "cancel") return { value:"已取消",tag:"已取消",tone:"orange",eyebrow:"任务取消",meta:task.last_event_note || "任务已取消，协调记录已保留" };
+  if (status === "cancelled" && ["cancel","cancel_task"].includes(task.last_event_type)) return { value:"已取消",tag:"已取消",tone:"orange",eyebrow:"任务取消",meta:task.last_event_note || "任务已取消，协调记录已保留" };
   const rejectionComment = (task.attributes || {}).rejection_comment || ((task.events || []).slice().reverse().find((event) => event.event_type === "reject") || {}).note || "";
   if (["cancelled", "rejected"].includes(status)) return { value: "已拒绝", tag: "已拒绝", tone: "orange", eyebrow: "TASK REJECTED", meta: `拒绝意见：${rejectionComment || "接收方未补充说明"}` };
-  if (status === "pending_review") return {value:"待发起人确认",tag:"待验收",tone:"orange",eyebrow:"任务验收",meta:task.completion_note || "完成说明已提交"};
+  if (status === "pending_review") return {value:"等待验收",tag:"待验收",tone:"orange",eyebrow:"任务验收",meta:task.completion_note || "完成说明已提交"};
   if (status === "in_progress" && task.last_event_type === "reject_completion") return {value:"执行中 · 已驳回",tag:"待重新提交",tone:"orange",eyebrow:"验收驳回",meta:task.last_event_note || "请补充处理后再次提交"};
   if (status === "completed") return { value: "已完成", tag: "已完成", tone: "green", eyebrow: "TASK COMPLETED", meta: task.completion_note || task.completionNote || "已同步完成结果" };
-  if (["pending_execution", "in_progress", "deferred"].includes(status)) return { value: "已接受", tag: "已接受", tone: "orange", eyebrow: "TASK ACCEPTED", meta: "任务已接受，等待执行或完成" };
+  if (status==='pending_execution') return {value:'待执行',tag:'待执行',tone:'orange',eyebrow:'任务执行',meta:task.self_managed===true||execution.self_managed===true?'本人自办任务已接受，可直接进入执行':'任务已接受，等待执行'};
+  if (['in_progress','deferred'].includes(status)) return {value:'执行中',tag:'执行中',tone:'orange',eyebrow:'任务执行',meta:'查看推进清单与过程反馈'};
   return { value: "待接受", tag: "待接受", tone: "orange", eyebrow: "NEW TASK", meta: "" };
+}
+
+function taskCardState(status,task={}){
+ const state=taskCardStateBase(status,task);
+ if(task.execution_mode==='execution_v3'){const x=require('../../utils/taskExecutionPresentation').summary({...task,status});return {...state,value:x.statusLabel,tag:x.processingLabel||x.statusLabel,eyebrow:'任务',meta:x.completionResult||x.latestFeedback||x.processingLabel||'查看任务与更新记录'};}
+ if(task.execution_mode==='execution_v2'){
+  const projected=require('../../utils/taskExecutionPresentation').summary({...task,status});
+  return {...state,value:projected.statusLabel,tag:projected.statusLabel};
+ }
+ return state;
+}
+function taskReceiptMetrics(task,metrics){
+  const rows=(metrics||[]).filter(m=>!['清单进度','任务责任'].includes(m.label)),execution=task.execution||{};
+  if(task.execution_mode==='execution_v3'||execution.protocol_version===3)return rows;
+  if(['execution_v1','execution_v2'].includes(task.execution_mode)||[1,2].includes(execution.protocol_version)){
+    const p=require('../../utils/taskExecutionPresentation').progress(task.progress||execution.progress);
+    rows.push({label:'清单进度',value:p.label+' · '+p.countLabel});
+    if(task.self_managed===true||execution.self_managed===true)rows.push({label:'任务责任',value:'本人自办 · 无需验收'});
+    else if(task.review_required===true||execution.review_required===true)rows.push({label:'任务责任',value:'整体验收'});
+  }
+  return rows;
 }
 
 function taskIdFromMessage(message) {
@@ -50,7 +81,7 @@ function applyLatestTaskState(message, taskMap) {
       ...message.card,
       tone: state.tone,
       eyebrow: state.eyebrow,
-      metrics: message.card.metrics.map((metric) => metric.label === "任务状态" ? { ...metric, value: state.value } : metric),
+      metrics: taskReceiptMetrics(task,message.card.metrics.map((metric) => metric.label === "任务状态" ? { ...metric, value: state.value } : metric)),
       rows: (message.card.rows || []).map((row) => row.taskId === taskId ? { ...row, tag: state.tag, meta: state.meta || row.meta } : row),
     },
   };
@@ -79,7 +110,14 @@ function formatAmount(value) {
 }
 
 Page({
+  onOverviewMetricTap(e) { const item=(e && e.detail && e.detail.item)||{}; return this.openOverviewTasks({currentTarget:{dataset:{key:item.key}}}); },
+
+  openKnowledgeLibrary() {
+    wx.showToast({title: "知识库暂不能使用", icon: "none"});
+  },
+
   data: {
+    pendingAgents: [],
     role: "sales",
     roleName: "一线销售",
     scope: "仅本人",
@@ -120,8 +158,13 @@ Page({
     this.chatBIPageDisposed = false;
     this.homeVisible = true;
     const enteringContext = chatBIContextKey(getApp());
+    if(this.recordingOwner && this.recordingOwner!==enteringContext){
+      this.pendingFinalRecording=null;this.pendingRecordingContext='';
+      this.setData({isProcessing:false,visitTranscriptVisible:false,visitTranscript:'',selectedCustomer:null});
+    }
     const shouldFocusLatest = this.data.initializedAccount !== accountKey(getApp().globalData.session) || !this.data.messages.length;
     const homeReady = this.syncRole();
+    this.restoreVisitRecording();
     this.consumePendingCustomerContext();
     wx.removeStorageSync("lastCreatedOpportunity");
     this.consumeCreatedCustomerSuccess();
@@ -134,6 +177,7 @@ Page({
     this.startNotificationPolling();
     this.consumeCompletedTask();
     this.consumeResolvedRisk();
+    this.refreshPendingAgents();
   },
 
   onReady() {
@@ -142,7 +186,10 @@ Page({
 
   onHide() {
     this.homeVisible = false;
-    if (this.homeReadVersions) this.homeReadVersions.membershipNavigation = (this.homeReadVersions.membershipNavigation || 0) + 1;
+    clearTimeout(this.livePreviewTimer);
+    if (this.homeReadVersions) {
+      for (const key of ['membershipNavigation', 'receiptNavigation']) this.homeReadVersions[key] = (this.homeReadVersions[key] || 0) + 1;
+    }
     this.stopNotificationPolling();
     if (this.data.isRecording) this.stopRecord();
   },
@@ -150,9 +197,12 @@ Page({
   onUnload() {
     this.chatBIPageDisposed = true;
     this.chatBIRequest = null;
+    this.homeAgentRequest = null;
     this.notificationReceipts = null;
     this.stopNotificationPolling();
     this.clearRecordTimer();
+    clearTimeout(this.livePreviewTimer);
+    this.liveTranscriptGeneration = (this.liveTranscriptGeneration || 0) + 1;
     if (this.data.isRecording && this.recorderManager) this.recorderManager.stop();
   },
 
@@ -208,7 +258,7 @@ Page({
         const taskMap = new Map(this.currentTaskMap || []);
         ids.forEach(id => taskMap.delete(id));
         items.forEach(item => taskMap.set(String(item.id), item));
-        const overviewMetrics = buildOverviewMetrics([]).map(item => ({ ...item, value: String(metrics[item.key]) }));
+        const overviewMetrics = buildOverviewMetrics([]).map(item => ({ ...item, value: Number.isInteger(metrics[item.key]) && metrics[item.key]>=0 ? String(metrics[item.key]) : "—" }));
         const messages = sortHomeMessages(this.data.messages.map(message => applyLatestTaskState(message, taskMap)), this.homeOrder);
         this.currentTaskMap = taskMap;
         this.setData({
@@ -225,6 +275,9 @@ Page({
   syncRole() {
     const app = getApp();
     const displayRequest = this.beginHomeRead('display');
+    if(this.homeAgentRequest && !this.isCurrentHomeAgentRequest(this.homeAgentRequest)){
+      this.homeAgentRequest=null;this.setData({isThinking:false});
+    }
     if (this.chatBIRequest && !this.isCurrentChatBIRequest(this.chatBIRequest)) {
       this.chatBIRequest = null;
       this.setData({ isProcessing: false });
@@ -246,7 +299,7 @@ Page({
       role,
       isFde:["fde","fde_lead"].includes(role),
       homeChatBIEnabled,
-      roleName: roleInfo.name,
+      roleName: session.roleName || roleInfo.name,
       scope: roleInfo.scope,
       userName: session.userName,
       greeting,
@@ -263,7 +316,7 @@ Page({
         { label: "客户认领", action: "客户认领", kind: "customer" },
         { label: "记录客户拜访", action: "记录客户拜访", kind: "visit" },
         { label: "创建任务", action: "创建任务", kind: "task" },
-      ].filter(item=>!app.can || app.can(item.kind==="customer"?"customer.claim":item.kind==="visit"?"visit.create":"task.create")),
+      ].filter(item=>!app.can || app.can(item.kind==="customer"?"customer.claim":item.kind==="visit"?["visit.create","visit.company_opportunity_follow_up"]:"task.create")),
       messages: shouldInitialize ? [] : this.data.messages,
     });
     const taskStateReady = this.refreshHomeTaskState();
@@ -273,7 +326,8 @@ Page({
       const requestedOrder = policy && policy.definition && policy.definition.message_order;
       this.homeOrder = requestedOrder === "asc" || requestedOrder === "desc" ? requestedOrder : homeMessageOrder;
       this.homeDisplayPolicy = policy || null;
-      this.setData({ fdeTeamSummary: role === 'fde_lead' ? (home.team_summary || null) : null });
+      this.setData({ fdeTeamSummary: role === 'fde_lead' ? (home.team_summary || null) : null,
+        fdeTeamSummaryScope: session.permissions ? access.scopeLabel(session,'task.read') : '当前授权范围' });
       const firstCustomer = (page.items || [])[0] || null;
       const initialMessages = shouldShowLoginGreeting ? [{
         id: `${role}_greeting_card`,
@@ -284,7 +338,7 @@ Page({
         card: {
           timeLabel: todayLabel,
           title: `${greeting}，${session.userName}`,
-          text: "我是Raccoon SalesBuddy，今天可以帮你查看客户、商机和待办。",
+          text: "我是神码 SalesBuddy，今天可以帮你查看客户、商机和待办。",
         },
       }] : [];
       const currentMessages = this.data.messages || [];
@@ -308,11 +362,6 @@ Page({
   },
 
   openFdeTeamTasks(){wx.navigateTo({url:"/pages/tasks/index?scope=team"});},
-  onOverviewMetricTap(e) {
-    const item = (e && e.detail && e.detail.item) || {};
-    this.openOverviewTasks({ currentTarget: { dataset: { key: item.key } } });
-  },
-
   openOverviewTasks(e) {
     const key = e.currentTarget.dataset.key;
     if (!["today_completed", "today_pending", "all_pending"].includes(key)) return;
@@ -331,7 +380,7 @@ Page({
       return;
     }
     if (action === "记录客户拜访") {
-      if(getApp().can&&!getApp().can("visit.create"))return;
+      if(!access.canStartVisit(getApp().globalData.session))return;
       wx.navigateTo({ url: "/pages/visit-entry/index" });
       return;
     }
@@ -346,7 +395,7 @@ Page({
     }
     if (REPORT_ACTIONS[action]) {
       if (this.data.isThinking || this.data.isProcessing) return;
-      this.runOperatingReport(action);
+      this.runOperatingReport(action, {scope:e.currentTarget.dataset.scope});
       return;
     }
     if (this.data.isThinking) return;
@@ -387,7 +436,13 @@ Page({
   },
 
   startVisitRecording() {
+    const session=getApp().globalData.session;
+    if(access.can(session,'visit.company_opportunity_follow_up') && (this.data.role!=='sales'||!access.can(session,'visit.create')||!access.can(session,'visit.upload'))) {
+      wx.navigateTo({url:'/pages/visit-entry/index'});return;
+    }
     if (this.data.role !== "sales") return;
+    if(this.pendingFinalRecording || this.pendingRecordingContext){this.continueVisitRecording();return;}
+    if (!access.can(getApp().globalData.session,'visit.upload')) {wx.showToast({title:'当前账号没有录音上传权限，请联系管理员',icon:'none'});return;}
     if (this.data.visitRecordingMode && this.data.isRecording && !this.data.isStopping) {
       this.stopRecord();
       return;
@@ -404,12 +459,15 @@ Page({
     this.liveTranscribing = false;
     this.liveTranscriptionPromise = null;
     this.liveTranscriptGeneration = Date.now();
+    this.recordingOwner = chatBIContextKey(getApp());
+    this.asrSessionId = uploadIntent.newKey();
+    this.previewOperationId = uploadIntent.newKey();
     this.setData({
       visitRecordingMode: true,
       showResult: false,
       visitTranscriptVisible: true,
       visitTranscript: "",
-      visitTranscriptStatus: "正在录音 · 较长内容会显示阶段性文字",
+      visitTranscriptStatus: "正在录音 · 结束后处理完整文字",
       visitTranscriptEditable: false,
     }, () => this.startRecord());
   },
@@ -522,9 +580,9 @@ Page({
       const state=taskCardState(task.status,task);
       this.appendMessage({id:`management_task_created_${task.id}`,from:'agent',kind:'data-card',time:'刚刚',card:{
         tone:state.tone,eyebrow:'TASK SAVED',title:'任务已保存',subtitle:task.title,
-        metrics:[{value:task.owner_name || '待确认',label:'任务负责人'},
-          {value:state.value,label:'任务状态'},{value:formatTime(task.due_at),label:'截止时间'}],
-        rows:[{taskId:task.id,title:task.title,meta:task.description || '',tag:state.tag}],emptyText:'',
+        metrics:taskReceiptMetrics(task,[{value:task.owner_name || '待确认',label:'任务负责人'},
+          {value:state.value,label:'任务状态'},{value:formatTime(task.due_at),label:'截止时间'}]),
+        rows:[{taskId:task.id,title:task.title,meta:state.meta || task.description || '',tag:state.tag}],emptyText:'',
         action:{label:'查看任务',code:'open_task_detail',taskId:task.id},
       }});
     });
@@ -661,7 +719,10 @@ Page({
           action:{label:'查看当前项目权限',code:'open_fde_membership',opportunityId:p.membership_opportunity_id||p.opportunity_id||(!removed?notification.object_id:'')}}};
     }
     if(['task_reassigned','task_cancelled'].includes(notification.template_code)) {
-      return {id:`remote_${notification.id}`,from:'agent',kind:'data-card',time:formatTime(notification.created_at,''),sortAt:new Date(notification.created_at||0).getTime()||0,card:{tone:'orange',eyebrow:'任务协调',title:notification.title,subtitle:notification.body,metrics:[],rows:[],action:{label:'查看任务',code:'open_task_detail',taskId:notification.object_id||(notification.payload||{}).task_id}}};
+      const payload=notification.payload || {},transfer=notification.template_code==='task_reassigned'?taskTransferSummary(payload):'';
+      return {id:`remote_${notification.id}`,from:'agent',kind:'data-card',time:formatTime(notification.created_at,''),sortAt:new Date(notification.created_at||0).getTime()||0,card:{tone:notification.template_code==='task_cancelled'?'gray':'orange',eyebrow:'任务协调',title:notification.title,subtitle:notification.body,metrics:[],
+        rows:transfer?[{title:'负责人变更',meta:transfer,tag:''}]:[],footer:payload.actor_name?`${payload.actor_name}操作`:'',
+        action:{label:'查看任务',code:'open_task_detail',taskId:notification.object_id||payload.task_id}}};
     }
     if(notification.template_code === 'business_changed') {
       const p=notification.payload || {};
@@ -717,7 +778,7 @@ Page({
       time: formatTime(notification.created_at, ""),
       sortAt: new Date(notification.created_at || 0).getTime() || 0,
       card: {
-        tone: rejected || accepted ? "orange" : completed || riskResolved || battleMapUpdated ? "green" : "blue",
+        tone: rejected ? "gray" : accepted ? "orange" : completed || riskResolved || battleMapUpdated ? "green" : "blue",
         eyebrow: battleMapUpdated ? "BATTLE MAP UPDATED" : customerAssigned ? "NEW CUSTOMER ASSIGNED" : riskResolved ? "RISK RESOLVED" : rejected ? "TASK REJECTED" : accepted ? "TASK ACCEPTED" : completed ? "TASK COMPLETED" : "NEW TASK",
         title: notification.title,
         subtitle: battleMapUpdated ? "最新跟进已同步，客户作战位置已重新评估。" : isAssignedTask ? `${payload.creator_name || "任务发起人"}向你下发了新任务，请进入详情确认${payload.target_position ? "领取" : "接受或拒绝"}。` : notification.body,
@@ -870,7 +931,28 @@ Page({
       });
     }
     const action = e.currentTarget.dataset.action;
-    if (["open_archived_customer", "open_assigned_customer"].includes(action)) {
+    if (["open_archived_customer", "open_archived_visit"].includes(action)) {
+      const { customerId, visitId } = e.currentTarget.dataset;
+      const openVisit = () => {
+        if (visitId) wx.navigateTo({ url: `/pages/visit-detail/index?visit_id=${encodeURIComponent(visitId)}` });
+      };
+      if (action === 'open_archived_visit' || !customerId) return openVisit();
+      const request = this.beginHomeRead('receiptNavigation');
+      const isCurrent = () => this.homeVisible !== false && this.isCurrentHomeRead(request);
+      // A historical receipt remains readable after customer ownership changes.
+      return apiClient.getCustomerHeader(customerId).then(() => {
+        if (!isCurrent()) return;
+        wx.removeStorageSync('pendingOpenOpportunityId');
+        wx.removeStorageSync('pendingBattleCustomerId');
+        wx.setStorageSync('pendingOpenCustomerId', customerId);
+        wx.switchTab({ url: '/pages/customers/index' });
+      }).catch(error => {
+        if (!isCurrent()) return;
+        if ([403, 404].includes(error.statusCode) && visitId) return openVisit();
+        wx.showToast({ title: error.message || '客户档案暂不可用，请稍后重试', icon: 'none' });
+      });
+    }
+    if (action === "open_assigned_customer") {
       const customerId = e.currentTarget.dataset.customerId;
       if (customerId) wx.setStorageSync("pendingOpenCustomerId", customerId);
       wx.switchTab({ url: "/pages/customers/index" });
@@ -947,6 +1029,7 @@ Page({
     if (this.recorderManager.onFrameRecorded) {
       this.recorderManager.onFrameRecorded((frame) => {
         if (!this.data.visitRecordingMode || !this.data.isRecording || !frame.frameBuffer) return;
+        if ((this.livePreviewCount || 0) >= 1 || (this.liveVisitBytes || 0) > 2*1024*1024) return;
         this.liveVisitFrames = [...(this.liveVisitFrames || []), frame.frameBuffer];
         this.liveVisitBytes = (this.liveVisitBytes || 0) + frame.frameBuffer.byteLength;
         this.transcribeLiveVisitFrames();
@@ -958,31 +1041,25 @@ Page({
       this.clearRecordTimer();
       const duration = result.duration || this.data.recordingSeconds * 1000;
       const recordingTime = this.formatRecordingTime(Math.max(1, Math.round(duration / 1000)));
-      this.setData({ isRecording: false, isStarting: false, isStopping: false, recordingTime, recordingPath: result.tempFilePath || "" });
+      if(!this.chatBIPageDisposed)this.setData({ isRecording: false, isStarting: false, isStopping: false, recordingTime, recordingPath: result.tempFilePath || "" });
       if (duration < 800) {
+        if(this.chatBIPageDisposed)return;
         this.setData({ visitRecordingMode: false });
         wx.showToast({ title: "录音时间太短，请重新录入", icon: "none" });
         return;
       }
       if (this.data.role === "sales" && this.data.visitRecordingMode) {
-        wx.setStorageSync("pendingVisitAudio", {
-          tempFilePath: result.tempFilePath || "",
-          duration,
-          recordedAt: Date.now(),
-          customerId: this.data.selectedCustomer ? this.data.selectedCustomer.id : "",
-          customerName: this.data.selectedCustomer ? this.data.selectedCustomer.name : "",
-        });
         this.processVisitRecording(result);
         return;
       }
-      this.processChatBIRecording(result, recordingTime);
+      if(!this.chatBIPageDisposed)this.processChatBIRecording(result, recordingTime);
     });
     this.recorderManager.onError((error) => {
       if (!this.recorderOwnerActive) return;
       this.recorderOwnerActive = false;
       this.clearRecordTimer();
       this.setData({ isRecording: false, isStarting: false, isStopping: false, isProcessing: false, visitRecordingMode: false });
-      wx.showToast({ title: error.errMsg || "录音失败，请重试", icon: "none" });
+      wx.showToast({ title: "录音失败，请检查麦克风权限后重试", icon: "none" });
     });
   },
 
@@ -1090,58 +1167,81 @@ Page({
     return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
   },
 
-  processVisitRecording(result) {
-    const generation = this.liveTranscriptGeneration;
-    this.setData({ isProcessing: true, showResult: false, visitTranscriptStatus: "正在完成最终语音转写…" });
-    const pendingLive = this.liveTranscriptionPromise || Promise.resolve();
-    pendingLive.catch(() => null).then(() => apiClient.transcribeAudio(result.tempFilePath, "visit_entry"))
-      .then((transcript) => {
-        if (generation !== this.liveTranscriptGeneration) return;
-        const text = String(transcript.text || "").trim();
-        if (!text) throw new Error("未识别到有效的拜访内容");
-        this.setData({
-          isProcessing: false,
-          visitRecordingMode: false,
-          visitTranscriptVisible: true,
-          visitTranscript: text,
-          visitTranscriptStatus: "转写完成 · 可手动编辑后提交",
-          visitTranscriptEditable: true,
-        });
-        wx.vibrateShort({ type: "light" });
-      })
-      .catch((error) => {
-        this.setData({ isProcessing: false, showResult: false, visitRecordingMode: false, visitTranscriptStatus: "转写失败，可重新录音" });
-        wx.showToast({ title: error.message || "拜访语音解析失败", icon: "none" });
-      });
+  async processVisitRecording(result) {
+    // Final processing never waits for a preview or uses preview text as final.
+    clearTimeout(this.livePreviewTimer);
+    this.liveTranscriptGeneration = (this.liveTranscriptGeneration || 0) + 1;
+    this.liveVisitFrames=[];
+    if(this.recordingOwner!==chatBIContextKey(getApp()))return;
+    this.pendingFinalRecording=result;
+    const owner=this.recordingOwner;
+    const update=patch=>{if(!this.chatBIPageDisposed&&owner===chatBIContextKey(getApp()))this.setData(patch);};
+    update({isProcessing:true,showResult:false,visitRecordingMode:false,visitTranscriptEditable:false,visitTranscriptStatus:'正在保留录音，进入完整转写…'});
+    try {
+      if(!result.tempFilePath)throw Error('未取得录音文件，请重新录入');
+      const sessionId=this.asrSessionId || uploadIntent.newKey(),context=`recording:${sessionId}`;
+      const scope=visitDraft.scope(getApp().globalData.session,apiClient),key=visitDraft.key('visitEntryV2',scope,context);
+      if(!wx.getStorageSync(key)){
+        const selected=this.data.selectedCustomer;
+        visitDraft.open(wx,key).write({draftId:`recording-${sessionId}`,entryMode:'voice',transcript:'',hasTranscription:false,
+          customerId:selected?selected.id:'',customerName:selected?selected.name:'',isFirstVisit:false,
+          audioSourceKind:'recording',asrSessionId:sessionId,homeAudioHandoff:true,
+          localFilePath:result.tempFilePath,localFileTemporary:true,fileName:result.fileName || '拜访录音.mp3',
+          importId:'',importStatus:'pending',uploadIntentKey:uploadIntent.newKey(),uploadIntentState:'new'});
+      }
+      // Persist the recovery pointer before navigation, including a stop caused
+      // by leaving this page. It is scoped to actor, workspace and API service.
+      wx.setStorageSync(visitDraft.key('homeVisitRecording',scope),context);
+      this.pendingRecordingContext=context;
+      const store=visitDraft.open(wx,key),draft=store.value;
+      if(draft.localFileTemporary && !draft.importId){
+        const saved=await new Promise(resolve=>{try{wx.getFileSystemManager().saveFile({tempFilePath:draft.localFilePath,success:resolve,fail:()=>resolve(null)});}catch(_){resolve(null);}});
+        if(saved?.savedFilePath){
+          try{store.write({...draft,localFilePath:saved.savedFilePath,localFileTemporary:false});}
+          catch(_){try{wx.getFileSystemManager().unlink({filePath:saved.savedFilePath});}catch(_){} }
+        }
+      }
+      if(owner!==chatBIContextKey(getApp()))return;
+      this.pendingFinalRecording=null;
+      update({isProcessing:false,visitTranscriptStatus:'录音已保留，点击继续处理'});
+      if(this.homeVisible&&!this.chatBIPageDisposed)this.continueVisitRecording();
+    } catch(_) {update({isProcessing:false,visitTranscriptStatus:'录音尚未保存，请保留当前页面并继续处理'});}
+  },
+  restoreVisitRecording(){
+    if(this.data.isRecording||this.data.isProcessing)return;
+    const scope=visitDraft.scope(getApp().globalData.session,apiClient),key=visitDraft.key('homeVisitRecording',scope);
+    const context=wx.getStorageSync(key),draft=context&&visitDraft.context({draftContext:context})?wx.getStorageSync(visitDraft.key('visitEntryV2',scope,context)):null;
+    this.pendingFinalRecording=null;this.pendingRecordingContext=draft?context:'';
+    if(draft)this.setData({visitTranscriptVisible:true,visitRecordingMode:false,visitTranscript:'',visitTranscriptEditable:false,visitTranscriptStatus:'有一份拜访录音待处理，点击继续查看'});
+    else{wx.removeStorageSync(key);this.setData({visitTranscriptVisible:false,visitTranscript:''});}
+  },
+  continueVisitRecording(){
+    if(this.data.isProcessing)return;
+    if(this.pendingFinalRecording)return this.processVisitRecording(this.pendingFinalRecording);
+    if(!this.pendingRecordingContext)return;
+    const context=this.pendingRecordingContext;
+    wx.navigateTo({url:`/pages/visit-entry/index?draftContext=${encodeURIComponent(context)}`,success:()=>this.setData({visitTranscriptVisible:false})});
   },
 
   transcribeLiveVisitFrames() {
-    if (this.liveTranscribing || (this.livePreviewCount || 0) >= 3 || !this.liveVisitFrames || !this.liveVisitFrames.length) return;
-    const generation = this.liveTranscriptGeneration;
-    const now = Date.now();
-    const total = this.liveVisitBytes || this.liveVisitFrames.reduce((sum, buffer) => sum + buffer.byteLength, 0);
-    // SenseAudio's file endpoint is not a streaming socket. Limit preview calls
-    // to roughly one complete 10-second window instead of re-uploading every few seconds.
-    if (total - (this.lastLiveTranscribedBytes || 0) < 64000 || now - (this.lastLiveTranscriptionAt || 0) < 10000) return;
-    const frames = this.liveVisitFrames.slice();
-    const merged = new Uint8Array(total);
-    let offset = 0;
-    frames.forEach((buffer) => { merged.set(new Uint8Array(buffer), offset); offset += buffer.byteLength; });
-    const path = `${wx.env.USER_DATA_PATH}/live-visit-${generation}.mp3`;
-    this.liveTranscribing = true;
-    this.livePreviewCount = (this.livePreviewCount || 0) + 1;
-    this.lastLiveTranscribedBytes = total;
-    this.lastLiveTranscriptionAt = now;
-    this.liveTranscriptionPromise = new Promise((resolve, reject) => {
-      wx.getFileSystemManager().writeFile({ filePath: path, data: merged.buffer, success: resolve, fail: reject });
-    }).then(() => apiClient.transcribeAudio(path, "visit_entry"))
-      .then((transcript) => {
-          if (generation !== this.liveTranscriptGeneration || !this.data.isRecording) return;
-          const text = String(transcript.text || "").trim();
-          if (text) this.setData({ visitTranscript: text, visitTranscriptStatus: "正在聆听并增量转写…" });
-      }).catch(() => {
-        if (generation === this.liveTranscriptGeneration && this.data.isRecording) this.setData({ visitTranscriptStatus: "正在录音，结束后将完成全文转写" });
-      }).finally(() => { this.liveTranscribing = false; });
+    if(this.liveTranscribing || (this.livePreviewCount || 0)>=1 || this.data.recordingSeconds<15 || !this.liveVisitFrames?.length)return;
+    const generation=this.liveTranscriptGeneration;
+    const preview=require('../../utils/visitAudioPreview').firstPreview(this.liveVisitFrames);
+    if(!preview)return;
+    const current=()=>generation===this.liveTranscriptGeneration && this.data.isRecording && this.recordingOwner===chatBIContextKey(getApp()) && !this.chatBIPageDisposed;
+    const path=`${wx.env.USER_DATA_PATH}/live-visit-${generation}.mp3`;
+    const options={sessionId:this.asrSessionId,operationId:this.previewOperationId,stage:'preview'};
+    this.liveTranscribing=true;this.livePreviewCount=1;this.liveVisitFrames=[];
+    this.setData({visitTranscriptStatus:'正在生成一次临时预览，录音仍在继续'});
+    this.livePreviewTimer=setTimeout(()=>{if(current())this.setData({visitTranscriptStatus:'预览较慢，录音仍在继续'});},8000);
+    this.liveTranscriptionPromise=new Promise((resolve,reject)=>{
+      wx.getFileSystemManager().writeFile({filePath:path,data:preview.data,success:resolve,fail:reject});
+    }).then(()=>current()?apiClient.transcribeAudio(path,'visit_entry',options):null).then(transcript=>{
+      if(!current()||!transcript)return;
+      const text=String(transcript.text||'').trim();
+      if(text)this.setData({visitTranscript:text,visitTranscriptStatus:'临时预览 · 结束后处理完整文字'});
+    }).catch(()=>{if(current())this.setData({visitTranscriptStatus:'预览暂不可用，结束后处理完整文字'});})
+      .finally(()=>{if(generation===this.liveTranscriptGeneration){this.liveTranscribing=false;clearTimeout(this.livePreviewTimer);}try{wx.getFileSystemManager().unlink({filePath:path});}catch(_){}});
   },
 
   inputVisitTranscript(e) {
@@ -1193,11 +1293,42 @@ Page({
     });
   },
 
-  runTodayTasksAgent() {
+  beginHomeAgentRequest() {
+    const request={context:chatBIContextKey(getApp())};this.homeAgentRequest=request;return request;
+  },
+  isCurrentHomeAgentRequest(request) {
+    return this.homeAgentRequest===request && request.context===chatBIContextKey(getApp()) && !this.chatBIPageDisposed;
+  },
+  resolveUnknownHomeAgent(e) {
+    const key=e.currentTarget.dataset.key;
+    wx.showModal({title:'核对原 AI 任务',content:'仅在管理员已确认原任务未受理后，才解除拦截。若仍未查清，请取消；不会自动重新提交。',confirmText:'确认未受理',success:result=>{
+      if(!result.confirm)return;apiClient.confirmAgentNotAccepted(key);this.refreshPendingAgents();
+    }});
+  },
+
+  refreshPendingAgents() {
+    const labels={today_tasks:'今日待办',personal_risks:'个人风险',operating_report:'经营报告',chatbi:'经营问数'};
+    const pending=typeof apiClient.pendingAgentRuns==='function'?apiClient.pendingAgentRuns():[];
+    this.setData({pendingAgents:pending.filter(r=>labels[r.kind]).map(r=>({...r,startedLabel:formatTime(r.createdAt),label:(r.meta && REPORT_ACTIONS[r.meta.action] && REPORT_ACTIONS[r.meta.action].label) || labels[r.kind]}))});
+  },
+  resumeHomeAgent(e) {
+    if(this.data.isThinking || this.data.isProcessing)return;
+    const key=e.currentTarget.dataset.key;
+    const receipt=(this.data.pendingAgents || []).find(r=>r.key===key);if(!receipt)return;
+    if(!receipt.runId){wx.showToast({title:'提交结果待确认，请先联系管理员核对，勿重复提交',icon:'none'});return;}
+    if(receipt.kind==='today_tasks')return this.runTodayTasksAgent(key);
+    if(receipt.kind==='personal_risks')return this.runPersonalRiskAgent(key);
+    if(receipt.kind==='operating_report')return this.runOperatingReport(receipt.meta.action,{scope:receipt.meta.scope,recoveryKey:key});
+    if(receipt.kind==='chatbi')return this.runChatBIQuestion('',false,0,key);
+  },
+
+  runTodayTasksAgent(recoveryKey = "") {
+    const request=this.beginHomeAgentRequest();
     if(this.data.isFde){wx.navigateTo({url:"/pages/tasks/index?overview=today_pending"});return;}
     this.setData({ isThinking: true, isProcessing: false, showResult: false });
     this.appendMessage({ id: `today_tasks_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: "查看今日待办" });
-    apiClient.queryTodayTasks().then((run) => {
+    return apiClient.queryTodayTasks({recoveryKey}).then((run) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       const result = run.result || {};
       const rows = (Array.isArray(result.rows) ? result.rows : []).map((item) => ({
         taskId: item.task_id || item.taskId || "",
@@ -1218,17 +1349,21 @@ Page({
         action: { label: "查看全部待办", code: "open_tasks" },
       };
       this.appendMessage({ id: `today_tasks_result_${Date.now()}`, from: "agent", kind: "data-card", time: "刚刚", card });
+      if(run.recoveryKey && apiClient.acknowledgeAgentResult)apiClient.acknowledgeAgentResult(run.recoveryKey);
       wx.vibrateShort({ type: "light" });
     }).catch((error) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       this.appendMessage({ id: `today_tasks_error_${Date.now()}`, from: "agent", kind: "text", time: "刚刚", text: error.message || "待办Agent暂时无法生成计划，请稍后重试。" });
-    }).finally(() => this.setData({ isThinking: false, isProcessing: false }));
+    }).finally(() => {if(this.isCurrentHomeAgentRequest(request)){this.homeAgentRequest=null;this.setData({ isThinking: false, isProcessing: false });this.refreshPendingAgents();}});
   },
 
-  runPersonalRiskAgent() {
+  runPersonalRiskAgent(recoveryKey = "") {
+    const request=this.beginHomeAgentRequest();
     if(this.data.isFde){wx.navigateTo({url:"/pages/risks/index"});return;}
     this.setData({ isThinking: true, isProcessing: false, showResult: false });
     this.appendMessage({ id: `personal_risks_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: "查看个人风险" });
-    apiClient.queryPersonalRisks().then((run) => {
+    return apiClient.queryPersonalRisks({recoveryKey}).then((run) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       const result = run.result || {};
       const rows = (Array.isArray(result.rows) ? result.rows : []).map((item) => ({
         riskId: item.risk_id || item.riskId || "",
@@ -1249,18 +1384,22 @@ Page({
         action: { label: "查看全部风险", code: "open_risks" },
       };
       this.appendMessage({ id: `personal_risks_result_${Date.now()}`, from: "agent", kind: "data-card", time: "刚刚", card });
+      if(run.recoveryKey && apiClient.acknowledgeAgentResult)apiClient.acknowledgeAgentResult(run.recoveryKey);
       wx.vibrateShort({ type: "light" });
     }).catch((error) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       this.appendMessage({ id: `personal_risks_error_${Date.now()}`, from: "agent", kind: "text", time: "刚刚", text: error.message || "个人风险Agent暂时无法完成分析，请稍后重试。" });
-    }).finally(() => this.setData({ isThinking: false, isProcessing: false }));
+    }).finally(() => {if(this.isCurrentHomeAgentRequest(request)){this.homeAgentRequest=null;this.setData({ isThinking: false, isProcessing: false });this.refreshPendingAgents();}});
   },
 
-  runOperatingReport(action) {
+  runOperatingReport(action, options = {}) {
+    const request=this.beginHomeAgentRequest();
     const config = REPORT_ACTIONS[action];
     if (!config) return;
     this.setData({ isThinking: true, isProcessing: false, showResult: false });
-    this.appendMessage({ id: `operating_report_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: config.label });
-    apiClient.queryOperatingReport(this.data.isFde ? "根据我的FDE协作身份和当前授权范围，总结协助项目变化、本人填写并确认归档的拜访记录及任务进展；不进行销售绩效评分。" : config.prompt).then((run) => {
+    this.appendMessage({ id: `operating_report_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: options.scope === 'self' ? `${config.label} · 本人` : config.label });
+    return apiClient.queryOperatingReport(reportPrompt(action, options),{...options,action}).then((run) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       const result = run.result || {};
       const rendered = buildReport(run, action);
       const sections = rendered.sections;
@@ -1269,11 +1408,10 @@ Page({
         value: String(section.rows.length),
         label: section.title,
       }));
-      const reportScope = action.indexOf("personal") >= 0 ? "SALES" : action.indexOf("team") >= 0 ? "DIRECTOR" : "GM";
       const reportPeriod = "INSTANT";
       const card = {
         tone: "cyan",
-        eyebrow: `${reportScope} ${reportPeriod} REVIEW · LIVE DATA`,
+        eyebrow: `OPERATING ${reportPeriod} REVIEW · LIVE DATA`,
         title: result.title || config.label,
         subtitle: result.summary || `${result.scope || "当前权限范围"} · ${result.period || "最新业务周期"}`,
         metrics,
@@ -1283,10 +1421,12 @@ Page({
         action: null,
       };
       this.appendMessage({ id: `operating_report_result_${Date.now()}`, from: "agent", kind: "data-card", time: "刚刚", card });
+      if(run.recoveryKey && apiClient.acknowledgeAgentResult)apiClient.acknowledgeAgentResult(run.recoveryKey);
       wx.vibrateShort({ type: "light" });
     }).catch((error) => {
+      if(!this.isCurrentHomeAgentRequest(request))return;
       this.appendMessage({ id: `operating_report_error_${Date.now()}`, from: "agent", kind: "text", time: "刚刚", text: error.message || `${config.label}生成失败，请稍后重试。` });
-    }).finally(() => this.setData({ isThinking: false, isProcessing: false }));
+    }).finally(() => {if(this.isCurrentHomeAgentRequest(request)){this.homeAgentRequest=null;this.setData({ isThinking: false, isProcessing: false });this.refreshPendingAgents();}});
   },
 
   beginChatBIRequest() {
@@ -1303,18 +1443,18 @@ Page({
     return this.chatBIRequest === request && request.contextKey === chatBIContextKey(getApp());
   },
 
-  runChatBIQuestion(question, appendQuestion, delay) {
+  runChatBIQuestion(question, appendQuestion, delay, recoveryKey = "") {
     const request = this.beginChatBIRequest();
     if (!request) return Promise.resolve();
     if (appendQuestion) this.appendMessage({ id: `chatbi_question_${Date.now()}`, from: "user", kind: "text", time: "刚刚", text: question }, false);
-    return apiClient.queryChatBI(question).then((run) => {
+    return apiClient.queryChatBI(question,{recoveryKey}).then((run) => {
         if (!this.isCurrentChatBIRequest(request)) return;
         const result = run.result || {};
         const card = {
           tone: "cyan",
           eyebrow: "CHATBI · LIVE DATA",
           title: result.title || "经营问数结果",
-          subtitle: result.summary || `问题：“${question}”`,
+          subtitle: result.summary || (question ? `问题：“${question}”` : "此前问数任务的处理结果"),
           metrics: Array.isArray(result.metrics) ? result.metrics : [],
           rows: (Array.isArray(result.rows) ? result.rows : []).map((item) => ({
             title: item.title || "分析结论",
@@ -1325,14 +1465,17 @@ Page({
           action: { label: "查看看板", code: "open_workbench" },
         };
         this.appendMessage({ id: `chatbi_result_${Date.now()}`, from: "agent", kind: "data-card", time: "刚刚", card });
+        if(run.recoveryKey && apiClient.acknowledgeAgentResult)apiClient.acknowledgeAgentResult(run.recoveryKey);
         this.chatBIRequest = null;
         this.setData({ isProcessing: false });
+        this.refreshPendingAgents();
         wx.vibrateShort({ type: "light" });
     }).catch((error) => {
         if (!this.isCurrentChatBIRequest(request)) return;
         this.chatBIRequest = null;
         this.appendMessage({ id: `chatbi_error_${Date.now()}`, from: "agent", kind: "text", time: "刚刚", text: error.message || "问数暂时失败，请稍后重试。" });
         this.setData({ isProcessing: false });
+        this.refreshPendingAgents();
     });
   },
 

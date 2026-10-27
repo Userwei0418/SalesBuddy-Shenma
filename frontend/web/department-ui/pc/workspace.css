@@ -1,0 +1,85 @@
+/* PC 工作台 */
+.department-ui[data-department-page="pages/index/index"] { height: auto; min-height: 100%; }
+.pc-workspace .pc-kpis { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.pc-ws-grid { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: var(--ui-block-gap); align-items: start; }
+.pc-ws-main, .pc-ws-side { display: flex; flex-direction: column; gap: var(--ui-block-gap); min-width: 0; }
+.pc-ws-side { position: sticky; top: 0; }
+@media (max-width: 1360px) { .pc-workspace .pc-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1180px) { .pc-ws-grid { grid-template-columns: minmax(0, 1fr); } .pc-ws-side { position: static; } }
+@media (max-width: 600px) { .pc-workspace .pc-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* 跟进流（工作台、跟进记录、工作报告共用） */
+.pc-fu-stream { display: flex; flex-direction: column; }
+.pc-fu-day { position: sticky; top: 0; z-index: 1; padding: 6px 0 4px; font-size: var(--ui-text-small); font-weight: 600; color: var(--ui-secondary); background: var(--ui-surface); }
+.pc-fu { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 10px 52px 10px 0; border-bottom: 1px solid var(--ui-line); }
+.pc-fu:last-child { border-bottom: 0; }
+.pc-fu-head { display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; font-size: var(--ui-text-caption); }
+.pc-fu-avatar.ant-avatar { background: var(--ui-selected-strong); color: var(--ui-primary); font-size: var(--ui-text-small); }
+.pc-fu-person { font-weight: 600; color: var(--ui-ink); }
+.pc-fu-time { color: var(--ui-muted); font-size: var(--ui-text-small); }
+.pc-fu-target { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; font-size: var(--ui-text-body); font-weight: 500; }
+.pc-fu-target .pc-link { font-weight: 500; }
+.pc-fu-opportunity.pc-link { color: var(--ui-secondary); font-weight: 400; }
+.pc-fu-opportunity.pc-link:hover { color: var(--ui-primary); }
+.pc-fu-dot { color: var(--ui-muted); }
+.pc-fu-content { margin: 0; font-size: var(--ui-text-caption); line-height: 20px; color: var(--ui-ink); }
+.pc-fu-next { margin: 0; display: flex; gap: 6px; font-size: var(--ui-text-caption); line-height: 20px; color: var(--ui-secondary); }
+.pc-fu-next span { flex: none; color: var(--ui-primary); font-size: var(--ui-text-small); padding: 0 6px; border-radius: var(--ui-radius-control); background: var(--ui-selected); height: 20px; }
+.pc-fu-more.ant-btn { position: absolute; right: 0; top: 8px; }
+.pc-fu-empty { margin: 0; padding: var(--ui-space-4) 0; color: var(--ui-muted); font-size: var(--ui-text-caption); text-align: center; }
+.pc-fu.is-dense { padding-top: 6px; padding-bottom: 6px; }
+.pc-ws-more, .pc-ws-foot { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-small); color: var(--ui-muted); }
+
+.pc-fu-drawer .ant-drawer-body { padding: var(--ui-space-4) var(--ui-page-gutter); }
+.pc-fu-drawer-actions { display: flex; gap: var(--ui-space-2); }
+.pc-fu-detail dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px var(--ui-space-4); margin: 0 0 var(--ui-space-4); }
+.pc-fu-detail dt { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-fu-detail dd { margin: 2px 0 0; font-size: var(--ui-text-body); color: var(--ui-ink); overflow-wrap: anywhere; }
+.pc-fu-detail section { padding: var(--ui-space-3) 0; border-top: 1px solid var(--ui-line); }
+.pc-fu-detail h3 { margin: 0 0 6px; font-size: var(--ui-text-caption); font-weight: 600; color: var(--ui-secondary); }
+.pc-fu-detail p { margin: 0; white-space: pre-wrap; font-size: var(--ui-text-body); line-height: 22px; }
+.pc-fu-detail-tags { display: flex; gap: var(--ui-space-2); margin-bottom: var(--ui-space-3); }
+.pc-fu-detail-tags:empty { display: none; }
+
+/* 右栏 */
+.pc-ws-tasks, .pc-ws-risks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pc-ws-tasks button, .pc-ws-risks button { width: 100%; display: flex; align-items: center; gap: var(--ui-space-2); padding: 8px 0; border: 0; border-bottom: 1px solid var(--ui-line); background: none; text-align: left; cursor: pointer; color: var(--ui-ink); font: inherit; }
+.pc-ws-tasks li:last-child button, .pc-ws-risks li:last-child button { border-bottom: 0; }
+.pc-ws-tasks button:hover b, .pc-ws-risks button:hover b { color: var(--ui-primary); }
+.pc-ws-task-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ui-line-strong); flex: none; }
+.pc-ws-task-dot.is-today { background: var(--ui-primary); }
+.pc-ws-task-dot.is-overdue { background: var(--ui-danger); }
+.pc-ws-task-main, .pc-ws-risk-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pc-ws-task-main b, .pc-ws-risks b { font-weight: 500; font-size: var(--ui-text-caption); line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-ws-task-main small, .pc-ws-risks small { font-size: var(--ui-text-small); color: var(--ui-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-ws-task-due { flex: none; font-size: var(--ui-text-small); color: var(--ui-secondary); }
+.pc-ws-task-due.is-overdue { color: var(--ui-danger); }
+.pc-ws-risks .pc-icon { color: var(--ui-warning); }
+.pc-ws-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-space-2); }
+.pc-ws-quick button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface); color: var(--ui-ink); cursor: pointer; font-size: var(--ui-text-small); }
+.pc-ws-quick button:hover { border-color: var(--ui-focus); color: var(--ui-primary); background: var(--ui-hover); }
+.pc-ws-quick .pc-icon { width: 18px; height: 18px; color: var(--ui-primary); }
+.pc-ws-fde { width: 100%; border: 0; background: var(--ui-warning-soft); color: var(--ui-warning); padding: 8px 10px; border-radius: var(--ui-radius-control); text-align: left; cursor: pointer; font-size: var(--ui-text-caption); }
+.pc-ws-caliber { margin: 0; font-size: var(--ui-text-small); color: var(--ui-muted); line-height: 18px; }
+
+.pc-ws-member { display: inline-flex; align-items: center; gap: var(--ui-space-2); min-width: 0; }
+.pc-ws-member .ant-avatar { background: var(--ui-selected-strong); color: var(--ui-primary); font-size: var(--ui-text-small); flex: none; }
+.pc-ws-member > span { display: flex; flex-direction: column; min-width: 0; }
+.pc-ws-member b { font-weight: 500; }
+.pc-ws-member small { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-ws-opp { display: flex; flex-direction: column; min-width: 0; }
+.pc-ws-opp small { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.pc-num { font-variant-numeric: tabular-nums; }
+
+/* 工作台里嵌入的原「业务动态」：去掉整屏高度，限制列表高度 */
+.department-home-activity.is-embedded { background: var(--ui-surface); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); box-shadow: var(--ui-shadow-card); min-height: 0; height: auto; }
+.department-home-activity.is-embedded .department-home-feed { max-height: 460px; overflow: auto; }
+
+.pc-workspace .ant-table-thead > tr > th { white-space: nowrap; }
+.pc-workspace .ant-table-cell { white-space: nowrap; }
+.pc-workspace .ant-table-cell .pc-ws-opp, .pc-workspace .ant-table-cell .pc-ws-member { white-space: normal; }
+.pc-ws-taskstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ui-space-2); margin: 0 0 var(--ui-space-3); }
+.pc-ws-taskstats button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); background: var(--ui-surface-subtle); color: var(--ui-ink); font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.pc-ws-taskstats button:hover { border-color: var(--ui-focus); background: var(--ui-hover); }
+.pc-ws-taskstats b { font-size: var(--ui-text-title); font-weight: 600; line-height: 22px; }
+.pc-ws-taskstats span { font-size: var(--ui-text-small); color: var(--ui-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }

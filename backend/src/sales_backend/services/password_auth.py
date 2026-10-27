@@ -2,11 +2,14 @@ import asyncio
 import hashlib
 from uuid import uuid4
 
-from sales_backend.auth.tokens import SessionReference
+from sales_backend.auth.models import ActorResponse
 from sales_backend.auth.passwords import DUMMY_HASH, encode_password, verify_password
+from sales_backend.auth.tokens import SessionReference
 from sales_backend.repositories.passwords import PasswordRepository
+from sales_backend.repositories.restricted import RestrictedRepository
 from sales_backend.services.auth import AuthenticationFailed, AuthService
 from sales_backend.services.capabilities import capability_snapshot
+from sales_backend.services.restricted import RestrictedService
 
 
 class LoginThrottled(AuthenticationFailed):
@@ -25,7 +28,8 @@ class LoginThrottled(AuthenticationFailed):
 class PasswordAuthService(AuthService):
     async def login(
         self, *, account, password, workspace=None, role=None, client_ip="unknown", client_channel="web",
-        previous_sessions: tuple[SessionReference, ...] = (),
+        previous_sessions: tuple[SessionReference, ...] = (), login_type="auto",
+        restricted_session_version=None,
     ):
         workspace = (workspace.strip() or None) if workspace else None
         account = account.strip().upper()
@@ -35,7 +39,7 @@ class PasswordAuthService(AuthService):
         repository = PasswordRepository()
         # Commit the attempt before authentication: failure must not roll it back.
         async with self.database.connection() as connection:
-            identifier = await repository.login_identifier(connection, workspace, account)
+            identifier = await repository.login_identifier(connection, workspace, account, login_type)
             throttle_workspace = identifier["workspace"] if identifier else workspace or "unresolved"
             canonical_account = identifier["account_code"] if identifier else account
             account_key = digest(f"account:{throttle_workspace}:{canonical_account}")
@@ -49,15 +53,16 @@ class PasswordAuthService(AuthService):
                     blocked.append(await repository.limit_status(connection, ip_key, 50))
                 scope = "network" if account_allowed else "account" if ip_allowed else "account_network"
                 raise LoginThrottled(scope, max(item["retry_after_seconds"] for item in blocked))
-            candidate = await repository.candidate(connection, workspace, account, role)
+            restricted = await RestrictedRepository().candidate(connection, workspace, account, login_type)
+            candidate = restricted or await repository.candidate(connection, workspace, account, role, login_type)
             # Console/FDE duties must not mask this person's active sales appointment
             # in the mini-program. Explicit role selection and console login stay unchanged.
             if (
-                role is None and client_channel in {"wechat-mini-program", "business_web"} and candidate
+                not restricted and role is None and client_channel == "wechat-mini-program" and candidate
                 and candidate["role_code"] in {"administrator", "operations", "fde_lead", "fde"}
             ):
                 for business_role in ("manager", "supervisor", "sales", "fde_lead", "fde"):
-                    business = await repository.candidate(connection, workspace, account, business_role)
+                    business = await repository.candidate(connection, workspace, account, business_role, login_type)
                     if business and (business["workspace_id"], business["user_id"]) == (candidate["workspace_id"], candidate["user_id"]):
                         candidate = business
                         break
@@ -65,16 +70,19 @@ class PasswordAuthService(AuthService):
             verify_password, password, candidate["password_hash"] if candidate else DUMMY_HASH
         )
         if not candidate or not valid:
-            raise AuthenticationFailed("账号或密码错误")
+            raise AuthenticationFailed("请核对账号和密码，改用已绑定手机号，或从所属公司的专属入口登录")
+        if restricted:
+            session = await RestrictedService(self.database, self.settings).login_verified(
+                restricted, channel=client_channel, protocol=restricted_session_version,
+                attempt_key=account_key,
+            )
+            return session, False
         record = self.repository._actor(candidate)
         session_id = str(uuid4())
         issued = self.tokens.issue(record.context, session_id=session_id)
         async with self.database.transaction(record.context) as connection:
-            if not await repository.lock_login_identifier(connection, account):
+            if not await repository.lock_login_identifier(connection, account, login_type):
                 raise AuthenticationFailed("登录账号已变更，请重新登录")
-            if client_channel == "business_web":
-                from sales_backend.services.authorization import require_permission
-                await require_permission(connection, "access.business_web")
             await self.repository.create_session(
                 connection,
                 session_id=session_id,
@@ -86,6 +94,7 @@ class PasswordAuthService(AuthService):
             await repository.complete_login(connection, session_id, candidate["password_hash"], account_key)
             record = await self.repository._with_role_title(connection, record)
             effective = await capability_snapshot(connection, record.context)
+            effective.update(await self.repository.company_identity(connection, record.context.workspace_id))
             # Close the previous browser family atomically with the new login. An
             # already-rotated but delayed response cannot reactivate the old family.
             for previous in previous_sessions:
@@ -93,7 +102,11 @@ class PasswordAuthService(AuthService):
         session = self._response(record, issued).model_copy(update={
             "auth_method": "password", "must_change_password": candidate["must_change_password"],
         })
-        session = session.model_copy(update={"actor": session.actor.model_copy(update=effective)})
+        # Validate structured capabilities before serializing the login union.
+        # Unvalidated nested dicts can make Pydantic fall through to the other
+        # union member and emit a warning containing a session representation.
+        actor = ActorResponse.model_validate({**session.actor.model_dump(), **effective})
+        session = session.model_copy(update={"actor": actor})
         return session, candidate["must_change_password"]
 
     async def change_password(self, identity, old_password, new_password):

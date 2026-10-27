@@ -1,0 +1,70 @@
+<block wx:if="{{execution}}">
+  <view wx:if="{{execution.raw.execution_handover}}" class="section-card execution-status-card">
+    <view class="execution-status-heading"><text class="section-title">执行交接</text><sb-status-tag label="{{execution.raw.execution_handover.status === 'pending' ? '待接手' : execution.raw.execution_handover.status === 'rejected' ? '待重新协调' : execution.raw.execution_handover.status === 'accepted' ? '已接手' : '已失效'}}" tone="{{execution.raw.execution_handover.status === 'accepted' ? 'good' : 'pending'}}"/></view>
+    <view class="description">接手人：{{execution.raw.execution_handover.target_name || '待确认'}}</view><view class="description">{{execution.raw.execution_handover.reason}}</view>
+    <view class="execution-help">待接手期间暂停执行操作；拒接不取消任务，历史成果保留。</view>
+    <view wx:if="{{execution.caps.respond_executor_handover && !executionError}}" class="execution-primary-actions"><button class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" data-action="executorReject" bindtap="executionPageAction">拒绝接手</button><button class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="executorAccept" bindtap="executionPageAction">确认接手</button></view>
+  </view>
+  <view wx:if="{{execution.raw.reviewer_handover}}" class="section-card execution-status-card">
+    <view class="execution-status-heading"><text class="section-title">验收交接</text><sb-status-tag label="{{execution.raw.reviewer_handover.status === 'pending' ? '待确认' : execution.raw.reviewer_handover.status === 'rejected' ? '已拒绝' : execution.raw.reviewer_handover.status === 'accepted' ? '已接手' : '已失效'}}" tone="{{execution.raw.reviewer_handover.status === 'accepted' ? 'good' : 'pending'}}"/></view>
+    <view class="description">候选验收人：{{execution.raw.reviewer_handover.target_name || '待确认'}}</view><view class="description">{{execution.raw.reviewer_handover.reason}}</view>
+    <view class="execution-help">对方接受前，原有效验收人继续负责；执行人不变。</view>
+    <view wx:if="{{execution.caps.respond_reviewer_handover && !executionError}}" class="execution-primary-actions"><button class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" data-action="reviewerReject" bindtap="executionPageAction">拒绝接手</button><button class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="reviewerAccept" bindtap="executionPageAction">确认接手</button></view>
+  </view>
+  <view wx:if="{{execution.raw.pending_requirements}}" class="section-card execution-status-card">
+    <view class="execution-status-heading"><text class="section-title">要求变更</text><sb-status-tag label="待确认" tone="pending"/></view>
+    <view class="execution-help">确认前仍按当前要求执行。</view><view class="description">变更原因：{{execution.raw.pending_requirements.reason}}</view>
+    <view wx:for="{{execution.requirementsDiff}}" wx:key="key" class="execution-diff"><text class="execution-diff-title">{{item.label}}</text><view class="execution-diff-before">变更前：{{item.before}}</view><view class="execution-diff-after">变更后：{{item.after}}</view></view>
+    <view wx:if="{{execution.caps.respond_requirements && !executionError}}" class="execution-primary-actions"><button class="execution-action-btn" disabled="{{executionBusy || executionLoading}}" data-action="requirementsReject" bindtap="executionPageAction">拒绝变更</button><button class="execution-action-btn is-primary" disabled="{{executionBusy || executionLoading}}" data-action="requirementsAccept" bindtap="executionPageAction">确认变更</button></view>
+    <button wx:if="{{execution.caps.withdraw_requirements && !executionError}}" class="execution-text-action" disabled="{{executionBusy || executionLoading}}" data-action="requirementsWithdraw" bindtap="executionPageAction">撤回本次申请</button>
+  </view>
+</block>
+
+<root-portal wx:if="{{handoverPurpose}}">
+  <view class="sb-portal-theme">
+    <sb-sheet visible="{{!!handoverPurpose}}" title="{{handoverPurpose === 'executor' ? '转交执行责任' : '转交验收责任'}}" description="{{handoverPurpose === 'executor' ? '由接手人确认接受，原有成果和记录保留。' : '对方接受后切换验收责任，执行人不变。'}}" closeOnOverlay="{{false}}" cancelLabel="返回" confirmLabel="确认交接" confirmLoading="{{executionBusy}}" confirmDisabled="{{handoverLoading || !handoverTarget || executionLoading || executionOffline}}" bind:confirm="submitExecutionHandover" bind:close="closeExecutionHandover">
+      <view class="execution-sheet-body">
+        <view class="execution-search-row"><sb-search class="execution-search-input" plain value="{{handoverQuery}}" placeholder="搜索接手人员" maxlength="{{100}}" data-key="handoverQuery" bind:change="inputHandover" bind:clear="inputHandover" bind:search="loadHandoverCandidates" disabled="{{executionBusy}}"/><button class="execution-action-btn" loading="{{handoverLoading}}" disabled="{{executionBusy || handoverLoading}}" bindtap="loadHandoverCandidates">查找</button></view>
+        <view class="execution-candidates">
+          <button wx:for="{{handoverCandidates}}" wx:key="user_id" class="execution-candidate {{handoverTarget === item.user_id ? 'is-selected' : ''}}" data-id="{{item.user_id}}" bindtap="selectHandoverCandidate" disabled="{{executionBusy || handoverLoading}}"><view class="execution-candidate-copy"><text class="execution-row-title">{{item.display_name}}</text><view class="execution-row-hint"><text wx:for="{{item.teams}}" wx:for-item="team" wx:key="team_id">{{index ? ' · ' : ''}}{{team.name}}</text></view></view><text class="execution-candidate-check">{{handoverTarget === item.user_id ? '✓' : ''}}</text></button>
+          <view wx:if="{{handoverLoading}}" class="execution-empty">正在读取候选人员…</view><view wx:elif="{{!handoverCandidates.length && !handoverError}}" class="execution-empty">暂无符合交接资格的人员</view>
+          <button wx:if="{{handoverMore}}" class="execution-text-action" data-more="{{true}}" bindtap="loadHandoverCandidates" disabled="{{handoverLoading || executionBusy}}">加载更多</button>
+        </view>
+        <view class="execution-form-notice">已选：{{handoverTargetLabel || '请选择接手人员'}}</view>
+        <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="交接原因" required maxlength="{{1000}}" value="{{handoverReason}}" placeholder="说明交接原因与需要承接的事项" data-key="handoverReason" bind:change="inputHandover" disabled="{{executionBusy}}"/>
+        <view wx:if="{{handoverError}}" class="coordinate-error">{{handoverError}}</view>
+      </view>
+    </sb-sheet>
+  </view>
+</root-portal>
+
+<root-portal wx:if="{{requirementsDraft}}">
+  <view class="sb-portal-theme">
+    <sb-sheet visible="{{!!requirementsDraft}}" title="{{requirementsPreview ? '核对要求变更' : '修改任务要求'}}" description="{{execution.selfManaged ? '本人核对后保存生效，保留变更历史。' : requirementsPreview ? '请核对下方差异，提交后由相关责任人确认。' : '修改不会立即生效，提交前可核对全部差异。'}}" closeOnOverlay="{{false}}" cancelLabel="取消编辑" secondaryLabel="{{requirementsPreview ? '返回编辑' : ''}}" confirmLabel="{{requirementsPreview ? '确认提交' : '核对差异'}}" confirmLoading="{{executionBusy}}" confirmDisabled="{{executionLoading || executionOffline}}" bind:confirm="confirmRequirementsSheet" bind:secondary="editRequirementsSheet" bind:close="closeRequirements">
+      <view class="execution-sheet-body">
+        <block wx:if="{{!requirementsPreview}}">
+          <sb-textarea class="execution-form-input" layout="stacked" plain fixed minRows="{{1}}" label="任务标题" required maxlength="{{500}}" value="{{requirementsDraft.title}}" data-key="title" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+          <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="任务描述" maxlength="{{8000}}" value="{{requirementsDraft.description}}" data-key="description" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+          <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="交付物" maxlength="{{4000}}" value="{{requirementsDraft.deliverable}}" data-key="deliverable" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+          <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="验收标准" maxlength="{{4000}}" value="{{requirementsDraft.acceptance_criteria}}" data-key="acceptance_criteria" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+          <view class="execution-field-pair"><picker mode="date" value="{{requirementsDate}}" data-key="date" bindchange="inputRequirements" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">截止日期</text><view class="execution-field-control"><text>{{requirementsDate || '请选择日期'}}</text><text class="execution-row-arrow">›</text></view></view></picker><picker mode="time" value="{{requirementsTime}}" data-key="time" bindchange="inputRequirements" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">截止时间</text><view class="execution-field-control"><text>{{requirementsTime}}</text><text class="execution-row-arrow">›</text></view></view></picker></view>
+          <picker range="{{requirementsPriorities}}" value="{{requirementsPriority}}" data-key="priority_code" bindchange="inputRequirements" disabled="{{executionBusy}}"><view class="execution-form-field"><text class="execution-field-label">优先级</text><view class="execution-field-control"><text>{{requirementsPriorities[requirementsPriority]}}</text><text class="execution-row-arrow">›</text></view></view></picker>
+          <block wx:if="{{execution.raw.protocol_version !== 2}}"><view class="execution-form-section"><text class="section-title">推进清单</text><text class="execution-help">逐项写明交付内容与验收标准</text></view>
+          <view wx:for="{{requirementsDraft.checklist}}" wx:key="item_id" class="execution-checklist-editor">
+            <view class="execution-item-number">推进项 {{index + 1}}</view>
+            <sb-textarea class="execution-form-input" layout="stacked" plain fixed minRows="{{1}}" label="标题" required maxlength="{{500}}" value="{{item.title}}" data-id="{{item.item_id}}" data-key="title" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+            <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="验收标准" required maxlength="{{2000}}" value="{{item.acceptance_criteria}}" data-id="{{item.item_id}}" data-key="acceptance_criteria" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+            <button class="execution-text-action is-danger" data-id="{{item.item_id}}" bindtap="removeRequirementItem" disabled="{{executionBusy}}">移除此项</button>
+          </view>
+          <button class="execution-action-btn execution-add-item" bindtap="addRequirementItem" disabled="{{executionBusy || requirementsDraft.checklist.length >= 100}}">＋ 添加推进项</button></block>
+          <sb-textarea class="execution-form-input" layout="stacked" plain fixed label="变更原因" required maxlength="{{1000}}" value="{{requirementsReason}}" placeholder="说明为什么需要修改任务要求" data-key="reason" bind:change="inputRequirements" disabled="{{executionBusy}}"/>
+        </block>
+        <block wx:else>
+          <view class="execution-form-notice">变更原因：{{requirementsReason}}</view>
+          <view wx:for="{{requirementsPreview}}" wx:key="key" class="execution-diff"><text class="execution-diff-title">{{item.label}}</text><view class="execution-diff-before">变更前：{{item.before}}</view><view class="execution-diff-after">变更后：{{item.after}}</view></view>
+        </block>
+        <view wx:if="{{requirementsError}}" class="coordinate-error">{{requirementsError}}</view>
+      </view>
+    </sb-sheet>
+  </view>
+</root-portal>

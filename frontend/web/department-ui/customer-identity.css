@@ -1,0 +1,21 @@
+.department-ui .ds-business-tags {display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center;vertical-align:middle;}
+.department-ui .ds-business-tags .ant-tag {margin:0;font-size:12px;}
+.department-ui .ds-identity-fields {padding:16px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-surface);display:grid;gap:12px;min-width:0;}
+.department-ui .ds-identity-heading {display:flex;align-items:baseline;gap:10px;}
+.department-ui .ds-identity-fields .ant-checkbox-group {gap:12px;}
+.department-ui .ds-identity-note {margin:0;padding:8px 12px;background:var(--ui-background);color:var(--ui-secondary);border-radius:6px;font-size:13px;}
+.department-ui .ds-identity-link {border-top:1px solid var(--ui-line);padding-top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.department-ui .ds-identity-link>div:first-child {display:grid;gap:5px;min-width:0;overflow-wrap:anywhere;}
+.department-ui .ds-identity-link small,.department-ui .ds-partner-result small {color:var(--ui-muted);font-size:12px;font-weight:400;}
+.department-ui .ds-identity-buttons {display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.department-ui .ds-partner-picker {display:grid;gap:12px;}
+.department-ui .ds-partner-search {display:flex;gap:8px;}
+.department-ui .ds-partner-results {max-height:52vh;overflow:auto;}
+.department-ui .ds-partner-result {display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--ui-line);}
+.department-ui .ds-partner-result>div {display:grid;gap:4px;min-width:0;overflow-wrap:anywhere;}
+.department-ui .ds-cc-identity {padding:20px 24px 0;}
+.department-ui .ds-cc-fields .ds-identity-fields {grid-column:1 / -1;}
+.department-ui .pc-enterprise-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px;border-bottom:1px solid var(--ui-line);}
+.department-ui .pc-enterprise-heading h2 {margin:0;font-size:15px;}
+.department-ui .pc-customer-view-switch {display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+@media(max-width:760px){.department-ui .ds-identity-link{align-items:stretch;flex-direction:column;}.department-ui .ds-cc-identity{padding:16px 16px 0;}}

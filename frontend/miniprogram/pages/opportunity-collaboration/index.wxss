@@ -1,0 +1,27 @@
+.collaboration-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28rpx;
+  color: var(--ui-ink, #23324b);
+  background: #f5f7fa;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.card { background: #fff; border: 1rpx solid #e3e8ef; border-radius: 20rpx; padding: 28rpx; }
+.title { font-size: 32rpx; font-weight: 600; margin-bottom: 20rpx; }
+.intro { color: #66758a; font-size: 25rpx; }
+.collaboration-page .collaboration-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin: 24rpx 0 0;
+  padding: 10px 24rpx;
+  border: 1px solid #ccd3df;
+  border-radius: 12rpx;
+  color: var(--ui-primary, #2863cd);
+  background: #fff;
+  font-size: 14px;
+  line-height: 22px;
+}
+.collaboration-page .collaboration-button::after { border: 0; }

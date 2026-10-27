@@ -8,6 +8,7 @@ from tests.test_admin_role_labels import run_web_script
 
 ACCOUNT_FIXTURE = r"""
     const organization={
+      management:{company_administrator:true,target_ids:['member','sales','operator','admin'],actions:{'account.update':true,'account.reset_password':true,'account.unlock':true}},
       roles:['fde','sales','operations','administrator'].map(code=>({code,name:code})),
       departments:[{id:'team',name:'业务部门',code:'TEAM',status:'active'}],
       accounts:[['member','fde',true],['sales','sales',false],
@@ -51,7 +52,7 @@ FORM_FIXTURE = r"""
 
 @pytest.mark.parametrize("actor_role", ["operations", "administrator"])
 def test_account_lock_status_and_unlock_action_respect_account_management(actor_role):
-    run_web_script(ACCOUNT_FIXTURE + f"core.state.actor.role={json.dumps(actor_role)};" + r"""
+    run_web_script(ACCOUNT_FIXTURE + f"core.state.actor.role={json.dumps(actor_role)};organization.management.target_ids=core.state.actor.role==='administrator'?['member','sales','operator','admin']:['member','sales'];" + r"""
         const page=await pages.accounts();
         assert.match(page.html, /<th>登录限制<\/th>/);
         const locked=accountRow(page.html,'member');

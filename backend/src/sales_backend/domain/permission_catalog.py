@@ -4,7 +4,9 @@ The catalog describes implemented actions. Tenant role templates and account
 exceptions supply grants; neither frontend labels nor request fields grant access.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+
+from sales_backend.domain.business_read import BUSINESS_READ_PERMISSIONS
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,20 +24,34 @@ COMPANY_SCOPE = ("workspace",)
 
 def _module(module, resource, actions, *, scopes=BUSINESS_SCOPES, sensitive=()):
     return tuple(PermissionDefinition(f"{resource}.{action}", label, module,
+                 COMPANY_SCOPE if (resource, action) == ("customer", "create_review") else
                  ("self",) if (resource, action) in {("visit", "upload"), ("visit", "transcribe"),
-                  ("visit", "retry_import"), ("agent", "history"), ("profile", "fde_review")} else scopes, action in sensitive)
+                  ("visit", "retry_import"), ("agent", "history"), ("profile", "fde_review"),
+                  ("customer", "create_request")} else scopes, action in sensitive)
                  for action, label in actions)
 
 
 PERMISSIONS = (
+    PermissionDefinition("asr_hotword.read", "查看公司语音热词", "语音热词", ("workspace",)),
+    PermissionDefinition("asr_hotword.manage", "维护公司语音热词", "语音热词", ("workspace",), True),
+    *_module("知识库", "knowledge", (("read", "查看知识材料"), ("create", "贡献知识材料"),
+        ("edit", "更新知识材料版本"), ("manage", "管理知识材料权限")), sensitive=("manage",)),
+    PermissionDefinition("knowledge.catalog_manage", "维护知识库分类目录", "知识库", COMPANY_SCOPE, True),
+    PermissionDefinition("opportunity.transfer", "转交商机主责", "商机管理", ("teams", "workspace"), True),
     *_module("个人周报", "weekly_report", (("generate", "生成本人周报"), ("read", "查看本人周报"),
-        ("edit", "编辑本人周报"), ("cancel", "取消本人周报生成")), scopes=("self",)),
-    *_module("使用入口", "access", (("mini_program", "使用小程序"), ("console", "使用运营后台"), ("business_web", "使用业务 Web")),
+        ("edit", "编辑本人周报"), ("cancel", "取消本人周报")), scopes=("self",)),
+    PermissionDefinition("access.business_web", "使用业务Web", "使用入口", COMPANY_SCOPE),
+    *_module("工作汇报", "work_report", (("read", "查看工作汇报"), ("write", "创建与编辑本人工作汇报"),
+        ("share", "确认分享本人工作汇报")), sensitive=("share",)),
+    PermissionDefinition("report.export", "导出或复制经营报告", "经营报告", BUSINESS_SCOPES, True),
+    PermissionDefinition("support.manage", "管理临时支持访问", "公司管理", COMPANY_SCOPE, True),
+    *_module("使用入口", "access", (("mini_program", "使用小程序"), ("console", "使用运营后台")),
              scopes=COMPANY_SCOPE),
     *_module("总览与经营", "overview", (("read", "查看总览"),)),
     *_module("客户管理", "customer", (
         ("reference", "搜索与选择客户基本信息"), ("read", "查看客户详情"),
-        ("create", "新建客户"), ("update", "修改客户资料"), ("claim", "申请认领客户"),
+        ("create", "新建客户"), ("create_request", "提交客户新建申请"),
+        ("create_review", "审批客户新建申请"), ("update", "修改客户资料"), ("claim", "申请认领客户"),
         ("claim_directory", "查看公司客户认领目录"), ("claim_review", "审批客户认领"), ("release", "释放客户"),
         ("resolve_owner", "核对历史客户归属"), ("export", "导出客户"),
     ), sensitive=("export", "release", "resolve_owner")),
@@ -47,26 +63,30 @@ PERMISSIONS = (
         ("fde_members", "维护商机协作 FDE"), ("export", "导出商机"),
     ), sensitive=("export", "reopen", "create_for_others")),
     *_module("跟进记录", "visit", (
-        ("read", "查看跟进记录"), ("create", "新增跟进记录"), ("supplement", "补充跟进记录"),
+        ("read", "查看跟进记录"), ("export", "导出跟进记录"), ("create", "新增跟进记录"), ("supplement", "补充跟进记录"),
         ("upload", "上传跟进材料"), ("transcribe", "语音转写"),
         ("retry_import", "重试材料识别"), ("download_original", "下载原始材料"),
         ("structure", "AI 整理跟进原文"), ("quality_review", "AI 质检跟进记录"),
         ("first_visit", "登记首次拜访信息"), ("attendance_manage", "登记协同人与参与 FDE"),
-    ), sensitive=("download_original",)),
+    ), sensitive=("download_original", "export")),
     *_module("待办事项", "task", (
         ("read", "查看待办"), ("create_daily", "创建日常待办"), ("create_customer", "创建客户待办"),
         ("assign", "向他人下发待办"), ("accept", "接收待办"), ("decline", "拒绝待办"),
         ("complete", "完成待办"), ("cancel", "取消待办"),
         ("coordinate", "协调岗位待办"), ("review", "处理待办结果"),
-    )),
+        ("feedback", "任务过程反馈"), ("reviewer_handover", "交接任务验收责任"),
+    ), sensitive=("reviewer_handover",)),
     *_module("经营建议与风险", "advice", (
         ("request", "生成经营建议"), ("read", "查看经营建议"), ("decide", "采纳或忽略建议"),
         ("customer", "分析客户整体经营"), ("opportunity", "分析商机经营"), ("visit", "分析单次跟进"),
     )),
     *_module("经营建议与风险", "risk", (("read", "查看风险"), ("resolve", "处理风险"), ("auto_review", "自动评估客户风险"))),
+    PermissionDefinition("risk.decide", "确认风险建议动作", "经营建议与风险", (*BUSINESS_SCOPES, "departments")),
     *_module("客户经营实绩", "actual", (
         ("read", "查看客户经营实绩"), ("create", "登记确收与回款"), ("void", "作废实绩登记"),
     ), sensitive=("void",)),
+    *_module("物料与实绩", "material", (("read", "查看物料目录"), ("manage", "维护物料与产品线")),
+             scopes=COMPANY_SCOPE, sensitive=("manage",)),
     *_module("经营看板", "dashboard", (("read", "查看经营看板"), ("ranking", "查看销售排名"))),
     *_module("个人与团队画像", "profile", (
         ("sales_read", "查看销售画像"), ("sales_review", "生成销售成长评估"),
@@ -79,9 +99,10 @@ PERMISSIONS = (
         ("fde_department", "访问 FDE 部门汇总目标"),
     )),
     *_module("智能助手", "agent", (
+        ("finance_assistant", "解释商机财务参考"),
         ("chatbi", "公司数据问答"), ("customer_chatbi", "客户数据问答"),
         ("today_tasks", "生成今日待办建议"), ("personal_risks", "分析个人经营风险"),
-        ("operating_report", "生成经营报告"), ("opportunity_draft", "起草商机建议"),
+        ("work_report", "生成工作汇报"), ("operating_report", "生成经营报告"), ("opportunity_draft", "起草商机建议"),
         ("management_task", "起草管理任务"), ("history", "查看本人智能助手会话"),
     )),
     *_module("伙伴与演示方案", "partner", (("read", "查看伙伴目录"), ("manage", "维护伙伴目录")), scopes=COMPANY_SCOPE),
@@ -101,8 +122,8 @@ PERMISSIONS = (
         ("accounts_manage", "配置账号角色与额外权限"), ("audit", "查看授权变更记录"),
     ), scopes=COMPANY_SCOPE, sensitive=("roles_manage", "accounts_manage")),
     *_module("历史数据导入", "history", (("import", "执行已审核历史数据导入"),), scopes=COMPANY_SCOPE, sensitive=("import",)),
-    *_module("公司管理", "company", (("read", "查看本公司资料"), ("update", "修改本公司资料")),
-             scopes=COMPANY_SCOPE),
+    *_module("公司管理", "company", (("read", "查看本公司资料"), ("update", "修改本公司资料"), ("export", "导出本公司业务数据包")),
+             scopes=COMPANY_SCOPE, sensitive=("export",)),
     *_module("业务规则", "rule", (
         ("read", "查看业务规则"), ("draft", "编辑业务规则草稿"),
         ("preview", "预览规则影响"), ("publish", "发布业务规则"), ("restore", "恢复历史规则"),
@@ -126,6 +147,9 @@ PERMISSIONS = (
     *_module("团队与通知", "notification", (("read", "查看本人通知"), ("mark_read", "将本人通知标为已读")),
              scopes=("self",)),
 )
+
+PERMISSIONS = tuple(replace(item, scopes=(*item.scopes, "departments"))
+                    if item.code in BUSINESS_READ_PERMISSIONS else item for item in PERMISSIONS)
 
 CATALOG = {permission.code: permission for permission in PERMISSIONS}
 if len(CATALOG) != len(PERMISSIONS):

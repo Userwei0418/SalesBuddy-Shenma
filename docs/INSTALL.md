@@ -1,3 +1,5 @@
+> 历史记录：当前版本和配置请先查阅 [PROJECT_FACTS.md](PROJECT_FACTS.md) 与 [OPERATIONS_HANDOVER.md](OPERATIONS_HANDOVER.md)。本文不能代替当前环境升级与验收。
+
 # 神码首次安装指引
 
 本页用于空环境首次安装。现有神码服务器的实施进度见 [部署记录](DEPLOYMENT.md)；已有数据库或实例时先按该记录续接，不重复初始化。

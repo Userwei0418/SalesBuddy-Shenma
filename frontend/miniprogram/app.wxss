@@ -1,8 +1,9 @@
 /* 部门设计变量与 TDesign 桥接（scripts/vendor_ui.mjs 从 shandianT/desgin 同步，勿手改 ui/ 下文件） */
 @import "ui/design-tokens.wxss";
 @import "ui/bridge-tdesign.wxss";
+@import "styles/portal-layout.wxss";
 @import "styles/theme-blue-black-white.wxss";
-@import "pages/customer-assets/opportunity-view.wxss";
+@import "styles/opportunity-view.wxss";
 @import "pages/profile/profile-compact.wxss";
 
 page {

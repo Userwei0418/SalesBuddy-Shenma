@@ -11,9 +11,12 @@ logger = logging.getLogger("sales_backend.worker.maintenance")
 class WorkerMaintenance:
     INTERVALS = {
         "ai_usage": 60,
+        "review_history": 60,
         "log_retention": 86400,
         "competency_schedule": 300,
         "priority_reminders": 1800,
+        "task_coordination_checks": 60,
+        "task_pause_rechecks": 60,
     }
     RETRY_SECONDS = 30
     TIMEOUT_SECONDS = 10

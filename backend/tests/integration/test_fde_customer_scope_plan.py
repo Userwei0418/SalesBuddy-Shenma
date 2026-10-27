@@ -11,6 +11,8 @@ import os
 import re
 from uuid import uuid4
 
+from tests.integration.tenant_fixtures import active_foreign_workspace
+
 import pytest
 
 from sales_backend.db import set_request_context
@@ -47,7 +49,7 @@ async def test_customer_scope_plan_reuse_rechecks_identity_and_live_grants(conne
         lead = await actor(connection, people["lead"]["code"])
         other_sales = await actor(connection, "XS002")
         identities = [first, lead, sales, other_sales, *outsiders, second,
-                      lead.model_copy(update={"workspace_id": str(uuid4())})]
+                      lead.model_copy(update={"workspace_id": await active_foreign_workspace(connection)})]
         prepared = await connection.prepare("""
           SELECT security.fde_customer_in_scope($1::uuid) AS actual,
             (security.is_fde_actor() AND EXISTS (

@@ -1,14 +1,16 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const path = require('node:path');
 const vm = require('node:vm');
 
 function makePage(api = {}) {
   let definition;
   const storage = new Map();
-  const wx = {setStorageSync: (key, value) => storage.set(key, value)};
+  const wx = {getStorageSync:key=>storage.get(key),setStorageSync: (key, value) => storage.set(key, value)};
   vm.runInNewContext(fs.readFileSync(__dirname + '/../miniprogram/pages/visit-entry/index.js', 'utf8'), {
-    require: name => name.includes("apiClient") ? api : ({}), Page: value => { definition = value; }, wx, clearTimeout, clearInterval,
+    require: name => name.includes("apiClient") ? api : require(path.resolve(__dirname, '../miniprogram/pages/visit-entry', name)), Page: value => { definition = value; }, wx, clearTimeout, clearInterval,
+    getApp: () => ({globalData:{session:{workspaceId:'w',userId:'u',role:'sales'}}}),
   });
   return { ...definition, draftKey: 'visit-test', storage, data: {...definition.data},
     setData(value) { Object.assign(this.data, value); } };
@@ -53,6 +55,11 @@ test('文件录入入口使用明确的文件类型说明', () => {
   assert.doesNotMatch(wxml, /录音与文档都可以/);
 });
 
+test('录音上传保留录音器返回的真实格式名，原生录音才回退到 mp3', () => {
+  const js = fs.readFileSync(__dirname + '/../miniprogram/pages/visit-entry/index.js', 'utf8');
+  assert.match(js, /name:\s*result\.fileName\s*\|\|\s*["']拜访录音\.mp3["']/);
+});
+
 test('结构化提交按钮只保留文字，不显示箭头', () => {
   const wxml = fs.readFileSync(__dirname + '/../miniprogram/pages/visit-entry/index.wxml', 'utf8');
   const wxss = fs.readFileSync(__dirname + '/../miniprogram/pages/visit-entry/index.wxss', 'utf8');
@@ -75,7 +82,7 @@ test('拜访录入先从公司客户中搜索并确认客户', () => {
   assert.match(wxml, /输入客户名称关键词/);
   assert.match(wxml, /class="customer-results"/);
   assert.match(wxml, /!customerConfirmed \? '请先选择客户'/);
-  assert.match(js, /listCustomers\(\{ q: query, scope: isFde \? "mine" : "company", pageSize: 100 \}\)/);
+  assert.match(js, /customerSearch\.list\(api,getApp\(\)\.globalData\.session,/);
   assert.match(js, /if \(!this\.data\.customerId\)[\s\S]*请先选择客户/);
 });
 
@@ -102,4 +109,12 @@ test('旧客户请求晚到不能覆盖用户刚选的客户', async () => {
   resolve({id:'old',name:'旧客户'});
   await pending;
   assert.equal(page.data.customerId, 'new');
+});
+
+test('follow-up picker separates else condition from repeated opportunity rows for official WXML compilation', () => {
+  for (const file of ['../miniprogram/pages/visit-entry/index.wxml','../web/source/miniprogram/pages/visit-entry/index.wxml']) {
+    const markup = require('node:fs').readFileSync(require('node:path').resolve(__dirname,file),'utf8');
+    assert.match(markup, /<block wx:else><view wx:for="{{followUpItems}}" wx:key="opportunity_id"/);
+    assert.doesNotMatch(markup, /<[^>]*wx:else[^>]*wx:for=/);
+  }
 });

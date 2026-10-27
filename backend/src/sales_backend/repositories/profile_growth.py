@@ -34,12 +34,15 @@ async def latest_reviews(connection, workspace_id, members, days):
         dict(row)
         for row in await connection.fetch(
             """SELECT DISTINCT ON(subject_user_ref_id) id::text,subject_user_ref_id::text,
-          review_date,reviewed_at,dimension_scores,input_snapshot
+          review_date,reviewed_at,framework_version,generation_no,status,overall_score,
+          evaluation_state,input_fingerprint,
+          dimension_scores,summary,strengths,improvements,input_snapshot
         FROM insight.sales_competency_review
         WHERE workspace_id=$1::uuid AND subject_user_ref_id=ANY($2::uuid[])
           AND status='succeeded'
+          AND security.authorization_subject('profile.sales_read','person',subject_user_ref_id,NULL)
           AND review_date>=timezone('Asia/Shanghai',clock_timestamp())::date-$3::int
-        ORDER BY subject_user_ref_id,review_date DESC,reviewed_at DESC,id DESC""",
+        ORDER BY subject_user_ref_id,review_date DESC,generation_no DESC,id DESC""",
             workspace_id,
             members,
             days,

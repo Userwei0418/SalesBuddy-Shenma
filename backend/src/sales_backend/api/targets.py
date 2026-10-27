@@ -8,10 +8,31 @@ from sales_backend.api.idempotency import MutationKey
 from sales_backend.contracts.targets import TargetBatchSave, TargetDepartment, TargetPeriod, TargetSave, TargetScope
 from sales_backend.db import Database
 from sales_backend.repositories.customer_assets import today
+from sales_backend.repositories.targets import TargetRepository
 from sales_backend.services.operations import management_write
 from sales_backend.services.targets import read_targets, save_target, save_target_batch
 
 router = APIRouter(prefix="/api/v1/targets", tags=["Targets"])
+
+
+@router.get("/{target_id}/history")
+async def history(
+    target_id: UUID,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    identity: RequestIdentity = Depends(get_identity),
+    database: Database = Depends(get_database),
+):
+    """Business target history within both target-read and history scopes."""
+    async with database.transaction(identity.actor, readonly=True) as connection:
+        try:
+            return await TargetRepository().history(
+                connection, identity.actor, target_id, limit=limit, offset=offset
+            )
+        except LookupError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except PermissionError as exc:
+            raise HTTPException(403, str(exc)) from exc
 
 
 @router.get("")

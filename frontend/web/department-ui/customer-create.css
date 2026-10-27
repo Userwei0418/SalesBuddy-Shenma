@@ -1,0 +1,83 @@
+/* 创建客户：直接填写，客户与联系人分区，动作固定在表单底部。 */
+.department-ui[data-department-page="pages/customer-create/index"] { height: 100%; }
+.department-ui .ds-ccreate { height: 100%; min-height: 0; display: flex; flex-direction: column; }
+.department-ui .ds-cc-main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.department-ui .ds-cc-top { display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-cc-progress { display: flex; flex-direction: column; gap: var(--ui-space-2); justify-content: center; }
+.department-ui .ds-cc-progress-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--ui-space-3); flex-wrap: wrap; }
+.department-ui .ds-cc-progress-head span { font-size: var(--ui-text-small); }
+.department-ui .ds-cc-progress .ant-progress { margin: 0; }
+.department-ui .ds-cc-notice { margin: 0; padding: var(--ui-space-2) var(--ui-space-4); font-size: var(--ui-text-small); color: var(--ui-secondary); background: var(--ui-background); border-bottom: 1px solid var(--ui-line); display: flex; align-items: center; gap: var(--ui-space-2); flex-wrap: wrap; }
+.department-ui .ds-cc-requests { margin: var(--ui-space-4) var(--ui-space-6) 0; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-panel); background: var(--ui-surface); overflow: hidden; }
+.department-ui .ds-cc-requests-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--ui-space-3); padding: var(--ui-space-4); border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-cc-requests-head h2 { margin: 0; font-size: var(--ui-text-section); font-weight: 600; }
+.department-ui .ds-cc-requests-head .ds-muted { display: block; margin-top: var(--ui-space-1); font-size: var(--ui-text-small); }
+.department-ui .ds-cc-requests-message { margin: 0; padding: var(--ui-space-4); color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-cc-requests-message.is-error { color: var(--ui-danger); }
+.department-ui .ds-cc-request-list { display: grid; grid-template-columns: minmax(0, 1fr); }
+.department-ui .ds-cc-request-row { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ui-space-2) var(--ui-space-4); padding: var(--ui-space-3) var(--ui-space-4); border-bottom: 1px solid var(--ui-line-subtle, var(--ui-line)); }
+.department-ui .ds-cc-request-row:last-child { border-bottom: 0; }
+.department-ui .ds-cc-request-main, .department-ui .ds-cc-request-result { display: flex; align-items: center; gap: var(--ui-space-3); min-width: 0; }
+.department-ui .ds-cc-request-main { flex: 1 1 300px; max-width: 100%; flex-wrap: wrap; gap: var(--ui-space-1) var(--ui-space-3); }
+.department-ui .ds-cc-request-result { flex: 0 1 auto; max-width: 100%; flex-wrap: wrap; }
+.department-ui .ds-cc-request-result > :not(.ds-cc-request-reason) { flex-shrink: 0; }
+.department-ui .ds-cc-request-main b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.department-ui .ds-cc-request-main .ds-muted, .department-ui .ds-cc-request-reason { font-size: var(--ui-text-small); white-space: nowrap; }
+.department-ui .ds-cc-request-reason { min-width: 0; color: var(--ui-secondary); max-width: min(280px, 100%); overflow: hidden; text-overflow: ellipsis; }
+.department-ui .ds-cc-request-reason.is-rejected { color: var(--ui-danger); }
+.department-ui .ds-cc-scroll { flex: 1; min-height: 0; overflow: auto; }
+.department-ui .ds-cc-form { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--ui-space-6); padding: var(--ui-space-6); align-content: start; }
+.department-ui .ds-cc-existing { grid-column: 1 / -1; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); padding: var(--ui-space-3); background: var(--ui-background); font-size: var(--ui-text-small); }
+.department-ui .ds-cc-existing p { margin: var(--ui-space-2) 0; color: var(--ui-muted); }
+.department-ui .ds-cc-existing .is-error, .department-ui .ds-cc-existing [role="alert"] { color: var(--ui-danger); }
+.department-ui .ds-cc-existing-head, .department-ui .ds-cc-existing-row { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); }
+.department-ui .ds-cc-existing-row { padding: var(--ui-space-2) 0; border-top: 1px solid var(--ui-line); }
+.department-ui .ds-cc-existing-row > div { min-width: 0; overflow-wrap: anywhere; }
+.department-ui .ds-cc-existing-row span { display: block; color: var(--ui-muted); margin-top: var(--ui-space-1); }
+.department-ui .ds-cc-existing-row button { flex-shrink: 0; }
+.department-ui .ds-cc-group { min-width: 0; }
+.department-ui .ds-cc-group h2 { font-size: var(--ui-text-section); font-weight: 600; margin: 0 0 var(--ui-space-4); }
+.department-ui .ds-cc-group-contact { border-left: 1px solid var(--ui-line); padding-left: var(--ui-space-6); }
+.department-ui .ds-cc-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); align-content: start; }
+.department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: minmax(0, 1fr); }
+.department-ui .ds-cc-field { min-width: 0; display: flex; flex-direction: column; gap: var(--ui-space-2); }
+.department-ui .ds-cc-field-wide { grid-column: 1 / -1; }
+.department-ui .ds-cc-field-label { display: flex; align-items: baseline; gap: var(--ui-space-2); color: var(--ui-ink); font-size: var(--ui-text-body); }
+.department-ui .ds-cc-required { font-size: var(--ui-text-small); color: var(--ui-muted); }
+.department-ui .ds-cc-field .ant-select { width: 100%; height: var(--ui-field-height); }
+.department-ui .ds-cc-field .ant-input { min-height: var(--ui-field-height); }
+.department-ui .ds-cc-field-error { font-size: var(--ui-text-small); color: var(--ui-danger); }
+.department-ui .ds-cc-submit-error { margin-top: var(--ui-space-3); padding: var(--ui-space-3); border: 1px solid var(--ui-danger); border-radius: var(--ui-radius-control); color: var(--ui-danger); background: var(--ui-surface); overflow-wrap: anywhere; }
+.department-ui .ds-cc-error-links { display: flex; flex-wrap: wrap; gap: var(--ui-space-1) var(--ui-space-3); margin-top: var(--ui-space-1); }
+.department-ui .ds-cc-error-links .ant-btn { padding-inline: 0; }
+.department-ui .ds-cc-options-status { display: flex; align-items: center; justify-content: space-between; gap: var(--ui-space-3); flex-wrap: wrap; margin-top: var(--ui-space-3); color: var(--ui-muted); font-size: var(--ui-text-small); }
+.department-ui .ds-cc-options-status[role="alert"] { color: var(--ui-danger); }
+.department-ui .ds-cc-bar { border-top: 1px solid var(--ui-line); flex-shrink: 0; }
+/* 其他页面的旧编辑抽屉仍复用这组选择项样式。 */
+.department-ui .ds-cc-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-2); }
+.department-ui .ds-cc-option { all: unset; box-sizing: border-box; cursor: pointer; padding: var(--ui-space-2) var(--ui-space-3); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-control); min-height: var(--ui-control-height); display: flex; align-items: center; }
+.department-ui .ds-cc-option:hover { background: var(--ui-selected); }
+.department-ui .ds-cc-option:focus-visible { outline: 2px solid var(--ui-focus); }
+.department-ui .ds-cc-option.is-selected { border-color: var(--ui-primary); background: var(--ui-selected); color: var(--ui-primary); font-weight: 600; }
+.department-ui .ds-cc-helper { margin: var(--ui-space-3) 0 0; font-size: var(--ui-text-small); }
+@media (max-width: 1180px) {
+  .department-ui .ds-cc-form { grid-template-columns: minmax(0, 1fr); }
+  .department-ui .ds-cc-group-contact { border-left: 0; padding-left: 0; border-top: 1px solid var(--ui-line); padding-top: var(--ui-space-4); }
+  .department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  /* 外框的桌面选择器优先级更高，仅在本页恢复窄屏隐藏侧栏。 */
+  body.department-design[data-route="customer-create"] .web-sidebar { display: none; }
+  .department-ui[data-department-page="pages/customer-create/index"] { height: auto; }
+  .department-ui .ds-ccreate { height: auto; }
+  .department-ui .ds-cc-request-reason.is-rejected { color: var(--ui-danger); }
+.department-ui .ds-cc-scroll { overflow: visible; }
+  .department-ui .ds-cc-form { overflow: visible; padding: var(--ui-space-4); }
+}
+@media (max-width: 600px) {
+  .department-ui .ds-cc-requests { margin-left: var(--ui-space-4); margin-right: var(--ui-space-4); }
+  .department-ui .ds-cc-request-row { align-items: flex-start; flex-direction: column; gap: var(--ui-space-2); }
+  .department-ui .ds-cc-request-main { flex: none; width: 100%; }
+  .department-ui .ds-cc-request-result { flex-wrap: wrap; }
+  .department-ui .ds-cc-fields, .department-ui .ds-cc-group-contact .ds-cc-fields { grid-template-columns: minmax(0, 1fr); }
+}

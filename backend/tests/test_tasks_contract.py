@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
 import pytest
 from pydantic import ValidationError
 
 from sales_backend.api.models import TaskCreate, TaskEventCreate
 from sales_backend.main import app
-from sales_backend.services.tasks import TaskService
+
+
+def confirmation():
+    return dict(execution_protocol_version=1, checklist=[dict(item_id=str(uuid4()),
+        definition_version=1,title="交付方案",acceptance_criteria="方案已经人工确认")])
 
 
 def test_task_routes_are_registered() -> None:
@@ -19,7 +24,7 @@ def test_task_routes_are_registered() -> None:
 
 
 def test_task_create_contract() -> None:
-    body = TaskCreate(
+    body = TaskCreate(**confirmation(),
         description="提交客户重启方案与下一步时间表",
         assignee_account_code="XS001",
         due_at=datetime.now(UTC) + timedelta(days=1),
@@ -30,7 +35,7 @@ def test_task_create_contract() -> None:
     assert body.priority_code == "high"
     assert body.customer_id == "2277ce92-87c8-4b04-9751-453f534b0297"
     assert (
-        TaskCreate(
+        TaskCreate(**confirmation(),
             description="提交客户重启方案与下一步时间表",
             assignee_account_code="XS001",
             due_at=datetime.now(UTC) + timedelta(days=1),
@@ -67,10 +72,10 @@ def test_cross_user_task_notifications_use_scoped_database_function() -> None:
 
 def test_position_and_person_are_exclusive_required_targets():
     common = dict(description="请协助核对客户资料", due_at=datetime.now(UTC) + timedelta(days=1))
-    assert TaskCreate(**common, target_position="operations").assignee_account_code is None
+    assert TaskCreate(**confirmation(),**common, target_position="operations").assignee_account_code is None
     for invalid in [{}, {"target_position": "unknown"}, {"target_position": "self", "assignee_account_code": "XS001"}]:
         with pytest.raises(ValidationError):
-            TaskCreate(**common, **invalid)
+            TaskCreate(**confirmation(),**common, **invalid)
 
 
 @pytest.mark.parametrize('accounts', [[], ['XS001', ' xs001 '], ['XS001'] * 101])
@@ -78,13 +83,13 @@ def test_task_batch_rejects_empty_duplicate_or_excess_recipients(accounts):
     from sales_backend.contracts.models import TaskBatchCreate
     due = datetime.now(UTC) + timedelta(days=1)
     with pytest.raises(ValidationError):
-        TaskBatchCreate(tasks=[dict(description='请协助核对客户资料', assignee_account_code=a, due_at=due) for a in accounts])
+        TaskBatchCreate(tasks=[dict(**confirmation(),description='请协助核对客户资料', assignee_account_code=a, due_at=due) for a in accounts])
 
 
 def test_task_batch_keeps_one_assignment_and_explicit_recipients():
     from sales_backend.api.advice import SuggestionDecision
     from sales_backend.contracts.models import TaskBatchCreate
-    common = dict(description='请协助核对客户资料', due_at=datetime.now(UTC) + timedelta(days=1))
+    common = dict(**confirmation(),description='请协助核对客户资料', due_at=datetime.now(UTC) + timedelta(days=1))
     tasks = [dict(**common, assignee_account_code=a) for a in ['XS001', 'XS002']]
     assert len(TaskBatchCreate(tasks=tasks).tasks) == 2
     for other in [dict(**common, target_position='self'), {**tasks[1], 'description': '另一种任务内容'}]:

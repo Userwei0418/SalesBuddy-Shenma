@@ -1,12 +1,75 @@
 """Resolve task targets from current workspace accounts and effective role/team bindings."""
 
 from sales_backend.domain.tasks import TaskForbidden, TaskNotFound
+from sales_backend.domain.role_presentation import business_role_title
+from sales_backend.repositories.companies import CompanyRepository
+from sales_backend.repositories.identity import ROLE_NAMES
 
 POSITIONS = {"self": "自己", "supervisor": "主管", "manager": "总经理", "operations": "运营",
              "fde": "FDE", "fde_lead": "FDE主管"}
 
 
 class TaskTargetRepository:
+    async def recipient_page(self, connection, actor, *, q="", limit=100, offset=0):
+        """Metadata for the existing company-wide recipient scope.
+
+        Call only after the create or task-specific coordination authorization.
+        No directory.read permission is needed: handing over an existing task
+        intentionally remains available without permission to create a new one.
+        """
+        from sales_backend.repositories.team_directory import attach_member_teams, default_team_id
+
+        rows = await self.recipients(connection, actor, q=q, limit=limit+1, offset=offset)
+        teams = [dict(row) for row in await connection.fetch(
+            """SELECT t.id::text,t.name,t.parent_team_id::text AS parent_id
+            FROM platform.team t
+            WHERE t.workspace_id=$1::uuid AND t.status='active' AND t.deleted_at IS NULL
+              AND clock_timestamp()>=t.valid_from AND clock_timestamp()<t.valid_to
+              AND NOT EXISTS (SELECT 1 FROM platform.team child
+                WHERE child.workspace_id=t.workspace_id AND child.parent_team_id=t.id
+                  AND child.deleted_at IS NULL)
+            ORDER BY t.name,t.id""", actor.workspace_id)]
+        items = await attach_member_teams(connection, actor, rows[:limit], teams)
+        if items and teams:
+            # Task pickers group existing recipients by organization as well as
+            # appointments. This is display metadata, never an assignment scope.
+            affiliations = await connection.fetch(
+                """SELECT u.id::text AS user_id,t.id::text AS team_id
+                FROM platform.user_ref u JOIN platform.team t
+                  ON t.workspace_id=u.workspace_id
+                  AND t.id::text=u.attributes->>'organization_team_id'
+                WHERE u.workspace_id=$1::uuid AND u.id=ANY($2::uuid[])
+                  AND u.status='active' AND u.deleted_at IS NULL
+                  AND t.id=ANY($3::uuid[]) AND t.status='active' AND t.deleted_at IS NULL
+                  AND clock_timestamp()>=t.valid_from AND clock_timestamp()<t.valid_to""",
+                actor.workspace_id, [item['id'] for item in items], [team['id'] for team in teams],
+            )
+            affiliation_by_user = {row['user_id']: row['team_id'] for row in affiliations}
+            for item in items:
+                if affiliation := affiliation_by_user.get(item['id']):
+                    item['team_ids'] = sorted({*item['team_ids'], affiliation})
+                    item['team'] = ' · '.join(team['name'] for team in teams if team['id'] in item['team_ids'])
+            # Keep team_id unchanged: resolve()/position_members() use the real
+            # business appointment when persisting a task's assignment history.
+        labels = (await CompanyRepository().role_labels(connection, actor.workspace_id))["labels"]
+        kinds = await connection.fetch(
+            """SELECT p.user_id::text,p.role,
+                ARRAY(SELECT COALESCE(t.attributes->>'kind','general')
+                  FROM security.account_team_scope($1::uuid,p.user_id,p.role) s
+                  JOIN platform.team t ON t.id=s.team_id::uuid AND t.workspace_id=$1::uuid) AS department_kinds
+                FROM unnest($2::uuid[],$3::text[]) AS p(user_id,role)""",
+            actor.workspace_id, [item["id"] for item in items], [item["role"] for item in items],
+        )
+        by_member = {(row["user_id"], row["role"]): row["department_kinds"] for row in kinds}
+        for item in items:
+            item["role_name"] = (
+                business_role_title(item["role"], labels, by_member.get((item["id"], item["role"]), ()))
+                or ROLE_NAMES.get(item["role"], item["role"])
+            )
+        more = len(rows) > limit
+        return {"items": items, "has_more": more, "next_offset": offset+limit if more else None,
+                "teams": teams, "defaults": {"team_id": await default_team_id(connection, actor, teams)}}
+
     async def recipients(self, connection, actor, *, q="", limit=None, offset=0, target_role=None, business_only=False):
         """Workspace recipient directory; selecting a colleague grants no CRM access."""
         rows = await connection.fetch(

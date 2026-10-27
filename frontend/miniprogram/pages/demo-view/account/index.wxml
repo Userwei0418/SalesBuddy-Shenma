@@ -1,0 +1,10 @@
+<import src="../common.wxml"/>
+<view class="page"><view class="page-header"><view class="heading">我的</view></view><template is="state" data="{{loading,ready,error}}"/>
+  <block wx:if="{{ready}}"><view class="card profile-card"><view class="profile-avatar"><image class="nav-icon" src="/images/icons/tab-profile-active.png" mode="aspectFit"/></view><view class="profile-main"><view class="record-title">{{account}}</view><view class="muted workspace-meta">{{companyName}}</view></view><text class="status-tag tone-good">已登录</text></view>
+    <view class="section-head"><text class="section-title">账号信息</text></view>
+    <view class="card"><view class="field"><text class="muted">所属公司</text><view class="field-value">{{companyName}}</view></view><view class="field"><text class="muted">账号</text><view class="field-value">{{account}}</view></view></view>
+    <view class="card"><view class="entry" bindtap="openPrivacy" hover-class="row-pressed"><text>隐私与数据使用说明</text><text class="chevron">›</text></view></view>
+    <button class="logout" bindtap="logout">退出登录 / 切换账号</button><view class="brand">神码 SalesBuddy</view>
+  </block>
+  <template is="navigation" data="{{navItems,activeKey}}"/>
+</view>

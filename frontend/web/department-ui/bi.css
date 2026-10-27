@@ -1,0 +1,59 @@
+/* 经营分析：一行范围与季度，两排指标卡，图两列 */
+.department-ui .ds-bi { display: flex; flex-direction: column; gap: var(--ui-space-4); }
+.department-ui .ds-bi-more-bar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--ui-space-3); padding:var(--ui-space-3) var(--ui-space-4); border:1px solid var(--ui-line); border-radius:var(--ui-radius-panel); background:var(--ui-surface); }
+.department-ui .ds-bi-more-content { display:flex; flex-direction:column; gap:var(--ui-space-4); min-width:0; }
+.department-ui .ds-bi-more-content[hidden] { display:none; }
+.department-ui .ds-dashboard-monitor { display:flex; flex-direction:column; gap:var(--ui-space-3); min-width:0; }
+.department-ui .ds-dashboard-monitor-head,.department-ui .ds-dashboard-monitor-controls { display:flex; align-items:center; justify-content:space-between; gap:var(--ui-space-3); flex-wrap:wrap; }
+.department-ui .ds-dashboard-monitor-head h2 { margin:0 0 var(--ui-space-1); font-size:var(--ui-text-section); }
+.department-ui .ds-dashboard-monitor-head .ds-muted { font-size:var(--ui-text-small); }
+.department-ui .ds-dashboard-monitor-controls { justify-content:flex-start; }
+.department-ui .ds-dashboard-monitor .rv-metric { border-radius:var(--ui-radius-panel); box-shadow:none; }
+.department-ui.ds-dashboard-drawer .ant-drawer-content-wrapper { max-width:100vw; }
+.department-ui .ds-dashboard-detail .ant-table-cell { overflow-wrap:anywhere; }
+.department-ui .ds-dashboard-detail .ant-table-cell small { display:block; color:var(--ui-secondary); margin-top:4px; }
+@media (min-width:721px) and (max-width:1000px) { .department-ui .ds-dashboard-monitor .rv-metric-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.department-ui .ds-bi-bar { display: flex; align-items: center; gap: var(--ui-space-3); flex-wrap: wrap; padding: var(--ui-space-3) var(--ui-space-4); }
+.department-ui .ds-bi-quarter { display: flex; align-items: center; gap: var(--ui-space-2); }
+.department-ui .ds-bi-quarters { display: flex; gap: var(--ui-space-1); }
+.department-ui .ds-bi-meta { margin-left: auto; font-size: var(--ui-text-small); white-space: nowrap; }
+.department-ui .ds-bi-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ui-space-3); }
+.department-ui .ds-bi-kpis > * { min-width: 0; }
+.department-ui .ds-bi-countdown { font-size: var(--ui-text-small); padding: 0 var(--ui-space-1); }
+.department-ui .ds-bi-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-4); }
+.department-ui .ds-bi-charts > * { min-width: 0; }
+.department-ui .ds-bi-h { margin: var(--ui-space-2) 0 0; font-size: var(--ui-text-section); font-weight: 650; display: flex; align-items: baseline; gap: var(--ui-space-2); }
+.department-ui .ds-bi-h small { font-weight: 400; font-size: var(--ui-text-small); }
+.department-ui .ds-bi-quarter { min-width: 0; flex-wrap: wrap; }
+.department-ui .pc-bi .pc-kpi-hint { white-space: normal; overflow-wrap: anywhere; }
+.department-ui .pc-bi .pc-kpi-value { flex-wrap: wrap; }
+.department-ui .pc-bi .pc-kpi-value small { white-space: nowrap; flex-shrink: 0; }
+.department-ui .ds-insight-period-note { margin: 0; font-size: var(--ui-text-small); }
+.department-ui .ds-insight-context { display: flex; gap: var(--ui-space-3); flex-wrap: wrap; color: var(--ui-secondary); }
+.department-ui .ds-insight-definition { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+.department-ui .ds-insight-summary { padding: var(--ui-space-3); border-radius: var(--ui-radius-panel); background: var(--ui-neutral-soft); line-height: 1.6; overflow-wrap: anywhere; }
+.department-ui .ds-insight-definitions { margin: 0; }
+.department-ui .ds-insight-definitions > div { padding: var(--ui-space-3) 0; border-bottom: 1px solid var(--ui-line); }
+.department-ui .ds-insight-definitions dt { display: flex; justify-content: space-between; gap: var(--ui-space-2); font-weight: 600; }
+.department-ui .ds-insight-definitions small { font-weight: 400; color: var(--ui-secondary); }
+.department-ui .ds-insight-definitions dd { margin: var(--ui-space-2) 0 0; line-height: 1.6; }
+.department-ui.ds-insight-drawer .ant-drawer-content-wrapper { max-width: 100vw; }
+.department-ui.ds-insight-drawer .ant-table-cell { overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .department-ui .pc-bi .pc-kpi-value b { font-size: var(--ui-text-section); } .department-ui .ds-bi-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .department-ui .ds-bi-charts { grid-template-columns: minmax(0, 1fr); } .department-ui .ds-bi-meta { margin-left: 0; white-space: normal; } }
+
+/* Adopted actuals are a separate row, not additional forecast metric cards. */
+.department-ui .ds-dashboard-actuals { min-width:0; }
+.department-ui .ds-dashboard-actuals-heading { display:flex; align-items:baseline; gap:var(--ui-space-3); flex-wrap:wrap; margin:var(--ui-space-1) 0 var(--ui-space-3); }
+.department-ui .ds-dashboard-actuals-heading h3 { margin:0; font-size:var(--ui-text-section); }
+.department-ui .ds-dashboard-actuals-heading span,.department-ui .ds-dashboard-actual-value small,.department-ui .ds-dashboard-actual-source { color:var(--ui-secondary); font-size:var(--ui-text-small); }
+.department-ui .ds-dashboard-actual-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--ui-space-4); }
+.department-ui .ds-dashboard-actual-card { min-width:0; padding:var(--ui-space-4); border:1px solid var(--ui-line); border-radius:var(--ui-radius-panel); background:var(--ui-surface); }
+.department-ui .ds-dashboard-actual-card header,.department-ui .ds-dashboard-actual-value { display:flex; justify-content:space-between; align-items:center; gap:var(--ui-space-3); flex-wrap:wrap; }
+.department-ui .ds-dashboard-actual-card h4 { margin:0; font-size:var(--ui-text-section); }
+.department-ui .ds-dashboard-actual-card .ant-tag { margin:0; }
+.department-ui .ds-dashboard-actual-value { margin-top:var(--ui-space-3); }
+.department-ui .ds-dashboard-actual-value strong { font-size:28px; font-weight:650; font-variant-numeric:tabular-nums; line-height:1.7; overflow-wrap:anywhere; }
+.department-ui .ds-dashboard-actual-value span { margin-left:var(--ui-space-2); color:var(--ui-secondary); }
+.department-ui .ds-dashboard-actual-source,.department-ui .ds-dashboard-actual-warning { margin:var(--ui-space-2) 0 0; line-height:1.6; }
+.department-ui .ds-dashboard-actual-warning { color:var(--ui-warning); font-size:var(--ui-text-small); }
+@media (max-width:720px) { .department-ui .ds-dashboard-actual-grid { grid-template-columns:minmax(0,1fr); } }

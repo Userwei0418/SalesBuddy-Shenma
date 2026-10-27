@@ -1,0 +1,2199 @@
+{
+  "frontend_revision": "4d9491637dbb785c09b5c904b57ad509dcf6ea83",
+  "registered_pages": 26,
+  "files": {
+    "app.js": "58c9e47116f961326ae1b87d13d206191bbc3c08d5f5fc9abc0047fbd6d63c8e",
+    "app.json": "d862898a400c45cabaa42d77ac156e2dbe5ea2e61e1b3dd5c61c540adb403360",
+    "app.wxss": "ceea245dce346d609f50e26d458c96194698ee794acfecfbd22c979d0732e6a3",
+    "components/advice-actions/index.js": "3ecbbf21eb45176bac0cb92ef7aaeb7d6c0c11f1087061956fe70124ad572f41",
+    "components/advice-actions/index.json": "fa055ab7ed7f7d59e47611395e61e314dff8663d649ecd3badc77541f3fe8a09",
+    "components/advice-actions/index.wxml": "3381b372eb8509e45161c540bd7d6cbbb107973d766b26c3865e86a261add4e2",
+    "components/advice-actions/index.wxss": "3b054a7a2f6d897cc2dbb552c597d5e7eea001b2d1351e22c132ce0a30a7f888",
+    "components/dashboard-picker/index.js": "fa9a8de36d3a1b7525639a608b512312693c5183b1e04e6b572da15654e51ad5",
+    "components/dashboard-picker/index.json": "1b423cd1c3eb56962a3f4e62d8805321fda1e33a65a1f07cddeb54cd01239af7",
+    "components/dashboard-picker/index.wxml": "b51825979d9d7cf5f3068f8fef5a6c71e13df7401c123f0bf998fb247bf3811f",
+    "components/dashboard-picker/index.wxss": "9fd8956a82df6545b20834deabfb6456a8ef35186b7179e9acf15a2625f9f7ee",
+    "components/dashboard-ranking/index.js": "699d6635aa26d372c07bc331650188a3a585c1124f516013fdeb54eaa7731d18",
+    "components/dashboard-ranking/index.json": "40c212cce2aedd5625908d1637d281fb170a47bc8591d941ad3a0a92f5fb0198",
+    "components/dashboard-ranking/index.wxml": "acee2392e3dfcd449e91876d88f09fd19dc4a316c2daed63d85bab9cce24865b",
+    "components/dashboard-ranking/index.wxss": "358cae6109b5af6b830cbb434d168eca0c3449c93ec10c3f1352f071ff315609",
+    "components/detail-pagination/index.js": "592b30a8efea7a0efe5e0106c587d0870a91558dc0bd9c65fbefa637ae1997b0",
+    "components/detail-pagination/index.json": "c69b499e09be0f165b4b89daf061ea258a63ef2bce284882b075936af4853128",
+    "components/detail-pagination/index.wxml": "b233be91516400355ffcadd74b62eaa1114b49beb3cda991a709da8ffb85e3c1",
+    "components/detail-pagination/index.wxss": "29cc1774c839c1b69d068ab7a06f58c0c95a28c3c437acb03f0df6e033d79326",
+    "components/fde-dashboard/index.js": "6e9f93c3a309f099bc7a521bbccb080b74ad1c5aa462659737a785509c76cbea",
+    "components/fde-dashboard/index.json": "e10745c0365fcdabcb01951ee161b71ef902002e853d0191009809dedc6a27d3",
+    "components/fde-dashboard/index.wxml": "7ac5f3030a416e9f75491c38e04131336567aaf386aa810d7c5f965de9b6dec7",
+    "components/fde-dashboard/index.wxss": "feeb8b35b38724c67b5b7f00669b58da2e00d09fd029e95bc71487995abcdeb0",
+    "components/fde-picker/index.js": "35cbf83b43837a6517f9aa2e403babcd1b64ba28dade201bd98043dab204149c",
+    "components/fde-picker/index.json": "2f256271193fb239cf892d29befc7c03d7f585a83d696a8387a4c04ce7d7ca9d",
+    "components/fde-picker/index.wxml": "cdd1a3cb420937882e22e8616ed77c999e7fedd916aa117ae504c122b488c37d",
+    "components/fde-picker/index.wxss": "ddcc2b8e02ae39a25885efddde1ea29a834b989e926549f496ad862ee751cdb4",
+    "components/fde-profile/index.js": "31e7643513a547c203477fda01b383434e85ae04902dd9f156b118de850c3679",
+    "components/fde-profile/index.json": "c1e69b4767809d2feed7f9ef5b73860e53dd6d54c47dba4afefa5b6e1e74b7de",
+    "components/fde-profile/index.wxml": "82f0d4a9cf9e7603a8bfdb8c7279bf4de2fe129fa31100d5a214534d0a9b706b",
+    "components/fde-profile/index.wxss": "ce2329aa9ee22ab78b694882d1bc92b92bbfa39a72c8869ae0e795c34b800a7a",
+    "components/fde-projects/index.js": "2dfba633b69b2e16a8040f60d76de083442ae4ab62a38669f5ff7f0c947fdfdc",
+    "components/fde-projects/index.json": "1bda09fc6bb6f2bb4a2ca042ccaa974603d988f2eaf4f15a7032fb8886ad6fbe",
+    "components/fde-projects/index.wxml": "6377cfff529ee3c0c6caa38e29b97261288f11ab050268e69d2dea231a27f7e5",
+    "components/fde-projects/index.wxss": "67dbe15d5acaef2fa41232445207cc27a63b3cccdd8bad0a6e13bba847080baa",
+    "components/fde-visit-opportunity/index.js": "61ca5327415a49e458a5f38505f47a4c11a5ed2cebb6906a5be1d2171a16664a",
+    "components/fde-visit-opportunity/index.json": "fb9b87df8ec6244cf689a5d143abe4b2bcde6b3e8df1c9a12f3559c01028c803",
+    "components/fde-visit-opportunity/index.wxml": "44963f6cf316b0cc6896e577725894078346a7b1e1afb6595e6b7e824925f2d1",
+    "components/fde-visit-opportunity/index.wxss": "f9d2a6137dab10b5c8800045d62a2143a9e4093acf602d478d39f52173018907",
+    "components/member-scope-filter/index.js": "9f9ead61fa61b5ddd7e2dfbeae00b7b17655ecaa48d37cfd52363e19b1fe1a50",
+    "components/member-scope-filter/index.json": "27bc526117f2bf8d7facebb611d671e403bccca8c0aee3b3e46ae8f155ba4ec1",
+    "components/member-scope-filter/index.wxml": "09020ef514acddc3f637f66f709d855b0bbcb33aa86ac337d60f56e69797e03f",
+    "components/member-scope-filter/index.wxss": "10a698a7a25d2cec63816642585b6f73c2b0b8aa680ac8768bb8422949476e06",
+    "components/opportunity-form/index.js": "b0eab607eaad001c171e9f1563c6884ee5978aee11e0d8aa4b3f21250041b9a0",
+    "components/opportunity-form/index.json": "d132c58656a438dc3831f78049d1027236027c18e336c6c47ef0681211236587",
+    "components/opportunity-form/index.wxml": "b31229742c3dc9fea21e1942106b033614db2175846b9fafdf16942c8e301582",
+    "components/opportunity-form/index.wxss": "15415aec6bc8d0bce33f38667240cac0c617d95b860414b22a758c3c861bda08",
+    "components/page-navigation/index.js": "2005afb0f27e4fd4e76f85b432fd183192d9522534249e6c3f2ba8d0d7502846",
+    "components/page-navigation/index.json": "6bcc2e9e536384851fcfbdd823aee8ae4331243636adc4a656a64a44d9cf9318",
+    "components/page-navigation/index.wxml": "6731cdcf1be06c6aba7203b0852829198ea2eb7580e53a5e8425b78874832041",
+    "components/page-navigation/index.wxss": "844a62ce1f5897f950333bd9360d84e4d9e46d9c9f7ebdc70b60b3cae0be6340",
+    "components/person-picker/index.js": "49d06d9e329d9a23e76cca65889b734f9d7fef22bdd4cdd8b32717f17b4645b1",
+    "components/person-picker/index.json": "4d838918b7e1e1faf8f9aafdd28fca221c0c6a4aab330ba232e7ea20fcfccb5b",
+    "components/person-picker/index.wxml": "fbf8c87f75dea2f36ec877be6ddc74aed9fbd643546643f551381eede64fbd28",
+    "components/person-picker/index.wxss": "37542ded9193e03bf6daa02bbdae30554a600eb54d7d182fe118c72eb0986ae5",
+    "components/profile-scope-picker/index.js": "2ad99d6f5a55c43b609de45bd716d0b8f7ca124caf3d9b61a414d9d288456d7c",
+    "components/profile-scope-picker/index.json": "7237107851369c07d1c62cdca362b2ab93be508c9de3a92aeab9a06bed4bf7c1",
+    "components/profile-scope-picker/index.wxml": "5843c61149df736ecbb9ba712285be3acee9f04454b2738fb05ceaeb50b2e57e",
+    "components/profile-scope-picker/index.wxss": "d7123224ad3a45406704238959ff20d1fcca2ed81bdbca13e804d37829f38e32",
+    "components/quarter-target/index.js": "a8a1dac62a77583cf7221fddc2ae4d40961841c27c34f855536185a22349b956",
+    "components/quarter-target/index.json": "edfc0ed07aead13ec8eaac31a7b1e7579645e9275a8890b08404ac8f97a57a96",
+    "components/quarter-target/index.wxml": "23d1e4a6374bf0b574c0039a668b87752b3bcb6307a228c63e26e3e10d4cc387",
+    "components/quarter-target/index.wxss": "7db4fd9b777d1146f03db341ab22dca9ec9de49ef1c4f753f9314ab3b0090eb3",
+    "components/review-summary-card/index.js": "0e7fef6b043fae6b1e0a0373aed48f3328eab01cf4b883b891077784c8656fa9",
+    "components/review-summary-card/index.json": "86322bd42b2781a45deca615ce6e06b2a8bc6c68a61468d76933b89e15867af9",
+    "components/review-summary-card/index.wxml": "26d689c9654386aa682af2018034e253b829335b7d4fd59eee7ef8416ee9a216",
+    "components/review-summary-card/index.wxss": "35573d06373952932bce491758ea622ebb7fee5071ff901877cf455acc57fbe0",
+    "components/task-cancel-dialog/index.js": "9aa5ab933a406ccd41d91c3ce649aa16a14be7de209417e8d7a2a06f3b015bdf",
+    "components/task-cancel-dialog/index.json": "0d2c2b80f0ba29cb3f56e6a28a3bd93f1bdc69d3b59f3b5581ebf66004c81f04",
+    "components/task-cancel-dialog/index.wxml": "2fe03c7453b98e7fd821bc9af871f6b2377f6dbc653e22b8c87746b3a5f4141b",
+    "components/task-cancel-dialog/index.wxss": "04bb8fc288840338e86dc3f4f468d6923dc9699305001faa3341dd2408ac6486",
+    "images/icons/avatar.png": "0f62ddcf18042b612262fa25ad60a08ffbc8711e6b28ff7a060fee389b7a11f6",
+    "images/icons/business-active.png": "2157cefd41a531a50f495aa37581a70e907a5ac2dd185b3229894c490aa5fb5c",
+    "images/icons/business.png": "b6ff708920696a56e2c428cf564b4a1b063d48dbbeb70a6506a50017a4d4e529",
+    "images/icons/close.png": "826f6fba339c5c679d4b349d7c77791cbd5f67a874b3845e87197740b7ad524d",
+    "images/icons/copy.png": "981011aa8fccf1c7f5548d4a3d1b92a7117d7d8ef5ff4b8404b5821c64ff348f",
+    "images/icons/customer-service.svg": "1b856120d7f1fff02a61956207b0d9eeb2105421320860e1307f41678af5c37e",
+    "images/icons/examples-active.png": "472e85cc1ad44529ec48984bd4de8e2dbd2005ccabcbfca3ef0f6fe963efbbe7",
+    "images/icons/examples.png": "ad40fd589b526486e58da35be6a80c96fe3b6fcf3865c981092b4dfee154af0e",
+    "images/icons/goods-active.png": "5e0e5c6644c095ba6e4bbcf5d8ac98c103f38569fc1f33e19a5104be9397a0ac",
+    "images/icons/goods.png": "9220a9208ee43c40022660c86dc585d6570d36d692c573060fa04ae16d9e18c2",
+    "images/icons/home-active.png": "cb24b98068b816229f79bd51d9a319168ada66eabc6bb5b1c32f5e0b8e126e3b",
+    "images/icons/home.png": "be4012b5a17e53cc68d7ece49d0bdd285b1732610c129f2a7b3bca8360295a61",
+    "images/icons/microphone.svg": "e87c435a37c09368a97fed46043bd3570c48e6810c03837e19eed0589ca0cf3a",
+    "images/icons/question.svg": "219b5980fd99ea067a26fc70fcccc97cb15661bcf2c536c012ba54f5960434f6",
+    "images/icons/setting.svg": "2a51c6cf1d0b2b478bae284571813d65fc9d9a9d749dc44b64b8d5be87dc492c",
+    "images/icons/share.svg": "12a3e375498282f01f24a8f95bceced10425456dcd2344ada908aac858e647a6",
+    "images/icons/tab-assistant-active.png": "de5972fc929daee765e7b708d156efa928460235c84a854413e87a83824b3e3b",
+    "images/icons/tab-assistant-active.svg": "e48675a9a3a2c561d59e5b543b872271725d0a3a28d866a2759d340ad4b42daf",
+    "images/icons/tab-assistant.png": "8b05c1cdffa201cbdd8a9e7debcae84146ebbe6a11f680b0995966d61cde68ba",
+    "images/icons/tab-assistant.svg": "6e5d8fd9e7a42609e7957c30abaeb479045c54d717238cbb2e1fd94837ccdf04",
+    "images/icons/tab-customers-active.png": "49eace7171aa6388c2ffde8ac5cecfff5298179b684dc7207637211bcc139647",
+    "images/icons/tab-customers-active.svg": "368ce4f6cf4781b21792d54bb3040ae7abeef2baee4a263e5dc143b5252b8c8b",
+    "images/icons/tab-customers.png": "93bd85b05e89ca7871e37c1c0fd266c45124c85aefe5b823d83ead298569c165",
+    "images/icons/tab-customers.svg": "9ead03af001110eb45acad10aae44a1f951e71a1382d9e1a3d3931e62dbe6533",
+    "images/icons/tab-profile-active.png": "1c60cc7219302317033b99ed707ce9b4f447495e1a569fba427dc540d3c9a87d",
+    "images/icons/tab-profile-active.svg": "4b4558f0210d8e97507eefc85db4206a94e5e26b7a43362e9dd76ed43aaee8c2",
+    "images/icons/tab-profile.png": "a204065726d0e5252c064ebff3b265880622043313c3f0eefae734e9ce8f0215",
+    "images/icons/tab-profile.svg": "5d1cc2901605b4f76a6e0b7ff9013590290fb8d318e021bd8b840cf110d3615b",
+    "images/icons/tab-workbench-active.png": "4f97eda33ef5cfcc59b2c99bf515d17f5386dd9edeacc75bd9bf981bce21fa11",
+    "images/icons/tab-workbench-active.svg": "379424d18438c2b5fc0f9252f9c7c66135ffc254fbda81502e414c3204abf865",
+    "images/icons/tab-workbench.png": "8397e5bc26273d35597f29f7c82419e2d9febc8c6c4db8909b9d712026310774",
+    "images/icons/tab-workbench.svg": "ecdaa5063072dd19c5d7457c51fcd74007d63af79ce696647653f57a6307e666",
+    "images/icons/usercenter-active.png": "9e916c0f7e57cb735e5dbf59f81eb79e0a21d89427c73c2cba88f3804309db43",
+    "images/icons/usercenter.png": "e0b84555631657cb0c5e214aa6b14e5b24c21890a8d72183a5eb7098531a7f75",
+    "images/raccoon-salesbuddy-white.png": "917950fb50b3d53d4122a6885468938f2314191af22eb9256541b96c06fa368f",
+    "images/raccoon-salesbuddy.png": "ba9c42ba5a9b7b30778c061b9a8d24d212e3684f1d8855f60565ea9d302b01a3",
+    "images/raccoon-white.svg": "751f82247e4e52eaf7ece57cd87287ccacebfe3c0fd9f8f939f2f6e3bbb2634a",
+    "pages/bi/index.js": "3a937821ec2d253fb48643da367ef45de3c2bd1f6948d0cca4c59780e9f7a068",
+    "pages/bi/index.json": "7b518ea2f24d4adcbd259f1cd82274adfce0f55cfc4a12ad6e27b18a2a4215ed",
+    "pages/bi/index.wxml": "578b4a9241be0b4764e52561951ab0d27829db02775d2448135d69dec72d2174",
+    "pages/bi/index.wxss": "33d771df90865bd428751d8fbcc8a4c3fa91744389bd2c3b021c3e2147273112",
+    "pages/customer-assets/index.js": "6e1903cee2a4727c6cc582aa41df1391e1a7c044e496ac3572d2dedff297c102",
+    "pages/customer-assets/index.json": "563b303d260eb615e9a5ee37abd8a60f114d6b5bb4fbb6df0e1115de74e528de",
+    "pages/customer-assets/index.wxml": "6b8f93938721ed0de1d97bc6464cecd79e719a92ac324da75d7454c4b40ef42a",
+    "pages/customer-assets/index.wxss": "a15677b9ffedf1629fb44053a4baf39fe2ca08e5f3d9a7ece9fd96732d1bec11",
+    "pages/customer-assets/opportunity-view.wxss": "dbaa929d1775b538f6f2958136a6365c9a2b3023c03246fb732d0db9ceea3734",
+    "pages/customer-assign-confirm/index.js": "55c1706d8eab86e085542565d086706e9009496c3b1de50d3e4b77015dd68762",
+    "pages/customer-assign-confirm/index.json": "1f882d64b08e2a879893851f1410b00390991370b28f1a9a211517f86177561d",
+    "pages/customer-assign-confirm/index.wxml": "1d20b5ab79649188ecf1631bb9d18f1015948dd2fbb68f8a954d5a2c94f90f9f",
+    "pages/customer-assign-confirm/index.wxss": "9e18bfaf90a279f010e192f27029ec4f72e751cecf6d2f164cefe71173ec110a",
+    "pages/customer-claim/index.js": "e9d7ed3e4cad3c9e97150774434704ff6f51b9311bb5cc99c262701ca4a19940",
+    "pages/customer-claim/index.json": "8ac60ac8204bea7b013d722560f6cf23fc00c2293f4eff24e867022d25a09743",
+    "pages/customer-claim/index.wxml": "c2c7ce7c96865fc5e6e7fe128087d4c620960476b7b9766b5e6b14ad2a298804",
+    "pages/customer-claim/index.wxss": "a2fbb32a243db1d95c0ea2053c5ade8261405b8956cef2cdd4df9b3d0aeb9509",
+    "pages/customer-create/index.js": "a041ccd3ea4dfd19932b495972f3e9f029f46f8eea3a3b3dc88ccbfbca33523a",
+    "pages/customer-create/index.json": "8649d7db02f9139afbcf097f2b856032f67be314f291428994df9def21bd950c",
+    "pages/customer-create/index.wxml": "dead4f3cc0fe5d6539e48c55c7018ff7f99d091a647981ea2530d73153e8058f",
+    "pages/customer-create/index.wxss": "da6f4b4de58a08ba54ffcc82386cc21dc1a5c90217d6179079eeb5a9e4604fb9",
+    "pages/customer-detail/index.js": "ec1715f265bcf627bbb82dff67b87aa4c81cfbb594c28bc2160dd3eb2001f748",
+    "pages/customer-detail/index.json": "64d74c3df85da837eb3983357f62162e74cee2b6b1346709b9f1460320f97908",
+    "pages/customer-detail/index.wxml": "439851db1499e7ceb3bce4f12a62f57e6d06499cd1c32c3accb9a65970327519",
+    "pages/customer-detail/index.wxss": "30e2f61c0c41f0fd9923041e6dfb4f6fa902deb005f80d52699842373cbe5b98",
+    "pages/customer-edit/index.js": "32c9d24ac1e7fce6f60ff74d144992aec5a696c2ccebe455abb047e025852e3c",
+    "pages/customer-edit/index.json": "b2b0b8634033429f52a7892f93acd62176fcf37102b6e9c18d9f84ac17b851c4",
+    "pages/customer-edit/index.wxml": "74559a2d8cfd6fd11c0291a6378d7d21ef6e7e6657692c368825826f858bbc74",
+    "pages/customer-edit/index.wxss": "b773d5477f1f5c8119ea5838517e0017e409e5371d80a6c2d96005a719dd28a9",
+    "pages/customers/battle-map.wxss": "05541c74f14f2a749cff364414a317079e6ec0039ac44f2aab41ef5e9b373bea",
+    "pages/customers/filter-bar.wxss": "57fdfd17a81a3205fd5c8a2de1a279842ce61ec5e542bf945f05238e44659549",
+    "pages/customers/index.js": "7c82d73501adbee75684e651c880cec65a893765616c354423f118b82668edcd",
+    "pages/customers/index.json": "1d1fd9c465c3ed9ac6d307c73b57200cb331f12b82f75468d3be71be0cfce906",
+    "pages/customers/index.wxml": "2bfe8fd3ea1562db4768755af779b3515a0a710363d674cf019e0ec6e24cee23",
+    "pages/customers/index.wxss": "a57812e4453b20a164ca65ee8e5c82f39ad787c4d61d618d4e7aaeb19acb9567",
+    "pages/customers/opportunity-actual-link.wxss": "f24ff4ab2b37651534cebdcf81b22f3c2fa311fa5311db7652c997760e4a7bc7",
+    "pages/demo-create/index.js": "663dca49be69be1c9055a63c24c4555509fe2687a28ab8fef945f772b4561df9",
+    "pages/demo-create/index.json": "5d15a1153fd3b4b63f3b7ea9685197d696ac95a6e9cf85934338eba3ab238b81",
+    "pages/demo-create/index.wxml": "6f6824ccb56715179c3a6efbe5b07a10635cea15da477161378285961becf676",
+    "pages/demo-create/index.wxss": "4e8e329363830f9f148df53109b17bc39643d67005d9955a37aff07e92c65cb3",
+    "pages/fde-records/index.js": "40f94e5c5d5127b54e4218eec9402bde08b00a36a1c75a19cd8e82c3a47074cd",
+    "pages/fde-records/index.json": "346740c6bfd3614a1a8ae38b34dd321fdc711bb496c071e283e7fd71284384b6",
+    "pages/fde-records/index.wxml": "39efe7941986aab0415c63a2584535baf0c2f57c6ed3b578e54eede43dcb01b6",
+    "pages/fde-records/index.wxss": "8d6b2b49dd45615a8d1a37f24662b728f63fbe3ec002d6a7f6fd1c1e9afc2c5a",
+    "pages/index/index.js": "473e4d9f48f6aa247188295a37aed8c4ccce07b475d22a71b268466593d9d872",
+    "pages/index/index.json": "2eea98db067fbd6b924b422a4325daa3e4759d13c165fb27640cabbbe75c994c",
+    "pages/index/index.wxml": "e862a0dad46d658977a94bb9760e17d76fb38db25eaa34745f745bb8621f9dbc",
+    "pages/index/index.wxss": "afcff61b25459831c41ad570c19f811e30b12f7e6f51a2fbf8d20d037c297c7c",
+    "pages/login/index.js": "fd57f4821904771096d60a35d5943292a42d3e4259b46a648af1d16091682084",
+    "pages/login/index.json": "9249b5e7c1af7967e0a50402630971db6a352ce4717b466b937e83e99295c963",
+    "pages/login/index.wxml": "3dd2f0da979502eec0687b22c83567828abb5bb9b362f12618cf4db889c88a3b",
+    "pages/login/index.wxss": "54a3079a344901f7d751f1fdfe55af747ed74a88a6a0faaa465c72e10be9abfb",
+    "pages/management-task-create/index.js": "02a2c067e42e83783008a68c71b719cf717db7c32f5c846078b07f9ebcd2434f",
+    "pages/management-task-create/index.json": "afe467aa54ea7775087073623f26c41e2230f6c89214ea62b98f48181e8b5f03",
+    "pages/management-task-create/index.wxml": "45283e34888a90d0bdd36c7a04c0797e813a99bcb7123e671be524d7a3cd9f52",
+    "pages/management-task-create/index.wxss": "4541d909894b20ab0a7b001e0e9f811e71670e56e07b4d362342b4ffb4306f3a",
+    "pages/member-growth/index.js": "b44abe980ea6bc58a236ef87161a7dda93ce608603091acf6c494884812b41b6",
+    "pages/member-growth/index.json": "2a7822d2dc60344643e1f081b1abaec5f68bbe4ff1523ef16f73fbda0ad94ff7",
+    "pages/member-growth/index.wxml": "f70ccdf2073e50167577c3c7d54f04a563ed1ecc53e0a0963b3b5d92afa679e8",
+    "pages/member-growth/index.wxss": "267c044c85729046b98e594c8d5c10e46f9e75c8939c4e8f6e5a49ac9eead6d6",
+    "pages/opportunities/index.js": "758ba010f18ca99ff520cb2e9da9c77228f3c7a70e4db76e19dc6088a8235507",
+    "pages/opportunities/index.json": "da3c6954aa54853a8b123e1a339f2e78bf75192eeb259f01d26438dcd8fc5667",
+    "pages/opportunities/index.wxml": "e052918c7b002205fda334e1329529facac7a544c008c4557cdc67dd722857a4",
+    "pages/opportunities/index.wxss": "aaaab92565482ac3bd06f82fccc8b9b5c3464889e975233d24efaeef57ae46f3",
+    "pages/opportunity-create/index.js": "bd3333c23041ec1710e12ba3b50e3ed63e11ec37cf43f9d394dbd9737cb3ae77",
+    "pages/opportunity-create/index.json": "285af24f99128214fe0c31b1e839ac903bfac640760adcad2944487a7bdb463a",
+    "pages/opportunity-create/index.wxml": "065a81a75d4e9ffc436da85a52ca43301996a5652893e60e6747a6b97bf079fb",
+    "pages/opportunity-create/index.wxss": "35da01e14e3f2495482870485749a05a90dcc718a10c96e66857220666e09a7e",
+    "pages/profile/index.js": "99b589a4a409ae8a33cee40a7bdefe7bf96826b13c18761a344894f7b11aef72",
+    "pages/profile/index.json": "dc0e75a4c123f4d4d17f3305d1db91be27080ab1973139a803c8a0440fedbbb8",
+    "pages/profile/index.wxml": "e0f7de1080db56783c33f897f3fbb95670f9cd3915f3925349576ba584e0435a",
+    "pages/profile/index.wxss": "7f487d0121c67128457eca56ea2daef433df9ad0dcf17f88de437bd393994e1e",
+    "pages/profile/profile-compact.wxss": "fe506973a8570c02f7b187b7529ed6d475007b0bd35ef9badc85fb35b87536bd",
+    "pages/report-detail/index.js": "9ea2c129d4ff0bc14fc1d914a62f44b16ae912dae32b744a70387f3a0eb2542e",
+    "pages/report-detail/index.json": "c53d78d82cebb7d78de52c3444a13bfae897e697a6be5049cd0951f566f335e6",
+    "pages/report-detail/index.wxml": "087cedf6a866027558cf711066bfaae8e42e09e1f9d1ecf5a0c77e7d35b7338d",
+    "pages/report-detail/index.wxss": "41cd0b882814a919f77410d480d03be67a32c4d0fb9485401037c4236feb959a",
+    "pages/risk-detail/index.js": "6504a6c4c5b97489894baf089e88143adb477f084c6302b3c0967765307f9df4",
+    "pages/risk-detail/index.json": "ac08e6de41c6662fd38f54f1eb4af8979f6dab718d396f9e4b2b04b84d378925",
+    "pages/risk-detail/index.wxml": "7a8fa6230dfa08f1703fa91e06c9a8db49416c5d9853553c9311f9b6417f8172",
+    "pages/risk-detail/index.wxss": "447ef07f2cd7da0e84106fd1880fe883ff24a4eb3e910fb25ff35413e80a95dd",
+    "pages/risks/index.js": "1e9b43d6d43f68e7c8c2098205d88c980f1f5561b3ce8a4b1d81d43aae087a0b",
+    "pages/risks/index.json": "3122d7a6ce51cba43b7749beeea7274b6b3f25417cb3a40a446d713026921ad9",
+    "pages/risks/index.wxml": "58e2938d962ae137e16aef64c9431462f5b42442a517eb6b8a4d9aa85ff112da",
+    "pages/risks/index.wxss": "4272e8acbe8b99c8538149dc5bc501c48281c06f836ad2768693da96691ecb6a",
+    "pages/task-detail/index.js": "bbf15b573c73fe8af7361fe1e13e541fa0e240b040145285b563e325da90a366",
+    "pages/task-detail/index.json": "883f181fae82414b72944c6dd34d013e4bf9b440ce7d6338bb4719695b141075",
+    "pages/task-detail/index.wxml": "3f8d28d5dcc96595cac2c5f651dfe702a601ef9f840e2989a6229d2379ec31fc",
+    "pages/task-detail/index.wxss": "525ec5d8fadb077377e7406837c48bef9d51016b6449a23642c8ed4a9d2bd8c5",
+    "pages/tasks/index.js": "44cbd987930b55df2cc0605493007dcae146eb5bebe7055b824af2c0a1f839b1",
+    "pages/tasks/index.json": "23bad05f5339eba817c17c571d2ceb591fc832df0f154599936f72f0d70f637a",
+    "pages/tasks/index.wxml": "041e9e5a6b79736fba508898303b70f7c641e13bbb918e72c3956777a80ab247",
+    "pages/tasks/index.wxss": "5b235dd1dd61d606e367b09e1b9fb2f67e23db0bc79a5afc03969697baf4d194",
+    "pages/visit-confirm/index.js": "19f89454bef346113a00c08f71adea50b2f7a0372722ba2662967d7e8d030f03",
+    "pages/visit-confirm/index.json": "07a525f4b164507478069d094fd5d4cd4a606c652780b96f924e78b62d3b1281",
+    "pages/visit-confirm/index.wxml": "ff6dc64b4e5bde3cb43afe5fc2d3ad31ef2aa58024d217cf97b5729b2062256b",
+    "pages/visit-confirm/index.wxss": "e7eb39cd9ef77e64da457b1c5b85e0df323c88613db8fbb22948cba2c2f0ea45",
+    "pages/visit-detail/index.js": "73cfdfab625409300957eac5a6b2a6017a9b9491715c0e42b175dcc0ff847e1c",
+    "pages/visit-detail/index.json": "0c3f4d4a95d6532dbc5186cc4ed56e2afa37acb81677eb938c0ac740708d8f60",
+    "pages/visit-detail/index.wxml": "a5cf27124183f9ee45f524666e5b4baf922c8b0607ee4807779bde220cf00652",
+    "pages/visit-detail/index.wxss": "12848c770b009fc813be7bb472545b7f7e54ac18ba23514ea7113f8833896814",
+    "pages/visit-entry/index.js": "0c46b80c4972a5afe5427a811d5aca4a86ca22201a74c1357ee98b4fcd5e4334",
+    "pages/visit-entry/index.json": "f274a257ec3798695afe16e4c76412de995b15f03a0a9e7f85be2694e61b8fd4",
+    "pages/visit-entry/index.wxml": "d4878a8c4f60863d99998750ab355046482e314124db6b9090fb4971a7125e70",
+    "pages/visit-entry/index.wxss": "0426f3067608087bbe7f7228fd9245589809d945b1fb71a295791d0c76a3c8f3",
+    "pages/workbench/index.js": "a7ac554c2115b48600a24c1c397479e21cfcb401499f430b338e69f50e08ca1d",
+    "pages/workbench/index.json": "8c597b0f2fa2053cd75fa9b34285eb5c5b22bbb63beb76fb35f5922ff09d86f3",
+    "pages/workbench/index.wxml": "8736bb57ca16a81b50adc9b894c52bf9e4498ed96478d344879409878fdbf7ee",
+    "pages/workbench/index.wxss": "73b3290b7a013863e1961af14eae4417646ca25b173b642d96c401d52c308930",
+    "sitemap.json": "9b6f9ce8a1cd47042022491f1a8cd55862a73466f3615a52014b4d350859fbd1",
+    "styles/dashboard-section.wxss": "5d315bb4aa26d053d2f66be4acfff42330fa55f19681fc175ba7f8768bbae55f",
+    "styles/detail-summary.wxss": "467471e82a24bd8f8644a71cf16eb0bb149b89d3fb90e270591d2c808e4eed05",
+    "styles/opportunity-edit-entry.wxss": "9564b23242cb2e24fe0008d455d5b22ccc145d64cc3b84dc820db70f685a5a98",
+    "styles/opportunity-list-card.wxss": "644a01d53bfdfad530f667ff3ce2ad473f8e051cde85c89d95196a5bf39c89e8",
+    "styles/opportunity-list-header.wxss": "dfead4b0caac720265f02d5fcf950a9fc2671447f2c039507ce56a3d34037830",
+    "styles/role-controls.wxss": "dc781533c3e85e86cd3d6b0df24a8689beb2b30d738bc38be0a8e542c9e53e12",
+    "styles/theme-blue-black-white.wxss": "0b42c24feeb77de1b154ff0175cc76a2acbfbde08176f3fde6929364a9320f67",
+    "templates/opportunity-list-card.wxml": "407d00058ecd384010ee60fce99d0e3cc7c7efc05b75e2c513d426e15af2539f",
+    "ui/bridge-tdesign.wxss": "cce552955578f06d0f1e8429091b86ead8491d49dde6229a00d280f8d0878f14",
+    "ui/design-tokens.wxss": "f684f18f725302d554d8a45de42544fe8de1eb4d86d633fd88ffb2ce6f559a9f",
+    "ui/lib/dayjs/index.js": "0198dd0b1f760cded169c7e7ff7eaf56bc36c4c22c7c9b7c683e59437ed8700e",
+    "ui/lib/dayjs/locale/zh-cn.js": "3d1f1f3107fe0a987f7cee1decf475e5766ca0be1eaced33bf39862b3bde517a",
+    "ui/lib/dayjs/plugin/localeData.js": "16e8ff612ead60f8c36e8045c486e4320acd5e53e61db7d644d343236248e78a",
+    "ui/lib/tslib.js": "c0406a0bad51a4815932944a60ee11b323d5f7da110cc0a39114b539ce5ca2a3",
+    "ui/sb/sb-ai-badge/index.js": "f556d08e8698c2bb4ed3ba8d0c099f89e54693914ef3ef0ba59e7bde8fb9a392",
+    "ui/sb/sb-ai-badge/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-ai-badge/index.wxml": "222babc0e6915fcf75bc8450f7a88f95131f6f959567c0322298de4fa8a84edb",
+    "ui/sb/sb-ai-badge/index.wxss": "aec07bb2c1bac9a63602aeb44be6a932fa7ecbec04fbde231c14164383bd3806",
+    "ui/sb/sb-amount-input/index.js": "27aff8a131817212750bb80f64a23a64027d20dde92310372c3bd3f00f1b7cf4",
+    "ui/sb/sb-amount-input/index.json": "0eb31cbf44529b503baf42baf2f85dd76b89adc15b5c47b341702d6152568910",
+    "ui/sb/sb-amount-input/index.wxml": "ad09deac53787d2d59aba4f4949aed00f11f33d8f4ba8ce2a1247bd2ebdf921a",
+    "ui/sb/sb-amount-input/index.wxss": "4f654a1dcb6a87073a36220bb4842769d8992b61d85d7fa0b15fd6a982f60e60",
+    "ui/sb/sb-bottom-bar/index.js": "379ccc93d55dababdd1eb7a7d5b63a503ba2b032d2ad82ac56b4485579236d6c",
+    "ui/sb/sb-bottom-bar/index.json": "d4d85694f1b212c60c3e801626d3329bb5f55abfe7d76652c1efe2f99874201d",
+    "ui/sb/sb-bottom-bar/index.wxml": "63c15ca1a46942ba5f09af8cdb2ea5c2ae06666cd6cf29707fde4812c960e12d",
+    "ui/sb/sb-bottom-bar/index.wxss": "e2e987105f9e0509d00fd7fc1ed9608a939e45ae0a3cd5ecebce501031fe1210",
+    "ui/sb/sb-date-picker/index.js": "fd4f7fceb20a28181e10860939707ffa8a686129fc09a7008c48fefee8979097",
+    "ui/sb/sb-date-picker/index.json": "a397d1d0d8593a39c339caaf827e79db95bf40474dc9f895df6aa7cff3642366",
+    "ui/sb/sb-date-picker/index.wxml": "e4da0c3c6be15166352424e2f52d0f58a945ffe2a0358d30fbdfb8fe5f8f05f3",
+    "ui/sb/sb-date-picker/index.wxss": "3c529e9d718ea4a23c772184d77cd75c5f38329a1e8ee17118e3836fa1f7b3a8",
+    "ui/sb/sb-desc-list/index.js": "8fda7d23cfeb4b8f4eb910840aefd7b9d87e683ffa69a3c51648be1ec7d1e019",
+    "ui/sb/sb-desc-list/index.json": "d6d3f765cfd45cc0ff4da4eca8ed8c0b6e993605f6c7de23deeb9c39980d87f4",
+    "ui/sb/sb-desc-list/index.wxml": "83aa3aa6c47430ff5b56e4c21c1944f72f3df5d4d40caec6fe0ce58d0064be71",
+    "ui/sb/sb-desc-list/index.wxss": "419eeafadd7a98f28b2790ab89432220e43bfcf76b457a3f78ecdd04c68d48cb",
+    "ui/sb/sb-input/index.js": "5182762b02c8fce8ffa350b2aa846af842431d74256493ae4a0b79dea9401dae",
+    "ui/sb/sb-input/index.json": "7cdd40299da727df931656e05d0d4b3c44ad5057fac4770ba3fcb924015b9381",
+    "ui/sb/sb-input/index.wxml": "f2d1d8a784924b08f5559c422c61a0351ac29fa56241cbaaf14002e810f8f92d",
+    "ui/sb/sb-input/index.wxss": "7b27b0f9347cbbbfe15dec7fa6fb3a3ddc4fb50956c0e784800795ff8a345038",
+    "ui/sb/sb-kpi-card/index.js": "25579a689dc7e141e2c58afa188b1ab595afed56f5b652ddb73e255f4397b5ea",
+    "ui/sb/sb-kpi-card/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-kpi-card/index.wxml": "158a3305a4582fdd97902546aa949fabecf502a605ced47623d47b6a600badbb",
+    "ui/sb/sb-kpi-card/index.wxss": "5df96e7313ab26207d62fb4e884fbb5cbb945b9898dc1ba92bf9b91ed59eb043",
+    "ui/sb/sb-labeled-select/index.js": "1a8a3f2afb657df7dd913a0c92d1220766e184d6595f9a1d8e3211e99e246961",
+    "ui/sb/sb-labeled-select/index.json": "4f6eb7c1778cb5536df15d77ea968b508c3636b6fb95d24b61059ae3d6fea144",
+    "ui/sb/sb-labeled-select/index.wxml": "9690bdfe04ffedef5dc6f61fb17b73b5cfc9f2605c030e84309934183c1241a5",
+    "ui/sb/sb-labeled-select/index.wxss": "e89da01a99941214c79d0d67b7425e8ad9362c045bd67d727721801efc258779",
+    "ui/sb/sb-pagination/index.js": "f31a2616e78709b82bad6dfc7352c69245239547ec5bd0851353f269d6def052",
+    "ui/sb/sb-pagination/index.json": "d4d85694f1b212c60c3e801626d3329bb5f55abfe7d76652c1efe2f99874201d",
+    "ui/sb/sb-pagination/index.wxml": "18c0fa8d0dc1de5b2084b1c3ae064201c27a333dbc1a182adcb89f3d4be35f2d",
+    "ui/sb/sb-pagination/index.wxss": "4a2e4ec3f22ee485ae5f6f4a655f550b8da81f915229f43d750528dc41745728",
+    "ui/sb/sb-result/index.js": "530c697471d0f6ee2adb26104606d33d43c0a3e5d8db3229784570862315660e",
+    "ui/sb/sb-result/index.json": "7c329af810d54db0dc4299f15cdf5b70bd32c24a8f3dfc9db7a0ca710b3a842a",
+    "ui/sb/sb-result/index.wxml": "6a70bbbd68fb50e6a2f480170ceefe83bafb7cbade262b09c91806923d28f83b",
+    "ui/sb/sb-result/index.wxss": "afca675adc93bb601d29b8243a32a5d79422ffcb5d85524b4e2f74a08af19fb2",
+    "ui/sb/sb-search/index.js": "e6de56b07e2529531b71d38082879caf762b90919a19231f463f2b0f409980f6",
+    "ui/sb/sb-search/index.json": "5d7e6dcefa7f124528af9f62b299d5bb69c701e22e1ecc0908acd2ddc3fd8262",
+    "ui/sb/sb-search/index.wxml": "44c5ff539acf3bca35af3e41de04dd6b75e0f6332074e6740f25bc72ace0c249",
+    "ui/sb/sb-search/index.wxss": "e7311e6d053023f80b2b1be66e55728fa9213698fbb626edfec1233164fd15ed",
+    "ui/sb/sb-section/index.js": "687c620afb25f8d97f861a7af2c8fe787e43bef384f0a1baab4ea3d39c4ce878",
+    "ui/sb/sb-section/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-section/index.wxml": "c531d5c9a4b66e180b5a9dfb5d973d61949e4d91dd95ee9151c58a799e2ab3a7",
+    "ui/sb/sb-section/index.wxss": "1ab12710ae127ed588b1ee38ce5187d05053ef5c89a4dbb88e0ac76c2d691515",
+    "ui/sb/sb-segmented/index.js": "3c3c866008b8b965cb6464963fbfa2d5a6ea267985fc7947625361cf7919782c",
+    "ui/sb/sb-segmented/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-segmented/index.wxml": "eb46bcf1572499763a2fe98e4aecd557ebcae5153c698bfdf0b7709861d91d89",
+    "ui/sb/sb-segmented/index.wxss": "04f12eaea1cc8a455ec4e31b692c8ae32777d385db854a77a74ed75964fa100f",
+    "ui/sb/sb-select/index.js": "d967d763e556f93834b705cf5407057a8ef6fa53dec26002679f56033318f406",
+    "ui/sb/sb-select/index.json": "4f6eb7c1778cb5536df15d77ea968b508c3636b6fb95d24b61059ae3d6fea144",
+    "ui/sb/sb-select/index.wxml": "fc17290fed0ddc5c32abaa3c8649119b73083f0ca93befff000425dd8b6e56c9",
+    "ui/sb/sb-select/index.wxss": "c4e30ff1ca8d98c15e108f38060d77b257abe7a7541e6a58ee7bfbd1f3828dff",
+    "ui/sb/sb-sheet/index.js": "ff457208c6f772b34ab23d9b37c3d612aa13e46f26335a2a4a0b280ced8f856d",
+    "ui/sb/sb-sheet/index.json": "afc7cf77e541a5a2ac30db04d972677bb4d7337d308e6863b4a597ebf184c62f",
+    "ui/sb/sb-sheet/index.wxml": "49ae4c452f7271962d99f653118130138017799570f7efa84e0ee0a4dfa6ffc3",
+    "ui/sb/sb-sheet/index.wxss": "648a16f93709afd06cd0a0c2d296a08d120487bc6c3e41b5cee40ace4431f5fb",
+    "ui/sb/sb-state-panel/index.js": "7db3867dd86abf0c5c804b44f24794bb5d8054c271fc8e30f819c9d0f4aba2de",
+    "ui/sb/sb-state-panel/index.json": "e9b2c846d912d39549cded5f9e32aefd586d36ad07ed9300484d52710cfd383b",
+    "ui/sb/sb-state-panel/index.wxml": "53a97c440c3accb061222c36602fe72acb863b78ee53422b7010f7a6eaf6aa00",
+    "ui/sb/sb-state-panel/index.wxss": "fcbd3cc643aa0e3e11a4de83e32f1c2d7178ee2572556fbd6fc746a8f2449b46",
+    "ui/sb/sb-status-tag/index.js": "533ce46f0b9dcf192b85d8d31018f2d9a3b899bd841823db29d30743c5fa1a16",
+    "ui/sb/sb-status-tag/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-status-tag/index.wxml": "dc3cdd5188fad731430e870fcaf7baaf859abc2d52819c102b364362ae4c5b75",
+    "ui/sb/sb-status-tag/index.wxss": "d8e36e7afb635badddfd9742736e0b5dc4741026c3918660bb9ff9c5f0e98576",
+    "ui/sb/sb-summary-card/index.js": "0fdb1b407233906f3641a84f494f29de6c1ba92df0868232b32fea2d42fd29e4",
+    "ui/sb/sb-summary-card/index.json": "fded03df33526940398119848364ebf00b0bccf663aaac9256ed7e19e2b99d61",
+    "ui/sb/sb-summary-card/index.wxml": "284543d49e2903e7c4a9c77b2e84a65c6e96986120070765f0bf4f6fb22a3747",
+    "ui/sb/sb-summary-card/index.wxss": "8889c3416c83b0390d6bf6482395fe9e0430af2f759043022da20578467409ab",
+    "ui/sb/sb-tabs/index.js": "7f37553baa5223f89f3ea3da250828690df89239f2c79a0f437257533d9173e1",
+    "ui/sb/sb-tabs/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "ui/sb/sb-tabs/index.wxml": "707833d558e649951b73bbb141eb4ea7316d1ca0ebe071ef28f4f8605cf0d559",
+    "ui/sb/sb-tabs/index.wxss": "b8ee959518febb7d8f68b7491cc0a9f391de6fcdf080621c221ffe6f7b655dc3",
+    "ui/sb/sb-textarea/index.js": "7dd1f648f3fcf62af906d3f80094d7fdcf4b98bf2c57af9141d11d50846620db",
+    "ui/sb/sb-textarea/index.json": "88971c08f71da73c6e9eee146221d602e87a97b8ddbf72b9ef32738e6a3c0ba3",
+    "ui/sb/sb-textarea/index.wxml": "65e66b1a38f09def0b764ad9509eec40d08dc1097d9a3242032d31e203f3a0c6",
+    "ui/sb/sb-textarea/index.wxss": "28c63ee5cc05f1379dfbbe1ce625d9af1d4bf173c1a4af559f3fb2f4e96d0147",
+    "ui/sb/style/bridge-tdesign.wxss": "cce552955578f06d0f1e8429091b86ead8491d49dde6229a00d280f8d0878f14",
+    "ui/sb/style/design-tokens.wxss": "f684f18f725302d554d8a45de42544fe8de1eb4d86d633fd88ffb2ce6f559a9f",
+    "ui/tdesign/button/button.js": "e919e95ee75fc15306538f8273267c7a49789560dbc2f4749349ccd590f5ea3d",
+    "ui/tdesign/button/button.json": "1ecda3c32b2d31cf055e4c71f92463dde00a0eb9168db3fa96b95e59195bdf0e",
+    "ui/tdesign/button/button.wxml": "29abea826310070f8726679f2feed1ab62649d5cb8c3dda4c9626f451fde44b2",
+    "ui/tdesign/button/button.wxss": "0269fb043332ce1e29ce4c2ac89d1483bf3e1cf0b55f183c057e704c5c58ba50",
+    "ui/tdesign/button/props.js": "19828e21875dd9679db307254c3e443fdfd5d8eb5997b46f4447fb8ff742a5a5",
+    "ui/tdesign/cell/cell.js": "5a1c26d31631b338714af21530b56bb48ae4350fb01349827e0ce550de2ea245",
+    "ui/tdesign/cell/cell.json": "52c8532021dac117623334888a0fb68e09521301480947d841c1ab0af933d450",
+    "ui/tdesign/cell/cell.wxml": "dc4c11b098036c56d8da06d797057c8ca78b2c81c08f6feb2d98fa843e9a0622",
+    "ui/tdesign/cell/cell.wxss": "4b61b6e9a762812ff002be52745f460979d7407ecd80fb036e12a56cc72d6932",
+    "ui/tdesign/cell/props.js": "ed29ab943c4451fe0ecd7b4355a1b1f629f9d832a595068fd738a975337ad413",
+    "ui/tdesign/checkbox/checkbox.js": "6ed395796a90dc1b649d0b8c8c9565200a0ad7c249bff4d46724cf23cf3aac52",
+    "ui/tdesign/checkbox/checkbox.json": "2e185239f34e0fa9d7491842348e3296f50d2bf23ca81eeac4a476658fbc5c75",
+    "ui/tdesign/checkbox/checkbox.wxml": "2cf4a4b1f7399de37b4fb6f343113ce850611be3fcd72dc1539393722eabd67c",
+    "ui/tdesign/checkbox/checkbox.wxss": "c12b860f58706481d22549b9f1b35388080d8cecdc7bfeb5ac1e4cb65d4825e3",
+    "ui/tdesign/checkbox/props.js": "6827e4e4191b559a926fa66a639736a7800eda4b0b245888fb78b4660c4cda8d",
+    "ui/tdesign/checkbox-group/checkbox-group.js": "cefd98c98fa3e6516a1d548ad3b9ee006e8edfb149c731a61e66674f6258fa22",
+    "ui/tdesign/checkbox-group/checkbox-group.json": "80b9189b7d3c71f6913eee14443f7c743a3244c17d08d822bf28bf99b3b70f17",
+    "ui/tdesign/checkbox-group/checkbox-group.wxml": "e85c262f32684196f76666e42ba948cfb05d277924bcfa8386a33aef2afd9995",
+    "ui/tdesign/checkbox-group/checkbox-group.wxss": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225",
+    "ui/tdesign/checkbox-group/props.js": "f5f4f4ae0f77a3421f83a1a19e8084dd2feb9a7c977149b12d75da52083dfcd8",
+    "ui/tdesign/common/config.js": "88ab8303ec89457a76220634b6a42a09c30d717f0b9e664cf4856ff389355c76",
+    "ui/tdesign/common/src/control.js": "376848abbd643a9e979234afb3087a0f1a30627a11b52c6d9eefd814f56aab92",
+    "ui/tdesign/common/src/flatTool.js": "65473aedf80143075e5357c83353e20899ff4f936fd63d2d975dbb90132402b5",
+    "ui/tdesign/common/src/index.js": "d11dee512497154925d4c8e778aa061fcb51f27c253a17222db22b6776c589c8",
+    "ui/tdesign/common/src/instantiationDecorator.js": "d2f41ddb858db8281114c9f02ca074b736e53916ad7247b0ee7c34e9dbe8a8d5",
+    "ui/tdesign/common/src/superComponent.js": "7d7a71e559ae14615b0955a89847d21ce51dd6c9795b8abdd0a02a26c0b03325",
+    "ui/tdesign/common/style/index.wxss": "728986ece4beb3d9cda2fbe3a0701e07816b96f48112cd454432691d1cd33ebf",
+    "ui/tdesign/common/template/icon.wxml": "797f507e6c470707e332ef42726d64f898d91d89c5f73ef4e02e04c19551c070",
+    "ui/tdesign/common/utils.js": "166182dd35d7cc64743faa267ea2c07565ed2bec1153417e391a56bfb4a16040",
+    "ui/tdesign/common/utils.wxs": "c814c7310b07f40ae0b6f56e35b2c4e018e8cc51f819d2524de9774258f84a78",
+    "ui/tdesign/common/validator.js": "a9f6d41d03cafc3f1d0c80bb5b67a79ad6346fe9ab730a4c5cb17c34a4b2f167",
+    "ui/tdesign/common/version.js": "d13f4796d55d3b0ac9c4ccd54d3e69822ca137eb8d7576e334a91d7e72c1bda7",
+    "ui/tdesign/common/wechat.js": "dbc8a25656cd7d5ffeedbbec2efb9f8fe437a5da4c54a785bdc4554c3cdc4be9",
+    "ui/tdesign/config-provider/config-store.js": "d5fdc0bdd1a870f10017f3602c43a8b42bbc372831a2da32e36fd60d03599e8d",
+    "ui/tdesign/config-provider/reactive-state.js": "90a07243f9a128afdf383221a3ebc162618bbe9dd139cd1c23dd4eb48ad588ab",
+    "ui/tdesign/config-provider/use-config.js": "723ce53e01732bed8d3d353220bebd86651b61f3cea100ba36be9378c6787b89",
+    "ui/tdesign/date-time-picker/date-time-picker.js": "b72134e66f6ca8bbbfe2b6e5bdb4a1bb06095120874b096a35d0ba11535dc294",
+    "ui/tdesign/date-time-picker/date-time-picker.json": "dff0f7b18ca89fb61185288d8faa08e0bb05ba53ca58a4406ad1193541a40460",
+    "ui/tdesign/date-time-picker/date-time-picker.wxml": "9fab5d88a27de7c6dfa22ca4ccbf9bd947b3c24b6e0a25ef46c9aab1dba1f264",
+    "ui/tdesign/date-time-picker/date-time-picker.wxss": "cfbb0c975fc48c75a6f7e940fcbb401d45dd7c469911661db91a3494e1c2a49f",
+    "ui/tdesign/date-time-picker/props.js": "7357951b87103e3379b0ec76cea98d5e8b8e73cbb14ce46c19385e27aae71754",
+    "ui/tdesign/icon/icon.js": "5648848c6b6b0f0d64251fbe0743eabe67dcc806b37dd25a0ee7ca86167f828f",
+    "ui/tdesign/icon/icon.json": "1abd7a519afa4585ed62780b4c4a044efb2930d21f1bfcd09d822b9b4868aef7",
+    "ui/tdesign/icon/icon.wxml": "2908cf7185aea03253282744165b0fb4336e1ba5281c25796d6a18e3c45b9cef",
+    "ui/tdesign/icon/icon.wxss": "28ac8f60d02e1b7ce7f0fb0627d15335010999a15f8acec1a496c4eda79f5cf4",
+    "ui/tdesign/icon/props.js": "6a69ee311e58c248523f52d61dd92a56c4b751612da5bc5091d2bf41e3d60a0a",
+    "ui/tdesign/image/image.js": "cdb18326d55f2304b0a5e6ac4904ef211106541e9ca4271a529ac2b5c109d221",
+    "ui/tdesign/image/image.json": "b3fa65b0a5bd75defaf8a79bd274ef4e0450264ec4051fdf8d7cc3e240cab67b",
+    "ui/tdesign/image/image.wxml": "8d709a9c1fde4e77de01fbe2a225f3e5f4c3a83cbf7f11f1be4f46942070a61b",
+    "ui/tdesign/image/image.wxss": "618af9d6875ac5da64e85040f0e84e98a1638005fe8fc0904ce12d218edcf891",
+    "ui/tdesign/image/props.js": "15219659ced065f7ca7db65a18873305b9b9b56d3afcd08b8d3a6ae9720d6c52",
+    "ui/tdesign/input/input.js": "845024859e8a317b9006034c159e0f28b26519ea15b22b6d8c4dceb3e1fde72e",
+    "ui/tdesign/input/input.json": "2e185239f34e0fa9d7491842348e3296f50d2bf23ca81eeac4a476658fbc5c75",
+    "ui/tdesign/input/input.wxml": "c2e9e956df1e2b5b90054b9e3bcaad38a22e72567b3c0df4803f38cacc8a50d9",
+    "ui/tdesign/input/input.wxs": "3f63eb9875224805a9ea5649cd15d4600eb91261b899f25e696026bb794fc379",
+    "ui/tdesign/input/input.wxss": "af83c28388bc92cc05d1f6b08b5a23d581bd1e846c3a512b9fdf6aa5399acd1d",
+    "ui/tdesign/input/props.js": "beeb2354435658383d08c06bc804d160d29f41b11020f2106393e3dca23108d4",
+    "ui/tdesign/loading/loading.js": "0100b9c842dc74bff70fd0ea2ee1652c7f986d0191e8cb363b91966f261a999c",
+    "ui/tdesign/loading/loading.json": "1abd7a519afa4585ed62780b4c4a044efb2930d21f1bfcd09d822b9b4868aef7",
+    "ui/tdesign/loading/loading.wxml": "d20734755edb1e5d2169fd748be14be646ec0f0060949b73439f90a66846eaf9",
+    "ui/tdesign/loading/loading.wxss": "bfb456a83ce12afc91e1f83f7e277f1c5c2accc46154e4bd840873f224bb3d45",
+    "ui/tdesign/loading/props.js": "4547ebd6ec08f781936c49c2c4f0d808e522f27137292e506193f4f37e029af1",
+    "ui/tdesign/locale/zh_CN.js": "6ff573a33c30c99c336ac43cbb0d1625eb550a3582957937250e0c56222a9d36",
+    "ui/tdesign/mixins/transition.js": "c5101aa59292694694305bb44ed9421bdf2151b7ac8b61d7fc5bfed03cc373e8",
+    "ui/tdesign/mixins/using-config.js": "953d19336d696f59e6c324e2bef277626cc48d91af253e996eb4cab1a0006b53",
+    "ui/tdesign/mixins/using-custom-navbar.js": "3136e070a65021f02942e15c4f6a530db9d517eb3a559b493d88b706b188d019",
+    "ui/tdesign/overlay/overlay.js": "519d0eadc5c18b8bd96c30a62c675dd96e6bf9c9c7eb4be3119b6186393ff867",
+    "ui/tdesign/overlay/overlay.json": "dcd04eaf580f07ff886e476c2e6c786be20f8334b99247ef5afc64b7947b295d",
+    "ui/tdesign/overlay/overlay.wxml": "7a51c8130342e006cf1e7093b2f1c6027884d65e7a00b72bf28b11306ad52e6b",
+    "ui/tdesign/overlay/overlay.wxss": "cf21c5a334f36ad3383b829ecb23c9340e8f3413848d62b160399d1f123b08e7",
+    "ui/tdesign/overlay/props.js": "607b5242ab7be96f7886dbe4b8f6d0df2ac6ecdf22aaed459c84fd012b579f5b",
+    "ui/tdesign/picker/picker.js": "d8476c96eef57cce7ae8b82d8eadb79e0aff2d0a3ffdf8104f370ff59d7db118",
+    "ui/tdesign/picker/picker.json": "fee33b98b8da42ffbf4998e883c6b34adc1f73848e5d330c460ab56b7503dec5",
+    "ui/tdesign/picker/picker.wxml": "6e432b5c384794ac780016c17d08a77a956a85a31d8d9dfff7059c75c044afc2",
+    "ui/tdesign/picker/picker.wxs": "904925d4352cbfdc52b55e0e13e81a085f277b57b4a65dfff9d9377520c09b2b",
+    "ui/tdesign/picker/picker.wxss": "8abf80784ed88a23c146e896cecb3284fbfb6e6c854e7a36236508b28c848acb",
+    "ui/tdesign/picker/props.js": "65593c3a05196359af77faad35b876698429a8d7a6427844de0af513bb9fb3e9",
+    "ui/tdesign/picker/template.wxml": "4b3ab1b13e453012bd470f1e29b76ca0fe0589ed3d46996b0234adb2800e2e7b",
+    "ui/tdesign/picker-item/picker-item.js": "eece132f8022b257a97e4aedca1ecbdd0788d81d65962e2f06bc00d70fe446ae",
+    "ui/tdesign/picker-item/picker-item.json": "2e185239f34e0fa9d7491842348e3296f50d2bf23ca81eeac4a476658fbc5c75",
+    "ui/tdesign/picker-item/picker-item.wxml": "f78331ea1e3a02f528be18a35174213f798d2f91b781ec9fdea5931ae5485e0f",
+    "ui/tdesign/picker-item/picker-item.wxss": "6a40c2e204a1ed3958850ca7f5840a84de2bb4db00447017071f0e6599bfd3e8",
+    "ui/tdesign/picker-item/props.js": "ff91c306f6bd3374b8283a41c9b170ede2a00f44516f8767c5ee8f5da6f1df69",
+    "ui/tdesign/popup/popup.js": "971999ff5cd138b76ca10ef8f5674086eae34ce3bde8423d89a1c8867f57a0a5",
+    "ui/tdesign/popup/popup.json": "120c58b80d8d964eab9fbfe35aeb8bc500781c76ba9593b91bfb9dc04a11a30e",
+    "ui/tdesign/popup/popup.wxml": "675c4c2937f8649d74b739af3af6d06c017a153602b88a924fd79deb4ebb7e1c",
+    "ui/tdesign/popup/popup.wxs": "2b24333d07a7dcd56b4a1f2c11251c67ee4ae7c528d8792b32acbe724cc20452",
+    "ui/tdesign/popup/popup.wxss": "a10e2b0bdabe7e3faf11dc42868bdd2f8ec4195a5c1c5d697f63e727bde99cb0",
+    "ui/tdesign/popup/props.js": "3d9046f26eac3a1d43e170c91281933d8a68bd4db212530d737268db1d18c222",
+    "ui/tdesign/result/props.js": "fb28117f043a0f188882b5c8a73c69fffbe7d477517ee468b5528653e6dd7ad3",
+    "ui/tdesign/result/result.js": "c7a7420b823d5bb1232fd49a2efbdd67eeebb5c72a9347bc4a38ba822931ef59",
+    "ui/tdesign/result/result.json": "52c8532021dac117623334888a0fb68e09521301480947d841c1ab0af933d450",
+    "ui/tdesign/result/result.wxml": "4f4724a5e867812abc8a6a45aabb680cdd199f9bb4e09a3316b1b75c7322b306",
+    "ui/tdesign/result/result.wxss": "7260344b7f723badcaf17e995d399cad80e9a8b4eef1754176c5a80303baeb7f",
+    "ui/tdesign/search/props.js": "de5355cdb7f49e77821eb10d997c2e5e5a594a43bbc5b65ab499369f56318502",
+    "ui/tdesign/search/search.js": "84ed51ffa0487846ee0c10e033de826d6a23d9a437d65c2cb35d1486381adac8",
+    "ui/tdesign/search/search.json": "4ac8a76e2ea5e66587fb7528d408b1cd5b2264f0175f31836eedffd6473c56ea",
+    "ui/tdesign/search/search.wxml": "3e8a6854978d9af3145ecb8848760d7f69b51a5edc7a59be6da076d914579080",
+    "ui/tdesign/search/search.wxs": "eb221c9662678a6cc0d5493ba7cdfac710524b88aaea87e173e57995df2ccf94",
+    "ui/tdesign/search/search.wxss": "9f12292ca8b1af250311eea40f9b024feed4ac121125fb11887fdaa143a3b332",
+    "ui/tdesign/skeleton/props.js": "0bb30c6fc4422a82222eb22bf4c1eb61e3c61b330a5bb41987546e812f68173b",
+    "ui/tdesign/skeleton/skeleton.js": "eb3b90498b2b3eb735d8f3867297aa587acaf9b784898726eda447c78ab59343",
+    "ui/tdesign/skeleton/skeleton.json": "1abd7a519afa4585ed62780b4c4a044efb2930d21f1bfcd09d822b9b4868aef7",
+    "ui/tdesign/skeleton/skeleton.wxml": "738a306bd4b6e4c0597ba3e02e27d79a776863fdefb5b9aac8bf5aa82d375a5d",
+    "ui/tdesign/skeleton/skeleton.wxss": "0148480de017f1d15edfb251255ee63e7a31aba7e9394174a31eec9781057616",
+    "ui/tdesign/textarea/props.js": "cb27ad5530c2fe49b023e7b61284d7f408c195666ce4c970417709f9686f1e84",
+    "ui/tdesign/textarea/textarea.js": "8d3930a90cafc03f47744dc709fd08d8e874b7428b00552cbfd6664e027926b3",
+    "ui/tdesign/textarea/textarea.json": "1abd7a519afa4585ed62780b4c4a044efb2930d21f1bfcd09d822b9b4868aef7",
+    "ui/tdesign/textarea/textarea.wxml": "6af62c887750054c705e499458d7b425a232a934de9435c1f5793043d4223fbb",
+    "ui/tdesign/textarea/textarea.wxs": "ac1d602b5cb7154f0e947234e38f2b303a9a47efc8d0f5e0da5692ae7eb6b3a8",
+    "ui/tdesign/textarea/textarea.wxss": "c3492f00957b72d4ba6900be0a4db6bcbafc2a86068655d707f16e82a8a9253d",
+    "utils/access.js": "0126854baf451900e15234acb79d151876d916bf94f40ebf81e503666dcf55fc",
+    "utils/advicePool.js": "6ac37e15a28b639c6dd380cdb409f29976e1db9ba5ed2b78d32817a4989c3a10",
+    "utils/apiClient.js": "62f9f81d0c09eaf1544555b371939123bb46b9f6d8235d32ed82951a03812890",
+    "utils/businessOptions.js": "f054f4f617b47bab10f3ba53cc45cf871e4a3355a8048324730df7702c01131e",
+    "utils/companyEntry.js": "96a0e7370fb98e17216a80ba1bb685a3f43ea63bf1c449f6583bd196ccc1d26f",
+    "utils/customerAdvice.js": "a11b1a73ed8563768a72b84a1173a2358d31f5bb74b19079574d3952cd2a515d",
+    "utils/customerDetail.js": "bec23f7489066336822481ba9f6ce6ed6c2192245b7b5edaada3b736bf89fea4",
+    "utils/customerLevel.js": "1eab66d4cba26e8a9225dd08c2e4390d8330b1a597f1a62340ebb3122b6d12e4",
+    "utils/customerMap.js": "2a92771d9f5be0921c59a8a647675edbe0e003299f7d3ad8bc379ed541fcf7ab",
+    "utils/customerRadar.js": "74af2d51caa9ab4fcdb5985d379058f60f2c7b8972f2b0637f0a1aac6cd8fbfe",
+    "utils/customerSignals.js": "cc6fd203c4b94072a07a975af751962b48bedd2c5b353fb3951fed8b5c36d029",
+    "utils/dashboardQuarters.js": "b0f0107198d41603a7cf8b1e1f3e385295aee60e24f25d33dd937bf66c3bc214",
+    "utils/demoDisplay.js": "93657805553060a7b4f25e3fb4adb5135e3f14a18d6bfcad4800d0a42c900250",
+    "utils/detailReadSession.js": "4ec98524b3d0374044bc961ceaba29f66502530ab4ee3e57fd385c1fe3e460f7",
+    "utils/draftScope.js": "dfb9b97211e688be5ad6eae7c4c8728de70acc7e8835b66b7f1799db6dbc2e69",
+    "utils/encryptedCredentials.js": "13e98ed519c55cdeb9c1c8bf67958207bf355bf49ac062ce5e78e3c16a668be3",
+    "utils/fdeCompanyRankings.js": "b1466aaa1533e594b3a9d2b2e10729d6793088f9b9da12013961993fbcc10ea3",
+    "utils/fdeEfficiency.js": "5771215df1ae3594c2b4787ff18ef1b8d45d90c6efaac38b27ecc8115836ceeb",
+    "utils/fdeHistory.js": "b1c115855347a04b461e880e6537e9701be317da247fbf3c1d2527bfc177e1d2",
+    "utils/fdePresentation.js": "fb73e43989bd390b6d6c3bf6948cf952e34c8fff1b93259668885aac44d43e29",
+    "utils/fdeRadar.js": "9bde9568effa54079d9004a9f01de4d4f3464ff333f85278f894c7ac1da56fb2",
+    "utils/followupRanking.js": "813fac345b4e723bcbd7036c1409519f3c111d7995988b47d94f7acbddc83c7a",
+    "utils/operatingReport.js": "699ce8b56ca7a44b2b52be49927d5fa45d297092e6ad1aa198dcc89bc0c2b094",
+    "utils/opportunity.js": "e37ac866d6adba80eacfac499bcd0be3ba7ee1c26c9e5cd8b4bb537c450eb7e7",
+    "utils/opportunityAdvice.js": "554ea7a76d77a3421b6dfcc51a424a75637eeac6748722fa89e7e230348d9e7b",
+    "utils/opportunityAmount.js": "42c8c023bba95e8b851b869d6bdd851cca391888dce4c4ad8923bfcdda0b562f",
+    "utils/opportunityCard.js": "ff00bdd864f5e17e4ea3e78037c9a7448eff91ddee36cf4ce5e74680b3c1b658",
+    "utils/opportunityListCard.js": "4347972c6c6bcf9f3b43a8823ddfb136be1454784775f5f4e719ec281e8d21fb",
+    "utils/opportunityOverview.js": "ec9399395a98f9e0095b1dde296d1cf54673ab5bb6d965199152afe5a44b6aa1",
+    "utils/opportunityQuarter.js": "fd57d14c742665137e05a2fc844210cefe26bb19c3030fdea231f7fe48096709",
+    "utils/opportunityQuarterActuals.js": "1c666df4ef44e8011ad2f664bceeef6fecda1d3286f04fb515598f47a99e10da",
+    "utils/pageWriteContext.js": "7ca5416eaf11e329fafded5d70f44a99d75a05a1cbe5a965208a96d30ed176db",
+    "utils/pagination.js": "392a62e8a4d3103b12b62e101865831d87bf38b5fb5296e78f33e14851dda94e",
+    "utils/personPicker.js": "0966acba8549e3d64ce22822521fde0ef6dbd0c019fa947d830ab5a0dcd88e02",
+    "utils/profileMetrics.js": "bd818f5554458692221b02e0c7fc409a7846a663cfe8100c6c4ae64af0ea9f37",
+    "utils/profileScores.js": "b90457ff4142cb83f6e3299577ad6ecfeaeaa010c29367be94e7c5710915ea1d",
+    "utils/quadrant.js": "d629449b40d9e9e48deedff0010450b9eee62e45b96491aa5bd0e2cb9b967961",
+    "utils/rankingDisplay.js": "a4127e4a32f9220f1d14ddb42d20357c9d4a4ddc4ccaeac1f40e9f7fe28ae087",
+    "utils/rememberedLogin.js": "3ad6170e677a299cf26e9fb36742546af9994a7b440febc8adf0e2d1e6b14517",
+    "utils/requestIdentity.js": "35b6019984e8d528c505c0328233438af78c019a8d362d2d3ac617b331404c24",
+    "utils/statusLight.js": "878f0287b04eaf3f0b1edb98db9995b15f79d353ebc87535d26ded23207f32cc",
+    "utils/taskCancellation.js": "031de5ad067c8ebd834053ff6a4ef79d3e66845ea17e255fad124e33e28e6784",
+    "utils/taskOverview.js": "8c2185ce7b12090e4547643f069a9d8c97b1391794f2c2ceb40459cbc119af21",
+    "utils/taskPresentation.js": "ff861ec50aec6cd7da800d0f64839175177a23fbd83b995c9b55ef34b3bd150d",
+    "utils/taskRecipients.js": "b4c3d234de806e519466f603ac566215c5e4aacc431fb3fd451b5a2e796a0cdc",
+    "utils/uiColors.js": "9e172029d14fed341a07025108caad4bd6a759209852f3d93e9b0ca451e58725",
+    "utils/visitCards.js": "1a3a8b53da26a7419573c871f9f69ea3501655aaea68e3fabf43b53603edab5e",
+    "utils/visitDates.js": "11bdd95903797a28442d402cbf0bd89a3e98d60ce1c5bb6cb885b7f01ff41042",
+    "utils/visitFieldNormalizer.js": "2734ac01b18eb141667a814f2b2dc259228ed60e7f1e007328ae65818e387499",
+    "utils/visitFirstVisit.js": "3cb68acbd13a77bf4636dfa2d006f8fd06406d3c23f420bda461a05f81dc0e31",
+    "utils/visitFlow.js": "9e33fcac8af19f7d72f62268ae26d6b73e8c9d80e5e5414dea83f683ceac2413",
+    "utils/visitNavigation.js": "ed6d2b656a608078303c3b7317f71bb654754a839adb57a0d0449d9499e48533",
+    "utils/visitOpportunityAI.js": "8b049b94b388b6fa49a27bef1957394c1a5ee40c9ca7ff311cd55a72dd5f68c0",
+    "utils/visitSnapshot.js": "931296b1c7de007d53b84e504287021cc9f7f31fec9618cf16a23fe1b8907385",
+    "buildInfo.js": "aa14db34970fc8278c7c48edd71d53bf5a85955d410ec81bc9072bfba297f707",
+    "utils/buildVersion.js": "e7da5bbc0258cd32c28346a0a2a6a71a3695c55d0d300d43e28698ae82bb7ecb",
+    "utils/financialDisplay.js": "5df41439156f7d214962b4aa379c365c731df8f7db8ce34f345f06d94210e323",
+    "utils/opportunityExtraFields.js": "0d2e46cd1eb1ee1538fd69241fdb5744105ed82f7157994c87127969776e2624",
+    "utils/opportunityExtraForm.js": "8029c700cd5d4d95c8032e2b87fe398458f762444deff41ba1c9d61941d05c66",
+    "utils/opportunityMaterialForm.js": "55d5494b2fbcc5bfee9104e8783ce8a179138d7ab6aa1834ecf135b24c1888f2",
+    "utils/opportunityMaterials.js": "0ac9bf9ac3931eebf9c3e9f8af70d7572f06f4c8a08a65444304549437e27e07",
+    "utils/visitUploadIntent.js": "53c9c9884efb17aab3cafbaf4ef6a77c6202bd3cfae7f01928eb28e8055602f9",
+    "utils/visitUploadRecovery.js": "03ceffdf939a452fcfefe21d5c9f0c958d295bf540105da0a1eae059f22c1af3",
+    "components/visit-opportunity-selector/index.js": "7934bdf3a1ea03f20096cc20af042e00333862df1b5447ab2ff55ccd4b8ea089",
+    "components/visit-opportunity-selector/index.json": "fb9b87df8ec6244cf689a5d143abe4b2bcde6b3e8df1c9a12f3559c01028c803",
+    "components/visit-opportunity-selector/index.wxml": "e4ad3c7c2fdb426af02919d7d597afddcb58923ace10c1ad7d00384afc084193",
+    "components/visit-opportunity-selector/index.wxss": "7dee3cf22325706cb6e9e14cd5f7be3da83492b673ac170ccdb55c8da4c14eda",
+    "utils/growthProfile.js": "c9392291b457b318b7e785f6170e4678988a16a6d90effeab69b6cabeccffdf6",
+    "utils/dashboardMetricDetails.js": "0bf30b5d6bb17d90e07ce1d74275dc04b02fe89cd8263305561a9d5e79b7ce9f",
+    "utils/riskDisplay.js": "c148bd7b968ef90a76056ba98eca22b502c754877609d622412593aa2b4cda2a",
+    "utils/opportunityProductLines.js": "b09595e38a1e11197afaa1b71d00419fb4c204377d4b60ce8be97b30d6b052d2",
+    "utils/visitCustomerSearch.js": "ddfc9f6eabc50ba9f7c3ca579dc3833dc14942bd0548158edf89cec68ff08986",
+    "utils/customerEditContract.js": "8b93df5d88a9bb8d761212aeee62a9631b54b97e8cc55e2b7fff6dcb0a56fbb0",
+    "utils/visitDraft.js": "de2a1db481127da092405f40a727f8e297af71727cc60371f2215e68343c8eba",
+    "styles/customer-identity.wxss": "75f4dd9343434d60943cfac2e9ccb23258597403ffde3d6775d235b0d7d7f217",
+    "templates/customer-identity.wxml": "1d8ec880db1dc50fcbbce834488dc83ef47878cb84ecdfae4a5e4641e1caeb47",
+    "utils/customerIdentity.js": "8e3939bcc5358411d9228af899c4c122016511598784af6788a79629915de573",
+    "utils/businessAdviceState.js": "4013e8e8f391e8fa252a6a6602a918d4d2b827a7e260a0ddc45898c2556cc707",
+    "utils/opportunityIntentHistory.js": "6ab228eeb2edffebaa77d7259c4196d9804fa68d6395cbe7cd981f774f7925a9",
+    "components/task-execution-panel/index.js": "3cb7056fa6562c541127ad36cfbec86ae26bc19c3e1aa8e1bffda11bcb855ba6",
+    "components/task-execution-panel/index.json": "777a44af19be818e2b2c5a1fbed91c5ed5e3e9a075b043256ae0f5ff9b30f997",
+    "components/task-execution-panel/index.wxml": "944d77d427a3f7bc54aa673e9d4810b0dbd290882ce43bda290824aa7fcd42be",
+    "components/task-execution-panel/index.wxss": "04af23d980d0af06d7e7c7869c501edb1031725777f40563367a7b3b3ed3a0aa",
+    "pages/task-detail/execution-governance.wxml": "3399bd14d772037288ab2a808edece6ea2eedefa9aa272a984d1708e44e470c3",
+    "utils/taskChecklist.js": "80fb40d5ab54b513ea36140ee9060c9609fab0e648f41d93b05a166f1146b4c3",
+    "utils/taskExecutionPresentation.js": "ab2c14270f182fc872ff837813144a78b63ac4f16301156d38844acb37d07e57",
+    "utils/opportunityAccess.js": "072268e0d4e780a6163a00dfd715f85af4cdce40709325f1f9be58624d4b897d",
+    "utils/visitOpportunityFollowUp.js": "46c33f0640da3770bc72673aeec19e8e76dadbd3c2a1cb3b5e00692e1c4400a5",
+    "utils/taskExecutionMode.js": "5440483b42c1068b3b37e16c7327da103ea27d8893067c84ebb96d6358344c6e",
+    "utils/taskListSync.js": "06ac7bf006685b660f03120ed22a8554c8579058d2325ebed7a40785fc6aa935",
+    "utils/opportunityCollaboration.js": "3a76c73c777b58e399a02cdbfea0cfb1eabb0d81063384dd0fc1dcae00716001",
+    "utils/knowledgeOverview.js": "713420148a7a6a3007bf650af277901f2cfdb8bc84fa7260e93e9186e580d1bc",
+    "utils/knowledgeDistribution.js": "b96bf0e8671e698ccaee66007efd992f04b7d9264c4619983e4ba9832ac6ac2c",
+    "utils/taskHistory.js": "dd4e57221dea4c3c4c5e10c5dfa7561182d7b9ab7f7dd9162b9ded8a87a83a44",
+    "utils/knowledgeFileTransfer.js": "3d91cd03420eec953d75c790e95c43f7f240c9251a489ccfed2d8fa0dceb8621",
+    "utils/opportunityChangeHistory.js": "f7891d7e3de7418d61de3be96db8b62f9d748deebf45f295d38d20fe03e8013e",
+    "utils/opportunityReadWindow.js": "c1e3e6afb4205a6ce025f1857f4cd3d73f7f7ba657ce666a3991dff8ca23a54f",
+    "utils/requestPolicy.js": "f7df8d7e5a6e74bc98940da27357c458c2b4d7c6cbfff40deb8a62757fa9b3ea",
+    "utils/agentRecovery.js": "a39450803e4763c2a13f7f1f1cfb843290446295dbaf0a7237be7d2e81edbf80",
+    "utils/errorMessages.js": "e209d090819fb2dd565c21e490ac859c49f1ba3dd9d0830ddbdd0344808db72b",
+    "utils/visitAudioPlayer.js": "f34dd6381bb56d22e59a4335601f5c87d3249d0ff948464c80fe2ac843459772",
+    "utils/visitAudioPreview.js": "da1381db10ae0a9ebe6ae3385604e6bca72bf7651f2ca121e7ff91aee3825ec6",
+    "pages/task-detail/execution-v2-editors.wxml": "e13c3389a44b40455d69cd2c7f487a2163aa62534e12474c9430188730b5c96d",
+    "utils/taskFeedback.js": "abd4c46cdd2fca2eefe300599bba2053c269337925ee2d9bda4046d26dfd92b4",
+    "utils/relatedTaskSync.js": "ffebce71d8e7bc76e41f03f7c9df33371141c57d56dfc9434913e08967e56e5a",
+    "pages/task-detail/taskExecutionPage.js": "be0c5c6aa1af2c881dc573097518f53cfde68e7827aee445f505d5426c7807fd",
+    "pages/task-detail/taskChecklistEditor.js": "56491c2a88286b219fad852893731d077a2e8504a6cf4a145b0159290d1af2fc",
+    "pages/task-detail/taskRequirements.js": "7b8350a4e160fba2e2b6027d177881f9df78dbcfc94893db977482a6b4af59ab",
+    "pages/task-detail/lightweight-editor.wxml": "ee70404e1a260eadf634fa0fa8c35b78c01b9a1000abe85ed9d7720035349a0a",
+    "pages/task-detail/lightweight.wxml": "acaba0bf687b45a1b230670e4641a1bedade6624599a138eb9145ba0bfc4b4dc",
+    "pages/task-detail/taskLightweightPage.js": "49d82875ce7f07c334b9cfde3e76fc3da6cb5b38c2c19213548ab44b79670bfb",
+    "utils/opportunityCollectionActualForm.js": "82df062304f94bd9c1f4bc703ed8b8003c1a21a7d58c4a99233ebe7517b7c71d",
+    "utils/opportunityFollowUpReference.js": "0dd5c8594b9791ec45802d6d73cc5b65ee3ed9fa7192cbed8f5d2fa51cf1ca19",
+    "components/opportunity-period-filters/index.js": "2265a7a60bd7bc0461b099d42fc1824ff218728bf28b5e5d0570a62e3d689389",
+    "components/opportunity-period-filters/index.json": "035503c1a56d8b4b9227ce8bb9145fbd1ef8ec7dce59e55f9d5d55fb5eb7d566",
+    "components/opportunity-period-filters/index.wxml": "d7c3e63e59b302d3f5f2691ec15b1213966977b6fae559b13a263626353f6808",
+    "components/opportunity-period-filters/index.wxss": "f08da902f1a027fc2767cc0fa41aa9d73190a6bfb682ee674d3424bd8c919a1a",
+    "utils/opportunityPeriodFilters.js": "36c2d66a2f383f8246e490ddf2fea1db5317535b2cbf2516f15b3fc5d5ca226a",
+    "utils/opportunityRecognizedActualForm.js": "4c55b265eacb0d8aaf69c9fe3289eb227216c370472fc4828232ab7484482e4f"
+  },
+  "adaptations": {
+    "config.js": "Browser requests use the fixed same-origin /api/v1 proxy.",
+    "pages/index/index.js": "Knowledge entry is unavailable and has no stats/directory prefetch; other shared home behavior retained.",
+    "pages/index/index.wxml": "Preserves Web summary metrics adapter; recording controls applied from 8d76e94a5f1259c2d6290e55c813f081c175b060.",
+    "pages/customers/index.js": "Preserves the existing Web omission of the Mini-only opportunity transfer entry from production 23a4d67fac911b10946620a3d87c888d415c56e9; bounded related-task refresh is retained.",
+    "pages/customers/index.wxml": "Preserves the existing Web omission of the Mini-only opportunity transfer button from production 23a4d67fac911b10946620a3d87c888d415c56e9; actual task progress is retained.",
+    "mini_only_identity": "Dedicated Mini session/pages excluded; marked login hooks stripped.",
+    "app.json": "Preserve existing Web route inventory; normal Mini task-creation subpackage keeps the same browser route.",
+    "recognized_actual_source_alignment": "2026-10-25: recognized actual shared form imported selectively; preserve three Web date clearable adapters, browser auth hooks and existing dashboard detail adapter. API adds only recognized-actuals GET and generic source label.",
+    "pages/bi/index.js": "2026-10-25: preserve Web React quarterly-monitor lifecycle; selectively align legacy dashboard amount coverage, plan labels and actual detail/coverage routing with d43599931c8ca80b75f13b9bdc977caceaba17e3.",
+    "pages/bi/index.wxml": "2026-10-25: preserve Web omission of Mini quarterly-monitor layout and detail sheet (rendered by React); selectively align legacy chart coverage hints and plan/source wording with d43599931c8ca80b75f13b9bdc977caceaba17e3.",
+    "pages/visit-entry/index.wxml": "Preserve Web picker markup; wrap conditional list in block so wx:else remains adjacent to wx:if before wx:for expansion.",
+    "web_customer_navigation": "Customer map retains Web default all activity periods; Mini transfer navigation is not imported."
+  },
+  "feature_flags": {
+    "HOME_CHATBI_ENABLED": false,
+    "HOME_MESSAGE_ORDER": "desc"
+  },
+  "incremental_imports": [
+    {
+      "files": [
+        "pages/workbench/index.js",
+        "utils/opportunityQuarter.js"
+      ],
+      "purpose": "quarterly-finance"
+    },
+    {
+      "files": [
+        "pages/opportunities/index.js",
+        "pages/workbench/index.js",
+        "utils/opportunityQuarter.js"
+      ],
+      "purpose": "quarterly-finance"
+    },
+    {
+      "files": [
+        "pages/workbench/index.wxml"
+      ],
+      "purpose": "quarterly-finance"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "quarterly-finance"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/requestIdentity.js"
+      ],
+      "purpose": "quarterly-finance"
+    },
+    {
+      "files": [
+        "app.js",
+        "components/fde-projects/index.js",
+        "pages/customer-create/index.js",
+        "pages/customer-detail/index.js",
+        "pages/customer-detail/index.wxml",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/opportunities/index.js",
+        "pages/risk-detail/index.js",
+        "pages/risk-detail/index.wxml",
+        "pages/risks/index.js",
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "pages/workbench/index.js",
+        "pages/workbench/index.wxml",
+        "utils/access.js",
+        "utils/apiClient.js"
+      ],
+      "purpose": "SB120-AUTH-001 effective action scopes",
+      "revision": "45ab3bc294d4c04c1ee2e4df7912969794537d6b"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "SB120-AUTH-001 task department filters",
+      "revision": "85f4e6909bf69b3451269e963a7baeb8477bb77a"
+    },
+    {
+      "files": [
+        "utils/operatingReport.js",
+        "pages/index/index.js"
+      ],
+      "purpose": "SB120-AUTH-001 effective report scope",
+      "revision": "90706344871fd54f98e6456571e243544d9789c4"
+    },
+    {
+      "files": [
+        "app.js",
+        "utils/access.js",
+        "pages/tasks/index.js",
+        "pages/risks/index.js",
+        "pages/opportunities/index.js",
+        "pages/workbench/index.js",
+        "pages/customers/index.js",
+        "pages/customer-detail/index.js"
+      ],
+      "purpose": "SB120-AUTH-001 clear old read state before rendering changed authorization",
+      "revision": "7871c94a5d6bead6aeed00c4dc914996f5f19287"
+    },
+    {
+      "files": [
+        "pages/workbench/index.js",
+        "pages/workbench/index.wxml",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/index/index.wxml",
+        "pages/tasks/index.js"
+      ],
+      "purpose": "SB120-AUTH-001 normalized result scope labels",
+      "revision": "0ad0657a3b69de477bebeeb827f590b64a843a7f"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "pages/index/index.wxml",
+        "pages/risk-detail/index.wxml"
+      ],
+      "purpose": "SB120-AUTH-001 readonly risk and effective summary scope",
+      "revision": "04bb1f6e40fc21c289e4c57c91b1b96839c9bd63"
+    },
+    {
+      "files": [
+        "pages/risk-detail/index.wxml"
+      ],
+      "purpose": "SB120-AUTH-001 readonly branch layout identity",
+      "revision": "eecf92b73ee0ddfc40cafa0622f93d26b93007d4"
+    },
+    {
+      "files": [
+        "pages/customer-claim/index.js",
+        "pages/customer-claim/index.wxml",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.wxml",
+        "utils/apiClient.js"
+      ],
+      "purpose": "SB120-WEB-003-CUSTOMER-FLOW",
+      "revision": "f2edd8e0360bb6bd7fcf37ddd731cd31c912f04c"
+    },
+    {
+      "files": [
+        "pages/customer-create/index.js"
+      ],
+      "purpose": "SB120-CUSTOMER-REFERENCE-OPTIONAL",
+      "revision": "3d0027169bde4210e553fceb586ae8e5149c8370"
+    },
+    {
+      "files": [
+        "pages/workbench/index.js"
+      ],
+      "purpose": "SB120-WEB-004 atomic filters and bounded return refresh",
+      "revision": "31285141d732cd04496ff988c6ff313ae4c91218"
+    },
+    {
+      "files": [
+        "utils/requestIdentity.js"
+      ],
+      "purpose": "SB120-WEB-005-write-protocol",
+      "revision": "e0776eff8cd7ee1f3c90d4fbc5b38d92c9908a39"
+    },
+    {
+      "files": [
+        "components/dashboard-ranking/index.wxml",
+        "components/dashboard-ranking/index.wxss",
+        "components/fde-dashboard/index.js",
+        "components/fde-dashboard/index.wxml",
+        "components/fde-profile/index.js",
+        "components/fde-profile/index.wxml",
+        "components/fde-profile/index.wxss",
+        "components/opportunity-form/index.js",
+        "components/opportunity-form/index.wxml",
+        "components/opportunity-form/index.wxss",
+        "pages/bi/index.js",
+        "pages/bi/index.wxml",
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml",
+        "pages/customer-detail/index.wxml",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/profile/index.js",
+        "pages/profile/index.wxml",
+        "templates/opportunity-list-card.wxml",
+        "utils/access.js",
+        "utils/apiClient.js",
+        "utils/fdeCompanyRankings.js",
+        "utils/opportunity.js",
+        "utils/opportunityCard.js",
+        "utils/opportunityQuarterActuals.js",
+        "utils/profileMetrics.js",
+        "buildInfo.js",
+        "utils/buildVersion.js",
+        "utils/financialDisplay.js",
+        "utils/opportunityExtraFields.js",
+        "utils/opportunityExtraForm.js",
+        "utils/opportunityMaterialForm.js",
+        "utils/opportunityMaterials.js"
+      ],
+      "purpose": "SB120-WEB-005-combined-finance-form-closure",
+      "new_files": [
+        "buildInfo.js",
+        "utils/buildVersion.js",
+        "utils/financialDisplay.js",
+        "utils/opportunityExtraFields.js",
+        "utils/opportunityExtraForm.js",
+        "utils/opportunityMaterialForm.js",
+        "utils/opportunityMaterials.js"
+      ],
+      "revision": "61eb6f809de70e5f8810b61c70458534ea9f9947"
+    },
+    {
+      "files": [
+        "components/opportunity-form/index.wxml"
+      ],
+      "purpose": "WEB005-roster-hint",
+      "revision": "970035a9a7edcea26d8600bb3bc7039d15af2c5f"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "utils/apiClient.js",
+        "utils/visitUploadIntent.js",
+        "utils/visitUploadRecovery.js"
+      ],
+      "purpose": "MINI002-upload-intent",
+      "new_files": [
+        "utils/visitUploadIntent.js",
+        "utils/visitUploadRecovery.js"
+      ],
+      "revision": "1d2864f9e5f336fc82fb3a5eb39d5eb418d9bc29"
+    },
+    {
+      "files": [
+        "utils/visitUploadRecovery.js"
+      ],
+      "purpose": "MINI002-readable-errors",
+      "revision": "1d1c3996900931dc974ba0dd96ba3da3e7120f61"
+    },
+    {
+      "files": [
+        "utils/access.js",
+        "utils/visitUploadRecovery.js",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml"
+      ],
+      "purpose": "MINI002-WEB-QA-06",
+      "revision": "fea534591157fb53155a17d955dc6c11fc19fca3"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.json",
+        "pages/visit-entry/index.wxml",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.json",
+        "pages/visit-confirm/index.wxml",
+        "components/visit-opportunity-selector/index.js",
+        "components/visit-opportunity-selector/index.json",
+        "components/visit-opportunity-selector/index.wxml",
+        "components/visit-opportunity-selector/index.wxss"
+      ],
+      "purpose": "SB120-WEB-007-optional-visit-opportunity",
+      "new_files": [
+        "components/visit-opportunity-selector/index.js",
+        "components/visit-opportunity-selector/index.json",
+        "components/visit-opportunity-selector/index.wxml",
+        "components/visit-opportunity-selector/index.wxss"
+      ],
+      "revision": "4d82c8e1597d396d3215c667b38547565cbc84b3"
+    },
+    {
+      "files": [
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml"
+      ],
+      "purpose": "Explicit opportunity advice intent and identity-scoped read reuse for stage LOCAL fixes",
+      "revision": "ae6bcfc0245560d3988555abec5bd212d0fc0dc9"
+    },
+    {
+      "files": [
+        "utils/requestIdentity.js"
+      ],
+      "purpose": "SB120-WEB-008-work-report-idempotency",
+      "revision": "c00bba403e31c329877585c6e14ec7e457a79f75"
+    },
+    {
+      "files": [
+        "pages/customer-create/index.js"
+      ],
+      "purpose": "SB120-WEB-003 request/direct customer creation team directory permission alignment; paired backend required",
+      "revision": "5cd88c9ba6f5a82b8b8f25d2f0bc34d8d38a6b05"
+    },
+    {
+      "files": [
+        "components/opportunity-form/index.wxml",
+        "components/opportunity-form/index.wxss",
+        "utils/opportunityMaterialForm.js"
+      ],
+      "purpose": "finance-frozen-rule-trace",
+      "revision": "e917db78b0a633f99d0238f084fa9a615e709586"
+    },
+    {
+      "files": [
+        "components/fde-profile/index.js",
+        "components/fde-profile/index.wxml",
+        "components/fde-profile/index.wxss",
+        "pages/profile/index.js",
+        "pages/profile/index.wxml",
+        "pages/profile/index.wxss",
+        "utils/apiClient.js",
+        "utils/fdeHistory.js",
+        "utils/requestIdentity.js",
+        "utils/growthProfile.js"
+      ],
+      "purpose": "growth-v2-read-explicit-review-evidence",
+      "new_files": [
+        "utils/growthProfile.js"
+      ],
+      "revision": "9c8ab2a64d6eb4d206b2ef6d7dad7fad1152c28b"
+    },
+    {
+      "files": [
+        "pages/profile/index.js"
+      ],
+      "purpose": "growth-frozen-score-rule-explanation",
+      "revision": "cde35ea36f64eceae28d9df3e6ce3742cf664338"
+    },
+    {
+      "files": [
+        "pages/bi/index.js",
+        "pages/bi/index.wxml",
+        "pages/bi/index.wxss",
+        "utils/followupRanking.js",
+        "utils/dashboardMetricDetails.js"
+      ],
+      "purpose": "SB120-INSIGHTS-001 eight metric definitions and authorized details",
+      "new_files": [
+        "utils/dashboardMetricDetails.js"
+      ],
+      "revision": "45ad4e140cd7df0bf77ccd2340fb247742eec15d"
+    },
+    {
+      "files": [
+        "pages/bi/index.js"
+      ],
+      "purpose": "INSIGHTS-DATA-01 preserve financial cents in shared cards",
+      "revision": "e9d3d0003057428cd930793d5440e399883999b1"
+    },
+    {
+      "files": [
+        "utils/dashboardMetricDetails.js"
+      ],
+      "purpose": "INSIGHTS-DATA-02 describe actual display grain without claiming API limitation",
+      "revision": "0c9c5d4847f993846378470d728688d378c4633b"
+    },
+    {
+      "files": [
+        "pages/risk-detail/index.js",
+        "pages/risk-detail/index.wxml",
+        "pages/risk-detail/index.wxss",
+        "pages/risks/index.js",
+        "pages/risks/index.json",
+        "pages/risks/index.wxml",
+        "pages/risks/index.wxss",
+        "utils/access.js",
+        "utils/apiClient.js",
+        "utils/customerDetail.js",
+        "utils/requestIdentity.js",
+        "utils/riskDisplay.js"
+      ],
+      "purpose": "SB120-RISK-001 authorized scope and human decision lifecycle",
+      "new_files": [
+        "utils/riskDisplay.js"
+      ],
+      "revision": "6e5b0fc0e2fc6c8760c9be711ba201dcdace9a30"
+    },
+    {
+      "files": [
+        "utils/dashboardMetricDetails.js"
+      ],
+      "purpose": "INSIGHTS-DATA-03 exact cents in business detail rows",
+      "revision": "ad9d05f88ac485cc676df0227acc27584fefe177"
+    },
+    {
+      "files": [
+        "utils/requestIdentity.js",
+        "utils/apiClient.js",
+        "pages/visit-entry/index.js",
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "web-visit-stage-network-recovery",
+      "revision": "7142e32c0284ca12945ee3d532f0569d2f403b64"
+    },
+    {
+      "files": [
+        "components/opportunity-form/index.js",
+        "components/opportunity-form/index.wxml",
+        "components/opportunity-form/index.wxss",
+        "utils/apiClient.js",
+        "utils/opportunity.js",
+        "utils/opportunityMaterialForm.js",
+        "utils/opportunityMaterials.js",
+        "utils/opportunityProductLines.js"
+      ],
+      "purpose": "FIN-R-C unified product lines and unsaved material draft preview",
+      "new_files": [
+        "utils/opportunityProductLines.js"
+      ],
+      "revision": "bd8f954c25ef0a183649a4deff71ea75661aafae"
+    },
+    {
+      "files": [
+        "utils/opportunityMaterials.js"
+      ],
+      "purpose": "FIN-R-MINI-001 bind formal material save to selected or frozen catalog version",
+      "revision": "df0b49630a05ee177e2705c80e3285522edd2dde"
+    },
+    {
+      "files": [
+        "utils/opportunityProductLines.js",
+        "utils/opportunityMaterialForm.js"
+      ],
+      "purpose": "FIN-R intent selection limit aligned with Backend maximum of 100 without truncating drafts",
+      "revision": "224d510392c5851828b36f87501bd3806114b148"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "pages/opportunity-create/index.js",
+        "utils/requestIdentity.js"
+      ],
+      "purpose": "opportunity-company-customer-reference-and-required-j09-closure",
+      "revision": "fe0ffff2727a55bc4c795e25b1ca1732e7c13959"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.json",
+        "pages/visit-confirm/index.wxml",
+        "pages/visit-confirm/index.wxss",
+        "utils/visitCustomerSearch.js"
+      ],
+      "purpose": "CUSTOMER-REFERENCE-AUDIT-20261012-01",
+      "new_files": [
+        "utils/visitCustomerSearch.js"
+      ],
+      "revision": "21d7eaf889ce7ab5667c25379c3c3908cbac8bb3"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.wxml",
+        "pages/customer-create/index.wxss"
+      ],
+      "purpose": "customer-create-safe-field-errors",
+      "revision": "8c77ae4cbc8781a4725ebde51e2e222d6d345944"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/businessOptions.js",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.wxml",
+        "pages/customer-create/index.wxss"
+      ],
+      "purpose": "customer-create-canonical-catalog",
+      "revision": "f33759f02053579ef4fb7f785892cc520599a266"
+    },
+    {
+      "files": [
+        "pages/customer-edit/index.js",
+        "pages/customer-edit/index.wxml",
+        "pages/management-task-create/index.js",
+        "utils/customerEditContract.js"
+      ],
+      "purpose": "FORM-CONTRACT-AUDIT-20261013-01 customer edit optional fields and task description bounds",
+      "new_files": [
+        "utils/customerEditContract.js"
+      ],
+      "revision": "99029d1c105ba8cdce94ef90a146167b6dbdfac5"
+    },
+    {
+      "files": [
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/customers/index.wxss",
+        "utils/customerMap.js"
+      ],
+      "purpose": "MINI121-MAP-WEB-CONSUME-20261013-01",
+      "revision": "56f89d6479d39698d733bc5b47220f68fbef2b51"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml",
+        "utils/visitDraft.js"
+      ],
+      "purpose": "identity-draft-20261013-B",
+      "new_files": [
+        "utils/visitDraft.js"
+      ],
+      "revision": "025749db75016a94bc5db4a687b95bf5f2f143aa"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "pages/visit-confirm/index.js",
+        "utils/visitDraft.js"
+      ],
+      "purpose": "identity-draft-20261013-B-legacy-conflict",
+      "revision": "918b672969d837dde8a8827168d6d628f7a5645c"
+    },
+    {
+      "files": [
+        "pages/customer-assign-confirm/index.js",
+        "pages/customer-assign-confirm/index.json",
+        "pages/customer-assign-confirm/index.wxml",
+        "pages/customer-assign-confirm/index.wxss",
+        "pages/customer-claim/index.js",
+        "pages/customer-claim/index.json",
+        "pages/customer-claim/index.wxml",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.json",
+        "pages/customer-create/index.wxml",
+        "pages/customer-create/index.wxss",
+        "pages/customer-detail/index.js",
+        "pages/customer-detail/index.wxml",
+        "pages/customer-detail/index.wxss",
+        "pages/customer-edit/index.js",
+        "pages/customer-edit/index.json",
+        "pages/customer-edit/index.wxml",
+        "pages/customer-edit/index.wxss",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "utils/apiClient.js",
+        "utils/businessOptions.js",
+        "utils/customerDetail.js",
+        "utils/customerEditContract.js",
+        "utils/customerMap.js",
+        "styles/customer-identity.wxss",
+        "templates/customer-identity.wxml",
+        "utils/customerIdentity.js"
+      ],
+      "purpose": "identity-partner-contract-v3",
+      "new_files": [
+        "styles/customer-identity.wxss",
+        "templates/customer-identity.wxml",
+        "utils/customerIdentity.js"
+      ],
+      "revision": "7c0de32731d824fdcae9dbf6f742890e3b0d0e09"
+    },
+    {
+      "files": [
+        "pages/customer-assign-confirm/index.js",
+        "pages/customer-assign-confirm/index.wxml",
+        "pages/customer-claim/index.js",
+        "pages/customer-claim/index.wxml"
+      ],
+      "purpose": "identity-v4-readability-and-assign-options",
+      "revision": "7bf48857abdd381e66af41f60607cf2a146b9ef7"
+    },
+    {
+      "files": [
+        "utils/draftScope.js"
+      ],
+      "purpose": "IDENTITY-DRAFT-LOGOUT-NULL-20261013 null actor lifecycle fix",
+      "revision": "5a072f3aaa7387e6b2929dccba004d06d3c18f6b"
+    },
+    {
+      "files": [
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml",
+        "pages/customer-assets/index.wxss",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/customers/index.wxss",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml",
+        "pages/visit-detail/index.js",
+        "pages/visit-detail/index.json",
+        "pages/visit-detail/index.wxml",
+        "utils/access.js",
+        "utils/apiClient.js",
+        "utils/businessAdviceState.js"
+      ],
+      "purpose": "ai-advice-latest-discovery-explicit-generation",
+      "new_files": [
+        "utils/businessAdviceState.js"
+      ],
+      "revision": "0b3eb9cc6b8d37b6fae48a0b0bda5acc5cd50fdd"
+    },
+    {
+      "files": [
+        "utils/advicePool.js",
+        "pages/customer-assets/index.js",
+        "utils/opportunityIntentHistory.js"
+      ],
+      "purpose": "ai-advice-cold-reentry-pool-and-required-page-dependency",
+      "new_files": [
+        "utils/opportunityIntentHistory.js"
+      ],
+      "revision": "feb8e3e040b5cb076aaadb59525d8587b037cca5"
+    },
+    {
+      "files": [
+        "pages/customers/index.js",
+        "pages/customers/index.wxml"
+      ],
+      "purpose": "ai-advice-partner-only-identity-guard",
+      "revision": "a9b938ce25a11a3fedfac612a9b6682f9384337f"
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.json",
+        "pages/visit-confirm/index.wxml",
+        "utils/visitSnapshot.js",
+        "utils/opportunity.js",
+        "components/opportunity-form/index.js"
+      ],
+      "purpose": "v122-visit-link-only-explicit-edit",
+      "revision": "3bf6d334c9c7555341af80fb7812e1610321aa80"
+    },
+    {
+      "files": [
+        "utils/opportunity.js",
+        "utils/opportunityMaterialForm.js",
+        "components/opportunity-form/index.js"
+      ],
+      "purpose": "v122-hydrated-material-noop",
+      "revision": "1f95c227e5bc171913cb52cb164cad17404dbf26"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "KB authenticated multipart and binary transport only; preserve pre-task create body",
+      "revision": "cf79e1c118a7e8bf7b7bdc54f70ff61c19cc9400"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "knowledge-upload-stable-idempotency",
+      "revision": "998c7e89e445a1cee8ffd1ab6482b7f04b23bfbe"
+    },
+    {
+      "files": [
+        "pages/management-task-create/index.js",
+        "pages/management-task-create/index.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.json",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/index.wxss",
+        "utils/apiClient.js",
+        "utils/requestIdentity.js",
+        "components/task-execution-panel/index.js",
+        "components/task-execution-panel/index.json",
+        "components/task-execution-panel/index.wxml",
+        "components/task-execution-panel/index.wxss",
+        "pages/task-detail/execution-governance.wxml",
+        "utils/taskChecklist.js",
+        "utils/taskExecutionPage.js",
+        "utils/taskExecutionPresentation.js",
+        "utils/taskRequirements.js"
+      ],
+      "purpose": "task-PC-checklist-execution-and-owner-refresh",
+      "new_files": [
+        "components/task-execution-panel/index.js",
+        "components/task-execution-panel/index.json",
+        "components/task-execution-panel/index.wxml",
+        "components/task-execution-panel/index.wxss",
+        "pages/task-detail/execution-governance.wxml",
+        "utils/taskChecklist.js",
+        "utils/taskExecutionPage.js",
+        "utils/taskExecutionPresentation.js",
+        "utils/taskRequirements.js"
+      ],
+      "revision": "da8c1a2cefd0ec418273cd1ea5c7adac8b9b9e46"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "task-pause-recheck-and-review-withdrawal",
+      "revision": "fc7423521e3c4a6632333293b93d0541e6357e5e"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "task-optional-actual-contribution-and-requirements-context",
+      "revision": "f7f4444543df34700fe3adeb21a86db496236532"
+    },
+    {
+      "files": [
+        "pages/tasks/index.js"
+      ],
+      "purpose": "task-list-current-executor-reviewer-and-pause",
+      "revision": "ac8751d11f861d80bf7899c963b3da9479171d98"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml",
+        "utils/apiClient.js",
+        "utils/opportunityAccess.js",
+        "utils/visitOpportunityFollowUp.js"
+      ],
+      "purpose": "object-only-follow-up-discovery-and-safe-source-restoration",
+      "new_files": [
+        "utils/opportunityAccess.js",
+        "utils/visitOpportunityFollowUp.js"
+      ],
+      "revision": "d8f5bdab594a710a1508c16fa1a77534d9c7a625"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPage.js",
+        "utils/apiClient.js",
+        "pages/management-task-create/index.js",
+        "pages/management-task-create/index.wxml",
+        "pages/tasks/index.js",
+        "utils/taskExecutionMode.js"
+      ],
+      "purpose": "per-task-legacy-v1-routing-and-explicit-creation",
+      "new_files": [
+        "utils/taskExecutionMode.js"
+      ],
+      "revision": "993f6ca741923ff82fdc5b4f45dd29df65a3ef02"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "knowledge-work-authenticated-download"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "knowledge-work-authenticated-download-and-scoped-generation-timeout"
+    },
+    {
+      "files": [
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "pages/tasks/index.wxss",
+        "utils/apiClient.js",
+        "utils/taskListSync.js",
+        "utils/opportunityCollaboration.js"
+      ],
+      "purpose": "1.2.2 reviewed task list synchronization and collaborator client contracts",
+      "new_files": [
+        "utils/taskListSync.js",
+        "utils/opportunityCollaboration.js"
+      ],
+      "revision": "5bee1299994e1dc6f393707a71ec56ec677c5e5e"
+    },
+    {
+      "files": [
+        "pages/task-detail/index.js",
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "task-detail-static-dependencies",
+      "revision": "be1f7afc49bb7b202ef1e93db8931c1d7ce84bbd"
+    },
+    {
+      "files": [
+        "components/task-execution-panel/index.js"
+      ],
+      "purpose": "task-feedback-preserve-draft-on-poll",
+      "revision": "7cb8eea11452820f1b559cb03d3d8311990e9439"
+    },
+    {
+      "files": [
+        "components/task-execution-panel/index.wxss",
+        "pages/task-detail/execution-governance.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.json",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/index.wxss"
+      ],
+      "purpose": "task-detail-shared-sheet-style-alignment",
+      "revision": "619fa09063487c6c954d47f15cace2289ca9395f"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "mini-system-knowledge-count-contract",
+      "revision": "2deb78bb90d6c967d05a7ecd906b237c36c8d25e"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPage.js",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.wxml"
+      ],
+      "purpose": "SB122-MINI-SUBMISSION-NOTE-uncommitted-reviewed"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "utils/knowledgeOverview.js",
+        "utils/knowledgeDistribution.js"
+      ],
+      "purpose": "knowledge-customer-distribution-home",
+      "new_files": [
+        "utils/knowledgeOverview.js",
+        "utils/knowledgeDistribution.js"
+      ],
+      "revision": "e7ec2e023e73a5e486997fd9fb0128c9b4559d47"
+    },
+    {
+      "files": [
+        "pages/tasks/index.js"
+      ],
+      "purpose": "task-list-snapshot-auto-refresh",
+      "revision": "c36221763b92521c54303078e62884a736a43af2"
+    },
+    {
+      "files": [
+        "utils/knowledgeDistribution.js"
+      ],
+      "purpose": "knowledge-customer-share-web-origin",
+      "revision": "28687ac67416dfca6fb542a100f6bd34d479513b"
+    },
+    {
+      "files": [
+        "utils/taskPresentation.js",
+        "utils/taskHistory.js"
+      ],
+      "purpose": "Expose execution history in Web/Mini task detail",
+      "new_files": [
+        "utils/taskHistory.js"
+      ],
+      "revision": "5b9550bd3da635b94825f23f1e24ac16dad1fc66"
+    },
+    {
+      "files": [
+        "pages/task-detail/index.js"
+      ],
+      "purpose": "Expose execution decision history in Web/Mini task detail",
+      "revision": "6af5bdcc66dd2397298ee6d613fef793e4d06fa3"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "Sync task execution history source after dual-role closeout",
+      "revision": "1df779514de3cef3853e93319dfd9c2aaaa0f8e0"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "knowledge-file-transfer-deadline",
+      "revision": "4f9348f40e03d80514f5bed052ada57e733f2dec"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/knowledgeFileTransfer.js"
+      ],
+      "purpose": "authenticated-file-range-read",
+      "new_files": [
+        "utils/knowledgeFileTransfer.js"
+      ],
+      "revision": "e8f860d76f14145fa2e7a94ef1e2720f8ddcede5"
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "Clarify visit archive failures while preserving reviewed drafts and idempotent retry; no unrelated source imports",
+      "revision": "f0b9ad499d65d4091779fd4d2c0d13a0050f80bd"
+    },
+    {
+      "files": [
+        "pages/customer-claim/index.js",
+        "pages/customer-claim/index.wxml"
+      ],
+      "purpose": "Mini claim directory defaults to unclaimed with stable filters and empty states",
+      "revision": "57cb6c43e6f26545354a0e599e3172344409e852"
+    },
+    {
+      "files": [
+        "pages/workbench/index.wxml"
+      ],
+      "purpose": "Remove duplicate My scope placeholder without changing scope values or authorization",
+      "revision": "58c3780bb9ae133d26e97113b4222cf7cb31c5b1"
+    },
+    {
+      "files": [
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml",
+        "pages/customer-assets/index.wxss",
+        "utils/apiClient.js",
+        "utils/opportunityIntentHistory.js",
+        "utils/opportunityChangeHistory.js"
+      ],
+      "purpose": "General opportunity history reader and read-only detail display using frozen change-history v1 contract",
+      "new_files": [
+        "utils/opportunityChangeHistory.js"
+      ],
+      "revision": "2c1c48658d7c8dd9fd2552d742e47eddd5a07707"
+    },
+    {
+      "files": [
+        "utils/opportunityChangeHistory.js"
+      ],
+      "purpose": "Clarify mixed opportunity and period history version labels",
+      "revision": "54799e5173e47f96b8ecb5a43f6b4918b2c08877"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "Allow 45 seconds for opportunity list and overview reads; preserve ordinary request and write budgets",
+      "revision": "ed03f6915c4722938ed0c620204d11b540976aff"
+    },
+    {
+      "files": [
+        "pages/workbench/index.js",
+        "pages/workbench/index.wxml",
+        "pages/workbench/index.json",
+        "components/fde-projects/index.js",
+        "components/fde-projects/index.wxml",
+        "pages/opportunities/index.js",
+        "pages/opportunities/index.json",
+        "utils/opportunityReadWindow.js"
+      ],
+      "purpose": "Render opportunity list before filtered statistics; bounded return refresh and buffered pagination",
+      "new_files": [
+        "utils/opportunityReadWindow.js"
+      ],
+      "revision": "50c13bf6a9978df05f7358bbed6aa82d14351135"
+    },
+    {
+      "files": [
+        "pages/opportunities/index.js"
+      ],
+      "purpose": "Keep automatic buffered paging paused after opportunity list or page failure",
+      "revision": "b8b80aab10577066ba9dc70a2aa5d134c55632aa"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/requestPolicy.js"
+      ],
+      "purpose": "timeout-read-recovery",
+      "new_files": [
+        "utils/requestPolicy.js"
+      ],
+      "revision": "b5ea2bebb120b812c34ac7f346aa387da16f7ed5"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/requestPolicy.js",
+        "pages/index/index.js",
+        "pages/index/index.wxml",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.wxml",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "utils/agentRecovery.js"
+      ],
+      "purpose": "ai-recovery-actions",
+      "new_files": [
+        "utils/agentRecovery.js"
+      ],
+      "revision": "677f5bb2a26183fa257a2c894444df5cda00448d"
+    },
+    {
+      "files": [
+        "pages/customers/index.js",
+        "pages/customers/index.json",
+        "pages/customers/index.wxml",
+        "utils/customerMap.js"
+      ],
+      "purpose": "timeout-map-progressive-recovery",
+      "revision": "cf26007ad2828aee8d3fd2fe82683249cb68d40e",
+      "adaptations": {
+        "pages/customers/index.js": "Preserve existing Web omission of Mini-only opportunity transfer entry.",
+        "pages/customers/index.wxml": "Preserve existing Web omission of Mini-only opportunity transfer button."
+      }
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/agentRecovery.js",
+        "pages/index/index.js",
+        "pages/index/index.wxml",
+        "pages/customer-create/index.js",
+        "pages/customer-create/index.wxml",
+        "pages/visit-entry/index.js"
+      ],
+      "purpose": "ai-recovery-boundaries",
+      "revision": "c64f38e712a2836be2fa56cf3bf23d8fc0d8d7ec"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "pages/index/index.wxml"
+      ],
+      "purpose": "preserve-existing-web-home-adapters-with-timeout-recovery",
+      "revision": "116cdad2fd008aeff084915485e5a661b1ae5ccd",
+      "adaptations": {
+        "pages/index/index.js": "Retain existing knowledgeDistribution.list endpoint and tenant/auth behavior.",
+        "pages/index/index.wxml": "Retain existing Web metricsTappable summary-card layout."
+      }
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "visit-collaborator-exclude-recorder",
+      "revision": "41a659b9507efd1312681e050c6d5e063f8f07b6"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/visitCustomerSearch.js",
+        "utils/visitOpportunityFollowUp.js",
+        "components/visit-opportunity-selector/index.js",
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "visit-recent-follow-up-order",
+      "revision": "ca440a2bc3b14580d6310d9efe8659c525497f8a"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/requestPolicy.js",
+        "utils/errorMessages.js"
+      ],
+      "purpose": "error-contract-safe-messages",
+      "new_files": [
+        "utils/errorMessages.js"
+      ],
+      "revision": "e88e3d3a514078fd04bc045a4021541cbf9ca98e"
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "error-contract-archive-uncertainty-local"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/requestPolicy.js",
+        "utils/errorMessages.js",
+        "utils/businessAdviceState.js",
+        "pages/visit-confirm/index.js",
+        "pages/visit-entry/index.js"
+      ],
+      "purpose": "error-contract-safe-http-async-and-archive-recovery",
+      "revision": "9f0fed9ebdf4824ea86faac0422776917bb078ae"
+    },
+    {
+      "files": [
+        "pages/visit-detail/index.js",
+        "pages/visit-detail/index.wxml",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "utils/apiClient.js",
+        "utils/errorMessages.js",
+        "utils/requestPolicy.js",
+        "utils/visitDraft.js",
+        "utils/visitUploadRecovery.js",
+        "utils/visitAudioPlayer.js",
+        "utils/visitAudioPreview.js"
+      ],
+      "purpose": "asr-stable-operations-source-audio-owner-playback",
+      "new_files": [
+        "utils/visitAudioPlayer.js",
+        "utils/visitAudioPreview.js"
+      ],
+      "revision": "8d76e94a5f1259c2d6290e55c813f081c175b060"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "pages/index/index.wxml"
+      ],
+      "revision": "8d76e94a5f1259c2d6290e55c813f081c175b060",
+      "purpose": "asr-home-selected-patch-preserving-web-knowledge-and-summary-adapters"
+    },
+    {
+      "files": [
+        "utils/visitUploadRecovery.js",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml"
+      ],
+      "purpose": "visit-upload-rejection-manual-recovery",
+      "revision": "6027b2183d95b11833f91a24b45ad1709eef8612"
+    },
+    {
+      "files": [
+        "components/task-execution-panel/index.js",
+        "components/task-execution-panel/index.wxml",
+        "pages/customer-assets/index.wxml",
+        "pages/customers/index.wxml",
+        "pages/index/index.js",
+        "pages/management-task-create/index.js",
+        "pages/management-task-create/index.wxml",
+        "pages/task-detail/execution-governance.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.wxml",
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "utils/apiClient.js",
+        "utils/customerDetail.js",
+        "utils/errorMessages.js",
+        "utils/taskChecklist.js",
+        "utils/taskExecutionMode.js",
+        "utils/taskExecutionPage.js",
+        "utils/taskExecutionPresentation.js",
+        "utils/taskHistory.js",
+        "utils/taskPresentation.js",
+        "utils/taskRequirements.js",
+        "pages/task-detail/execution-v2-editors.wxml",
+        "utils/taskChecklistEditor.js",
+        "utils/taskFeedback.js"
+      ],
+      "purpose": "task-execution-v2",
+      "new_files": [
+        "pages/task-detail/execution-v2-editors.wxml",
+        "utils/taskChecklistEditor.js",
+        "utils/taskFeedback.js"
+      ],
+      "revision": "e9b63952597c7088bf48e7b02fff772b738de6c1"
+    },
+    {
+      "files": [
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml",
+        "pages/task-detail/index.wxml",
+        "utils/apiClient.js",
+        "utils/detailReadSession.js",
+        "utils/taskExecutionPage.js",
+        "utils/relatedTaskSync.js"
+      ],
+      "purpose": "task-v2-adoption-related-window-sync",
+      "new_files": [
+        "utils/relatedTaskSync.js"
+      ],
+      "revision": "3e81b63eac6a5540b4f01a4bd745e4b152eabd39"
+    },
+    {
+      "files": [
+        "pages/task-detail/execution-v2-editors.wxml",
+        "utils/taskChecklistEditor.js",
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "task-checklist-order-impact",
+      "revision": "257456b1ebb0197f97f9e8fa530cb958ea54eaa5"
+    },
+    {
+      "files": [
+        "utils/taskHistory.js",
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "task-create-and-completion-history-readback",
+      "revision": "7a70dcb2c5cd48fb84fada6cc24f47f77543b593"
+    },
+    {
+      "files": [
+        "pages/management-task-create/index.js",
+        "utils/taskExecutionMode.js",
+        "utils/taskExecutionPage.js"
+      ],
+      "purpose": "Separate V2 creation capability while preserving V1 client rollout",
+      "revision": "184611f48451ff260c33857de1ec48d3d444c543"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "pages/customers/index.js",
+        "pages/customers/index.wxml"
+      ],
+      "purpose": "Preserve production Web-specific behavior while releasing task V2",
+      "revision": "23a4d67fac911b10946620a3d87c888d415c56e9",
+      "adaptations": {
+        "pages/index/index.js": "Preserves the existing Web knowledgeDistribution overview adapter from production 23a4d67fac911b10946620a3d87c888d415c56e9; task V2 receipts and actual progress are retained.",
+        "pages/customers/index.js": "Preserves the existing Web omission of the Mini-only opportunity transfer entry from production 23a4d67fac911b10946620a3d87c888d415c56e9; bounded related-task refresh is retained.",
+        "pages/customers/index.wxml": "Preserves the existing Web omission of the Mini-only opportunity transfer button from production 23a4d67fac911b10946620a3d87c888d415c56e9; actual task progress is retained."
+      }
+    },
+    {
+      "files": [
+        "pages/task-detail/index.js",
+        "pages/task-detail/taskExecutionPage.js",
+        "pages/task-detail/taskChecklistEditor.js",
+        "pages/task-detail/taskRequirements.js"
+      ],
+      "purpose": "Move detail-only task modules to the existing task-detail subpackage without route changes",
+      "new_files": [
+        "pages/task-detail/taskExecutionPage.js",
+        "pages/task-detail/taskChecklistEditor.js",
+        "pages/task-detail/taskRequirements.js"
+      ],
+      "revision": "a83aff3dd00be526dfc151e8c5c4726a4f9ac346",
+      "removed_files": [
+        "utils/taskExecutionPage.js",
+        "utils/taskChecklistEditor.js",
+        "utils/taskRequirements.js"
+      ]
+    },
+    {
+      "files": [
+        "pages/management-task-create/index.js",
+        "pages/management-task-create/index.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/index.wxss",
+        "pages/task-detail/taskExecutionPage.js",
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "pages/tasks/index.wxss",
+        "utils/apiClient.js",
+        "utils/customerDetail.js",
+        "utils/errorMessages.js",
+        "utils/requestIdentity.js",
+        "utils/statusLight.js",
+        "utils/taskCancellation.js",
+        "utils/taskExecutionMode.js",
+        "utils/taskExecutionPresentation.js",
+        "utils/taskHistory.js",
+        "utils/taskPresentation.js",
+        "pages/task-detail/lightweight-editor.wxml",
+        "pages/task-detail/lightweight.wxml",
+        "pages/task-detail/taskLightweightPage.js"
+      ],
+      "purpose": "task-lightweight-v3 shared controllers and Mini views",
+      "new_files": [
+        "pages/task-detail/lightweight-editor.wxml",
+        "pages/task-detail/lightweight.wxml",
+        "pages/task-detail/taskLightweightPage.js"
+      ],
+      "revision": "297ed0f882e76d2e9fa398ca9aff21034c827659"
+    },
+    {
+      "files": [
+        "pages/index/index.js"
+      ],
+      "purpose": "task-lightweight-v3 card projection; preserve existing Web knowledge distribution adapter",
+      "revision": "297ed0f882e76d2e9fa398ca9aff21034c827659"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js"
+      ],
+      "purpose": "restricted-account-web-error-copy",
+      "revision": "805f1b365e35511d0c81422609bb4c22e69762dc"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js"
+      ],
+      "purpose": "task-lightweight-v3 final database error codes",
+      "revision": "c738a4f0be37894af08cbaf261a30bcdb8ac2657"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "pages/tasks/index.js"
+      ],
+      "purpose": "Task V3 progressing-group query and authoritative pending pagination; preserve integrated Mini-only identity guards and Web adapters"
+    },
+    {
+      "files": [
+        "pages/index/index.js",
+        "utils/visitCards.js"
+      ],
+      "purpose": "visit receipt customer access fallback; preserve existing Web knowledgeDistribution adapter"
+    },
+    {
+      "files": [
+        "utils/access.js",
+        "utils/opportunityAdvice.js",
+        "utils/opportunityFollowUpReference.js",
+        "utils/visitOpportunityFollowUp.js",
+        "pages/workbench/index.js",
+        "pages/workbench/index.wxml",
+        "pages/opportunities/index.js",
+        "pages/customer-assets/index.js",
+        "pages/customer-assets/index.wxml",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "utils/apiClient.js"
+      ],
+      "purpose": "sales-shared-opportunity-read-and-followup-customer-selector"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml"
+      ],
+      "purpose": "followup-opportunity-required-submit-state"
+    },
+    {
+      "files": [
+        "utils/visitOpportunityFollowUp.js"
+      ],
+      "purpose": "followup-picker-retain-processing-guard"
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml",
+        "utils/visitSnapshot.js"
+      ],
+      "purpose": "company-follow-up-confirmation-isolation"
+    },
+    {
+      "files": [
+        "utils/access.js",
+        "pages/visit-entry/index.wxml",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml"
+      ],
+      "purpose": "preserve-existing-visit-read-scope"
+    },
+    {
+      "files": [
+        "utils/access.js",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml"
+      ],
+      "purpose": "claimed-customer-visit-read-boundary"
+    },
+    {
+      "files": [
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml"
+      ],
+      "purpose": "visit-receipt-object-read-boundary"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "task-management-order-safe-pass-through-preserve-web-adapters"
+    },
+    {
+      "files": [
+        "pages/customer-assets/index.js"
+      ],
+      "purpose": "mini-customer-name-query-decoding",
+      "revision": "412aa3d7bce5903bafb72ff56bd61ceb772e08b6"
+    },
+    {
+      "files": [
+        "pages/management-task-create/index.js",
+        "pages/management-task-create/index.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/index.wxss",
+        "pages/task-detail/taskExecutionPage.js",
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "pages/tasks/index.wxss",
+        "pages/index/index.js",
+        "utils/taskExecutionMode.js",
+        "utils/taskExecutionPresentation.js",
+        "utils/taskHistory.js",
+        "utils/taskCancellation.js",
+        "utils/taskPresentation.js",
+        "utils/statusLight.js",
+        "utils/requestIdentity.js",
+        "utils/customerDetail.js",
+        "utils/errorMessages.js",
+        "pages/task-detail/taskLightweightPage.js",
+        "pages/task-detail/lightweight.wxml",
+        "pages/task-detail/lightweight-editor.wxml"
+      ],
+      "purpose": "task-execution-v3-task-only-delta-preserve-local-increments",
+      "new_files": [
+        "pages/task-detail/taskLightweightPage.js",
+        "pages/task-detail/lightweight.wxml",
+        "pages/task-detail/lightweight-editor.wxml"
+      ],
+      "revision": "ddcb422fae7d98c4ff39f0fc39dee1a5f3ff0339"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "task-execution-v3-command-and-tabs-preserve-web-adapters-and-order",
+      "revision": "ddcb422fae7d98c4ff39f0fc39dee1a5f3ff0339"
+    },
+    {
+      "files": [
+        "pages/index/index.js"
+      ],
+      "purpose": "task-execution-v3-receipts-preserve-web-knowledge-adapter",
+      "revision": "ddcb422fae7d98c4ff39f0fc39dee1a5f3ff0339"
+    },
+    {
+      "files": [
+        "components/fde-projects/index.js",
+        "components/fde-projects/index.json",
+        "components/fde-projects/index.wxml",
+        "pages/opportunities/index.js",
+        "pages/opportunities/index.json",
+        "pages/opportunities/index.wxml",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.json",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/index.wxss",
+        "pages/task-detail/lightweight-editor.wxml",
+        "pages/task-detail/lightweight.wxml",
+        "pages/task-detail/taskLightweightPage.js",
+        "pages/tasks/index.js",
+        "pages/tasks/index.json",
+        "pages/tasks/index.wxml",
+        "pages/workbench/index.js",
+        "pages/workbench/index.json",
+        "pages/workbench/index.wxml",
+        "components/opportunity-period-filters/index.js",
+        "components/opportunity-period-filters/index.json",
+        "components/opportunity-period-filters/index.wxml",
+        "components/opportunity-period-filters/index.wxss",
+        "utils/opportunityPeriodFilters.js"
+      ],
+      "purpose": "Mini task editor refresh protection and server-side opportunity creation/financial quarter filters",
+      "new_files": [
+        "components/opportunity-period-filters/index.js",
+        "components/opportunity-period-filters/index.json",
+        "components/opportunity-period-filters/index.wxml",
+        "components/opportunity-period-filters/index.wxss",
+        "utils/opportunityPeriodFilters.js"
+      ],
+      "revision": "db27a8b49dbd67d795259c0cb607f30aaf17e5a2"
+    },
+    {
+      "files": [
+        "utils/apiClient.js"
+      ],
+      "purpose": "Merge opportunity period query fields into Web API adapter; preserve browser transport and auth differences",
+      "revision": "db27a8b49dbd67d795259c0cb607f30aaf17e5a2"
+    },
+    {
+      "files": [
+        "app.json"
+      ],
+      "purpose": "Move task creation into a normal Mini subpackage without changing routes or functionality; preserve Web-only inventory differences"
+    },
+    {
+      "files": [
+        "utils/taskHistory.js",
+        "pages/task-detail/lightweight.wxml"
+      ],
+      "purpose": "task-history-r2",
+      "revision": "e2b2e10bbc42fe8a535e695f804b6157a3de1c2b"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js"
+      ],
+      "purpose": "retire-opportunity-collaboration",
+      "revision": "538133c2addcd8808ce7e6fe53e5f3983e7ea617"
+    },
+    {
+      "files": [
+        "pages/fde-records/index.js",
+        "pages/fde-records/index.wxml",
+        "pages/fde-records/index.wxss",
+        "pages/profile/index.js",
+        "pages/profile/index.wxml",
+        "pages/visit-confirm/index.js",
+        "pages/visit-confirm/index.wxml",
+        "pages/visit-detail/index.js",
+        "pages/visit-detail/index.wxml",
+        "pages/visit-entry/index.js",
+        "pages/visit-entry/index.wxml",
+        "utils/access.js",
+        "utils/apiClient.js",
+        "utils/customerDetail.js",
+        "utils/opportunityFollowUpReference.js",
+        "utils/visitOpportunityFollowUp.js",
+        "utils/visitSnapshot.js"
+      ],
+      "purpose": "company-customer-follow-up-and-authorized-history",
+      "revision": "59c40ffa0cdfb8c1d25acca1ec58548d3fc08e77"
+    },
+    {
+      "files": [
+        "utils/visitOpportunityFollowUp.js"
+      ],
+      "purpose": "followup-picker-search-and-selection",
+      "revision": "0ddfb65a870043557e2be14f3ff18cc3c7631db5"
+    },
+    {
+      "files": [
+        "utils/visitOpportunityFollowUp.js"
+      ],
+      "purpose": "SB1210-WEB-RELEASE-P2-20261025-selection-cancels-search-state"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js",
+        "utils/opportunityCollectionActualForm.js",
+        "components/opportunity-form/index.wxml"
+      ],
+      "purpose": "quarter-collection-actionable-errors-and-trade-relation-validation"
+    },
+    {
+      "files": [
+        "components/opportunity-form/index.js",
+        "components/opportunity-form/index.wxml",
+        "components/opportunity-form/index.wxss",
+        "pages/opportunity-create/index.js",
+        "utils/errorMessages.js",
+        "utils/financialDisplay.js",
+        "utils/opportunityRecognizedActualForm.js"
+      ],
+      "purpose": "recognized-actual-direct-edit-20261025",
+      "new_files": [
+        "utils/opportunityRecognizedActualForm.js"
+      ],
+      "revision": "6a0267bfb50358976264a518fdff7d9c0764988d"
+    },
+    {
+      "files": [
+        "components/fde-dashboard/index.js",
+        "components/fde-dashboard/index.wxml",
+        "utils/fdePresentation.js",
+        "utils/rankingDisplay.js",
+        "utils/financialDisplay.js",
+        "utils/dashboardMetricDetails.js"
+      ],
+      "purpose": "dashboard-indicator-coverage-and-display-20261025",
+      "revision": "d43599931c8ca80b75f13b9bdc977caceaba17e3"
+    },
+    {
+      "files": [
+        "pages/bi/index.js",
+        "pages/bi/index.wxml"
+      ],
+      "purpose": "dashboard-indicator-selective-Web-adapter-alignment-20261025",
+      "revision": "d43599931c8ca80b75f13b9bdc977caceaba17e3",
+      "adaptations": {
+        "pages/bi/index.js": "2026-10-25: preserve Web React quarterly-monitor lifecycle; selectively align legacy dashboard amount coverage, plan labels and actual detail/coverage routing with d43599931c8ca80b75f13b9bdc977caceaba17e3.",
+        "pages/bi/index.wxml": "2026-10-25: preserve Web omission of Mini quarterly-monitor layout and detail sheet (rendered by React); selectively align legacy chart coverage hints and plan/source wording with d43599931c8ca80b75f13b9bdc977caceaba17e3."
+      }
+    },
+    {
+      "files": [
+        "pages/index/index.js"
+      ],
+      "purpose": "knowledge-disabled-home-no-prefetch"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js",
+        "utils/knowledgeDistribution.js"
+      ],
+      "purpose": "knowledge-disabled-safe-error"
+    },
+    {
+      "files": [
+        "pages/visit-entry/index.wxml"
+      ],
+      "purpose": "wxml-else-repeat-compile-fix-preserve-web-layout"
+    },
+    {
+      "files": [
+        "utils/errorMessages.js"
+      ],
+      "purpose": "report-job-failure-safe-message-20261026"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/errorMessages.js",
+        "pages/opportunity-create/index.js",
+        "pages/customer-detail/index.js",
+        "pages/customers/index.js",
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "opportunity-create-customer-claim-scope"
+    },
+    {
+      "files": [
+        "utils/apiClient.js",
+        "utils/errorMessages.js",
+        "pages/opportunity-create/index.js",
+        "pages/customer-detail/index.js",
+        "pages/customers/index.js",
+        "pages/visit-confirm/index.js"
+      ],
+      "purpose": "opportunity-create-customer-claim-scope"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPresentation.js",
+        "utils/statusLight.js",
+        "utils/taskOverview.js",
+        "utils/taskPresentation.js",
+        "utils/customerDetail.js",
+        "utils/access.js",
+        "pages/tasks/index.js",
+        "pages/tasks/index.wxml",
+        "pages/tasks/index.wxss",
+        "pages/task-detail/index.js",
+        "pages/task-detail/index.wxml",
+        "pages/task-detail/taskLightweightPage.js",
+        "pages/task-detail/lightweight.wxml",
+        "pages/index/index.js"
+      ],
+      "purpose": "Unify task terminal outcomes and authoritative completion counts across Mini and Web; retain lifecycle and action permissions"
+    },
+    {
+      "files": [
+        "utils/taskExecutionPresentation.js",
+        "utils/customerDetail.js"
+      ],
+      "purpose": "Finalize safe unknown outcomes and customer-row projection for task outcome alignment"
+    }
+  ],
+  "customer_adaptations": {
+    "customer": "Shenma",
+    "upstream_web_revision": "075cfbbf62b7a73a8a452c440b856bee335c6a9e",
+    "preserved_from": "439d8bd3a5e0ecf8ef14ffcb643fddc89d0a5c3b",
+    "features": [
+      "Shenma branding",
+      "explicit Feishu work report publication",
+      "uncertain save receipt recovery"
+    ]
+  }
+}

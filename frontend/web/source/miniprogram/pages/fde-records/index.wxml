@@ -1,0 +1,13 @@
+<view wx:if="{{accessBlocked}}" class="access-empty"><text>此功能暂不可用</text><label>{{accessMessage}}</label></view>
+<block wx:else>
+<view wx:if="{{authorized}}" class="visible-records">
+  <view class="records-title">可见跟进记录</view><view class="records-note">仅显示当前有权查看的正式跟进，不开放客户或商机档案权限。</view>
+  <view class="records-dates"><picker mode="date" value="{{dateFrom}}" data-key="dateFrom" bindchange="changeDate"><view>从 {{dateFrom}}</view></picker><picker mode="date" value="{{dateTo}}" data-key="dateTo" bindchange="changeDate"><view>至 {{dateTo}}</view></picker></view>
+  <input value="{{query}}" maxlength="100" placeholder="搜索客户、商机或跟进内容" bindinput="inputQuery" bindconfirm="loadRecords"/><button size="mini" bindtap="loadRecords" loading="{{recordsLoading}}">查询</button>
+  <view class="records-note">共 {{recordsTotal}} 条</view>
+  <view wx:for="{{records}}" wx:key="id" class="record-row" data-id="{{item.id}}" bindtap="openRecord"><view class="record-title">{{item.customer_name || item.partner_name || '未关联客户'}}</view><view class="records-note">{{item.dateLabel}} · {{item.recorderLabel}}</view><view wx:if="{{item.opportunity_name}}">{{item.opportunity_name}}</view><view class="record-content">{{item.follow_up_record}}</view><view wx:if="{{item.next_action}}" class="record-content">下一步：{{item.next_action}}</view><view wx:if="{{item.canReadDetail}}" class="record-link">查看跟进详情 ›</view></view>
+  <view wx:if="{{recordsError}}" class="record-error">{{recordsError}}<button size="mini" data-more="{{records.length>0}}" bindtap="loadRecords">重试</button></view><view wx:elif="{{recordsLoading}}" class="records-note">正在读取…</view><button wx:elif="{{recordsMore}}" size="mini" data-more="{{true}}" bindtap="loadRecords">加载更多</button><view wx:elif="{{!records.length}}" class="records-note">所选范围内暂无可见跟进</view>
+</view>
+<fde-dashboard wx:elif="{{context}}" records-only record-context="{{context}}" member-id="{{context.member_id}}" />
+
+</block>

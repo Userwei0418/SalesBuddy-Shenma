@@ -33,7 +33,7 @@ def test_batch_preserves_decimal_reason_versions_and_quarter():
     {"items": [{"kind": "visit_count", "amount": "0.5"}]},
     {"items": [{"kind": "collection", "amount": "1.001"}]},
     {"items": [{"kind": "collection", "amount": "NaN"}]},
-    {"items": [{"kind": "collection", "amount": 0}]},
+    {"items": [{"kind": "collection", "amount": -1}]},
     {"items": [{"kind": "collection", "amount": 1, "version_no": 2147483648}]},
     {"items": [{"kind": "collection", "amount": 1, "approved": True}]},
     {"scope": "person"}, {"scope": "team"}, {"scope": "self", "department_code": "fde"},
@@ -57,7 +57,10 @@ def test_batch_endpoints_use_the_strict_form_contract():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("amount, expected", [("1.2300", "1.23"), ("1E+3", "1000.00"), ("1000000.01", "1000000.01")])
+@pytest.mark.parametrize(
+    "amount, expected",
+    [("0", "0.00"), ("1.2300", "1.23"), ("1E+3", "1000.00"), ("1000000.01", "1000000.01")],
+)
 async def test_batch_normalizes_valid_decimal_input_for_database(monkeypatch, amount, expected):
     from sales_backend.repositories.targets import TargetRepository
 

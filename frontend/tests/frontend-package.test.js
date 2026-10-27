@@ -24,6 +24,7 @@ function fixture(t) {
   git('config', 'user.email', 'packaging@example.invalid');
   git('config', 'commit.gpgsign', 'false');
   write('frontend/scripts/package_frontend.py', fs.readFileSync(sourceScript));
+  write('frontend/scripts/miniprogram_manifest.py', fs.readFileSync(path.join(path.dirname(sourceScript),'miniprogram_manifest.py')));
   write('frontend/README.md', '# 前端\n\n[当前状态](../docs/CURRENT_STATUS.md)\n');
   write('frontend/VERSION.json', JSON.stringify({artifact_kind:'source_tree', source_package_date:'2026-09-12'}));
   write('frontend/project.config.json', JSON.stringify({miniprogramRoot:'miniprogram/'}));
@@ -62,13 +63,17 @@ with zipfile.ZipFile(sys.argv[1]) as z:
             digest,name=line.split('  ',1)
             assert hashlib.sha256(z.read(prefix+base+name)).hexdigest()==digest
     print(json.dumps({'names':[n[len(prefix):] for n in names],
-        'version':json.loads(z.read(prefix+'frontend/VERSION.json'))}))
+        'version':json.loads(z.read(prefix+'frontend/VERSION.json')),
+        'buildInfo':json.loads(z.read(prefix+'frontend/miniprogram/buildInfo.json')),
+        'buildModule':z.read(prefix+'frontend/miniprogram/buildInfo.js').decode()}))
 `, filename], {encoding:'utf8'}));
 }
 
 test('交付来自最终提交，包含可导入项目及版本；本地缓存和私有配置不进入包', t => {
   const f = fixture(t);
+  f.write('frontend/VERSION.json', JSON.stringify({artifact_kind:'source_tree', release_version:'1.2.3'}));
   f.write('frontend/miniprogram/pages/index/index.wxml', '<view>latest committed UI</view>');
+  f.write('frontend/tests/fixtures/example.json', '{"synthetic":true}');
   f.write('docs/evidence/final/check.json', '{"passed":true}');
   f.write('docs/evidence/final/local.key', 'must not be distributed');
   const head = f.commit();
@@ -77,6 +82,10 @@ test('交付来自最终提交，包含可导入项目及版本；本地缓存�
   const output = JSON.parse(result.stdout);
   const inspected = inspectZip(output.zip);
   assert.equal(inspected.version.frontend_revision, head);
+  assert.equal(inspected.version.release_version, '1.2.3');
+  assert.deepEqual(inspected.buildInfo, {schemaVersion:1,environment:'online',sourceRevision:head,releaseVersion:'1.2.3'});
+  const scope={module:{exports:{}}};require('node:vm').runInNewContext(inspected.buildModule,scope);
+  assert.equal(JSON.stringify(scope.module.exports),JSON.stringify(inspected.buildInfo));
   assert.equal(inspected.version.backend_revision, f.deployed);
   assert.equal(inspected.version.api_base_url, 'https://example.invalid/api/v1');
   assert.equal(inspected.version.artifact_kind, 'frontend_handoff');
@@ -85,6 +94,7 @@ test('交付来自最终提交，包含可导入项目及版本；本地缓存�
     assert.ok(inspected.names.includes(name), name);
   }
   assert.equal(inspected.names.some(name => /private|node_modules|\.env|local\.key/.test(name)), false);
+  assert.equal(inspected.names.some(name => name.startsWith('frontend/tests/')), false);
   assert.equal(output.sha256,crypto.createHash('sha256').update(fs.readFileSync(output.zip)).digest('hex'));
   assert.equal(f.git('status','--porcelain'), '');
   assert.notEqual(f.run().status,0, 'must not overwrite an existing release');
@@ -129,4 +139,29 @@ test('拒绝仓库内交付、仓库内账号说明、越界文档和不完整�
   ]) assert.notEqual(f.run(...args).status,0);
   f.git('rm','frontend/miniprogram/pages/index/index.wxml');f.commit();
   const result=f.run();assert.notEqual(result.status,0);assert.match(result.stderr,/缺少/);
+});
+
+test('分包保留完整页面路由和总页数，且检查分包页面完整性', t => {
+  const f=fixture(t);
+  f.write('frontend/miniprogram/app.json',JSON.stringify({pages:['pages/index/index'],subPackages:[{root:'pages/detail',pages:['index']}]}));
+  for(const suffix of ['js','wxss','wxml'])f.write('frontend/miniprogram/pages/detail/index.'+suffix,'');
+  f.write('frontend/miniprogram/pages/detail/index.json','{}');
+  f.commit();const result=f.run();assert.equal(result.status,0,result.stderr);
+  const {version}=inspectZip(JSON.parse(result.stdout).zip);
+  assert.equal(version.registered_pages,2);assert.equal(version.main_package_pages,1);
+  assert.deepEqual(version.subpackage_roots,['pages/detail']);
+  f.git('rm','frontend/miniprogram/pages/detail/index.wxml');f.commit();
+  const broken=f.run('--release-name','missing-subpage');assert.notEqual(broken.status,0);assert.match(broken.stderr,/缺少/);
+});
+
+test('分包允许复用主包模块，阻止主包反向引用', t => {
+  const f=fixture(t);
+  f.write('frontend/miniprogram/app.json',JSON.stringify({pages:['pages/index/index'],subPackages:[{root:'pages/detail',pages:['index']}]}));
+  f.write('frontend/miniprogram/utils/shared.js','module.exports={};');
+  f.write('frontend/miniprogram/pages/detail/index.js',"require('../../utils/shared');");
+  f.write('frontend/miniprogram/pages/detail/index.json','{}');
+  for(const suffix of ['wxss','wxml'])f.write('frontend/miniprogram/pages/detail/index.'+suffix,'');
+  f.commit();assert.equal(f.run().status,0);
+  f.write('frontend/miniprogram/pages/index/index.js',"require('../detail/index');");f.commit();
+  const invalid=f.run('--release-name','cross-package');assert.notEqual(invalid.status,0);assert.match(invalid.stderr,/Cross-subpackage/);
 });

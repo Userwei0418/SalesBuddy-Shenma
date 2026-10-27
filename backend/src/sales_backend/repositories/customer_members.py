@@ -10,7 +10,7 @@ from sales_backend.domain.customer_search import matching_names, phonetic_query
 
 class CustomerMemberRepository:
     async def claim_pool_page(self, connection, *, query=None, limit=50, offset=0,
-                              industry=None, claim_status=None):
+                              industry=None, claim_status=None, business_identity="all", order="name"):
         query = query.strip() if query else None
         phonetic = phonetic_query(query)
         names = []
@@ -19,9 +19,13 @@ class CustomerMemberRepository:
                 "SELECT name FROM security.company_customer_directory_search_names($1) AS name", industry
             )
             names = await asyncio.to_thread(matching_names, [row["name"] for row in rows], phonetic)
+        if order == "recent_follow_up":
+            return json_value(await connection.fetchval(
+                RECENT_CUSTOMER_PAGE_SQL, query, industry, claim_status, names, business_identity, limit, offset
+            ))
         return json_value(await connection.fetchval(
-            "SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[])",
-            query, limit, offset, industry, claim_status, names,
+            "SELECT security.company_customer_directory_search($1,$2,$3,$4,$5,$6::text[],$7)",
+            query, limit, offset, industry, claim_status, names, business_identity,
         ))
 
     async def claim_pool_options(self, connection):
@@ -63,3 +67,29 @@ class CustomerMemberRepository:
             customer_id,
             user_id,
         )
+
+
+# V281 exposes only the existing claim-directory candidate scope. Visit facts
+# are deliberately read here as the API role, so all visit RLS stays in effect.
+RECENT_CUSTOMER_PAGE_SQL = """WITH candidates AS MATERIALIZED (
+  SELECT id,name FROM security.company_customer_directory_candidates($1,$2,$3,$4::text[],$5)
+), latest_visits AS MATERIALIZED (
+  SELECT v.customer_id,max(v.interaction_at) AS latest_follow_up_at
+  FROM activity.visit v
+  WHERE v.workspace_id=common.current_workspace_id() AND v.deleted_at IS NULL
+    AND v.status IN ('confirmed','archived') AND v.interaction_at IS NOT NULL
+    AND v.customer_id IN (SELECT id FROM candidates)
+  GROUP BY v.customer_id
+), ranked AS MATERIALIZED (
+  SELECT c.id,c.name,v.latest_follow_up_at FROM candidates c
+  LEFT JOIN latest_visits v ON v.customer_id=c.id
+), page AS MATERIALIZED (
+  SELECT * FROM ranked ORDER BY latest_follow_up_at DESC NULLS LAST,name,id LIMIT $6 OFFSET $7
+), page_ids AS (
+  SELECT COALESCE(array_agg(id ORDER BY latest_follow_up_at DESC NULLS LAST,name,id),'{}'::uuid[]) AS ids
+  FROM page
+), totals AS (SELECT count(*) AS total FROM candidates)
+SELECT jsonb_build_object('items',security.company_customer_directory_page_items(page_ids.ids),
+  'total',totals.total,'has_more',$7+cardinality(page_ids.ids)<totals.total,
+  'next_offset',CASE WHEN $7+cardinality(page_ids.ids)<totals.total THEN $7+cardinality(page_ids.ids) ELSE NULL END)
+FROM page_ids CROSS JOIN totals"""

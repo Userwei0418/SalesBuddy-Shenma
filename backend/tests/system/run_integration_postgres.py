@@ -61,6 +61,8 @@ async def main(serve=None):
             "INSERT INTO platform.workspace(id,external_workspace_id,name) VALUES($1,'demo-sales-workspace','隔离验收')",
             workspace,
         )
+        if await conn.fetchval("SELECT to_regclass('control.tenant_module') IS NOT NULL"):
+            await conn.execute("UPDATE control.tenant_module SET enabled=true,source='isolated-test-fixture' WHERE workspace_id=$1", workspace)
         await conn.execute(
             "INSERT INTO platform.team(id,workspace_id,code,name) VALUES($1,$2,'south','南区')", team, workspace
         )
@@ -146,6 +148,7 @@ async def main(serve=None):
             "pytest",
             str(ROOT / "backend/tests/integration"),
             "-q",
+            "-rs",
             "-p",
             "no:cacheprovider",
             env=env,
@@ -154,6 +157,60 @@ async def main(serve=None):
         code = await process.wait()
         if code:
             raise RuntimeError(f"Integration suite failed: exit {code}")
+        support = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_support_access_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await support.wait():
+            raise RuntimeError('Temporary support revocation verification failed')
+        lifecycle = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_tenant_suspend_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await lifecycle.wait():
+            raise RuntimeError('Tenant lifecycle concurrency verification failed')
+        mfa = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_platform_mfa_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await mfa.wait():
+            raise RuntimeError('Platform MFA concurrency verification failed')
+        delegation = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_delegation_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await delegation.wait():
+            raise RuntimeError('Authorization delegation concurrency verification failed')
+        fairness = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_tenant_job_fairness_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await fairness.wait():
+            raise RuntimeError('Tenant job fairness concurrency verification failed')
+        quota = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_account_quota_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await quota.wait():
+            raise RuntimeError('Tenant account quota concurrency verification failed')
+        storage = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_storage_quota_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await storage.wait():
+            raise RuntimeError('Tenant storage quota concurrency verification failed')
+        http_limits = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_http_limits_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await http_limits.wait():
+            raise RuntimeError('Tenant HTTP limits concurrency verification failed')
+        calls = await asyncio.create_subprocess_exec(
+            sys.executable, str(ROOT / 'backend/tests/system/verify_call_quota_postgres.py'),
+            env=env, cwd=str(ROOT),
+        )
+        if await calls.wait():
+            raise RuntimeError('Tenant call quota concurrency verification failed')
         model_api = await asyncio.create_subprocess_exec(
             sys.executable, str(ROOT / 'backend/tests/system/verify_model_api_postgres.py'),
             env=env, cwd=str(ROOT),

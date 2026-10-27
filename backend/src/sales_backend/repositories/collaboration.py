@@ -16,7 +16,7 @@ def member_ids(values):
 
 async def fde_directory(connection, *, query=None):
     rows = await connection.fetch(
-        """SELECT DISTINCT ON(u.id) u.id::text,u.display_name AS name,rb.role_code AS role,
+        """SELECT DISTINCT ON(u.id) u.id::text,u.display_name AS name,u.account_code,rb.role_code AS role,
           tm.team_id::text AS team_id,t.name AS team,true AS is_active
         FROM platform.user_ref u JOIN platform.role_binding rb ON rb.user_ref_id=u.id
         JOIN platform.team_membership tm ON tm.user_ref_id=u.id
@@ -32,11 +32,18 @@ async def fde_directory(connection, *, query=None):
     return sorted((dict(row) for row in rows), key=lambda r: (r["team"], r["name"], r["id"]))
 
 
-async def validated_fde(connection, values):
+async def validated_fde(connection, values, *, existing=()):
     ids = member_ids(values)
     if not ids:
         return []
     available = {r["id"]: r for r in await fde_directory(connection)}
+    retained = sorted((set(ids) & set(existing)) - available.keys())
+    if retained:
+        for row in await connection.fetch(
+            "SELECT id::text,display_name AS name,false AS is_active FROM platform.user_ref "
+            "WHERE workspace_id=common.current_workspace_id() AND id=ANY($1::uuid[])", retained,
+        ):
+            available[row["id"]] = dict(row)
     if any(uid not in available for uid in ids):
         raise ValueError("FDE 成员不存在、已停用或不属于有效 FDE 部门，请重新选择")
     return [available[uid] for uid in ids]
@@ -47,7 +54,8 @@ async def members_by_opportunity(connection, ids):
         return {}
     rows = await connection.fetch(
         """SELECT p.opportunity_id::text,u.id::text,u.display_name AS name,
-            p.valid_from,COALESCE(d.role,'fde') AS role,d.team,d.team_id
+            p.valid_from,COALESCE(d.role,'fde') AS role,d.team,d.team_id,
+            security.fde_user_is_active(u.id) AS is_active
         FROM crm.opportunity_participant p JOIN platform.user_ref u ON u.id=p.user_ref_id
         LEFT JOIN LATERAL(SELECT rb.role_code AS role,t.name AS team,tm.team_id::text AS team_id
           FROM platform.role_binding rb JOIN platform.team_membership tm ON tm.user_ref_id=rb.user_ref_id
@@ -59,7 +67,6 @@ async def members_by_opportunity(connection, ids):
           ORDER BY tm.is_primary DESC,rb.valid_from DESC LIMIT 1) d ON true
         WHERE p.opportunity_id=ANY($1::uuid[]) AND p.participant_role='fde'
           AND clock_timestamp()>=p.valid_from AND clock_timestamp()<p.valid_to
-          AND security.fde_user_is_active(u.id)
         ORDER BY u.display_name,u.id""",
         ids,
     )
@@ -101,19 +108,10 @@ async def bump_membership_version(connection, opportunity_id, version):
 
 
 async def archive_fde_collaboration(connection, actor, visit, participants):
+    """Notify recorded attendees without granting persistent opportunity access."""
     oid = visit.get("opportunity_id")
     if not oid or not participants:
         return
-    current = await effective_ids(connection, oid)
-    if set(participants) - current:
-        version = await manageable_version(connection, oid)
-        await bump_membership_version(connection, oid, version)
-        # The roster may have changed before the aggregate lock was acquired.
-        # Union against the locked state so another visit's additions survive.
-        current = await effective_ids(connection, oid)
-        await write_members(
-            connection, actor, oid, current | set(participants), source="visit_archive", visit_id=visit["id"]
-        )
     for uid in participants:
         await connection.fetchval(
             "SELECT workflow.enqueue_fde_collaboration_notification("
@@ -193,12 +191,17 @@ async def write_visit_participants(connection, actor, visit_id, collaborators, f
 
 
 async def scope_members(connection, actor, scope=None, selected=None, selected_ids=None, team_id=None,
-                        *, permission='profile.fde_read', fde_cohort=False):
-    from sales_backend.repositories.authorization_checks import require_permission
+                        *, permission='profile.fde_read', fde_cohort=False, permissions=None, teams=None):
+    from sales_backend.repositories.authorization import AuthorizationRepository
     from sales_backend.repositories.team_directory import selectable_teams
 
-    await require_permission(connection, permission)
-    teams = await selectable_teams(connection, actor, 'fde', permission=permission)
+    # Reuse only a server-resolved object from this transaction. Previously the
+    # identical effective policy was loaded twice before resolving any members.
+    if permissions is None:
+        permissions = await AuthorizationRepository().effective(connection)
+    permissions.require(permission)
+    if teams is None:
+        teams = await selectable_teams(connection, actor, 'fde', permission=permission, permissions=permissions)
     if fde_cohort or permission.startswith('profile.fde'):
         available = await fde_directory(connection)
     else:
@@ -260,18 +263,19 @@ async def scoped_opportunity_ids(connection, actor, scope=None, member_id=None, 
 
 async def fde_scope_options(connection, actor):
     _, _, people = await scope_members(connection, actor)
-    from sales_backend.repositories.team_directory import selectable_teams
+    from sales_backend.repositories.team_directory import default_team_id, selectable_teams
 
     teams = await selectable_teams(connection, actor, 'fde')
     memberships = await connection.fetch(
         "SELECT user_ref_id::text,team_id::text FROM platform.team_membership WHERE workspace_id=$1::uuid "
         "AND user_ref_id=ANY($2::uuid[]) AND membership_role IN ('fde','fde_lead') "
+        "AND team_id=ANY($3::uuid[]) "
         "AND clock_timestamp()>=valid_from AND clock_timestamp()<valid_to",
-        actor.workspace_id, [p['id'] for p in people])
+        actor.workspace_id, [p['id'] for p in people], [team['id'] for team in teams])
     return {'data_source': 'database', 'teams': teams,
             'members': [{**p, 'user_id': p['id'], 'display_name': p['name'],
                          'team_ids': sorted({r['team_id'] for r in memberships if r['user_ref_id'] == p['id']})}
                         for p in people],
             'allowed_scopes': (['self'] if any(p['id']==actor.user_id for p in people) else []) + (['person'] if people else []) + (['team'] if teams else []),
             'defaults': {'scope': 'team' if teams else 'self', 'member_id': actor.user_id,
-                         'team_id': teams[0]['id'] if teams else None}}
+                         'team_id': await default_team_id(connection, actor, teams)}}

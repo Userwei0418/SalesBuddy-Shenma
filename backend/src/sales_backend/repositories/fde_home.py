@@ -3,6 +3,8 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
+from sales_backend.repositories.task_execution_projection import TASK_REQUIRES_ACTION_SQL, normalize_execution
+from sales_backend.repositories.task_outcomes import NORMAL_COMPLETED_SQL
 from sales_backend.repositories.tasks import TASK_HANDOVER_REQUIRED_SQL, TaskRepository
 
 
@@ -23,20 +25,18 @@ async def fde_home(connection, actor):
               AND security.fde_user_is_active(p.user_ref_id)))
         SELECT (SELECT count(*) FROM personal_projects WHERE status='open') AS open_opportunities,
           (SELECT count(*) FROM insight.risk r WHERE r.deleted_at IS NULL
-            AND r.status IN ('new','pending','in_progress','escalated')
+            AND r.status <> 'resolved'
             AND EXISTS(SELECT 1 FROM personal_projects p WHERE p.id=r.opportunity_id)) AS open_risks""",
         actor.user_id,
     )
     predicates, args = TaskRepository._filters(inbox=True, fde_view="self")
     assert not args
     personal = " AND ".join(predicates)
-    action = """CASE WHEN t.status='pending_review' THEN t.creator_user_ref_id=common.current_user_ref_id() ELSE EXISTS(SELECT 1 FROM workflow.v_task_action_recipient ar
-        WHERE ar.task_id=t.id AND ar.assignee_user_ref_id=common.current_user_ref_id()
-          AND ar.assignee_role=common.current_role_code()) END"""
-    active = "t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review')"
+    action = TASK_REQUIRES_ACTION_SQL
+    active = "t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review','needs_adjustment')"
     counts = await connection.fetchrow(
         "SELECT count(*) FILTER(WHERE " + active + " AND " + action + ") AS my_tasks,"
-        " count(*) FILTER(WHERE t.status='completed' AND EXISTS("
+        " count(*) FILTER(WHERE " + NORMAL_COMPLETED_SQL + " AND EXISTS("
         "SELECT 1 FROM workflow.task_assignee a WHERE a.task_id=t.id AND a.responsibility='owner'"
         " AND a.assignee_user_ref_id=common.current_user_ref_id()"
         " AND a.assignee_role=common.current_role_code())) AS completed_tasks"
@@ -45,7 +45,7 @@ async def fde_home(connection, actor):
     # Page first, without collecting candidates, events, attachments or dashboard
     # rows. Priority cards retain the previous inclusion of overdue tasks.
     cards_sql = (
-        "SELECT t.id::text,t.title,t.description,t.due_at,t.status,t.target_position"
+        "SELECT t.id::text,t.execution_mode,t.title,t.description,t.due_at,t.status,t.target_position,workflow.task_execution_summary(t.id) AS execution"
         " FROM workflow.task t WHERE " + personal + " AND " + active + " AND " + action
     )
     ordering = " ORDER BY t.due_at,t.created_at DESC,t.id LIMIT 8"
@@ -53,13 +53,17 @@ async def fde_home(connection, actor):
     urgent = await connection.fetch(cards_sql + " AND t.due_at<=$1" + ordering, now + timedelta(hours=12))
 
     def card(task):
+        task = normalize_execution(dict(task))
         return {
+            "execution_mode": task["execution_mode"], "execution_protocol_version": task["execution_protocol_version"],
+            "execution": task.get("execution"), "progress": task.get("progress"),
+            "execution_flags": task.get("execution_flags"), "reviewer": task.get("reviewer"),
             "source_type": "task", "source_id": task["id"], "title": task["title"],
             "detail": task["description"] or "进入任务详情查看执行要求。",
             "meta": "截止 " + task["due_at"].astimezone(now.tzinfo).strftime("%m-%d %H:%M"),
             "tag": "待领取" if task["status"] == "pending_confirm" and task["target_position"]
                 else "待接受" if task["status"] == "pending_confirm"
-                else "待发起人确认" if task["status"] == "pending_review"
+                else "待验收人确认" if task["status"] == "pending_review"
                 else "已逾期" if task["due_at"] < now else "待完成",
             "tone": "warning" if task["due_at"] < now else "normal", "scope_group": "personal",
         }

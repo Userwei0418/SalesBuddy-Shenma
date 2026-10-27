@@ -58,6 +58,8 @@ async def update_members(
                     connection, identity.actor, str(opportunity_id), body.member_ids, body.version_no
                 ),
             )
+    except asyncpg.DeadlockDetectedError as exc:
+        raise HTTPException(409, "同时有其他修改正在保存，本次修改未完成，请刷新后重试") from exc
     except (VersionConflict, asyncpg.SerializationError) as exc:
         raise HTTPException(409, "协助人员已更新，请刷新后重试") from exc
     except (PermissionError, asyncpg.InsufficientPrivilegeError) as exc:
@@ -68,7 +70,10 @@ async def update_members(
         raise HTTPException(422, str(exc)) from exc
 
 
-@router.get("/fde/scope-options")
+@router.get("/fde/scope-options", description=(
+    "FDE 画像授权目录；成员保留稳定 id 并提供 account_code；team_ids 仅含本接口可选团队中的有效 FDE/FDE主管归属。"
+    "defaults.team_id 为当前人可选的有效主团队或 null，不用首个团队代替。"
+))
 async def profile_scope_options(
     identity: RequestIdentity = Depends(get_identity),
     database: Database = Depends(get_database),
@@ -88,6 +93,9 @@ async def profile_scope_options(
         "items[].opportunity_count 为所选期间已归档拜访涉及的去重商机数，"
         "团队按录入时团队快照去重，不累加个人去重数；followup_count 为归档次数。"
         "summary 仅统计所选对象，selection.team_ids 标识所选团队，不裁剪完整榜单。"
+        "summary 与 ranking[] 的 open_acv 保留已知金额合计，open_acv_known_count / "
+        "open_acv_missing_count 分别为在推商机已填 / 未填金额数，明确零算已填。"
+        "缺项大于零时金额仅为已知小计；全缺项显示未填写，不能按零解释。"
     ),
 )
 async def dashboard(

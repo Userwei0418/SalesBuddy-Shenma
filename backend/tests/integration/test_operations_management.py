@@ -20,7 +20,7 @@ pytestmark = pytest.mark.asyncio
 
 
 async def test_account_lifecycle_roles_and_last_administrator(connection):
-    ops = await actor(connection, "OPS001")
+    ops = await actor(connection, "ADMIN001")
     service = OperationsAccountService()
     org = await OperationsAccountRepository().organization(connection)
     team = org["departments"][0]["id"]
@@ -36,8 +36,10 @@ async def test_account_lifecycle_roles_and_last_administrator(connection):
     assert not await connection.fetchrow(
         "SELECT * FROM security.resolve_demo_actor('demo-sales-workspace',$1)", created["account_code"]
     )
+    restricted = await actor(connection, "OPS001")
     with pytest.raises(PermissionError):
-        await service.create(connection, ops, {**data, "roles": ["administrator"]}, "Isolated-New-2026")
+        await service.create(connection, restricted, data, "Isolated-New-2026")
+    ops = await actor(connection, "ADMIN001")
     await service.update(connection, ops, created["id"], {**data, "status": "inactive", "version_no": 1})
     assert not await connection.fetchval(
         "SELECT security.password_candidate('demo-sales-workspace',$1,NULL)", created["account_code"]
@@ -197,7 +199,7 @@ async def test_audit_total_survives_empty_page_and_actor_switch(connection):
 
 
 async def test_email_rename_keeps_identity_password_and_disables_old_login(connection):
-    ops = await actor(connection, "OPS001")
+    ops = await actor(connection, "ADMIN001")
     service = OperationsAccountService()
     org = await OperationsAccountRepository().organization(connection)
     data = dict(account_code="BEFORE" + uuid4().hex[:12], display_name="隔离邮箱账号",

@@ -1,0 +1,39 @@
+/* 排名卡：白卡放在灰底上，不描边；卡内行与行之间一条细线 */
+.rank-card{margin-top:16px;padding:16px;background:var(--ui-surface);border-radius:var(--ui-radius-panel);color:var(--ui-ink);font-family:var(--ui-font)}
+.rank-heading{display:flex;align-items:center;gap:16rpx}
+.rank-copy{flex:1;min-width:0}
+.rank-title{display:block;font-size:var(--ui-text-section);font-weight:600;line-height:1.4}
+.rank-subtitle{display:block;margin-top:4rpx;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.5}
+.rank-details{display:flex;align-items:center;flex-shrink:0;min-height:44px;padding-left:16rpx;font-size:14px;color:var(--ui-primary)}
+.rank-details.disabled{color:var(--ui-muted)}
+.rank-details-pressed{opacity:.7}
+.rank-details-icon{display:inline-flex}
+.rank-period{margin-top:4px;padding-bottom:12px;border-bottom:1px solid var(--ui-line);color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.5}
+.rank-row{display:flex;align-items:center;gap:16rpx;padding:24rpx 0}
+.rank-row+.rank-row{border-top:1px solid var(--ui-line)}
+.rank-badge{display:flex;align-items:center;justify-content:center;flex:0 0 40rpx;height:40rpx;border-radius:50%;background:var(--ui-neutral-soft);color:var(--ui-neutral);font-size:var(--ui-text-small);font-weight:600}
+.rank-person{min-width:0;flex:1}
+.rank-name-line{display:flex;align-items:center;flex-wrap:wrap;gap:8rpx 12rpx}
+.rank-name{display:block;font-size:var(--ui-text-body);font-weight:600;line-height:1.4;word-break:break-all}
+.rank-meta{display:block;margin-top:4rpx;color:var(--ui-secondary);font-size:var(--ui-text-small);line-height:1.4}
+.rank-track{margin-top:12rpx;background:var(--ui-neutral-soft);border-radius:var(--ui-radius-control);height:8rpx;overflow:hidden}
+.rank-fill{height:100%;background:var(--ui-chart-1);border-radius:var(--ui-radius-control)}
+.rank-value{flex-shrink:0;max-width:128px;text-align:right;font-size:var(--ui-text-body);font-weight:600;font-variant-numeric:tabular-nums;color:var(--ui-ink);white-space:nowrap}
+/* 320 宽屏：金额（1 亿以上 12 位以上）不拆行，字号降到 14px */
+@media (max-width:359px){.rank-value{font-size:14px}}
+.rank-empty{padding:32rpx 8rpx;font-size:14px;color:var(--ui-secondary);line-height:1.6;text-align:center}
+.self-label{padding:0 8px;border-radius:4px;background:var(--ui-selected);color:var(--ui-primary);font-size:var(--ui-text-small);font-weight:400;line-height:20px}
+
+/* 完整榜单：sb-sheet；说明固定在标题下；内层 scroll-view 只用来定位到当前所选对象，高度小于弹层正文，外层不再滚动。
+   本人／当前查看那一行不整行铺色，只靠名字后面的浅蓝小标签（飞书：浅底配深字的小标签，不整块涂色） */
+.sheet-fixed{display:flex;flex-direction:column;gap:4rpx;padding-bottom:8rpx;border-bottom:1px solid var(--ui-line)}
+.sheet-sub{display:block;font-size:14px;color:var(--ui-secondary);line-height:1.5}
+.rank-scroll{max-height:50vh}
+.sheet-rows{padding-bottom:8px}
+.sheet-rows .rank-row{padding:24rpx 0}
+
+/* New business controls styled with the retained A tokens. */
+.upgrade-member-link,.upgrade-member-back{display:block;min-height:var(--ui-touch-target);line-height:var(--ui-touch-target);font-size:14px;color:var(--ui-primary)}
+
+/* 小计含状态文案，允许在金额列内换行，保留姓名列空间。 */
+.rank-value-subtotal{white-space:normal;overflow-wrap:anywhere}

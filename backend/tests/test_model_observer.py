@@ -69,7 +69,49 @@ async def test_auth_failure_is_one_attempt_and_unknown_usage_stays_unknown():
     assert observer.finished[0][1]["output_tokens"] is None
 
 
-@pytest.mark.parametrize("value", [None, True, -1, "100", 1.5])
+@pytest.mark.parametrize("value", [None, True, -1, "100", 1.5, 2147483648])
 def test_usage_never_fabricates_provider_counters(value):
     usage = response_usage(httpx.Response(200, json={"usage": {"prompt_tokens": value}}))
     assert usage["input_tokens"] is None and usage["output_tokens"] is None
+
+
+@pytest.mark.parametrize('value', [True, -1, '240', float('inf'), float('nan'), 10**400])
+def test_invalid_audio_usage_does_not_prevent_accounting(value):
+    from types import SimpleNamespace
+    response = SimpleNamespace(json=lambda: {'duration':value},headers={},status_code=200)
+    usage = response_usage(response)
+    assert usage['audio_seconds'] is None and usage['http_status'] == 200
+
+
+class QuotaObserver(Observer):
+    def __init__(self, dispatch_error=None):
+        super().__init__()
+        self.dispatch_error = dispatch_error
+        self.sent = []
+
+    async def prepare_dispatch(self, invocation_id):
+        if self.dispatch_error:
+            raise self.dispatch_error
+
+    async def finish(self, invocation_id, response, error, *, network_sent):
+        self.sent.append(network_sent)
+        await super().finish(invocation_id, response, error)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('failure', ['marker', 'transport', 'purpose'])
+async def test_quota_transport_distinguishes_no_dispatch_from_unknown_response(failure):
+    calls = []
+    async def transport(request):
+        calls.append(request)
+        raise httpx.ReadTimeout('unknown response')
+    observer = QuotaObserver(RuntimeError('cannot reserve dispatch') if failure == 'marker' else None)
+    config = replace(settings(), max_retries=0)
+    if failure == 'purpose':
+        config = replace(config, model_api_endpoint='https://api.example.org/asr', model_api_metadata={'connection_purpose':'asr'})
+    async with httpx.AsyncClient(base_url='https://api.senseaudio.cn', transport=httpx.MockTransport(transport)) as http:
+        model = SenseAudioClient(config, client=http, observer=observer)
+        with pytest.raises((RuntimeError, SenseAudioError)):
+            await model.chat_json(messages=[ChatMessage(role='user', content='synthetic')])
+    assert observer.sent == [failure == 'transport']
+    assert len(calls) == (1 if failure == 'transport' else 0)

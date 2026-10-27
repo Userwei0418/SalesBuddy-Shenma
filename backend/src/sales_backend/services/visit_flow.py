@@ -3,14 +3,18 @@
 from datetime import date, timedelta
 
 from sales_backend.contracts.visit_flow import canonical_fields, validate_quality_input
-from sales_backend.db import json_value
 from sales_backend.domain.agent import AgentMode
 from sales_backend.domain.business_time import business_datetime
 from sales_backend.repositories.assistant import AssistantRepository
+from sales_backend.repositories.opportunity_access import follow_up_reference
 from sales_backend.repositories.visits import validate_collaborators
 from sales_backend.services.agent_access import require_agent_access
 from sales_backend.services.capabilities import require_capability
-from sales_backend.services.visit_access import require_visit_recording_scope, validate_visit_attendance, validate_visit_optional_actions
+from sales_backend.services.visit_access import (
+    require_visit_recording_scope,
+    validate_visit_attendance,
+    validate_visit_optional_actions,
+)
 
 
 async def structure_source(connection, actor, source_run_id):
@@ -54,23 +58,20 @@ def relative_time_context(anchor, current_time):
     }
 
 
-async def prepare_visit_run(connection, actor, body, stage):
+async def require_visit_run_scope(connection, actor, body, stage):
+    """The same live target gate runs before receipt replay and before enqueue."""
     await require_capability(connection, actor, "visit.create")
     await require_agent_access(connection, actor, "visit_entry", body.customer_id, opportunity_id=body.opportunity_id)
     await require_visit_recording_scope(connection, actor, body.customer_id, body.opportunity_id)
     await require_visit_recording_scope(connection, actor, body.customer_id, body.opportunity_id,
         permission="visit.quality_review" if stage == "quality" else "visit.structure")
-    customer = json_value(await connection.fetchval("SELECT security.customer_reference($1::uuid)", body.customer_id))
+
+
+async def prepare_visit_run(connection, actor, body, stage):
+    await require_visit_run_scope(connection, actor, body, stage)
+    customer = await follow_up_reference(connection, body.customer_id, body.opportunity_id)
     if not customer:
         raise PermissionError("客户不存在或不可用于录入")
-    if body.opportunity_id:
-        linked = await connection.fetchval(
-            "SELECT id FROM crm.opportunity WHERE id=$1::uuid AND customer_id=$2::uuid AND deleted_at IS NULL",
-            body.opportunity_id,
-            body.customer_id,
-        )
-        if not linked:
-            raise PermissionError("商机不存在、不可见或不属于当前客户")
     if body.source_import_id:
         owned = await connection.fetchval(
             "SELECT id FROM activity.visit_import WHERE id=$1::uuid "
@@ -91,6 +92,18 @@ async def prepare_visit_run(connection, actor, body, stage):
             raise ValueError("请使用结构化原始记录作为来源")
         if original.get("source_import_id") != body.source_import_id:
             raise ValueError("原始材料已变化，请重新整理")
+        source_opportunity_id = source["business_context"].get("opportunity_id")
+        if source_opportunity_id != body.opportunity_id:
+            # Confirmation allows choosing an opportunity after structuring a
+            # customer visit. Keep the original run immutable and authorize
+            # both contexts; a new binding must not resurrect revoked access.
+            await require_visit_run_scope(connection, actor,
+                body.model_copy(update={"opportunity_id": source_opportunity_id}), "structure")
+            if source_opportunity_id and not await follow_up_reference(
+                connection, body.customer_id, source_opportunity_id
+            ):
+                raise ValueError("原商机已变化，请重新整理")
+        request["source_opportunity_id"] = source_opportunity_id
         request["date_anchor"] = structure_date_anchor(source)
         request["fields"] = canonical_fields(request["fields"])
         # customer_type here means the record target, not CRM lifecycle stage.
@@ -104,7 +117,8 @@ async def prepare_visit_run(connection, actor, body, stage):
             first_visit=request["fields"].get("is_first_visit", False))
         await validate_collaborators(connection, actor, body.collaborator_ids)
         request["fde_participant_ids"] = await validate_visit_attendance(
-            connection, actor, body.fde_participant_ids, body.opportunity_id, request.get("opportunity_mutation")
+            connection, actor, body.fde_participant_ids, body.opportunity_id, request.get("opportunity_mutation"),
+            customer_id=body.customer_id,
         )
         text = source["text_content"]
     else:

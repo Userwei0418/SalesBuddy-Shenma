@@ -1,3 +1,4 @@
+@import "../../styles/customer-identity.wxss";
 @import "../../styles/opportunity-edit-entry.wxss";
 @import "../../styles/detail-summary.wxss";
 page{background:var(--ui-background)}
@@ -122,3 +123,5 @@ page{background:var(--ui-background)}
 .risk-head{display:flex;align-items:center;justify-content:space-between;gap:16rpx}
 .risk-head>text{color:var(--ui-ink);font-size:var(--ui-text-body);font-weight:600}
 .risk-card>view>text{display:block;margin-top:12rpx;color:var(--ui-secondary);font-size:14px;line-height:1.6}
+
+.opportunity-create-disabled { opacity: .55; }

@@ -5,6 +5,7 @@ from typing import Any
 
 import asyncpg
 
+from sales_backend.repositories.task_outcomes import NORMAL_COMPLETED_SQL
 from sales_backend.db import json_value
 from sales_backend.domain.agent import ActorContext, AgentMode
 from sales_backend.domain.visit_contract import VISIT_FIELDS, quality_grade
@@ -15,19 +16,40 @@ class MessageReplayConflict(Exception):
 
 
 class AssistantRepository:
+    async def _readable_receipt_customers(self, connection: asyncpg.Connection, customer_ids: list[str]) -> set[str]:
+        if not customer_ids:
+            return set()
+        # Home applies overview.read as an additional row scope. The link opens
+        # the customer header, so evaluate that route's actual customer RLS,
+        # without confusing company-wide reference access with archive access.
+        previous = await connection.fetchval("SELECT current_setting('app.authorized_feature',true)")
+        try:
+            # A savepoint makes restoration safe even if the lookup SQL fails.
+            async with connection.transaction():
+                await connection.execute("SELECT set_config('app.authorized_feature','customer.read',true)")
+                rows = await connection.fetch(
+                    """SELECT id::text FROM crm.customer
+                    WHERE id=ANY($1::uuid[]) AND workspace_id=common.current_workspace_id()
+                      AND deleted_at IS NULL""", customer_ids,
+                )
+        finally:
+            await connection.execute("SELECT set_config('app.authorized_feature',$1,true)", previous or "")
+        return {row["id"] for row in rows}
+
     async def archived_visits(self, connection: asyncpg.Connection, actor: ActorContext) -> list[dict]:
         """Recent receipts are projections of committed visits, scoped to their recorder.
 
         A stable visit ID makes reloads/retries idempotent without a second notification
-        write. Older history remains available in the customer archive.
+        write. These receipts open a customer archive, so partner-only imported
+        history stays in visit details rather than this customer-linked projection.
         """
         rows = await connection.fetch(
             """SELECT v.id::text,v.customer_id::text,
             COALESCE(v.archived_fields->>'customer_name',
-                     security.customer_reference(v.customer_id)->>'name') AS customer_name,
-            v.customer_type_code_snapshot AS customer_type,o.name AS opportunity_name,
+                     security.customer_reference(v.customer_id)->>'name','') AS customer_name,
+            v.customer_type_code_snapshot AS customer_type,COALESCE(o.name,v.archived_fields->>'opportunity_name') AS opportunity_name,
             v.interaction_at,v.interaction_mode_code AS interaction_mode,v.archived_at,
-            v.visit_goal,v.follow_up_record,v.next_action,v.visit_location,
+            v.visit_goal,v.follow_up_record,COALESCE(v.next_action,'') AS next_action,v.visit_location,
             v.contact_name_snapshot AS contact_name,v.contact_title_snapshot AS contact_title,
             v.partner_name_snapshot AS partner_name,v.follow_up_score AS score,v.quality_review,v.archived_fields,
             ARRAY(SELECT fd.field_key FROM config.form_version_field vf
@@ -37,6 +59,7 @@ class AssistantRepository:
             LEFT JOIN crm.opportunity o ON o.id=v.opportunity_id AND o.deleted_at IS NULL
             WHERE v.workspace_id=$1::uuid AND v.recorder_user_ref_id=$2::uuid
               AND v.status='archived' AND v.deleted_at IS NULL AND v.archived_at IS NOT NULL
+              AND v.customer_id IS NOT NULL
               AND ($3::text NOT IN ('fde','fde_lead') OR
                    (v.created_by_user_ref_id=$2::uuid AND v.confirmed_by_user_ref_id=$2::uuid
                     AND v.recording_role_code_snapshot IN ('fde','fde_lead')))
@@ -45,9 +68,13 @@ class AssistantRepository:
             actor.user_id,
             actor.role.value,
         )
+        readable_customers = await self._readable_receipt_customers(
+            connection, list({row["customer_id"] for row in rows}),
+        )
         result = []
         for row in rows:
             item = dict(row)
+            item["can_read_customer"] = item["customer_id"] in readable_customers
             score = item["score"]
             item["grade"] = (
                 quality_grade(score, ((item.get("quality_review") or {}).get("company_policy") or {}).get("definition"))
@@ -67,6 +94,7 @@ class AssistantRepository:
                     for key in (
                         "id",
                         "customer_id",
+                        "can_read_customer",
                         "customer_name",
                         "opportunity_name",
                         "interaction_at",
@@ -97,13 +125,13 @@ class AssistantRepository:
                 WHERE deleted_at IS NULL AND status = 'open') AS open_opportunities,
               (SELECT count(*) FROM insight.risk
                 WHERE deleted_at IS NULL
-                  AND status IN ('new', 'pending', 'in_progress', 'escalated')) AS open_risks,
+                  AND status <> 'resolved') AS open_risks,
               (SELECT count(*) FROM workflow.task t
                 WHERE t.deleted_at IS NULL
-                  AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review')) AS my_tasks
+                  AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review', 'needs_adjustment')) AS my_tasks
               ,(SELECT count(*) FROM workflow.task t
                 WHERE t.deleted_at IS NULL
-                  AND t.status = 'completed') AS completed_tasks
+                  AND """ + NORMAL_COMPLETED_SQL + """) AS completed_tasks
             """
         )
         priority_items = await connection.fetch(
@@ -126,7 +154,7 @@ class AssistantRepository:
                  AND clock_timestamp() >= assignee_tm.valid_from
                  AND clock_timestamp() < assignee_tm.valid_to
                WHERE t.deleted_at IS NULL
-                 AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review')
+                 AND t.status IN ('pending_confirm', 'pending_execution', 'in_progress', 'deferred', 'pending_review', 'needs_adjustment')
                  AND (
                    ta.assignee_user_ref_id = $1::uuid
                    OR ($2 = 'supervisor' AND ta.assignee_role='sales' AND ta.assignee_user_ref_id <> $1::uuid
@@ -151,7 +179,7 @@ class AssistantRepository:
                 FROM insight.risk r
                 LEFT JOIN crm.customer c ON c.id = r.customer_id
                WHERE r.deleted_at IS NULL
-                 AND r.status IN ('new', 'pending', 'in_progress', 'escalated')
+                 AND r.status <> 'resolved'
                  AND r.severity_code IN ('medium', 'high', 'critical')
             ) alerts
             ORDER BY sort_group, sort_time
@@ -178,7 +206,7 @@ class AssistantRepository:
                (t.status='pending_review' AND t.creator_user_ref_id=$1::uuid) OR EXISTS(
                  SELECT 1 FROM workflow.v_task_action_recipient ta WHERE ta.task_id=t.id
                  AND ta.assignee_user_ref_id=$1::uuid))
-               AND t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review')
+               AND t.status IN ('pending_confirm','pending_execution','in_progress','deferred','pending_review','needs_adjustment')
              ORDER BY (t.due_at < clock_timestamp()) DESC, t.due_at, t.created_at DESC
              LIMIT 8
             """,

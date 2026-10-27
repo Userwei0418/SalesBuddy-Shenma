@@ -25,6 +25,11 @@ from sales_backend.domain.customer_risk import CUSTOMER_RISK_OUTPUT_CONTRACT
 from sales_backend.integrations.senseaudio import SenseAudioClient, SenseAudioError
 from sales_backend.repositories.identity import IdentityRepository
 from sales_backend.services.agent_platform.audit import InferenceAudit
+from sales_backend.services.agent_platform.authorization_snapshot import (
+    PermissionCheckedObserver,
+    for_inference,
+    recheck,
+)
 from sales_backend.services.agent_platform.routing import (
     AgentRouter,
     AgentUnavailable,
@@ -52,6 +57,9 @@ CAPABILITIES = frozenset(
         "opportunity_advice",
         "visit_advice",
         "competency_review",
+        "task_import",
+        "work_report",
+        "finance_assistant",
     }
 )
 REFERENCE = re.compile(r"^[A-Za-z0-9_.:-]{1,160}$")
@@ -89,6 +97,9 @@ def binding_for(raw: str, workspace_id: str, capability: str) -> AgentBinding | 
             "opportunity_advice",
             "visit_advice",
             "competency_review",
+            "task_import",
+            "work_report",
+            "finance_assistant",
         }:
             return None  # Only individually integrated capabilities; backend owns all result writes.
         agent_id = item["agent_id"]
@@ -158,7 +169,14 @@ class InferenceService:
     async def assert_actor_current(self, actor, permission):
         async with self.database.transaction(actor, readonly=True) as connection:
             from sales_backend.services.authorization import require_permission
-            await require_permission(connection, permission)
+            if permission == "task.import":
+                from sales_backend.services.capabilities import require_capability
+                await require_capability(connection, actor, "task.create")
+            else:
+                from sales_backend.services.company_follow_up import permits_action
+
+                if permission not in {"visit.structure", "visit.quality_review"} or not await permits_action(connection, permission):
+                    await require_permission(connection, permission)
             current = await IdentityRepository().find_actor_by_id(
                 connection,
                 workspace_id=actor.workspace_id,
@@ -169,6 +187,16 @@ class InferenceService:
             actor.model_copy(update={"team_ids": tuple(sorted(actor.team_ids))})
         ):
             raise PermissionError("当前数据权限已变化，请重新发起分析")
+
+    async def assert_mode_current(self, actor, mode, permission):
+        if mode == "customer_create":
+            from sales_backend.services.agent_access import require_agent_action
+
+            async with self.database.transaction(actor, readonly=True) as connection:
+                permission = await require_agent_action(connection, mode)
+        # The generic check retains exact-action semantics. Only the named draft
+        # mode above may select customer.create_request instead of customer.create.
+        await self.assert_actor_current(actor, permission)
 
     async def evaluate(
         self,
@@ -205,12 +233,28 @@ class InferenceService:
                       or {"customer_advice": "advice.customer", "opportunity_advice": "advice.opportunity",
                           "visit_advice": "advice.visit", "visit_quality": "visit.quality_review",
                           "opportunity_change": "opportunity.update", "battle_map_review": "battle_map.read",
-                          "competency_review": "profile.sales_review"}.get(mode)
+                          "competency_review": "profile.sales_review", "task_import": "task.import"}.get(mode)
                       or AGENT_PERMISSIONS.get(mode, ""))
         operation_id = str(uuid4())  # fresh per worker attempt; run_id remains the stable business reference
         if run_id:
             UUID(run_id)
-        await self.assert_actor_current(actor, permission)
+        await self.assert_mode_current(actor, mode, permission)
+        authorization_scope = await for_inference(self.database, actor, facts)
+
+        async def assert_fact_permissions():
+            await self.assert_mode_current(actor, mode, permission)
+            await recheck(self.database, actor, authorization_scope)
+            if mode in {"visit_entry", "visit_quality"}:
+                from sales_backend.services.visit_access import require_visit_recording_scope
+
+                selection = (authorization_scope or {}).get("selection") or {}
+                async with self.database.transaction(actor, readonly=True) as connection:
+                    await require_visit_recording_scope(
+                        connection, actor, selection.get("customer_id"), selection.get("opportunity_id"),
+                        permission=permission,
+                    )
+
+        await recheck(self.database, actor, authorization_scope)
         binding = binding_for(self.settings.agent_platform_bindings_json, actor.workspace_id, capability)
         audit = InferenceAudit(
             self.database,
@@ -219,6 +263,7 @@ class InferenceService:
             mode=mode,
             run_id=run_id,
             facts=facts,
+            authorization_scope=authorization_scope,
             config={
                 "platform_enabled": binding is not None,
                 "adapter_configured": self.platform is not None,
@@ -241,6 +286,7 @@ class InferenceService:
 
         async def platform_call():
             nonlocal operation
+            await assert_fact_permissions()
             if binding and self.platform:
                 operation = self.platform.operation(
                     PlatformRequest(
@@ -257,7 +303,10 @@ class InferenceService:
                             **(
                                 {"backend_prompt": messages[0].content}
                                 if mode == "opportunity_change" or capability
-                                in {"customer_advice", "opportunity_advice", "visit_advice", "competency_review"}
+                                in {
+                                    "customer_advice", "opportunity_advice", "visit_advice",
+                                    "competency_review", "task_import",
+                                }
                                 else {}
                             ),
                             **(
@@ -303,16 +352,16 @@ class InferenceService:
             return state
 
         async def direct():
+            # Also runs between platform failure and fallback. PermissionError
+            # is deliberately not a provider failure and must never be retried.
+            await assert_fact_permissions()
             if rule_fallback is not None:
                 return rule_fallback()
             client = self.direct_factory(
                 self.settings,
-                observer=DatabaseModelObserver(
-                    self.database,
-                    actor,
-                    mode,
-                    operation_id=operation_id,
-                    run_id=run_id,
+                observer=PermissionCheckedObserver(
+                    DatabaseModelObserver(self.database, actor, mode, operation_id=operation_id, run_id=run_id),
+                    assert_fact_permissions,
                 ),
             )
             try:
@@ -367,7 +416,7 @@ class InferenceService:
             }
             if operation:
                 trace["platform_run"] = operation.diagnostics()
-            await self.assert_actor_current(actor, permission)
+            await assert_fact_permissions()
             logger.info(
                 "inference completed capability=%s operation=%s provider=%s fallback=%s elapsed_ms=%s",
                 capability,

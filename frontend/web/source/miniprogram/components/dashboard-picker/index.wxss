@@ -1,0 +1,20 @@
+/* 触发片：和 sb-labeled-select small 同尺寸（64rpx 灰底、chevron-down），外层按钮按 px 补足 44px 点击区。
+   始终显示当前值（label，没有才显示标题），超长省略；只有调用方传 active（选了非默认的成员或团队）才用浅蓝底主色字，
+   默认值是灰底正文色，和季度触发片 quarter-picker-on（改过周期才变蓝）、sb-labeled-select small 的约定一致 */
+.picker-trigger.picker-trigger{display:flex;align-items:center;box-sizing:border-box;width:auto;min-width:176rpx;max-width:280rpx;min-height:0;height:44px;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--ui-ink);font-size:14px;font-weight:400;line-height:1;white-space:nowrap}
+.picker-trigger::after{border:0}
+.trigger-chip{display:flex;align-items:center;justify-content:center;gap:8rpx;width:100%;min-width:0;height:64rpx;box-sizing:border-box;padding:0 12rpx 0 16rpx;border-radius:var(--ui-radius-control);background:var(--ui-neutral-soft)}
+.picker-trigger-pressed .trigger-chip{opacity:.7}
+.trigger-title{min-width:0;overflow:hidden;line-height:1.2;white-space:nowrap;text-overflow:ellipsis}
+.trigger-caret{display:inline-flex;flex-shrink:0;color:var(--ui-secondary)}
+.picker-trigger-on .trigger-chip{background:var(--ui-selected);color:var(--ui-primary)}
+.picker-trigger-on .trigger-title{font-weight:600}
+.picker-trigger-on .trigger-caret{color:var(--ui-primary)}
+
+/* 弹层正文：t-cell 一行一项，勾在右；分隔线从文字起点开始 */
+.sheet-fixed{padding-top:4rpx}
+.option-list{--td-cell-horizontal-padding:0;--td-cell-vertical-padding:12px;--td-cell-right-icon-color:var(--ui-primary);--td-cell-right-icon-size:40rpx;padding-bottom:8px}
+.option-group{padding-bottom:8px}
+.group-name{display:block;padding:24rpx 0 4rpx;color:var(--ui-muted);font-size:var(--ui-text-small);line-height:1.5}
+.sheet-empty{padding:32px 0;text-align:center;font-size:14px;color:var(--ui-secondary);line-height:1.6}
+.sheet-note{padding:8px 0 0;font-size:var(--ui-text-small);color:var(--ui-muted);line-height:1.5;text-align:center}

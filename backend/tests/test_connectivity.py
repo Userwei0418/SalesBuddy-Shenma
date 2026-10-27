@@ -133,6 +133,7 @@ async def test_agent_connectivity_distinguishes_auth_json_and_business_acceptanc
 async def test_current_direct_test_loads_inherited_configuration_without_publishing(monkeypatch):
     s = service()
     monkeypatch.setattr(module.ModelApiRepository, "current", AsyncMock(return_value=None))
+    monkeypatch.setattr(module.AgentRuntimeConfigRepository, "current", AsyncMock(return_value=None))
     cfg = {
         "mode": "inherit",
         "provider_name": "Fixture",

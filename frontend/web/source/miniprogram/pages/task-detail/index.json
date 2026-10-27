@@ -1,0 +1,21 @@
+{
+  "navigationBarTitleText": "待办详情",
+  "navigationBarBackgroundColor": "#FFFFFF",
+  "navigationBarTextStyle": "black",
+  "homeButton": true,
+  "usingComponents": {
+    "sb-status-tag": "/ui/sb/sb-status-tag/index",
+    "sb-bottom-bar": "/ui/sb/sb-bottom-bar/index",
+    "sb-summary-card": "/components/review-summary-card/index",
+    "sb-desc-list": "/ui/sb/sb-desc-list/index",
+    "sb-select": "/ui/sb/sb-select/index",
+    "sb-textarea": "/ui/sb/sb-textarea/index",
+    "t-cell": "/ui/tdesign/cell/cell",
+    "person-picker": "/components/person-picker/index",
+    "task-cancel-dialog": "/components/task-cancel-dialog/index",
+    "task-execution-panel": "/components/task-execution-panel/index",
+    "sb-sheet": "/ui/sb/sb-sheet/index",
+    "sb-search": "/ui/sb/sb-search/index"
+  },
+  "enablePullDownRefresh": true
+}

@@ -19,7 +19,7 @@ from sales_backend.contracts.detail_reads import (
     TimelineEvent,
     VisitHistoryPage,
 )
-from sales_backend.db import Database
+from sales_backend.db import Database, json_value
 from sales_backend.repositories.customer_assets import today
 from sales_backend.repositories.customers import CustomerRepository
 from sales_backend.repositories.detail_history import DetailHistoryRepository
@@ -82,7 +82,6 @@ async def customer_opportunity_header(
     identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        await require_customer(connection, customer_id)
         # Preserve the customer-panorama RLS scope, distinct from personal opportunity detail.
         item = await DetailOverviewRepository().opportunity_header(
             connection, None, str(opportunity_id), customer_id=str(customer_id),
@@ -112,14 +111,17 @@ async def customer_opportunities(
     identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        await require_customer(connection, customer_id)
+        # A customer ID is only a filter; each returned opportunity must pass
+        # its own RLS. No customer master data is returned by this endpoint.
         # Legacy customer detail used actor=None: RLS defines the customer panorama.
         # This is deliberately different from the actor's personal project list.
         result = await OpportunityRepository().page(
             connection, None, customer_id=customer_id, query=q.strip() if q else None,
             limit=page_size, offset=offset, include_closed=True,
         )
-        risks = await opportunity_risk_summaries(connection, [row["id"] for row in result["items"]])
+        risks = await opportunity_risk_summaries(
+            connection, [row["id"] for row in result["items"] if not row.get("shared_read_only")],
+        )
         for row in result["items"]:
             row["risk_summary"] = risks.get(row["id"], {})
     return result
@@ -133,7 +135,6 @@ async def customer_opportunity_overview(
     identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        await require_customer(connection, customer_id)
         # Customer panorama has always used RLS without the personal-list owner filter.
         # Both IDs participate in the database predicate; knowing an ID grants no access.
         item = await DetailOverviewRepository().opportunity(
@@ -144,7 +145,9 @@ async def customer_opportunity_overview(
     return item
 
 
-@router.get("/visits", response_model=VisitHistoryPage, response_model_exclude_unset=True)
+@router.get("/visits", response_model=VisitHistoryPage, response_model_exclude_unset=True,
+            description="沿用原跟进查看范围，并允许当前客户认领者、其有效单一部门祖先在任主管/FDE主管及本公司有效经理读取客户正式跟进。"
+            "此父级引用不授客户/商机完整档案权限，记录跟进能力本身不授历史查看权限。")
 async def visit_history(
     customer_id: UUID, opportunity_id: UUID | None = None,
     page_size: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0),
@@ -154,9 +157,15 @@ async def visit_history(
     identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
-        await require_customer(connection, customer_id)
-        if opportunity_id:
-            await require_opportunity(connection, None, opportunity_id, customer_id)
+        # Only the current claim/hierarchy formal-visit rule substitutes the parent gate for this
+        # visit projection. It grants neither customer nor opportunity detail.
+        claimed = await connection.fetchval(
+            "SELECT security.customer_claim_visit_reference($1::uuid,$2::uuid)", customer_id, opportunity_id,
+        )
+        if claimed is None:
+            await require_customer(connection, customer_id)
+            if opportunity_id:
+                await require_opportunity(connection, None, opportunity_id, customer_id)
         try:
             return await DetailHistoryRepository().visits(
                 connection, customer_id, opportunity_id=opportunity_id, limit=page_size,
@@ -183,6 +192,9 @@ async def opportunity_timeline(
     identity: RequestIdentity = Depends(get_identity), database: Database = Depends(get_database),
 ) -> dict:
     async with database.transaction(identity.actor, readonly=True) as connection:
+        context = json_value(await connection.fetchval("SELECT security.opportunity_read_context($1::uuid)", opportunity_id))
+        if context and context.get("shared_read_only"):
+            raise HTTPException(403, "当前商机可查看，但未获变更历史权限")
         if customer_id:
             await require_customer(connection, customer_id)
             await require_opportunity(connection, None, opportunity_id, customer_id)

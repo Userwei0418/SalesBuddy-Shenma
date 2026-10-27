@@ -44,7 +44,7 @@ async def existing_actor(connection, account, role):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("account,role", [("XS001", "sales"), ("FDE001", "fde")])
 @pytest.mark.parametrize("case", ["archive_replay", "low_score", "next_rejected", "changed_content", "structure_only",
-                                 "cross_day", "legacy_cross_day"])
+                                 "cross_day", "legacy_cross_day", "choose_opportunity_after_structure"])
 async def test_split_visit_requires_own_unchanged_passing_quality(connection, account, role, case):
     # Every branch must execute in a fresh CI database. Do not depend on a
     # previously imported customer, existing FDE account or live model run.
@@ -74,7 +74,7 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
         actor,
         StructureRequest(
             customer_id=customer_id,
-            opportunity_id=opportunity_id,
+            opportunity_id=None if case == "choose_opportunity_after_structure" else opportunity_id,
             text=fields["follow_up_record"] + fields["next_action"],
         ),
         "structure",
@@ -91,6 +91,12 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
     if case in {"cross_day", "legacy_cross_day"}:
         # Editing the visible date must not move the trusted relative-time anchor.
         fields["created_date"] = "2099-01-01"
+    original_context = None
+    if case == "choose_opportunity_after_structure":
+        original_context = await connection.fetchval(
+            "SELECT business_context FROM agent.run WHERE id=$1::uuid", first["run_id"]
+        )
+        assert original_context.get("opportunity_id") is None
     review_id = first["run_id"]
     if case != "structure_only":
         second = await prepare_visit_run(
@@ -105,9 +111,21 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
             ),
             "quality",
         )
+        if case == "choose_opportunity_after_structure":
+            quality_context = await connection.fetchval(
+                "SELECT business_context FROM agent.run WHERE id=$1::uuid", second["run_id"]
+            )
+            assert quality_context["opportunity_id"] == opportunity_id
+            assert quality_context["visit_request"]["source_run_id"] == first["run_id"]
+            assert quality_context["visit_request"]["source_opportunity_id"] is None
+            assert await connection.fetchval(
+                "SELECT business_context FROM agent.run WHERE id=$1::uuid", first["run_id"]
+            ) == original_context
         if case == "legacy_cross_day":
-            await connection.execute("UPDATE agent.run SET business_context=business_context #- '{visit_request,date_anchor}' WHERE id=$1::uuid",
-                                     second["run_id"])
+            await connection.execute(
+                "UPDATE agent.run SET business_context=business_context #- '{visit_request,date_anchor}' "
+                "WHERE id=$1::uuid", second["run_id"]
+            )
         run = await handler._load_and_start(second["run_id"], actor)
         facts = await handler.facts_loader.load(run)
         assert facts["fields"] == fields  # Date strings cannot be normalized as timestamps.
@@ -137,7 +155,7 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
     if case == "changed_content":
         submitted["contact_name"] = "改了联系人"
     task_count = await connection.fetchval("SELECT count(*) FROM workflow.task")
-    if case not in {"archive_replay", "cross_day", "legacy_cross_day"}:
+    if case not in {"archive_replay", "cross_day", "legacy_cross_day", "choose_opportunity_after_structure"}:
         with pytest.raises(ValueError):
             async with connection.transaction():
                 await archive_visit(connection, actor, customer_id=customer_id, fields=submitted)
@@ -145,6 +163,15 @@ async def test_split_visit_requires_own_unchanged_passing_quality(connection, ac
     visit = await archive_visit(connection, actor, customer_id=customer_id, fields=submitted)
     replay = await archive_visit(connection, actor, customer_id=customer_id, fields=submitted)
     assert visit["id"] == replay["id"] and replay["replayed"]
+    if case == "choose_opportunity_after_structure":
+        saved = await connection.fetchrow(
+            "SELECT customer_id,opportunity_id FROM activity.visit WHERE id=$1::uuid", visit["id"]
+        )
+        assert str(saved["customer_id"]) == customer_id
+        assert str(saved["opportunity_id"]) == opportunity_id
+        assert await connection.fetchval(
+            "SELECT business_context FROM agent.run WHERE id=$1::uuid", first["run_id"]
+        ) == original_context
     assert (
         await connection.fetchval("SELECT follow_up_task_mode FROM activity.visit WHERE id=$1::uuid", visit["id"])
         == "human_advice"
