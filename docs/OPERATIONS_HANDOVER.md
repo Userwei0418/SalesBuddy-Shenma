@@ -12,13 +12,13 @@
 
 后台部分配置页跳转入口需适配神码中台；该问题不影响已核实的报告API绑定及AI生成样本。现行Web开发源码入口为`frontend/web`，旧`business-web`不再作为现行入口。
 
-## GitHub交付状态与推送受阻处理
+## GitHub交付状态与权限处理
 
-截至2026-10-27 22:15北京时间，GitHub登录授权已成功，但当前登录账号对指定仓库只有读取权限（`pull=true`、`push=false`），因此尚未完成源码推送。当前问题是仓库写权限不足，不能继续按登录失效处理；能够浏览或克隆公开仓库不代表能够推送。
+2026-10-27 22:29北京时间，仓库写权限已开通（`push=true`），交付分支已成功推送。Git远端引用和GitHub分支API均回读到`a7770ccc5ab02e60bf1b324978af617db141140c`，与当次本地HEAD完全一致。此前22:15的阻塞是登录成功后仍缺少仓库Write权限，现已解决；能够浏览或克隆公开仓库不代表能够推送。
 
-唯一交付目标为 [Userwei0418/SalesBuddy-Shenma](https://github.com/Userwei0418/SalesBuddy-Shenma)。本地源码交付提交为`b39205d484830aac2d7f763a933470d8ca084135`，分支为`codex/shenma-deployed-handover-20261027`；本节补记属于后续纯文档更新，最终本地HEAD以Git读取为准。最后一次远端核验中，交付分支尚不存在，`main`仍为`61362e9ad65d74c707f89b122d740f9fe80cf964`，未创建PR。线上部署、小程序正式发布、本地提交、GitHub推送和主线合并须分别登记；本次权限阻塞不影响已运行的服务。
+唯一交付目标为 [Userwei0418/SalesBuddy-Shenma](https://github.com/Userwei0418/SalesBuddy-Shenma)，已推送的[交付分支](https://github.com/Userwei0418/SalesBuddy-Shenma/tree/codex/shenma-deployed-handover-20261027)为`codex/shenma-deployed-handover-20261027`，包含源码快照`b39205d484830aac2d7f763a933470d8ca084135`。本节为成功推送后的纯文档补记；后续文档提交的完整SHA可从分支历史及远端引用读取。`main`仍为`61362e9ad65d74c707f89b122d740f9fe80cf964`，尚未合并、未创建PR。线上部署、小程序正式发布、本地提交、GitHub推送和主线合并分别登记；本次仅交付源码与文档，没有重新部署服务器或发布小程序。
 
-处理步骤：
+后续交付如再次遇到权限问题，按以下步骤处理：
 
 1. 由仓库管理员授予执行推送的账号Write权限，或使用已有Write权限的账号重新完成GitHub登录；如通过邀请授权，先接受该仓库邀请。
 2. 使用`gh api repos/Userwei0418/SalesBuddy-Shenma --jq '{repository: .full_name, permissions: .permissions}'`核对目标仓库及`permissions.push=true`。不在文档、终端输出或聊天中记录Token。

@@ -51,4 +51,4 @@
 
 交付分支为`codex/shenma-deployed-handover-20261027`，源码和检查范围见 [2026-10-27交付记录](GITHUB_DELIVERY_20261027.md)。GitHub推送与PR状态以实际远端回读为准；本地提交不等于已推送。
 
-2026-10-27 22:15北京时间复核：GitHub登录已成功，当前账号对目标仓库仅有读取权限，`permissions.push=false`，没有该仓库待接受邀请。源码交付提交`b39205d484830aac2d7f763a933470d8ca084135`已在本地保存；本次状态补记为后续纯文档更新。远端交付分支尚不存在，`main`仍为`61362e9ad65d74c707f89b122d740f9fe80cf964`，推送与PR均未完成。需要仓库管理员授予Write权限或改用有Write权限的账号，再核对远端完整SHA。处理步骤见[运维交接](OPERATIONS_HANDOVER.md)；线上部署和小程序发布状态保持独立登记。
+2026-10-27 22:29北京时间复核：Write权限已开通，`permissions.push=true`；[交付分支](https://github.com/Userwei0418/SalesBuddy-Shenma/tree/codex/shenma-deployed-handover-20261027)推送成功，Git远端引用与GitHub分支API均回读到`a7770ccc5ab02e60bf1b324978af617db141140c`，包含源码快照`b39205d484830aac2d7f763a933470d8ca084135`。此前写权限不足的阻塞已解决。本次状态补记仅涉及文档；分支后续文档提交的完整SHA以远端引用及提交历史为准。`main`仍为`61362e9ad65d74c707f89b122d740f9fe80cf964`，尚未合并、未创建PR。权限处理与后续核验步骤见[运维交接](OPERATIONS_HANDOVER.md)；线上部署和小程序发布状态保持独立登记，本次未重新发布。
