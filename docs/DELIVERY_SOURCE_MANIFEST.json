@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "description": "Reviewed source snapshot corresponding to deployed Shenma components; Git publication is not a new deployment.",
-  "source_revision": "456f0d43b9aa2c1b0b21c494530d75b492f3f2bb",
+  "source_revision": "540229ad5ee40c9c9a439891d846e09f4929e003",
   "business_runtime_revision": "4b90d47e464ccfac8285e91335f8914ae36161fd",
   "mini_source_revision": "c21b0e95ec02a01135ed940f89103fa9a297b76f",
-  "database_head": "V449",
+  "database_head": "V450",
   "local_preview_configuration_adjusted": [
     "frontend/web/connection.config.json"
   ],
@@ -3796,6 +3796,7 @@
     "tools/installation/runtime_roles.py": "cf63fe593a4ffbe7b4a70bbb133bb2bae6d3562a887e80fc6f60dffa8152a76a",
     "tools/installation/runtime_permissions.json": "303056a3802b18c4597d0119853525833dbcd5d911fe46a3f811292b9423d3e4",
     "tools/installation/upgrade_permissions.py": "dd8b8bb053ab3d38ae5b2c23f8fb65e547e6abcdf4ed413143abe2b248406d2f",
-    "backend/src/sales_backend/weekly_contract/PROVENANCE.md": "365734fd97dce0473d9881cd8de73878ed181e32dc7d616a1ed5cc870ce224f6"
+    "backend/src/sales_backend/weekly_contract/PROVENANCE.md": "365734fd97dce0473d9881cd8de73878ed181e32dc7d616a1ed5cc870ce224f6",
+    "database/migrations/V450__work_report_lazy_source_access.sql": "ff8aface9743b515c62d0dedf1b2b0119a4d5e3b6ec38dc375d70977fadec100"
   }
 }

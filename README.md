@@ -7,7 +7,7 @@
 | `frontend/miniprogram` | 神码小程序，AppID `wx2824bdeb58528fd8` |
 | `frontend/web` | 当前销售 Web 源码与构建工具 |
 | `backend` | API、管理端、Worker、Agent 适配器与接口契约 |
-| `database` | 基线和迁移；当前交付迁移头 V449 |
+| `database` | 基线和迁移；当前交付迁移头 V450 |
 | `agent-platform` | 保留的中台安装配置、源码及许可证 |
 | `deployment` | 神码部署配置；已有环境升级必须先备份、核对兼容性 |
 | `scripts` | 神码目标隔离和源码打包检查 |
