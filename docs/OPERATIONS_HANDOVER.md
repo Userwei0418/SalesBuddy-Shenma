@@ -12,6 +12,22 @@
 
 后台部分配置页跳转入口需适配神码中台；该问题不影响已核实的报告API绑定及AI生成样本。现行Web开发源码入口为`frontend/web`，旧`business-web`不再作为现行入口。
 
+## GitHub交付状态与推送受阻处理
+
+截至2026-10-27 22:15北京时间，GitHub登录授权已成功，但当前登录账号对指定仓库只有读取权限（`pull=true`、`push=false`），因此尚未完成源码推送。当前问题是仓库写权限不足，不能继续按登录失效处理；能够浏览或克隆公开仓库不代表能够推送。
+
+唯一交付目标为 [Userwei0418/SalesBuddy-Shenma](https://github.com/Userwei0418/SalesBuddy-Shenma)。本地源码交付提交为`b39205d484830aac2d7f763a933470d8ca084135`，分支为`codex/shenma-deployed-handover-20261027`；本节补记属于后续纯文档更新，最终本地HEAD以Git读取为准。最后一次远端核验中，交付分支尚不存在，`main`仍为`61362e9ad65d74c707f89b122d740f9fe80cf964`，未创建PR。线上部署、小程序正式发布、本地提交、GitHub推送和主线合并须分别登记；本次权限阻塞不影响已运行的服务。
+
+处理步骤：
+
+1. 由仓库管理员授予执行推送的账号Write权限，或使用已有Write权限的账号重新完成GitHub登录；如通过邀请授权，先接受该仓库邀请。
+2. 使用`gh api repos/Userwei0418/SalesBuddy-Shenma --jq '{repository: .full_name, permissions: .permissions}'`核对目标仓库及`permissions.push=true`。不在文档、终端输出或聊天中记录Token。
+3. 在神码交付检出内核对`git remote -v`、`git branch --show-current`、`git rev-parse HEAD`及`git status --short`。fetch与push地址都必须指向上述神码仓库，交付分支和提交范围必须符合本次交付记录。
+4. 将确认后的HEAD推送到`codex/shenma-deployed-handover-20261027`，使用`git ls-remote --heads origin refs/heads/codex/shenma-deployed-handover-20261027`回读，确认远端完整SHA与本地一致，再登记推送完成时间。
+5. 全量检查仍有失败项，处理并完成检查后再经PR审查合并；不直接推送`main`。推送分支成功不等于主线已合并，也不触发本手册之外的服务器或微信发布。
+
+该仓库公开，只交付审查后的源码和公开文档。含服务器密码的私有运维手册、数据库备份、人员业务数据、证书私钥及运行凭据不得提交。
+
 ## 日常巡检
 
 1. 使用正常TLS校验检查业务`/api/v1/health/version`、`/api/v1/health/ready`及Web版本信息，记录状态、耗时和就绪项目。
